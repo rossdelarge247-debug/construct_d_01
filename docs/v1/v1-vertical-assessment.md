@@ -24,17 +24,16 @@ The V1 strategy doc (Doc 4) specifies that the vertical should be grounded in:
 - Support content (Relate, domestic abuse services)
 - Real-user discussion (forums, Mumsnet, Reddit, social)
 
-**Status: NOT YET DONE.** We have the requirement but have not conducted the desk research. This is a gap.
+**Status: ✅ COMPLETE.** Full desk research conducted April 2026 across all source categories. Documented in `v1-desk-research.md` (findings) and `v1-research-implications.md` (product implications).
 
-**Recommendation:** Conduct focused desk research before or during V0 build. Key questions the research should answer:
-1. What do people actually search for when separation begins?
-2. What does GOV.UK tell them and where does it fall short?
-3. What does the MIAM/mediation path actually look like from the user's perspective?
-4. What recurring confusions appear in forum discussions?
-5. What do practitioners say people most commonly get wrong early on?
-6. What are the specific safeguarding screening approaches used by mediators (FMC standards)?
-
-This research directly informs the route generation logic, the guided prompts, the microcopy, and the safeguarding screening design.
+Key research outputs:
+1. Official guidance gaps identified across GOV.UK, MoneyHelper, Citizens Advice
+2. 50+ Mumsnet threads analysed — real user language, pain points, emotional register captured
+3. Practitioner guidance from Resolution, Law Society, leading family law firms
+4. FMC safeguarding standards, DASH risk checklist, MIAM exemption requirements
+5. Domestic abuse/support services research (Refuge, Women's Aid, Relate)
+6. Competitor analysis (Amicable, SeparateSpace, OurFamilyWizard, 8+ others)
+7. GOV.UK Design System "Exit this page" component identified as mandatory
 
 ---
 
@@ -51,7 +50,16 @@ Captured in Doc 4:
 7. Discovering that divorce, finances, and children are different but connected tracks
 8. Often still knowing only part of the financial picture
 
-**Status:** Defined at a strategic level. Desk research would add specificity and real-user language.
+**Research additions:**
+
+9. Not knowing that divorce, finances, and children are three separate legal processes
+10. Living with partner during separation (major practical/emotional pain point)
+11. Secretly gathering financial documents before partner can hide assets
+12. Not knowing that a consent order is needed even when both parties agree
+13. Being advised by friends/family with incorrect information
+14. Not knowing CETVs take up to 3 months to obtain
+
+**Status:** ✅ Well-defined and validated by desk research. Real user language captured from 50+ Mumsnet threads.
 
 ---
 
@@ -70,13 +78,21 @@ From Doc 4, confirmed and expanded:
 | Information fragmentation | Guidance is spread across GOV.UK, solicitor sites, forums, mediator sites | Single guided experience replaces scattered reading |
 | False precision pressure | Existing tools/forms demand exact answers the user doesn't have | System explicitly supports estimates, unknowns, and "not sure yet" |
 
-**Status:** Well-defined. Desk research may surface additional pain points.
+**Pain points surfaced by desk research (now confirmed, not speculative):**
 
-**Potential gaps to investigate:**
-- Privacy anxiety ("will my partner find out I'm doing this?")
-- Trust in digital tools with sensitive family data
-- Confusion about what's legally binding vs. advisory
-- Fear of making a "wrong" first move
+| Pain point | Description | How V1 addresses it |
+|-----------|-------------|-------------------|
+| Privacy anxiety | "Will my partner find out I'm doing this?" Multiple Mumsnet threads about secret planning. Critical for abuse survivors | Exit This Page component, anonymous sessions, digital safety guidance, neutral branding, no sensitive email content |
+| Three-process confusion | Users don't know divorce, finances, and children are separate processes. The #1 confusion across all sources | Route explanation (Step 3) makes this a signature clarity moment |
+| Consent order ignorance | Users don't know they need a financial order even when they agree. Most dangerous knowledge gap | Route explanation includes consent order / clean break warning |
+| Pension blindness | "I had no idea mine would be worth that much." Consistently the most overlooked major asset | Elevated in financial aims (Step 6), flagged in confidence mapping (Step 7), CETV timing in next steps |
+| Coercive control / financial abuse | Partner controls access to money, documents, information. 95% of DA cases involve economic abuse | Enhanced safeguarding screening beyond conflict level — screens for financial control and decision-making freedom |
+| Terminology confusion | Decree nisi/absolute vs conditional/final order, "custody" vs child arrangements. Old terminology persists | Plain English throughout, contextual corrections ("The law now calls this...") |
+| Cost spiral fear | Solicitor costs can reach £40k+. Users terrified of the process itself being financially ruinous | Cost transparency in route, affordable positioning, free V1 value |
+| "Common law marriage" myth | 79% of people believe it exists. Cohabiting couples have fundamentally different rights | Detected in Step 2, route adjusted for cohabiting vs married |
+| Trust in digital tools | Users cautious about sensitive data online. Strongest trust factor: court-admissibility and encryption | Trust signals on landing page, clear privacy messaging, professional-grade output |
+
+**Status:** ✅ Comprehensive. Research confirmed all four speculative gaps and surfaced five additional pain points.
 
 ---
 
@@ -94,7 +110,20 @@ From Doc 4, confirmed and expanded:
 | Premium first-run experience as competitive edge | The first 30 minutes should be the best in the category |
 | Downloadable output as trust builder | PDF plan is tangible proof of value, shareable with advisers |
 
-**Status:** Well-mapped. Each opportunity has a clear design response.
+**Opportunities surfaced by desk research:**
+
+| Opportunity | How V1 captures it |
+|------------|-------------------|
+| Three-process clarity as a signature moment | Route explanation shows the parallel journey — no existing source does this |
+| Consent order education | Proactive warning in route, not buried in fine print |
+| Pension early warning | Flag CETV timing in next steps, signpost MoneyHelper free pension appointment |
+| Myth-busting woven into guidance | Correct misconceptions in context, not in a separate "myths" section |
+| Resolution process options spectrum | Help users understand DIY → mediation → solicitor → court spectrum |
+| MIAM / voucher scheme awareness | Explain what MIAM is, that it's not mediation, and the £500 voucher exists |
+| Digital safety as trust signal | Exit This Page, safety guidance — shows we understand the reality |
+| Cohabiting vs married distinction | Detect early and adjust route — fundamentally different legal rights |
+
+**Status:** ✅ Comprehensive. Research added 8 new opportunities, all with design responses.
 
 ---
 
@@ -161,7 +190,15 @@ From Doc 4:
 8. As someone concerned about privacy, I want to explore without creating an account
 9. As someone who may be at risk, I want the service to recognise this and adjust without alarming me
 
-**Status:** Comprehensive. Story 9 (safeguarding) is particularly important.
+**Additional stories from desk research:**
+
+10. As someone who doesn't understand the legal process, I want to know that divorce, finances, and children are three separate things before I make assumptions
+11. As someone who might be cohabiting rather than married, I want the service to tell me honestly that my legal position is different
+12. As someone secretly planning, I want to be sure my partner cannot discover I'm using this service
+13. As someone who has heard friends' divorce stories, I want the service to correct my misconceptions gently rather than let me plan on wrong assumptions
+14. As someone worried about pensions, I want to understand early that this matters more than I think and takes months to sort out
+
+**Status:** ✅ Comprehensive. Research added 5 stories grounded in real user needs.
 
 ---
 
@@ -279,7 +316,7 @@ From Doc 4, plus additions from Sprint 0:
 | How sophisticated can plan-review logic be without sounding overconfident? | Affects AI prompt design and disclaimer framing | Open — test during build |
 | How should uncertain information be represented visually? | Core UX decision for confidence chips/maps | Open — design system work |
 | How much branching is too much in the interview? | Affects complexity and build time | Partially resolved — conditional steps are limited to children and home |
-| How should safeguarding signals alter the route without alarming the user? | Critical for emotional safety | Open — needs desk research on FMC screening approaches |
+| How should safeguarding signals alter the route without alarming the user? | Critical for emotional safety | Partially resolved — FMC standards, DASH checklist, and Women's Aid guidance researched. Screen for coercive control and financial abuse beyond conflict level. Suppress mediation when risk detected. Surface helplines contextually. Ongoing screening needed in V2+. |
 | What is the most elegant save-workspace conversion moment? | Affects conversion rate | Resolved — after plan + commercial bridge |
 | Will the adaptive output tiers feel right in practice? | Core value delivery | Open — test with test group |
 | What pricing works for Standard vs. Enhanced? | Commercial model | Deferred — configurable stubs for now |
@@ -295,14 +332,16 @@ From Doc 4, plus additions from Sprint 0:
 | Risk | Mitigation |
 |------|-----------|
 | Users interpret plan as legal advice | Clear framing throughout: "provisional", "starting position", "not legal advice". Disclaimer in PDF |
-| Safeguarding missed or mishandled | Structured screening in Step 2, route adjustments, resource surfacing. Desk research on FMC standards |
+| Safeguarding missed or mishandled | Structured screening in Step 2 with coercive control and financial abuse questions. Route adjustments per FMC standards. DASH-informed risk factors. Helplines surfaced contextually. Exit This Page on every page. Ongoing screening flagged for V2+ |
 | Overconfident AI-generated summaries | Confidence-aware language in prompts. Never state legal outcomes. Always frame as provisional |
 | Data loss for anonymous users | Server-side sessions via Supabase anonymous auth. Clear save prompts |
 | Users feel sold to too aggressively | Commercial bridge is informational, not pressuring. Free save always available. Tone adapts by readiness tier |
-| Mediation assumed safe when it isn't | Safety screening suppresses mediation language when risk signals detected |
+| Mediation assumed safe when it isn't | Safety screening suppresses mediation language when risk signals detected. Grounded in Women's Aid position that mediation can increase unequal power relations. MIAM exemption information surfaced when appropriate |
+| Device compromise / tech-facilitated abuse | Exit This Page component (GOV.UK standard). Digital safety guidance. No sensitive email content. Neutral sender name. User-controllable notifications. 72% of Refuge service users report tech-facilitated abuse |
+| Cohabiting users assume equal rights | Detect cohabiting status in Step 2. Route explanation clearly communicates different legal position. 79% of people wrongly believe in "common law marriage" |
 | User enters false information | Not a V1 problem — system works with what it's given. Evidence layer (V2) adds verification |
 
-**Status:** Well-considered. Safeguarding desk research is the key gap.
+**Status:** ✅ Comprehensive. Safeguarding desk research complete. Three new risks added from research findings.
 
 ---
 
@@ -379,14 +418,14 @@ Configurable: features can be repackaged into different bundles.
 | Planning standard item | Status |
 |-----------------------|--------|
 | User problem | ✅ Well-defined |
-| Desk research base | ⚠️ Required but NOT YET DONE |
-| As-is journey snapshot | ✅ Defined, would benefit from research depth |
-| Pain points | ✅ Well-mapped with V1 responses |
-| Opportunities | ✅ Each has a design response |
-| Why this vertical exists | ✅ Clear |
+| Desk research base | ✅ Complete — 7 source categories, 50+ forum threads, comprehensive findings |
+| As-is journey snapshot | ✅ Validated and enriched by real user language from research |
+| Pain points | ✅ Comprehensive — original 8 confirmed, 9 new added from research |
+| Opportunities | ✅ Comprehensive — original 9 confirmed, 8 new added from research |
+| Why this vertical exists | ✅ Strongly validated — "Where do I even start?" is the #1 user question |
 | Downstream value | ✅ Explicit integration points |
 | User states | ✅ All five defined with handling |
-| Key user stories | ✅ Comprehensive |
+| Key user stories | ✅ 14 stories, 5 added from research |
 | Key outcomes | ✅ Defined with adaptive model |
 | North-star UX | ✅ Clear and emotionally grounded |
 | Magic moments | ✅ Mapped to flow steps |
@@ -394,10 +433,10 @@ Configurable: features can be repackaged into different bundles.
 | Technology opportunities | ✅ Mapped to stack |
 | Confidence/follow-up logic | ✅ Well-defined |
 | Launch implementation | ✅ Specified in detail |
-| Spike questions | ✅ Identified, several open |
-| Trust/risk considerations | ✅ Mitigations defined |
+| Spike questions | ✅ Safeguarding spike partially resolved by research |
+| Trust/risk considerations | ✅ Comprehensive — 3 new risks added from research, mitigations defined |
 | Auth/conversion/monetisation | ✅ Full model with tiers |
 | Enhancement path | ✅ Identified, none blocking |
 | Success metrics | ✅ Comprehensive |
 
-**Key gap: desk research.** Everything else is well-covered. The desk research should be conducted to validate assumptions, inform microcopy, sharpen route logic, and ensure safeguarding screening is grounded in real practice standards.
+**All 21 items now complete.** Desk research validated the strategic assumptions, surfaced new pain points and opportunities, strengthened the safeguarding design, and confirmed the competitive positioning. Research implications documented in `v1-research-implications.md` with specific changes to V1 flow, V0 architecture, and flags for V2-V5.
