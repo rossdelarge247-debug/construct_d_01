@@ -170,6 +170,24 @@ PostHog tracking planned for:
 - Drop-off by stage
 - Time-to-value
 
+### 19. Release model
+
+**Public launch requires V0–V5 fully built, polished, and integrated.** This is not MVP.
+
+Each vertical is tested with a small private test group as it completes, but nothing goes public until the full product is ready.
+
+| Milestone | Scope | Audience |
+|-----------|-------|----------|
+| V0 complete | Platform foundation | Founder only |
+| V1 complete | Guided entry + option shaping | Founder + test group |
+| V2 complete | Financial picture + evidence | Founder + test group |
+| V3 complete | Disclosure + negotiation tracking | Founder + test group |
+| V4 complete | Collaboration + professional roles | Founder + test group |
+| V5 complete | Outputs + formalisation prep | Founder + test group |
+| **Public launch** | **V0–V5, polished, payments live, legal pages finalised** | **Public** |
+
+Stance: build the full product properly, then launch it. Per the Founder Pack: "Build an ambitious, launchable, premium v1 through vertically complete slices. Do not minimise what we can build. Minimise what we need to prove."
+
 ---
 
 ## Source documents
