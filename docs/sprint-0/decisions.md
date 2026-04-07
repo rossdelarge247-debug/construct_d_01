@@ -188,6 +188,31 @@ Each vertical is tested with a small private test group as it completes, but not
 
 Stance: build the full product properly, then launch it. Per the Founder Pack: "Build an ambitious, launchable, premium v1 through vertically complete slices. Do not minimise what we can build. Minimise what we need to prove."
 
+### 20. Public site and information architecture
+
+A minimal public shell is included in V0/V1 scope. The V1 guided journey is triggered by "Get started" on the landing page.
+
+| Page | Route | Status | Notes |
+|------|-------|--------|-------|
+| Landing page | `/` | Built in V0/V1 | Hero, what/who/why, trust signals, one CTA |
+| How it works | `/how-it-works` or landing section | Built in V0/V1 | 3-4 step visual summary |
+| Features | `/features` | Stubbed | Placeholder structure, populated as verticals complete |
+| Pricing | `/pricing` | Stubbed | Placeholder, finalised before public launch |
+| Privacy & trust | Landing section | Built in V0/V1 | Short, visible trust messaging |
+| Privacy policy | `/privacy` | Stubbed | Legal review before go-live |
+| Terms of service | `/terms` | Stubbed | Legal review before go-live |
+| Cookie policy | `/cookies` | Stubbed | Legal review before go-live |
+| Get started | `/start` | V1 | Entry to guided journey |
+
+**Deferred to pre-launch polish (before public launch, after V5):**
+- Blog / content hub
+- SEO-optimised content pages
+- Testimonials / social proof
+- Detailed "About" page
+- Marketing depth and acquisition content
+
+The MDX content structure supports adding these pages progressively without structural changes.
+
 ---
 
 ## Source documents

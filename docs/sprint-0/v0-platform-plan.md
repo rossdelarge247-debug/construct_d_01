@@ -309,18 +309,27 @@ All 11 core entities, designed for full product scope even though V1 populates a
 - CI pipeline: lint → type-check → unit tests on every push
 - Core schema tests: verify RLS policies, permission logic
 
-### 14. Stubbed legal pages
+### 14. Public site shell and stubbed pages
 
-- `/privacy` — placeholder privacy policy
-- `/terms` — placeholder terms of service
-- `/cookies` — placeholder cookie policy
-- All marked clearly as drafts requiring legal review before go-live
+**Built in V0 (minimal, functional):**
+- Landing page (`/`) — hero message, what/who/why, trust signals, single "Get started" CTA
+- How it works (`/how-it-works` or landing section) — 3-4 step visual summary of the service
+
+**Stubbed in V0 (placeholder content, real routes):**
+- Features (`/features`) — placeholder structure, populated as verticals complete
+- Pricing (`/pricing`) — placeholder, finalised before public launch
+- Privacy policy (`/privacy`) — draft requiring legal review before go-live
+- Terms of service (`/terms`) — draft requiring legal review before go-live
+- Cookie policy (`/cookies`) — draft requiring legal review before go-live
+
+All stubbed pages clearly marked as drafts. All built as MDX for easy content editing.
 
 ### 15. Content structure
 
-- MDX files for marketing/public pages
+- MDX files for marketing/public pages (landing, how it works, features, pricing)
+- MDX files for legal page stubs
 - Microcopy constants file for in-app copy (separable, editable)
-- Legal page stubs as MDX
+- Content separated from components so a non-developer can edit
 
 ---
 
@@ -339,7 +348,8 @@ All 11 core entities, designed for full product scope even though V1 populates a
 - [ ] Debug panel visible in dev environment
 - [ ] PDF generation produces a test output
 - [ ] CI pipeline passes (lint + types + unit tests)
-- [ ] Legal page stubs accessible
+- [ ] Landing page renders with hero, trust signals, and "Get started" CTA
+- [ ] Stubbed pages accessible (features, pricing, privacy, terms, cookies)
 - [ ] Environment banner shows correctly per environment
 - [ ] README documents setup, architecture, and local dev instructions
 
@@ -349,7 +359,7 @@ All 11 core entities, designed for full product scope even though V1 populates a
 
 - Any V1 guided journey UI or logic
 - Any V1 content or microcopy
-- Marketing pages or landing page
+- Deep marketing content (blog, SEO pages, testimonials)
 - Real Stripe credentials or payment flows
 - Document upload or processing
 - AI prompts for specific verticals
