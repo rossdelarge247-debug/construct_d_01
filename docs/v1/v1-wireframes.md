@@ -28,12 +28,13 @@ flowchart TD
     N2 --> O
     N3 --> O
     N4 --> O
-    O --> P["Save workspace prompt"]
-    P --> Q{"Saves?"}
-    Q -->|Yes| R["Auth: magic link / Google"]
-    Q -->|Not now| S["Session preserved\nCan return"]
-    R --> T["Compass Workspace (/workspace)"]
-    S -.->|Returns later| P
+    O --> P["What comes next\n(service overview + tiers)"]
+    P --> Q["Save workspace prompt"]
+    Q --> R{"Saves?"}
+    R -->|Yes| S["Auth: magic link / Google"]
+    R -->|Not now| T["Session preserved\nCan return"]
+    S --> U["Compass Workspace (/workspace)"]
+    T -.->|Returns later| Q
 ```
 
 ## Adaptive output decision flow
@@ -302,46 +303,145 @@ stateDiagram-v2
 └─────────────────────────────────────────────────────┘
 ```
 
+### What comes next — service overview + commercial bridge (`/start/next`)
+
+```
+┌─────────────────────────────────────────────────────┐
+│  ── ── ── ── ── ── ── ── ●─                        │
+├─────────────────────────────────────────────────────┤
+│                                                     │
+│        Make your plan real                          │
+│                                                     │
+│        You've shaped a strong starting position.    │
+│        Here's how Decouple helps you from here.     │
+│                                                     │
+│  BASED ON YOUR PLAN:                                │
+│                                                     │
+│  ┌────────────────────────────────────────────┐     │
+│  │  Build the full picture                    │     │
+│  │  You marked 4 items as Unknown or Unsure.  │     │
+│  │  Build a detailed financial position,      │     │
+│  │  deepen family arrangements, and upload    │     │
+│  │  evidence — we'll extract and structure    │     │
+│  │  the detail automatically.                 │     │
+│  └────────────────────────────────────────────┘     │
+│                                                     │
+│  ┌────────────────────────────────────────────┐     │
+│  │  Prepare for disclosure                    │     │
+│  │  Turn your full picture into structured,   │     │
+│  │  Form E-ready disclosure. Resolve open     │     │
+│  │  questions. Link evidence to every claim.  │     │
+│  └────────────────────────────────────────────┘     │
+│                                                     │
+│  ┌────────────────────────────────────────────┐     │
+│  │  Share and negotiate                       │     │
+│  │  Invite your partner, mediator, or         │     │
+│  │  solicitor. Track proposals, counter-      │     │
+│  │  proposals, and mediation progress.        │     │
+│  │  Control exactly what they see.            │     │
+│  └────────────────────────────────────────────┘     │
+│                                                     │
+│  ┌────────────────────────────────────────────┐     │
+│  │  Reach agreement                           │     │
+│  │  Resolve open points. Capture the final    │     │
+│  │  agreed position. Get ready for            │     │
+│  │  formalisation.                             │     │
+│  └────────────────────────────────────────────┘     │
+│                                                     │
+│  ┌────────────────────────────────────────────┐     │
+│  │  Prepare court documents      ✦ Enhanced   │     │
+│  │  Generate draft consent orders, disclosure │     │
+│  │  packs, and adviser-ready bundles directly │     │
+│  │  from your structured case record.         │     │
+│  └────────────────────────────────────────────┘     │
+│                                                     │
+├─────────────────────────────────────────────────────┤
+│                                                     │
+│  CHOOSE HOW TO CONTINUE                             │
+│                                                     │
+│  ┌──────────────────┐  ┌──────────────────┐         │
+│  │    Standard       │  │    Enhanced      │         │
+│  │                   │  │                  │         │
+│  │  Full picture     │  │  Everything in   │         │
+│  │  Disclosure       │  │  Standard, plus: │         │
+│  │  Sharing &        │  │                  │         │
+│  │  negotiation      │  │  Draft court     │         │
+│  │  Reach agreement  │  │  documents       │         │
+│  │                   │  │  Additional      │         │
+│  │  £X/case          │  │  support         │         │
+│  │                   │  │                  │         │
+│  │  [Choose]         │  │  £X/case         │         │
+│  │                   │  │                  │         │
+│  └──────────────────┘  │  [Choose]         │         │
+│                         │                  │         │
+│                         └──────────────────┘         │
+│                                                     │
+│  You can upgrade from Standard to Enhanced          │
+│  at any time.                                       │
+│                                                     │
+│  Not ready to decide? Save your workspace for       │
+│  free and explore when you're ready.                │
+│                                                     │
+│           ┌──────────────────────┐                  │
+│           │  Save workspace free │                  │
+│           └──────────────────────┘                  │
+│                                                     │
+└─────────────────────────────────────────────────────┘
+```
+
 ### Compass Workspace (`/workspace`) — desktop
+
+The route map reflects the real journey ahead, not the interview steps.
+V1 interview answers become the starting state that gets deepened.
 
 ```
 ┌──────────────────────────────────────────────────────────────────┐
-│  Decouple                                          Profile  ⚙   │
+│  Decouple                                       Profile  ⚙  💬  │
 ├──────────────┬───────────────────────────────────────────────────┤
 │              │                                                   │
-│  ROUTE MAP   │  YOUR WORKSPACE                                   │
+│  YOUR        │  YOUR WORKSPACE                                   │
+│  JOURNEY     │                                                   │
+│              │  ┌─────────────────────────────────────────────┐  │
+│  ✓ Understand│  │  YOUR PLAN              [View] [Download]   │  │
+│    your      │  │  Route clear · 3 areas started · 4 unknown  │  │
+│    situation │  └─────────────────────────────────────────────┘  │
 │              │                                                   │
-│  ✓ Situation │  ┌─────────────────────────────────────────────┐  │
-│  ✓ Route     │  │  YOUR PLAN              [View] [Download]   │  │
-│  ✓ Children  │  │  3 areas covered · 4 known · 2 unknown     │  │
-│  ✓ Home      │  └─────────────────────────────────────────────┘  │
-│  ✓ Finances  │                                                   │
-│  ✓ Confidence│  Your children ─────────────────────────────────  │
+│  ● Build the │  ─── BUILD THE FULL PICTURE ──────────────────── │
+│    full      │                                                   │
+│    picture   │  Tasks                                   3 of 12  │
+│    ├ Finances│  ┌─────────────────────────────────────────────┐  │
+│    ├ Family  │  │  ☐ Detail your income and employment       │  │
+│    ├ Evidence│  │  ☐ Detail your partner's income (estimated) │  │
+│    └ Gaps    │  │  ☐ List all bank accounts and savings      │  │
+│              │  │  ☐ List all debts and loans                │  │
+│  ○ Prepare   │  │  ☐ Get a property valuation or estimate    │  │
+│    for       │  │  ☐ Detail mortgage position                │  │
+│    disclosure│  │  ☐ Investigate your pension value           │  │
+│              │  │  ☐ Investigate partner's pension            │  │
+│  ○ Share &   │  │  ☐ Detail children's arrangements fully    │  │
+│    negotiate │  │  ☐ Upload supporting documents              │  │
+│              │  │  ☐ Link evidence to financial items         │  │
+│  ○ Reach     │  │  ☐ Review and confirm all estimates        │  │
+│    agreement │  └─────────────────────────────────────────────┘  │
+│              │                                                   │
+│  ○ Prepare   │  ─── STARTING POSITION (from your plan) ──────── │
+│    court     │                                                   │
+│    documents │  ┌──────────────────┐  ┌──────────────────┐      │
+│    ✦ Enhanced│  │ Children: equal  │  │ Home: stay       │      │
+│              │  │ time aim         │  │ ◐ Estimated      │      │
+│              │  │ ● Known   [Edit] │  │ [Edit]           │      │
+│              │  └──────────────────┘  └──────────────────┘      │
 │              │  ┌──────────────────┐  ┌──────────────────┐      │
-│  ─ ─ ─ ─ ─  │  │ Current: shared  │  │ Aim: equal time  │      │
-│              │  │ ● Known          │  │ ● Known          │      │
-│  ○ Financial │  │ [Edit]           │  │ [Edit]           │      │
-│    picture   │  └──────────────────┘  └──────────────────┘      │
-│  ○ Evidence  │                                                   │
-│  ○ Disclosure│  Your home ─────────────────────────────────────  │
-│  ○ Sharing   │  ┌──────────────────┐  ┌──────────────────┐      │
-│  ○ Outputs   │  │ Own jointly      │  │ Aim: stay        │      │
-│              │  │ ● Known          │  │ ◐ Estimated      │      │
+│              │  │ Fair split       │  │ Pension: unknown │      │
+│              │  │ priority         │  │ ○ Unknown        │      │
 │              │  │ [Edit]           │  │ [Edit]           │      │
 │              │  └──────────────────┘  └──────────────────┘      │
 │              │                                                   │
-│              │  Your finances ──────────────────────────────────  │
-│              │  ┌──────────────────┐  ┌──────────────────┐      │
-│              │  │ Priority: fair   │  │ Concern: pension │      │
-│              │  │ split            │  │ unknown          │      │
-│              │  │ [Edit]           │  │ ○ Unknown        │      │
-│              │  └──────────────────┘  └──────────────────┘      │
-│              │                                                   │
 │              │  ┌─────────────────────────────────────────────┐  │
-│              │  │  NEXT STEPS                                 │  │
-│              │  │  1. Build your financial picture →           │  │
-│              │  │  2. Confirm property value                   │  │
-│              │  │  3. Investigate pension positions             │  │
+│              │  │  CONFIDENCE MAP                             │  │
+│              │  │  Known: 4  Estimated: 2  Unsure: 2         │  │
+│              │  │  Unknown: 2                                 │  │
+│              │  │  ████████████░░░░░░░░░░░░░░                 │  │
 │              │  └─────────────────────────────────────────────┘  │
 │              │                                                   │
 ├──────────────┴───────────────────────────────────────────────────┤
@@ -355,40 +455,89 @@ stateDiagram-v2
 ┌──────────────────────────┐
 │ Decouple          ☰  👤  │
 ├──────────────────────────┤
-│ ●●●●●●○○○○○  6/11 done  │
+│ Phase: Build full picture│
+│ ████░░░░░░░░  3/12 tasks │
 ├──────────────────────────┤
 │                          │
 │ ┌──────────────────────┐ │
 │ │ YOUR PLAN     [View] │ │
-│ │ 3 areas · 4 known    │ │
+│ │ Route · 3 areas · 4? │ │
 │ └──────────────────────┘ │
 │                          │
-│ Your children ────────── │
+│ ── CURRENT TASKS ─────── │
 │ ┌──────────────────────┐ │
-│ │ Current: shared      │ │
-│ │ ● Known       [Edit] │ │
-│ └──────────────────────┘ │
-│ ┌──────────────────────┐ │
-│ │ Aim: equal time      │ │
-│ │ ● Known       [Edit] │ │
+│ │ ☐ Detail income      │ │
+│ │ ☐ List bank accounts │ │
+│ │ ☐ Property estimate  │ │
+│ │ ☐ Investigate pension│ │
+│ │     + 8 more         │ │
 │ └──────────────────────┘ │
 │                          │
-│ Your home ────────────── │
+│ ── STARTING POSITION ─── │
 │ ┌──────────────────────┐ │
-│ │ Own jointly          │ │
+│ │ Children: equal time │ │
 │ │ ● Known       [Edit] │ │
 │ └──────────────────────┘ │
 │ ┌──────────────────────┐ │
-│ │ Aim: stay in home    │ │
+│ │ Home: stay           │ │
 │ │ ◐ Estimated   [Edit] │ │
 │ └──────────────────────┘ │
+│ ┌──────────────────────┐ │
+│ │ Pension: unknown     │ │
+│ │ ○ Unknown     [Edit] │ │
+│ └──────────────────────┘ │
 │                          │
 │ ┌──────────────────────┐ │
-│ │ NEXT STEPS           │ │
-│ │ 1. Build financial   │ │
-│ │    picture →         │ │
-│ │ 2. Confirm property  │ │
+│ │ CONFIDENCE MAP       │ │
+│ │ ████████░░░░  6/10   │ │
 │ └──────────────────────┘ │
 │                          │
 └──────────────────────────┘
+```
+
+### Journey map states — how the sidebar evolves
+
+The journey sidebar is not static. It evolves as the user progresses:
+
+**On first entry (post V1):**
+```
+✓ Understand your situation
+● Build the full picture ← active, expanded
+  ├ Finances (3/12)
+  ├ Family (0/4)
+  ├ Evidence (0/8)
+  └ Gaps (6 remaining)
+○ Prepare for disclosure
+○ Share & negotiate
+○ Reach agreement
+○ Prepare court documents ✦
+```
+
+**Mid-progress (V2/V3 work underway):**
+```
+✓ Understand your situation
+✓ Build the full picture
+● Prepare for disclosure ← active, expanded
+  ├ Form E sections (7/12)
+  ├ Open questions (3 raised)
+  ├ Evidence linked (14/18)
+  └ Readiness: 65%
+○ Share & negotiate
+○ Reach agreement
+○ Prepare court documents ✦
+```
+
+**Later (V4 work underway):**
+```
+✓ Understand your situation
+✓ Build the full picture
+✓ Prepare for disclosure
+● Share & negotiate ← active, expanded
+  ├ Respondent invited ✓
+  ├ Mediator: adjacent mode
+  ├ Proposals: v3 (2 disputed)
+  ├ Next session: 14 Apr
+  └ Agreed: 8/12 points
+○ Reach agreement
+○ Prepare court documents ✦
 ```

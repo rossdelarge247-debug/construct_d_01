@@ -17,25 +17,36 @@ PUBLIC PAGES
 
 GENTLE INTERVIEW (pre-auth, anonymous session)
 ├── /start ..................... Welcome + reassurance
-├── /start/situation ........... Chapter 1: Your situation + safety screening
-├── /start/route ............... Chapter 2: Your route (personalised process clarity)
-├── /start/children ............ Chapter 3: Children + parenting (conditional)
-├── /start/home ................ Chapter 4: Housing + property (conditional)
-├── /start/finances ............ Chapter 5: Financial aims + concerns
-├── /start/confidence .......... Chapter 6: Knowns / estimates / unknowns
-├── /start/plan ................ Your Plan (adaptive output) + PDF download
-└── /start/next-steps .......... Your Next Steps + save workspace prompt
+├── /start/situation ........... Step 1: Your situation + safety screening
+├── /start/route ............... Step 2: Your route (personalised process clarity)
+├── /start/children ............ Step 3: Children + parenting (conditional)
+├── /start/home ................ Step 4: Housing + property (conditional)
+├── /start/finances ............ Step 5: Financial aims + concerns
+├── /start/confidence .......... Step 6: Knowns / estimates / unknowns
+├── /start/plan ................ Step 7: Your Plan (adaptive output) + PDF download
+├── /start/next-steps .......... Step 8: Your Next Steps (action roadmap)
+├── /start/next ................ Step 9: What comes next (service overview + tiers)
+└── /start/save ................ Step 10: Save your workspace (auth conversion)
 
 AUTH
-└── /auth/save-workspace ....... Magic link / Google sign-in (modal or page)
+└── /auth/save-workspace ....... Magic link / Google sign-in (modal or inline)
 
 COMPASS WORKSPACE (post-auth)
 └── /workspace ................. Persistent workspace
-    ├── Route map sidebar (V1 done, V2+ ahead)
-    ├── Workspace cards by section
-    ├── Plan summary card
-    ├── Next steps card
-    └── V2 entry CTA
+    ├── Journey sidebar (process phases, not interview steps)
+    │   ├── ✓ Understand your situation (V1 done)
+    │   ├── ● Build the full picture (active phase)
+    │   │   ├── Finances
+    │   │   ├── Family arrangements
+    │   │   ├── Evidence & documents
+    │   │   └── Gaps & confirmation
+    │   ├── ○ Prepare for disclosure
+    │   ├── ○ Share & negotiate
+    │   ├── ○ Reach agreement
+    │   └── ○ Prepare court documents (Enhanced tier)
+    ├── Main area: task list + starting position cards + confidence map
+    ├── Plan summary (always accessible)
+    └── Active phase tasks and progress
 ```
 
 ## Session state model
