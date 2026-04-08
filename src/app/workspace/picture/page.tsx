@@ -19,13 +19,15 @@ export default function PicturePage() {
   const [extractionResult, setExtractionResult] = useState<ExtractionResult | null>(null)
   const [classification, setClassification] = useState<ClassificationResult | null>(null)
   const [message, setMessage] = useState<string | null>(null)
+  const [debugInfo, setDebugInfo] = useState<string | null>(null)
 
-  const handleProcessed = useCallback((result: { classification: unknown; extraction: unknown; message: string }) => {
+  const handleProcessed = useCallback((result: { classification: unknown; extraction: unknown; message: string; debug?: unknown }) => {
     const classResult = result.classification as ClassificationResult | null
     const extractResult = result.extraction as ExtractionResult | null
 
     setClassification(classResult)
     setMessage(result.message)
+    setDebugInfo(JSON.stringify({ classification: classResult, hasExtraction: !!extractResult, itemCount: extractResult?.items?.length ?? 0, debug: result.debug }, null, 2))
 
     if (extractResult && extractResult.items.length > 0) {
       setExtractionResult(extractResult)
@@ -104,11 +106,19 @@ export default function PicturePage() {
         {/* Upload view */}
         {view === 'upload' && (
           <div className="space-y-6">
-            {/* Classification hint if we tried and failed */}
+            {/* Result message */}
             {message && !extractionResult && (
-              <div className="rounded-[var(--radius-md)] border border-amber-light bg-amber-light/30 p-4">
+              <div className="rounded-[var(--radius-md)] border border-amber-light bg-amber-light/30 p-4 space-y-2">
                 <p className="text-sm text-ink">{message}</p>
               </div>
+            )}
+
+            {/* Debug output — temporary for troubleshooting */}
+            {debugInfo && (
+              <details className="rounded-[var(--radius-sm)] border border-cream-dark p-3">
+                <summary className="text-xs text-ink-faint cursor-pointer">Debug info</summary>
+                <pre className="mt-2 text-[10px] text-ink-faint overflow-x-auto whitespace-pre-wrap">{debugInfo}</pre>
+              </details>
             )}
 
             {/* Guided prompt */}
