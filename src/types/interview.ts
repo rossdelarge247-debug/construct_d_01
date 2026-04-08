@@ -49,18 +49,18 @@ export interface InterviewSession {
     additional_notes: string | null
   }
 
-  // Step 7: Confidence mapping
+  // Step 7: Confidence mapping (3 states: known, estimated, unknown)
   confidence: {
-    my_income: 'known' | 'estimated' | 'unsure' | 'unknown' | null
-    partner_income: 'known' | 'estimated' | 'unsure' | 'unknown' | null
-    savings: 'known' | 'estimated' | 'unsure' | 'unknown' | null
-    debts: 'known' | 'estimated' | 'unsure' | 'unknown' | null
-    property_value: 'known' | 'estimated' | 'unsure' | 'unknown' | null
-    mortgage: 'known' | 'estimated' | 'unsure' | 'unknown' | null
-    my_pension: 'known' | 'estimated' | 'unsure' | 'unknown' | null
-    partner_pension: 'known' | 'estimated' | 'unsure' | 'unknown' | null
-    other_assets: 'known' | 'estimated' | 'unsure' | 'unknown' | null
-    commitments: 'known' | 'estimated' | 'unsure' | 'unknown' | null
+    my_income: 'known' | 'estimated' | 'unknown' | null
+    partner_income: 'known' | 'estimated' | 'unknown' | null
+    savings: 'known' | 'estimated' | 'unknown' | null
+    debts: 'known' | 'estimated' | 'unknown' | null
+    property_value: 'known' | 'estimated' | 'unknown' | null
+    mortgage: 'known' | 'estimated' | 'unknown' | null
+    my_pension: 'known' | 'estimated' | 'unknown' | null
+    partner_pension: 'known' | 'estimated' | 'unknown' | null
+    other_assets: 'known' | 'estimated' | 'unknown' | null
+    commitments: 'known' | 'estimated' | 'unknown' | null
   }
 
   // Optional values captured when confidence is Known or Estimated

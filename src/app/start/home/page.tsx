@@ -17,8 +17,7 @@ const DESIRED_OPTIONS = [
 const VALUE_CONFIDENCE_OPTIONS = [
   { value: 'known', label: 'Known', description: 'I have a recent valuation' },
   { value: 'estimated', label: 'Estimated', description: 'I have a rough idea' },
-  { value: 'unsure', label: 'Unsure', description: 'I\'m guessing' },
-  { value: 'unknown', label: 'Unknown', description: 'I have no idea' },
+  { value: 'unknown', label: 'Unknown', description: 'I don\'t know' },
 ]
 
 const MORTGAGE_CONFIDENCE_OPTIONS = [

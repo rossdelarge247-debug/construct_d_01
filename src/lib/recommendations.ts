@@ -173,7 +173,7 @@ export function generateRecommendations(session: InterviewSession, hasSafeguardi
 
   // ── Medium priority: property ──
 
-  if (home.value_confidence === 'unknown' || home.value_confidence === 'unsure') {
+  if (home.value_confidence === 'unknown') {
     recs.push({
       id: 'property-value',
       title: 'Get a property valuation',

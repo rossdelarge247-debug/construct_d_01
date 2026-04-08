@@ -20,12 +20,12 @@ export default function NextStepsPage() {
 
   // Phase 1: Build your picture — always
   const unknownCount = Object.values(session.confidence).filter(v => v === 'unknown').length
-  const unsureCount = Object.values(session.confidence).filter(v => v === 'unsure').length
+  const estimatedCount = Object.values(session.confidence).filter(v => v === 'estimated').length
   journeyPhases.push({
     title: 'Build your full picture',
     description: 'Bring together everything about your finances, property, pensions, and' + (hasChildren ? ' children\'s arrangements' : ' commitments') + '.',
     userContext: unknownCount > 0
-      ? `You have ${unknownCount} unknown area${unknownCount > 1 ? 's' : ''} and ${unsureCount} area${unsureCount > 1 ? 's' : ''} you're unsure about. This is where you fill those gaps — upload documents and we extract and organise everything automatically, or add information manually.`
+      ? `You have ${unknownCount} unknown area${unknownCount > 1 ? 's' : ''}${estimatedCount > 0 ? ` and ${estimatedCount} estimate${estimatedCount > 1 ? 's' : ''} to confirm` : ''}. This is where you fill those gaps — upload documents and we extract and organise everything automatically, or add information manually.`
       : 'You have a good foundation. This stage helps you add the detail and evidence that makes your position stronger.',
     howWeHelp: 'Upload documents and we\'ll automatically extract, classify, and structure your financial information. Review and confirm — we do the heavy lifting. No spreadsheets, no chasing through paperwork.',
     active: true,
