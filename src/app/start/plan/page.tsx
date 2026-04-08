@@ -1,14 +1,16 @@
 'use client'
 
+import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { InterviewLayout } from '@/components/interview/interview-layout'
 import { MicroMoment } from '@/components/interview/micro-moment'
 import { Button } from '@/components/ui/button'
 import { useInterviewContext } from '@/components/interview/interview-provider'
 import { cn } from '@/utils/cn'
-import { generateRecommendations, type Recommendation } from '@/lib/recommendations'
+import { generateRecommendations } from '@/lib/recommendations'
 import type { ReadinessTier } from '@/types'
 import type { InterviewSession } from '@/types/interview'
+import type { AIPlanNarrative } from '@/lib/ai/plan-narrative'
 
 function calculateTier(session: InterviewSession): ReadinessTier {
   const confidence = session.confidence
@@ -81,19 +83,81 @@ function PlanSection({ title, confidence, children }: {
   )
 }
 
+// Template fallbacks when AI is unavailable
+function getTemplatePlan(session: InterviewSession, isMarried: boolean, hasChildren: boolean, hasProperty: boolean, hasSafeguarding: boolean) {
+  return {
+    route: isMarried
+      ? `Your route involves three connected processes: the divorce itself, a financial settlement, and${hasChildren ? ' children\'s arrangements' : ' sorting out shared finances'}. The financial settlement is usually the most complex and important part.`
+      + (hasSafeguarding ? ' Given your situation, some routes like mediation may not be appropriate.' : '')
+      : `As cohabiting partners, you'll need to work out how to divide shared finances${hasProperty ? ' and property' : ''}${hasChildren ? ', and agree children\'s arrangements' : ''}.`,
+    children: hasChildren && session.children.current_arrangements
+      ? `Current arrangements: ${session.children.current_arrangements === 'roughly_shared' ? 'roughly shared' : session.children.current_arrangements === 'with_me' ? 'mostly with you' : session.children.current_arrangements === 'with_partner' ? 'mostly with your partner' : 'other'}. You're aiming for ${session.children.desired_arrangements === 'not_sure' ? 'something you\'re still working out' : session.children.desired_arrangements === 'roughly_equal' ? 'roughly equal time' : session.children.desired_arrangements === 'broadly_same' ? 'broadly the same as now' : 'a change in the balance'}.`
+      : null,
+    housing: hasProperty && session.home.desired_outcome
+      ? `You'd like to ${session.home.desired_outcome === 'sell_and_split' ? 'sell the property and split the proceeds' : session.home.desired_outcome === 'one_stays' ? 'have one person stay in the home' : 'work this out as the picture becomes clearer'}.${session.home.value_confidence === 'unknown' ? ' The property value is currently unknown — getting an estimate or valuation is a clear next step.' : ''}`
+      : null,
+    finances: session.finances.priorities.length > 0
+      ? `What matters most to you: ${session.finances.priorities.map(p => p.replace(/_/g, ' ')).join(', ')}.${session.finances.combined_awareness === 'really_dont_know' ? ' You don\'t yet have a clear picture of the combined finances — building this is the strongest next step.' : session.finances.combined_awareness === 'know_my_side' ? ' You know your side but not your partner\'s — this is very common and something the next stage helps with.' : ''}`
+      : 'Building a clear financial picture is the strongest next step.',
+  }
+}
+
+// Loading shimmer
+function NarrativeLoading() {
+  return (
+    <div className="space-y-3 animate-pulse">
+      <div className="h-4 w-full rounded bg-cream-dark" />
+      <div className="h-4 w-5/6 rounded bg-cream-dark" />
+      <div className="h-4 w-4/6 rounded bg-cream-dark" />
+    </div>
+  )
+}
+
 export default function PlanPage() {
   const router = useRouter()
   const { session, hasChildren, hasProperty, hasSafeguardingConcerns } = useInterviewContext()
 
+  const [narrative, setNarrative] = useState<AIPlanNarrative | null>(null)
+  const [loading, setLoading] = useState(true)
+  const [aiUsed, setAiUsed] = useState(false)
+
   const tier = calculateTier(session)
   const isMarried = session.situation.relationship_status === 'married' || session.situation.relationship_status === 'civil_partnership'
 
-  // Determine children confidence
-  const childConf = session.children.confidence === 'known' ? 'strong' : session.children.confidence === 'estimated' ? 'mixed' : 'gaps'
-  // Determine home confidence
-  const homeConf = session.home.value_confidence === 'known' || session.home.value_confidence === 'estimated' ? (session.home.mortgage_confidence === 'known' ? 'strong' : 'mixed') : 'gaps'
-  // Determine finances confidence
-  const finConf = session.finances.combined_awareness === 'pretty_clear' ? 'strong' : session.finances.combined_awareness === 'rough_idea' || session.finances.combined_awareness === 'know_my_side' ? 'mixed' : 'gaps'
+  const childConf = session.children.confidence === 'known' ? 'strong' as const : session.children.confidence === 'estimated' ? 'mixed' as const : 'gaps' as const
+  const homeConf = session.home.value_confidence === 'known' || session.home.value_confidence === 'estimated' ? (session.home.mortgage_confidence === 'known' ? 'strong' as const : 'mixed' as const) : 'gaps' as const
+  const finConf = session.finances.combined_awareness === 'pretty_clear' ? 'strong' as const : session.finances.combined_awareness === 'rough_idea' || session.finances.combined_awareness === 'know_my_side' ? 'mixed' as const : 'gaps' as const
+
+  const templatePlan = getTemplatePlan(session, isMarried, hasChildren, hasProperty, hasSafeguardingConcerns)
+
+  // Generate AI narrative on mount
+  useEffect(() => {
+    if (tier === 'not_ready') {
+      setLoading(false)
+      return
+    }
+
+    async function fetchNarrative() {
+      try {
+        const res = await fetch('/api/plan/generate', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ session, hasSafeguardingConcerns }),
+        })
+        const data = await res.json()
+        if (data.narrative) {
+          setNarrative(data.narrative)
+          setAiUsed(true)
+        }
+      } catch {
+        // Fallback to templates silently
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    fetchNarrative()
+  }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
   const tierMessages = {
     full: { heading: 'You\'ve built a strong starting position.', micro: 'Here\'s where you stand across each area.' },
@@ -112,48 +176,48 @@ export default function PlanPage() {
           </p>
         </div>
 
-        <MicroMoment>{tierMessages[tier].heading}</MicroMoment>
+        {/* AI overview or tier heading */}
+        {loading ? (
+          <div className="rounded-[var(--radius-md)] border border-cream-dark p-5">
+            <NarrativeLoading />
+          </div>
+        ) : (
+          <MicroMoment>
+            {aiUsed && narrative?.overview ? narrative.overview : tierMessages[tier].heading}
+          </MicroMoment>
+        )}
 
-        {/* Route summary — always shown */}
+        {/* Route */}
         <PlanSection title="Your route">
-          {isMarried ? (
-            <p>Your route involves three connected processes: the divorce itself, a financial settlement, and{hasChildren ? ' children\'s arrangements' : ' sorting out shared finances'}. The financial settlement is usually the most complex and important part.</p>
-          ) : (
-            <p>As cohabiting partners, you&apos;ll need to work out how to divide shared finances{hasProperty ? ' and property' : ''}{hasChildren ? ', and agree children\'s arrangements' : ''}.</p>
-          )}
-          {hasSafeguardingConcerns && (
-            <p className="mt-2">Given your situation, some routes like mediation may not be appropriate. We&apos;ve adjusted our guidance accordingly.</p>
+          {loading ? <NarrativeLoading /> : (
+            <p>{aiUsed && narrative?.route ? narrative.route : templatePlan.route}</p>
           )}
         </PlanSection>
 
-        {/* Children — if applicable and answered */}
+        {/* Children */}
         {hasChildren && session.children.current_arrangements && tier !== 'not_ready' && (
           <PlanSection title="Children" confidence={childConf}>
-            <p>
-              Current arrangements: {session.children.current_arrangements === 'roughly_shared' ? 'roughly shared' : session.children.current_arrangements === 'with_me' ? 'mostly with you' : session.children.current_arrangements === 'with_partner' ? 'mostly with your partner' : 'other'}.
-              {' '}You&apos;re aiming for {session.children.desired_arrangements === 'not_sure' ? 'something you\'re still working out' : session.children.desired_arrangements === 'roughly_equal' ? 'roughly equal time' : session.children.desired_arrangements === 'broadly_same' ? 'broadly the same as now' : 'a change in the balance'}.
-            </p>
+            {loading ? <NarrativeLoading /> : (
+              <p>{aiUsed && narrative?.children ? narrative.children : templatePlan.children}</p>
+            )}
           </PlanSection>
         )}
 
-        {/* Home — if applicable and answered */}
+        {/* Housing */}
         {hasProperty && session.home.desired_outcome && tier !== 'not_ready' && (
           <PlanSection title="Housing" confidence={homeConf}>
-            <p>
-              You&apos;d like to {session.home.desired_outcome === 'sell_and_split' ? 'sell the property and split the proceeds' : session.home.desired_outcome === 'one_stays' ? 'have one person stay in the home' : 'work this out as the picture becomes clearer'}.
-              {session.home.value_confidence === 'unknown' && ' The property value is currently unknown — getting an estimate or valuation is a clear next step.'}
-            </p>
+            {loading ? <NarrativeLoading /> : (
+              <p>{aiUsed && narrative?.housing ? narrative.housing : templatePlan.housing}</p>
+            )}
           </PlanSection>
         )}
 
-        {/* Finances — if answered */}
+        {/* Finances */}
         {session.finances.priorities.length > 0 && tier !== 'not_ready' && (
           <PlanSection title="Finances" confidence={finConf}>
-            <p>
-              What matters most to you: {session.finances.priorities.map(p => p.replace(/_/g, ' ')).join(', ')}.
-              {session.finances.combined_awareness === 'really_dont_know' && ' You don\'t yet have a clear picture of the combined finances — building this is the strongest next step.'}
-              {session.finances.combined_awareness === 'know_my_side' && ' You know your side but not your partner\'s — this is very common and something the next stage helps with.'}
-            </p>
+            {loading ? <NarrativeLoading /> : (
+              <p>{aiUsed && narrative?.finances ? narrative.finances : templatePlan.finances}</p>
+            )}
           </PlanSection>
         )}
 
@@ -164,10 +228,19 @@ export default function PlanPage() {
             <div className="mt-4">
               <ConfidenceSummaryBar session={session} />
             </div>
-            <p className="mt-3 text-sm text-ink-light leading-relaxed">
-              This shows what you know and where the gaps are. The next stage helps you fill in the detail.
-            </p>
+            {loading ? (
+              <div className="mt-3"><NarrativeLoading /></div>
+            ) : (
+              <p className="mt-3 text-sm text-ink-light leading-relaxed">
+                {aiUsed && narrative?.confidence_insight ? narrative.confidence_insight : 'This shows what you know and where the gaps are. The next stage helps you fill in the detail.'}
+              </p>
+            )}
           </div>
+        )}
+
+        {/* AI closing message */}
+        {!loading && aiUsed && narrative?.closing && tier !== 'not_ready' && (
+          <MicroMoment>{narrative.closing}</MicroMoment>
         )}
 
         {/* AI Recommendations — personalised, connected to service */}
