@@ -316,7 +316,7 @@ export default function PlanPage() {
         <div className="flex items-center justify-between pt-4">
           <button type="button" onClick={() => router.back()} className="text-sm text-ink-light transition-colors hover:text-ink">Back</button>
           <Button onClick={() => router.push('/start/next-steps')}>
-            See next steps
+            Your road ahead
           </Button>
         </div>
       </div>
