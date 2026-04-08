@@ -41,7 +41,7 @@ export function InterviewLayout({ children, currentStep, steps, showProgress = t
     <div className="flex min-h-screen flex-col bg-cream">
       {/* Minimal header */}
       <header className="px-6 pt-6">
-        <div className="mx-auto flex max-w-lg items-center justify-between">
+        <div className="mx-auto flex max-w-xl items-center justify-between">
           <Link href="/" className="font-heading text-lg font-medium text-ink-faint transition-colors hover:text-ink">
             {APP_NAME}
           </Link>
@@ -51,7 +51,7 @@ export function InterviewLayout({ children, currentStep, steps, showProgress = t
       {/* Step progress — dots with labels */}
       {showProgress && currentStep && steps && (
         <div className="px-6 pt-6">
-          <div className="mx-auto max-w-lg">
+          <div className="mx-auto max-w-xl">
             {/* Progress bar */}
             <div className="h-1 overflow-hidden rounded-full bg-cream-dark">
               <div
@@ -82,7 +82,7 @@ export function InterviewLayout({ children, currentStep, steps, showProgress = t
 
       {/* Content */}
       <main className="flex flex-1 flex-col px-6 pb-12 pt-8">
-        <div className="mx-auto w-full max-w-lg">
+        <div className="mx-auto w-full max-w-xl">
           {children}
         </div>
       </main>
