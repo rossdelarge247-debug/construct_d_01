@@ -33,6 +33,11 @@ const STEP_LABELS: Record<InterviewStepId, string> = {
   next: 'Next',
 }
 
+// All possible steps in order — conditional ones animate in/out
+const ALL_STEPS: InterviewStepId[] = [
+  'situation', 'route', 'children', 'home', 'finances', 'confidence', 'plan', 'next',
+]
+
 export function InterviewLayout({ children, currentStep, steps, showProgress = true }: InterviewLayoutProps) {
   const currentIndex = currentStep && steps ? steps.indexOf(currentStep) : -1
   const totalSteps = steps?.length ?? 0
@@ -48,7 +53,7 @@ export function InterviewLayout({ children, currentStep, steps, showProgress = t
         </div>
       </header>
 
-      {/* Step progress — dots with labels */}
+      {/* Step progress */}
       {showProgress && currentStep && steps && (
         <div className="px-6 pt-6">
           <div className="mx-auto max-w-xl">
@@ -60,18 +65,27 @@ export function InterviewLayout({ children, currentStep, steps, showProgress = t
               />
             </div>
 
-            {/* Step labels */}
-            <div className="mt-2 flex items-center justify-between">
-              {steps.map((step, i) => (
-                <span key={step} className={cn(
-                  'text-[11px] transition-colors',
-                  i < currentIndex ? 'text-sage' :
-                  i === currentIndex ? 'font-medium text-warmth-dark' :
-                  'text-ink-faint',
-                )}>
-                  {STEP_LABELS[step]}
-                </span>
-              ))}
+            {/* Step labels — all rendered, conditional ones animate */}
+            <div className="mt-2 flex items-center">
+              {ALL_STEPS.map((step) => {
+                const isActive = steps.includes(step)
+                const stepIndex = steps.indexOf(step)
+
+                return (
+                  <span
+                    key={step}
+                    className={cn(
+                      'text-[11px] transition-all duration-300 ease-out overflow-hidden',
+                      isActive ? 'max-w-24 opacity-100 mx-auto' : 'max-w-0 opacity-0 mx-0',
+                      isActive && stepIndex < currentIndex && 'text-sage',
+                      isActive && stepIndex === currentIndex && 'font-medium text-warmth-dark',
+                      isActive && stepIndex > currentIndex && 'text-ink-faint',
+                    )}
+                  >
+                    {STEP_LABELS[step]}
+                  </span>
+                )
+              })}
             </div>
           </div>
         </div>
