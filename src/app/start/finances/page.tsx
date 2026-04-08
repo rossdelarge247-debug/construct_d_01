@@ -82,7 +82,7 @@ export default function FinancesPage() {
     if (idx < STEPS.length - 1) {
       setStep(STEPS[idx + 1])
     } else {
-      router.push('/start/confidence')
+      router.push('/start/readiness')
     }
   }
 

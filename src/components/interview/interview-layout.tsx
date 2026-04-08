@@ -11,7 +11,7 @@ export type InterviewStepId =
   | 'children'
   | 'home'
   | 'finances'
-  | 'confidence'
+  | 'readiness'
   | 'plan'
   | 'next'
 
@@ -22,26 +22,37 @@ interface InterviewLayoutProps {
   showProgress?: boolean
 }
 
-const STEP_LABELS: Record<InterviewStepId, string> = {
+// The tracker shows a simplified journey with two waypoint deliverables
+// Internal steps (children, home, finances, readiness) collapse into "Your picture"
+type TrackerPhase = 'situation' | 'pathway' | 'picture' | 'plan'
+
+const TRACKER_PHASES: TrackerPhase[] = ['situation', 'pathway', 'picture', 'plan']
+
+const PHASE_LABELS: Record<TrackerPhase, string> = {
   situation: 'Situation',
-  route: 'Your pathway',
-  children: 'Children',
-  home: 'Home',
-  finances: 'Finances',
-  confidence: 'Confidence',
-  plan: 'Plan',
-  next: '',
+  pathway: 'Your pathway',
+  picture: 'Your picture',
+  plan: 'Your plan',
 }
 
-// All possible steps in order — conditional ones animate in/out
-// 'next' excluded from tracker display
-const ALL_STEPS: InterviewStepId[] = [
-  'situation', 'route', 'children', 'home', 'finances', 'confidence', 'plan',
-]
+// Map each internal step to a tracker phase
+const STEP_TO_PHASE: Record<InterviewStepId, TrackerPhase> = {
+  situation: 'situation',
+  route: 'pathway',
+  children: 'picture',
+  home: 'picture',
+  finances: 'picture',
+  readiness: 'picture',
+  plan: 'plan',
+  next: 'plan',
+}
+
+// Waypoint phases get a diamond marker
+const WAYPOINT_PHASES: TrackerPhase[] = ['pathway', 'plan']
 
 export function InterviewLayout({ children, currentStep, steps, showProgress = true }: InterviewLayoutProps) {
-  const currentIndex = currentStep && steps ? steps.indexOf(currentStep) : -1
-  const totalSteps = steps?.length ?? 0
+  const currentPhase = currentStep ? STEP_TO_PHASE[currentStep] : null
+  const currentPhaseIndex = currentPhase ? TRACKER_PHASES.indexOf(currentPhase) : -1
 
   return (
     <div className="flex min-h-screen flex-col bg-cream">
@@ -54,7 +65,7 @@ export function InterviewLayout({ children, currentStep, steps, showProgress = t
         </div>
       </header>
 
-      {/* Step progress */}
+      {/* Progress tracker — simplified with waypoints */}
       {showProgress && currentStep && steps && (
         <div className="px-6 pt-6">
           <div className="mx-auto max-w-xl">
@@ -62,29 +73,38 @@ export function InterviewLayout({ children, currentStep, steps, showProgress = t
             <div className="h-1 overflow-hidden rounded-full bg-cream-dark">
               <div
                 className="h-full rounded-full bg-warmth transition-all duration-500 ease-out"
-                style={{ width: `${((currentIndex + 1) / totalSteps) * 100}%` }}
+                style={{ width: `${((currentPhaseIndex + 1) / TRACKER_PHASES.length) * 100}%` }}
               />
             </div>
 
-            {/* Step labels — all rendered, conditional ones animate */}
-            <div className="mt-2 flex items-center">
-              {ALL_STEPS.map((step) => {
-                const isActive = steps.includes(step)
-                const stepIndex = steps.indexOf(step)
+            {/* Phase labels with waypoint diamonds */}
+            <div className="mt-3 flex items-center justify-between">
+              {TRACKER_PHASES.map((phase, i) => {
+                const isWaypoint = WAYPOINT_PHASES.includes(phase)
+                const isComplete = i < currentPhaseIndex
+                const isCurrent = i === currentPhaseIndex
+                const isFuture = i > currentPhaseIndex
 
                 return (
-                  <span
-                    key={step}
-                    className={cn(
-                      'text-[11px] transition-all duration-300 ease-out overflow-hidden',
-                      isActive ? 'max-w-24 opacity-100 mx-auto' : 'max-w-0 opacity-0 mx-0',
-                      isActive && stepIndex < currentIndex && 'text-sage',
-                      isActive && stepIndex === currentIndex && 'font-medium text-warmth-dark',
-                      isActive && stepIndex > currentIndex && 'text-ink-faint',
-                    )}
-                  >
-                    {STEP_LABELS[step]}
-                  </span>
+                  <div key={phase} className="flex flex-col items-center gap-1">
+                    {/* Diamond or dot marker */}
+                    <div className={cn(
+                      'transition-all duration-300',
+                      isWaypoint ? 'h-2.5 w-2.5 rotate-45' : 'h-1.5 w-1.5 rounded-full',
+                      isComplete && 'bg-sage',
+                      isCurrent && 'bg-warmth',
+                      isFuture && 'bg-cream-dark',
+                    )} />
+                    {/* Label */}
+                    <span className={cn(
+                      'text-[11px] transition-colors duration-300',
+                      isComplete && 'text-sage',
+                      isCurrent && 'font-medium text-warmth-dark',
+                      isFuture && 'text-ink-faint',
+                    )}>
+                      {PHASE_LABELS[phase]}
+                    </span>
+                  </div>
                 )
               })}
             </div>

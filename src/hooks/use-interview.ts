@@ -126,7 +126,7 @@ export function useInterview() {
     ...(hasChildren ? ['children' as const] : []),
     ...(hasProperty ? ['home' as const] : []),
     'finances' as const,
-    'confidence' as const,
+    'readiness' as const,
     'plan' as const,
     'next' as const,
   ]
