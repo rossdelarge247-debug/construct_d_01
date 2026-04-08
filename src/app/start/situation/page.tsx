@@ -102,9 +102,16 @@ export default function SituationPage() {
               value={session.situation.relationship_status}
               onChange={(v) => updateSituation({ relationship_status: v as InterviewSessionSituationRelationshipStatus })}
             />
-            <Explainer label="Why we ask this">
-              <p>The legal process differs depending on whether you&apos;re married, in a civil partnership, or cohabiting. This helps us show you the right route.</p>
-            </Explainer>
+            {session.situation.relationship_status === 'cohabiting' && (
+              <Explainer label="What this means for you">
+                <p>As cohabiting partners, your legal rights are different from married couples. There&apos;s no such thing as &quot;common law marriage&quot; in England and Wales — even if you&apos;ve lived together for many years. We&apos;ll tailor your route to reflect this.</p>
+              </Explainer>
+            )}
+            {session.situation.relationship_status !== 'cohabiting' && (
+              <Explainer label="Why we ask this">
+                <p>The legal process differs depending on whether you&apos;re married, in a civil partnership, or cohabiting. This helps us show you the right route.</p>
+              </Explainer>
+            )}
           </div>
         )}
 
@@ -166,13 +173,31 @@ export default function SituationPage() {
               onChange={(v) => updateSituation({ relationship_quality: v as 'amicable' | 'difficult' | 'high_conflict' | 'safety_concerns' })}
               columns={1}
             />
+            {session.situation.relationship_quality === 'high_conflict' && (
+              <Explainer label="What this means for your journey">
+                <p>High-conflict situations are more common than you might think. It doesn&apos;t mean you can&apos;t reach a resolution — but the route may look different. We&apos;ll adjust our guidance to reflect this, and help you understand when professional support is particularly important.</p>
+              </Explainer>
+            )}
             {session.situation.relationship_quality === 'safety_concerns' && (
               <div className="rounded-[var(--radius-md)] border border-warmth-light bg-warmth-light/30 p-5">
                 <p className="text-sm font-medium text-ink">You&apos;re not alone.</p>
                 <p className="mt-2 text-sm text-ink-light leading-relaxed">
                   If you or your children are in immediate danger, call 999. For confidential support, you can contact the National Domestic Abuse Helpline on 0808 2000 247 (24 hours, free).
                 </p>
+                <Explainer label="More support options">
+                  <div className="space-y-2">
+                    <p>Women&apos;s Aid Live Chat: womensaid.org.uk (7 days, 10am-6pm)</p>
+                    <p>Men&apos;s Advice Line: 0808 8010 327 (Mon-Fri 10am-8pm)</p>
+                    <p>Galop (LGBT+): 0800 999 5428</p>
+                    <p>Surviving Economic Abuse: survivingeconomicabuse.org</p>
+                  </div>
+                </Explainer>
               </div>
+            )}
+            {session.situation.relationship_quality === 'difficult' && (
+              <MicroMoment>
+                Difficult but manageable is where most people are. The structure and clarity this service provides can help make those conversations easier.
+              </MicroMoment>
             )}
           </div>
         )}

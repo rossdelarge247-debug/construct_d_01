@@ -106,9 +106,19 @@ export default function ConfidencePage() {
           </div>
         )}
 
-        {allAnswered && (
+        {allAnswered && unknown >= 4 && (
+          <MicroMoment>
+            Having several unknowns is completely normal — especially around your partner&apos;s finances. Knowing where the gaps are is itself valuable. The next stage is designed to help you fill them in.
+          </MicroMoment>
+        )}
+        {allAnswered && unknown < 4 && unknown > 0 && (
           <MicroMoment>
             You can see exactly where the gaps are — and that&apos;s powerful information in itself.
+          </MicroMoment>
+        )}
+        {allAnswered && unknown === 0 && (
+          <MicroMoment>
+            You have a strong picture of your financial position. That puts you in a much stronger starting place than most people at this stage.
           </MicroMoment>
         )}
 

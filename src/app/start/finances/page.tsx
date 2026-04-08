@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation'
 import { InterviewLayout } from '@/components/interview/interview-layout'
 import { CardSelect } from '@/components/interview/card-select'
 import { MicroMoment } from '@/components/interview/micro-moment'
+import { Explainer } from '@/components/interview/explainer'
 import { Button } from '@/components/ui/button'
 import { useInterviewContext } from '@/components/interview/interview-provider'
 import { getFinancialReactions } from '@/lib/recommendations'
@@ -112,6 +113,16 @@ export default function FinancesPage() {
               selected={session.finances.priorities}
               onChange={(v) => updateFinances({ priorities: v })}
             />
+            {session.finances.priorities.includes('pension_protection') && (
+              <Explainer label="Why pensions matter so much">
+                <p>Pensions are often the largest single asset in a separation — sometimes worth more than the family home. Many people don&apos;t realise this until late in the process. We&apos;ll make sure this gets the attention it deserves.</p>
+              </Explainer>
+            )}
+            {session.finances.priorities.includes('clean_break') && (
+              <Explainer label="What a clean break means">
+                <p>A clean break means neither of you can make financial claims against each other in the future. This is formalised through a consent order — and it&apos;s strongly recommended even when you agree on everything.</p>
+              </Explainer>
+            )}
           </div>
         )}
 
@@ -123,9 +134,26 @@ export default function FinancesPage() {
               selected={session.finances.worries}
               onChange={(v) => updateFinances({ worries: v })}
             />
-            <MicroMoment>
-              These are the most common financial worries during separation. You&apos;re not alone in feeling this.
-            </MicroMoment>
+            {session.finances.worries.includes('hidden_assets') && (
+              <Explainer label="How disclosure protects you">
+                <p>The formal disclosure process requires both parties to declare everything under a legal oath. If information is deliberately hidden, there are serious consequences — including court orders and contempt proceedings. Having your side thoroughly prepared is the strongest protection.</p>
+              </Explainer>
+            )}
+            {session.finances.worries.includes('not_enough') && (
+              <MicroMoment>
+                This is the most common financial worry during separation. Building a clear picture is the first step to understanding what&apos;s realistic.
+              </MicroMoment>
+            )}
+            {session.finances.worries.includes('process_cost') && (
+              <Explainer label="Keeping costs manageable">
+                <p>The divorce application is £612. Mediation is subsidised with a £500 government voucher. This service is designed to reduce your dependence on expensive solicitor hours by helping you do the preparation yourself — structured and guided.</p>
+              </Explainer>
+            )}
+            {!session.finances.worries.includes('hidden_assets') && !session.finances.worries.includes('not_enough') && !session.finances.worries.includes('process_cost') && (
+              <MicroMoment>
+                These are the most common financial worries during separation. You&apos;re not alone in feeling this.
+              </MicroMoment>
+            )}
           </div>
         )}
 
