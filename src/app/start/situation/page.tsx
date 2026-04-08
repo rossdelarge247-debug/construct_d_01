@@ -1,0 +1,205 @@
+'use client'
+
+import { useState } from 'react'
+import { useRouter } from 'next/navigation'
+import { InterviewLayout } from '@/components/interview/interview-layout'
+import { CardSelect } from '@/components/interview/card-select'
+import { Explainer } from '@/components/interview/explainer'
+import { MicroMoment } from '@/components/interview/micro-moment'
+import { Button } from '@/components/ui/button'
+import { useInterviewContext } from '@/components/interview/interview-provider'
+
+const RELATIONSHIP_OPTIONS = [
+  { value: 'married', label: 'Married' },
+  { value: 'civil_partnership', label: 'Civil partnership' },
+  { value: 'cohabiting', label: 'Living together (not married)' },
+  { value: 'other', label: 'Other' },
+]
+
+const LIVING_OPTIONS = [
+  { value: 'yes', label: 'Yes, still living together' },
+  { value: 'no', label: 'No, living separately' },
+  { value: 'complicated', label: 'It\'s complicated' },
+]
+
+const CHILDREN_OPTIONS = [
+  { value: 'yes', label: 'Yes' },
+  { value: 'no', label: 'No' },
+]
+
+const PROPERTY_OPTIONS = [
+  { value: 'own_jointly', label: 'Own together' },
+  { value: 'own_one_name', label: 'Own in one name' },
+  { value: 'rent', label: 'Rent' },
+  { value: 'other', label: 'Other' },
+]
+
+const PROCESS_OPTIONS = [
+  { value: 'not_yet', label: 'Not yet started' },
+  { value: 'discussed', label: 'We\'ve discussed it' },
+  { value: 'formally_underway', label: 'Formally underway' },
+]
+
+const RELATIONSHIP_QUALITY_OPTIONS = [
+  { value: 'amicable', label: 'Amicable', description: 'We can have reasonable conversations' },
+  { value: 'difficult', label: 'Difficult but manageable', description: 'It\'s hard, but we can communicate' },
+  { value: 'high_conflict', label: 'High conflict', description: 'Communication is very difficult' },
+  { value: 'safety_concerns', label: 'I have safety concerns', description: 'I\'m worried about my safety or my children\'s safety' },
+]
+
+type SituationStep = 'relationship' | 'living' | 'children' | 'property' | 'process' | 'quality'
+
+const STEP_ORDER: SituationStep[] = ['relationship', 'living', 'children', 'property', 'process', 'quality']
+
+export default function SituationPage() {
+  const router = useRouter()
+  const { session, updateSituation } = useInterviewContext()
+  const [currentStep, setCurrentStep] = useState<SituationStep>('relationship')
+
+  const currentIndex = STEP_ORDER.indexOf(currentStep)
+
+  function nextSubStep() {
+    const nextIndex = currentIndex + 1
+    if (nextIndex < STEP_ORDER.length) {
+      setCurrentStep(STEP_ORDER[nextIndex])
+    } else {
+      router.push('/start/route')
+    }
+  }
+
+  function canContinue(): boolean {
+    switch (currentStep) {
+      case 'relationship': return session.situation.relationship_status !== null
+      case 'living': return session.situation.living_together !== null
+      case 'children': return session.situation.has_children !== null
+      case 'property': return session.situation.property_status !== null
+      case 'process': return session.situation.process_status !== null
+      case 'quality': return session.situation.relationship_quality !== null
+      default: return false
+    }
+  }
+
+  return (
+    <InterviewLayout step={currentIndex + 1} totalSteps={STEP_ORDER.length} showProgress>
+      <div className="space-y-8">
+        {/* Step heading */}
+        <div>
+          <h1 className="font-heading text-2xl font-medium text-ink">
+            Your situation
+          </h1>
+          <p className="mt-2 text-sm text-ink-light leading-relaxed">
+            A few questions to help us understand where you are. Nothing is shared.
+          </p>
+        </div>
+
+        {/* Current sub-question */}
+        {currentStep === 'relationship' && (
+          <div className="space-y-5">
+            <p className="text-ink">Are you married or in a civil partnership?</p>
+            <CardSelect
+              options={RELATIONSHIP_OPTIONS}
+              value={session.situation.relationship_status}
+              onChange={(v) => updateSituation({ relationship_status: v as InterviewSessionSituationRelationshipStatus })}
+            />
+            <Explainer label="Why we ask this">
+              <p>The legal process differs depending on whether you&apos;re married, in a civil partnership, or cohabiting. This helps us show you the right route.</p>
+            </Explainer>
+          </div>
+        )}
+
+        {currentStep === 'living' && (
+          <div className="space-y-5">
+            <p className="text-ink">Are you currently living together?</p>
+            <CardSelect
+              options={LIVING_OPTIONS}
+              value={session.situation.living_together}
+              onChange={(v) => updateSituation({ living_together: v as 'yes' | 'no' | 'complicated' })}
+              columns={1}
+            />
+            <MicroMoment>
+              Many people are still living together when they begin this process. That&apos;s completely normal.
+            </MicroMoment>
+          </div>
+        )}
+
+        {currentStep === 'children' && (
+          <div className="space-y-5">
+            <p className="text-ink">Do you have children together?</p>
+            <CardSelect
+              options={CHILDREN_OPTIONS}
+              value={session.situation.has_children === null ? null : session.situation.has_children ? 'yes' : 'no'}
+              onChange={(v) => updateSituation({ has_children: v === 'yes' })}
+            />
+          </div>
+        )}
+
+        {currentStep === 'property' && (
+          <div className="space-y-5">
+            <p className="text-ink">What&apos;s your housing situation?</p>
+            <CardSelect
+              options={PROPERTY_OPTIONS}
+              value={session.situation.property_status}
+              onChange={(v) => updateSituation({ property_status: v as 'own_jointly' | 'own_one_name' | 'rent' | 'other' })}
+            />
+          </div>
+        )}
+
+        {currentStep === 'process' && (
+          <div className="space-y-5">
+            <p className="text-ink">Where are you in the separation process?</p>
+            <CardSelect
+              options={PROCESS_OPTIONS}
+              value={session.situation.process_status}
+              onChange={(v) => updateSituation({ process_status: v as 'not_yet' | 'discussed' | 'formally_underway' })}
+              columns={1}
+            />
+          </div>
+        )}
+
+        {currentStep === 'quality' && (
+          <div className="space-y-5">
+            <p className="text-ink">How would you describe the relationship with your partner right now?</p>
+            <CardSelect
+              options={RELATIONSHIP_QUALITY_OPTIONS}
+              value={session.situation.relationship_quality}
+              onChange={(v) => updateSituation({ relationship_quality: v as 'amicable' | 'difficult' | 'high_conflict' | 'safety_concerns' })}
+              columns={1}
+            />
+            {session.situation.relationship_quality === 'safety_concerns' && (
+              <div className="rounded-[var(--radius-md)] border border-warmth-light bg-warmth-light/30 p-5">
+                <p className="text-sm font-medium text-ink">You&apos;re not alone.</p>
+                <p className="mt-2 text-sm text-ink-light leading-relaxed">
+                  If you or your children are in immediate danger, call 999. For confidential support, you can contact the National Domestic Abuse Helpline on 0808 2000 247 (24 hours, free).
+                </p>
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* Navigation */}
+        <div className="flex items-center justify-between pt-4">
+          {currentIndex > 0 ? (
+            <button
+              type="button"
+              onClick={() => setCurrentStep(STEP_ORDER[currentIndex - 1])}
+              className="text-sm text-ink-light transition-colors hover:text-ink"
+            >
+              Back
+            </button>
+          ) : (
+            <div />
+          )}
+          <Button
+            onClick={nextSubStep}
+            disabled={!canContinue()}
+          >
+            Continue
+          </Button>
+        </div>
+      </div>
+    </InterviewLayout>
+  )
+}
+
+// Type helper to avoid inline cast verbosity
+type InterviewSessionSituationRelationshipStatus = NonNullable<ReturnType<typeof useInterviewContext>['session']['situation']['relationship_status']>
