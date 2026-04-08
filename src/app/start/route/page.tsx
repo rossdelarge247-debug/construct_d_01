@@ -333,9 +333,11 @@ export default function PathwayPage() {
             You now have a clearer picture of the process than most people at this stage.
           </MicroMoment>
 
-          <p className="text-sm text-ink leading-relaxed">
-            Now let&apos;s build the detail behind this pathway — your finances, your priorities, and how ready you are. This becomes your personalised plan.
-          </p>
+          <div className="rounded-[var(--radius-md)] border border-sage-light bg-sage-light/30 p-4">
+            <p className="text-sm text-ink leading-relaxed">
+              <span className="font-medium">This pathway is part of your free plan.</span> Keep going to add your financial picture, priorities, and personalised recommendations — then download everything as a PDF.
+            </p>
+          </div>
 
           <div className="flex items-center justify-between pt-2">
             <button
