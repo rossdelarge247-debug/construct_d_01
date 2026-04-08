@@ -61,12 +61,12 @@ export function InterviewLayout({ children, currentStep, steps, showProgress = t
             </div>
 
             {/* Step labels */}
-            <div className="mt-3 flex items-center gap-1 overflow-x-auto">
+            <div className="mt-3 flex flex-wrap items-center gap-x-1 gap-y-1">
               {steps.map((step, i) => (
                 <div key={step} className="flex items-center gap-1">
                   {i > 0 && <span className="text-cream-dark mx-0.5">·</span>}
                   <span className={cn(
-                    'whitespace-nowrap text-xs transition-colors',
+                    'text-xs transition-colors',
                     i < currentIndex ? 'text-sage' :
                     i === currentIndex ? 'font-medium text-warmth-dark' :
                     'text-ink-faint',
