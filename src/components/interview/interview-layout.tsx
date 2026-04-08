@@ -24,18 +24,19 @@ interface InterviewLayoutProps {
 
 const STEP_LABELS: Record<InterviewStepId, string> = {
   situation: 'Situation',
-  route: 'Route',
+  route: 'Your pathway',
   children: 'Children',
   home: 'Home',
   finances: 'Finances',
   confidence: 'Confidence',
   plan: 'Plan',
-  next: 'Next',
+  next: '',
 }
 
 // All possible steps in order — conditional ones animate in/out
+// 'next' excluded from tracker display
 const ALL_STEPS: InterviewStepId[] = [
-  'situation', 'route', 'children', 'home', 'finances', 'confidence', 'plan', 'next',
+  'situation', 'route', 'children', 'home', 'finances', 'confidence', 'plan',
 ]
 
 export function InterviewLayout({ children, currentStep, steps, showProgress = true }: InterviewLayoutProps) {
