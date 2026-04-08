@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { InterviewLayout } from '@/components/interview/interview-layout'
 import { MicroMoment } from '@/components/interview/micro-moment'
@@ -106,12 +106,10 @@ function PlanPanel({ title, label, labelClass, loading, aiContent, fallback, tas
 
 export default function PlanPage() {
   const router = useRouter()
-  const { session, hasChildren, hasProperty, hasSafeguardingConcerns } = useInterviewContext()
+  const { session, hasChildren, hasProperty, hasSafeguardingConcerns, getPlanNarrative, startPlanGeneration } = useInterviewContext()
 
-  // Cache the AI narrative in a ref so navigating back doesn't regenerate
-  const cachedNarrative = useRef<AIPlanNarrative | null>(null)
-  const [narrative, setNarrative] = useState<AIPlanNarrative | null>(cachedNarrative.current)
-  const [loading, setLoading] = useState(!cachedNarrative.current)
+  const [narrative, setNarrative] = useState<AIPlanNarrative | null>(null)
+  const [loading, setLoading] = useState(true)
   const aiUsed = narrative !== null
 
   const tier = calculateTier(session)
@@ -119,30 +117,28 @@ export default function PlanPage() {
   const v = session.values
 
   // Confidence labels
-  const childLabel = session.children.confidence === 'known' ? { text: 'Strong', cls: 'text-sage-dark bg-sage-light' } : session.children.confidence === 'estimated' ? { text: 'Some gaps', cls: 'text-amber bg-amber-light' } : { text: 'Needs detail', cls: 'text-ink-faint bg-cream-dark' }
-  const homeLabel = session.home.value_confidence === 'known' ? { text: 'Strong', cls: 'text-sage-dark bg-sage-light' } : session.home.value_confidence === 'estimated' ? { text: 'Some gaps', cls: 'text-amber bg-amber-light' } : { text: 'Needs detail', cls: 'text-ink-faint bg-cream-dark' }
-  const finLabel = session.finances.combined_awareness === 'pretty_clear' ? { text: 'Strong', cls: 'text-sage-dark bg-sage-light' } : session.finances.combined_awareness === 'rough_idea' || session.finances.combined_awareness === 'know_my_side' ? { text: 'Some gaps', cls: 'text-amber bg-amber-light' } : { text: 'Needs detail', cls: 'text-ink-faint bg-cream-dark' }
+  const confLabel = (state: string | null) =>
+    state === 'known' ? { text: 'Strong', cls: 'text-sage-dark bg-sage-light' }
+    : state === 'estimated' ? { text: 'Some gaps', cls: 'text-amber bg-amber-light' }
+    : { text: 'Needs detail', cls: 'text-ink-faint bg-cream-dark' }
 
-  // Generate AI narrative (only once)
+  const childLabel = confLabel(session.children.confidence)
+  const homeLabel = confLabel(session.home.value_confidence)
+  const finLabel = confLabel(session.finances.combined_awareness === 'pretty_clear' ? 'known' : session.finances.combined_awareness === 'rough_idea' || session.finances.combined_awareness === 'know_my_side' ? 'estimated' : null)
+
+  // Get pre-generated narrative, or trigger generation if not started
   useEffect(() => {
-    if (cachedNarrative.current || tier === 'not_ready') { setLoading(false); return }
+    if (tier === 'not_ready') { setLoading(false); return }
 
-    async function fetchNarrative() {
-      try {
-        const res = await fetch('/api/plan/generate', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ session, hasSafeguardingConcerns }),
-        })
-        const data = await res.json()
-        if (data.narrative) {
-          cachedNarrative.current = data.narrative
-          setNarrative(data.narrative)
-        }
-      } catch { /* fallback */ }
-      finally { setLoading(false) }
+    async function loadNarrative() {
+      // Ensure generation has been triggered
+      startPlanGeneration(session, hasSafeguardingConcerns)
+      // Await the result (resolves immediately if already done)
+      const result = await getPlanNarrative()
+      if (result) setNarrative(result)
+      setLoading(false)
     }
-    fetchNarrative()
+    loadNarrative()
   }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
   // Template fallbacks

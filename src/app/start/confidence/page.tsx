@@ -1,5 +1,6 @@
 'use client'
 
+import { useEffect, useRef } from 'react'
 import { useRouter } from 'next/navigation'
 import { InterviewLayout } from '@/components/interview/interview-layout'
 import { MicroMoment } from '@/components/interview/micro-moment'
@@ -85,10 +86,19 @@ function ConfidenceRow({ domain, confidenceValue, numericValue, onConfidenceChan
 
 export default function ConfidencePage() {
   const router = useRouter()
-  const { session, updateConfidence, updateValues } = useInterviewContext()
+  const { session, updateConfidence, updateValues, startPlanGeneration, hasSafeguardingConcerns } = useInterviewContext()
+  const pregenTriggered = useRef(false)
 
   const answeredCount = DOMAINS.filter(d => session.confidence[d.key] !== null).length
   const allAnswered = answeredCount === DOMAINS.length
+
+  // Pre-generate plan when 7+ items are answered (user is nearly done)
+  useEffect(() => {
+    if (answeredCount >= 7 && !pregenTriggered.current) {
+      pregenTriggered.current = true
+      startPlanGeneration(session, hasSafeguardingConcerns)
+    }
+  }, [answeredCount, session, hasSafeguardingConcerns, startPlanGeneration])
 
   const known = DOMAINS.filter(d => session.confidence[d.key] === 'known').length
   const estimated = DOMAINS.filter(d => session.confidence[d.key] === 'estimated').length

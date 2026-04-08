@@ -1,10 +1,15 @@
 'use client'
 
-import { useState, useCallback } from 'react'
+import { useState, useCallback, useRef } from 'react'
 import { type InterviewSession, INITIAL_SESSION } from '@/types/interview'
+import type { AIPlanNarrative } from '@/lib/ai/plan-narrative'
 
 export function useInterview() {
   const [session, setSession] = useState<InterviewSession>(INITIAL_SESSION)
+
+  // Pre-generation: stores the promise so plan page can await it
+  const planPromise = useRef<Promise<AIPlanNarrative | null> | null>(null)
+  const planResult = useRef<AIPlanNarrative | null>(null)
 
   const updateSituation = useCallback(
     (updates: Partial<InterviewSession['situation']>) => {
@@ -76,6 +81,39 @@ export function useInterview() {
     [],
   )
 
+  // Start generating the plan narrative in the background
+  // Called from the confidence page when enough data exists
+  const startPlanGeneration = useCallback(
+    (currentSession: InterviewSession, safeguarding: boolean) => {
+      // Don't re-trigger if already running or completed
+      if (planPromise.current || planResult.current) return
+
+      planPromise.current = fetch('/api/plan/generate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ session: currentSession, hasSafeguardingConcerns: safeguarding }),
+      })
+        .then(res => res.json())
+        .then(data => {
+          const narrative = data.narrative as AIPlanNarrative | null
+          planResult.current = narrative
+          return narrative
+        })
+        .catch(() => {
+          planResult.current = null
+          return null
+        })
+    },
+    [],
+  )
+
+  // Get the plan narrative — returns immediately if cached, or awaits the promise
+  const getPlanNarrative = useCallback(async (): Promise<AIPlanNarrative | null> => {
+    if (planResult.current) return planResult.current
+    if (planPromise.current) return planPromise.current
+    return null
+  }, [])
+
   // Determine which steps are relevant based on situation answers
   const hasChildren = session.situation.has_children === true
   const hasProperty = session.situation.property_status === 'own_jointly' || session.situation.property_status === 'own_one_name'
@@ -93,5 +131,7 @@ export function useInterview() {
     hasChildren,
     hasProperty,
     hasSafeguardingConcerns,
+    startPlanGeneration,
+    getPlanNarrative,
   }
 }
