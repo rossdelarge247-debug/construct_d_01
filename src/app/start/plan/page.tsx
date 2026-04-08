@@ -6,6 +6,7 @@ import { MicroMoment } from '@/components/interview/micro-moment'
 import { Button } from '@/components/ui/button'
 import { useInterviewContext } from '@/components/interview/interview-provider'
 import { cn } from '@/utils/cn'
+import { generateRecommendations, type Recommendation } from '@/lib/recommendations'
 import type { ReadinessTier } from '@/types'
 import type { InterviewSession } from '@/types/interview'
 
@@ -168,6 +169,66 @@ export default function PlanPage() {
             </p>
           </div>
         )}
+
+        {/* AI Recommendations — personalised, connected to service */}
+        {tier !== 'not_ready' && (() => {
+          const recs = generateRecommendations(session, hasSafeguardingConcerns)
+          const highPriority = recs.filter(r => r.priority === 'high')
+          const mediumPriority = recs.filter(r => r.priority === 'medium')
+
+          return (
+            <div className="space-y-5">
+              <h2 className="font-heading text-lg font-medium text-ink">
+                Our recommendations for you
+              </h2>
+              <p className="text-sm text-ink-light leading-relaxed">
+                Based on everything you&apos;ve told us, here&apos;s what we&apos;d prioritise.
+              </p>
+
+              {highPriority.length > 0 && (
+                <div className="space-y-3">
+                  {highPriority.map(rec => (
+                    <div key={rec.id} className="rounded-[var(--radius-md)] border border-warmth-light bg-warmth-light/20 p-5">
+                      <div className="flex items-start gap-3">
+                        <span className="mt-0.5 shrink-0 text-warmth">●</span>
+                        <div>
+                          <h3 className="text-sm font-medium text-ink">{rec.title}</h3>
+                          <p className="mt-2 text-sm text-ink-light leading-relaxed">{rec.explanation}</p>
+                          {rec.serviceDescription && (
+                            <p className="mt-3 text-sm text-warmth-dark leading-relaxed">
+                              <span className="font-medium">How we help:</span> {rec.serviceDescription}
+                            </p>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              {mediumPriority.length > 0 && (
+                <div className="space-y-3">
+                  {mediumPriority.map(rec => (
+                    <div key={rec.id} className="rounded-[var(--radius-md)] border border-cream-dark p-5">
+                      <div className="flex items-start gap-3">
+                        <span className="mt-0.5 shrink-0 text-ink-faint">○</span>
+                        <div>
+                          <h3 className="text-sm font-medium text-ink">{rec.title}</h3>
+                          <p className="mt-2 text-sm text-ink-light leading-relaxed">{rec.explanation}</p>
+                          {rec.serviceDescription && (
+                            <p className="mt-3 text-sm text-warmth-dark leading-relaxed">
+                              <span className="font-medium">How we help:</span> {rec.serviceDescription}
+                            </p>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          )
+        })()}
 
         {/* Download PDF placeholder */}
         {tier !== 'not_ready' && (

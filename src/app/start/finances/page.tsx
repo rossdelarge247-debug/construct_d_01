@@ -7,6 +7,7 @@ import { CardSelect } from '@/components/interview/card-select'
 import { MicroMoment } from '@/components/interview/micro-moment'
 import { Button } from '@/components/ui/button'
 import { useInterviewContext } from '@/components/interview/interview-provider'
+import { getFinancialReactions } from '@/lib/recommendations'
 import { cn } from '@/utils/cn'
 
 const PRIORITY_OPTIONS = [
@@ -33,8 +34,8 @@ const AWARENESS_OPTIONS = [
   { value: 'really_dont_know', label: 'I really don\'t know' },
 ]
 
-type FinanceStep = 'priorities' | 'worries' | 'awareness'
-const STEPS: FinanceStep[] = ['priorities', 'worries', 'awareness']
+type FinanceStep = 'priorities' | 'worries' | 'reflection' | 'awareness'
+const STEPS: FinanceStep[] = ['priorities', 'worries', 'reflection', 'awareness']
 
 function MultiSelect({ options, selected, onChange }: {
   options: { value: string; label: string }[]
@@ -88,6 +89,7 @@ export default function FinancesPage() {
     switch (step) {
       case 'priorities': return session.finances.priorities.length > 0
       case 'worries': return session.finances.worries.length > 0
+      case 'reflection': return true // always can continue
       case 'awareness': return session.finances.combined_awareness !== null
     }
   }
@@ -123,6 +125,27 @@ export default function FinancesPage() {
             />
             <MicroMoment>
               These are the most common financial worries during separation. You&apos;re not alone in feeling this.
+            </MicroMoment>
+          </div>
+        )}
+
+        {step === 'reflection' && (
+          <div className="space-y-5">
+            <p className="text-ink">Here&apos;s what we&apos;ve heard</p>
+            <div className="space-y-3">
+              {getFinancialReactions(session).map(reaction => (
+                <div key={reaction.trigger} className="rounded-[var(--radius-md)] border border-cream-dark p-5">
+                  <p className="text-sm text-ink-light leading-relaxed">{reaction.message}</p>
+                </div>
+              ))}
+              {getFinancialReactions(session).length === 0 && (
+                <MicroMoment>
+                  You&apos;ve captured the financial picture as you see it now. The next stage will help you build the detail.
+                </MicroMoment>
+              )}
+            </div>
+            <MicroMoment>
+              We&apos;ll use this to tailor your plan and recommendations.
             </MicroMoment>
           </div>
         )}
