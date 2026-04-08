@@ -86,7 +86,7 @@ function ConfidenceRow({ domain, confidenceValue, numericValue, onConfidenceChan
 
 export default function ConfidencePage() {
   const router = useRouter()
-  const { session, updateConfidence, updateValues, startPlanGeneration, hasSafeguardingConcerns } = useInterviewContext()
+  const { session, updateConfidence, updateValues, startPlanGeneration, hasSafeguardingConcerns, interviewSteps } = useInterviewContext()
   const pregenTriggered = useRef(false)
 
   const answeredCount = DOMAINS.filter(d => session.confidence[d.key] !== null).length
@@ -106,7 +106,7 @@ export default function ConfidencePage() {
   const valuesProvided = DOMAINS.filter(d => session.values[d.key] && session.values[d.key]!.trim() !== '').length
 
   return (
-    <InterviewLayout step={6} totalSteps={8}>
+    <InterviewLayout currentStep="confidence" steps={interviewSteps}>
       <div className="space-y-8">
         <div>
           <h1 className="font-heading text-2xl font-medium text-ink">What do you know?</h1>

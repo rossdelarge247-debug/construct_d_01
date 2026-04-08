@@ -10,7 +10,7 @@ import { cn } from '@/utils/cn'
 
 export default function NextStepsPage() {
   const router = useRouter()
-  const { session, hasChildren, hasProperty, hasSafeguardingConcerns } = useInterviewContext()
+  const { session, hasChildren, hasProperty, hasSafeguardingConcerns, interviewSteps } = useInterviewContext()
 
   const recommendations = generateRecommendations(session, hasSafeguardingConcerns)
   const isMarried = session.situation.relationship_status === 'married' || session.situation.relationship_status === 'civil_partnership'
@@ -83,7 +83,7 @@ export default function NextStepsPage() {
   const immediateActions = recommendations.filter(r => r.priority === 'high').slice(0, 2)
 
   return (
-    <InterviewLayout showProgress={false}>
+    <InterviewLayout currentStep="next" steps={interviewSteps}>
       <div className="space-y-10">
         <div>
           <h1 className="font-heading text-2xl font-medium text-ink">

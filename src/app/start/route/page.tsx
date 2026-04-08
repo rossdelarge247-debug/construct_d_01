@@ -9,7 +9,7 @@ import { useInterviewContext } from '@/components/interview/interview-provider'
 
 export default function RoutePage() {
   const router = useRouter()
-  const { session, hasChildren, hasProperty, hasSafeguardingConcerns } = useInterviewContext()
+  const { session, hasChildren, hasProperty, hasSafeguardingConcerns, interviewSteps } = useInterviewContext()
 
   const isMarriedOrCP = session.situation.relationship_status === 'married' || session.situation.relationship_status === 'civil_partnership'
   const isCohabiting = session.situation.relationship_status === 'cohabiting'
@@ -21,7 +21,7 @@ export default function RoutePage() {
   }
 
   return (
-    <InterviewLayout step={2} totalSteps={8}>
+    <InterviewLayout currentStep="route" steps={interviewSteps}>
       <div className="space-y-8">
         <div>
           <h1 className="font-heading text-2xl font-medium text-ink">

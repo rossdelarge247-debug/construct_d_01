@@ -119,6 +119,18 @@ export function useInterview() {
   const hasProperty = session.situation.property_status === 'own_jointly' || session.situation.property_status === 'own_one_name'
   const hasSafeguardingConcerns = session.situation.relationship_quality === 'safety_concerns' || session.situation.financial_control_concerns === true
 
+  // Dynamic step list based on situation
+  const interviewSteps = [
+    'situation' as const,
+    'route' as const,
+    ...(hasChildren ? ['children' as const] : []),
+    ...(hasProperty ? ['home' as const] : []),
+    'finances' as const,
+    'confidence' as const,
+    'plan' as const,
+    'next' as const,
+  ]
+
   return {
     session,
     updateSituation,
@@ -131,6 +143,7 @@ export function useInterview() {
     hasChildren,
     hasProperty,
     hasSafeguardingConcerns,
+    interviewSteps,
     startPlanGeneration,
     getPlanNarrative,
   }

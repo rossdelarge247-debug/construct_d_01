@@ -74,7 +74,7 @@ function MultiSelect({ options, selected, onChange }: {
 
 export default function FinancesPage() {
   const router = useRouter()
-  const { session, updateFinances } = useInterviewContext()
+  const { session, updateFinances, interviewSteps } = useInterviewContext()
   const [step, setStep] = useState<FinanceStep>('priorities')
   const idx = STEPS.indexOf(step)
 
@@ -96,7 +96,7 @@ export default function FinancesPage() {
   }
 
   return (
-    <InterviewLayout step={5} totalSteps={8}>
+    <InterviewLayout currentStep="finances" steps={interviewSteps}>
       <div className="space-y-8">
         <div>
           <h1 className="font-heading text-2xl font-medium text-ink">Your finances</h1>

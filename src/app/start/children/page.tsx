@@ -34,7 +34,7 @@ const STEPS: ChildStep[] = ['current', 'desired', 'confidence']
 
 export default function ChildrenPage() {
   const router = useRouter()
-  const { session, updateChildren, hasProperty } = useInterviewContext()
+  const { session, updateChildren, hasProperty, interviewSteps } = useInterviewContext()
   const [step, setStep] = useState<ChildStep>('current')
   const idx = STEPS.indexOf(step)
 
@@ -55,7 +55,7 @@ export default function ChildrenPage() {
   }
 
   return (
-    <InterviewLayout step={3} totalSteps={8}>
+    <InterviewLayout currentStep="children" steps={interviewSteps}>
       <div className="space-y-8">
         <div>
           <h1 className="font-heading text-2xl font-medium text-ink">Your children</h1>

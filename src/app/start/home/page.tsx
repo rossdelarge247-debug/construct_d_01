@@ -32,7 +32,7 @@ const STEPS: HomeStep[] = ['desired', 'value', 'mortgage']
 
 export default function HomePage() {
   const router = useRouter()
-  const { session, updateHome } = useInterviewContext()
+  const { session, updateHome, interviewSteps } = useInterviewContext()
   const [step, setStep] = useState<HomeStep>('desired')
   const idx = STEPS.indexOf(step)
 
@@ -53,7 +53,7 @@ export default function HomePage() {
   }
 
   return (
-    <InterviewLayout step={4} totalSteps={8}>
+    <InterviewLayout currentStep="home" steps={interviewSteps}>
       <div className="space-y-8">
         <div>
           <h1 className="font-heading text-2xl font-medium text-ink">Your home</h1>

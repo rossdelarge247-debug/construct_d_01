@@ -123,7 +123,7 @@ function PlanPanel({ title, label, labelClass, loading, aiSection, fallbackSumma
 
 export default function PlanPage() {
   const router = useRouter()
-  const { session, hasChildren, hasProperty, hasSafeguardingConcerns, getPlanNarrative, startPlanGeneration } = useInterviewContext()
+  const { session, hasChildren, hasProperty, hasSafeguardingConcerns, getPlanNarrative, startPlanGeneration, interviewSteps } = useInterviewContext()
 
   const [narrative, setNarrative] = useState<AIPlanNarrative | null>(null)
   const [loading, setLoading] = useState(true)
@@ -229,7 +229,7 @@ export default function PlanPage() {
   const financeService = 'Upload documents and we extract, classify, and structure everything automatically. You review and confirm.'
 
   return (
-    <InterviewLayout step={7} totalSteps={8}>
+    <InterviewLayout currentStep="plan" steps={interviewSteps}>
       <div className="space-y-6">
         <div>
           <h1 className="font-heading text-2xl font-medium text-ink">Your plan</h1>

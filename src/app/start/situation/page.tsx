@@ -53,7 +53,7 @@ const STEP_ORDER: SituationStep[] = ['relationship', 'living', 'children', 'prop
 
 export default function SituationPage() {
   const router = useRouter()
-  const { session, updateSituation } = useInterviewContext()
+  const { session, updateSituation, interviewSteps } = useInterviewContext()
   const [currentStep, setCurrentStep] = useState<SituationStep>('relationship')
 
   const currentIndex = STEP_ORDER.indexOf(currentStep)
@@ -81,7 +81,7 @@ export default function SituationPage() {
   }
 
   return (
-    <InterviewLayout step={currentIndex + 1} totalSteps={STEP_ORDER.length} showProgress>
+    <InterviewLayout currentStep="situation" steps={interviewSteps}>
       <div className="space-y-8">
         {/* Step heading */}
         <div>
