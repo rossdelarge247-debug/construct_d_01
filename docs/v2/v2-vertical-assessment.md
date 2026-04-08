@@ -270,6 +270,8 @@ V2 deepens the confidence model from V1:
 20. **Async document processing** — upload in bulk, leave, come back. Notifications when extraction complete.
 21. **Safeguarding continuity** — soft check-ins from V1 safeguarding flags carried into V2
 22. **Disputed values supported** — data model supports two values on same item (yours and partner's) for V4 negotiation
+23. **Come and go** — designed for interrupted sessions. Nobody completes this in one sitting. Remember where they left off, show what's done at a glance, never guilt for not finishing, celebrate what's been added.
+24. **No onboarding dependency** — V2 builds the workspace. Onboarding, billing, and first-run tour are V1.5 (built after V2 exists).
 
 ---
 

@@ -58,14 +58,20 @@ No premature coding. Design first, decide together, then build for real.
 
 ### 5. Build sequence
 
-**V0 → V1 → V2 → V3 → V4 → V5**
+**V0 → V1 → V2 → V1.5 → V3 → V4 → V5**
 
 - **V0** — Platform foundation (schema, auth, permissions, design system, shell, AI layer, debug infrastructure)
 - **V1** — Guided entry + option shaping
-- **V2** — Financial picture + evidence layer
+- **V2** — Financial picture + evidence layer (workspace)
+- **V1.5** — Onboarding, billing, first-run experience (built AFTER V2 so it can reference the real workspace)
 - **V3** — Structured disclosure, open questions + negotiation tracking
 - **V4** — Collaboration, professional roles + mediation modes
 - **V5** — Draft outputs, application packs + formalisation prep
+
+V1.5 is sequenced after V2 because:
+- Billing model needs V2 to understand what's being sold
+- Onboarding tour needs the workspace to exist
+- Auth upgrade mechanics already work; V1.5 adds commercial and polish layers
 
 Full core schema designed up front in V0, even though V1 only populates a subset.
 
