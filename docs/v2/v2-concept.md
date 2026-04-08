@@ -333,3 +333,186 @@ All V1 workspace principles apply, plus:
 6. **Celebrate completions** — micro-moments between sections: "You've captured your income and spending in one upload"
 7. **Three paths everywhere** — upload, enter manually, or skip. Never blocked.
 8. **Come back anytime** — async processing, auto-save, "we'll notify you when ready"
+
+---
+
+## User scenario analysis
+
+Ten user scenarios tested against the concept. Fixes incorporated.
+
+### Scenario adaptations
+
+**Prepared users (have multiple documents ready):**
+The empty state offers TWO entry points:
+- "Let's start with your current account" (guided priority)
+- "Got multiple documents? Drop them all here" (bulk upload)
+
+Bulk upload classifies all documents, then presents a consolidated review across categories. Power users can batch-confirm high-confidence items without stepping through one category at a time.
+
+**Users with no documents:**
+"Start without documents" path is positioned as equally valid, not a fallback. Framed as: "Let's capture what you already know." Manual wizard pre-populates from V1 estimates. Document checklist provided as actionable homework: "When you're ready, here's what to gather."
+
+**Safeguarding-flagged users:**
+Empty state adapts entirely when V1 safeguarding flags are present:
+- Lead with manual entry, not document upload
+- "Let's capture what you know, even if it's rough estimates"
+- Surface: "If you can't access financial documents, the disclosure process will require your partner to share. A solicitor can help if they won't."
+- Frame readiness as "your side of the picture"
+- Accept that this user may never reach full readiness independently — that's OK
+
+**Simple finances (renting, no property, small pensions):**
+Categories adapt based on V1 data. If no property, Property category hidden by default (available via "Add a category"). Simple case might show only: Income, Savings, Debts, Outgoings. Proportionate to complexity.
+
+**Complex finances (multiple properties, business, trusts):**
+Each category supports multiple items. "Add another" always available. Inherited and pre-marital flags on any item. Trust interests captured as free text with specialist referral prompt. System recognises complexity: "Your financial picture is more detailed than average — make sure every asset and liability is captured."
+
+**Self-employed users:**
+When self-employment detected, income section changes approach:
+- Don't present a single income figure from bank statement alone
+- Show: "Salary: £12,000. We also need dividend history, business accounts, and tax returns for the full picture."
+- Readiness tiers adjusted: first-draft requires business accounts, not just personal statements
+- Flag: "A forensic accountant may be needed for business valuation"
+
+**Overwhelmed users (10 minutes at a time):**
+- Show what's DONE as the primary message, not what's left
+- "What to do next" shows ONE item, not a list
+- Celebrate micro-progress: "You've added your income. That's a real step forward."
+- Never show a long outstanding items list by default
+- Auto-save everything, always
+
+**Fast-moving organised users:**
+Bulk upload → consolidated review → batch confirm high-confidence items → move on. The system stays out of their way. No forced category-by-category hand-holding.
+
+### Spending review — summary not transactions
+
+12 months of bank statements may produce hundreds of transactions. The system presents spending as **pre-categorised monthly averages**, not individual transactions:
+
+"Groceries: £420/month · Transport: £165/month · Utilities: £185/month"
+
+The user confirms CATEGORY totals. Individual transactions viewable by drilling in, but never the default review unit. This keeps the review manageable regardless of transaction volume.
+
+### Partner's information
+
+Primary flow focuses on the user's own finances. After each category, an optional prompt: "Do you know anything about your partner's [income/savings/pension]?"
+
+Partner items are:
+- Visually distinct (lighter styling, different section)
+- Always marked "Partner's — to be confirmed in disclosure"
+- Can be placeholders: "Partner's pension — unknown value, unknown provider"
+- Become open questions in V3
+
+### AI extraction errors
+
+- Every extraction shows confidence level
+- Low-confidence items flagged visually (amber)
+- System states what it THINKS the document is before extraction: "We think this is a bank statement from Barclays. Is that right?"
+- Side-by-side review for every extracted value
+- Corrections logged to improve future extractions
+- Never auto-finalise — always requires user confirmation
+
+### Mobile experience
+
+- Accept photos as well as PDFs (lower accuracy, flagged)
+- Support share-to-upload from banking apps
+- Category cards and review flow must work on mobile viewport
+- One-column layout throughout
+
+---
+
+## Navigation and transitions
+
+### Between layers
+
+Breadcrumb navigation: `Build your picture > Income > Review`
+
+Back button always visible. Tapping "Build your picture" in breadcrumb returns to the hub.
+
+### Between categories
+
+When a category is confirmed, an inline transition card appears:
+
+```
+┌──────────────────────────────────────────────────┐
+│                                                  │
+│  ✓ Income complete                               │
+│                                                  │
+│  Salary: £3,218/mo · Benefits: £96/mo            │
+│  1 account detected · 11 months of spending      │
+│                                                  │
+│  Next suggested: Savings & accounts              │
+│  Upload your savings statements, or enter what   │
+│  you know.                                       │
+│                                                  │
+│  [Continue to savings →]  [Back to hub]          │
+│                                                  │
+└──────────────────────────────────────────────────┘
+```
+
+Brief, celebrates what was captured, suggests next, always offers return to hub.
+
+### Document checklist
+
+Slide-out panel triggered by a persistent button: "What do I still need?"
+
+Not inline with the hub. Accessible from any screen within V2. Shows:
+
+```
+✓ Current account statements (12 months)
+✓ Savings statements
+✓ Mortgage statement
+⏳ Pension CETV (requested 14 Mar)
+✗ Property valuation
+✗ Credit card statements
+✗ Partner's income evidence
+? Payslips (optional — income confirmed from bank)
+```
+
+Each item has context: why it's needed, what to do to get it. Never just a bare checklist.
+
+### Notifications
+
+In-app only by default. When async extraction completes: badge on workspace icon, message on hub: "3 documents processed — ready for your review."
+
+User can opt into email notifications in settings. Email uses neutral subject: "Your workspace has updates." No financial content in email body — just "Log in to see what's new." Respects safeguarding.
+
+### Transition to V3
+
+When first-draft readiness is reached, a gentle card appears in the hub:
+
+```
+┌──────────────────────────────────────────────────┐
+│                                                  │
+│  Your picture is ready to share                  │
+│                                                  │
+│  You have enough to start a conversation with    │
+│  a mediator or solicitor. When you're ready,     │
+│  the next phase helps you prepare for formal     │
+│  disclosure.                                     │
+│                                                  │
+│  [Prepare for disclosure →]                      │
+│                                                  │
+│  You can keep building your picture at any time. │
+│                                                  │
+└──────────────────────────────────────────────────┘
+```
+
+Not a gate. An invitation. The user can keep refining V2 even after entering V3.
+
+### Readiness language
+
+Plain language tied to what the user can DO:
+
+| Internal tier | User sees |
+|--------------|-----------|
+| First draft | "Ready to share with a mediator for initial discussion" |
+| Disclosure | "Ready for formal financial disclosure" |
+| Final draft | "Substantively complete — minor items outstanding" |
+| Formalisation | "Complete and locked — ready for consent order" |
+
+### V1 to V2 transition
+
+First visit to workspace includes a brief framing moment (not a tour — that's V1.5):
+
+"Welcome to your workspace. This is where your plan becomes real. We've brought forward everything you told us — let's start building the detail."
+
+Then the guided priority flow begins with the first upload prompt.
