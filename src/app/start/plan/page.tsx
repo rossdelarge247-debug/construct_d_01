@@ -7,10 +7,9 @@ import { MicroMoment } from '@/components/interview/micro-moment'
 import { Button } from '@/components/ui/button'
 import { useInterviewContext } from '@/components/interview/interview-provider'
 import { cn } from '@/utils/cn'
-import { generateRecommendations } from '@/lib/recommendations'
 import type { ReadinessTier } from '@/types'
 import type { InterviewSession } from '@/types/interview'
-import type { AIPlanNarrative } from '@/lib/ai/plan-narrative'
+import type { AIPlanNarrative, AIPlanSection } from '@/lib/ai/plan-narrative'
 
 function calculateTier(session: InterviewSession): ReadinessTier {
   const confValues = Object.values(session.confidence).filter(v => v !== null)
@@ -51,20 +50,23 @@ function ConfidenceBar({ session }: { session: InterviewSession }) {
   )
 }
 
-function PlanPanel({ title, label, labelClass, loading, aiContent, fallback, tasks, serviceHelp }: {
+function PlanPanel({ title, label, labelClass, loading, aiSection, fallbackSummary, fallbackPoints, nextSteps, serviceHelp }: {
   title: string
   label?: string
   labelClass?: string
   loading: boolean
-  aiContent?: string | null
-  fallback: string
-  tasks?: string[]
+  aiSection?: AIPlanSection | null
+  fallbackSummary: string
+  fallbackPoints: string[]
+  nextSteps?: string[]
   serviceHelp?: string
 }) {
-  const content = aiContent || fallback
+  const summary = aiSection?.summary || fallbackSummary
+  const points = aiSection?.key_points || fallbackPoints
 
   return (
-    <div className="rounded-[var(--radius-md)] border border-cream-dark p-5 space-y-4">
+    <div className="rounded-[var(--radius-md)] border border-cream-dark p-5 space-y-3">
+      {/* Header */}
       <div className="flex items-center justify-between">
         <h3 className="font-heading text-base font-medium text-ink">{title}</h3>
         {label && <span className={cn('rounded-full px-2.5 py-0.5 text-xs font-medium', labelClass)}>{label}</span>}
@@ -72,33 +74,48 @@ function PlanPanel({ title, label, labelClass, loading, aiContent, fallback, tas
 
       {loading ? (
         <div className="space-y-2 animate-pulse">
-          <div className="h-3.5 w-full rounded bg-cream-dark" />
-          <div className="h-3.5 w-5/6 rounded bg-cream-dark" />
+          <div className="h-3.5 w-4/5 rounded bg-cream-dark" />
+          <div className="h-3 w-3/5 rounded bg-cream-dark" />
         </div>
       ) : (
-        <p className="text-sm text-ink-light leading-relaxed">{content}</p>
-      )}
+        <>
+          {/* Summary — one line */}
+          <p className="text-sm font-medium text-ink">{summary}</p>
 
-      {!loading && tasks && tasks.length > 0 && (
-        <div className="space-y-2 border-t border-cream-dark pt-3">
-          <p className="text-xs font-medium text-ink-faint uppercase tracking-wide">Things to do next</p>
-          <ul className="space-y-1.5">
-            {tasks.map((task, i) => (
-              <li key={i} className="flex items-start gap-2 text-sm text-ink-light">
-                <span className="mt-0.5 text-warmth">→</span>
-                <span>{task}</span>
-              </li>
-            ))}
-          </ul>
-        </div>
-      )}
+          {/* Key points — bullets */}
+          {points.length > 0 && (
+            <ul className="space-y-1.5">
+              {points.map((point, i) => (
+                <li key={i} className="flex items-start gap-2 text-sm text-ink-light">
+                  <span className="mt-1 h-1.5 w-1.5 shrink-0 rounded-full bg-ink-faint" />
+                  {point}
+                </li>
+              ))}
+            </ul>
+          )}
 
-      {!loading && serviceHelp && (
-        <div className="rounded-[var(--radius-sm)] bg-warmth-light/30 p-3">
-          <p className="text-sm text-warmth-dark leading-relaxed">
-            <span className="font-medium">How we make this easier:</span> {serviceHelp}
-          </p>
-        </div>
+          {/* Next steps — what they do */}
+          {nextSteps && nextSteps.length > 0 && (
+            <div className="border-t border-cream-dark pt-3 space-y-1.5">
+              <p className="text-xs font-medium text-ink-faint uppercase tracking-wide">Your next steps</p>
+              {nextSteps.map((step, i) => (
+                <p key={i} className="flex items-start gap-2 text-sm text-ink-light">
+                  <span className="mt-0.5 text-warmth">→</span>
+                  {step}
+                </p>
+              ))}
+            </div>
+          )}
+
+          {/* Service value — how we help */}
+          {serviceHelp && (
+            <div className="rounded-[var(--radius-sm)] bg-warmth-light/30 p-3">
+              <p className="text-sm text-warmth-dark">
+                <span className="font-medium">How we make this easier:</span> {serviceHelp}
+              </p>
+            </div>
+          )}
+        </>
       )}
     </div>
   )
@@ -116,7 +133,6 @@ export default function PlanPage() {
   const isMarried = session.situation.relationship_status === 'married' || session.situation.relationship_status === 'civil_partnership'
   const v = session.values
 
-  // Confidence labels
   const confLabel = (state: string | null) =>
     state === 'known' ? { text: 'Strong', cls: 'text-sage-dark bg-sage-light' }
     : state === 'estimated' ? { text: 'Some gaps', cls: 'text-amber bg-amber-light' }
@@ -126,14 +142,10 @@ export default function PlanPage() {
   const homeLabel = confLabel(session.home.value_confidence)
   const finLabel = confLabel(session.finances.combined_awareness === 'pretty_clear' ? 'known' : session.finances.combined_awareness === 'rough_idea' || session.finances.combined_awareness === 'know_my_side' ? 'estimated' : null)
 
-  // Get pre-generated narrative, or trigger generation if not started
   useEffect(() => {
     if (tier === 'not_ready') { setLoading(false); return }
-
     async function loadNarrative() {
-      // Ensure generation has been triggered
       startPlanGeneration(session, hasSafeguardingConcerns)
-      // Await the result (resolves immediately if already done)
       const result = await getPlanNarrative()
       if (result) setNarrative(result)
       setLoading(false)
@@ -141,69 +153,88 @@ export default function PlanPage() {
     loadNarrative()
   }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
-  // Template fallbacks
-  const propertyStr = v.property_value ? `£${v.property_value}` : null
-  const mortgageStr = v.mortgage ? `£${v.mortgage}` : null
-  const incomeStr = v.my_income ? `£${v.my_income}/month` : null
+  // ── Fallback content (structured) ──
 
-  const fallbacks = {
-    route: isMarried
-      ? `Your route involves three connected processes: the divorce itself, a financial settlement, and${hasChildren ? ' children\'s arrangements' : ' sorting out shared finances'}. The financial settlement is usually the most complex part.${hasSafeguardingConcerns ? ' Given your situation, some routes like mediation may not be appropriate.' : ''}`
-      : `As cohabiting partners, you'll need to divide shared finances${hasProperty ? ' and property' : ''}${hasChildren ? ', and agree children\'s arrangements' : ''}.`,
-    children: `Current arrangements: ${session.children.current_arrangements === 'roughly_shared' ? 'roughly shared' : session.children.current_arrangements === 'with_me' ? 'mostly with you' : session.children.current_arrangements === 'with_partner' ? 'mostly with your partner' : 'other'}. You're aiming for ${session.children.desired_arrangements === 'not_sure' ? 'something you\'re still working out' : session.children.desired_arrangements === 'roughly_equal' ? 'roughly equal time' : session.children.desired_arrangements === 'broadly_same' ? 'broadly the same as now' : 'a change in the balance'}.`,
-    housing: `You'd like to ${session.home.desired_outcome === 'sell_and_split' ? 'sell and split the proceeds' : session.home.desired_outcome === 'one_stays' ? 'have one person stay in the home' : 'work this out as the picture becomes clearer'}.${propertyStr && mortgageStr ? ` Estimated value: ${propertyStr}, mortgage: ${mortgageStr}.` : ''}`,
-    finances: `Your priorities: ${session.finances.priorities.map(p => p.replace(/_/g, ' ')).join(', ')}.${incomeStr ? ` Your income: ${incomeStr}.` : ''}${session.finances.combined_awareness === 'really_dont_know' ? ' You don\'t yet have a clear combined picture — this is the strongest next step.' : ''}`,
+  const routeFallback = {
+    summary: isMarried
+      ? 'Your separation involves three connected processes: divorce, financial settlement, and' + (hasChildren ? ' children\'s arrangements.' : ' dividing shared finances.')
+      : 'You\'ll need to divide shared finances' + (hasProperty ? ', property,' : '') + (hasChildren ? ' and agree children\'s arrangements.' : '.'),
+    points: [
+      isMarried ? 'The divorce itself is the simplest part — apply online, minimum 26 weeks' : null,
+      isMarried ? 'A financial order (consent order) is essential — without it, claims stay open indefinitely' : null,
+      hasChildren ? 'Children\'s arrangements are agreed separately, often through mediation' : null,
+      !hasSafeguardingConcerns ? '£500 government mediation voucher available regardless of income' : null,
+      hasSafeguardingConcerns ? 'Given your situation, mediation may not be appropriate — speak to a specialist solicitor' : null,
+    ].filter(Boolean) as string[],
   }
 
-  // Get recommendations for inline integration
-  const recs = generateRecommendations(session, hasSafeguardingConcerns)
-
-  // Build tasks per panel
-  const routeTasks = [
-    isMarried && session.situation.process_status === 'not_yet' ? 'Submit divorce application (£612, straightforward online at gov.uk)' : null,
-    !hasSafeguardingConcerns ? 'Look into mediation — £500 government voucher available' : null,
-    hasSafeguardingConcerns ? 'Speak to a solicitor experienced in domestic abuse' : null,
-  ].filter(Boolean) as string[]
-
-  const childrenTasks = [
-    session.children.confidence !== 'known' ? 'Think through school terms, holidays, handovers' : null,
-    'Consider what the children might want',
-  ].filter(Boolean) as string[]
-
-  const housingTasks = [
-    session.home.value_confidence !== 'known' ? 'Get a free estate agent market appraisal' : null,
-    session.home.mortgage_confidence !== 'known' ? 'Check your latest mortgage statement' : null,
-    session.home.desired_outcome === 'one_stays' ? 'Consider solo mortgage affordability' : null,
-  ].filter(Boolean) as string[]
-
-  const financeTasks = [
-    session.confidence.my_pension === 'unknown' || session.confidence.partner_pension === 'unknown' ? 'Request pension valuations (CETVs) — takes up to 3 months' : null,
-    session.finances.combined_awareness !== 'pretty_clear' ? 'Gather bank statements, payslips, pension letters' : null,
-    session.finances.worries.includes('hidden_assets') ? 'Document everything you know — thorough records are your protection' : null,
-  ].filter(Boolean) as string[]
-
-  // Service help per panel
-  const routeServiceHelp = 'We guide you through every step of the process — what to do, when, and why. No legal jargon.'
-  const childrenServiceHelp = 'Our guided tools help you build detailed arrangements that are ready to share with a mediator or use in a parenting plan.'
-  const housingServiceHelp = 'Track your property value and mortgage, link valuation evidence, and see how housing fits your overall financial position.'
-  const financeServiceHelp = 'Upload documents and we automatically extract, classify, and structure your financial information. You review and confirm — we do the heavy lifting.'
-
-  const tierMessage = {
-    full: 'Here\'s your personalised assessment.',
-    partial: 'Here\'s what we can see so far — some areas need more detail.',
-    thin: 'Here\'s what you\'ve captured so far.',
-    not_ready: 'When you\'re ready to start shaping your plan, everything is here.',
+  const childrenFallback = {
+    summary: `Currently ${session.children.current_arrangements === 'roughly_shared' ? 'roughly shared' : session.children.current_arrangements === 'with_me' ? 'mostly with you' : 'with your partner'}, aiming for ${session.children.desired_arrangements === 'roughly_equal' ? 'roughly equal time' : session.children.desired_arrangements === 'broadly_same' ? 'broadly the same' : session.children.desired_arrangements === 'not_sure' ? 'something you\'re still working out' : 'a change'}.`,
+    points: [
+      session.children.confidence !== 'known' ? 'The more detail you can think through, the stronger your position' : 'You have a clear idea of what you want — that\'s a strong starting point',
+      'Consider school terms, holidays, and handover logistics',
+    ],
   }
+
+  const housingFallback = {
+    summary: `You\'d like to ${session.home.desired_outcome === 'sell_and_split' ? 'sell and split' : session.home.desired_outcome === 'one_stays' ? 'have one person stay' : 'decide later'}.`
+      + (v.property_value ? ` Estimated value: £${v.property_value}.` : '')
+      + (v.mortgage ? ` Mortgage: £${v.mortgage}.` : ''),
+    points: [
+      session.home.value_confidence !== 'known' ? 'Get a property valuation — estate agents offer free appraisals' : null,
+      session.home.mortgage_confidence !== 'known' ? 'Check your latest mortgage statement for the balance' : null,
+      session.home.desired_outcome === 'one_stays' ? 'Affordability depends on the full financial picture' : null,
+    ].filter(Boolean) as string[],
+  }
+
+  const financesFallback = {
+    summary: `Your priorities: ${session.finances.priorities.map(p => p.replace(/_/g, ' ')).join(', ')}.`
+      + (v.my_income ? ` Income: £${v.my_income}/month.` : ''),
+    points: [
+      session.confidence.my_pension === 'unknown' || session.confidence.partner_pension === 'unknown' ? 'Pension valuations (CETVs) take up to 3 months — start now' : null,
+      session.finances.worries.includes('hidden_assets') ? 'Formal disclosure requires everything declared under oath' : null,
+      session.finances.combined_awareness !== 'pretty_clear' ? 'Building the full picture is the strongest next step' : null,
+      session.finances.worries.includes('process_cost') ? 'Costs can be managed — £500 mediation voucher, DIY divorce is £612' : null,
+    ].filter(Boolean) as string[],
+  }
+
+  // ── Next steps per section ──
+
+  const routeNextSteps = [
+    isMarried && session.situation.process_status === 'not_yet' ? 'Submit divorce application at gov.uk (£612)' : null,
+    hasSafeguardingConcerns ? 'Contact a solicitor experienced in domestic abuse' : 'Book a free initial solicitor consultation',
+  ].filter(Boolean) as string[]
+
+  const childrenNextSteps = [
+    session.children.confidence !== 'known' ? 'Map out a typical week — school, activities, handovers' : null,
+    'Think about what the children would want',
+  ].filter(Boolean) as string[]
+
+  const housingNextSteps = [
+    session.home.value_confidence !== 'known' ? 'Get a free estate agent appraisal' : null,
+    session.home.mortgage_confidence !== 'known' ? 'Request a mortgage statement' : null,
+  ].filter(Boolean) as string[]
+
+  const financeNextSteps = [
+    session.confidence.my_pension === 'unknown' ? 'Request your pension CETV (free, takes ~3 months)' : null,
+    session.confidence.partner_pension === 'unknown' ? 'Find out about your partner\'s pension if possible' : null,
+    'Gather 12 months of bank statements' ,
+  ].filter(Boolean) as string[]
+
+  // ── Service help per section ──
+
+  const routeService = 'We guide you through every step — what to do, when, and why.'
+  const childrenService = 'Build detailed arrangements ready to share with a mediator or use in a parenting plan.'
+  const housingService = 'Track property value, mortgage, and equity — linked to evidence, ready for disclosure.'
+  const financeService = 'Upload documents and we extract, classify, and structure everything automatically. You review and confirm.'
 
   return (
     <InterviewLayout step={7} totalSteps={8}>
       <div className="space-y-6">
         <div>
           <h1 className="font-heading text-2xl font-medium text-ink">Your plan</h1>
-          <p className="mt-2 text-sm text-ink-light">{tierMessage[tier]}</p>
         </div>
 
-        {/* Loading indicator */}
         {loading && (
           <div className="flex items-center gap-3 rounded-[var(--radius-md)] border border-warmth-light bg-warmth-light/20 p-4">
             <div className="h-4 w-4 animate-spin rounded-full border-2 border-warmth-light border-t-warmth" />
@@ -211,87 +242,82 @@ export default function PlanPage() {
           </div>
         )}
 
-        {/* AI overview */}
-        {!loading && aiUsed && narrative?.overview && (
-          <MicroMoment>{narrative.overview}</MicroMoment>
+        {!loading && (
+          <MicroMoment>
+            {aiUsed && narrative?.overview ? narrative.overview : 'Here\'s what we can see from what you\'ve told us.'}
+          </MicroMoment>
         )}
 
-        {/* Route panel */}
         <PlanPanel
           title="Your route"
           loading={loading}
-          aiContent={aiUsed ? narrative?.route : null}
-          fallback={fallbacks.route}
-          tasks={routeTasks}
-          serviceHelp={routeServiceHelp}
+          aiSection={aiUsed ? narrative?.route : null}
+          fallbackSummary={routeFallback.summary}
+          fallbackPoints={routeFallback.points}
+          nextSteps={routeNextSteps}
+          serviceHelp={routeService}
         />
 
-        {/* Children panel */}
         {hasChildren && session.children.current_arrangements && tier !== 'not_ready' && (
           <PlanPanel
             title="Children"
             label={childLabel.text}
             labelClass={childLabel.cls}
             loading={loading}
-            aiContent={aiUsed ? narrative?.children : null}
-            fallback={fallbacks.children}
-            tasks={childrenTasks}
-            serviceHelp={childrenServiceHelp}
+            aiSection={aiUsed ? narrative?.children : null}
+            fallbackSummary={childrenFallback.summary}
+            fallbackPoints={childrenFallback.points}
+            nextSteps={childrenNextSteps}
+            serviceHelp={childrenService}
           />
         )}
 
-        {/* Housing panel */}
         {hasProperty && session.home.desired_outcome && tier !== 'not_ready' && (
           <PlanPanel
             title="Housing"
             label={homeLabel.text}
             labelClass={homeLabel.cls}
             loading={loading}
-            aiContent={aiUsed ? narrative?.housing : null}
-            fallback={fallbacks.housing}
-            tasks={housingTasks}
-            serviceHelp={housingServiceHelp}
+            aiSection={aiUsed ? narrative?.housing : null}
+            fallbackSummary={housingFallback.summary}
+            fallbackPoints={housingFallback.points}
+            nextSteps={housingNextSteps}
+            serviceHelp={housingService}
           />
         )}
 
-        {/* Finances panel */}
         {session.finances.priorities.length > 0 && tier !== 'not_ready' && (
           <PlanPanel
             title="Finances"
             label={finLabel.text}
             labelClass={finLabel.cls}
             loading={loading}
-            aiContent={aiUsed ? narrative?.finances : null}
-            fallback={fallbacks.finances}
-            tasks={financeTasks}
-            serviceHelp={financeServiceHelp}
+            aiSection={aiUsed ? narrative?.finances : null}
+            fallbackSummary={financesFallback.summary}
+            fallbackPoints={financesFallback.points}
+            nextSteps={financeNextSteps}
+            serviceHelp={financeService}
           />
         )}
 
-        {/* Confidence map */}
         {tier !== 'not_ready' && (
           <div className="rounded-[var(--radius-md)] border border-cream-dark p-5 space-y-3">
             <h3 className="font-heading text-base font-medium text-ink">Confidence map</h3>
             <ConfidenceBar session={session} />
             {!loading && (
-              <p className="text-sm text-ink-light leading-relaxed">
+              <p className="text-sm text-ink-light">
                 {aiUsed && narrative?.confidence_insight ? narrative.confidence_insight : 'This shows what you know and where the gaps are.'}
               </p>
             )}
           </div>
         )}
 
-        {/* AI closing */}
-        {!loading && aiUsed && narrative?.closing && tier !== 'not_ready' && (
+        {!loading && aiUsed && narrative?.closing && (
           <MicroMoment>{narrative.closing}</MicroMoment>
         )}
 
-        {/* Download PDF */}
         {tier !== 'not_ready' && (
-          <button
-            type="button"
-            className="w-full rounded-[var(--radius-sm)] border border-cream-dark px-4 py-3 text-center text-sm text-ink-light hover:bg-cream-dark transition-colors"
-          >
+          <button type="button" className="w-full rounded-[var(--radius-sm)] border border-cream-dark px-4 py-3 text-center text-sm text-ink-light hover:bg-cream-dark transition-colors">
             Download your plan as PDF
           </button>
         )}
