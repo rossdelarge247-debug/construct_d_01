@@ -66,6 +66,16 @@ export function useInterview() {
     [],
   )
 
+  const updateValues = useCallback(
+    (updates: Partial<InterviewSession['values']>) => {
+      setSession(prev => ({
+        ...prev,
+        values: { ...prev.values, ...updates },
+      }))
+    },
+    [],
+  )
+
   // Determine which steps are relevant based on situation answers
   const hasChildren = session.situation.has_children === true
   const hasProperty = session.situation.property_status === 'own_jointly' || session.situation.property_status === 'own_one_name'
@@ -79,6 +89,7 @@ export function useInterview() {
     updateHome,
     updateFinances,
     updateConfidence,
+    updateValues,
     hasChildren,
     hasProperty,
     hasSafeguardingConcerns,

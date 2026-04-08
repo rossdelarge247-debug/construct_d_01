@@ -44,11 +44,19 @@ ${hasChildren ? `CHILDREN:
 ${hasProperty ? `HOUSING:
 - Desired outcome: ${session.home.desired_outcome}
 - Property value confidence: ${session.home.value_confidence}
-- Mortgage confidence: ${session.home.mortgage_confidence}` : ''}
+- Mortgage confidence: ${session.home.mortgage_confidence}
+- Property value (if provided): ${session.values.property_value ? '£' + session.values.property_value : 'not provided'}
+- Mortgage balance (if provided): ${session.values.mortgage ? '£' + session.values.mortgage : 'not provided'}` : ''}
 
 FINANCIAL PRIORITIES: ${session.finances.priorities.join(', ') || 'none selected'}
 FINANCIAL WORRIES: ${session.finances.worries.join(', ') || 'none selected'}
 COMBINED FINANCIAL AWARENESS: ${session.finances.combined_awareness}
+
+VALUES PROVIDED BY USER (use these to make the plan more specific):
+${Object.entries(session.values)
+  .filter(([, v]) => v && v.trim() !== '')
+  .map(([k, v]) => `- ${k.replace(/_/g, ' ')}: £${v}`)
+  .join('\n') || 'No specific values provided'}
 
 CONFIDENCE MAP: ${confEntries}
 

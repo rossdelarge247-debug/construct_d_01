@@ -62,6 +62,20 @@ export interface InterviewSession {
     other_assets: 'known' | 'estimated' | 'unsure' | 'unknown' | null
     commitments: 'known' | 'estimated' | 'unsure' | 'unknown' | null
   }
+
+  // Optional values captured when confidence is Known or Estimated
+  values: {
+    my_income: string | null
+    partner_income: string | null
+    savings: string | null
+    debts: string | null
+    property_value: string | null
+    mortgage: string | null
+    my_pension: string | null
+    partner_pension: string | null
+    other_assets: string | null
+    commitments: string | null
+  }
 }
 
 export const INITIAL_SESSION: InterviewSession = {
@@ -104,6 +118,18 @@ export const INITIAL_SESSION: InterviewSession = {
     additional_notes: null,
   },
   confidence: {
+    my_income: null,
+    partner_income: null,
+    savings: null,
+    debts: null,
+    property_value: null,
+    mortgage: null,
+    my_pension: null,
+    partner_pension: null,
+    other_assets: null,
+    commitments: null,
+  },
+  values: {
     my_income: null,
     partner_income: null,
     savings: null,
