@@ -95,9 +95,9 @@ export default function PicturePage() {
     >
       <div className="max-w-xl space-y-6">
         <div>
-          <h1 className="font-heading text-2xl font-medium text-ink">Build your picture</h1>
+          <h1 className="font-heading text-2xl font-medium text-ink">Add to your picture</h1>
           <p className="mt-2 text-sm text-ink-light leading-relaxed">
-            Upload financial documents and we&apos;ll extract, categorise, and organise everything. Or enter details manually.
+            Upload a document and we&apos;ll do the heavy lifting — reading, extracting, and organising the financial details.
           </p>
         </div>
 
@@ -186,31 +186,35 @@ export default function PicturePage() {
           </div>
         )}
 
-        {/* Complete view — section done */}
+        {/* Complete view — celebration moment */}
         {view === 'complete' && (
           <div className="space-y-6">
-            <div className="rounded-[var(--radius-md)] border border-sage-light bg-sage-light/30 p-5 space-y-2">
+            {/* Success card with warmth */}
+            <div className="rounded-[var(--radius-md)] border border-sage bg-sage-light/20 p-6 text-center space-y-3">
+              <div className="mx-auto flex h-10 w-10 items-center justify-center rounded-full bg-sage/20">
+                <span className="text-sage text-lg">✓</span>
+              </div>
               <p className="text-sm font-medium text-ink">
-                ✓ {extractionResult?.items.length || 0} items confirmed
+                {extractionResult?.items.length || 0} items added to your picture
               </p>
               {extractionResult?.spending_categories && (
                 <p className="text-xs text-ink-light">
-                  Spending categorised across {extractionResult.spending_categories.length} categories
+                  Plus a full spending breakdown across {extractionResult.spending_categories.length} categories
                 </p>
               )}
+              <p className="text-xs text-ink-faint italic">
+                {items.length <= 3
+                  ? 'That\'s a strong start. One document, and we already have a foundation to build on.'
+                  : 'Your picture is really coming together now. Each document makes your position clearer.'}
+              </p>
             </div>
 
-            <MicroMoment>
-              {items.length <= 3
-                ? 'Great start. Each document you add makes your picture stronger.'
-                : 'You\'re making real progress. Your financial picture is taking shape.'}
-            </MicroMoment>
-
+            {/* Next category suggestion */}
             {nextCategory && (
-              <div className="rounded-[var(--radius-md)] border border-cream-dark p-5 space-y-2">
-                <p className="text-sm font-medium text-ink">Next: {nextCategory.label}</p>
-                <p className="text-xs text-ink-light">{nextCategory.description}</p>
-                <p className="text-xs text-ink-faint">Ideal documents: {nextCategory.idealDocs}</p>
+              <div className="rounded-[var(--radius-md)] border border-warmth/30 bg-warmth-light/5 p-5 space-y-3">
+                <p className="text-xs font-medium uppercase tracking-wide text-warmth-dark">Continue with</p>
+                <p className="text-sm font-medium text-ink">{nextCategory.label}</p>
+                <p className="text-xs text-ink-light leading-relaxed">{nextCategory.description}. Best document: {nextCategory.idealDocs}.</p>
               </div>
             )}
 
@@ -219,7 +223,7 @@ export default function PicturePage() {
                 Upload next document
               </Button>
               <Link href="/workspace">
-                <Button variant="secondary">Back to hub</Button>
+                <Button variant="secondary">Back to overview</Button>
               </Link>
             </div>
           </div>
