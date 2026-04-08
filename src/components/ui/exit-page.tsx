@@ -1,15 +1,21 @@
 'use client'
 
-import { useCallback, useEffect } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { EXIT_PAGE_URL } from '@/constants'
 
 export function ExitPageButton() {
+  const [exiting, setExiting] = useState(false)
+
   const exitPage = useCallback(() => {
-    // Replace current history entry so back button doesn't return here
-    window.location.replace(EXIT_PAGE_URL)
+    // Immediately blank the screen before redirect
+    setExiting(true)
+    // Small delay to ensure the overlay renders before navigation
+    setTimeout(() => {
+      window.location.replace(EXIT_PAGE_URL)
+    }, 50)
   }, [])
 
-  // Keyboard shortcut: press Shift 3 times within 3 seconds
+  // Keyboard shortcut: press Shift 3 times within 3 seconds (GOV.UK pattern)
   useEffect(() => {
     let shiftCount = 0
     let timer: ReturnType<typeof setTimeout> | null = null
@@ -35,11 +41,18 @@ export function ExitPageButton() {
     }
   }, [exitPage])
 
+  // Full-screen overlay that immediately hides all content
+  if (exiting) {
+    return (
+      <div className="fixed inset-0 z-[9999] bg-white" aria-hidden="true" />
+    )
+  }
+
   return (
     <button
       onClick={exitPage}
-      className="fixed right-4 top-4 z-50 rounded-lg bg-red-600 px-4 py-2 text-sm font-medium text-white shadow-lg transition-colors hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-600 focus:ring-offset-2"
-      aria-label="Exit this page quickly"
+      className="fixed right-4 top-3 z-50 rounded-[var(--radius-sm)] bg-depth px-3.5 py-1.5 text-xs font-medium text-cream shadow-[var(--shadow-sm)] transition-colors hover:bg-ink focus:outline-none focus:ring-2 focus:ring-depth focus:ring-offset-2"
+      aria-label="Exit this page quickly — redirects to BBC Weather"
     >
       Exit this page
     </button>

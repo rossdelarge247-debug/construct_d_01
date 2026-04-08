@@ -3,7 +3,6 @@
 import { type ReactNode } from 'react'
 import Link from 'next/link'
 import { APP_NAME } from '@/constants'
-import { ExitPageButton } from '@/components/ui/exit-page'
 
 interface InterviewLayoutProps {
   children: ReactNode
@@ -15,8 +14,6 @@ interface InterviewLayoutProps {
 export function InterviewLayout({ children, step, totalSteps, showProgress = true }: InterviewLayoutProps) {
   return (
     <div className="flex min-h-screen flex-col bg-cream">
-      <ExitPageButton />
-
       {/* Minimal header */}
       <header className="px-6 pt-6">
         <div className="mx-auto flex max-w-lg items-center justify-between">

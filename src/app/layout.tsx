@@ -1,6 +1,7 @@
 import type { Metadata } from 'next'
 import './globals.css'
 import { EnvBanner } from '@/components/layout/env-banner'
+import { ExitPageButton } from '@/components/ui/exit-page'
 import { APP_NAME, APP_DESCRIPTION } from '@/constants'
 
 export const metadata: Metadata = {
@@ -22,6 +23,7 @@ export default function RootLayout({
       </head>
       <body className="flex min-h-full flex-col bg-cream text-ink">
         <EnvBanner />
+        <ExitPageButton />
         {children}
       </body>
     </html>
