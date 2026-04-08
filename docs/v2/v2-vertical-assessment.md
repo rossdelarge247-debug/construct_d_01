@@ -154,6 +154,12 @@ V2 data feeds every subsequent vertical:
 7. As someone who entered values in V1, I want those to appear already and let me add evidence and detail
 8. As someone preparing for mediation, I want a structured summary I can share or print
 9. As someone concerned about cost, I want to do the organisation myself instead of paying a solicitor
+10. As someone with a self-employed partner, I want the system to flag that their declared income might not reflect reality
+11. As someone with multiple bank accounts, I want to upload statements for all of them and have them organised separately
+12. As someone who inherited a property, I want to flag this so it's treated correctly in settlement discussions
+13. As someone uploading many documents, I want to drop them all at once and come back when they're processed
+14. As someone whose financial situation is changing, I want to update values and see the history of changes
+15. As someone nearing disclosure readiness, I want a literal checklist of what's still missing
 
 ---
 
@@ -254,6 +260,16 @@ V2 deepens the confidence model from V1:
 10. **Children depth is user's choice** — lightweight default, deeper path with week planner, holidays, birthdays, special occasions
 11. **Feedback loop** — corrections improve extraction over time
 12. **Respondent pre-population** — joint items carry over when partner joins in V4
+13. **Self-employment handled pragmatically** — capture business details, accounts, tax returns, flag income vs profit discrepancy, SIPP contributions, signal when forensic accountant needed. Don't attempt business valuation.
+14. **Inherited and pre-marital assets flagged** — ownership tag extended with "Inherited" and "Pre-marital" markers, as courts may treat these differently
+15. **Multiple items per category** — support multiple properties, multiple pensions, multiple bank accounts. Not just one per type.
+16. **Date sensitivity on values** — every value has an "as at" date. System flags stale data ("This balance is 6 months old — do you have a more recent statement?")
+17. **Document versioning** — newer documents for the same account/asset supersede older ones, with history preserved
+18. **Inconsistency detection** — AI flags mismatches (income vs deposits, outgoings vs income, duplicate items)
+19. **"What do I still need?" checklist** — literal actionable list of outstanding documents, separate from readiness dashboard
+20. **Async document processing** — upload in bulk, leave, come back. Notifications when extraction complete.
+21. **Safeguarding continuity** — soft check-ins from V1 safeguarding flags carried into V2
+22. **Disputed values supported** — data model supports two values on same item (yours and partner's) for V4 negotiation
 
 ---
 
@@ -270,7 +286,11 @@ V2 launch should include:
    - Pensions → Form E 2.7
    - Debts & liabilities → Form E 2.10
    - Outgoings / expenditure → Form E 2.12
-   - Other assets (vehicles, valuables) → Form E 2.9
+   - Other assets (vehicles, valuables, crypto, digital) → Form E 2.9
+   - Life insurance & endowments → Form E 2.6
+   - Self-employment & business interests → Form E 2.8
+   - Standard of living narrative → Form E 2.13
+   - Significant changes & expectations (inheritance, redundancy, health) → Form E Part 4
    - Children's arrangements (optional depth)
 3. **Document upload** — drag and drop, multi-file, any format, low-quality guidance
 4. **AI classification** — Haiku classifies document type automatically
@@ -306,6 +326,10 @@ V2 launch should include:
 | Post-separation budget projection? | Feature scope | **Resolved** — included in V2, prompted when current picture sufficient, AI-guided with maintenance intelligence |
 | Maintenance intelligence? | AI complexity, legal sensitivity | **Resolved** — CMS estimate from income data, spousal maintenance flagged on income disparity, framed as estimates not advice |
 | Variable asset distribution? | Data model, negotiation tracking | **Resolved** — every shared item has editable split (0-100), tracks changes over time for negotiation history |
+| Self-employment handling? | Scope, accuracy, liability | **Resolved** — capture business details/accounts/tax returns, flag income vs profit, SIPP contributions. Don't attempt valuation. Recommend specialist. |
+| Multiple properties / complex assets? | Data model | **Resolved** — support multiple items per category, inherited/pre-marital flags |
+| Document versioning? | Data integrity | **Resolved** — newer supersedes older, history preserved |
+| Disputed values in negotiation? | Data model, V4 dependency | **Resolved** — support two values per item (yours + partner's) from V2 data model |
 
 ---
 
@@ -320,6 +344,11 @@ V2 launch should include:
 | Overconfidence in AI output | Always show source document alongside extracted value, never auto-finalise |
 | Missing items user doesn't know about | Completeness checklist based on Form E requirements surfaces likely gaps |
 | Brown v Brown precedent | Emphasise that disclosure must be complete and accurate — explain consequences |
+| Data accuracy liability | Clear: user is responsible for accuracy of their disclosure, not the service. We organise, not verify |
+| Partial disclosure risk | System actively asks "Do you have any other accounts not shown here?" — not just passive gap tracking |
+| Safeguarding continuity | V1 flags carried into V2. Periodic soft check-in: "Has anything changed in your safety situation?" |
+| Self-employment complexity | Capture and structure available data, flag issues, but explicitly recommend specialist for business valuation |
+| Stale data risk | "As at" dates on values, flag data older than 3 months, prompt for updated statements |
 
 ---
 
@@ -391,18 +420,18 @@ The transition should feel like a natural continuation, not a hard gate:
 | Why this vertical exists | ✅ Foundation for V3-V5 |
 | Downstream value | ✅ Explicit data flow to V3, V4, V5 |
 | User states | ✅ 5 states with handling |
-| Key user stories | ✅ 9 stories |
+| Key user stories | ✅ 15 stories |
 | Key outcomes | ✅ 7 outcomes |
 | North-star UX | ✅ Clear |
-| Magic moments | ✅ 5 moments |
+| Magic moments | ✅ 8 moments |
 | Interaction model | ✅ Upload-first, review-by-exception |
 | Technology opportunities | ✅ 8 mapped |
 | Confidence/follow-up logic | ✅ Extended with evidence grounding |
-| Launch implementation | ✅ 13 components |
-| Spike questions | ✅ 7 identified |
-| Trust/risk considerations | ✅ 7 with mitigations |
+| Launch implementation | ✅ 18 components + self-employment + life insurance |
+| Spike questions | ✅ 15 (11 resolved, 1 open) |
+| Trust/risk considerations | ✅ 12 with mitigations |
 | Auth/conversion/monetisation | ✅ Paywall position defined |
 | Enhancement path | ✅ 6 identified |
 | Success metrics | ✅ Comprehensive |
 
-**All 21 items complete.** Ready for concept design.
+**All 21 items complete.** Pressure-tested against full Form E structure, real-world scenarios (self-employment, inheritance, multiple properties, overseas assets, crypto), process edge cases (document versioning, stale data, disputed values, bulk upload), and AI intelligence opportunities (inconsistency detection, duplicate detection, temporal analysis). Ready for concept design.
