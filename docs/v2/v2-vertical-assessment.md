@@ -179,11 +179,14 @@ A user arrives with a pile of documents and fragmented knowledge. Within a few s
 
 ## Magic moments
 
-1. "I uploaded a bank statement and it found all my accounts and balances automatically"
+1. "I uploaded a bank statement and it found all my accounts, balances, and categorised my spending automatically"
 2. "I can see my entire financial picture on one screen — I've never had that before"
 3. "It told me my pension CETV is still missing and exactly how to request it"
-4. "I entered a rough estimate for the property and it flagged that I need a proper valuation"
-5. "I can see exactly what's ready for disclosure and what still needs work"
+4. "It detected a joint account and split it automatically — I just had to confirm"
+5. "It calculated my monthly outgoings across 10 categories from 12 months of statements"
+6. "It showed me a projected post-separation budget and flagged that I might need child maintenance"
+7. "I can see exactly what's ready for disclosure and what still needs work — four clear levels"
+8. "The children's arrangements section let me plan Christmas and birthdays — things I hadn't even thought about yet"
 
 ---
 
@@ -237,23 +240,54 @@ V2 deepens the confidence model from V1:
 
 ---
 
+## Design principles
+
+1. **User-friendly surface, Form E underneath** — plain language categories, Form E mapping internal
+2. **Upload-first, review-by-exception** — system does work, user confirms
+3. **Ownership on every item** — Yours / Joint / Partner's / Unknown — auto-detected where possible
+4. **Joint items show notional share** — full value visible, 50% default, editable 0-100% for negotiation
+5. **Distribution tracks over time** — "Original 50/50 → Proposal 60/40 → Agreed 58/42"
+6. **Four-tier readiness** — first draft (share with mediator) → disclosure (exchange) → final draft (minor items outstanding) → formalisation (locked)
+7. **Every transaction categorised and mapped** — ~10 groups, drillable sub-categories, monthly averages
+8. **Post-separation budget projection** — AI-guided when current picture sufficient
+9. **Maintenance intelligence** — CMS estimates, spousal maintenance flags, based on captured data
+10. **Children depth is user's choice** — lightweight default, deeper path with week planner, holidays, birthdays, special occasions
+11. **Feedback loop** — corrections improve extraction over time
+12. **Respondent pre-population** — joint items carry over when partner joins in V4
+
+---
+
 ## Launch implementation
 
 V2 launch should include:
 
-1. **Workspace shell** — phase bar, "Build your picture" as active phase
-2. **Category-based sections** — matching Form E structure in user-friendly language
-3. **Document upload** — drag and drop, multi-file, any format
-4. **AI classification** — automatic document type detection
-5. **AI extraction** — key values pulled from documents
-6. **Review flow** — accept/edit/reject extracted values
-7. **Manual entry** — add items without documents
-8. **V1 data import** — populate from interview session values
-9. **Completeness dashboard** — per-category and overall progress
-10. **Gap identification** — what's missing, what to do about it
-11. **CETV tracking** — log requests, reminders, guidance
-12. **Evidence linking** — every item connected to its source
-13. **Summary view** — structured financial picture overview
+1. **Workspace shell** — phase bar, timeline, "Build your picture" as active phase
+2. **Category-based sections** — user-friendly language mapping to Form E structure:
+   - Income (employment, self-employment, benefits) → Form E 2.11
+   - Property (homes, land) → Form E 2.1-2.3
+   - Bank accounts & savings → Form E 2.4
+   - Investments (ISAs, shares, bonds) → Form E 2.5
+   - Pensions → Form E 2.7
+   - Debts & liabilities → Form E 2.10
+   - Outgoings / expenditure → Form E 2.12
+   - Other assets (vehicles, valuables) → Form E 2.9
+   - Children's arrangements (optional depth)
+3. **Document upload** — drag and drop, multi-file, any format, low-quality guidance
+4. **AI classification** — Haiku classifies document type automatically
+5. **AI extraction** — Sonnet extracts key values, transactions, categories
+6. **Transaction categorisation** — auto-assign to expenditure groups, monthly averages
+7. **Ownership detection** — auto-detect joint/individual from documents, user confirms
+8. **Review flow** — accept/edit/reject extracted values, ownership tags
+9. **Manual entry** — add items without documents, estimates accepted
+10. **V1 data import** — pre-populate from interview session values and confidence map
+11. **Four-tier readiness dashboard** — visual progress toward each tier
+12. **Gap identification** — what's missing per category, guidance on what to do
+13. **CETV tracking** — log requests, reminders, explain CETV vs real value
+14. **Evidence linking** — every item connected to source documents
+15. **Post-separation budget** — prompted when current picture sufficient, AI projections
+16. **Maintenance intelligence** — CMS estimate, spousal maintenance flag based on income data
+17. **Children detail path** — optional deeper section (week planner, holidays, birthdays, occasions)
+18. **Summary view** — structured financial picture overview, shareable, printable
 
 ---
 
@@ -261,13 +295,17 @@ V2 launch should include:
 
 | Question | Impact | Status |
 |----------|--------|--------|
-| Which AI model for document extraction? | Accuracy, cost, speed | Open — test Claude Haiku vs specialised parsers |
-| Open banking integration timing? | Feature richness, partnership dependency | Deferred — V2 enhancement, not launch |
-| How granular should categories be? | UX complexity vs Form E alignment | Open — test user-friendly grouping vs Form E sections |
-| How to handle joint vs individual accounts? | Data model, disclosure logic | Open — needs design |
-| PDF parsing quality for UK bank statements? | Core feature reliability | Open — prototype with real documents |
-| How to handle scanned/photographed documents? | Accessibility, extraction quality | Open — OCR layer needed |
-| What's the right completeness threshold? | When to encourage V3 progression | Open — test with users |
+| Which AI model for document extraction? | Accuracy, cost, speed | **Resolved** — Haiku for classification, Sonnet for extraction |
+| Open banking integration timing? | Feature richness, partnership dependency | **Resolved** — deferred. PDF upload + AI extraction for launch. Open banking as enhancement when user volume justifies |
+| How granular should categories be? | UX complexity vs Form E alignment | **Resolved** — user-friendly surface (~10 groups), Form E structure underneath, drillable sub-categories |
+| How to handle joint vs individual accounts? | Data model, disclosure logic | **Resolved** — ownership tag (Yours/Joint/Partner's/Unknown), auto-detect from documents, joint items show 50% notional share default, distribution editable 0-100% for negotiation tracking |
+| PDF parsing quality for UK bank statements? | Core feature reliability | Open — prototype with real documents. Feedback loop from corrections to improve over time |
+| How to handle scanned/photographed documents? | Accessibility, extraction quality | **Resolved** — accept all, flag low confidence, offer guidance for better results, manual entry fallback |
+| What's the right completeness threshold? | When to encourage V3 progression | **Resolved** — four-tier readiness: first draft → disclosure → final draft → formalisation ready |
+| Children's arrangements depth? | UX scope | **Resolved** — lightweight default, optional deeper path including typical week, holidays, birthdays/Christmas, special occasions |
+| Post-separation budget projection? | Feature scope | **Resolved** — included in V2, prompted when current picture sufficient, AI-guided with maintenance intelligence |
+| Maintenance intelligence? | AI complexity, legal sensitivity | **Resolved** — CMS estimate from income data, spousal maintenance flagged on income disparity, framed as estimates not advice |
+| Variable asset distribution? | Data model, negotiation tracking | **Resolved** — every shared item has editable split (0-100), tracks changes over time for negotiation history |
 
 ---
 
