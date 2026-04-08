@@ -54,13 +54,25 @@ export function DocumentUpload({ onProcessed, prompt, hint }: DocumentUploadProp
         body: formData,
       })
 
+      if (!res.ok) {
+        const errorText = await res.text()
+        onProcessed({
+          classification: null,
+          extraction: null,
+          message: `Upload failed (${res.status}): ${errorText.substring(0, 200)}. Please try again or enter details manually.`,
+        })
+        return
+      }
+
       const result = await res.json()
       onProcessed(result)
-    } catch {
+    } catch (err) {
+      const errorMsg = err instanceof Error ? err.message : 'Unknown error'
+      console.error('[DocumentUpload] Error:', errorMsg)
       onProcessed({
         classification: null,
         extraction: null,
-        message: 'Something went wrong. Please try again or enter details manually.',
+        message: `Connection error: ${errorMsg}. This may be a timeout — large documents can take a moment. Please try again.`,
       })
     } finally {
       timers.forEach(clearTimeout)

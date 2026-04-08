@@ -1,6 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { classifyDocument, extractFromDocument } from '@/lib/documents/processor'
 
+// Extend Vercel serverless timeout — PDF processing + 3 AI calls needs time
+export const maxDuration = 60
+
 export async function POST(request: NextRequest) {
   try {
     const formData = await request.formData()
