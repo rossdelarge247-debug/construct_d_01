@@ -153,7 +153,10 @@ export async function POST(request: NextRequest) {
       message,
       debug: {
         text_length: text.length,
-        text_preview: text.substring(0, 100),
+        text_preview: text.substring(0, 200),
+        classification_raw: classification,
+        extraction_items: extraction?.items?.length ?? 0,
+        extraction_summary: extraction?.raw_summary ?? null,
       },
     })
   } catch (error) {

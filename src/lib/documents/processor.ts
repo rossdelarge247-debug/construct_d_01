@@ -103,8 +103,15 @@ Be generous with classification — if it looks like a financial statement of an
   )
 
   try {
-    return JSON.parse(response.content) as ClassificationResult
-  } catch {
+    // Strip markdown code fences if Claude wraps the JSON
+    let content = response.content.trim()
+    if (content.startsWith('```')) {
+      content = content.replace(/^```(?:json)?\n?/, '').replace(/\n?```$/, '').trim()
+    }
+    console.log('[Classify] Raw AI response:', content.substring(0, 500))
+    return JSON.parse(content) as ClassificationResult
+  } catch (parseError) {
+    console.error('[Classify] JSON parse failed. Raw response:', response.content.substring(0, 500))
     return {
       document_type: 'unknown',
       confidence: 0,
@@ -139,8 +146,14 @@ Return ONLY valid JSON matching the structure requested above.`,
   )
 
   try {
-    return JSON.parse(response.content) as ExtractionResult
-  } catch {
+    let content = response.content.trim()
+    if (content.startsWith('```')) {
+      content = content.replace(/^```(?:json)?\n?/, '').replace(/\n?```$/, '').trim()
+    }
+    console.log('[Extract] Raw AI response:', content.substring(0, 500))
+    return JSON.parse(content) as ExtractionResult
+  } catch (parseError) {
+    console.error('[Extract] JSON parse failed. Raw response:', response.content.substring(0, 500))
     return { items: [], spending_categories: null, accounts: [], raw_summary: 'Extraction failed — please enter details manually.' }
   }
 }
