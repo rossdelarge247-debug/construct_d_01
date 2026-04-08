@@ -64,22 +64,37 @@ export interface ExtractedAccount {
 
 export async function classifyDocument(documentText: string): Promise<ClassificationResult> {
   const response = await generateCompletion(
-    `Classify this financial document. Return JSON only.
+    `You are classifying a UK financial document for a divorce/separation case. Look at the text and determine what type of document this is.
 
-DOCUMENT TEXT (first 2000 chars):
-${documentText.substring(0, 2000)}
+CLUES TO LOOK FOR:
+- "statement" + bank name → bank_statement or savings_statement
+- "Everyday Saver", "ISA", "savings account" → savings_statement
+- "current account", "sort code", "transactions" → bank_statement
+- "payslip", "gross pay", "net pay", "PAYE" → payslip
+- "P60", "end of year certificate" → p60
+- "pension", "CETV", "transfer value", "retirement" → pension_letter
+- "mortgage", "outstanding balance", "interest rate", "redemption" → mortgage_statement
+- "credit card", "minimum payment", "credit limit" → credit_card_statement
+- "loan", "repayment", "APR" → loan_statement
+- "valuation", "market value", "property" → property_valuation
+- "insurance", "life cover", "endowment" → insurance_document
+- "tax return", "self assessment", "SA302" → tax_return
+- "profit and loss", "company accounts", "director" → business_accounts
 
-Return:
+DOCUMENT TEXT (first 3000 chars):
+${documentText.substring(0, 3000)}
+
+Return ONLY this JSON:
 {
   "document_type": "bank_statement|payslip|pension_letter|mortgage_statement|savings_statement|investment_statement|tax_return|credit_card_statement|loan_statement|property_valuation|insurance_document|business_accounts|p60|unknown",
-  "confidence": 0.0-1.0,
+  "confidence": 0.0 to 1.0,
   "provider_name": "name of bank/provider or null",
   "account_type": "current|savings|credit_card|mortgage|pension|investment|loan or null",
-  "is_joint": true/false/null,
-  "date_range": "e.g. Jan 2025 - Dec 2025 or null"
+  "is_joint": true or false or null,
+  "date_range": "e.g. Mar 2025 - Mar 2026 or null"
 }
 
-Return ONLY valid JSON.`,
+Be generous with classification — if it looks like a financial statement of any kind, classify it. Only return "unknown" if you genuinely cannot tell what this document is. Return ONLY valid JSON, nothing else.`,
     {
       taskType: 'document_classification',
       maxTokens: 256,
