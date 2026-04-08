@@ -113,21 +113,45 @@ export async function POST(request: NextRequest) {
       })
     }
 
+    console.log(`[Extract] Text extracted: ${text.length} chars. First 200: ${text.substring(0, 200)}`)
+
     // Step 1: Classify the document
     const classification = await classifyDocument(text)
+    console.log(`[Extract] Classification: ${classification.document_type}, confidence: ${classification.confidence}`)
 
-    // Step 2: Extract data if classification is confident enough
+    // Step 2: Extract data — attempt even at lower confidence
     let extraction = null
-    if (classification.confidence >= 0.5 && classification.document_type !== 'unknown') {
+    if (classification.confidence >= 0.3 && classification.document_type !== 'unknown') {
       extraction = await extractFromDocument(text, classification.document_type)
+    } else if (classification.document_type === 'unknown') {
+      // Try extraction anyway with a generic prompt — the document might still contain useful data
+      extraction = await extractFromDocument(text, 'unknown')
+    }
+
+    console.log(`[Extract] Extraction: ${extraction?.items.length ?? 0} items found`)
+
+    // Build user-friendly message
+    let message: string
+    if (extraction && extraction.items.length > 0) {
+      const docName = classification.document_type !== 'unknown'
+        ? classification.document_type.replace(/_/g, ' ')
+        : 'document'
+      const provider = classification.provider_name ? ` (${classification.provider_name})` : ''
+      message = `Found ${extraction.items.length} item${extraction.items.length !== 1 ? 's' : ''} from your ${docName}${provider}.`
+    } else if (classification.document_type !== 'unknown') {
+      message = `We identified this as a ${classification.document_type.replace(/_/g, ' ')} but couldn't extract specific values. You can enter the details manually or try uploading a clearer version.`
+    } else {
+      message = `We couldn't identify this document type. This can happen with scanned documents or unusual formats. You can enter the details manually — we'll link this document as evidence.`
     }
 
     return NextResponse.json({
       classification,
       extraction,
-      message: extraction
-        ? `Found ${extraction.items.length} item${extraction.items.length !== 1 ? 's' : ''} from your ${classification.document_type.replace(/_/g, ' ')}${classification.provider_name ? ` (${classification.provider_name})` : ''}.`
-        : `We identified this as a ${classification.document_type.replace(/_/g, ' ')} but couldn't extract specific values. You can enter the details manually.`,
+      message,
+      debug: {
+        text_length: text.length,
+        text_preview: text.substring(0, 100),
+      },
     })
   } catch (error) {
     const errorMessage = error instanceof Error ? error.message : 'Unknown error'
