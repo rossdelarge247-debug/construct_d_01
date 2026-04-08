@@ -23,14 +23,14 @@ interface InterviewLayoutProps {
 }
 
 const STEP_LABELS: Record<InterviewStepId, string> = {
-  situation: 'Your situation',
-  route: 'Your route',
+  situation: 'Situation',
+  route: 'Route',
   children: 'Children',
   home: 'Home',
   finances: 'Finances',
-  confidence: 'What you know',
-  plan: 'Your plan',
-  next: 'Road ahead',
+  confidence: 'Confidence',
+  plan: 'Plan',
+  next: 'Next',
 }
 
 export function InterviewLayout({ children, currentStep, steps, showProgress = true }: InterviewLayoutProps) {
@@ -61,19 +61,16 @@ export function InterviewLayout({ children, currentStep, steps, showProgress = t
             </div>
 
             {/* Step labels */}
-            <div className="mt-3 flex flex-wrap items-center gap-x-1 gap-y-1">
+            <div className="mt-2 flex items-center justify-between">
               {steps.map((step, i) => (
-                <div key={step} className="flex items-center gap-1">
-                  {i > 0 && <span className="text-cream-dark mx-0.5">·</span>}
-                  <span className={cn(
-                    'text-xs transition-colors',
-                    i < currentIndex ? 'text-sage' :
-                    i === currentIndex ? 'font-medium text-warmth-dark' :
-                    'text-ink-faint',
-                  )}>
-                    {STEP_LABELS[step]}
-                  </span>
-                </div>
+                <span key={step} className={cn(
+                  'text-[11px] transition-colors',
+                  i < currentIndex ? 'text-sage' :
+                  i === currentIndex ? 'font-medium text-warmth-dark' :
+                  'text-ink-faint',
+                )}>
+                  {STEP_LABELS[step]}
+                </span>
               ))}
             </div>
           </div>
