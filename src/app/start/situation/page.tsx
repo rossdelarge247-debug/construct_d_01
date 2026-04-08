@@ -47,9 +47,9 @@ const RELATIONSHIP_QUALITY_OPTIONS = [
   { value: 'safety_concerns', label: 'I have safety concerns', description: 'I\'m worried about my safety or my children\'s safety' },
 ]
 
-type SituationStep = 'relationship' | 'living' | 'children' | 'property' | 'process' | 'quality'
+type SituationStep = 'relationship' | 'living' | 'children' | 'property' | 'process' | 'quality' | 'financial_control'
 
-const STEP_ORDER: SituationStep[] = ['relationship', 'living', 'children', 'property', 'process', 'quality']
+const STEP_ORDER: SituationStep[] = ['relationship', 'living', 'children', 'property', 'process', 'quality', 'financial_control']
 
 export default function SituationPage() {
   const router = useRouter()
@@ -75,6 +75,7 @@ export default function SituationPage() {
       case 'property': return session.situation.property_status !== null
       case 'process': return session.situation.process_status !== null
       case 'quality': return session.situation.relationship_quality !== null
+      case 'financial_control': return session.situation.financial_control_concerns !== null
       default: return false
     }
   }
@@ -173,6 +174,33 @@ export default function SituationPage() {
                 </p>
               </div>
             )}
+          </div>
+        )}
+
+        {currentStep === 'financial_control' && (
+          <div className="space-y-5">
+            <p className="text-ink">Do you feel safe making decisions about your finances without your partner&apos;s permission?</p>
+            <CardSelect
+              options={[
+                { value: 'yes', label: 'Yes', description: 'I can make financial decisions freely' },
+                { value: 'no', label: 'No', description: 'My partner controls or restricts my access to money or documents' },
+                { value: 'unsure', label: 'I\'m not sure', description: 'I haven\'t thought about it, or it\'s complicated' },
+              ]}
+              value={session.situation.financial_control_concerns === null ? null : session.situation.financial_control_concerns ? 'no' : 'yes'}
+              onChange={(v) => updateSituation({ financial_control_concerns: v === 'no' })}
+              columns={1}
+            />
+            {session.situation.financial_control_concerns && (
+              <div className="rounded-[var(--radius-md)] border border-warmth-light bg-warmth-light/30 p-5">
+                <p className="text-sm font-medium text-ink">This is more common than you might think.</p>
+                <p className="mt-2 text-sm text-ink-light leading-relaxed">
+                  Controlling someone&apos;s access to money is a form of economic abuse. You can speak to Surviving Economic Abuse at survivingeconomicabuse.org, or call the National Domestic Abuse Helpline on 0808 2000 247.
+                </p>
+              </div>
+            )}
+            <MicroMoment>
+              This helps us tailor our guidance. Your answers are private and never shared.
+            </MicroMoment>
           </div>
         )}
 
