@@ -3,6 +3,7 @@
 import { WorkspaceLayout } from '@/components/workspace/workspace-layout'
 import { LiveSummary } from '@/components/workspace/financial-summary'
 import { ReadinessBar } from '@/components/workspace/readiness-bar'
+import { DocumentChecklist } from '@/components/workspace/document-checklist'
 import { Button } from '@/components/ui/button'
 import { useWorkspace } from '@/hooks/use-workspace'
 import { useStaggeredReveal } from '@/hooks/use-staggered-reveal'
@@ -213,6 +214,15 @@ export default function WorkspacePage() {
             )}
           </div>
         )}
+
+        {/* Document checklist — floating button + slide-out */}
+        <DocumentChecklist
+          items={items}
+          documents={documents}
+          hasChildren={false}
+          hasProperty={items.some(i => i.category === 'property')}
+          isSelfEmployed={items.some(i => i.category === 'business' as never)}
+        />
       </div>
     </WorkspaceLayout>
   )

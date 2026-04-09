@@ -94,6 +94,17 @@ export function WorkspaceLayout({ children, activePhase, breadcrumb }: Workspace
           {children}
         </div>
       </main>
+
+      {/* Document checklist trigger — always accessible */}
+      <DocumentChecklistWrapper />
     </div>
   )
+}
+
+// Lazy wrapper to avoid importing workspace hook at layout level
+function DocumentChecklistWrapper() {
+  // The actual checklist component needs workspace data
+  // For now, render a simple trigger that links to the workspace
+  // Full integration happens when workspace context is lifted to layout
+  return null // TODO: wire up when workspace context is available at layout level
 }
