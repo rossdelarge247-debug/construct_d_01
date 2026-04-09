@@ -1,7 +1,7 @@
 @import "tailwindcss";
 
 @theme {
-  /* Core palette — warm, never clinical */
+  /* ═══ Core palette ═══ */
   --color-cream: #FAF6F1;
   --color-cream-dark: #F0EBE3;
   --color-surface: #FEFDFB;
@@ -9,82 +9,103 @@
   --color-ink-light: #6B6560;
   --color-ink-faint: #A39E99;
 
-  /* Primary accent — terracotta warmth */
+  /* ═══ Primary accent — terracotta warmth ═══ */
   --color-warmth: #C67D5A;
   --color-warmth-light: #F0DDD2;
   --color-warmth-dark: #A8623F;
 
-  /* Secondary accent — soft teal complement */
+  /* ═══ Secondary accent — soft teal ═══ */
   --color-teal: #5B8A8A;
   --color-teal-light: #E0EDED;
   --color-teal-dark: #4A7272;
 
-  /* Success — sage green */
+  /* ═══ Success — sage green ═══ */
   --color-sage: #7A9E7E;
   --color-sage-light: #E4EDE5;
   --color-sage-dark: #5C7E60;
 
-  /* Warning — amber */
+  /* ═══ Warning — amber ═══ */
   --color-amber: #D4A84B;
   --color-amber-light: #F5ECD4;
 
-  /* Depth — warm navy for emphasis */
+  /* ═══ Depth — warm navy ═══ */
   --color-depth: #3D4F5F;
   --color-depth-light: #E8ECF0;
 
-  /* Soft — lavender (minimal use) */
+  /* ═══ Soft — lavender (minimal) ═══ */
   --color-soft: #C2B5C7;
   --color-soft-light: #EDE8EF;
 
-  /* Typography — all sans-serif, bold and confident */
+  /* ═══ Typography — all Inter ═══ */
   --font-heading: 'Inter', system-ui, -apple-system, sans-serif;
   --font-body: 'Inter', system-ui, -apple-system, sans-serif;
 
-  /* Shadows — warm, not grey */
-  --shadow-sm: 0 1px 2px rgba(45, 41, 38, 0.06);
-  --shadow-md: 0 2px 8px rgba(45, 41, 38, 0.08);
-  --shadow-lg: 0 4px 16px rgba(45, 41, 38, 0.10);
+  /* ═══ Shadows — warm ═══ */
+  --shadow-sm: 0 1px 3px rgba(45, 41, 38, 0.06);
+  --shadow-md: 0 3px 12px rgba(45, 41, 38, 0.08);
+  --shadow-lg: 0 8px 24px rgba(45, 41, 38, 0.12);
 
-  /* Border radius — slightly tighter for modern feel */
+  /* ═══ Radius ═══ */
   --radius-sm: 8px;
   --radius-md: 12px;
   --radius-lg: 16px;
   --radius-full: 9999px;
 
-  /* Border widths */
-  --border-card: 2px;
-  --border-accent: 5px;
-
-  /* Layout */
+  /* ═══ Layout ═══ */
   --sidebar-width: 240px;
   --sidebar-collapsed: 64px;
-  --border-accent: 4px;
+
+  /* ═══ Borders ═══ */
+  --border-card: 2px;
+  --border-accent: 5px;
 }
 
-/* Base styles */
+/* ═══ Base ═══ */
 body {
   font-family: var(--font-body);
+  font-size: 15px;
   color: var(--color-ink);
   background-color: var(--color-cream);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
 
-h1, h2, h3 {
+h1, h2, h3, h4 {
   font-family: var(--font-heading);
   font-weight: 700;
   letter-spacing: -0.02em;
 }
 
-/* Focus styles */
+/* ═══ Focus ═══ */
 *:focus-visible {
   outline: 2px solid var(--color-warmth);
   outline-offset: 2px;
   border-radius: 4px;
 }
 
-/* Selection */
+/* ═══ Selection ═══ */
 ::selection {
   background-color: var(--color-warmth-light);
   color: var(--color-ink);
+}
+
+/* ═══ Scrollbar (subtle) ═══ */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: var(--color-cream-dark);
+  border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--color-ink-faint);
+}
+
+/* ═══ Tabular numbers for financial data ═══ */
+.tabular-nums {
+  font-variant-numeric: tabular-nums;
 }

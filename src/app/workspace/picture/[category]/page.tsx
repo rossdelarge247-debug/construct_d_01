@@ -134,7 +134,7 @@ export default function CategoryPage() {
 
   if (!categoryInfo) {
     return (
-      <WorkspaceLayout activePhase="build_your_picture" breadcrumb={[{ label: 'Build your picture', href: '/workspace' }]}>
+      <WorkspaceLayout activePhase="build_your_picture" >
         <div className="py-12 text-center">
           <p className="text-ink-light">Category not found.</p>
           <Link href="/workspace" className="mt-2 text-sm text-warmth-dark hover:text-warmth">Back to workspace</Link>
@@ -148,10 +148,6 @@ export default function CategoryPage() {
   return (
     <WorkspaceLayout
       activePhase="build_your_picture"
-      breadcrumb={[
-        { label: 'Build your picture', href: '/workspace' },
-        { label: categoryInfo.label, href: `/workspace/picture/${categoryKey}` },
-      ]}
     >
       <div className="max-w-xl space-y-6">
         {/* Header */}

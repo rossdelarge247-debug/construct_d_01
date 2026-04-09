@@ -66,10 +66,6 @@ export default function ManualEntryPage() {
   return (
     <WorkspaceLayout
       activePhase="build_your_picture"
-      breadcrumb={[
-        { label: 'Build your picture', href: '/workspace/picture' },
-        { label: 'Enter manually', href: '/workspace/picture/manual' },
-      ]}
     >
       <div className="max-w-xl space-y-6">
         <div>

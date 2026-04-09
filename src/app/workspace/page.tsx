@@ -1,246 +1,204 @@
 'use client'
 
 import { WorkspaceLayout } from '@/components/workspace/workspace-layout'
-import { LiveSummary } from '@/components/workspace/financial-summary'
-import { ReadinessBar } from '@/components/workspace/readiness-bar'
-import { DocumentChecklist } from '@/components/workspace/document-checklist'
 import { Button } from '@/components/ui/button'
 import { useWorkspace } from '@/hooks/use-workspace'
-import { useStaggeredReveal } from '@/hooks/use-staggered-reveal'
-import { CATEGORY_PRIORITY } from '@/types/workspace'
+import { useCountUp } from '@/hooks/use-count-up'
 import { cn } from '@/utils/cn'
 import Link from 'next/link'
 
-const SIDEBAR_CATEGORIES = CATEGORY_PRIORITY.slice(0, 9).map(cat => ({
-  label: cat.label,
-  href: `/workspace/picture/${cat.key}`,
-  status: 'pending' as const,
-}))
+const PHASES = [
+  { key: 'build', label: 'Build your picture', href: '/workspace/build', description: 'Upload documents, capture your financial position, track what you know and what you need.' },
+  { key: 'disclose', label: 'Share & disclose', href: '/workspace/disclose', description: 'Prepare your disclosure and exchange financial information with the other party.' },
+  { key: 'negotiate', label: 'Work through it', href: '/workspace/negotiate', description: 'Track proposals, counter-proposals, and mediation progress.' },
+  { key: 'agree', label: 'Reach agreement', href: '/workspace/agree', description: 'Resolve remaining points and capture the final agreed position.' },
+  { key: 'finalise', label: 'Make it official', href: '/workspace/finalise', description: 'Prepare consent order, D81, and court documents.' },
+]
 
-export default function WorkspacePage() {
-  const { items, summary, readiness, documents, spending } = useWorkspace()
+function AnimatedNumber({ value, className }: { value: number; className?: string }) {
+  const display = useCountUp(value)
+  return <span className={className}>{new Intl.NumberFormat('en-GB', { style: 'currency', currency: 'GBP', maximumFractionDigits: 0 }).format(display)}</span>
+}
 
-  const isEmpty = items.length === 0 && documents.length === 0
-  const categories = CATEGORY_PRIORITY.slice(0, 9)
-  const visibleCards = useStaggeredReveal(isEmpty ? 0 : categories.length, { initialDelay: 200, staggerDelay: 80 })
+export default function WorkspaceHomePage() {
+  const { items, summary, readiness, loaded } = useWorkspace()
+  const hasData = items.length > 0
 
-  const nextCategory = CATEGORY_PRIORITY.find(cat => {
-    const hasItems = items.some(i =>
-      i.category === cat.key || i.subcategory === cat.key ||
-      (cat.key === 'current_account' && i.category === 'income')
-    )
-    return !hasItems
-  })
+  if (!loaded) return (
+    <WorkspaceLayout activePhase={null}>
+      <div className="flex h-screen items-center justify-center">
+        <div className="h-8 w-8 animate-spin rounded-full border-2 border-cream-dark border-t-warmth" />
+      </div>
+    </WorkspaceLayout>
+  )
 
   return (
-    <WorkspaceLayout
-      activePhase="build_your_picture"
-      phaseTitle="Build your picture"
-      phaseSubtitle={isEmpty
-        ? 'Start by uploading your main bank statement — one document tells us a lot'
-        : `${summary.items_confirmed + summary.items_estimated} items captured · ${summary.categories_started} categories started`
-      }
-      sidebarSubItems={SIDEBAR_CATEGORIES}
-    >
-      <div className="space-y-8">
+    <WorkspaceLayout activePhase={null}>
+      <div className="px-6 py-8 md:px-10 md:py-10">
+        <div className="mx-auto max-w-4xl space-y-10">
 
-        {/* ── EMPTY STATE ── */}
-        {isEmpty && (
-          <div className="space-y-8">
-            {/* Primary upload prompt — bold */}
-            <div className="rounded-[var(--radius-lg)] bg-surface p-8 shadow-[var(--shadow-md)] border-l-[var(--border-accent)] border-l-warmth border-[var(--border-card)] border-cream-dark">
-              <h2 className="text-xl font-semibold text-ink">
-                Start with your main bank account
-              </h2>
-              <p className="mt-2 text-ink-light leading-relaxed">
-                This one document gives us your income and a full spending breakdown. Download 12 months as a PDF from your online banking.
-              </p>
-              <div className="mt-5 flex flex-wrap gap-3">
-                <Link href="/workspace/picture">
-                  <Button size="lg">Upload your first document</Button>
-                </Link>
-                <Link href="/workspace/picture/manual">
-                  <Button variant="secondary" size="lg">I&apos;d rather enter details myself</Button>
-                </Link>
-              </div>
-            </div>
-
-            {/* What we know — from V1 */}
-            <div className="rounded-[var(--radius-md)] bg-teal-light/50 p-6 border-l-[var(--border-accent)] border-l-teal border-[var(--border-card)] border-teal-light">
-              <h3 className="text-xs font-semibold uppercase tracking-widest text-teal-dark">From your free plan</h3>
-              <div className="mt-4 grid gap-4 sm:grid-cols-3">
-                <div>
-                  <p className="text-xs text-ink-faint">Income</p>
-                  <p className="text-lg font-semibold text-ink">~£3,200/mo</p>
-                  <p className="text-[10px] text-ink-faint">estimated</p>
-                </div>
-                <div>
-                  <p className="text-xs text-ink-faint">Property</p>
-                  <p className="text-lg font-semibold text-ink">Own jointly</p>
-                  <p className="text-[10px] text-ink-faint">value unknown</p>
-                </div>
-                <div>
-                  <p className="text-xs text-ink-faint">Pension</p>
-                  <p className="text-lg font-semibold text-ink">Unknown</p>
-                  <p className="text-[10px] text-ink-faint">needs attention</p>
-                </div>
-              </div>
-              <p className="mt-4 text-xs text-teal-dark">These will be replaced with real figures as you add evidence.</p>
-            </div>
-
-            {/* How this works */}
-            <div className="rounded-[var(--radius-md)] bg-surface p-6 shadow-[var(--shadow-sm)]">
-              <h3 className="text-[11px] font-bold uppercase tracking-[0.15em] text-ink-faint">How this works</h3>
-              <div className="mt-4 grid gap-6 sm:grid-cols-3">
-                <div className="flex gap-3">
-                  <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-warmth text-sm font-bold text-white">1</div>
-                  <p className="text-sm text-ink-light leading-relaxed">Upload a document — we read it, extract the numbers, and categorise everything</p>
-                </div>
-                <div className="flex gap-3">
-                  <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-warmth text-sm font-bold text-white">2</div>
-                  <p className="text-sm text-ink-light leading-relaxed">Review what we found and confirm or correct</p>
-                </div>
-                <div className="flex gap-3">
-                  <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-warmth text-sm font-bold text-white">3</div>
-                  <p className="text-sm text-ink-light leading-relaxed">Your financial picture builds up section by section</p>
-                </div>
-              </div>
-            </div>
+          {/* Welcome */}
+          <div>
+            <h1 className="text-3xl font-bold tracking-tight text-ink">
+              {hasData ? 'Welcome back' : 'Welcome to your workspace'}
+            </h1>
+            <p className="mt-2 text-base text-ink-light">
+              {hasData
+                ? 'Here\'s where things stand across your separation journey.'
+                : 'Everything from your plan is here. Let\'s start building the detail.'}
+            </p>
           </div>
-        )}
 
-        {/* ── ACTIVE STATE ── */}
-        {!isEmpty && (
-          <div className="space-y-8">
-            {/* Financial summary — hero numbers */}
-            <LiveSummary summary={summary} />
-
-            {/* Next step — ONE thing, prominent */}
-            {nextCategory && (
-              <div className="rounded-[var(--radius-md)] bg-surface p-6 shadow-[var(--shadow-sm)] border-l-[var(--border-accent)] border-l-warmth border-[var(--border-card)] border-cream-dark">
-                <h3 className="text-xs font-semibold uppercase tracking-widest text-warmth-dark">Your next step</h3>
-                <p className="mt-2 text-lg font-semibold text-ink">{nextCategory.label}</p>
-                <p className="mt-1 text-sm text-ink-light">{nextCategory.description}. Best document: {nextCategory.idealDocs}.</p>
-                <div className="mt-4">
-                  <Link href={`/workspace/picture/${nextCategory.key}`}>
-                    <Button>Get started</Button>
-                  </Link>
+          {/* Journey progress — horizontal */}
+          <div className="rounded-[var(--radius-lg)] border-[var(--border-card)] border-cream-dark bg-surface p-6 shadow-[var(--shadow-sm)]">
+            <div className="flex items-center justify-between">
+              {PHASES.map((phase, i) => (
+                <div key={phase.key} className="flex flex-1 items-center">
+                  <div className="flex flex-col items-center">
+                    <div className={cn(
+                      'flex h-10 w-10 items-center justify-center rounded-full text-sm font-bold transition-colors',
+                      i === 0 ? 'bg-warmth text-white' : 'bg-cream-dark text-ink-faint',
+                    )}>
+                      {i + 1}
+                    </div>
+                    <p className={cn(
+                      'mt-2 text-center text-xs font-semibold',
+                      i === 0 ? 'text-warmth-dark' : 'text-ink-faint',
+                    )}>
+                      {phase.label}
+                    </p>
+                  </div>
+                  {i < PHASES.length - 1 && (
+                    <div className={cn(
+                      'mx-2 h-0.5 flex-1',
+                      i === 0 ? 'bg-warmth/30' : 'bg-cream-dark',
+                    )} />
+                  )}
                 </div>
-              </div>
-            )}
-
-            {/* Upload more — compact */}
-            <Link href="/workspace/picture" className="block">
-              <div className="rounded-[var(--radius-md)] border-2 border-dashed border-warmth/30 bg-warmth-light/10 p-5 text-center transition-all duration-200 hover:border-warmth/60 hover:bg-warmth-light/20">
-                <p className="text-sm font-medium text-warmth-dark">Upload more documents</p>
-                <p className="mt-1 text-xs text-ink-faint">or <Link href="/workspace/picture/manual" className="text-warmth-dark underline">enter manually</Link></p>
-              </div>
-            </Link>
-
-            {/* Categories — visual status grid */}
-            <div>
-              <h3 className="text-[11px] font-bold uppercase tracking-[0.15em] text-ink-faint">Categories</h3>
-              <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-                {categories.map((cat, i) => {
-                  const catItems = items.filter(item =>
-                    item.category === cat.key || item.subcategory === cat.key ||
-                    (cat.key === 'current_account' && (item.category === 'income' || item.subcategory === 'current_account'))
-                  )
-                  const hasContent = catItems.length > 0
-                  const isNext = nextCategory?.key === cat.key
-                  const totalValue = catItems.filter(item => item.value !== null).reduce((sum, item) => sum + item.value!, 0)
-                  const confirmed = catItems.filter(item => item.status === 'confirmed').length
-                  const toReview = catItems.filter(item => item.status === 'to_review').length
-                  const isAwaiting = catItems.some(item => item.status === 'awaiting')
-
-                  return (
-                    <Link
-                      key={cat.key}
-                      href={`/workspace/picture/${cat.key}`}
-                      className={cn(
-                        'rounded-[var(--radius-md)] p-4 transition-all duration-300 border-l-[var(--border-accent)]',
-                        i < visibleCards ? 'translate-y-0 opacity-100' : 'translate-y-3 opacity-0',
-                        hasContent && !isAwaiting ? 'bg-surface border-l-sage border-[var(--border-card)] border-cream-dark shadow-[var(--shadow-sm)] hover:-translate-y-1 hover:shadow-[var(--shadow-md)]' :
-                        isAwaiting ? 'bg-amber-light/30 border-l-amber border-[var(--border-card)] border-amber-light shadow-[var(--shadow-sm)]' :
-                        isNext ? 'bg-warmth-light/20 border-l-warmth border-[var(--border-card)] border-warmth-light hover:bg-warmth-light/30' :
-                        'bg-cream-dark/30 border-[var(--border-card)] border-cream-dark hover:bg-cream-dark/50 hover:border-ink-faint',
-                      )}
-                    >
-                      <div className="flex items-center justify-between">
-                        <p className={cn('text-base font-bold', hasContent ? 'text-ink' : 'text-ink-light')}>{cat.label}</p>
-                        {confirmed > 0 && <span className="text-xs font-medium text-sage">✓ {confirmed}</span>}
-                        {isAwaiting && <span className="text-xs font-medium text-amber">⏳</span>}
-                        {toReview > 0 && <span className="text-xs font-medium text-warmth">● {toReview}</span>}
-                        {!hasContent && isNext && <span className="text-xs font-medium text-warmth-dark">Next</span>}
-                      </div>
-
-                      {hasContent && totalValue > 0 && (
-                        <p className="mt-2 text-2xl font-extrabold text-ink tabular-nums tracking-tight">
-                          {new Intl.NumberFormat('en-GB', { style: 'currency', currency: 'GBP', maximumFractionDigits: 0 }).format(totalValue)}
-                        </p>
-                      )}
-                      {!hasContent && (
-                        <p className="mt-1 text-xs text-ink-faint">{cat.description}</p>
-                      )}
-                    </Link>
-                  )
-                })}
-              </div>
-            </div>
-
-            {/* Readiness */}
-            <ReadinessBar readiness={readiness} />
-
-            {/* AI Insight */}
-            {readiness.blockers.length > 0 && readiness.level !== 'not_started' && (
-              <div className="rounded-[var(--radius-md)] bg-warmth-light/30 p-6 border-l-[var(--border-accent)] border-warmth">
-                <h3 className="text-xs font-semibold uppercase tracking-widest text-warmth-dark">💡 Insight</h3>
-                <p className="mt-2 text-sm text-ink leading-relaxed">{readiness.blockers[0]}</p>
-              </div>
-            )}
-
-            {/* V3 transition — when ready */}
-            {readiness.level === 'first_draft' && (
-              <div className="rounded-[var(--radius-md)] bg-sage-light/50 p-6 border-l-[var(--border-accent)] border-sage">
-                <h3 className="text-lg font-semibold text-ink">Your picture is ready to share</h3>
-                <p className="mt-1 text-sm text-ink-light leading-relaxed">
-                  You have enough for an initial conversation with a mediator or solicitor. When you&apos;re ready, the next phase helps you prepare for formal disclosure.
-                </p>
-                <div className="mt-4">
-                  <Button variant="secondary">Prepare for disclosure</Button>
-                </div>
-              </div>
-            )}
-
-            {/* Quick actions */}
-            <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-              {[
-                { label: 'Upload', icon: '📎', href: '/workspace/picture' },
-                { label: 'Add item', icon: '✎', href: '/workspace/picture/manual' },
-                { label: 'Documents', icon: '📄', href: '#' },
-                { label: 'Summary', icon: '📊', href: '#' },
-              ].map(action => (
-                <Link
-                  key={action.label}
-                  href={action.href}
-                  className="flex flex-col items-center gap-2 rounded-[var(--radius-md)] bg-surface p-4 text-center shadow-[var(--shadow-sm)] transition-all hover:shadow-[var(--shadow-md)] hover:-translate-y-0.5"
-                >
-                  <span className="text-2xl">{action.icon}</span>
-                  <span className="text-xs font-medium text-ink-light">{action.label}</span>
-                </Link>
               ))}
             </div>
           </div>
-        )}
 
-        {/* Document checklist */}
-        <DocumentChecklist
-          items={items}
-          documents={documents}
-          hasChildren={false}
-          hasProperty={items.some(i => i.category === 'property')}
-          isSelfEmployed={items.some(i => i.category === 'business' as never)}
-        />
+          {/* Two-column: Next step + Financial snapshot */}
+          <div className="grid gap-6 md:grid-cols-2">
+            {/* Next step */}
+            <div className="rounded-[var(--radius-lg)] border-[var(--border-card)] border-cream-dark border-l-[var(--border-accent)] border-l-warmth bg-surface p-6 shadow-[var(--shadow-sm)]">
+              <p className="text-[11px] font-bold uppercase tracking-[0.15em] text-warmth-dark">Your next step</p>
+              <h2 className="mt-3 text-xl font-bold text-ink">
+                {hasData ? 'Continue building your picture' : 'Upload your first document'}
+              </h2>
+              <p className="mt-2 text-sm text-ink-light leading-relaxed">
+                {hasData
+                  ? 'You have items captured but there\'s more to add. Each document strengthens your position.'
+                  : 'Start with your current account — one document gives us your income and spending.'}
+              </p>
+              <div className="mt-5">
+                <Link href="/workspace/build">
+                  <Button>Continue →</Button>
+                </Link>
+              </div>
+            </div>
+
+            {/* Financial snapshot */}
+            <div className="rounded-[var(--radius-lg)] border-[var(--border-card)] border-cream-dark border-l-[var(--border-accent)] border-l-teal bg-surface p-6 shadow-[var(--shadow-sm)]">
+              <p className="text-[11px] font-bold uppercase tracking-[0.15em] text-teal-dark">Financial snapshot</p>
+              {hasData ? (
+                <div className="mt-4 space-y-4">
+                  <div className="grid grid-cols-3 gap-3">
+                    <div>
+                      <p className="text-[11px] text-ink-faint">Assets</p>
+                      <AnimatedNumber value={summary.total_assets} className="text-2xl font-extrabold tracking-tight text-ink" />
+                    </div>
+                    <div>
+                      <p className="text-[11px] text-ink-faint">Liabilities</p>
+                      <AnimatedNumber value={summary.total_liabilities} className="text-2xl font-extrabold tracking-tight text-ink" />
+                    </div>
+                    <div>
+                      <p className="text-[11px] text-ink-faint">Net</p>
+                      <AnimatedNumber value={summary.net_position} className={cn('text-2xl font-extrabold tracking-tight', summary.net_position >= 0 ? 'text-sage-dark' : 'text-warmth-dark')} />
+                    </div>
+                  </div>
+                  <div className="pt-2">
+                    <Link href="/workspace/build" className="text-sm font-semibold text-teal hover:text-teal-dark transition-colors">
+                      View full picture →
+                    </Link>
+                  </div>
+                </div>
+              ) : (
+                <div className="mt-4">
+                  <p className="text-sm text-ink-light">No financial data yet. Start building your picture to see your position here.</p>
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* Phase cards */}
+          <div>
+            <p className="text-[11px] font-bold uppercase tracking-[0.15em] text-ink-faint">Your phases</p>
+            <div className="mt-4 grid gap-4 md:grid-cols-2">
+              {PHASES.map((phase, i) => {
+                const isActive = i === 0
+                const isFuture = i > 0
+
+                return (
+                  <Link
+                    key={phase.key}
+                    href={phase.href}
+                    className={cn(
+                      'rounded-[var(--radius-lg)] border-[var(--border-card)] p-6 transition-all duration-200',
+                      isActive && 'border-warmth bg-surface shadow-[var(--shadow-sm)] border-l-[var(--border-accent)] border-l-warmth hover:shadow-[var(--shadow-md)] hover:-translate-y-0.5',
+                      isFuture && 'border-cream-dark bg-cream-dark/30 hover:bg-cream-dark/50 hover:border-ink-faint',
+                    )}
+                  >
+                    <div className="flex items-start justify-between">
+                      <div>
+                        <h3 className="text-lg font-bold text-ink">{phase.label}</h3>
+                        <p className="mt-1 text-sm text-ink-light leading-relaxed">{phase.description}</p>
+                      </div>
+                      <div className={cn(
+                        'flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-xs font-bold',
+                        isActive && 'bg-warmth text-white',
+                        isFuture && 'bg-cream-dark text-ink-faint',
+                      )}>
+                        {i + 1}
+                      </div>
+                    </div>
+                    {isActive && (
+                      <div className="mt-4">
+                        <p className="text-sm font-semibold text-warmth-dark">
+                          {hasData ? `${summary.categories_started} categories started · ${summary.items_confirmed + summary.items_estimated} items` : 'Not started yet'}
+                        </p>
+                      </div>
+                    )}
+                    {isFuture && (
+                      <p className="mt-3 text-xs font-semibold text-ink-faint">Learn more →</p>
+                    )}
+                  </Link>
+                )
+              })}
+            </div>
+          </div>
+
+          {/* Quick actions */}
+          <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+            {[
+              { label: 'Upload document', icon: '📎', href: '/workspace/build' },
+              { label: 'Add manually', icon: '✎', href: '/workspace/build' },
+              { label: 'Documents', icon: '📄', href: '#' },
+              { label: 'Summary', icon: '📊', href: '#' },
+            ].map(action => (
+              <Link
+                key={action.label}
+                href={action.href}
+                className="flex flex-col items-center gap-2 rounded-[var(--radius-md)] border-[var(--border-card)] border-cream-dark bg-surface p-5 text-center shadow-[var(--shadow-sm)] transition-all duration-150 hover:shadow-[var(--shadow-md)] hover:-translate-y-0.5 active:scale-[0.98]"
+              >
+                <span className="text-2xl">{action.icon}</span>
+                <span className="text-xs font-semibold text-ink-light">{action.label}</span>
+              </Link>
+            ))}
+          </div>
+
+        </div>
       </div>
     </WorkspaceLayout>
   )

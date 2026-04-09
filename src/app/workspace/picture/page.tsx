@@ -104,7 +104,7 @@ export default function PicturePage() {
   return (
     <WorkspaceLayout
       activePhase="build_your_picture"
-      breadcrumb={[{ label: 'Build your picture', href: '/workspace/picture' }]}
+      
     >
       <div className="max-w-xl space-y-6">
         <div>
