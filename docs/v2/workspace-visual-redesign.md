@@ -55,11 +55,12 @@ Bold. Warm. Structured. Compassionate. Modern. Connected.
 ### Sidebar design
 
 - Width: 240px desktop, collapsible to 64px (icon-only)
-- Background: `depth` colour (#3D4F5F) — the warm navy from our palette. NOT black. NOT pure dark. Warm depth.
-- Text: cream on depth background
-- Active phase: warmth-coloured pill/highlight (like Splitifi's orange Dashboard button)
-- Phase icons: simple, clear, meaningful
-- Logo: Decouple in cream, top of sidebar
+- Background: `cream-dark` (#F0EBE3) — light, warm, part of the same world as the content
+- Border: subtle right border in cream-dark or soft shadow — not a harsh line
+- Active phase: solid `warmth` (#C67D5A) pill with white text — bold and unmistakable
+- Inactive phases: `ink-light` (#6B6560) text — readable but recessive
+- Utility items (documents, timeline, settings): `ink-faint` (#A39E99)
+- Logo: `ink` (#2D2926) — grounded at the top
 - Exit this page: bottom of sidebar, always accessible
 
 ---
@@ -72,20 +73,37 @@ Current: cream background everywhere, warmth only on buttons, everything feels t
 
 New: **use colour to create zones, hierarchy, and meaning.**
 
+### Colour palette — updated
+
+| Role | Token | Hex | Usage |
+|------|-------|-----|-------|
+| Primary accent | `warmth` | #C67D5A | CTAs, active states, emphasis, sidebar active pill |
+| Secondary accent | `teal` | #5B8A8A | Info callouts, phase markers, secondary buttons, visual rhythm |
+| Teal light | `teal-light` | #E0EDED | Teal backgrounds for info sections |
+| Success | `sage` | #7A9E7E | Confirmed items, complete states |
+| Warning | `amber` | #D4A84B | Estimated, awaiting, attention |
+| Background | `cream` | #FAF6F1 | Main content area |
+| Sidebar bg | `cream-dark` | #F0EBE3 | Navigation panel |
+| Surface (elevated) | `surface` | #FEFDFB | Elevated cards, active content |
+| Text primary | `ink` | #2D2926 | Headings, bold text |
+| Text secondary | `ink-light` | #6B6560 | Body, descriptions |
+| Text faint | `ink-faint` | #A39E99 | Metadata, labels, inactive |
+
 ### Colour zones
 
 | Zone | Colour | Where |
 |------|--------|-------|
-| Sidebar | `depth` (#3D4F5F) | Persistent navigation |
-| Phase header | `warmth` (#C67D5A) as gradient or solid block | Top of main content, announces the current phase |
+| Sidebar | `cream-dark` (#F0EBE3) | Persistent navigation, warm and light |
+| Phase header | `warmth` (#C67D5A) solid or gradient | Top of main content, announces the current phase |
 | Main background | `cream` (#FAF6F1) | Primary content area |
-| Cards — active/important | White (#FEFDFB) with warmth left-border | Items needing attention, active tasks |
-| Cards — complete | `sage-light` (#E4EDE5) fill | Confirmed items, completed sections |
+| Cards — active/important | `surface` (#FEFDFB) with warmth left-border | Items needing attention |
+| Cards — complete | `sage-light` (#E4EDE5) fill | Confirmed items |
 | Cards — awaiting | `amber-light` (#F5ECD4) fill | Pending items, CETV requests |
-| Cards — empty | `cream-dark` (#F0EBE3) fill | Not started, placeholder |
-| AI insights | `warmth-light` (#F0DDD2) fill with warmth left-border | Recommendations, smart prompts |
-| Alerts/warnings | Solid warmth or amber block | Important callouts |
-| Stats/numbers | Large, bold, `ink` on contrasting backgrounds | Financial summaries, readiness |
+| Cards — empty | `cream-dark` (#F0EBE3) fill | Not started |
+| AI insights | `warmth-light` (#F0DDD2) fill with warmth left-border | Recommendations |
+| Info/context | `teal-light` (#E0EDED) fill with teal left-border | Informational callouts, "did you know" prompts |
+| Stats/numbers | Large, bold, `ink` on `surface` backgrounds | Financial summaries |
+| Phase markers (future) | `teal` (#5B8A8A) | Indicate upcoming phases, secondary emphasis |
 
 ### The rule
 
@@ -310,11 +328,13 @@ On mobile (< 768px):
 /* New tokens for workspace */
 --color-surface: #FEFDFB;         /* White-warm for elevated cards */
 --color-surface-muted: #F7F4EF;   /* Slightly darker than cream for sections */
+--color-teal: #5B8A8A;            /* Secondary accent — complement to warmth */
+--color-teal-light: #E0EDED;      /* Teal backgrounds */
 
 /* Sidebar */
 --sidebar-width: 240px;
 --sidebar-width-collapsed: 64px;
---sidebar-bg: var(--color-depth);
+--sidebar-bg: var(--color-cream-dark);  /* Light sidebar, not dark */
 
 /* Typography scale */
 --text-hero: 48px;
@@ -356,7 +376,9 @@ The interview stays narrow, focused, and gentle. The workspace is where we get b
 | Typography | Small, uniform, shy | Large headings, hero numbers, clear hierarchy |
 | Cards | All identical thin-bordered cream | Status-differentiated with coloured left borders |
 | Numbers | 14px, mixed with text | 36-48px heroes, prominent and counted-up |
+| Sidebar | None | Light warm sidebar (cream-dark), warmth pill on active phase |
 | Navigation | Flat phase labels in header | Sidebar with phase + sub-category navigation |
+| Secondary colour | None | Soft teal (#5B8A8A) for info, context, visual rhythm |
 | Empty states | "Not started" text | Warm illustrations, bold CTAs, guidance |
 | AI insights | Below the fold | Prominent cards with warmth backgrounds |
 | Progress | Thin bar | Bold bar with milestone labels and percentages |
