@@ -11,16 +11,19 @@ import { CATEGORY_PRIORITY } from '@/types/workspace'
 import { cn } from '@/utils/cn'
 import Link from 'next/link'
 
+const SIDEBAR_CATEGORIES = CATEGORY_PRIORITY.slice(0, 9).map(cat => ({
+  label: cat.label,
+  href: `/workspace/picture/${cat.key}`,
+  status: 'pending' as const,
+}))
+
 export default function WorkspacePage() {
-  const { items, summary, readiness, documents } = useWorkspace()
+  const { items, summary, readiness, documents, spending } = useWorkspace()
 
   const isEmpty = items.length === 0 && documents.length === 0
-  const categories = CATEGORY_PRIORITY.slice(0, 9) // main categories
-
-  // Stagger category cards on load
+  const categories = CATEGORY_PRIORITY.slice(0, 9)
   const visibleCards = useStaggeredReveal(isEmpty ? 0 : categories.length, { initialDelay: 200, staggerDelay: 80 })
 
-  // Find next suggested category
   const nextCategory = CATEGORY_PRIORITY.find(cat => {
     const hasItems = items.some(i =>
       i.category === cat.key || i.subcategory === cat.key ||
@@ -30,86 +33,77 @@ export default function WorkspacePage() {
   })
 
   return (
-    <WorkspaceLayout activePhase="build_your_picture">
-      <div className="space-y-6">
-        {/* Phase header */}
-        <div>
-          <h1 className="font-heading text-2xl font-medium text-ink">Build your picture</h1>
-          {isEmpty ? (
-            <p className="mt-2 text-sm text-ink-light leading-relaxed">
-              This is where everything comes together. One document can tell us a lot — let&apos;s start with the one that matters most.
-            </p>
-          ) : (
-            <p className="mt-2 text-sm text-ink-light leading-relaxed">
-              Your picture is taking shape.
-              {summary.items_to_review > 0
-                ? ` ${summary.items_to_review} item${summary.items_to_review > 1 ? 's' : ''} need${summary.items_to_review === 1 ? 's' : ''} your review.`
-                : ' Keep adding to make it stronger.'}
-            </p>
-          )}
-        </div>
+    <WorkspaceLayout
+      activePhase="build_your_picture"
+      phaseTitle="Build your picture"
+      phaseSubtitle={isEmpty
+        ? 'Start by uploading your main bank statement — one document tells us a lot'
+        : `${summary.items_confirmed + summary.items_estimated} items captured · ${summary.categories_started} categories started`
+      }
+      sidebarSubItems={SIDEBAR_CATEGORIES}
+    >
+      <div className="space-y-8">
 
         {/* ── EMPTY STATE ── */}
         {isEmpty && (
-          <div className="space-y-6">
-            {/* Primary upload prompt */}
-            <div className="rounded-[var(--radius-md)] border border-cream-dark p-6 space-y-4">
-              <div>
-                <p className="text-sm font-medium text-ink">
-                  Start with your main bank account
-                </p>
-                <p className="mt-1 text-sm text-ink-light leading-relaxed">
-                  This one document gives us your income and a full spending breakdown. Download 12 months as a PDF from your online banking.
-                </p>
-              </div>
-
-              <Link href="/workspace/picture">
-                <Button className="w-full sm:w-auto">Upload your first document</Button>
-              </Link>
-
-              <div className="flex items-center gap-4 text-sm">
-                <Link href="/workspace/picture/manual" className="text-warmth-dark hover:text-warmth transition-colors">
-                  I&apos;d rather enter details myself
+          <div className="space-y-8">
+            {/* Primary upload prompt — bold */}
+            <div className="rounded-[var(--radius-lg)] bg-surface p-8 shadow-[var(--shadow-md)] border-l-[var(--border-accent)] border-warmth">
+              <h2 className="text-xl font-semibold text-ink">
+                Start with your main bank account
+              </h2>
+              <p className="mt-2 text-ink-light leading-relaxed">
+                This one document gives us your income and a full spending breakdown. Download 12 months as a PDF from your online banking.
+              </p>
+              <div className="mt-5 flex flex-wrap gap-3">
+                <Link href="/workspace/picture">
+                  <Button size="lg">Upload your first document</Button>
+                </Link>
+                <Link href="/workspace/picture/manual">
+                  <Button variant="secondary" size="lg">I&apos;d rather enter details myself</Button>
                 </Link>
               </div>
             </div>
 
-            {/* What we already know */}
-            <div className="rounded-[var(--radius-md)] border border-cream-dark p-5 space-y-3">
-              <h3 className="text-xs font-medium uppercase tracking-wide text-ink-faint">What we know from your plan</h3>
-              <div className="space-y-2">
-                <p className="flex items-center justify-between text-sm">
-                  <span className="text-ink-light">Income</span>
-                  <span className="text-ink-faint">~£3,200/mo <span className="text-[10px]">(estimated)</span></span>
-                </p>
-                <p className="flex items-center justify-between text-sm">
-                  <span className="text-ink-light">Property</span>
-                  <span className="text-ink-faint">Own jointly <span className="text-[10px]">(value unknown)</span></span>
-                </p>
-                <p className="flex items-center justify-between text-sm">
-                  <span className="text-ink-light">Pension</span>
-                  <span className="text-ink-faint">Unknown</span>
-                </p>
+            {/* What we know — from V1 */}
+            <div className="rounded-[var(--radius-md)] bg-teal-light/50 p-6 border-l-[var(--border-accent)] border-teal">
+              <h3 className="text-xs font-semibold uppercase tracking-widest text-teal-dark">From your free plan</h3>
+              <div className="mt-4 grid gap-4 sm:grid-cols-3">
+                <div>
+                  <p className="text-xs text-ink-faint">Income</p>
+                  <p className="text-lg font-semibold text-ink">~£3,200/mo</p>
+                  <p className="text-[10px] text-ink-faint">estimated</p>
+                </div>
+                <div>
+                  <p className="text-xs text-ink-faint">Property</p>
+                  <p className="text-lg font-semibold text-ink">Own jointly</p>
+                  <p className="text-[10px] text-ink-faint">value unknown</p>
+                </div>
+                <div>
+                  <p className="text-xs text-ink-faint">Pension</p>
+                  <p className="text-lg font-semibold text-ink">Unknown</p>
+                  <p className="text-[10px] text-ink-faint">needs attention</p>
+                </div>
               </div>
-              <p className="text-xs text-ink-faint">These will be replaced with real figures as you add evidence.</p>
+              <p className="mt-4 text-xs text-teal-dark">These will be replaced with real figures as you add evidence.</p>
             </div>
 
-            {/* What's ahead */}
-            <div className="rounded-[var(--radius-md)] border border-cream-dark p-5 space-y-3">
-              <h3 className="text-xs font-medium uppercase tracking-wide text-ink-faint">How this works</h3>
-              <div className="space-y-3">
-                <p className="flex items-start gap-3 text-sm text-ink-light">
-                  <span className="mt-0.5 text-warmth shrink-0">1</span>
-                  Upload a document — we read it, extract the numbers, and categorise everything
-                </p>
-                <p className="flex items-start gap-3 text-sm text-ink-light">
-                  <span className="mt-0.5 text-warmth shrink-0">2</span>
-                  You review what we found and confirm or correct
-                </p>
-                <p className="flex items-start gap-3 text-sm text-ink-light">
-                  <span className="mt-0.5 text-warmth shrink-0">3</span>
-                  Your financial picture builds up section by section
-                </p>
+            {/* How this works */}
+            <div className="rounded-[var(--radius-md)] bg-surface p-6 shadow-[var(--shadow-sm)]">
+              <h3 className="text-xs font-semibold uppercase tracking-widest text-ink-faint">How this works</h3>
+              <div className="mt-4 grid gap-6 sm:grid-cols-3">
+                <div className="flex gap-3">
+                  <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-warmth text-sm font-bold text-white">1</div>
+                  <p className="text-sm text-ink-light leading-relaxed">Upload a document — we read it, extract the numbers, and categorise everything</p>
+                </div>
+                <div className="flex gap-3">
+                  <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-warmth text-sm font-bold text-white">2</div>
+                  <p className="text-sm text-ink-light leading-relaxed">Review what we found and confirm or correct</p>
+                </div>
+                <div className="flex gap-3">
+                  <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-warmth text-sm font-bold text-white">3</div>
+                  <p className="text-sm text-ink-light leading-relaxed">Your financial picture builds up section by section</p>
+                </div>
               </div>
             </div>
           </div>
@@ -117,24 +111,36 @@ export default function WorkspacePage() {
 
         {/* ── ACTIVE STATE ── */}
         {!isEmpty && (
-          <div className="space-y-6">
+          <div className="space-y-8">
+            {/* Financial summary — hero numbers */}
+            <LiveSummary summary={summary} />
+
+            {/* Next step — ONE thing, prominent */}
+            {nextCategory && (
+              <div className="rounded-[var(--radius-md)] bg-surface p-6 shadow-[var(--shadow-sm)] border-l-[var(--border-accent)] border-warmth">
+                <h3 className="text-xs font-semibold uppercase tracking-widest text-warmth-dark">Your next step</h3>
+                <p className="mt-2 text-lg font-semibold text-ink">{nextCategory.label}</p>
+                <p className="mt-1 text-sm text-ink-light">{nextCategory.description}. Best document: {nextCategory.idealDocs}.</p>
+                <div className="mt-4">
+                  <Link href={`/workspace/picture/${nextCategory.key}`}>
+                    <Button>Get started</Button>
+                  </Link>
+                </div>
+              </div>
+            )}
+
             {/* Upload more — compact */}
             <Link href="/workspace/picture" className="block">
-              <div className="rounded-[var(--radius-md)] border-2 border-dashed border-cream-dark p-4 text-center transition-all duration-200 hover:border-ink-faint hover:bg-cream-dark/10">
-                <p className="text-sm text-ink-light">
-                  <span className="text-warmth-dark font-medium">Upload more documents</span> — or <Link href="/workspace/picture/manual" className="text-warmth-dark underline decoration-warmth-light hover:decoration-warmth">enter manually</Link>
-                </p>
+              <div className="rounded-[var(--radius-md)] border-2 border-dashed border-warmth/30 bg-warmth-light/10 p-5 text-center transition-all duration-200 hover:border-warmth/60 hover:bg-warmth-light/20">
+                <p className="text-sm font-medium text-warmth-dark">Upload more documents</p>
+                <p className="mt-1 text-xs text-ink-faint">or <Link href="/workspace/picture/manual" className="text-warmth-dark underline">enter manually</Link></p>
               </div>
             </Link>
 
-            {/* Live summary */}
-            <LiveSummary summary={summary} />
-
-            {/* Category cards — staggered reveal */}
-            <div className="space-y-3">
-              <h3 className="text-xs font-medium uppercase tracking-wide text-ink-faint">Your categories</h3>
-
-              <div className="grid gap-3 sm:grid-cols-2">
+            {/* Categories — visual status grid */}
+            <div>
+              <h3 className="text-xs font-semibold uppercase tracking-widest text-ink-faint">Categories</h3>
+              <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
                 {categories.map((cat, i) => {
                   const catItems = items.filter(item =>
                     item.category === cat.key || item.subcategory === cat.key ||
@@ -145,41 +151,35 @@ export default function WorkspacePage() {
                   const totalValue = catItems.filter(item => item.value !== null).reduce((sum, item) => sum + item.value!, 0)
                   const confirmed = catItems.filter(item => item.status === 'confirmed').length
                   const toReview = catItems.filter(item => item.status === 'to_review').length
+                  const isAwaiting = catItems.some(item => item.status === 'awaiting')
 
                   return (
                     <Link
                       key={cat.key}
                       href={`/workspace/picture/${cat.key}`}
                       className={cn(
-                        'rounded-[var(--radius-md)] border p-4 transition-all duration-300',
-                        // Stagger animation
+                        'rounded-[var(--radius-md)] p-4 transition-all duration-300 border-l-[var(--border-accent)]',
                         i < visibleCards ? 'translate-y-0 opacity-100' : 'translate-y-3 opacity-0',
-                        // State styling
-                        hasContent ? 'border-cream-dark hover:shadow-[var(--shadow-sm)] hover:-translate-y-0.5' :
-                        isNext ? 'border-warmth/40 bg-warmth-light/5 hover:bg-warmth-light/10' :
-                        'border-cream-dark hover:border-ink-faint',
+                        hasContent && !isAwaiting ? 'bg-surface border-sage shadow-[var(--shadow-sm)] hover:-translate-y-0.5 hover:shadow-[var(--shadow-md)]' :
+                        isAwaiting ? 'bg-amber-light/30 border-amber shadow-[var(--shadow-sm)]' :
+                        isNext ? 'bg-warmth-light/20 border-warmth hover:bg-warmth-light/30' :
+                        'bg-cream-dark/50 border-transparent hover:bg-cream-dark hover:border-ink-faint',
                       )}
                     >
                       <div className="flex items-center justify-between">
-                        <p className={cn('text-sm font-medium', hasContent ? 'text-ink' : 'text-ink-light')}>{cat.label}</p>
-                        {hasContent ? (
-                          <span className="flex items-center gap-1 text-xs text-sage">
-                            <span className="h-1.5 w-1.5 rounded-full bg-sage" />
-                            {confirmed} confirmed
-                          </span>
-                        ) : isNext ? (
-                          <span className="text-xs text-warmth-dark">Suggested</span>
-                        ) : (
-                          <span className="text-xs text-ink-faint">—</span>
-                        )}
+                        <p className={cn('font-semibold', hasContent ? 'text-ink' : 'text-ink-light')}>{cat.label}</p>
+                        {confirmed > 0 && <span className="text-xs font-medium text-sage">✓ {confirmed}</span>}
+                        {isAwaiting && <span className="text-xs font-medium text-amber">⏳</span>}
+                        {toReview > 0 && <span className="text-xs font-medium text-warmth">● {toReview}</span>}
+                        {!hasContent && isNext && <span className="text-xs font-medium text-warmth-dark">Next</span>}
                       </div>
 
-                      {hasContent ? (
-                        <p className="mt-1 text-xs text-ink-light tabular-nums">
+                      {hasContent && totalValue > 0 && (
+                        <p className="mt-1 text-xl font-bold text-ink tabular-nums">
                           {new Intl.NumberFormat('en-GB', { style: 'currency', currency: 'GBP', maximumFractionDigits: 0 }).format(totalValue)}
-                          {toReview > 0 && <span className="ml-2 text-amber">· {toReview} to review</span>}
                         </p>
-                      ) : (
+                      )}
+                      {!hasContent && (
                         <p className="mt-1 text-xs text-ink-faint">{cat.description}</p>
                       )}
                     </Link>
@@ -191,31 +191,49 @@ export default function WorkspacePage() {
             {/* Readiness */}
             <ReadinessBar readiness={readiness} />
 
-            {/* What to do next — just one thing */}
-            {nextCategory && (
-              <div className="rounded-[var(--radius-md)] border border-cream-dark p-5 space-y-2">
-                <h3 className="text-xs font-medium uppercase tracking-wide text-ink-faint">Focus on next</h3>
-                <p className="text-sm text-ink">
-                  <span className="font-medium">{nextCategory.label}</span> — {nextCategory.description.toLowerCase()}
-                </p>
-                <p className="text-xs text-ink-faint">Best document: {nextCategory.idealDocs}</p>
+            {/* AI Insight */}
+            {readiness.blockers.length > 0 && readiness.level !== 'not_started' && (
+              <div className="rounded-[var(--radius-md)] bg-warmth-light/30 p-6 border-l-[var(--border-accent)] border-warmth">
+                <h3 className="text-xs font-semibold uppercase tracking-widest text-warmth-dark">💡 Insight</h3>
+                <p className="mt-2 text-sm text-ink leading-relaxed">{readiness.blockers[0]}</p>
               </div>
             )}
 
-            {/* V3 transition prompt — only when ready */}
+            {/* V3 transition — when ready */}
             {readiness.level === 'first_draft' && (
-              <div className="rounded-[var(--radius-md)] border border-sage-light bg-sage-light/20 p-5 space-y-2">
-                <p className="text-sm font-medium text-ink">Your picture is ready to share</p>
-                <p className="text-xs text-ink-light leading-relaxed">
+              <div className="rounded-[var(--radius-md)] bg-sage-light/50 p-6 border-l-[var(--border-accent)] border-sage">
+                <h3 className="text-lg font-semibold text-ink">Your picture is ready to share</h3>
+                <p className="mt-1 text-sm text-ink-light leading-relaxed">
                   You have enough for an initial conversation with a mediator or solicitor. When you&apos;re ready, the next phase helps you prepare for formal disclosure.
                 </p>
-                <Button variant="secondary" size="sm">Prepare for disclosure</Button>
+                <div className="mt-4">
+                  <Button variant="secondary">Prepare for disclosure</Button>
+                </div>
               </div>
             )}
+
+            {/* Quick actions */}
+            <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+              {[
+                { label: 'Upload', icon: '📎', href: '/workspace/picture' },
+                { label: 'Add item', icon: '✎', href: '/workspace/picture/manual' },
+                { label: 'Documents', icon: '📄', href: '#' },
+                { label: 'Summary', icon: '📊', href: '#' },
+              ].map(action => (
+                <Link
+                  key={action.label}
+                  href={action.href}
+                  className="flex flex-col items-center gap-2 rounded-[var(--radius-md)] bg-surface p-4 text-center shadow-[var(--shadow-sm)] transition-all hover:shadow-[var(--shadow-md)] hover:-translate-y-0.5"
+                >
+                  <span className="text-2xl">{action.icon}</span>
+                  <span className="text-xs font-medium text-ink-light">{action.label}</span>
+                </Link>
+              ))}
+            </div>
           </div>
         )}
 
-        {/* Document checklist — floating button + slide-out */}
+        {/* Document checklist */}
         <DocumentChecklist
           items={items}
           documents={documents}

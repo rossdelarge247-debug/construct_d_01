@@ -1,29 +1,40 @@
 @import "tailwindcss";
 
 @theme {
-  /* Colour palette — warm, never clinical */
+  /* Core palette — warm, never clinical */
   --color-cream: #FAF6F1;
   --color-cream-dark: #F0EBE3;
+  --color-surface: #FEFDFB;
   --color-ink: #2D2926;
   --color-ink-light: #6B6560;
   --color-ink-faint: #A39E99;
 
+  /* Primary accent — terracotta warmth */
   --color-warmth: #C67D5A;
   --color-warmth-light: #F0DDD2;
   --color-warmth-dark: #A8623F;
 
+  /* Secondary accent — soft teal complement */
+  --color-teal: #5B8A8A;
+  --color-teal-light: #E0EDED;
+  --color-teal-dark: #4A7272;
+
+  /* Success — sage green */
   --color-sage: #7A9E7E;
   --color-sage-light: #E4EDE5;
   --color-sage-dark: #5C7E60;
 
+  /* Warning — amber */
+  --color-amber: #D4A84B;
+  --color-amber-light: #F5ECD4;
+
+  /* Depth — warm navy for emphasis */
   --color-depth: #3D4F5F;
   --color-depth-light: #E8ECF0;
 
+  /* Soft — lavender (minimal use) */
   --color-soft: #C2B5C7;
   --color-soft-light: #EDE8EF;
-
-  --color-amber: #D4A84B;
-  --color-amber-light: #F5ECD4;
 
   /* Typography */
   --font-heading: 'Lora', Georgia, 'Times New Roman', serif;
@@ -39,6 +50,11 @@
   --radius-md: 12px;
   --radius-lg: 16px;
   --radius-full: 9999px;
+
+  /* Layout */
+  --sidebar-width: 240px;
+  --sidebar-collapsed: 64px;
+  --border-accent: 4px;
 }
 
 /* Base styles */
@@ -54,14 +70,14 @@ h1, h2, h3 {
   font-family: var(--font-heading);
 }
 
-/* Focus styles — warm, visible, accessible */
+/* Focus styles */
 *:focus-visible {
   outline: 2px solid var(--color-warmth);
   outline-offset: 2px;
   border-radius: 4px;
 }
 
-/* Selection — warm */
+/* Selection */
 ::selection {
   background-color: var(--color-warmth-light);
   color: var(--color-ink);
