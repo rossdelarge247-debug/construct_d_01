@@ -3,6 +3,7 @@
 import { useState, useCallback } from 'react'
 import { DocumentUpload } from '@/components/workspace/document-upload'
 import { ExtractionReview } from '@/components/workspace/extraction-review'
+import { CetvTracker, type CetvRequest } from '@/components/workspace/cetv-tracker'
 import { Button } from '@/components/ui/button'
 import { CATEGORY_PRIORITY } from '@/types/workspace'
 import type { FinancialPictureItem } from '@/types/workspace'
@@ -14,6 +15,7 @@ interface CategoryContentProps {
   items: FinancialPictureItem[]
   onAddItem: (item: FinancialPictureItem) => void
   onRemoveItem: (id: string) => void
+  onEditItem: (id: string) => void
   onOpenManualEntry: () => void
   setSpending: (s: { category: string; monthly_average: number; transaction_count: number; examples: string[] }[]) => void
 }
@@ -37,9 +39,12 @@ function formatCurrency(amount: number | null): string {
 
 type ViewState = 'idle' | 'uploading' | 'reviewing'
 
-export function CategoryContent({ categoryKey, items, onAddItem, onRemoveItem, onOpenManualEntry, setSpending }: CategoryContentProps) {
+export function CategoryContent({ categoryKey, items, onAddItem, onRemoveItem, onEditItem, onOpenManualEntry, setSpending }: CategoryContentProps) {
   const [view, setView] = useState<ViewState>('idle')
   const [extractionResult, setExtractionResult] = useState<ExtractionResult | null>(null)
+  const [cetvRequests, setCetvRequests] = useState<CetvRequest[]>([])
+
+  const isPensions = categoryKey === 'pensions'
   const [classification, setClassification] = useState<ClassificationResult | null>(null)
   const [message, setMessage] = useState<string | null>(null)
 
@@ -190,7 +195,7 @@ export function CategoryContent({ categoryKey, items, onAddItem, onRemoveItem, o
                 </div>
               </div>
               <div className="mt-3 flex gap-4">
-                <button className="text-xs font-semibold text-ink-faint hover:text-warmth-dark transition-colors">Edit</button>
+                <button onClick={() => onEditItem(item.id)} className="text-xs font-semibold text-ink-faint hover:text-warmth-dark transition-colors">Edit</button>
                 <button onClick={() => onRemoveItem(item.id)} className="text-xs font-semibold text-ink-faint hover:text-warmth-dark transition-colors">Remove</button>
               </div>
             </div>
@@ -204,6 +209,15 @@ export function CategoryContent({ categoryKey, items, onAddItem, onRemoveItem, o
           <p className="text-base font-semibold text-ink-light">No {categoryInfo?.label.toLowerCase()} items yet</p>
           <p className="mt-1 text-sm text-ink-faint">Upload a document above or enter details manually.</p>
         </div>
+      )}
+
+      {/* CETV tracker — pensions only */}
+      {isPensions && (
+        <CetvTracker
+          requests={cetvRequests}
+          onAdd={(req) => setCetvRequests(prev => [...prev, req])}
+          onUpdate={(id, updates) => setCetvRequests(prev => prev.map(r => r.id === id ? { ...r, ...updates } : r))}
+        />
       )}
 
       {/* AI prompt */}

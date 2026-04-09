@@ -7,7 +7,9 @@ import { CategoryTabs } from '@/components/workspace/category-tabs'
 import { CategoryContent } from '@/components/workspace/category-content'
 import { SummaryTab } from '@/components/workspace/summary-tab'
 import { ManualEntryModal } from '@/components/workspace/manual-entry-modal'
+import { DocumentReviewModal } from '@/components/workspace/document-review-modal'
 import { useWorkspace } from '@/hooks/use-workspace'
+import { useToast } from '@/components/workspace/toast'
 import { useCountUp } from '@/hooks/use-count-up'
 import { cn } from '@/utils/cn'
 import Link from 'next/link'
@@ -30,7 +32,8 @@ function getReadinessLabel(progress: number) {
 const DEFAULT_CATEGORIES = ['current_account', 'savings', 'property', 'pensions', 'debts', 'other_income', 'other_assets', 'outgoings']
 
 export default function BuildYourPicturePage() {
-  const { items, addItem, removeItem, summary, readiness, spending, setSpending, loaded } = useWorkspace()
+  const { items, addItem, updateItem, removeItem, summary, readiness, spending, setSpending, loaded } = useWorkspace()
+  const { showToast } = useToast()
 
   // Page-level tab
   const [pageTab, setPageTab] = useState<'preparation' | 'summary'>('preparation')
@@ -38,8 +41,10 @@ export default function BuildYourPicturePage() {
   // Category tab (component-level, inside preparation)
   const [activeCategory, setActiveCategory] = useState('current_account')
 
-  // Manual entry modal
+  // Modals
   const [showManualEntry, setShowManualEntry] = useState(false)
+  const [editingItemId, setEditingItemId] = useState<string | null>(null)
+  const editingItem = editingItemId ? items.find(i => i.id === editingItemId) || null : null
 
   // First-time how-it-works
   const [showHowItWorks, setShowHowItWorks] = useState(true)
@@ -148,8 +153,9 @@ export default function BuildYourPicturePage() {
                   <CategoryContent
                     categoryKey={activeCategory}
                     items={items}
-                    onAddItem={addItem}
-                    onRemoveItem={removeItem}
+                    onAddItem={(item) => { addItem(item); showToast(`${item.label} added`) }}
+                    onRemoveItem={(id) => { removeItem(id); showToast('Item removed') }}
+                    onEditItem={(id) => setEditingItemId(id)}
                     onOpenManualEntry={() => setShowManualEntry(true)}
                     setSpending={setSpending}
                   />
@@ -182,8 +188,15 @@ export default function BuildYourPicturePage() {
       <ManualEntryModal
         isOpen={showManualEntry}
         onClose={() => setShowManualEntry(false)}
-        onSave={(item) => { addItem(item); setShowManualEntry(false) }}
+        onSave={(item) => { addItem(item); setShowManualEntry(false); showToast(`${item.label} added`) }}
         defaultCategory={activeCategory}
+      />
+
+      <DocumentReviewModal
+        isOpen={!!editingItemId}
+        onClose={() => setEditingItemId(null)}
+        item={editingItem}
+        onSave={(id, updates) => { updateItem(id, updates); setEditingItemId(null); showToast('Item updated') }}
       />
     </WorkspaceLayout>
   )
