@@ -1,9 +1,23 @@
 'use client'
 
-import { useState, useRef, useEffect } from 'react'
+import { useRef, useEffect, useState } from 'react'
 import { cn } from '@/utils/cn'
 import { CATEGORY_PRIORITY } from '@/types/workspace'
 import type { FinancialPictureItem } from '@/types/workspace'
+
+const CATEGORY_ICONS: Record<string, string> = {
+  current_account: '🏦',
+  savings: '💰',
+  property: '🏠',
+  pensions: '📊',
+  debts: '💳',
+  other_income: '📥',
+  other_assets: '🚗',
+  business: '💼',
+  outgoings: '📉',
+  budget: '📋',
+  children: '👶',
+}
 
 interface CategoryTabsProps {
   activeTab: string
@@ -45,7 +59,6 @@ export function CategoryTabs({ activeTab, onTabChange, items, visibleCategories 
 
   return (
     <div className="relative">
-      {/* Tab bar */}
       <div
         ref={scrollRef}
         className="flex overflow-x-auto border-b-[var(--border-card)] border-cream-dark scrollbar-none"
@@ -54,34 +67,42 @@ export function CategoryTabs({ activeTab, onTabChange, items, visibleCategories 
         {categories.map(cat => {
           const isActive = cat.key === activeTab
           const status = getTabStatus(cat.key, items)
+          const icon = CATEGORY_ICONS[cat.key] || '📁'
 
           return (
             <button
               key={cat.key}
               onClick={() => onTabChange(cat.key)}
               className={cn(
-                'relative shrink-0 px-5 py-3.5 text-sm font-semibold transition-colors whitespace-nowrap',
+                'relative shrink-0 flex items-center gap-2 px-4 py-3.5 text-sm font-semibold transition-colors whitespace-nowrap',
                 isActive ? 'text-warmth-dark' : 'text-ink-faint hover:text-ink-light',
               )}
             >
-              {cat.label}
+              <span className="text-base">{icon}</span>
+              <span>{cat.label}</span>
               {status && (
-                <span className={cn('ml-1.5 text-xs font-bold', status.colour)}>
+                <span className={cn('text-xs font-bold', status.colour)}>
                   {status.label}
                 </span>
               )}
-              {/* Active indicator — bold bottom border */}
               {isActive && (
                 <div className="absolute bottom-0 left-0 right-0 h-[3px] rounded-t-full bg-warmth" />
               )}
             </button>
           )
         })}
+
+        {/* Add category button */}
+        <button
+          className="shrink-0 flex items-center gap-1 px-4 py-3.5 text-xs font-semibold text-ink-faint hover:text-warmth-dark transition-colors whitespace-nowrap"
+        >
+          <span>+</span>
+          <span>Add</span>
+        </button>
       </div>
 
-      {/* Scroll indicator */}
       {showScrollRight && (
-        <div className="pointer-events-none absolute right-0 top-0 bottom-0 w-12 bg-gradient-to-l from-cream to-transparent" />
+        <div className="pointer-events-none absolute right-0 top-0 bottom-0 w-12 bg-gradient-to-l from-surface to-transparent" />
       )}
     </div>
   )

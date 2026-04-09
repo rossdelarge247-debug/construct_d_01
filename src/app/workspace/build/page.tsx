@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { WorkspaceLayout } from '@/components/workspace/workspace-layout'
 import { PageTabs } from '@/components/workspace/page-tabs'
 import { CategoryTabs } from '@/components/workspace/category-tabs'
@@ -8,11 +8,14 @@ import { CategoryContent } from '@/components/workspace/category-content'
 import { SummaryTab } from '@/components/workspace/summary-tab'
 import { ManualEntryModal } from '@/components/workspace/manual-entry-modal'
 import { DocumentReviewModal } from '@/components/workspace/document-review-modal'
+import { DocumentUpload } from '@/components/workspace/document-upload'
+import { FirstTimeWizard } from '@/components/workspace/first-time-wizard'
 import { useWorkspace } from '@/hooks/use-workspace'
 import { useToast } from '@/components/workspace/toast'
 import { useCountUp } from '@/hooks/use-count-up'
 import { cn } from '@/utils/cn'
 import Link from 'next/link'
+import type { ExtractionResult, ClassificationResult } from '@/lib/documents/processor'
 
 const READINESS_MILESTONES = [
   { threshold: 0, label: 'Getting started', colour: 'bg-cream-dark' },
@@ -29,16 +32,35 @@ function getReadinessLabel(progress: number) {
   return READINESS_MILESTONES[0]
 }
 
-const DEFAULT_CATEGORIES = ['current_account', 'savings', 'property', 'pensions', 'debts', 'other_income', 'other_assets', 'outgoings']
+// Map document types to category keys
+const DOC_TYPE_TO_CATEGORY: Record<string, string> = {
+  bank_statement: 'current_account',
+  savings_statement: 'savings',
+  payslip: 'current_account',
+  p60: 'current_account',
+  pension_letter: 'pensions',
+  mortgage_statement: 'property',
+  property_valuation: 'property',
+  credit_card_statement: 'debts',
+  loan_statement: 'debts',
+  insurance_document: 'other_assets',
+  tax_return: 'business',
+  business_accounts: 'business',
+  investment_statement: 'savings',
+}
 
 export default function BuildYourPicturePage() {
   const { items, addItem, updateItem, removeItem, summary, readiness, spending, setSpending, loaded } = useWorkspace()
   const { showToast } = useToast()
 
+  // First-time wizard
+  const [wizardComplete, setWizardComplete] = useState(false)
+  const [visibleCategories, setVisibleCategories] = useState<string[]>([])
+
   // Page-level tab
   const [pageTab, setPageTab] = useState<'preparation' | 'summary'>('preparation')
 
-  // Category tab (component-level, inside preparation)
+  // Category tab
   const [activeCategory, setActiveCategory] = useState('current_account')
 
   // Modals
@@ -46,15 +68,88 @@ export default function BuildYourPicturePage() {
   const [editingItemId, setEditingItemId] = useState<string | null>(null)
   const editingItem = editingItemId ? items.find(i => i.id === editingItemId) || null : null
 
-  // First-time how-it-works
-  const [showHowItWorks, setShowHowItWorks] = useState(true)
+  // Upload state (shared — one upload zone)
+  const [extractionResult, setExtractionResult] = useState<ExtractionResult | null>(null)
+  const [classification, setClassification] = useState<ClassificationResult | null>(null)
+  const [uploadMessage, setUploadMessage] = useState<string | null>(null)
+  const [isReviewing, setIsReviewing] = useState(false)
+
+  // Check wizard state on mount
   useEffect(() => {
-    if (localStorage.getItem('how_it_works_dismissed') === 'true') setShowHowItWorks(false)
+    const config = localStorage.getItem('wizard_config')
+    if (config) {
+      try {
+        const parsed = JSON.parse(config)
+        setVisibleCategories(parsed.categories || ['current_account', 'savings', 'property', 'pensions', 'debts'])
+        setWizardComplete(true)
+      } catch {
+        // Default categories
+        setVisibleCategories(['current_account', 'savings', 'property', 'pensions', 'debts'])
+      }
+    }
   }, [])
-  const dismissHowItWorks = () => {
-    setShowHowItWorks(false)
-    localStorage.setItem('how_it_works_dismissed', 'true')
+
+  // Smart document routing — when upload completes, route to correct tab
+  const handleUploadProcessed = useCallback((result: { classification: unknown; extraction: unknown; message: string }) => {
+    const classResult = result.classification as ClassificationResult | null
+    const extractResult = result.extraction as ExtractionResult | null
+
+    setClassification(classResult)
+    setUploadMessage(result.message)
+
+    if (extractResult && extractResult.items.length > 0) {
+      setExtractionResult(extractResult)
+      setIsReviewing(true)
+
+      // Route to the correct tab based on document type
+      if (classResult?.document_type) {
+        const targetTab = DOC_TYPE_TO_CATEGORY[classResult.document_type]
+        if (targetTab && visibleCategories.includes(targetTab)) {
+          setActiveCategory(targetTab)
+        }
+      }
+    }
+  }, [visibleCategories])
+
+  const handleWizardComplete = (config: { categories: string[]; counts: Record<string, number> }) => {
+    setVisibleCategories(config.categories)
+    setWizardComplete(true)
+    localStorage.setItem('wizard_config', JSON.stringify(config))
+    if (config.categories.length > 0) {
+      setActiveCategory(config.categories[0])
+    }
   }
+
+  const handleConfirmExtraction = useCallback((confirmedItems: ExtractionResult['items'], extractedSpending: ExtractionResult['spending_categories']) => {
+    confirmedItems.forEach(item => {
+      addItem({
+        id: crypto.randomUUID(),
+        category: item.category as never,
+        subcategory: item.subcategory || activeCategory,
+        label: item.label,
+        value: item.value,
+        currency: 'GBP',
+        period: item.period,
+        ownership: item.ownership_hint === 'joint' ? 'joint' : item.ownership_hint === 'yours' ? 'yours' : 'unknown',
+        split: item.ownership_hint === 'joint' ? 50 : 100,
+        confidence: item.confidence >= 0.9 ? 'known' : 'estimated',
+        status: 'confirmed',
+        source_document_id: null,
+        notes: item.source_description,
+        is_inherited: false,
+        is_pre_marital: false,
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+      })
+    })
+    if (extractedSpending) {
+      setSpending(extractedSpending.map(s => ({ category: s.category, monthly_average: s.monthly_average, transaction_count: s.transaction_count, examples: s.examples })))
+    }
+    setIsReviewing(false)
+    setExtractionResult(null)
+    setUploadMessage(null)
+    showToast(`${confirmedItems.length} items added to your picture`)
+  }, [addItem, setSpending, activeCategory, showToast])
 
   // Readiness
   const progress = readiness.progress
@@ -83,22 +178,18 @@ export default function BuildYourPicturePage() {
       <div className="px-6 md:px-10">
         <div className="mx-auto max-w-4xl space-y-6 py-6">
 
-          {/* ── Title panel (terracotta) ── */}
+          {/* ── Title panel ── */}
           <div className="relative rounded-[var(--radius-lg)] bg-warmth p-7 shadow-[var(--shadow-md)] overflow-hidden">
             <h1 className="text-2xl font-bold tracking-tight text-white md:text-3xl">
               Build your picture
             </h1>
             <p className="mt-1.5 text-sm text-white/80 leading-relaxed">
-              Bring everything together — finances, property, pensions. Upload documents and we do the heavy lifting.
+              Upload any financial document — we&apos;ll detect what it is and organise it automatically.
             </p>
 
-            {/* Progress bar along bottom edge */}
             <div className="absolute bottom-0 left-0 right-0 h-1.5">
               <div className="h-full w-full bg-warmth-dark/30">
-                <div
-                  className={cn('h-full transition-all duration-700 ease-out', milestone.colour)}
-                  style={{ width: `${animatedProgress}%` }}
-                />
+                <div className={cn('h-full transition-all duration-700 ease-out', milestone.colour)} style={{ width: `${animatedProgress}%` }} />
               </div>
             </div>
 
@@ -111,80 +202,121 @@ export default function BuildYourPicturePage() {
             )}
           </div>
 
-          {/* ── Page-level tabs ── */}
-          <PageTabs active={pageTab} onChange={setPageTab} />
+          {/* ── First-time wizard ── */}
+          {!wizardComplete && (
+            <FirstTimeWizard onComplete={handleWizardComplete} />
+          )}
 
-          {/* ── PREPARATION TAB ── */}
-          {pageTab === 'preparation' && (
-            <div className="space-y-6">
+          {/* ── Main content (after wizard) ── */}
+          {wizardComplete && (
+            <>
+              {/* Page-level tabs */}
+              <PageTabs active={pageTab} onChange={setPageTab} />
 
-              {/* How this works — first visit */}
-              {showHowItWorks && items.length === 0 && (
-                <div className="relative rounded-[var(--radius-lg)] border-[var(--border-card)] border-teal-light bg-teal-light/30 p-6">
-                  <button onClick={dismissHowItWorks} className="absolute top-4 right-4 text-teal-dark/40 hover:text-teal-dark text-lg">✕</button>
-                  <p className="text-[11px] font-bold uppercase tracking-[0.15em] text-teal-dark">How this works</p>
-                  <div className="mt-4 grid gap-5 sm:grid-cols-3">
-                    {[
-                      { n: '1', text: 'Upload a document — we read, extract, and categorise everything' },
-                      { n: '2', text: 'Review what we found and confirm with a few taps' },
-                      { n: '3', text: 'Your financial picture builds as you go' },
-                    ].map(step => (
-                      <div key={step.n} className="flex gap-3">
-                        <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-teal text-sm font-bold text-white">{step.n}</div>
-                        <p className="text-sm text-ink-light leading-relaxed">{step.text}</p>
-                      </div>
-                    ))}
+              {/* ── PREPARATION TAB ── */}
+              {pageTab === 'preparation' && (
+                <div className="space-y-6">
+
+                  {/* Single upload zone — always at top, routes to correct tab */}
+                  <div className="rounded-[var(--radius-lg)] border-[var(--border-card)] border-cream-dark bg-surface shadow-[var(--shadow-sm)] p-6">
+                    {!isReviewing ? (
+                      <>
+                        <DocumentUpload
+                          onProcessed={handleUploadProcessed}
+                          prompt="Drop any financial document here"
+                          hint="Bank statements, payslips, pension letters, mortgage statements, valuations — we'll detect the type automatically"
+                        />
+
+                        {uploadMessage && !isReviewing && (
+                          <div className="mt-4 rounded-[var(--radius-md)] border-[var(--border-card)] border-amber-light bg-amber-light/30 p-4">
+                            <p className="text-sm text-ink">{uploadMessage}</p>
+                          </div>
+                        )}
+
+                        <div className="mt-4 flex items-center gap-4">
+                          <button onClick={() => setShowManualEntry(true)} className="text-sm font-semibold text-warmth-dark hover:text-warmth transition-colors">
+                            Enter details manually
+                          </button>
+                        </div>
+                      </>
+                    ) : extractionResult && (
+                      <>
+                        {classification && (
+                          <div className="mb-4 flex items-center gap-2">
+                            <span className="rounded-full bg-cream-dark px-3 py-1 text-xs font-semibold text-ink-light">
+                              {classification.document_type.replace(/_/g, ' ')}
+                            </span>
+                            {classification.provider_name && (
+                              <span className="text-xs text-ink-faint">{classification.provider_name}</span>
+                            )}
+                            <span className="text-xs text-ink-faint">→ routed to {activeCategory.replace(/_/g, ' ')}</span>
+                          </div>
+                        )}
+                        {/* Inline review using existing ExtractionReview */}
+                        <div className="space-y-4">
+                          {/* Import and use ExtractionReview inline */}
+                          <p className="text-sm font-semibold text-ink">{extractionResult.raw_summary}</p>
+                          <div className="flex gap-3">
+                            <button
+                              onClick={() => handleConfirmExtraction(extractionResult.items, extractionResult.spending_categories)}
+                              className="rounded-[var(--radius-sm)] bg-warmth px-5 py-2.5 text-sm font-bold text-white transition-all hover:bg-warmth-dark active:scale-[0.97]"
+                            >
+                              Confirm {extractionResult.items.length} items
+                            </button>
+                            <button
+                              onClick={() => { setIsReviewing(false); setExtractionResult(null); setUploadMessage(null) }}
+                              className="text-sm font-semibold text-ink-faint hover:text-ink transition-colors"
+                            >
+                              Discard
+                            </button>
+                          </div>
+                        </div>
+                      </>
+                    )}
+                  </div>
+
+                  {/* Category tabs — show captured data per category */}
+                  <div className="rounded-[var(--radius-lg)] border-[var(--border-card)] border-cream-dark bg-surface shadow-[var(--shadow-sm)] overflow-hidden">
+                    <CategoryTabs
+                      activeTab={activeCategory}
+                      onTabChange={setActiveCategory}
+                      items={items}
+                      visibleCategories={visibleCategories}
+                    />
+                    <div className="px-6 pb-6">
+                      <CategoryContent
+                        categoryKey={activeCategory}
+                        items={items}
+                        onAddItem={(item) => { addItem(item); showToast(`${item.label} added`) }}
+                        onRemoveItem={(id) => { removeItem(id); showToast('Item removed') }}
+                        onEditItem={(id) => setEditingItemId(id)}
+                        onOpenManualEntry={() => setShowManualEntry(true)}
+                        setSpending={setSpending}
+                      />
+                    </div>
                   </div>
                 </div>
               )}
 
-              {/* Upload/work component with category tabs */}
-              <div className="rounded-[var(--radius-lg)] border-[var(--border-card)] border-cream-dark bg-surface shadow-[var(--shadow-sm)] overflow-hidden">
-                {/* Category tabs (component-level) */}
-                <CategoryTabs
-                  activeTab={activeCategory}
-                  onTabChange={setActiveCategory}
+              {/* ── SUMMARY TAB ── */}
+              {pageTab === 'summary' && (
+                <SummaryTab
                   items={items}
-                  visibleCategories={DEFAULT_CATEGORIES}
+                  spending={spending}
+                  onEditItem={(id) => {
+                    const item = items.find(i => i.id === id)
+                    if (item) setEditingItemId(id)
+                  }}
+                  onSwitchToPreparation={() => setPageTab('preparation')}
                 />
-
-                {/* Category content */}
-                <div className="px-6 pb-6">
-                  <CategoryContent
-                    categoryKey={activeCategory}
-                    items={items}
-                    onAddItem={(item) => { addItem(item); showToast(`${item.label} added`) }}
-                    onRemoveItem={(id) => { removeItem(id); showToast('Item removed') }}
-                    onEditItem={(id) => setEditingItemId(id)}
-                    onOpenManualEntry={() => setShowManualEntry(true)}
-                    setSpending={setSpending}
-                  />
-                </div>
-              </div>
-            </div>
-          )}
-
-          {/* ── SUMMARY TAB ── */}
-          {pageTab === 'summary' && (
-            <SummaryTab
-              items={items}
-              spending={spending}
-              onEditItem={(id) => {
-                // Switch to preparation and find the item's category
-                const item = items.find(i => i.id === id)
-                if (item) {
-                  setActiveCategory(item.subcategory || item.category)
-                  setPageTab('preparation')
-                }
-              }}
-              onSwitchToPreparation={() => setPageTab('preparation')}
-            />
+              )}
+            </>
           )}
 
         </div>
       </div>
 
-      {/* Manual entry modal */}
+      {/* Modals */}
       <ManualEntryModal
         isOpen={showManualEntry}
         onClose={() => setShowManualEntry(false)}

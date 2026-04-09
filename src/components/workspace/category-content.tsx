@@ -1,23 +1,20 @@
 'use client'
 
-import { useState, useCallback } from 'react'
-import { DocumentUpload } from '@/components/workspace/document-upload'
-import { ExtractionReview } from '@/components/workspace/extraction-review'
+import { useState } from 'react'
 import { CetvTracker, type CetvRequest } from '@/components/workspace/cetv-tracker'
-import { Button } from '@/components/ui/button'
 import { CATEGORY_PRIORITY } from '@/types/workspace'
-import type { FinancialPictureItem } from '@/types/workspace'
-import type { ExtractionResult, ClassificationResult } from '@/lib/documents/processor'
+import type { FinancialPictureItem, SpendingCategory } from '@/types/workspace'
 import { cn } from '@/utils/cn'
 
 interface CategoryContentProps {
   categoryKey: string
   items: FinancialPictureItem[]
+  spending?: SpendingCategory[]
   onAddItem: (item: FinancialPictureItem) => void
   onRemoveItem: (id: string) => void
   onEditItem: (id: string) => void
   onOpenManualEntry: () => void
-  setSpending: (s: { category: string; monthly_average: number; transaction_count: number; examples: string[] }[]) => void
+  setSpending: (s: SpendingCategory[]) => void
 }
 
 const AI_PROMPTS: Record<string, string> = {
@@ -37,120 +34,19 @@ function formatCurrency(amount: number | null): string {
   return new Intl.NumberFormat('en-GB', { style: 'currency', currency: 'GBP', maximumFractionDigits: amount < 100 ? 2 : 0 }).format(amount)
 }
 
-type ViewState = 'idle' | 'uploading' | 'reviewing'
-
-export function CategoryContent({ categoryKey, items, onAddItem, onRemoveItem, onEditItem, onOpenManualEntry, setSpending }: CategoryContentProps) {
-  const [view, setView] = useState<ViewState>('idle')
-  const [extractionResult, setExtractionResult] = useState<ExtractionResult | null>(null)
+export function CategoryContent({ categoryKey, items, spending, onAddItem, onRemoveItem, onEditItem, onOpenManualEntry, setSpending }: CategoryContentProps) {
   const [cetvRequests, setCetvRequests] = useState<CetvRequest[]>([])
 
   const isPensions = categoryKey === 'pensions'
-  const [classification, setClassification] = useState<ClassificationResult | null>(null)
-  const [message, setMessage] = useState<string | null>(null)
-
+  const isOutgoings = categoryKey === 'outgoings'
   const categoryInfo = CATEGORY_PRIORITY.find(c => c.key === categoryKey)
   const catItems = items.filter(i =>
     i.category === categoryKey || i.subcategory === categoryKey ||
     (categoryKey === 'current_account' && (i.category === 'income' || i.subcategory === 'current_account'))
   )
 
-  const handleProcessed = useCallback((result: { classification: unknown; extraction: unknown; message: string }) => {
-    const classResult = result.classification as ClassificationResult | null
-    const extractResult = result.extraction as ExtractionResult | null
-    setClassification(classResult)
-    setMessage(result.message)
-
-    if (extractResult && extractResult.items.length > 0) {
-      setExtractionResult(extractResult)
-      setView('reviewing')
-    } else {
-      setView('idle')
-    }
-  }, [])
-
-  const handleConfirmAll = useCallback((
-    confirmedItems: ExtractionResult['items'],
-    spending: ExtractionResult['spending_categories'],
-  ) => {
-    confirmedItems.forEach(item => {
-      onAddItem({
-        id: crypto.randomUUID(),
-        category: item.category as never,
-        subcategory: item.subcategory || categoryKey,
-        label: item.label,
-        value: item.value,
-        currency: 'GBP',
-        period: item.period,
-        ownership: item.ownership_hint === 'joint' ? 'joint' : item.ownership_hint === 'yours' ? 'yours' : 'unknown',
-        split: item.ownership_hint === 'joint' ? 50 : 100,
-        confidence: item.confidence >= 0.9 ? 'known' : 'estimated',
-        status: 'confirmed',
-        source_document_id: null,
-        notes: item.source_description,
-        is_inherited: false,
-        is_pre_marital: false,
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString(),
-      })
-    })
-    if (spending) {
-      setSpending(spending.map(s => ({ category: s.category, monthly_average: s.monthly_average, transaction_count: s.transaction_count, examples: s.examples })))
-    }
-    setView('idle')
-    setExtractionResult(null)
-    setMessage(null)
-  }, [onAddItem, setSpending, categoryKey])
-
   return (
     <div className="space-y-6 py-6">
-      {/* Upload zone — always visible in idle state */}
-      {view === 'idle' && (
-        <>
-          <DocumentUpload
-            onProcessed={handleProcessed}
-            prompt={`Drop your ${categoryInfo?.label.toLowerCase() || 'financial'} document here`}
-            hint={categoryInfo ? `Best document: ${categoryInfo.idealDocs}` : undefined}
-          />
-
-          <div className="flex items-center gap-4">
-            <button onClick={onOpenManualEntry} className="text-sm font-semibold text-warmth-dark hover:text-warmth transition-colors">
-              Enter details manually
-            </button>
-          </div>
-
-          {/* Error/info message from last upload */}
-          {message && (
-            <div className="rounded-[var(--radius-md)] border-[var(--border-card)] border-amber-light bg-amber-light/30 p-4">
-              <p className="text-sm text-ink">{message}</p>
-            </div>
-          )}
-        </>
-      )}
-
-      {/* Review — inline when extraction completes */}
-      {view === 'reviewing' && extractionResult && (
-        <div className="rounded-[var(--radius-lg)] border-[var(--border-card)] border-cream-dark bg-surface p-6 shadow-[var(--shadow-md)]">
-          {classification && (
-            <div className="mb-4 flex items-center gap-2">
-              <span className="rounded-full bg-cream-dark px-3 py-1 text-xs font-semibold text-ink-light">
-                {classification.document_type.replace(/_/g, ' ')}
-              </span>
-              {classification.provider_name && (
-                <span className="text-xs text-ink-faint">{classification.provider_name}</span>
-              )}
-            </div>
-          )}
-          <ExtractionReview
-            items={extractionResult.items}
-            spending={extractionResult.spending_categories}
-            accounts={extractionResult.accounts}
-            summary={extractionResult.raw_summary}
-            onConfirmAll={(items, spending) => handleConfirmAll(items, spending)}
-            onDismiss={() => { setView('idle'); setExtractionResult(null); setMessage(null) }}
-          />
-        </div>
-      )}
-
       {/* Items captured */}
       {catItems.length > 0 && (
         <div className="space-y-3">
@@ -161,7 +57,7 @@ export function CategoryContent({ categoryKey, items, onAddItem, onRemoveItem, o
             <div
               key={item.id}
               className={cn(
-                'rounded-[var(--radius-md)] border-[var(--border-card)] p-4 transition-all',
+                'rounded-[var(--radius-md)] border-[var(--border-card)] p-4 transition-all hover:shadow-[var(--shadow-sm)]',
                 'border-l-[var(--border-accent)]',
                 item.confidence === 'known' ? 'border-cream-dark border-l-sage bg-surface' :
                 item.confidence === 'estimated' ? 'border-cream-dark border-l-amber bg-surface' :
@@ -183,6 +79,8 @@ export function CategoryContent({ categoryKey, items, onAddItem, onRemoveItem, o
                     <span className="rounded-full bg-cream-dark px-2.5 py-0.5 text-[11px] font-semibold text-ink-faint capitalize">
                       {item.ownership === 'joint' ? `Joint · ${item.split}%` : item.ownership}
                     </span>
+                    {item.is_inherited && <span className="rounded-full bg-teal-light px-2 py-0.5 text-[10px] font-bold text-teal-dark">Inherited</span>}
+                    {item.is_pre_marital && <span className="rounded-full bg-teal-light px-2 py-0.5 text-[10px] font-bold text-teal-dark">Pre-marital</span>}
                   </div>
                   {item.notes && <p className="mt-1.5 text-xs text-ink-faint">{item.notes}</p>}
                 </div>
@@ -203,11 +101,33 @@ export function CategoryContent({ categoryKey, items, onAddItem, onRemoveItem, o
         </div>
       )}
 
+      {/* Spending breakdown (outgoings tab) */}
+      {isOutgoings && spending && spending.length > 0 && (
+        <div className="space-y-3">
+          <p className="text-[11px] font-bold uppercase tracking-[0.15em] text-ink-faint">Monthly spending</p>
+          <div className="rounded-[var(--radius-md)] border-[var(--border-card)] border-cream-dark overflow-hidden">
+            {spending.map((cat, i) => (
+              <div key={cat.category} className={cn('flex items-center justify-between px-4 py-3', i > 0 && 'border-t border-cream-dark')}>
+                <span className="text-sm text-ink capitalize">{cat.category.replace(/_/g, ' ')}</span>
+                <span className="text-sm font-bold text-ink tabular-nums">{formatCurrency(cat.monthly_average)}/mo</span>
+              </div>
+            ))}
+            <div className="flex items-center justify-between px-4 py-3 border-t-[var(--border-card)] border-ink-faint bg-cream-dark/20">
+              <span className="text-sm font-bold text-ink">Total</span>
+              <span className="text-base font-extrabold text-ink tabular-nums">{formatCurrency(spending.reduce((s, c) => s + c.monthly_average, 0))}/mo</span>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Empty state */}
-      {catItems.length === 0 && view === 'idle' && (
+      {catItems.length === 0 && !(isOutgoings && spending && spending.length > 0) && (
         <div className="rounded-[var(--radius-lg)] border-[var(--border-card)] border-cream-dark bg-cream-dark/20 p-8 text-center">
           <p className="text-base font-semibold text-ink-light">No {categoryInfo?.label.toLowerCase()} items yet</p>
-          <p className="mt-1 text-sm text-ink-faint">Upload a document above or enter details manually.</p>
+          <p className="mt-1 text-sm text-ink-faint">Drop a document above or enter details manually.</p>
+          <button onClick={onOpenManualEntry} className="mt-3 text-sm font-semibold text-warmth-dark hover:text-warmth transition-colors">
+            Add manually
+          </button>
         </div>
       )}
 
