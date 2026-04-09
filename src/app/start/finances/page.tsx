@@ -99,7 +99,7 @@ export default function FinancesPage() {
     <InterviewLayout currentStep="finances" steps={interviewSteps}>
       <div className="space-y-8">
         <div>
-          <h1 className="font-heading text-2xl font-medium text-ink">Your finances</h1>
+          <h1 className="font-heading text-2xl font-bold text-ink">Your finances</h1>
           <p className="mt-2 text-sm text-ink-light leading-relaxed">
             This isn&apos;t about exact numbers yet. It&apos;s about understanding what matters to you.
           </p>

@@ -3,7 +3,7 @@ import { cn } from '@/utils/cn'
 
 export function ReadinessBar({ readiness }: { readiness: ReadinessState }) {
   return (
-    <div className="rounded-[var(--radius-md)] border border-cream-dark p-5 space-y-3">
+    <div className="rounded-[var(--radius-md)] border-[var(--border-card)] border-cream-dark p-5 space-y-3">
       <div className="flex items-center justify-between">
         <h3 className="text-xs font-medium uppercase tracking-wide text-ink-faint">Readiness</h3>
         <span className={cn(

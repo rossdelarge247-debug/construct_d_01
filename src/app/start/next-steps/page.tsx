@@ -86,7 +86,7 @@ export default function NextStepsPage() {
     <InterviewLayout currentStep="next" steps={interviewSteps}>
       <div className="space-y-10">
         <div>
-          <h1 className="font-heading text-2xl font-medium text-ink">
+          <h1 className="font-heading text-2xl font-bold text-ink">
             Your road ahead
           </h1>
           <p className="mt-2 text-sm text-ink-light leading-relaxed">
@@ -97,7 +97,7 @@ export default function NextStepsPage() {
         {/* Immediate actions — high priority, time-sensitive */}
         {immediateActions.length > 0 && (
           <div className="space-y-4">
-            <h2 className="font-heading text-lg font-medium text-ink">Start with these</h2>
+            <h2 className="font-heading text-lg font-semibold text-ink">Start with these</h2>
             {immediateActions.map(action => (
               <div key={action.id} className="rounded-[var(--radius-md)] border border-warmth-light bg-warmth-light/20 p-5">
                 <h3 className="text-sm font-medium text-ink">{action.title}</h3>
@@ -109,7 +109,7 @@ export default function NextStepsPage() {
 
         {/* The journey — personalised phases with service value */}
         <div className="space-y-4">
-          <h2 className="font-heading text-lg font-medium text-ink">How the service helps at every step</h2>
+          <h2 className="font-heading text-lg font-semibold text-ink">How the service helps at every step</h2>
           <p className="text-sm text-ink-light leading-relaxed">
             Each stage builds on the last. You&apos;re never starting from scratch.
           </p>
@@ -162,10 +162,10 @@ export default function NextStepsPage() {
 
         {/* Tier selection */}
         <div className="space-y-4">
-          <h2 className="font-heading text-lg font-medium text-ink">Choose how to continue</h2>
+          <h2 className="font-heading text-lg font-semibold text-ink">Choose how to continue</h2>
           <div className="grid gap-4 sm:grid-cols-2">
             <div className="rounded-[var(--radius-md)] border-2 border-cream-dark p-6">
-              <h3 className="font-heading text-base font-medium text-ink">Standard</h3>
+              <h3 className="font-heading text-base font-semibold text-ink">Standard</h3>
               <p className="mt-2 text-sm text-ink-light leading-relaxed">
                 Build your picture, prepare disclosure, share and negotiate, reach agreement.
               </p>
@@ -173,7 +173,7 @@ export default function NextStepsPage() {
               <Button variant="secondary" className="mt-4 w-full">Coming soon</Button>
             </div>
             <div className="rounded-[var(--radius-md)] border-2 border-depth-light p-6">
-              <h3 className="font-heading text-base font-medium text-ink">Enhanced</h3>
+              <h3 className="font-heading text-base font-semibold text-ink">Enhanced</h3>
               <p className="mt-2 text-sm text-ink-light leading-relaxed">
                 Everything in Standard, plus court document preparation and additional support.
               </p>

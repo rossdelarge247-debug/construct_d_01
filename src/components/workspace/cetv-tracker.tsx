@@ -57,7 +57,7 @@ export function CetvTracker({ requests, onAdd, onUpdate }: CetvTrackerProps) {
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
-        <h3 className="font-heading text-lg font-medium text-ink">Pension valuations</h3>
+        <h3 className="font-heading text-lg font-semibold text-ink">Pension valuations</h3>
         <button
           onClick={() => setShowAddForm(!showAddForm)}
           className="text-xs text-warmth-dark hover:text-warmth transition-colors"
@@ -79,7 +79,7 @@ export function CetvTracker({ requests, onAdd, onUpdate }: CetvTrackerProps) {
             const shouldChase = req.status === 'requested' && days > 42 // 6 weeks
 
             return (
-              <div key={req.id} className="rounded-[var(--radius-md)] border border-cream-dark p-4 space-y-3">
+              <div key={req.id} className="rounded-[var(--radius-md)] border-[var(--border-card)] border-cream-dark p-4 space-y-3">
                 <div className="flex items-start justify-between">
                   <div>
                     <p className="text-sm font-medium text-ink">{req.provider}</p>
@@ -189,7 +189,7 @@ export function CetvTracker({ requests, onAdd, onUpdate }: CetvTrackerProps) {
             value={newProvider}
             onChange={(e) => setNewProvider(e.target.value)}
             placeholder="Pension provider name (e.g. Aviva, NHS Pensions)"
-            className="w-full rounded-[var(--radius-sm)] border border-cream-dark bg-cream px-3 py-2.5 text-sm text-ink placeholder:text-ink-faint/50 focus:border-warmth focus:outline-none"
+            className="w-full rounded-[var(--radius-sm)] border-[var(--border-card)] border-cream-dark bg-cream px-3 py-2.5 text-sm text-ink placeholder:text-ink-faint/50 focus:border-warmth focus:outline-none"
           />
           <div className="flex gap-2">
             <button
@@ -213,7 +213,7 @@ export function CetvTracker({ requests, onAdd, onUpdate }: CetvTrackerProps) {
       )}
 
       {requests.length === 0 && !showAddForm && (
-        <div className="rounded-[var(--radius-md)] border border-cream-dark p-5 text-center space-y-2">
+        <div className="rounded-[var(--radius-md)] border-[var(--border-card)] border-cream-dark p-5 text-center space-y-2">
           <p className="text-sm text-ink-light">No pensions tracked yet.</p>
           <p className="text-xs text-ink-faint">Pensions are often the largest asset in a settlement. Add yours to start tracking.</p>
         </div>

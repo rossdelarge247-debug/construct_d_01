@@ -68,7 +68,7 @@ function PlanPanel({ title, label, labelClass, loading, aiSection, fallbackSumma
     <div className="rounded-[var(--radius-md)] border border-cream-dark p-5 space-y-3">
       {/* Header */}
       <div className="flex items-center justify-between">
-        <h3 className="font-heading text-base font-medium text-ink">{title}</h3>
+        <h3 className="font-heading text-base font-semibold text-ink">{title}</h3>
         {label && <span className={cn('rounded-full px-2.5 py-0.5 text-xs font-medium', labelClass)}>{label}</span>}
       </div>
 
@@ -232,7 +232,7 @@ export default function PlanPage() {
     <InterviewLayout currentStep="plan" steps={interviewSteps}>
       <div className="space-y-6">
         <div>
-          <h1 className="font-heading text-2xl font-medium text-ink">Your plan</h1>
+          <h1 className="font-heading text-2xl font-bold text-ink">Your plan</h1>
         </div>
 
         {loading && (
@@ -302,7 +302,7 @@ export default function PlanPage() {
 
         {tier !== 'not_ready' && (
           <div className="rounded-[var(--radius-md)] border border-cream-dark p-5 space-y-3">
-            <h3 className="font-heading text-base font-medium text-ink">Confidence map</h3>
+            <h3 className="font-heading text-base font-semibold text-ink">Confidence map</h3>
             <ConfidenceBar session={session} />
             {!loading && (
               <p className="text-sm text-ink-light">

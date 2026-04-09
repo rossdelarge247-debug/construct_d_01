@@ -56,7 +56,7 @@ export default function HomePage() {
     <InterviewLayout currentStep="home" steps={interviewSteps}>
       <div className="space-y-8">
         <div>
-          <h1 className="font-heading text-2xl font-medium text-ink">Your home</h1>
+          <h1 className="font-heading text-2xl font-bold text-ink">Your home</h1>
           <p className="mt-2 text-sm text-ink-light leading-relaxed">
             Let&apos;s think about what you&apos;d like to happen with the property.
           </p>

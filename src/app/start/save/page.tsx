@@ -7,7 +7,7 @@ export default function SaveWorkspacePage() {
   return (
     <InterviewLayout showProgress={false}>
       <div className="flex flex-col items-center py-12 text-center">
-        <h1 className="font-heading text-2xl font-medium text-ink">
+        <h1 className="font-heading text-2xl font-bold text-ink">
           Save your workspace
         </h1>
         <p className="mt-4 max-w-sm text-sm text-ink-light leading-relaxed">

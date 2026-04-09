@@ -15,7 +15,7 @@ export function Card({ className, padding = 'md', ...props }: CardProps) {
   return (
     <div
       className={cn(
-        'rounded-[var(--radius-md)] border border-cream-dark bg-cream shadow-[var(--shadow-sm)]',
+        'rounded-[var(--radius-md)] border-[var(--border-card)] border-cream-dark bg-surface shadow-[var(--shadow-sm)]',
         paddingStyles[padding],
         className,
       )}
@@ -29,7 +29,7 @@ export function CardHeader({ className, ...props }: HTMLAttributes<HTMLDivElemen
 }
 
 export function CardTitle({ className, ...props }: HTMLAttributes<HTMLHeadingElement>) {
-  return <h3 className={cn('font-heading text-xl font-medium text-ink', className)} {...props} />
+  return <h3 className={cn('font-heading text-xl font-semibold text-ink', className)} {...props} />
 }
 
 export function CardDescription({ className, ...props }: HTMLAttributes<HTMLParagraphElement>) {

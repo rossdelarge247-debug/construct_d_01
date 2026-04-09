@@ -131,9 +131,9 @@ export function DocumentChecklist({ items, documents, hasChildren, hasProperty, 
           />
 
           {/* Panel */}
-          <div className="fixed right-0 top-0 z-50 h-full w-full max-w-md overflow-y-auto bg-cream border-l border-cream-dark shadow-[var(--shadow-lg)] p-6">
+          <div className="fixed right-0 top-0 z-50 h-full w-full max-w-md overflow-y-auto bg-surface border-l-[var(--border-card)] border-cream-dark shadow-[var(--shadow-lg)] p-6">
             <div className="flex items-center justify-between mb-6">
-              <h2 className="font-heading text-lg font-medium text-ink">What do I still need?</h2>
+              <h2 className="font-heading text-lg font-semibold text-ink">What do I still need?</h2>
               <button
                 onClick={() => setIsOpen(false)}
                 className="text-ink-faint hover:text-ink transition-colors text-lg"

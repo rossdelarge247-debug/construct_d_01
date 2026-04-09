@@ -109,7 +109,7 @@ export default function ReadinessPage() {
     <InterviewLayout currentStep="readiness" steps={interviewSteps}>
       <div className="space-y-8">
         <div>
-          <h1 className="font-heading text-2xl font-medium text-ink">How ready are you?</h1>
+          <h1 className="font-heading text-2xl font-bold text-ink">How ready are you?</h1>
           <p className="mt-2 text-sm text-ink-light leading-relaxed">
             Tag each area. If you know a number — even roughly — add it for a more specific plan.
           </p>

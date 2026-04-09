@@ -58,7 +58,7 @@ export default function ChildrenPage() {
     <InterviewLayout currentStep="children" steps={interviewSteps}>
       <div className="space-y-8">
         <div>
-          <h1 className="font-heading text-2xl font-medium text-ink">Your children</h1>
+          <h1 className="font-heading text-2xl font-bold text-ink">Your children</h1>
           <p className="mt-2 text-sm text-ink-light leading-relaxed">
             Let&apos;s think about what arrangements might work best for your children.
           </p>

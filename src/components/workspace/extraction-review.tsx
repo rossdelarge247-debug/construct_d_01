@@ -32,7 +32,7 @@ function SpendingReview({ spending, visible }: { spending: ExtractedSpendingCate
       <h3 className="text-xs font-medium uppercase tracking-wide text-ink-faint">Your monthly spending</h3>
       <p className="text-xs text-ink-light">Tap any category to see what&apos;s included and correct anything that&apos;s wrong.</p>
 
-      <div className="rounded-[var(--radius-md)] border border-cream-dark overflow-hidden">
+      <div className="rounded-[var(--radius-md)] border-[var(--border-card)] border-cream-dark overflow-hidden">
         {spending.map((cat, i) => {
           const isExpanded = expandedCategory === cat.category
 
@@ -155,7 +155,7 @@ export function ExtractionReview({ items, spending, accounts, summary, onConfirm
         )}>
           <h3 className="text-xs font-medium uppercase tracking-wide text-ink-faint">Accounts we found</h3>
           {accounts.map((account, i) => (
-            <div key={i} className="rounded-[var(--radius-md)] border border-cream-dark p-4 flex items-center justify-between hover:shadow-[var(--shadow-sm)] transition-shadow duration-200">
+            <div key={i} className="rounded-[var(--radius-md)] border-[var(--border-card)] border-cream-dark p-4 flex items-center justify-between hover:shadow-[var(--shadow-sm)] transition-shadow duration-200">
               <div>
                 <p className="text-sm font-medium text-ink">{account.provider} {account.account_reference}</p>
                 <p className="text-xs text-ink-light">

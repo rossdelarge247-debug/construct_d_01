@@ -85,7 +85,7 @@ export default function SituationPage() {
       <div className="space-y-8">
         {/* Step heading */}
         <div>
-          <h1 className="font-heading text-2xl font-medium text-ink">
+          <h1 className="font-heading text-2xl font-bold text-ink">
             Your situation
           </h1>
           <p className="mt-2 text-sm text-ink-light leading-relaxed">

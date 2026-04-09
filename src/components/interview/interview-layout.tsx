@@ -61,7 +61,7 @@ export function InterviewLayout({ children, currentStep, steps, showProgress = t
       {/* Minimal header */}
       <header className="px-6 pt-6">
         <div className="mx-auto flex max-w-xl items-center justify-between">
-          <Link href="/" className="font-heading text-lg font-medium text-ink-faint transition-colors hover:text-ink">
+          <Link href="/" className="font-heading text-lg font-semibold text-ink-faint transition-colors hover:text-ink">
             {APP_NAME}
           </Link>
         </div>

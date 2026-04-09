@@ -7,7 +7,7 @@ export default function TermsPage() {
       <Header />
       <main className="flex-1">
         <div className="mx-auto max-w-2xl px-6 py-28">
-          <h1 className="font-heading text-3xl font-medium text-ink">Terms of service</h1>
+          <h1 className="font-heading text-3xl font-bold text-ink">Terms of service</h1>
           <div className="mt-8 rounded-[var(--radius-md)] border border-amber-light bg-amber-light/50 p-5">
             <p className="text-sm text-ink-light">
               This is a draft. Terms will be reviewed by a legal professional before public launch.

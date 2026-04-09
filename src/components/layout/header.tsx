@@ -5,7 +5,7 @@ export function Header() {
   return (
     <header className="border-b border-cream-dark bg-cream">
       <div className="mx-auto flex h-16 max-w-4xl items-center justify-between px-6">
-        <Link href="/" className="font-heading text-xl font-medium text-ink">
+        <Link href="/" className="font-heading text-xl font-semibold text-ink">
           {APP_NAME}
         </Link>
         <nav className="flex items-center gap-8">

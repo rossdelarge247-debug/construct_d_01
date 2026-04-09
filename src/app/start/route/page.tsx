@@ -242,7 +242,7 @@ export default function PathwayPage() {
             <div className="h-3 w-3 rotate-45 bg-warmth" />
             <span className="text-xs font-medium uppercase tracking-wide text-warmth-dark">Your pathway</span>
           </div>
-          <h1 className="mt-3 font-heading text-2xl font-medium text-ink">
+          <h1 className="mt-3 font-heading text-2xl font-bold text-ink">
             Your separation journey, step by step.
           </h1>
           <p className="mt-2 text-sm text-ink-light leading-relaxed">
