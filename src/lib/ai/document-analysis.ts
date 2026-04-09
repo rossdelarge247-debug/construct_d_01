@@ -137,7 +137,7 @@ export async function analyseDocumentDirect(
       console.log(`[AI Direct Analysis] Trying model: ${model}`)
       const response = await client.messages.create({
         model,
-        max_tokens: 3000,
+        max_tokens: 8192,
         system: ANALYSIS_SYSTEM_PROMPT,
         messages: [{
           role: 'user',
@@ -188,7 +188,7 @@ ${documentText.substring(0, 10000)}
 ${ANALYSIS_INSTRUCTIONS}`,
     {
       taskType: 'field_extraction',
-      maxTokens: 3000,
+      maxTokens: 8192,
       temperature: 0.3,
       systemPrompt: ANALYSIS_SYSTEM_PROMPT,
     },
@@ -198,53 +198,107 @@ ${ANALYSIS_INSTRUCTIONS}`,
 }
 
 function parseAnalysisResponse(raw: string, isDryRun: boolean): AnalysisResult {
-  try {
-    let content = raw.trim()
+  if (isDryRun) {
+    console.log('[AI Analysis] Running in DRY RUN mode — returning mock data')
+  }
 
-    if (isDryRun) {
-      console.log('[AI Analysis] Running in DRY RUN mode — returning mock data')
-    }
+  let content = raw.trim()
 
-    // Strip markdown code fences if present
-    if (content.startsWith('```')) {
-      content = content.replace(/^```(?:json)?\n?/, '').replace(/\n?```$/, '').trim()
-    }
+  // Strip markdown code fences if present
+  if (content.startsWith('```')) {
+    content = content.replace(/^```(?:json)?\n?/, '').replace(/\n?```$/, '').trim()
+  }
 
-    // Try to extract JSON if there's surrounding text
-    if (!content.startsWith('{')) {
-      const jsonMatch = content.match(/\{[\s\S]*\}/)
-      if (jsonMatch) {
-        content = jsonMatch[0]
-      }
-    }
-
-    const result = JSON.parse(content) as AnalysisResult
-
-    // Ensure all items have IDs
-    result.items = (result.items || []).map((item, i) => ({
-      ...item,
-      id: item.id || `item_${i}_${Date.now()}`,
-    }))
-    result.gaps = (result.gaps || []).map((gap, i) => ({
-      ...gap,
-      id: gap.id || `gap_${i}_${Date.now()}`,
-    }))
-
-    console.log(`[AI Analysis] Parsed OK: ${result.items.length} items, ${result.gaps.length} gaps, dry_run: ${isDryRun}`)
-    return result
-  } catch (error) {
-    const errorMsg = error instanceof Error ? error.message : 'Unknown parse error'
-    console.error(`[AI Analysis] Parse failed: ${errorMsg}`)
-    console.error(`[AI Analysis] Raw content (first 500 chars): ${raw.substring(0, 500)}`)
-    console.error(`[AI Analysis] Was dry run: ${isDryRun}`)
-    // Surface the parse failure reason in the summary so it reaches the user
-    const snippet = raw.substring(0, 120).replace(/\n/g, ' ')
-    return {
-      document_summary: `Parse error: ${errorMsg}. AI returned: "${snippet}..."`,
-      document_type: 'other',
-      provider: null,
-      items: [],
-      gaps: [],
+  // Try to extract JSON if there's surrounding text
+  if (!content.startsWith('{')) {
+    const jsonMatch = content.match(/\{[\s\S]*\}/)
+    if (jsonMatch) {
+      content = jsonMatch[0]
     }
   }
+
+  // Attempt 1: parse as-is
+  try {
+    return finaliseResult(JSON.parse(content), isDryRun)
+  } catch {
+    console.warn(`[AI Analysis] Direct parse failed, attempting truncated JSON repair...`)
+  }
+
+  // Attempt 2: repair truncated JSON
+  // The AI hit max_tokens and the JSON was cut off mid-way.
+  // Strategy: find the last complete item in the items array, close all brackets.
+  try {
+    const repaired = repairTruncatedJson(content)
+    if (repaired) {
+      console.log(`[AI Analysis] Repaired truncated JSON (${content.length} → ${repaired.length} chars)`)
+      return finaliseResult(JSON.parse(repaired), isDryRun)
+    }
+  } catch (repairError) {
+    console.warn(`[AI Analysis] Repair also failed: ${repairError instanceof Error ? repairError.message : 'Unknown'}`)
+  }
+
+  // Attempt 3: extract just the items array if the top-level object is broken
+  try {
+    const itemsMatch = content.match(/"items"\s*:\s*\[([\s\S]*?)(?:\]\s*,|\]\s*\})/);
+    if (itemsMatch) {
+      const partialJson = `{"document_summary":"Partial extraction","document_type":"bank_statement","provider":null,"items":[${itemsMatch[1]}],"gaps":[]}`
+      return finaliseResult(JSON.parse(partialJson), isDryRun)
+    }
+  } catch {
+    console.warn('[AI Analysis] Partial items extraction also failed')
+  }
+
+  // All attempts failed
+  const errorSnippet = raw.substring(0, 150).replace(/\n/g, ' ')
+  console.error(`[AI Analysis] All parse attempts failed. Raw (first 500): ${raw.substring(0, 500)}`)
+  return {
+    document_summary: `Parse error — AI response was truncated. Preview: "${errorSnippet}..."`,
+    document_type: 'other',
+    provider: null,
+    items: [],
+    gaps: [],
+  }
+}
+
+function finaliseResult(parsed: AnalysisResult, isDryRun: boolean): AnalysisResult {
+  parsed.items = (parsed.items || []).map((item, i) => ({
+    ...item,
+    id: item.id || `item_${i}_${Date.now()}`,
+  }))
+  parsed.gaps = (parsed.gaps || []).map((gap, i) => ({
+    ...gap,
+    id: gap.id || `gap_${i}_${Date.now()}`,
+  }))
+  console.log(`[AI Analysis] Parsed OK: ${parsed.items.length} items, ${parsed.gaps.length} gaps, dry_run: ${isDryRun}`)
+  return parsed
+}
+
+/**
+ * Attempts to repair JSON truncated by max_tokens.
+ * Finds the last complete object in the items array and closes all brackets.
+ */
+function repairTruncatedJson(content: string): string | null {
+  // Find the last complete object boundary (closing brace followed by comma or array end)
+  // Work backwards from the end to find the last "}," or "}" that ends a complete item
+  const lastCompleteItem = content.lastIndexOf('},')
+  if (lastCompleteItem === -1) return null
+
+  // Take everything up to and including that closing brace
+  let repaired = content.substring(0, lastCompleteItem + 1)
+
+  // Count open brackets to close them
+  let openBraces = 0
+  let openBrackets = 0
+  for (const ch of repaired) {
+    if (ch === '{') openBraces++
+    if (ch === '}') openBraces--
+    if (ch === '[') openBrackets++
+    if (ch === ']') openBrackets--
+  }
+
+  // Close any open arrays and objects
+  while (openBrackets > 0) { repaired += ']'; openBrackets-- }
+  while (openBraces > 0) { repaired += '}'; openBraces-- }
+
+  return repaired
 }
