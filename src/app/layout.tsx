@@ -1,7 +1,5 @@
 import type { Metadata } from 'next'
 import './globals.css'
-import { EnvBanner } from '@/components/layout/env-banner'
-import { ExitPageButton } from '@/components/ui/exit-page'
 import { APP_NAME, APP_DESCRIPTION } from '@/constants'
 
 export const metadata: Metadata = {
@@ -19,11 +17,9 @@ export default function RootLayout({
       <head>
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
-        <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Lora:wght@400;500;600;700&display=swap" rel="stylesheet" />
+        <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
       </head>
-      <body className="flex min-h-full flex-col bg-cream text-ink">
-        <EnvBanner />
-        <ExitPageButton />
+      <body className="min-h-full bg-cream text-ink">
         {children}
       </body>
     </html>
