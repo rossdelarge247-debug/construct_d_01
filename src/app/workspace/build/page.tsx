@@ -63,38 +63,47 @@ export default function BuildYourPicturePage() {
 
   return (
     <WorkspaceLayout activePhase="build_your_picture">
-      {/* Phase header — warmth block with progress bar */}
-      <div className="relative bg-warmth px-6 py-7 md:px-10">
-        <Link href="/workspace" className="text-sm font-semibold text-white/70 hover:text-white transition-colors">
-          ← Back to workspace
-        </Link>
-        <h1 className="mt-3 text-3xl font-bold tracking-tight text-white">
-          Build your picture
-        </h1>
-        <p className="mt-1 text-sm text-white/75">
-          Bring everything together — finances, property, pensions. Upload documents and we do the heavy lifting.
-        </p>
-
-        {/* Progress bar along bottom edge */}
-        <div className="absolute bottom-0 left-0 right-0 h-1.5 bg-warmth-dark/30">
-          <div
-            className={cn('h-full transition-all duration-700 ease-out rounded-r-full', milestone.colour)}
-            style={{ width: `${animatedProgress}%` }}
-          />
+      {/* Top navigation bar — full width, thin, navigation only */}
+      <div className="border-b-[var(--border-card)] border-cream-dark bg-cream-dark/40 px-6 py-3 md:px-10">
+        <div className="mx-auto flex max-w-4xl items-center justify-between">
+          <Link href="/workspace" className="text-sm font-semibold text-ink-light hover:text-ink transition-colors">
+            ← Back to workspace
+          </Link>
+          {/* Future: profile, notifications, etc. */}
         </div>
-
-        {/* Milestone label */}
-        {progress > 0 && (
-          <div className="mt-3 flex items-center gap-2">
-            <span className="text-xs font-bold text-white/60">{animatedProgress}%</span>
-            <span className="text-xs text-white/50">·</span>
-            <span className="text-xs font-semibold text-white/70">{milestone.label}</span>
-          </div>
-        )}
       </div>
 
       <div className="px-6 md:px-10">
         <div className="mx-auto max-w-4xl">
+
+          {/* Title panel — terracotta card, same width as content */}
+          <div className="relative mt-6 rounded-[var(--radius-lg)] bg-warmth p-7 shadow-[var(--shadow-md)]">
+            <h1 className="text-2xl font-bold tracking-tight text-white md:text-3xl">
+              Build your picture
+            </h1>
+            <p className="mt-1.5 text-sm text-white/80 leading-relaxed">
+              Bring everything together — finances, property, pensions. Upload documents and we do the heavy lifting.
+            </p>
+
+            {/* Progress bar along bottom edge */}
+            <div className="absolute bottom-0 left-0 right-0 h-1.5 overflow-hidden rounded-b-[var(--radius-lg)]">
+              <div className="h-full w-full bg-warmth-dark/30">
+                <div
+                  className={cn('h-full transition-all duration-700 ease-out rounded-r-full', milestone.colour)}
+                  style={{ width: `${animatedProgress}%` }}
+                />
+              </div>
+            </div>
+
+            {/* Milestone label */}
+            {progress > 0 && (
+              <div className="mt-3 flex items-center gap-2">
+                <span className="text-xs font-bold text-white/60">{animatedProgress}%</span>
+                <span className="text-xs text-white/40">·</span>
+                <span className="text-xs font-semibold text-white/70">{milestone.label}</span>
+              </div>
+            )}
+          </div>
 
           {/* How this works — dismissable */}
           {showHowItWorks && items.length === 0 && (
