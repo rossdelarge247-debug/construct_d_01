@@ -4,39 +4,9 @@ import { useState } from 'react'
 import { useStaggeredReveal } from '@/hooks/use-staggered-reveal'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/utils/cn'
+import type { AnalysisResult, AnalysisItem, GapPrompt } from '@/lib/ai/document-analysis'
 
-// ── Types ──
-
-interface AnalysisItem {
-  id: string
-  label: string
-  value: number
-  period: 'monthly' | 'annual' | 'total'
-  confidence: number
-  tier: 'auto' | 'confirm' | 'question'
-  category: string
-  subcategory: string
-  ownership_hint: 'yours' | 'joint' | 'unknown'
-  source_description: string
-  confirm_question?: string
-  confirm_options?: string[]
-  question?: string
-  options?: string[]
-}
-
-interface GapPrompt {
-  id: string
-  domain: string
-  prompt: string
-  options: string[]
-}
-
-export interface AnalysisResult {
-  summary: string
-  items: AnalysisItem[]
-  gaps: GapPrompt[]
-  spending?: { category: string; monthly_average: number; transaction_count: number }[]
-}
+export type { AnalysisResult, AnalysisItem, GapPrompt }
 
 interface AiAnalysisProps {
   result: AnalysisResult
