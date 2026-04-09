@@ -171,6 +171,14 @@ export default function PicturePage() {
         {/* Review view */}
         {view === 'reviewing' && extractionResult && (
           <div className="space-y-4">
+            {/* Debug output — temporary */}
+            {debugInfo && (
+              <details className="rounded-[var(--radius-sm)] border border-cream-dark p-3">
+                <summary className="text-xs text-ink-faint cursor-pointer">Debug info</summary>
+                <pre className="mt-2 text-[10px] text-ink-faint overflow-x-auto whitespace-pre-wrap">{debugInfo}</pre>
+              </details>
+            )}
+
             {classification && (
               <div className="flex items-center gap-2">
                 <span className="rounded-full bg-cream-dark px-2.5 py-0.5 text-xs text-ink-light">

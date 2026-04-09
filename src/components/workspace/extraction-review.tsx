@@ -15,8 +15,10 @@ interface ExtractionReviewProps {
   onDismiss: () => void
 }
 
-function formatCurrency(amount: number): string {
-  return new Intl.NumberFormat('en-GB', { style: 'currency', currency: 'GBP', maximumFractionDigits: 0 }).format(amount)
+function formatCurrency(amount: number | string | null | undefined): string {
+  const num = typeof amount === 'string' ? parseFloat(amount) : amount
+  if (num === null || num === undefined || isNaN(num)) return '—'
+  return new Intl.NumberFormat('en-GB', { style: 'currency', currency: 'GBP', maximumFractionDigits: num < 100 ? 2 : 0 }).format(num)
 }
 
 export function ExtractionReview({ items, spending, accounts, summary, onConfirmAll, onDismiss }: ExtractionReviewProps) {
@@ -73,7 +75,7 @@ export function ExtractionReview({ items, spending, accounts, summary, onConfirm
               </div>
               <div className="text-right">
                 <p className="text-sm font-medium text-ink">{formatCurrency(account.balance)}</p>
-                <p className="text-[10px] text-ink-faint">as at {account.balance_date}</p>
+                {account.balance_date && <p className="text-[10px] text-ink-faint">as at {account.balance_date}</p>}
               </div>
             </div>
           ))}
