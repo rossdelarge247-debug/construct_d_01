@@ -21,6 +21,95 @@ function formatCurrency(amount: number | string | null | undefined): string {
   return new Intl.NumberFormat('en-GB', { style: 'currency', currency: 'GBP', maximumFractionDigits: num < 100 ? 2 : 0 }).format(num)
 }
 
+function SpendingReview({ spending, visible }: { spending: ExtractedSpendingCategory[]; visible: boolean }) {
+  const [expandedCategory, setExpandedCategory] = useState<string | null>(null)
+
+  return (
+    <div className={cn(
+      'space-y-3 transition-all duration-500',
+      visible ? 'translate-y-0 opacity-100' : 'translate-y-4 opacity-0',
+    )}>
+      <h3 className="text-xs font-medium uppercase tracking-wide text-ink-faint">Your monthly spending</h3>
+      <p className="text-xs text-ink-light">Tap any category to see what&apos;s included and correct anything that&apos;s wrong.</p>
+
+      <div className="rounded-[var(--radius-md)] border border-cream-dark overflow-hidden">
+        {spending.map((cat, i) => {
+          const isExpanded = expandedCategory === cat.category
+
+          return (
+            <div key={i} className={cn(i > 0 && 'border-t border-cream-dark')}>
+              {/* Category row — clickable */}
+              <button
+                type="button"
+                onClick={() => setExpandedCategory(isExpanded ? null : cat.category)}
+                className="flex w-full items-center justify-between px-4 py-3 text-left transition-colors hover:bg-cream-dark/10"
+              >
+                <div className="flex items-center gap-2">
+                  <span className={cn(
+                    'text-ink-faint transition-transform duration-200 text-xs',
+                    isExpanded && 'rotate-90',
+                  )}>
+                    ›
+                  </span>
+                  <div>
+                    <p className="text-sm text-ink capitalize">{cat.category.replace(/_/g, ' ')}</p>
+                    <p className="text-[10px] text-ink-faint">
+                      {cat.transaction_count} transaction{cat.transaction_count !== 1 ? 's' : ''}
+                    </p>
+                  </div>
+                </div>
+                <p className="text-sm font-medium text-ink tabular-nums">
+                  {formatCurrency(cat.monthly_average)}<span className="text-xs text-ink-faint">/mo</span>
+                </p>
+              </button>
+
+              {/* Expanded detail */}
+              {isExpanded && (
+                <div className="border-t border-cream-dark bg-cream-dark/5 px-4 py-3 space-y-2">
+                  <p className="text-xs text-ink-faint">Transactions included:</p>
+                  <div className="space-y-1">
+                    {cat.examples.map((example, j) => (
+                      <div key={j} className="flex items-center justify-between text-xs">
+                        <span className="text-ink-light">{example}</span>
+                      </div>
+                    ))}
+                  </div>
+                  {cat.examples.length < cat.transaction_count && (
+                    <p className="text-[10px] text-ink-faint">
+                      + {cat.transaction_count - cat.examples.length} more transaction{cat.transaction_count - cat.examples.length !== 1 ? 's' : ''}
+                    </p>
+                  )}
+                  <div className="pt-2 flex gap-3">
+                    <button className="text-xs text-warmth-dark hover:text-warmth transition-colors">
+                      Move to different category
+                    </button>
+                    <button className="text-xs text-ink-faint hover:text-ink transition-colors">
+                      Flag as incorrect
+                    </button>
+                  </div>
+                </div>
+              )}
+            </div>
+          )
+        })}
+
+        {/* Total */}
+        <div className="flex items-center justify-between px-4 py-3 border-t border-cream-dark bg-cream-dark/20">
+          <p className="text-sm font-medium text-ink">Total monthly outgoings</p>
+          <p className="text-sm font-medium text-ink tabular-nums">
+            {formatCurrency(spending.reduce((sum, s) => sum + s.monthly_average, 0))}<span className="text-xs text-ink-faint">/mo</span>
+          </p>
+        </div>
+      </div>
+
+      {/* Add missing category */}
+      <button className="w-full rounded-[var(--radius-sm)] border border-dashed border-cream-dark px-4 py-2.5 text-xs text-ink-faint hover:text-ink-light hover:border-ink-faint transition-colors">
+        + Add a spending category that&apos;s missing
+      </button>
+    </div>
+  )
+}
+
 export function ExtractionReview({ items, spending, accounts, summary, onConfirmAll, onDismiss }: ExtractionReviewProps) {
   const [reviewedItems, setReviewedItems] = useState<Record<string, 'accepted' | 'rejected'>>({})
 
@@ -159,34 +248,10 @@ export function ExtractionReview({ items, spending, accounts, summary, onConfirm
 
       {/* Spending */}
       {spending && spending.length > 0 && (
-        <div className={cn(
-          'space-y-3 transition-all duration-500',
-          visibleSections > sectionIndex ? 'translate-y-0 opacity-100' : 'translate-y-4 opacity-0',
-        )}>
-          <h3 className="text-xs font-medium uppercase tracking-wide text-ink-faint">Your monthly spending</h3>
-          <p className="text-xs text-ink-light">Auto-categorised from your transactions. You can adjust these later.</p>
-
-          <div className="rounded-[var(--radius-md)] border border-cream-dark overflow-hidden">
-            {spending.map((cat, i) => (
-              <div key={i} className={cn(
-                'flex items-center justify-between px-4 py-3 transition-colors hover:bg-cream-dark/10',
-                i > 0 && 'border-t border-cream-dark',
-              )}>
-                <div>
-                  <p className="text-sm text-ink capitalize">{cat.category.replace(/_/g, ' ')}</p>
-                  <p className="text-[10px] text-ink-faint">{cat.transaction_count} transactions</p>
-                </div>
-                <p className="text-sm font-medium text-ink tabular-nums">{formatCurrency(cat.monthly_average)}<span className="text-xs text-ink-faint">/mo</span></p>
-              </div>
-            ))}
-            <div className="flex items-center justify-between px-4 py-3 border-t border-cream-dark bg-cream-dark/20">
-              <p className="text-sm font-medium text-ink">Total monthly outgoings</p>
-              <p className="text-sm font-medium text-ink tabular-nums">
-                {formatCurrency(spending.reduce((sum, s) => sum + s.monthly_average, 0))}<span className="text-xs text-ink-faint">/mo</span>
-              </p>
-            </div>
-          </div>
-        </div>
+        <SpendingReview
+          spending={spending}
+          visible={visibleSections > sectionIndex}
+        />
       )}
 
       {/* Actions */}
