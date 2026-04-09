@@ -48,7 +48,7 @@ export default function WorkspacePage() {
         {isEmpty && (
           <div className="space-y-8">
             {/* Primary upload prompt — bold */}
-            <div className="rounded-[var(--radius-lg)] bg-surface p-8 shadow-[var(--shadow-md)] border-l-[var(--border-accent)] border-warmth">
+            <div className="rounded-[var(--radius-lg)] bg-surface p-8 shadow-[var(--shadow-md)] border-l-[var(--border-accent)] border-l-warmth border-[var(--border-card)] border-cream-dark">
               <h2 className="text-xl font-semibold text-ink">
                 Start with your main bank account
               </h2>
@@ -66,7 +66,7 @@ export default function WorkspacePage() {
             </div>
 
             {/* What we know — from V1 */}
-            <div className="rounded-[var(--radius-md)] bg-teal-light/50 p-6 border-l-[var(--border-accent)] border-teal">
+            <div className="rounded-[var(--radius-md)] bg-teal-light/50 p-6 border-l-[var(--border-accent)] border-l-teal border-[var(--border-card)] border-teal-light">
               <h3 className="text-xs font-semibold uppercase tracking-widest text-teal-dark">From your free plan</h3>
               <div className="mt-4 grid gap-4 sm:grid-cols-3">
                 <div>
@@ -90,7 +90,7 @@ export default function WorkspacePage() {
 
             {/* How this works */}
             <div className="rounded-[var(--radius-md)] bg-surface p-6 shadow-[var(--shadow-sm)]">
-              <h3 className="text-xs font-semibold uppercase tracking-widest text-ink-faint">How this works</h3>
+              <h3 className="text-[11px] font-bold uppercase tracking-[0.15em] text-ink-faint">How this works</h3>
               <div className="mt-4 grid gap-6 sm:grid-cols-3">
                 <div className="flex gap-3">
                   <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-warmth text-sm font-bold text-white">1</div>
@@ -117,7 +117,7 @@ export default function WorkspacePage() {
 
             {/* Next step — ONE thing, prominent */}
             {nextCategory && (
-              <div className="rounded-[var(--radius-md)] bg-surface p-6 shadow-[var(--shadow-sm)] border-l-[var(--border-accent)] border-warmth">
+              <div className="rounded-[var(--radius-md)] bg-surface p-6 shadow-[var(--shadow-sm)] border-l-[var(--border-accent)] border-l-warmth border-[var(--border-card)] border-cream-dark">
                 <h3 className="text-xs font-semibold uppercase tracking-widest text-warmth-dark">Your next step</h3>
                 <p className="mt-2 text-lg font-semibold text-ink">{nextCategory.label}</p>
                 <p className="mt-1 text-sm text-ink-light">{nextCategory.description}. Best document: {nextCategory.idealDocs}.</p>
@@ -139,7 +139,7 @@ export default function WorkspacePage() {
 
             {/* Categories — visual status grid */}
             <div>
-              <h3 className="text-xs font-semibold uppercase tracking-widest text-ink-faint">Categories</h3>
+              <h3 className="text-[11px] font-bold uppercase tracking-[0.15em] text-ink-faint">Categories</h3>
               <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
                 {categories.map((cat, i) => {
                   const catItems = items.filter(item =>
@@ -160,14 +160,14 @@ export default function WorkspacePage() {
                       className={cn(
                         'rounded-[var(--radius-md)] p-4 transition-all duration-300 border-l-[var(--border-accent)]',
                         i < visibleCards ? 'translate-y-0 opacity-100' : 'translate-y-3 opacity-0',
-                        hasContent && !isAwaiting ? 'bg-surface border-sage shadow-[var(--shadow-sm)] hover:-translate-y-0.5 hover:shadow-[var(--shadow-md)]' :
-                        isAwaiting ? 'bg-amber-light/30 border-amber shadow-[var(--shadow-sm)]' :
-                        isNext ? 'bg-warmth-light/20 border-warmth hover:bg-warmth-light/30' :
-                        'bg-cream-dark/50 border-transparent hover:bg-cream-dark hover:border-ink-faint',
+                        hasContent && !isAwaiting ? 'bg-surface border-l-sage border-[var(--border-card)] border-cream-dark shadow-[var(--shadow-sm)] hover:-translate-y-1 hover:shadow-[var(--shadow-md)]' :
+                        isAwaiting ? 'bg-amber-light/30 border-l-amber border-[var(--border-card)] border-amber-light shadow-[var(--shadow-sm)]' :
+                        isNext ? 'bg-warmth-light/20 border-l-warmth border-[var(--border-card)] border-warmth-light hover:bg-warmth-light/30' :
+                        'bg-cream-dark/30 border-[var(--border-card)] border-cream-dark hover:bg-cream-dark/50 hover:border-ink-faint',
                       )}
                     >
                       <div className="flex items-center justify-between">
-                        <p className={cn('font-semibold', hasContent ? 'text-ink' : 'text-ink-light')}>{cat.label}</p>
+                        <p className={cn('text-base font-bold', hasContent ? 'text-ink' : 'text-ink-light')}>{cat.label}</p>
                         {confirmed > 0 && <span className="text-xs font-medium text-sage">✓ {confirmed}</span>}
                         {isAwaiting && <span className="text-xs font-medium text-amber">⏳</span>}
                         {toReview > 0 && <span className="text-xs font-medium text-warmth">● {toReview}</span>}
@@ -175,7 +175,7 @@ export default function WorkspacePage() {
                       </div>
 
                       {hasContent && totalValue > 0 && (
-                        <p className="mt-1 text-xl font-bold text-ink tabular-nums">
+                        <p className="mt-2 text-2xl font-extrabold text-ink tabular-nums tracking-tight">
                           {new Intl.NumberFormat('en-GB', { style: 'currency', currency: 'GBP', maximumFractionDigits: 0 }).format(totalValue)}
                         </p>
                       )}

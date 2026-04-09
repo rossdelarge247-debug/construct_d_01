@@ -36,8 +36,8 @@
   --color-soft: #C2B5C7;
   --color-soft-light: #EDE8EF;
 
-  /* Typography */
-  --font-heading: 'Lora', Georgia, 'Times New Roman', serif;
+  /* Typography — all sans-serif, bold and confident */
+  --font-heading: 'Inter', system-ui, -apple-system, sans-serif;
   --font-body: 'Inter', system-ui, -apple-system, sans-serif;
 
   /* Shadows — warm, not grey */
@@ -45,11 +45,15 @@
   --shadow-md: 0 2px 8px rgba(45, 41, 38, 0.08);
   --shadow-lg: 0 4px 16px rgba(45, 41, 38, 0.10);
 
-  /* Border radius */
+  /* Border radius — slightly tighter for modern feel */
   --radius-sm: 8px;
   --radius-md: 12px;
   --radius-lg: 16px;
   --radius-full: 9999px;
+
+  /* Border widths */
+  --border-card: 2px;
+  --border-accent: 5px;
 
   /* Layout */
   --sidebar-width: 240px;
@@ -68,6 +72,8 @@ body {
 
 h1, h2, h3 {
   font-family: var(--font-heading);
+  font-weight: 700;
+  letter-spacing: -0.02em;
 }
 
 /* Focus styles */
