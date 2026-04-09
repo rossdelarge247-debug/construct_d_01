@@ -113,12 +113,23 @@ export async function analyseDocumentDirect(
 
   const isPdf = mediaType === 'application/pdf'
 
-  const contentBlock = isPdf
+  // Build the message content with the document/image + analysis instructions
+  const documentContent = isPdf
     ? { type: 'document' as const, source: { type: 'base64' as const, media_type: 'application/pdf' as const, data: base64Data } }
     : { type: 'image' as const, source: { type: 'base64' as const, media_type: mediaType as 'image/jpeg' | 'image/png' | 'image/webp', data: base64Data } }
 
-  // Try primary model, fall back if unavailable
-  const models = ['claude-sonnet-4-6', 'claude-sonnet-4-5-20241022']
+  const textContent = {
+    type: 'text' as const,
+    text: `You are analysing a UK financial document for someone going through separation/divorce. Read every detail in this document and extract all financial data.\n\n${ANALYSIS_INSTRUCTIONS}`,
+  }
+
+  // Try models in order: newest → stable → guaranteed working
+  const models = [
+    'claude-sonnet-4-6',
+    'claude-sonnet-4-5-20241022',
+    'claude-3-5-sonnet-20241022',
+    'claude-haiku-4-5-20251001',
+  ]
   let lastError: unknown
 
   for (const model of models) {
@@ -130,28 +141,31 @@ export async function analyseDocumentDirect(
         system: ANALYSIS_SYSTEM_PROMPT,
         messages: [{
           role: 'user',
-          content: [
-            contentBlock,
-            {
-              type: 'text',
-              text: `You are analysing a UK financial document for someone going through separation/divorce. Read every detail in this document and extract all financial data.\n\n${ANALYSIS_INSTRUCTIONS}`,
-            },
-          ],
+          content: [documentContent, textContent],
         }],
       })
 
       const textBlock = response.content.find(b => b.type === 'text')
       const raw = textBlock?.text ?? ''
 
-      console.log(`[AI Direct Analysis] Model: ${model}, Tokens: ${response.usage.input_tokens} in, ${response.usage.output_tokens} out`)
+      console.log(`[AI Direct Analysis] SUCCESS with model: ${model}`)
+      console.log(`[AI Direct Analysis] Tokens: ${response.usage.input_tokens} in, ${response.usage.output_tokens} out`)
+      console.log(`[AI Direct Analysis] Response preview: ${raw.substring(0, 200)}`)
 
-      return parseAnalysisResponse(raw, false)
+      const result = parseAnalysisResponse(raw, false)
+
+      // If we got 0 items, log but still return (might genuinely be empty)
+      if (result.items.length === 0) {
+        console.warn(`[AI Direct Analysis] Model ${model} returned 0 items. Summary: ${result.document_summary}`)
+      }
+
+      return result
     } catch (err) {
       lastError = err
       const errMsg = err instanceof Error ? err.message : 'Unknown'
       console.warn(`[AI Direct Analysis] Model ${model} failed: ${errMsg}`)
-      // If it's not a model-not-found error, don't retry
-      if (!errMsg.includes('model') && !errMsg.includes('not_found')) {
+      // Only retry on model-related errors; throw immediately for auth/network issues
+      if (!errMsg.includes('model') && !errMsg.includes('not_found') && !errMsg.includes('Could not resolve')) {
         throw err
       }
     }
