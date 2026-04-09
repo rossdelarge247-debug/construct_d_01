@@ -128,12 +128,8 @@ export async function analyseDocumentDirect(
     text: `You are analysing a UK financial document for someone going through separation/divorce. Read every detail in this document and extract all financial data.\n\n${ANALYSIS_INSTRUCTIONS}`,
   }
 
-  // Use Haiku for reliable speed within timeout limits.
-  // Quality issues (hallucination, shallow extraction) are addressed via
-  // the tightened ANALYSIS_INSTRUCTIONS prompt, not model size.
-  // Once Vercel Pro maxDuration is confirmed working, switch to:
-  // 'claude-3-5-sonnet-20241022' for richer analysis.
-  const model = 'claude-haiku-4-5-20251001'
+  // Vercel Pro allows 300s. Use Sonnet for thorough, accurate analysis.
+  const model = 'claude-3-5-sonnet-20241022'
   console.log(`[AI Direct Analysis] Using ${model}`)
 
   const response = await client.messages.create({
