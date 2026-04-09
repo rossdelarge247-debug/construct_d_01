@@ -117,28 +117,47 @@ export async function analyseDocumentDirect(
     ? { type: 'document' as const, source: { type: 'base64' as const, media_type: 'application/pdf' as const, data: base64Data } }
     : { type: 'image' as const, source: { type: 'base64' as const, media_type: mediaType as 'image/jpeg' | 'image/png' | 'image/webp', data: base64Data } }
 
-  const response = await client.messages.create({
-    model: 'claude-sonnet-4-6',
-    max_tokens: 3000,
-    system: ANALYSIS_SYSTEM_PROMPT,
-    messages: [{
-      role: 'user',
-      content: [
-        contentBlock,
-        {
-          type: 'text',
-          text: `You are analysing a UK financial document for someone going through separation/divorce. Read every detail in this document and extract all financial data.\n\n${ANALYSIS_INSTRUCTIONS}`,
-        },
-      ],
-    }],
-  })
+  // Try primary model, fall back if unavailable
+  const models = ['claude-sonnet-4-6', 'claude-sonnet-4-5-20241022']
+  let lastError: unknown
 
-  const textBlock = response.content.find(b => b.type === 'text')
-  const raw = textBlock?.text ?? ''
+  for (const model of models) {
+    try {
+      console.log(`[AI Direct Analysis] Trying model: ${model}`)
+      const response = await client.messages.create({
+        model,
+        max_tokens: 3000,
+        system: ANALYSIS_SYSTEM_PROMPT,
+        messages: [{
+          role: 'user',
+          content: [
+            contentBlock,
+            {
+              type: 'text',
+              text: `You are analysing a UK financial document for someone going through separation/divorce. Read every detail in this document and extract all financial data.\n\n${ANALYSIS_INSTRUCTIONS}`,
+            },
+          ],
+        }],
+      })
 
-  console.log(`[AI Direct Analysis] Tokens: ${response.usage.input_tokens} in, ${response.usage.output_tokens} out`)
+      const textBlock = response.content.find(b => b.type === 'text')
+      const raw = textBlock?.text ?? ''
 
-  return parseAnalysisResponse(raw, false)
+      console.log(`[AI Direct Analysis] Model: ${model}, Tokens: ${response.usage.input_tokens} in, ${response.usage.output_tokens} out`)
+
+      return parseAnalysisResponse(raw, false)
+    } catch (err) {
+      lastError = err
+      const errMsg = err instanceof Error ? err.message : 'Unknown'
+      console.warn(`[AI Direct Analysis] Model ${model} failed: ${errMsg}`)
+      // If it's not a model-not-found error, don't retry
+      if (!errMsg.includes('model') && !errMsg.includes('not_found')) {
+        throw err
+      }
+    }
+  }
+
+  throw lastError
 }
 
 /**
@@ -204,8 +223,10 @@ function parseAnalysisResponse(raw: string, isDryRun: boolean): AnalysisResult {
     console.error(`[AI Analysis] Parse failed: ${errorMsg}`)
     console.error(`[AI Analysis] Raw content (first 500 chars): ${raw.substring(0, 500)}`)
     console.error(`[AI Analysis] Was dry run: ${isDryRun}`)
+    // Surface the parse failure reason in the summary so it reaches the user
+    const snippet = raw.substring(0, 120).replace(/\n/g, ' ')
     return {
-      document_summary: 'Could not analyse this document automatically.',
+      document_summary: `Parse error: ${errorMsg}. AI returned: "${snippet}..."`,
       document_type: 'other',
       provider: null,
       items: [],
