@@ -128,8 +128,9 @@ export async function analyseDocumentDirect(
     text: `You are analysing a UK financial document for someone going through separation/divorce. Read every detail in this document and extract all financial data.\n\n${ANALYSIS_INSTRUCTIONS}`,
   }
 
-  // Vercel Pro allows 300s. Use Sonnet for thorough, accurate analysis.
-  const model = 'claude-3-5-sonnet-20241022'
+  // Haiku 4.5 is confirmed working with PDF document type.
+  // Quality controlled via prompt, not model size.
+  const model = 'claude-haiku-4-5-20251001'
   console.log(`[AI Direct Analysis] Using ${model}`)
 
   const response = await client.messages.create({
