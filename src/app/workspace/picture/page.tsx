@@ -26,14 +26,25 @@ export default function PicturePage() {
     const extractResult = result.extraction as ExtractionResult | null
 
     setClassification(classResult)
-    setMessage(result.message)
     setDebugInfo(JSON.stringify({ classification: classResult, hasExtraction: !!extractResult, itemCount: extractResult?.items?.length ?? 0, debug: result.debug }, null, 2))
+
+    // Check if they uploaded the wrong document type for the guided flow
+    const isFirstUpload = items.length === 0
+    const isSavingsWhenWeWantCurrent = isFirstUpload && classResult?.document_type === 'savings_statement'
+    const isWrongDocForFirstUpload = isFirstUpload && classResult?.document_type && !['bank_statement', 'unknown'].includes(classResult.document_type)
+
+    if (isSavingsWhenWeWantCurrent) {
+      setMessage(`This looks like a savings account statement${classResult?.provider_name ? ` from ${classResult.provider_name}` : ''}. That's useful — but your current account statement is the best place to start because it shows your income and spending. You can add this savings statement afterwards.`)
+    } else if (isWrongDocForFirstUpload) {
+      setMessage(`This looks like a ${classResult!.document_type.replace(/_/g, ' ')}${classResult?.provider_name ? ` from ${classResult.provider_name}` : ''}. We'll save this for later — but starting with your current account statement gives us the richest picture because it shows income and spending in one go.`)
+    } else {
+      setMessage(result.message)
+    }
 
     if (extractResult && extractResult.items.length > 0) {
       setExtractionResult(extractResult)
       setView('reviewing')
     } else {
-      // No extraction — show message and offer manual entry
       setView('upload')
     }
   }, [])

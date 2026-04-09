@@ -190,13 +190,20 @@ export function ExtractionReview({ items, spending, accounts, summary, onConfirm
       )}
 
       {/* Actions */}
-      <div className="flex items-center justify-between pt-2">
-        <button onClick={onDismiss} className="text-sm text-ink-light hover:text-ink transition-colors">
-          I&apos;ll review this later
-        </button>
-        <Button onClick={handleConfirmAll}>
-          Confirm and continue
-        </Button>
+      <div className="space-y-3 pt-2">
+        <div className="flex items-center justify-between">
+          <button onClick={onDismiss} className="text-sm text-ink-light hover:text-ink transition-colors">
+            I&apos;ll review this later
+          </button>
+          <Button onClick={handleConfirmAll}>
+            Confirm and continue
+          </Button>
+        </div>
+        <div className="text-center">
+          <button onClick={onDismiss} className="text-xs text-ink-faint hover:text-warmth-dark transition-colors">
+            Discard this and upload a different document
+          </button>
+        </div>
       </div>
     </div>
   )
