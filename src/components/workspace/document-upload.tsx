@@ -124,55 +124,54 @@ export function DocumentUpload({ onProcessed, prompt, hint, isProcessing: contro
     if (file) processFile(file)
   }, [processFile])
 
-  // Processing state — premium AI thinking visual
+  // Processing state — subtle AI sparkle thinking visual
   if (isProcessing) {
     const phase = PROCESSING_PHASES[currentPhase] || PROCESSING_PHASES[0]
 
     return (
-      <div className="rounded-[var(--radius-lg)] border-[var(--border-card)] border-warmth/40 bg-gradient-to-b from-warmth-light/20 to-surface p-8 space-y-6">
-        {/* AI thinking indicator — pulsing bars */}
-        <div className="flex items-center justify-center gap-1.5">
-          {[0, 1, 2, 3, 4].map(i => (
-            <div
-              key={i}
-              className="w-1 rounded-full bg-warmth"
-              style={{
-                height: '20px',
-                animation: `aiPulse 1.2s ease-in-out ${i * 0.15}s infinite`,
-              }}
-            />
-          ))}
+      <div className="rounded-[var(--radius-lg)] border-[var(--border-card)] border-cream-dark bg-surface p-10 space-y-5">
+        {/* Sparkle cluster — subtle twinkling dots */}
+        <div className="flex items-center justify-center">
+          <div className="relative h-10 w-10">
+            {[
+              { x: '50%', y: '20%', delay: '0s', size: 3 },
+              { x: '80%', y: '45%', delay: '0.4s', size: 2 },
+              { x: '65%', y: '75%', delay: '0.8s', size: 2.5 },
+              { x: '25%', y: '60%', delay: '1.2s', size: 2 },
+              { x: '35%', y: '35%', delay: '0.6s', size: 3.5 },
+              { x: '70%', y: '20%', delay: '1.0s', size: 2 },
+              { x: '15%', y: '30%', delay: '0.2s', size: 2 },
+            ].map((dot, i) => (
+              <div
+                key={i}
+                className="absolute rounded-full bg-warmth"
+                style={{
+                  left: dot.x,
+                  top: dot.y,
+                  width: dot.size,
+                  height: dot.size,
+                  animation: `sparkle 2s ease-in-out ${dot.delay} infinite`,
+                }}
+              />
+            ))}
+          </div>
         </div>
 
-        {/* Phase text */}
-        <div className="text-center space-y-1.5">
-          <p className="text-base font-bold text-ink transition-all duration-500">{phase.text}</p>
-          <p className="text-sm text-ink-faint transition-all duration-500">{phase.detail}</p>
-        </div>
-
-        {/* Progress steps */}
-        <div className="flex items-center justify-center gap-2">
-          {PROCESSING_PHASES.map((_, i) => (
-            <div
-              key={i}
-              className={cn(
-                'h-1.5 rounded-full transition-all duration-500',
-                i <= currentPhase ? 'w-8 bg-warmth' : 'w-4 bg-cream-dark',
-              )}
-            />
-          ))}
+        {/* Phase text — conversational */}
+        <div className="text-center space-y-1">
+          <p className="text-sm font-semibold text-ink transition-all duration-500">{phase.text}</p>
+          <p className="text-xs text-ink-faint transition-all duration-500">{phase.detail}</p>
         </div>
 
         {/* File name */}
         {fileName && (
-          <p className="text-center text-xs text-ink-faint">{fileName}</p>
+          <p className="text-center text-[11px] text-ink-faint/60">{fileName}</p>
         )}
 
-        {/* Inline animation keyframes */}
         <style dangerouslySetInnerHTML={{ __html: `
-          @keyframes aiPulse {
-            0%, 100% { transform: scaleY(0.4); opacity: 0.4; }
-            50% { transform: scaleY(1); opacity: 1; }
+          @keyframes sparkle {
+            0%, 100% { opacity: 0; transform: scale(0.5); }
+            50% { opacity: 1; transform: scale(1); }
           }
         `}} />
       </div>

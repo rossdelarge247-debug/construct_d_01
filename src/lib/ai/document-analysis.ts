@@ -80,23 +80,28 @@ const ANALYSIS_INSTRUCTIONS = `Return a JSON object with this EXACT structure:
 }
 
 TIER RULES:
-- "auto" (confidence >= 0.9): You are very confident. Label, value, and category are clear. Examples: regular salary deposits, account balances, named direct debits.
-- "confirm" (confidence 0.7-0.9): Fairly sure but need one simple confirmation. Provide confirm_question and confirm_options (2 choices max).
-- "question" (confidence < 0.7): Genuinely can't determine from the document. Provide question and options (2-4 choices plus "I don't know").
+- "auto" (confidence >= 0.9): Value is explicitly stated in the document. Label, value, and category are unambiguous. Examples: printed salary amounts, stated account balances, named direct debits with amounts.
+- "confirm" (confidence 0.7-0.9): Value appears in the document but its purpose needs one simple confirmation. Provide confirm_question and confirm_options (2 choices max). Example: "This £2,150/mo payment looks like a mortgage — is that right?" with options ["Yes, it's my mortgage", "No, it's rent"].
+- "question" (confidence < 0.7): You genuinely can't determine from the document alone. Provide question and options (2-4 choices plus "I don't know"). Example: large unusual transfers, ambiguous income sources.
 
 GAP RULES:
 - Only 1-3 gaps maximum. Only about things genuinely not found. Always include "Skip".
+- Common gaps: pension contributions not visible, savings accounts not referenced
 
 SPENDING RULES:
 - Only if this is a bank statement with transactions. Categorise into standard categories above.
+- Calculate from ACTUAL transactions in the document. Do not estimate or extrapolate.
 
-IMPORTANT:
-- Extract ALL financial items, not just a summary
-- For bank statements: income deposits, balances, spending categories, regular commitments
-- For payslips: gross pay, net pay, tax, NI, pension contributions
-- For pension letters: CETV value, provider, scheme type
-- For mortgage statements: balance, monthly payment, interest rate
-- Be generous — more items with high confidence is better than fewer
+CRITICAL — ACCURACY RULES:
+- ONLY extract values that are EXPLICITLY STATED in the document. Never invent, estimate, or infer values.
+- If a balance or amount is not printed in the document, do NOT include it.
+- The source_description MUST reference the specific location in the document (e.g. "Statement balance shown as £1,842 on page 1", "Regular credit of £3,218 on 28th of each month").
+- Do NOT create items for things you think "might" exist. Only extract what you can see.
+- For bank statements: extract income deposits, closing/opening balances, regular commitments (rent, mortgage, bills), and spending categories from ACTUAL transactions.
+- For payslips: extract gross pay, net pay, tax, NI, pension contributions — all explicitly printed.
+- For pension letters: extract CETV value, provider, scheme type.
+- For mortgage statements: extract balance, monthly payment, interest rate.
+- If a confirm_question references a specific amount, that amount MUST appear in the document.
 - Return ONLY valid JSON. No markdown, no code fences.`
 
 /**
@@ -123,11 +128,10 @@ export async function analyseDocumentDirect(
     text: `You are analysing a UK financial document for someone going through separation/divorce. Read every detail in this document and extract all financial data.\n\n${ANALYSIS_INSTRUCTIONS}`,
   }
 
-  // Use Haiku for speed — must complete within Vercel's 10s limit (Hobby plan).
-  // Haiku is 5-10x faster than Sonnet, and good enough for structured extraction.
-  // 4096 tokens gives room for thorough analysis without excessive generation time.
-  const model = 'claude-haiku-4-5-20251001'
-  console.log(`[AI Direct Analysis] Using ${model} (optimised for speed)`)
+  // User is on Vercel Pro — maxDuration=60 applies. Use Sonnet for thorough,
+  // accurate analysis. Haiku was too shallow and hallucinated values.
+  const model = 'claude-sonnet-4-5-20241022'
+  console.log(`[AI Direct Analysis] Using ${model} (Pro plan, 60s limit)`)
 
   const response = await client.messages.create({
     model,
