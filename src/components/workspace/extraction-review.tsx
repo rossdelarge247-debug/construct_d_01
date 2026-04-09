@@ -29,7 +29,7 @@ function SpendingReview({ spending, visible }: { spending: ExtractedSpendingCate
       'space-y-3 transition-all duration-500',
       visible ? 'translate-y-0 opacity-100' : 'translate-y-4 opacity-0',
     )}>
-      <h3 className="text-xs font-medium uppercase tracking-wide text-ink-faint">Your monthly spending</h3>
+      <h3 className="text-[11px] font-bold uppercase tracking-[0.15em] text-ink-faint">Your monthly spending</h3>
       <p className="text-xs text-ink-light">Tap any category to see what&apos;s included and correct anything that&apos;s wrong.</p>
 
       <div className="rounded-[var(--radius-md)] border-[var(--border-card)] border-cream-dark overflow-hidden">
@@ -153,7 +153,7 @@ export function ExtractionReview({ items, spending, accounts, summary, onConfirm
           'space-y-3 transition-all duration-500',
           visibleSections > sectionIndex ? 'translate-y-0 opacity-100' : 'translate-y-4 opacity-0',
         )}>
-          <h3 className="text-xs font-medium uppercase tracking-wide text-ink-faint">Accounts we found</h3>
+          <h3 className="text-[11px] font-bold uppercase tracking-[0.15em] text-ink-faint">Accounts we found</h3>
           {accounts.map((account, i) => (
             <div key={i} className="rounded-[var(--radius-md)] border-[var(--border-card)] border-cream-dark p-4 flex items-center justify-between hover:shadow-[var(--shadow-sm)] transition-shadow duration-200">
               <div>
@@ -179,7 +179,7 @@ export function ExtractionReview({ items, spending, accounts, summary, onConfirm
           visibleSections > sectionIndex ? 'translate-y-0 opacity-100' : 'translate-y-4 opacity-0',
         )}>
           <div className="flex items-center justify-between">
-            <h3 className="text-xs font-medium uppercase tracking-wide text-ink-faint">What we extracted</h3>
+            <h3 className="text-[11px] font-bold uppercase tracking-[0.15em] text-ink-faint">What we extracted</h3>
             {items.length > 2 && Object.keys(reviewedItems).length === 0 && (
               <button
                 onClick={handleConfirmAll}
@@ -194,7 +194,7 @@ export function ExtractionReview({ items, spending, accounts, summary, onConfirm
             <div
               key={i}
               className={cn(
-                'rounded-[var(--radius-md)] border p-4 transition-all duration-300',
+                'rounded-[var(--radius-md)] border-[var(--border-card)] border-cream-dark p-4 transition-all duration-300',
                 reviewedItems[i] === 'accepted' ? 'border-sage bg-sage-light/10' :
                 reviewedItems[i] === 'rejected' ? 'border-cream-dark opacity-40 scale-[0.98]' :
                 'border-cream-dark hover:shadow-[var(--shadow-sm)]',
