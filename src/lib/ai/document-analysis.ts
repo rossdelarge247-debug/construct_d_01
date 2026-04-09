@@ -123,55 +123,35 @@ export async function analyseDocumentDirect(
     text: `You are analysing a UK financial document for someone going through separation/divorce. Read every detail in this document and extract all financial data.\n\n${ANALYSIS_INSTRUCTIONS}`,
   }
 
-  // Try models in order: newest → stable → guaranteed working
-  const models = [
-    'claude-sonnet-4-6',
-    'claude-sonnet-4-5-20241022',
-    'claude-3-5-sonnet-20241022',
-    'claude-haiku-4-5-20251001',
-  ]
-  let lastError: unknown
+  // Use Haiku for speed — must complete within Vercel's 10s limit (Hobby plan).
+  // Haiku is 5-10x faster than Sonnet, and good enough for structured extraction.
+  // 4096 tokens gives room for thorough analysis without excessive generation time.
+  const model = 'claude-haiku-4-5-20251001'
+  console.log(`[AI Direct Analysis] Using ${model} (optimised for speed)`)
 
-  for (const model of models) {
-    try {
-      console.log(`[AI Direct Analysis] Trying model: ${model}`)
-      const response = await client.messages.create({
-        model,
-        max_tokens: 8192,
-        system: ANALYSIS_SYSTEM_PROMPT,
-        messages: [{
-          role: 'user',
-          content: [documentContent, textContent],
-        }],
-      })
+  const response = await client.messages.create({
+    model,
+    max_tokens: 4096,
+    system: ANALYSIS_SYSTEM_PROMPT,
+    messages: [{
+      role: 'user',
+      content: [documentContent, textContent],
+    }],
+  })
 
-      const textBlock = response.content.find(b => b.type === 'text')
-      const raw = textBlock?.text ?? ''
+  const textBlock = response.content.find(b => b.type === 'text')
+  const raw = textBlock?.text ?? ''
 
-      console.log(`[AI Direct Analysis] SUCCESS with model: ${model}`)
-      console.log(`[AI Direct Analysis] Tokens: ${response.usage.input_tokens} in, ${response.usage.output_tokens} out`)
-      console.log(`[AI Direct Analysis] Response preview: ${raw.substring(0, 200)}`)
+  console.log(`[AI Direct Analysis] Tokens: ${response.usage.input_tokens} in, ${response.usage.output_tokens} out`)
+  console.log(`[AI Direct Analysis] Response preview: ${raw.substring(0, 200)}`)
 
-      const result = parseAnalysisResponse(raw, false)
+  const result = parseAnalysisResponse(raw, false)
 
-      // If we got 0 items, log but still return (might genuinely be empty)
-      if (result.items.length === 0) {
-        console.warn(`[AI Direct Analysis] Model ${model} returned 0 items. Summary: ${result.document_summary}`)
-      }
-
-      return result
-    } catch (err) {
-      lastError = err
-      const errMsg = err instanceof Error ? err.message : 'Unknown'
-      console.warn(`[AI Direct Analysis] Model ${model} failed: ${errMsg}`)
-      // Only retry on model-related errors; throw immediately for auth/network issues
-      if (!errMsg.includes('model') && !errMsg.includes('not_found') && !errMsg.includes('Could not resolve')) {
-        throw err
-      }
-    }
+  if (result.items.length === 0) {
+    console.warn(`[AI Direct Analysis] 0 items returned. Summary: ${result.document_summary}`)
   }
 
-  throw lastError
+  return result
 }
 
 /**
@@ -188,7 +168,7 @@ ${documentText.substring(0, 10000)}
 ${ANALYSIS_INSTRUCTIONS}`,
     {
       taskType: 'field_extraction',
-      maxTokens: 8192,
+      maxTokens: 4096,
       temperature: 0.3,
       systemPrompt: ANALYSIS_SYSTEM_PROMPT,
     },
