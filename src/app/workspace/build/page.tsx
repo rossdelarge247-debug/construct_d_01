@@ -67,10 +67,12 @@ export default function BuildYourPicturePage() {
   const [editingItemId, setEditingItemId] = useState<string | null>(null)
   const editingItem = editingItemId ? items.find(i => i.id === editingItemId) || null : null
 
-  // Upload + analysis state — persisted in ref so tab switching doesn't lose it
+  // Upload + analysis state — all lifted to page level so tab switching doesn't lose it
   const [analysisResult, setAnalysisResult] = useState<AnalysisResult | null>(null)
   const [uploadMessage, setUploadMessage] = useState<string | null>(null)
   const [isAnalysing, setIsAnalysing] = useState(false)
+  const [isUploading, setIsUploading] = useState(false)
+  const [uploadFileName, setUploadFileName] = useState<string | null>(null)
   const analysisResultRef = useRef<AnalysisResult | null>(null)
 
   // Wizard init
@@ -234,6 +236,10 @@ export default function BuildYourPicturePage() {
                           onProcessed={handleUploadProcessed}
                           prompt="Drop any financial document here"
                           hint="Bank statements, payslips, pension letters, mortgage statements — we'll detect the type and analyse it"
+                          isProcessing={isUploading}
+                          onProcessingChange={setIsUploading}
+                          processingFileName={uploadFileName ?? undefined}
+                          onFileNameChange={setUploadFileName}
                         />
 
                         {uploadMessage && (

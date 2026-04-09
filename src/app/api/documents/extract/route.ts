@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { analyseDocument } from '@/lib/ai/document-analysis'
+import { analyseDocument, analyseDocumentDirect } from '@/lib/ai/document-analysis'
 
 export const maxDuration = 60
 
@@ -23,76 +23,54 @@ export async function POST(request: NextRequest) {
       })
     }
 
-    // Extract text from file
-    let text: string
-
+    // For PDFs and images: single AI call that reads the document AND analyses it
+    // This avoids the 2-call latency that causes Vercel timeouts
     if (fileType === 'application/pdf' || fileName.endsWith('.pdf')) {
       const buffer = await file.arrayBuffer()
       const base64 = Buffer.from(buffer).toString('base64')
 
       try {
-        const Anthropic = (await import('@anthropic-ai/sdk')).default
-        const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY })
-
-        const pdfResponse = await client.messages.create({
-          model: 'claude-haiku-4-5-20251001',
-          max_tokens: 4096,
-          messages: [{
-            role: 'user',
-            content: [{
-              type: 'document',
-              source: { type: 'base64', media_type: 'application/pdf', data: base64 },
-            }, {
-              type: 'text',
-              text: 'Extract ALL text content from this document. Return the raw text exactly as it appears, preserving numbers, dates, names, and amounts. Do not summarise.',
-            }],
-          }],
+        const analysis = await analyseDocumentDirect(base64, 'application/pdf')
+        console.log(`[Analysis] PDF direct: ${analysis.items.length} items, type: ${analysis.document_type}`)
+        return NextResponse.json({
+          analysis,
+          message: analysis.items.length > 0
+            ? `Found ${analysis.items.length} item${analysis.items.length !== 1 ? 's' : ''} from your ${analysis.document_type.replace(/_/g, ' ')}${analysis.provider ? ` (${analysis.provider})` : ''}.`
+            : `Couldn't extract specific items from ${fileName}. You can enter details manually.`,
         })
-
-        const textBlock = pdfResponse.content.find(b => b.type === 'text')
-        text = textBlock?.text ?? ''
       } catch (pdfError) {
-        console.error('[PDF extraction] Error:', pdfError)
+        console.error('[PDF analysis] Error:', pdfError)
         return NextResponse.json({
           analysis: null,
-          message: `Couldn't read this PDF (${fileName}). Try downloading a digital version from your online banking, or enter details manually.`,
+          message: `Couldn't read this PDF (${fileName}). Try a digital version from your online banking, or enter details manually.`,
         })
       }
-    } else if (fileType.startsWith('image/')) {
+    }
+
+    if (fileType.startsWith('image/')) {
       const buffer = await file.arrayBuffer()
       const base64 = Buffer.from(buffer).toString('base64')
       const mediaType = fileType as 'image/jpeg' | 'image/png' | 'image/webp'
 
       try {
-        const Anthropic = (await import('@anthropic-ai/sdk')).default
-        const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY })
-
-        const imgResponse = await client.messages.create({
-          model: 'claude-haiku-4-5-20251001',
-          max_tokens: 4096,
-          messages: [{
-            role: 'user',
-            content: [{
-              type: 'image',
-              source: { type: 'base64', media_type: mediaType, data: base64 },
-            }, {
-              type: 'text',
-              text: 'Extract ALL text content from this financial document. Preserve numbers, dates, names, and amounts.',
-            }],
-          }],
+        const analysis = await analyseDocumentDirect(base64, mediaType)
+        console.log(`[Analysis] Image direct: ${analysis.items.length} items, type: ${analysis.document_type}`)
+        return NextResponse.json({
+          analysis,
+          message: analysis.items.length > 0
+            ? `Found ${analysis.items.length} item${analysis.items.length !== 1 ? 's' : ''} from your ${analysis.document_type.replace(/_/g, ' ')}${analysis.provider ? ` (${analysis.provider})` : ''}.`
+            : `Couldn't extract specific items. Try a clearer photo, or enter details manually.`,
         })
-
-        const textBlock = imgResponse.content.find(b => b.type === 'text')
-        text = textBlock?.text ?? ''
       } catch {
         return NextResponse.json({
           analysis: null,
           message: `Couldn't read this image. Try a clearer photo or upload as PDF.`,
         })
       }
-    } else {
-      text = await file.text()
     }
+
+    // For text/CSV files: extract text then analyse
+    const text = await file.text()
 
     if (!text || text.trim().length < 30) {
       return NextResponse.json({
@@ -101,15 +79,10 @@ export async function POST(request: NextRequest) {
       })
     }
 
-    console.log(`[Analysis] Extracted text: ${text.length} chars, first 200: ${text.substring(0, 200)}`)
-
-    // Run tiered AI analysis
+    console.log(`[Analysis] Text file: ${text.length} chars`)
     const analysis = await analyseDocument(text)
 
     console.log(`[Analysis] Result: ${analysis.items.length} items, ${analysis.gaps.length} gaps, type: ${analysis.document_type}`)
-    if (analysis.items.length === 0) {
-      console.warn(`[Analysis] WARNING: Zero items extracted. Document summary: ${analysis.document_summary}`)
-    }
 
     return NextResponse.json({
       analysis,

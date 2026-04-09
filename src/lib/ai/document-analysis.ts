@@ -36,14 +36,9 @@ export interface AnalysisResult {
   spending?: { category: string; monthly_average: number; transaction_count: number }[]
 }
 
-export async function analyseDocument(documentText: string): Promise<AnalysisResult> {
-  const response = await generateCompletion(
-    `You are analysing a UK financial document for someone going through separation/divorce. Your job is to extract financial data AND assess what needs clarification.
+const ANALYSIS_SYSTEM_PROMPT = 'You are a financial document analyst for UK divorce/separation cases. Return structured JSON analysis with tiered confidence items. Always return valid JSON. No markdown, no code fences.'
 
-DOCUMENT TEXT:
-${documentText.substring(0, 10000)}
-
-Return a JSON object with this EXACT structure:
+const ANALYSIS_INSTRUCTIONS = `Return a JSON object with this EXACT structure:
 
 {
   "document_summary": "One sentence describing what this document is",
@@ -85,42 +80,95 @@ Return a JSON object with this EXACT structure:
 }
 
 TIER RULES:
-- "auto" (confidence >= 0.9): You are very confident. Label, value, and category are clear from the document. Examples: regular salary deposits, account balances, named direct debits.
-- "confirm" (confidence 0.7-0.9): You're fairly sure but need one simple confirmation. Provide confirm_question and confirm_options (2 choices max). Examples: "This £2,150 payment looks like a mortgage — is that right?" with options ["Yes, it's my mortgage", "No, it's rent"].
-- "question" (confidence < 0.7): You genuinely can't determine from the document. Provide question and options (2-4 choices plus "I don't know"). Examples: large unusual transfers, ambiguous income sources.
+- "auto" (confidence >= 0.9): You are very confident. Label, value, and category are clear. Examples: regular salary deposits, account balances, named direct debits.
+- "confirm" (confidence 0.7-0.9): Fairly sure but need one simple confirmation. Provide confirm_question and confirm_options (2 choices max).
+- "question" (confidence < 0.7): Genuinely can't determine from the document. Provide question and options (2-4 choices plus "I don't know").
 
 GAP RULES:
-- Only include 1-3 gaps maximum
-- Only ask about things genuinely not found in the document
-- Always include a "Skip" option
-- Common gaps: pension contributions not visible, savings accounts not referenced, partner's income unknown
+- Only 1-3 gaps maximum. Only about things genuinely not found. Always include "Skip".
 
 SPENDING RULES:
-- Only include if this is a bank statement with transaction history
-- Categorise into the standard categories listed above
-- Calculate monthly averages from the statement period
-- If the statement covers less than a month, extrapolate carefully
+- Only if this is a bank statement with transactions. Categorise into standard categories above.
 
 IMPORTANT:
-- Extract ALL financial items you can find, not just a summary
-- For bank statements: extract income deposits, account balances, spending categories, regular commitments
-- For payslips: extract gross pay, net pay, tax, NI, pension contributions
-- For pension letters: extract CETV value, provider, scheme type
-- For mortgage statements: extract balance, monthly payment, interest rate
-- Be generous with extraction — more items with high confidence is better than fewer
-- Return ONLY valid JSON. No markdown, no code fences.`,
+- Extract ALL financial items, not just a summary
+- For bank statements: income deposits, balances, spending categories, regular commitments
+- For payslips: gross pay, net pay, tax, NI, pension contributions
+- For pension letters: CETV value, provider, scheme type
+- For mortgage statements: balance, monthly payment, interest rate
+- Be generous — more items with high confidence is better than fewer
+- Return ONLY valid JSON. No markdown, no code fences.`
+
+/**
+ * Single-call analysis for PDFs and images.
+ * Sends the document directly to Claude — reads AND analyses in one pass.
+ * This avoids the 2-call latency that causes Vercel timeouts.
+ */
+export async function analyseDocumentDirect(
+  base64Data: string,
+  mediaType: string,
+): Promise<AnalysisResult> {
+  const Anthropic = (await import('@anthropic-ai/sdk')).default
+  const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY })
+
+  const isPdf = mediaType === 'application/pdf'
+
+  const contentBlock = isPdf
+    ? { type: 'document' as const, source: { type: 'base64' as const, media_type: 'application/pdf' as const, data: base64Data } }
+    : { type: 'image' as const, source: { type: 'base64' as const, media_type: mediaType as 'image/jpeg' | 'image/png' | 'image/webp', data: base64Data } }
+
+  const response = await client.messages.create({
+    model: 'claude-sonnet-4-6',
+    max_tokens: 3000,
+    system: ANALYSIS_SYSTEM_PROMPT,
+    messages: [{
+      role: 'user',
+      content: [
+        contentBlock,
+        {
+          type: 'text',
+          text: `You are analysing a UK financial document for someone going through separation/divorce. Read every detail in this document and extract all financial data.\n\n${ANALYSIS_INSTRUCTIONS}`,
+        },
+      ],
+    }],
+  })
+
+  const textBlock = response.content.find(b => b.type === 'text')
+  const raw = textBlock?.text ?? ''
+
+  console.log(`[AI Direct Analysis] Tokens: ${response.usage.input_tokens} in, ${response.usage.output_tokens} out`)
+
+  return parseAnalysisResponse(raw, false)
+}
+
+/**
+ * Text-based analysis for pre-extracted text (CSV, plain text, etc.)
+ * Uses the provider abstraction layer.
+ */
+export async function analyseDocument(documentText: string): Promise<AnalysisResult> {
+  const response = await generateCompletion(
+    `You are analysing a UK financial document for someone going through separation/divorce. Your job is to extract financial data AND assess what needs clarification.
+
+DOCUMENT TEXT:
+${documentText.substring(0, 10000)}
+
+${ANALYSIS_INSTRUCTIONS}`,
     {
       taskType: 'field_extraction',
       maxTokens: 3000,
       temperature: 0.3,
-      systemPrompt: 'You are a financial document analyst for UK divorce/separation cases. Return structured JSON analysis with tiered confidence items. Always return valid JSON.',
+      systemPrompt: ANALYSIS_SYSTEM_PROMPT,
     },
   )
 
-  try {
-    let content = response.content.trim()
+  return parseAnalysisResponse(response.content, response.dryRun)
+}
 
-    if (response.dryRun) {
+function parseAnalysisResponse(raw: string, isDryRun: boolean): AnalysisResult {
+  try {
+    let content = raw.trim()
+
+    if (isDryRun) {
       console.log('[AI Analysis] Running in DRY RUN mode — returning mock data')
     }
 
@@ -149,13 +197,13 @@ IMPORTANT:
       id: gap.id || `gap_${i}_${Date.now()}`,
     }))
 
-    console.log(`[AI Analysis] Parsed OK: ${result.items.length} items, ${result.gaps.length} gaps, dry_run: ${response.dryRun}`)
+    console.log(`[AI Analysis] Parsed OK: ${result.items.length} items, ${result.gaps.length} gaps, dry_run: ${isDryRun}`)
     return result
   } catch (error) {
     const errorMsg = error instanceof Error ? error.message : 'Unknown parse error'
     console.error(`[AI Analysis] Parse failed: ${errorMsg}`)
-    console.error(`[AI Analysis] Raw content (first 500 chars): ${response.content.substring(0, 500)}`)
-    console.error(`[AI Analysis] Was dry run: ${response.dryRun}`)
+    console.error(`[AI Analysis] Raw content (first 500 chars): ${raw.substring(0, 500)}`)
+    console.error(`[AI Analysis] Was dry run: ${isDryRun}`)
     return {
       document_summary: 'Could not analyse this document automatically.',
       document_type: 'other',

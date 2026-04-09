@@ -8,6 +8,11 @@ interface DocumentUploadProps {
   onProcessed: (result: { classification: unknown; extraction: unknown; message: string }) => void
   prompt?: string
   hint?: string
+  /** Controlled processing state — lifted to parent so tab switches don't lose it */
+  isProcessing?: boolean
+  onProcessingChange?: (processing: boolean) => void
+  processingFileName?: string
+  onFileNameChange?: (name: string | null) => void
 }
 
 const PROCESSING_PHASES = [
@@ -18,13 +23,26 @@ const PROCESSING_PHASES = [
   { text: 'Preparing your review', detail: 'Organising what we found into clear sections', delay: 12000 },
 ]
 
-export function DocumentUpload({ onProcessed, prompt, hint }: DocumentUploadProps) {
+export function DocumentUpload({ onProcessed, prompt, hint, isProcessing: controlledProcessing, onProcessingChange, processingFileName, onFileNameChange }: DocumentUploadProps) {
   const [isDragging, setIsDragging] = useState(false)
-  const [isProcessing, setIsProcessing] = useState(false)
+  const [internalProcessing, setInternalProcessing] = useState(false)
   const [currentPhase, setCurrentPhase] = useState(0)
-  const [fileName, setFileName] = useState<string | null>(null)
+  const [internalFileName, setInternalFileName] = useState<string | null>(null)
   const [pulseVisible, setPulseVisible] = useState(true)
   const inputRef = useRef<HTMLInputElement>(null)
+  const timersRef = useRef<ReturnType<typeof setTimeout>[]>([])
+
+  // Use controlled or internal state
+  const isProcessing = controlledProcessing ?? internalProcessing
+  const fileName = processingFileName ?? internalFileName
+
+  const setProcessing = useCallback((v: boolean) => {
+    onProcessingChange ? onProcessingChange(v) : setInternalProcessing(v)
+  }, [onProcessingChange])
+
+  const setFileName = useCallback((v: string | null) => {
+    onFileNameChange ? onFileNameChange(v) : setInternalFileName(v)
+  }, [onFileNameChange])
 
   // Gentle idle pulse
   useEffect(() => {
@@ -35,18 +53,27 @@ export function DocumentUpload({ onProcessed, prompt, hint }: DocumentUploadProp
     return () => clearInterval(interval)
   }, [isProcessing])
 
-  const processFile = useCallback(async (file: File) => {
-    setFileName(file.name)
-    setIsProcessing(true)
-
-    // Stagger processing phases for conversational feel
+  // Restart phase animation when processing starts (handles re-mount after tab switch)
+  useEffect(() => {
+    if (!isProcessing) {
+      setCurrentPhase(0)
+      return
+    }
+    // If we're processing (e.g. re-mounted after tab switch), restart phase timers
+    timersRef.current.forEach(clearTimeout)
+    timersRef.current = []
     setCurrentPhase(0)
-    const timers: ReturnType<typeof setTimeout>[] = []
     PROCESSING_PHASES.forEach((phase, i) => {
       if (i > 0) {
-        timers.push(setTimeout(() => setCurrentPhase(i), phase.delay))
+        timersRef.current.push(setTimeout(() => setCurrentPhase(i), phase.delay))
       }
     })
+    return () => timersRef.current.forEach(clearTimeout)
+  }, [isProcessing])
+
+  const processFile = useCallback(async (file: File) => {
+    setFileName(file.name)
+    setProcessing(true)
 
     try {
       const formData = new FormData()
@@ -78,12 +105,12 @@ export function DocumentUpload({ onProcessed, prompt, hint }: DocumentUploadProp
         message: `Connection error: ${errorMsg}. This may be a timeout — large documents can take a moment. Please try again.`,
       })
     } finally {
-      timers.forEach(clearTimeout)
-      setIsProcessing(false)
-      setCurrentPhase(0)
+      timersRef.current.forEach(clearTimeout)
+      timersRef.current = []
+      setProcessing(false)
       setFileName(null)
     }
-  }, [onProcessed])
+  }, [onProcessed, setProcessing, setFileName])
 
   const handleDrop = useCallback((e: React.DragEvent) => {
     e.preventDefault()
