@@ -33,14 +33,16 @@ interface AIResponse {
   durationMs: number
 }
 
-const isDryRun = process.env.AI_DRY_RUN === 'true'
+// Only dry-run if explicitly enabled AND no API key is available
+// This prevents the flag accidentally blocking real analysis on Vercel
+const isDryRun = process.env.AI_DRY_RUN === 'true' && !process.env.ANTHROPIC_API_KEY
 
 // Default provider routing by task type
 const DEFAULT_ROUTING: Record<AITaskType, { provider: AIProvider; model: string }> = {
   route_generation: { provider: 'claude', model: 'claude-sonnet-4-6' },
   plan_summarisation: { provider: 'claude', model: 'claude-sonnet-4-6' },
   document_classification: { provider: 'claude', model: 'claude-haiku-4-5-20251001' },
-  field_extraction: { provider: 'claude', model: 'claude-haiku-4-5-20251001' },
+  field_extraction: { provider: 'claude', model: 'claude-sonnet-4-6' },
   safeguarding_assessment: { provider: 'claude', model: 'claude-sonnet-4-6' },
   next_step_generation: { provider: 'claude', model: 'claude-sonnet-4-6' },
   mediation_summary: { provider: 'claude', model: 'claude-sonnet-4-6' },
@@ -59,9 +61,12 @@ export async function generateCompletion(
 
   if (isDryRun) {
     console.log(`[AI DRY RUN] Provider: ${provider}, Model: ${model}, Task: ${options.taskType}`)
-    console.log(`[AI DRY RUN] Prompt: ${prompt.substring(0, 200)}...`)
+    console.log(`[AI DRY RUN] No ANTHROPIC_API_KEY found — returning mock data`)
+
+    // Return valid JSON mocks so downstream parsers don't break
+    const mockContent = getDryRunMock(options.taskType)
     return {
-      content: `[DRY RUN] Response for ${options.taskType}`,
+      content: mockContent,
       provider,
       model,
       tokenUsage: { input: 0, output: 0 },
@@ -111,4 +116,73 @@ async function callClaude(
     dryRun: false,
     durationMs: Date.now() - start,
   }
+}
+
+function getDryRunMock(taskType: AITaskType): string {
+  if (taskType === 'field_extraction') {
+    return JSON.stringify({
+      document_summary: '[DRY RUN] Mock bank statement analysis — no API key configured',
+      document_type: 'bank_statement',
+      provider: 'Demo Bank',
+      items: [
+        {
+          id: 'mock_1',
+          label: 'Monthly salary (demo)',
+          value: 3200,
+          period: 'monthly',
+          confidence: 0.95,
+          tier: 'auto',
+          category: 'income',
+          subcategory: 'employment',
+          ownership_hint: 'yours',
+          source_description: 'Mock data — connect your Anthropic API key to analyse real documents',
+        },
+        {
+          id: 'mock_2',
+          label: 'Current account balance (demo)',
+          value: 4850,
+          period: 'total',
+          confidence: 0.92,
+          tier: 'auto',
+          category: 'asset',
+          subcategory: 'current_account',
+          ownership_hint: 'yours',
+          source_description: 'Mock data — connect your Anthropic API key to analyse real documents',
+        },
+        {
+          id: 'mock_3',
+          label: 'Monthly mortgage payment (demo)',
+          value: 1150,
+          period: 'monthly',
+          confidence: 0.78,
+          tier: 'confirm',
+          category: 'liability',
+          subcategory: 'mortgage',
+          ownership_hint: 'joint',
+          source_description: 'Mock data — regular payment detected',
+          confirm_question: 'This £1,150/mo payment looks like a mortgage — is that right?',
+          confirm_options: ['Yes, it\'s our mortgage', 'No, it\'s something else'],
+        },
+      ],
+      gaps: [
+        {
+          id: 'mock_gap_1',
+          domain: 'pensions',
+          prompt: 'We didn\'t see any pension contributions — do you have a workplace pension?',
+          options: ['Yes', 'No', 'Skip'],
+        },
+      ],
+      spending: [
+        { category: 'housing', monthly_average: 1150, transaction_count: 1 },
+        { category: 'groceries', monthly_average: 380, transaction_count: 12 },
+        { category: 'transport', monthly_average: 165, transaction_count: 8 },
+      ],
+    })
+  }
+
+  if (taskType === 'document_classification') {
+    return JSON.stringify({ document_type: 'bank_statement', confidence: 0.9 })
+  }
+
+  return JSON.stringify({ result: `[DRY RUN] Mock response for ${taskType}` })
 }

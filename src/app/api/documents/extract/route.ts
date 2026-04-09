@@ -101,12 +101,15 @@ export async function POST(request: NextRequest) {
       })
     }
 
-    console.log(`[Analysis] Text: ${text.length} chars`)
+    console.log(`[Analysis] Extracted text: ${text.length} chars, first 200: ${text.substring(0, 200)}`)
 
     // Run tiered AI analysis
     const analysis = await analyseDocument(text)
 
     console.log(`[Analysis] Result: ${analysis.items.length} items, ${analysis.gaps.length} gaps, type: ${analysis.document_type}`)
+    if (analysis.items.length === 0) {
+      console.warn(`[Analysis] WARNING: Zero items extracted. Document summary: ${analysis.document_summary}`)
+    }
 
     return NextResponse.json({
       analysis,

@@ -119,14 +119,28 @@ IMPORTANT:
 
   try {
     let content = response.content.trim()
+
+    if (response.dryRun) {
+      console.log('[AI Analysis] Running in DRY RUN mode — returning mock data')
+    }
+
+    // Strip markdown code fences if present
     if (content.startsWith('```')) {
       content = content.replace(/^```(?:json)?\n?/, '').replace(/\n?```$/, '').trim()
+    }
+
+    // Try to extract JSON if there's surrounding text
+    if (!content.startsWith('{')) {
+      const jsonMatch = content.match(/\{[\s\S]*\}/)
+      if (jsonMatch) {
+        content = jsonMatch[0]
+      }
     }
 
     const result = JSON.parse(content) as AnalysisResult
 
     // Ensure all items have IDs
-    result.items = result.items.map((item, i) => ({
+    result.items = (result.items || []).map((item, i) => ({
       ...item,
       id: item.id || `item_${i}_${Date.now()}`,
     }))
@@ -135,9 +149,13 @@ IMPORTANT:
       id: gap.id || `gap_${i}_${Date.now()}`,
     }))
 
+    console.log(`[AI Analysis] Parsed OK: ${result.items.length} items, ${result.gaps.length} gaps, dry_run: ${response.dryRun}`)
     return result
   } catch (error) {
-    console.error('[AI Analysis] Parse failed:', response.content.substring(0, 500))
+    const errorMsg = error instanceof Error ? error.message : 'Unknown parse error'
+    console.error(`[AI Analysis] Parse failed: ${errorMsg}`)
+    console.error(`[AI Analysis] Raw content (first 500 chars): ${response.content.substring(0, 500)}`)
+    console.error(`[AI Analysis] Was dry run: ${response.dryRun}`)
     return {
       document_summary: 'Could not analyse this document automatically.',
       document_type: 'other',
