@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react'
 import { WorkspaceLayout } from '@/components/workspace/workspace-layout'
 import { CategoryTabs } from '@/components/workspace/category-tabs'
 import { CategoryContent } from '@/components/workspace/category-content'
+import { ManualEntryModal } from '@/components/workspace/manual-entry-modal'
 import { LiveSummary } from '@/components/workspace/financial-summary'
 import { useWorkspace } from '@/hooks/use-workspace'
 import { useCountUp } from '@/hooks/use-count-up'
@@ -32,6 +33,7 @@ export default function BuildYourPicturePage() {
   const { items, addItem, removeItem, summary, readiness, spending, setSpending, loaded } = useWorkspace()
   const [activeTab, setActiveTab] = useState('current_account')
   const [showHowItWorks, setShowHowItWorks] = useState(true)
+  const [showManualEntry, setShowManualEntry] = useState(false)
 
   // Check if "how it works" was dismissed
   useEffect(() => {
@@ -48,10 +50,7 @@ export default function BuildYourPicturePage() {
   const milestone = getReadinessLabel(progress)
   const animatedProgress = useCountUp(progress, 800)
 
-  const handleOpenManualEntry = () => {
-    // TODO: open modal — for now alert
-    alert('Manual entry modal — coming soon')
-  }
+  const handleOpenManualEntry = () => setShowManualEntry(true)
 
   if (!loaded) return (
     <WorkspaceLayout activePhase="build_your_picture">
@@ -215,6 +214,14 @@ export default function BuildYourPicturePage() {
 
         </div>
       </div>
+
+      {/* Manual entry modal */}
+      <ManualEntryModal
+        isOpen={showManualEntry}
+        onClose={() => setShowManualEntry(false)}
+        onSave={(item) => { addItem(item); setShowManualEntry(false) }}
+        defaultCategory={activeTab}
+      />
     </WorkspaceLayout>
   )
 }
