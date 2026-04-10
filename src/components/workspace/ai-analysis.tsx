@@ -62,6 +62,14 @@ export function AiAnalysis({ result, onComplete, onDismiss }: AiAnalysisProps) {
     }
   }, [autoRevealCount, autoItems.length, currentStep, steps])
 
+  // Advance to first interactive step (or complete) once auto items are revealed
+  useEffect(() => {
+    if (autoRevealed && currentStep === 0 && steps.length > 1) {
+      const timer = setTimeout(() => setCurrentStep(1), 400)
+      return () => clearTimeout(timer)
+    }
+  }, [autoRevealed, currentStep, steps.length])
+
   function handleAnswer(itemId: string, answer: string) {
     setAnswers(prev => ({ ...prev, [itemId]: answer }))
     // Auto-advance to next step after a brief moment
