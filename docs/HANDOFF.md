@@ -347,7 +347,25 @@ The build progressed through clear phases:
 
 ## 12. Immediate Next Session Priorities
 
-### P0 — Must fix first
+### P0 — Design work needed before more code
+
+**The analysis flow needs more design thinking before further implementation.** The current approach jumped to code too quickly. The structure, presentation, flow, and interaction patterns need deeper specification through wireframes and detailed design before building more. Specifically:
+
+- **Data field combination logic**: How should the AI combine and simplify extracted data for presentation? E.g. multiple salary credits should become one "Employment income" line, not 4 separate transactions. Regular standing orders should be grouped by purpose. The rules for how raw transaction data becomes clean financial items need explicit specification.
+
+- **Assumptions and simplification heuristics**: What assumptions should the AI make to reduce the number of questions? E.g. if there's a regular £1,150 payment to a building society, assume mortgage without asking. If HMRC credits appear monthly, assume salary without confirming. The more the AI can confidently resolve, the fewer questions the user faces. These heuristics need documenting per document type.
+
+- **Dialogue interaction design**: The step-through dialogue needs wireframes showing exactly what each step looks like, how answers affect subsequent steps, what happens when a user changes their mind, and how the flow adapts based on what the document contains. The current implementation is mechanical (show card, get answer, next card) rather than conversational.
+
+- **Data presentation hierarchy**: How should extracted items be grouped and displayed? Currently it's a flat list of values. Should it be organised by: account → income vs outgoings → individual items? Or by confidence tier? The visual hierarchy and information architecture needs designing before building.
+
+- **Cross-field intelligence**: Some fields inform others. If the AI detects joint account, that affects ownership of all items. If rent is detected, property questions change. If self-employment income appears, business category activates. These relationships need mapping out.
+
+- **Document type-specific flows**: A bank statement produces a very different analysis from a pension letter or a payslip. Each document type should have its own tailored presentation and question flow, not a one-size-fits-all template. Wireframes needed per type.
+
+**Recommendation**: Before writing more code, produce detailed wireframes and interaction specs (similar to the level of detail in specs 09, 10b, and 11) covering the above. The specs that exist are good but were written before we saw real AI output — they need updating based on what we've learned.
+
+### P1 — Technical fixes (can run in parallel with design)
 
 1. **Two-step Sonnet upgrade** — Haiku extraction quality is insufficient (shallow, hallucinated values, missed items like rent). Implement: Haiku reads PDF text → Sonnet (`claude-3-5-sonnet-20241022`) analyses extracted text (no PDF document type needed). Vercel Pro 300s timeout gives plenty of room for two sequential calls.
 
@@ -355,7 +373,7 @@ The build progressed through clear phases:
 
 3. **Verify step-through dialogue works end-to-end** — The auto-advance bug was fixed (`47c18ac`) but the full flow (auto items → confirms → questions → gaps → "Add items" button → items appear in category tabs) needs testing with a real document.
 
-### P1 — Core V2 features
+### P2 — Core V2 features (after design work)
 
 4. **"Something wrong?" correction flow** (spec 10b) — Make the auto-confirmed items list editable when the user clicks "Correct an item". Currently the button exists but does nothing.
 
@@ -363,7 +381,7 @@ The build progressed through clear phases:
 
 6. **Celebration pattern** (spec 09) — Green flash, count-up animations on category cards, toast on confirmation completion.
 
-### P2 — Completeness
+### P3 — Completeness
 
 7. **V1 → V2 data wiring** — Pipe interview session data into workspace to pre-populate categories and readiness state.
 
