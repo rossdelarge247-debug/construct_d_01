@@ -39,26 +39,39 @@ For a new session or contributor, read in this order:
 | 11 | [`v2/workspace-visual-redesign.md`](./v2/workspace-visual-redesign.md) | Bold 2026 direction — layout, colour zones, typography hierarchy |
 | 12 | [`v2/v2-decisions.md`](./v2/v2-decisions.md) | Architecture and UX decisions made during V2 build |
 
-### 3. Build specs (reference as needed)
+### 3. Build specs — current (post-pivot)
 
-The workspace specs are the detailed build-level specifications. Read the bolded ones first; others are reference.
+These are the active build specs following the V2 design pivot. Read in order.
 
 | # | Document | What it specifies |
 |---|----------|-------------------|
-| 13 | [`workspace-spec/01-design-system.md`](./workspace-spec/01-design-system.md) | Typography scale, spacing, colour usage rules |
-| 14 | [`workspace-spec/02-page-map.md`](./workspace-spec/02-page-map.md) | Workspace URL hierarchy |
-| 15 | [`workspace-spec/03-sidebar-navigation.md`](./workspace-spec/03-sidebar-navigation.md) | Sidebar structure, width, status indicators |
-| 16 | [`workspace-spec/04-workspace-home.md`](./workspace-spec/04-workspace-home.md) | Mission control page |
-| — | ~~[`workspace-spec/05-build-your-picture.md`](./workspace-spec/05-build-your-picture.md)~~ | **[SUPERSEDED]** Original layout |
-| 17 | **[`workspace-spec/05b-build-your-picture-revised.md`](./workspace-spec/05b-build-your-picture-revised.md)** | **Current build spec**: one page, three zones, two-tier tabs |
-| 18 | [`workspace-spec/06-category-detail.md`](./workspace-spec/06-category-detail.md) | Per-category deep-dive layout |
-| 19 | [`workspace-spec/07-future-phases.md`](./workspace-spec/07-future-phases.md) | Placeholder pages for V3–V5 |
-| 20 | [`workspace-spec/08-interaction-patterns.md`](./workspace-spec/08-interaction-patterns.md) | When to use modals, navigation, inline expansion |
-| 21 | **[`workspace-spec/09-upload-review-flow.md`](./workspace-spec/09-upload-review-flow.md)** | **Key unbuilt spec**: upload zone, review panel, side-by-side PDF, celebration |
-| 22 | **[`workspace-spec/10-ai-analysis-flow.md`](./workspace-spec/10-ai-analysis-flow.md)** | **Core to V2**: domain reasoning, staggered reveal |
-| 23 | **[`workspace-spec/10b-ai-tiered-questions.md`](./workspace-spec/10b-ai-tiered-questions.md)** | **Implemented**: four confidence tiers, step-through dialogue |
-| 24 | **[`workspace-spec/11-ai-question-mapping.md`](./workspace-spec/11-ai-question-mapping.md)** | **Not yet implemented**: 8-domain signal→question mapping |
-| 25 | [`workspace-spec/12-two-tier-tabs.md`](./workspace-spec/12-two-tier-tabs.md) | Page tabs + category tabs architecture |
+| 13 | **[`v2/v2-design-pivot.md`](./v2/v2-design-pivot.md)** | **Read first**: The design pivot — new IA, 3 phases, hub + hero panel, visual direction |
+| 14 | **[`workspace-spec/15-discovery-configuration-flow.md`](./workspace-spec/15-discovery-configuration-flow.md)** | **First-time experience**: Discovery dialogue, 10 screens, personalisation logic |
+| 15 | **[`workspace-spec/16-hero-panel-flow.md`](./workspace-spec/16-hero-panel-flow.md)** | **Core interaction**: Upload → processing → Q&A → summary state machine |
+| 16 | **[`workspace-spec/17-hub-page-states.md`](./workspace-spec/17-hub-page-states.md)** | **Hub page**: Section cards, fidelity labels, all page states |
+| 17 | **[`workspace-spec/13-extraction-decision-tree-documents.md`](./workspace-spec/13-extraction-decision-tree-documents.md)** | **AI logic**: What to extract per document type, questions, Form E mapping |
+| 18 | **[`workspace-spec/14-extraction-decision-tree-wizard.md`](./workspace-spec/14-extraction-decision-tree-wizard.md)** | **Wizard logic**: Manual input flows per section, question sequences |
+
+### 3b. Build specs — reference (pre-pivot, partially superseded)
+
+These specs preceded the design pivot. Some concepts carry forward; see `v2-design-pivot.md` for supersession details.
+
+| # | Document | Status |
+|---|----------|--------|
+| — | [`workspace-spec/01-design-system.md`](./workspace-spec/01-design-system.md) | Typography/spacing still relevant, visual direction updating |
+| — | [`workspace-spec/02-page-map.md`](./workspace-spec/02-page-map.md) | URL hierarchy needs updating for new IA |
+| — | ~~[`workspace-spec/03-sidebar-navigation.md`](./workspace-spec/03-sidebar-navigation.md)~~ | **Superseded** — sidebar replaced by hamburger + left nav |
+| — | ~~[`workspace-spec/04-workspace-home.md`](./workspace-spec/04-workspace-home.md)~~ | **Superseded** — replaced by hub page (spec 17) |
+| — | ~~[`workspace-spec/05-build-your-picture.md`](./workspace-spec/05-build-your-picture.md)~~ | **Superseded** — original layout |
+| — | ~~[`workspace-spec/05b-build-your-picture-revised.md`](./workspace-spec/05b-build-your-picture-revised.md)~~ | **Superseded** — two-tier tabs replaced by hub + hero panel |
+| — | [`workspace-spec/06-category-detail.md`](./workspace-spec/06-category-detail.md) | Concept partially relevant — per-section review handled differently now |
+| — | [`workspace-spec/07-future-phases.md`](./workspace-spec/07-future-phases.md) | Placeholder approach still valid, phase count changed (5→3) |
+| — | [`workspace-spec/08-interaction-patterns.md`](./workspace-spec/08-interaction-patterns.md) | Modal/navigation principles still relevant |
+| — | [`workspace-spec/09-upload-review-flow.md`](./workspace-spec/09-upload-review-flow.md) | Upload concept validated; implementation via hero panel now |
+| — | [`workspace-spec/10-ai-analysis-flow.md`](./workspace-spec/10-ai-analysis-flow.md) | AI analysis concept still valid |
+| — | [`workspace-spec/10b-ai-tiered-questions.md`](./workspace-spec/10b-ai-tiered-questions.md) | Tiered confidence model expressed through hero panel states |
+| — | ~~[`workspace-spec/11-ai-question-mapping.md`](./workspace-spec/11-ai-question-mapping.md)~~ | **Superseded** by specs 13 and 14 (decision trees) |
+| — | ~~[`workspace-spec/12-two-tier-tabs.md`](./workspace-spec/12-two-tier-tabs.md)~~ | **Superseded** — tabs removed in pivot |
 
 ### 4. V1 reference (if working on V1 or understanding the interview)
 
