@@ -91,6 +91,58 @@ V5  Reach Agreement / Make It Official                                ⬜ Future
 - Anti-hallucination prompt rules added but not yet verified with Sonnet-quality model
 - The two-step approach (Haiku reads PDF → Sonnet analyses text) should resolve all of these
 
+### 4.2.1 Known Issues: Extraction, Analysis & Presentation
+
+This is the most fragile area of the product. The pipeline technically works end-to-end (upload → AI → items appear) but the quality, intelligence, and UX do not yet match the design specs. Below is an explicit list of every observed issue.
+
+**Extraction issues (what the AI finds):**
+- Shallow extraction: Haiku misses items a human would catch — e.g. regular rent payments visible in transaction history, standing orders, direct debits
+- Hallucinated values: AI invented a £13k asset that was not in the uploaded document at all. Anti-hallucination prompt added but untested with a stronger model
+- Incomplete spending categorisation: bank statement transactions not fully categorised into the spending breakdown (housing, groceries, transport etc.)
+- Single-document limitation: each upload is analysed in isolation. No cross-document intelligence (e.g. spotting the same account across two statements, or noticing missing months)
+- Source descriptions may be vague ("Regular payment detected") rather than specific ("£1,150 standing order to Halifax on 1st of each month, page 2")
+
+**Analysis issues (how the AI reasons):**
+- Questions feel basic/generic rather than intelligent and contextual. The AI should reason like a financial analyst: "This £2,150 going out on the 1st looks like a mortgage or rent — which is it?" Instead it asks shallow confirm questions
+- Gap detection is weak: should notice missing pensions, savings accounts not referenced, partner income unknown — but gaps returned are generic
+- Confidence scoring may be inaccurate: items marked as "auto" (≥0.9 confidence) may not warrant that confidence level
+- No domain-specific intelligence per spec 11 (ai-question-mapping.md): the 8-domain signal→question mapping is specified but not yet driving the AI prompt. The prompt is generic rather than domain-aware
+- Tier assignments may be wrong: items that should be "confirm" end up as "auto", missing opportunities to ask the user about ambiguous items
+
+**Presentation issues (what the user sees):**
+- Processing animation (sparkle dots) too subtle to notice — user reported "no magical sparkling that I could see". Needs to be more visible while remaining elegant
+- Step-through dialogue had a dead-end bug (now fixed in `47c18ac`): after auto items revealed, nothing appeared next. Needs end-to-end verification with real data
+- After completing the dialogue and clicking "Add items", confirmed items should appear in the correct category tab with count updates and toast notification — this flow needs testing
+- No celebration moment after items are added (spec 09 calls for green flash, count-up animation, toast)
+- Auto-confirmed items list shows values but no way to correct them — "Something wrong? Correct an item" button exists but does nothing
+- No "Confirm all" bulk action as specified in spec 09
+- Items added to workspace may not map to the correct category/subcategory — the `DOC_TYPE_TO_CATEGORY` mapping in `build/page.tsx` is basic
+- Spending breakdown appears in auto-confirmed section but may not flow through to the outgoings category tab
+- No indication of which document an item came from (no source document linking)
+
+**Architecture issues (how the pipeline works):**
+- Single model constraint: only Haiku 4.5 works with PDF `type: 'document'`. Two-step approach (Haiku reads → Sonnet analyses) is the fix but not yet implemented
+- JSON truncation risk: if AI generates more than 4096 tokens of JSON, response gets cut off. Repair logic exists (3-tier: parse → repair brackets → extract partial items) but it's a workaround, not a solution
+- No streaming: the entire AI response must complete before anything shows to the user. Streaming would allow progressive reveal of results
+- No retry on failure: if the AI call fails, user sees an error and must manually retry
+- Uploaded documents are not stored: the PDF is sent to the AI but not persisted. Can't be reviewed later in the side-by-side modal (spec 09)
+
+**What the specs call for vs what exists:**
+
+| Spec requirement | Status | Gap |
+|-----------------|--------|-----|
+| Auto-confirmed items with staggered reveal (10b) | ✅ Built | Works but quality depends on model |
+| Quick confirmations one at a time (10b) | ✅ Built | Step-through dialogue implemented |
+| Genuine questions with context (10b) | 🔶 Partial | Questions lack domain-specific intelligence |
+| Gap prompts (10b) | 🔶 Partial | Gaps are generic, not document-aware |
+| "Something wrong?" correction flow (10b) | ❌ Not built | Button exists, does nothing |
+| PDF side-by-side review (09) | ❌ Not built | Needs document storage + PDF viewer |
+| Celebration on completion (09) | ❌ Not built | No green flash, no count-up |
+| Confirm all bulk action (09) | ❌ Not built | Only individual item addition |
+| Conversational processing messages (09) | 🔶 Partial | Messages exist but not specific to detected content |
+| Domain-aware AI questioning (11) | ❌ Not built | 8-domain mapping specified but not in prompt |
+| Cross-document intelligence | ❌ Not built | Each document analysed in isolation |
+
 ### 4.3 Workspace Components
 
 | Component | File | Status | Notes |
