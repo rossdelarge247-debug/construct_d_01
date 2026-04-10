@@ -1,195 +1,249 @@
 # Discovery & Configuration Flow
 
 **Purpose:** The first-time experience that personalises the hub. Asks what the user has, tells them what they need, and generates the evidence checklist and section cards.
-**Pattern:** One question per screen, conversational, progressive disclosure for follow-ups.
-**Duration:** ~90 seconds (10 screens core, sub-flows add time for complex cases).
+**Pattern:** One question per screen with inline progressive disclosure for follow-ups. No separate sub-flow screens — follow-ups expand within the current question.
+**Duration:** ~90 seconds (8 core screens, inline expansions add a few seconds for complex answers).
+
+---
+
+## Persistent UI elements during configuration
+
+### Progress bar
+
+A stepper/progress bar appears at the top of the config card on every screen. It shows:
+- Current position within the overall flow (filled segments)
+- Remaining steps (unfilled segments)
+
+The bar advances with each primary question. Inline progressive disclosure (estimates, counts) does NOT advance the bar — they're part of the same step.
+
+### Title bar
+
+During config, the title bar shows:
+- "Overview" (left) — page identity
+- "Configuring the service" (centre/right) — mode indicator
+
+### Section labels
+
+Each question screen has a section label above the question text that categorises the topic:
+- "Basics: Recap" (V1 playback)
+- "Income: Employment" (employment question)
+- "Assets: Property" (property question)
+- "Assets: Pensions" (pension question)
+- "Assets: Savings" (savings question)
+- "Liabilities: Debts" (debts question)
+- "Assets: Other" (other assets question)
+- "End of the beginning" (summary)
+
+These labels hint at the Form E structure without showing Form E section numbers.
+
+### Navigation
+
+Every question screen has:
+- **[Next]** — primary button, advances to next question
+- **Back** — link, returns to previous question
 
 ---
 
 ## Flow overview
 
 ```
-Welcome / V1 replay
+1a. First-time hub (Get started — single CTA, nothing else)
     ↓
-Employment → Property → Pensions → Savings → Debts → Other assets
-    ↓              ↓
-    (progressive disclosure sub-flows for complex answers)
+1b. V1 replay (if V1 data exists)
     ↓
-Document checklist (what you'll need and why)
-    ↓
-What do you have today? (select documents available)
-    ↓
-Estimates? (yes/no for gap-filling)
-    ↓
-Plan for today (confirmation + time estimate)
+1c. Discovery questions (Employment → Property → Pensions → Savings → Debts → Other)
+    ↓  ↑ (inline progressive disclosure: estimates, counts, follow-ups)
+1d. Config summary (lozenges showing what's needed)
     ↓
 → Hub (personalised, estimates pre-populated, hero panel ready)
 ```
 
 ---
 
-## Screen 1: Welcome / V1 replay
+## Screen 1a: First-time hub — pre-configuration
 
-### If V1 data exists
+**Title bar:** "Overview" (left), [TITLE BAR] (right). Nav bar with hamburger, bell (notifications), cog (settings).
 
-**Page title:** Clean, bold, minimal.
+**Page content: a single card on an otherwise empty page.**
 
-**Content:**
-
-> "Welcome to your workspace. Here's what we know from your plan:"
+> **[Progress bar — start position]**
 >
-> - You're married, separating
-> - You have 2 children (8 and 11)
-> - You own your home jointly
-> - You're employed (PAYE)
-> - Your confidence: high on income, low on pensions
+> **Start building your financial picture now**
 >
-> "We're going to use this to set up your financial picture. We just need to check a few things."
+> Start with rough estimates, or a recent current account bank statement, it takes seconds to begin preparing your disclosure picture. We will guide you through exactly what is needed, and you can come back as many times as needed.
+>
+> **[Get started]**
 
-**CTA:** [That looks right →] · [Some of this has changed →]
+**Nothing else on the page.** No section cards, no hero panel, no financial summary. The hub page exists but is intentionally empty until configuration generates its content.
 
-"Some has changed" opens the relevant items for inline correction — does not restart the interview.
-
-### If no V1 data
-
-**Content:**
-
-> "Let's set up your financial picture. We'll ask a few quick questions to understand your situation, then show you exactly what you need to gather."
-
-**CTA:** [Let's go →]
-
-### Design notes
-
-- Hyper-focused: one purpose per screen, nothing else
-- Clean page title at top
-- This is the first screen the user sees in the workspace — it must feel confident and purposeful, not tentative
+**Design principles:**
+- Hyper-focused first-time dashboard — wizard only, nothing else
+- Very clean page title
+- Single purpose, single CTA
+- The copy sets expectations: fast ("seconds"), flexible ("come back as many times"), two valid paths ("rough estimates, or a bank statement")
 
 ---
 
-## Screen 2: Employment
+## Screen 1b: V1 playback
+
+**Title bar:** "Overview" (left), "Configuring the service" (centre-right)
+
+**Progress bar:** Advanced to first segment.
+
+**Section label:** "Basics: Recap"
+
+**Content:**
+
+> Here's what we know from your plan
+>
+> - You're married, separating
+> - You have children
+> - You own your home jointly
+> - You have a mortgage
+
+**CTAs:** **[This looks right]** · Not quite right
+
+**If "Not quite right":** Opens relevant items for inline correction on the same screen. Does not restart the flow.
+
+**If no V1 data exists:** This screen is skipped. The flow advances directly from 1a to the first discovery question.
+
+---
+
+## Screen 1c: Discovery questions
+
+All discovery questions follow the same layout pattern:
+
+```
+┌─────────────────────────────────────────────┐
+│  [Progress bar]                              │
+│                                              │
+│  [Section label]                             │
+│  [Question text]                             │
+│                                              │
+│  ○ Option 1                                  │
+│  ○ Option 2                                  │
+│     ↳ [inline expansion if selected]         │
+│  ○ Option 3                                  │
+│  ○ Option 4                                  │
+│                                              │
+│  [Next]  Back                                │
+└─────────────────────────────────────────────┘
+```
+
+### Question: Employment
+
+**Section label:** "Income : Employment"
 
 **Question:** "How do you earn your income?"
 
-**Options:**
-- Employed (salary/wages)
-- Self-employed or company director
-- Both
-- Not currently working
-- Retired
+**Options (radio):**
+- ○ Employed (salary/wages)
+- ○ Self-employed or company director
+- ○ Both
+- ○ Not currently working
+- ○ Retired
+
+**Inline progressive disclosure:** If "Self-employed or company director" selected:
+> ↳ "What's your business structure?"
+> ○ Sole trader · ○ Limited company · ○ Partnership · ○ LLP
 
 **Triggers:**
-- "Employed" → Income section on hub, payslip in evidence checklist
-- "Self-employed or company director" → Income section + Business section on hub, SA302/tax returns/business accounts in evidence checklist
-- "Both" → Income + Business sections, all employment and business evidence
-- "Not currently working" → Income section (benefits focus), no payslip in checklist
-- "Retired" → Income section (pension income focus), pension section emphasised
+- Employed → Income section, payslip in evidence lozenges
+- Self-employed/director → Income + Business sections, SA302/tax returns/business accounts in evidence lozenges
+- Both → Income + Business, all employment and business evidence
+- Not currently working → Income section (benefits focus)
+- Retired → Income section (pension income focus)
 
-**Progressive disclosure:** If "Self-employed or company director" → sub-flow:
-> "What's your business structure?"
-> Sole trader · Limited company · Partnership · LLP
+### Question: Property
 
-This determines the depth of business section and which documents are needed (business accounts vs company accounts vs partnership accounts).
+**Section label:** "Assets : Property"
 
----
+**Question:** "Do you own a property"
 
-## Screen 3: Property
+**Options (radio):**
+- ○ Yes — I own (or jointly own) my home
+- ○ Yes — I own other property too (buy-to-let, abroad, land)
+- ○ Both
+- ○ No — I rent
+- ○ It's complicated
 
-**Question:** "Do you own any property?"
+**Inline progressive disclosure — property count:** If "other property too" or "Both" selected:
+> ↳ Numbered selector appears: **[1] [2] [3] [4]** — how many additional properties?
 
-**Options:**
-- Yes — I own (or jointly own) my home
-- Yes — I own other property too (buy-to-let, abroad, land)
-- No — I rent
-- It's complicated
+**Inline progressive disclosure — estimates:** If "own my home" or "Both" selected:
+> ↳ "Do you know the estimated value?" **[Please select ▾]** (dropdown with ranges or free input)
 
 **Triggers:**
-- "Own my home" → Your Home section on hub, mortgage statement + property valuation in evidence checklist
-- "Other property too" → Your Home + Other Property sections, evidence per property
-- "Rent" → No property section, but rent will be captured in Spending from bank statements
-- "It's complicated" → brief clarifier sub-flow (beneficial interest, trust, living with family, etc.)
+- Own home → Your Home section, mortgage statement + property valuation in evidence lozenges
+- Other property → Your Home + Other Property sections, evidence per property
+- Rent → No property section (rent captured from bank statements in Spending)
+- It's complicated → inline clarifier (beneficial interest, trust, living with family)
 
-**Progressive disclosure — estimates:** If property owned:
-> "Roughly, what do you think your home is worth?"
-> £[input] · I have no idea
+### Question: Pensions
 
-> "Is there a mortgage?"
-> Yes · No (owned outright)
-
-> If yes: "Roughly how much is outstanding on the mortgage?"
-> £[input] · I don't know
-
-These populate the Property section card on the hub as estimates immediately.
-
----
-
-## Screen 4: Pensions
+**Section label:** "Assets : Pensions"
 
 **Question:** "Do you have any pensions?"
 
-**Options:**
-- Yes — workplace pension
-- Yes — private/personal pension
-- Yes — more than one
-- I'm not sure
-- No
+**Options (radio):**
+- ○ Yes — workplace pension
+- ○ Yes — private/personal pension
+- ○ Yes — more than one
+- ○ I'm not sure
+- ○ No
+
+**Inline progressive disclosure — estimates:** If any "Yes" selected:
+> ↳ "Do you have any idea what it might be worth?" £[input] / No idea
+> ↳ "Have you requested a CETV?" Yes / No / I don't know what that is
+
+If "don't know what that is" → inline education: "A CETV is how pensions are valued for divorce. We'll help you request one — it's free but takes months, so starting early is important."
 
 **Triggers:**
-- Any "Yes" → Pensions section on hub, pension CETV letter in evidence checklist
-- "I'm not sure" → Pensions section still shown, with guidance: "Most people who've been employed have at least one. We'll help you find out." Evidence checklist includes pension tracing.
-- "No" → No pensions section (but can be added later via "+ More to disclose")
+- Any Yes → Pensions section, CETV letter in evidence lozenges
+- I'm not sure → Pensions section shown with guidance. Evidence lozenges include pension tracing.
+- No → No pensions section (addable later via "+ More to disclose")
 
-**Progressive disclosure — estimates:** If pension exists:
-> "Do you have any idea what it might be worth?"
-> Yes, roughly £[input] · No idea
+### Question: Savings and investments
 
-> "Have you requested a CETV (Cash Equivalent Transfer Value)?"
-> Yes · No · I don't know what that is
-
-If "don't know what that is" → brief education: "A CETV is how pensions are valued for divorce. We'll help you request one — it's free but takes months, so starting early is important."
-
----
-
-## Screen 5: Savings and investments
+**Section label:** "Assets : Savings"
 
 **Question:** "Do you have any savings, ISAs, or investments?"
 
-**Options:**
-- Yes — savings accounts
-- Yes — ISAs, shares, bonds, or investment funds
-- Yes — both
-- No
+**Options (radio):**
+- ○ Yes — savings accounts
+- ○ Yes — ISAs, shares, bonds, or investment funds
+- ○ Yes — both
+- ○ No
+
+**Inline progressive disclosure — estimates:** If any "Yes":
+> ↳ "Roughly how much across all accounts?" £[input] / I'm not sure
 
 **Triggers:**
-- Any "Yes" → Accounts section scope expanded, savings/investment statements in evidence checklist
-- "No" → Accounts section shows only current accounts
+- Any Yes → Accounts section expanded, savings/investment statements in evidence lozenges
+- No → Accounts section shows only current accounts
 
-**Progressive disclosure — estimates:** If savings exist:
-> "Roughly how much do you have in savings across all accounts?"
-> £[input] · I'm not sure
+### Question: Debts
 
----
-
-## Screen 6: Debts
+**Section label:** "Liabilities : Debts"
 
 **Question:** "Do you have any debts, loans, or credit cards?"
 
-**Options:**
-- Yes — credit cards
-- Yes — loans (personal, car, student)
-- Yes — both
-- No
+**Options (radio):**
+- ○ Yes — credit cards
+- ○ Yes — loans (personal, car, student)
+- ○ Yes — both
+- ○ No
+
+**Inline progressive disclosure — estimates:** If any "Yes":
+> ↳ "Roughly, how much do you owe in total?" £[input] / I'm not sure
 
 **Triggers:**
-- Any "Yes" → "What you owe" section on hub, credit card/loan statements in evidence checklist
-- "No" → No debts section
+- Any Yes → "What you owe" section, credit card/loan statements in evidence lozenges
+- No → No debts section
 
-**Progressive disclosure — estimates:** If debts exist:
-> "Roughly, how much do you owe in total?"
-> £[input] · I'm not sure
+### Question: Other assets
 
----
-
-## Screen 7: Other assets
+**Section label:** "Assets : Other"
 
 **Question:** "Do you have any of these?"
 
@@ -202,97 +256,58 @@ If "don't know what that is" → brief education: "A CETV is how pensions are va
 - ☐ None of these
 
 **Triggers:**
-- Any selection → Other Assets section on hub with relevant sub-categories
-- Crypto selected → explicit prompt later for approximate value
-- "None" → No other assets section
+- Any selection → Other Assets section with relevant sub-categories
+- None → No other assets section
 
 ---
 
-## Screen 8: Document checklist
+## Screen 1d: Configuration summary
 
-**Heading:** "Based on what you've told us, here's what you'll eventually need for full disclosure. You don't need it all today."
+**Progress bar:** Final segment — nearly complete.
 
-The checklist is **personalised** based on discovery answers. Only relevant items shown.
+**Section label:** "End of the beginning"
 
-| Document | What it fills | Shown if |
-|----------|-------------|----------|
-| Your current account statements (12 months) | Income, spending, accounts | Always |
-| Your payslips (last 3 months) | Income details, tax, pension contributions | Employed |
-| Your mortgage statement | Property debt, monthly payments | Owns property with mortgage |
-| Your pension statement or CETV letter | Pension value — takes months to get | Has pension |
-| Your savings/investment statements | Account balances | Has savings/investments |
-| Your credit card / loan statements | Debt balances, terms | Has debts |
-| Your SA302 / tax returns (2 years) | Self-employment income | Self-employed |
-| Your business accounts (2 years) | Business value, income | Has business |
+**Content:**
 
-Each item shows a one-line explanation of what it fills and why it matters. Items with long lead times (pension CETV) are flagged: "This takes months — start now."
+> **We now know everything you need to prepare**
+>
+> [Evidence lozenges — personalised from answers:]
+> - Income
+> - 1 Mortgage
+> - 2 Accounts
+> - Pensions
+> - Spending
+> - 2 Other assets
+
+**CTAs:** **[Next]** · Back
+
+**Design note:** These lozenges are the SAME component that appears in the hero panel on the hub. The user sees them generated here and then immediately recognises them on the hub. Visual continuity between config output and hub input.
+
+**"End of the beginning"** acknowledges this is setup, not the work itself. The real work starts on the hub.
 
 ---
 
-## Screen 9: What do you have today?
+## Transition to hub
 
-**Heading:** "Which of these do you have to hand today? Select all that apply."
+After the user clicks [Next] on the summary screen, the page transitions to the post-config hub:
 
-Checkboxes matching the personalised checklist from Screen 8:
-- ☐ Bank statements
-- ☐ Payslips
-- ☐ Mortgage statement
-- ☐ Pension documents
-- ☐ Savings/investment statements
-- ☐ Credit card / loan statements
-- ☐ Business documents
-- ☐ Other documents
-- ☐ I don't have any documents yet
-
-Whatever is selected determines the guided upload sequence in the hero panel. Unselected items become the "still to be uploaded" lozenges.
+- Hero panel appears with the evidence lozenges from the summary
+- Section cards appear below, personalised from config
+- Estimates entered during inline progressive disclosure are pre-populated in relevant section cards
+- Fidelity label shows "Not yet ready for first mediation conversation"
 
 ---
 
-## Screen 10: Estimates question
+## What the config flow does NOT include (change from previous spec)
 
-### If they have some documents but not all
+The following screens from the earlier spec version have been **removed** to keep the flow short:
 
-> "For the areas where you don't have documents yet, would you like to enter rough estimates?"
->
-> "Estimates help us build a first-draft picture faster. They'll be clearly marked as estimates and replaced when you upload evidence later."
->
-> [Yes — I'll estimate what I can →] · [No — I'll just work with what I have today →]
+- ~~Document checklist screen~~ — The config summary (1d) shows the lozenges which serve as the evidence checklist. A separate detailed checklist screen is unnecessary.
+- ~~"What do you have today?" screen~~ — The hero panel's drag-and-drop zone on the hub handles this. The user uploads what they have; the system classifies it. No need to pre-declare.
+- ~~"Estimates?" yes/no screen~~ — Estimates are captured inline during discovery questions (progressive disclosure). No separate gate needed.
+- ~~"Plan for today" screen~~ — The hero panel's ready state on the hub effectively shows this. Removing it gets the user to the hub faster.
 
-### If they have no documents
-
-> "No documents yet? No problem. We can build a sketch from what you know off the top of your head."
->
-> "This won't be as accurate as working from documents, but it gives you a starting point — and shows you exactly what documents to gather."
->
-> [Start with estimates →] · [I'd rather come back when I have documents →]
-
-"Come back" still shows the personalised checklist: "Here's what to gather. We'll be here when you're ready."
-
----
-
-## Screen 11: Plan for today (optional — may be cut for speed)
-
-**Heading:** "Here's what we'll do:"
-
-Summary of what's about to happen:
-
-> **Upload & analyse:**
-> ☑ Bank statements → fills income, spending, accounts
-> ☑ Payslips → fills income details
->
-> **Estimate:**
-> ☑ Property value
-> ☑ Rough pension value
->
-> **Skip for now:**
-> ○ Mortgage statement
-> ○ Savings statements
->
-> "This should take about 10–15 minutes."
-
-**CTA:** [Let's go →]
-
-**Design consideration:** This screen sets expectations and reduces anxiety ("I know what's about to happen and how long it will take"). But it adds one more screen before the user starts doing real work. Could be cut if the config flow feels too long — the hero panel's ready state effectively shows the same information.
+**Result:** The config flow is now 4 screens (1a → 1b → 1c questions → 1d summary) instead of 11. The core discovery questions (1c) may involve 6-7 question screens depending on the user's situation, but each is fast (5-10 seconds with inline expansions).
 
 ---
 
@@ -301,20 +316,17 @@ Summary of what's about to happen:
 The configuration flow produces:
 
 1. **Personalised section cards** for the hub — only sections relevant to this user
-2. **Evidence lozenges** in the hero panel — showing what documents are expected
-3. **Pre-populated estimates** in relevant section cards (if user chose to estimate)
-4. **The "still to upload" list** — documents the user said they have today become the guided upload sequence; everything else goes into "still to be uploaded" for return visits
-5. **Fidelity level** — typically "Not yet ready for first mediation conversation" (Sketch if estimates entered, otherwise pre-Sketch)
-
-The user arrives at the hub (Screen 1 of the upload flow) with everything personalised and ready.
+2. **Evidence lozenges** in the hero panel — showing what documents are expected (same lozenges shown in summary)
+3. **Pre-populated estimates** in relevant section cards (from inline progressive disclosure)
+4. **Fidelity level** — "Not yet ready for first mediation conversation" (Sketch if estimates entered, otherwise pre-Sketch)
 
 ---
 
 ## Return visit handling
 
 On return, the user lands directly on the hub — **not** the configuration flow. The hub shows:
-- Hero panel with "Still to be uploaded" title and remaining lozenges
+- Hero panel with remaining evidence lozenges and drag-and-drop zone
 - Section cards with cumulative data from all previous sessions
 - Fidelity level reflecting current state
 
-The configuration is a **one-time setup**. It can be re-entered via settings/profile if the user's situation changes (e.g., discovers they have a pension they didn't know about, or becomes self-employed).
+The configuration is a **one-time setup**. It can be re-entered via settings/profile if the user's situation changes.
