@@ -80,9 +80,16 @@ V5  Reach Agreement / Make It Official                                ⬜ Future
 
 **Known model constraints:**
 - `claude-haiku-4-5-20251001` is the only model confirmed working with `type: 'document'` PDF content blocks
-- `claude-3-5-sonnet-20241022` does NOT support PDF document type (returns error)
+- `claude-3-5-sonnet-20241022` does NOT support PDF document type (returns error/timeout)
 - `claude-sonnet-4-5-20241022` and `claude-sonnet-4-6` either don't exist in the API or aren't available on this key
-- **Upgrade path**: Use Haiku for PDF text extraction, then pipe extracted text to Sonnet for richer analysis (two-step)
+- **Upgrade path**: Use Haiku for PDF text extraction, then pipe extracted text to Sonnet for richer analysis (two-step approach). This is the top priority for improving extraction quality.
+
+**Current quality issues with Haiku (observed in testing):**
+- Extraction can be shallow — misses items like rent payments that should be detected
+- May hallucinate values not present in the document (e.g. invented £13k assets)
+- Questions can feel basic/generic rather than intelligent and contextual
+- Anti-hallucination prompt rules added but not yet verified with Sonnet-quality model
+- The two-step approach (Haiku reads PDF → Sonnet analyses text) should resolve all of these
 
 ### 4.3 Workspace Components
 
@@ -254,6 +261,10 @@ All specs are in `docs/` and should be treated as the source of truth for UX dec
 
 6. **Staggered reveal hook**: `useStaggeredReveal` fires on mount regardless of whether the component is visible. Works fine currently but would need attention if components are conditionally rendered differently.
 
+7. **Step-through dialogue auto-advance**: Fixed in final commit (`47c18ac`). After auto-confirmed items reveal, a `useEffect` now advances `currentStep` from 0 to 1 so confirms/questions/complete button appear. Without this, the UI dead-ends after showing auto items.
+
+8. **Sparkle animation visibility**: The sparkle/twinkle dots in the processing screen may be too subtle on some displays. User feedback: "no magical sparkling that I could see." May need larger dots, higher contrast, or a different animation approach (e.g. a shimmer gradient or animated SVG constellation).
+
 ---
 
 ## 10. Environment Variables (Vercel)
@@ -284,14 +295,26 @@ The build progressed through clear phases:
 
 ## 12. Immediate Next Session Priorities
 
-1. **Test the current deployment** — Haiku + improved prompt + step-through dialogue. Verify extraction quality, question relevance, no hallucination.
+### P0 — Must fix first
 
-2. **Two-step Sonnet upgrade** — If Haiku quality is insufficient, implement: Haiku reads PDF text → Sonnet analyses extracted text. This gives Sonnet-quality reasoning with Haiku-speed PDF reading.
+1. **Two-step Sonnet upgrade** — Haiku extraction quality is insufficient (shallow, hallucinated values, missed items like rent). Implement: Haiku reads PDF text → Sonnet (`claude-3-5-sonnet-20241022`) analyses extracted text (no PDF document type needed). Vercel Pro 300s timeout gives plenty of room for two sequential calls.
 
-3. **"Something wrong?" correction flow** — Make the auto-confirmed items list editable when the user clicks "Correct an item".
+2. **Processing animation** — Current sparkle dots are too subtle to notice. Replace with a more visible but still elegant animation (shimmer gradient, animated SVG constellation, or larger/brighter twinkle pattern). Reference emergent 2026 AI design patterns.
 
-4. **PDF side-by-side review** (spec 09) — Store uploaded PDFs in Supabase Storage. Build split-view modal with PDF viewer left, editable extracted data right. This is the biggest unbuilt feature.
+3. **Verify step-through dialogue works end-to-end** — The auto-advance bug was fixed (`47c18ac`) but the full flow (auto items → confirms → questions → gaps → "Add items" button → items appear in category tabs) needs testing with a real document.
 
-5. **Celebration pattern** — Green flash, count-up animations, toast on confirmation completion.
+### P1 — Core V2 features
 
-6. **V1 → V2 data wiring** — Pipe interview session data into workspace to pre-populate categories.
+4. **"Something wrong?" correction flow** (spec 10b) — Make the auto-confirmed items list editable when the user clicks "Correct an item". Currently the button exists but does nothing.
+
+5. **PDF side-by-side review modal** (spec 09) — Store uploaded PDFs in Supabase Storage. Build split-view modal with PDF viewer left, editable extracted data right. The Dext pattern. This is the biggest unbuilt feature.
+
+6. **Celebration pattern** (spec 09) — Green flash, count-up animations on category cards, toast on confirmation completion.
+
+### P2 — Completeness
+
+7. **V1 → V2 data wiring** — Pipe interview session data into workspace to pre-populate categories and readiness state.
+
+8. **Supabase persistence** — Replace localStorage with Supabase. Requires auth upgrade path.
+
+9. **PDF/email export from Summary tab** — Form E equivalent structured output.
