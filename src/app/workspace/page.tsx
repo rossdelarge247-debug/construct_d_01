@@ -56,8 +56,12 @@ export default function WorkspacePage() {
           onReviewStart={hub.startReview}
           onAutoConfirmAccept={hub.acceptAutoConfirm}
           onQuestionAnswer={hub.answerQuestion}
+          onQuestionSkip={hub.skipQuestion}
           onSummaryFinish={hub.finishSession}
           onUploadMore={hub.resetToReady}
+          onCancelReview={hub.cancelReview}
+          summaryAchievements={hub.summaryAchievements}
+          summaryTodoItems={hub.summaryTodoItems}
         />
 
         <div

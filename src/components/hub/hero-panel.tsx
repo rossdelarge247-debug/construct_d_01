@@ -1,6 +1,6 @@
 'use client'
 
-import { useCallback, useRef } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { Upload } from 'lucide-react'
 import { EvidenceLozenge } from './evidence-lozenge'
 import type {
@@ -22,8 +22,12 @@ interface HeroPanelProps {
   onReviewStart: () => void
   onAutoConfirmAccept: (acceptedIds: string[]) => void
   onQuestionAnswer: (questionId: string, answer: string) => void
+  onQuestionSkip: (questionId: string) => void
   onSummaryFinish: () => void
   onUploadMore: () => void
+  onCancelReview: () => void
+  summaryAchievements: string[]
+  summaryTodoItems: { text: string; helpLink?: string }[]
 }
 
 export function HeroPanel({
@@ -37,8 +41,12 @@ export function HeroPanel({
   onReviewStart,
   onAutoConfirmAccept,
   onQuestionAnswer,
+  onQuestionSkip,
   onSummaryFinish,
   onUploadMore,
+  onCancelReview,
+  summaryAchievements,
+  summaryTodoItems,
 }: HeroPanelProps) {
   return (
     <div className="bg-white rounded-lg p-8" style={{ boxShadow: 'var(--shadow-hero)' }}>
@@ -75,14 +83,28 @@ export function HeroPanel({
       {state === 'uploading_context' && <UploadingContextState context={uploadContext} />}
       {state === 'analysing' && <AnalysingState context={uploadContext} />}
       {state === 'review_ready' && <ReviewReadyState onReview={onReviewStart} onUploadMore={onUploadMore} />}
-      {state === 'auto_confirm' && <AutoConfirmState items={autoConfirmItems} onAccept={onAutoConfirmAccept} />}
+      {state === 'auto_confirm' && (
+        <AutoConfirmState
+          items={autoConfirmItems}
+          onAccept={onAutoConfirmAccept}
+          onCancel={onCancelReview}
+        />
+      )}
       {state === 'clarification' && questions[currentQuestionIndex] && (
         <ClarificationState
           question={questions[currentQuestionIndex]}
           onAnswer={onQuestionAnswer}
+          onSkip={onQuestionSkip}
         />
       )}
-      {state === 'summary' && <SummaryState onFinish={onSummaryFinish} onUploadMore={onUploadMore} />}
+      {state === 'summary' && (
+        <SummaryState
+          onFinish={onSummaryFinish}
+          onUploadMore={onUploadMore}
+          achievements={summaryAchievements}
+          todoItems={summaryTodoItems}
+        />
+      )}
     </div>
   )
 }
@@ -291,11 +313,21 @@ function ReviewReadyState({ onReview, onUploadMore }: { onReview: () => void; on
 function AutoConfirmState({
   items,
   onAccept,
+  onCancel,
 }: {
   items: AutoConfirmItem[]
   onAccept: (ids: string[]) => void
+  onCancel: () => void
 }) {
-  const acceptedIds = items.filter((i) => i.accepted).map((i) => i.id)
+  const [localItems, setLocalItems] = useState(items.map((i) => ({ ...i })))
+
+  const toggleItem = useCallback((id: string) => {
+    setLocalItems((prev) =>
+      prev.map((item) => item.id === id ? { ...item, accepted: !item.accepted } : item)
+    )
+  }, [])
+
+  const acceptedIds = localItems.filter((i) => i.accepted).map((i) => i.id)
 
   return (
     <div>
@@ -306,14 +338,12 @@ function AutoConfirmState({
         We automatically found these easy ones..
       </p>
       <div className="mt-4 space-y-3">
-        {items.map((item) => (
-          <label key={item.id} className="flex items-start gap-3 cursor-pointer">
+        {localItems.map((item) => (
+          <label key={item.id} className="flex items-start gap-3 cursor-pointer group">
             <input
               type="checkbox"
               checked={item.accepted}
-              onChange={() => {
-                // Toggle would be handled by parent state
-              }}
+              onChange={() => toggleItem(item.id)}
               className="mt-0.5 w-4 h-4 rounded border-grey-200 text-ink focus:ring-blue-600"
             />
             <div>
@@ -325,12 +355,16 @@ function AutoConfirmState({
       </div>
       <div className="mt-6 flex items-center gap-4">
         <button
-          onClick={() => onAccept(acceptedIds.length > 0 ? acceptedIds : items.map((i) => i.id))}
-          className="px-5 py-2.5 bg-ink text-white text-sm font-semibold rounded-md hover:opacity-90 transition-opacity"
+          onClick={() => onAccept(acceptedIds)}
+          disabled={acceptedIds.length === 0}
+          className="px-5 py-2.5 bg-ink text-white text-sm font-semibold rounded-md hover:opacity-90 transition-opacity disabled:opacity-40 disabled:cursor-not-allowed"
         >
-          Accept
+          Accept{acceptedIds.length > 0 ? ` (${acceptedIds.length})` : ''}
         </button>
-        <button className="text-sm text-blue-600 hover:underline">
+        <button
+          onClick={onCancel}
+          className="text-sm text-blue-600 hover:underline"
+        >
           Cancel and start again
         </button>
       </div>
@@ -343,10 +377,21 @@ function AutoConfirmState({
 function ClarificationState({
   question,
   onAnswer,
+  onSkip,
 }: {
   question: ClarificationQuestion
   onAnswer: (questionId: string, answer: string) => void
+  onSkip: (questionId: string) => void
 }) {
+  const [selectedValue, setSelectedValue] = useState<string | null>(null)
+
+  // Reset selection when question changes
+  useEffect(() => {
+    setSelectedValue(null)
+  }, [question.id])
+
+  const isBinary = question.options.length <= 2
+
   return (
     <div>
       <p className="text-xs font-semibold text-ink-tertiary uppercase tracking-wide">
@@ -356,13 +401,13 @@ function ClarificationState({
         {question.questionText}
       </p>
       {question.reasoning && (
-        <p className="mt-2 text-sm text-ink-secondary">
+        <p className="mt-2 text-sm text-ink-secondary leading-relaxed">
           {question.reasoning}
         </p>
       )}
 
-      {question.options.length <= 2 ? (
-        // Binary: primary button + link
+      {isBinary ? (
+        // Binary: primary button + secondary link
         <div className="mt-6 flex items-center gap-4">
           <button
             onClick={() => onAnswer(question.id, question.options[0].value)}
@@ -380,16 +425,24 @@ function ClarificationState({
           )}
         </div>
       ) : (
-        // Radio options
-        <div className="mt-4 space-y-3">
+        // Radio options with tracked selection
+        <div className="mt-4 space-y-2.5">
           {question.options.map((option) => (
-            <label key={option.value} className="flex items-center gap-3 cursor-pointer">
+            <label
+              key={option.value}
+              className={`flex items-center gap-3 p-3 rounded-md cursor-pointer transition-colors ${
+                selectedValue === option.value
+                  ? 'bg-blue-50 border border-blue-600/20'
+                  : 'hover:bg-grey-50'
+              }`}
+            >
               <input
                 type="radio"
                 name={question.id}
                 value={option.value}
-                className="w-4 h-4 border-grey-200 text-ink focus:ring-blue-600"
-                onChange={() => {}}
+                checked={selectedValue === option.value}
+                onChange={() => setSelectedValue(option.value)}
+                className="w-4 h-4 border-grey-200 text-blue-600 focus:ring-blue-600"
               />
               <span className="text-sm text-ink">{option.label}</span>
             </label>
@@ -397,15 +450,22 @@ function ClarificationState({
           <div className="mt-5 flex items-center gap-4">
             <button
               onClick={() => {
-                // Would use selected radio value
-                onAnswer(question.id, question.options[0].value)
+                if (selectedValue) {
+                  onAnswer(question.id, selectedValue)
+                }
               }}
-              className="px-5 py-2.5 bg-ink text-white text-sm font-semibold rounded-md hover:opacity-90 transition-opacity"
+              disabled={!selectedValue}
+              className="px-5 py-2.5 bg-ink text-white text-sm font-semibold rounded-md hover:opacity-90 transition-opacity disabled:opacity-40 disabled:cursor-not-allowed"
             >
-              {question.primaryOption || question.options[0].label}
+              {selectedValue
+                ? question.options.find((o) => o.value === selectedValue)?.label || 'Confirm'
+                : 'Select an option'}
             </button>
-            <button className="text-sm text-blue-600 hover:underline">
-              {question.secondaryLabel}
+            <button
+              onClick={() => onSkip(question.id)}
+              className="text-sm text-blue-600 hover:underline"
+            >
+              I&apos;ll answer this later
             </button>
           </div>
         </div>
@@ -416,25 +476,45 @@ function ClarificationState({
 
 // ═══ State 4: Summary ═══
 
-function SummaryState({ onFinish, onUploadMore }: { onFinish: () => void; onUploadMore: () => void }) {
+interface SummaryProps {
+  onFinish: () => void
+  onUploadMore: () => void
+  achievements: string[]
+  todoItems: { text: string; helpLink?: string }[]
+}
+
+function SummaryState({ onFinish, onUploadMore, achievements, todoItems }: SummaryProps) {
   return (
     <div>
-      <p className="text-base font-medium text-ink">
-        We&apos;ve just added a lot to your financial picture
-      </p>
+      {achievements.length > 0 && (
+        <>
+          <p className="text-base font-medium text-ink">
+            What&apos;s been achieved
+          </p>
+          <div className="mt-3 space-y-2">
+            {achievements.map((text, i) => (
+              <SummaryItem key={i} type="done" text={text} />
+            ))}
+          </div>
+        </>
+      )}
 
-      <div className="mt-4 space-y-2">
-        <SummaryItem type="done" text="Your monthly spending behaviours are ready for a first mediation chat or conversation" />
-        <SummaryItem type="done" text="We've got 2 months of your Barclays Bank current account statements, this is enough for a first mediation chat or conversation (10 more months for full disclosure)" />
-        <SummaryItem type="done" text="We've got a good understanding of your income, ready for a first mediation conversation" />
-      </div>
+      {todoItems.length > 0 && (
+        <>
+          <p className={`text-sm font-semibold text-ink ${achievements.length > 0 ? 'mt-6' : ''}`}>
+            On the todo list for next time...
+          </p>
+          <div className="mt-2 space-y-2">
+            {todoItems.map((item, i) => (
+              <SummaryItem key={i} type="todo" text={item.text} linkText={item.helpLink} />
+            ))}
+          </div>
+        </>
+      )}
 
-      <p className="mt-6 text-sm font-semibold text-ink">On the todo list for next time...</p>
-      <div className="mt-2 space-y-2">
-        <SummaryItem type="todo" text="Upload your pension details, we have your estimates, so this doesn't block your first mediation chat. But have you applied for the official valuation yet?" linkText="Help with this" />
-        <SummaryItem type="todo" text="Upload your mortgage statements" />
-        <SummaryItem type="todo" text="Upload your payslips for 3 months" />
-      </div>
+      {achievements.length === 0 && todoItems.length === 0 && (
+        <p className="text-sm text-ink-secondary">Your financial picture has been updated.</p>
+      )}
 
       <div className="mt-8 flex items-center gap-4">
         <button

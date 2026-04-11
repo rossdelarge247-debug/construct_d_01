@@ -335,9 +335,39 @@ export function useHub() {
     })
   }, [])
 
+  const skipQuestion = useCallback((questionId: string) => {
+    setQuestions((prev) =>
+      prev.map((q) => (q.id === questionId ? { ...q, answered: true, answer: 'skipped' } : q))
+    )
+    const nextIndex = currentQuestionIndex + 1
+    if (nextIndex < questions.length) {
+      setCurrentQuestionIndex(nextIndex)
+    } else {
+      setItems((prev) => {
+        const existingIds = new Set(prev.map((i) => i.id))
+        const remaining = pendingFinancialItems.current.filter((i) => !existingIds.has(i.id))
+        return remaining.length > 0 ? [...prev, ...remaining] : prev
+      })
+      setHeroPanelState('summary')
+    }
+  }, [currentQuestionIndex, questions])
+
+  const cancelReview = useCallback(() => {
+    setHeroPanelState('ready')
+    setQuestions([])
+    setAutoConfirmItems([])
+    setCurrentQuestionIndex(0)
+    pendingFinancialItems.current = []
+  }, [])
+
   const resetToReady = useCallback(() => {
     setHeroPanelState('ready')
   }, [])
+
+  // ═══ Dynamic summary content ═══
+
+  const summaryAchievements = generateAchievements(items, sections, uploadContext)
+  const summaryTodoItems = generateTodoItems(lozengeState, config, sections)
 
   // ═══ Section actions (stubs — spec 14 wizards) ═══
 
@@ -370,8 +400,12 @@ export function useHub() {
     startReview,
     acceptAutoConfirm,
     answerQuestion,
+    skipQuestion,
+    cancelReview,
     finishSession,
     resetToReady,
+    summaryAchievements,
+    summaryTodoItems,
     openManualInput,
     openSectionReview,
     addSection,
@@ -517,4 +551,97 @@ function calculateFidelity(
   }
 
   return 'sketch'
+}
+
+/**
+ * Generate dynamic summary achievements from actual processed data.
+ * Per spec 16: every achievement framed in terms of what the user can now DO.
+ */
+function generateAchievements(
+  items: FinancialItem[],
+  sections: SectionData[],
+  context: UploadContext,
+): string[] {
+  const achievements: string[] = []
+
+  const incomeItems = items.filter((i) => i.sectionKey === 'income' && i.confidence === 'confirmed')
+  if (incomeItems.length > 0) {
+    achievements.push("We've got a good understanding of your income, ready for a first mediation conversation")
+  }
+
+  const spendingItems = items.filter((i) => i.sectionKey === 'spending')
+  if (spendingItems.length > 0) {
+    achievements.push('Your monthly spending behaviours are ready for a first mediation chat or conversation')
+  }
+
+  const accountItems = items.filter((i) => i.sectionKey === 'accounts')
+  if (accountItems.length > 0) {
+    achievements.push(`We've identified ${accountItems.length} account${accountItems.length > 1 ? 's' : ''} from your statements`)
+  }
+
+  const propertyItems = items.filter((i) => i.sectionKey === 'property')
+  if (propertyItems.length > 0) {
+    achievements.push('Your property details have been captured')
+  }
+
+  const pensionItems = items.filter((i) => i.sectionKey === 'pensions')
+  if (pensionItems.length > 0) {
+    achievements.push('Your pension information has been recorded')
+  }
+
+  if (achievements.length === 0 && items.length > 0) {
+    achievements.push(`${items.length} item${items.length > 1 ? 's' : ''} added to your financial picture`)
+  }
+
+  return achievements
+}
+
+/**
+ * Generate dynamic todo items from remaining lozenges and section gaps.
+ * Per spec 16: todo items are specific and actionable with context.
+ */
+function generateTodoItems(
+  lozenges: EvidenceLozenge[],
+  config: ConfigAnswers,
+  sections: SectionData[],
+): { text: string; helpLink?: string }[] {
+  const todos: { text: string; helpLink?: string }[] = []
+
+  const emptyLozenges = lozenges.filter((l) => l.status === 'empty')
+  for (const lozenge of emptyLozenges) {
+    switch (lozenge.type) {
+      case 'pensions':
+        todos.push({
+          text: "Upload your pension details, we have your estimates, so this doesn't block your first mediation chat. But have you applied for the official valuation yet?",
+          helpLink: 'Help with this',
+        })
+        break
+      case 'mortgage_details':
+        todos.push({ text: 'Upload your mortgage statements' })
+        break
+      case 'payslips':
+        todos.push({ text: 'Upload your payslips for 3 months' })
+        break
+      case 'savings_account':
+        todos.push({ text: 'Upload your savings account statements' })
+        break
+      case 'credit_cards':
+        todos.push({ text: 'Upload your credit card or loan statements' })
+        break
+      case 'current_account':
+        todos.push({ text: 'Upload your current account bank statements (12 months ideal)' })
+        break
+    }
+  }
+
+  const emptyVisibleSections = sections.filter(
+    (s) => s.visible && s.status === 'not_started' && !s.estimateFromConfig
+  )
+  for (const section of emptyVisibleSections) {
+    if (!todos.some((t) => t.text.toLowerCase().includes(section.label.toLowerCase()))) {
+      todos.push({ text: `Add details for ${section.label}` })
+    }
+  }
+
+  return todos
 }
