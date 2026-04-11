@@ -2,126 +2,106 @@
 
 **Date:** 11 April 2026
 **Branch:** `claude/new-session-GUZLb`
-**Lines changed:** ~282 (well within 2,000 limit)
+**Commits:** 9
+**Lines changed:** ~890 code + ~275 spec/docs
 
 ---
 
 ## What happened this session
 
-### Diagnosis: 504 root cause identified and fixed
+### The pipeline blocker (Sessions 3-4) is resolved
 
-The pipeline 504 on Vercel was caused by using the **OpenAI API format** (`response_format`) instead of the **Anthropic SDK format** (`output_config`) for structured outputs.
+The two-step AI pipeline (Haiku reads PDF → Sonnet analyses text) now works end-to-end with real PDFs on Vercel. A real bank statement was uploaded, processed, and items appeared in section cards.
 
-**The bug:** `pipeline.ts` Step 2 (Sonnet analysis) passed:
-```typescript
-response_format: {
-  type: 'json_schema',
-  json_schema: { name: '...', schema, strict: true }
-}
-```
+### Root causes found and fixed
 
-**The fix:** Replaced with the correct Anthropic SDK 0.85 format:
-```typescript
-output_config: {
-  format: {
-    type: 'json_schema',
-    schema,
-  }
-}
-```
+**504 #1 — Wrong API parameter:**
+`response_format` (OpenAI API pattern) was used instead of `output_config` (Anthropic SDK 0.85). Grepped the entire SDK — zero references to `response_format`. Fixed across all 3 pipeline paths.
 
-**Evidence:** Grepped the entire `@anthropic-ai/sdk` package (0.85.0) — zero references to `response_format`. The SDK exports `OutputConfig` with `format?: JSONOutputFormat` where `JSONOutputFormat` is `{ type: 'json_schema', schema: {...} }`. The `response_format` parameter is OpenAI-specific and was never supported.
+**504 #2 — Schema validation:**
+Anthropic's structured outputs require `additionalProperties: false` on every `type: 'object'` in the JSON schema. Added to all 18 object definitions.
 
-**Impact:** Fixed all 3 occurrences across `extractFromPDF`, `extractFromImage`, and `extractFromText`. TypeScript compiles clean with the correct types.
+**504 #3 — Timeouts too aggressive:**
+SDK timeout was 45s per call — real PDFs take 30-60s for Haiku to read. Route `maxDuration` was 120s — total pipeline time is ~80s for a real PDF. Fixed: SDK 90s, route 300s.
 
-### Isolation test endpoint added
+**500 — Transform crash:**
+After pipeline succeeded, `transformExtractionResult` could crash and Vercel returned HTML 500 instead of JSON. Added defensive try/catch with stack trace logging.
 
-Created `/api/test-pipeline` to test Step 1 (Haiku classification) and Step 2 (Sonnet structured output) independently:
-- `GET /api/test-pipeline` — tests both steps with sample bank statement text
-- `GET /api/test-pipeline?step=1` — tests only Haiku classification
-- `GET /api/test-pipeline?step=2` — tests only Sonnet structured output with `output_config`
-- `POST /api/test-pipeline` — tests Haiku PDF reading with an uploaded file
+**200 but unparseable — Stream consumed:**
+Client called `response.json()` which consumed the body stream. On failure, `response.text()` returned empty. Fixed: read as text first, then `JSON.parse`.
 
-This follows Session 3's retro recommendation: "Create isolation tests for external dependencies."
+**Section cards empty — Two bugs:**
+1. `acceptAutoConfirm` matched items by label text (which differed). Fixed: match by ID prefix.
+2. Transformer only created `financialItems` for income, not payments or accounts. Fixed: all auto-confirmed data now creates section card items.
 
-### Visual quality pass started (spec 18)
+### Performance improvement
 
-1. **Processing animation replaced** — removed the purple diamond sparkle animation (whimsical, not matching spec 18). Replaced with Option C: a thin indeterminate progress line that sweeps across the hero panel. "Competent and measured, not magical or whimsical."
+Removed AI-generated reasoning, clarification questions, and gap analysis from the extraction schema. These are now generated deterministically by app code using spec 13 decision trees.
 
-2. **Typography fixes:**
-   - Hero heading: `text-lg` (18px) → `text-2xl` (24px) with -0.01em tracking (spec 18: hero-heading)
-   - Page title: `text-lg` (18px) → `text-[28px]` with -0.02em tracking (spec 18: page-title)
-   - Title bar height: `h-14` (56px) → explicit `var(--title-bar-height)` (56px)
-   - Body subtitle: `text-sm` → `text-[15px]` (spec 18: body)
+| Metric | Before | After |
+|--------|--------|-------|
+| Step 2 output tokens | 989 | 435 |
+| Step 2 latency | 70s | 33s |
+| Step 2 input tokens | 1,940 | 1,610 |
+| Question generation | AI (variable) | App code (deterministic) |
 
-3. **Button fixes:**
-   - Primary CTAs: `px-5 py-2.5 text-sm` → `px-6 py-3 text-[15px]` (spec 18: 12px 24px, 15px/600)
-   - "Share & collaborate" pill: `text-xs px-4 py-1.5` → `text-[13px] px-5 py-2` with `rounded-[var(--radius-pill)]`
-   - Links: `text-xs` → `text-[13px]` for "Manually input" and "Review details" (spec 18: small = 13px)
+### Real PDF test results
 
-4. **Section card spacing:** `space-y-4` → `space-y-4 sm:space-y-8` (spec 18: 32px desktop, 16px mobile)
+Uploaded a real NatWest Premier current account statement:
+- Step 1 (Haiku): 52.9s, 23,866 input / 5,805 output tokens, 16,774 chars extracted
+- Step 2 (Sonnet): 26.7s, 6,944 input / 1,718 output tokens, 27 items extracted
+- 5 auto-confirm items, 12 clarification questions, financial items created
+- Section cards populated with income, accounts, spending data
+
+### Visual quality pass (spec 18)
+
+- Processing animation: sparkle diamonds → indeterminate progress line
+- Hero heading: 18px → 24px, page title: 18px → 28px
+- Primary CTA padding: 10px/20px → 12px/24px
+- Section card gap: 16px → 32px desktop
+- Link text: 12px → 13px
+- Lozenge flyout: raw AI description → clean summary
+
+### Spec 19 written
+
+Based on real testing feedback, spec'd three improvements:
+1. Keyword lookup table — match payee names to Form E categories
+2. Payment aggregation — group multiple payments from same source
+3. Progressive category dropdown — Form E budget categories for unknowns
 
 ---
 
-## What was NOT done
+## Retrospective
 
-1. **Vercel deployment and end-to-end test** — the pipeline fix needs deploying to Vercel and testing with a real PDF upload. The isolation test endpoint (`/api/test-pipeline`) can verify each step independently.
+### What went well
 
-2. **Full visual quality pass** — only high-impact items were fixed. Remaining spec 18 work:
-   - Evidence lozenges need styling audit (slate-700 background, white text, micro 11px)
-   - Discovery flow typography and spacing
-   - Drag-and-drop zone min-height (200px per spec)
-   - Info boxes (blue-50/amber-50 with 3px left border)
-   - Radio/checkbox hit targets (44px per spec)
+- **Diagnose before fixing worked.** Grepping the SDK for `response_format` found the root cause in minutes. Previous sessions spent 5 deploy cycles guessing model IDs.
+- **Test endpoint paid off.** `/api/test-pipeline` isolated Step 1 and Step 2 independently, confirming the `additionalProperties` fix before touching the full pipeline.
+- **Schema slimming was the right call.** 52% latency reduction by removing fields the app generates better than the AI.
+- **Real PDF testing found real bugs.** Section cards empty, lozenge verbosity, detail text repetition — none visible without a real document.
 
-3. **Session 3's remaining backlog** — spec 14 wizards, section card actions, cross-document intelligence
+### What could improve
+
+- **Should have tested with a real PDF earlier.** The test endpoint uses sample text — the real PDF path had different failure modes (large base64, long Haiku processing, transform crashes).
+- **The response parsing bug was avoidable.** `response.json()` consuming the stream is a known fetch API gotcha — should have used text-first parsing from the start.
+- **Transform error handling should have been defensive from day one.** A try/catch around `transformExtractionResult` would have shown the actual error instead of Vercel's generic 500.
 
 ---
 
 ## Key decisions
 
-1. **`output_config.format` not `response_format`** — this is the correct Anthropic SDK pattern. Session 3 identified this as an unknown but never tested it in isolation.
-
-2. **Indeterminate progress line** — chose Option C from spec 18 over typing dots (Option B). The line is minimal, competent, and doesn't compete with the contextual processing messages below it.
-
-3. **Test endpoint kept simple** — `/api/test-pipeline` uses a hardcoded sample bank statement for GET requests. POST accepts a real file. No authentication required — this is a diagnostic endpoint.
-
----
-
-## Session discipline metrics
-
-- **Lines changed:** ~282 (36 modified + 160 new + 86 deleted)
-- **Files touched:** 6 (pipeline.ts, globals.css, hero-panel.tsx, section-cards.tsx, title-bar.tsx, test-pipeline/route.ts)
-- **TypeScript errors:** 0
-- **Commits:** Will be 1 atomic commit
+1. **`output_config.format` not `response_format`** — Anthropic SDK 0.85 pattern
+2. **AI extracts facts, app generates questions** — spec 13 decision trees in result-transformer.ts
+3. **90s SDK timeout, 300s maxDuration** — real PDFs need this headroom
+4. **Read response as text first, then JSON.parse** — avoids stream-consumed bug
+5. **Financial items created for ALL auto-confirmed data** — not just income
 
 ---
 
 ## Priority for next session
 
-### P0: Deploy and verify pipeline fix
-
-1. Push to branch, let Vercel auto-deploy
-2. Hit `/api/test-pipeline` on the deployed URL — verify Step 1 and Step 2 both return `status: "ok"`
-3. Hit `/api/test-pipeline?step=2` specifically — this was the broken path
-4. Upload a real PDF via the workspace UI and verify the full flow works end-to-end
-
-### P1: Complete visual quality pass
-
-5. Evidence lozenge styling (spec 18 section 4)
-6. Discovery flow typography and spacing
-7. Drag-and-drop zone (200px min-height, 2px dashed grey-200 border)
-8. Info boxes for advisory messages
-9. Focus states and accessibility (spec 18 section 7)
-
-### P2: Pipeline quality iteration
-
-10. Upload real documents and evaluate extraction quality
-11. Tune extraction prompts based on real output
-12. Verify confidence thresholds (0.95/0.80) produce good tier splits
-
-### P3: Section card actions
-
-13. Wire `openManualInput` — spec 14 wizard flows
-14. Wire `openSectionReview` — review details modal
-15. Wire `addSection` — section picker for adding missed sections
+1. **P0: Keyword lookup table** — string match in transformer, ~100 lines
+2. **P1: Payment aggregation** — group by normalised payee, ~150 lines
+3. **P3: Answered questions → financial items** — complete the data flow
+4. **P2: Progressive category dropdown** — new component for unknowns
+5. **P4: Visual quality pass** — remaining spec 18 items
