@@ -25,15 +25,11 @@ import {
   type P60Extraction,
 } from './extraction-schemas'
 
-// Models
-const HAIKU_MODEL = 'claude-haiku-4-5-20251001' // Only model confirmed working with PDF type: 'document'
-
-// Sonnet model candidates — tried in order. Previous sessions found some IDs
-// don't work on all API keys. The pipeline logs which model succeeded.
-const SONNET_CANDIDATES = [
-  'claude-sonnet-4-5-20241022',
-  'claude-sonnet-4-6-20250514',
-] as const
+// Models — verified working via /api/health on 11 April 2026
+// Date-suffixed IDs (claude-sonnet-4-5-20241022 etc.) return 404.
+// Plain IDs without dates work.
+const HAIKU_MODEL = 'claude-haiku-4-5-20251001'
+const SONNET_MODEL = 'claude-sonnet-4-6' // Best available — 1.2s on health check
 
 export type ExtractionResult =
   | BankStatementExtraction
@@ -94,7 +90,7 @@ export async function extractFromPDF(
   const timings = { classify: 0, extract: 0 }
   const diagnostics: PipelineDiagnostics = {
     step1: { model: HAIKU_MODEL, status: 'pending', inputTokens: null, outputTokens: null, timeMs: null, textLength: null, classificationResult: null, error: null },
-    step2: { model: SONNET_CANDIDATES[0], status: 'pending', inputTokens: null, outputTokens: null, timeMs: null, promptUsed: null, schemaUsed: null, extractionItemCount: null, error: null },
+    step2: { model: SONNET_MODEL, status: 'pending', inputTokens: null, outputTokens: null, timeMs: null, promptUsed: null, schemaUsed: null, extractionItemCount: null, error: null },
   }
 
   // ═══ Step 1: Haiku reads PDF + classifies ═══
@@ -200,127 +196,108 @@ ${CLASSIFICATION_PROMPT}`,
     }
   }
 
-  // ═══ Step 2: Analyse extracted text (try Sonnet candidates, fallback to Haiku) ═══
+  // ═══ Step 2: Sonnet analyses extracted text ═══
+  console.log(`[Pipeline] Step 2: ${SONNET_MODEL} analysing as ${classification.document_type}...`)
+  const step2Start = Date.now()
+
   const extractionPrompt = getExtractionPrompt(classification.document_type)
   const schema = getSchemaForType(classification.document_type)
 
+  diagnostics.step2.model = SONNET_MODEL
   diagnostics.step2.promptUsed = classification.document_type
   diagnostics.step2.schemaUsed = schema ? `${classification.document_type}_extraction` : 'none'
 
-  const step2Start = Date.now()
-  const modelErrors: string[] = []
-
-  // Try each Sonnet candidate
-  for (const modelId of SONNET_CANDIDATES) {
-    console.log(`[Pipeline] Step 2: Trying ${modelId} for ${classification.document_type}...`)
-    diagnostics.step2.model = modelId
-
-    try {
-      const step2Response = await client.messages.create({
-        model: modelId,
-        max_tokens: 8192,
-        system: 'You are a financial document analyst for UK divorce/separation cases. Extract data precisely from the provided text. Return structured JSON matching the required schema. Never invent values — only extract what is explicitly stated.',
-        messages: [{
-          role: 'user',
-          content: `${extractionPrompt}\n\nDOCUMENT TEXT:\n${rawText.substring(0, 15000)}`,
-        }],
-        ...(schema ? {
-          response_format: {
-            type: 'json_schema' as const,
-            json_schema: {
-              name: `${classification.document_type}_extraction`,
-              schema,
-              strict: true,
-            },
-          },
-        } : {}),
-      })
-
-      timings.extract = Date.now() - step2Start
-      const step2Text = step2Response.content.find(b => b.type === 'text')?.text ?? ''
-
-      diagnostics.step2.inputTokens = step2Response.usage.input_tokens
-      diagnostics.step2.outputTokens = step2Response.usage.output_tokens
-      diagnostics.step2.timeMs = timings.extract
-
-      console.log(`[Pipeline] Step 2 (${modelId}) complete: ${step2Response.usage.input_tokens} in, ${step2Response.usage.output_tokens} out, ${timings.extract}ms`)
-
-      let extraction: ExtractionResult
-      try {
-        extraction = JSON.parse(step2Text)
-      } catch {
-        const cleaned = step2Text.replace(/```json?\n?/g, '').replace(/```/g, '').trim()
-        try {
-          extraction = JSON.parse(cleaned)
-        } catch {
-          diagnostics.step2.status = 'error'
-          diagnostics.step2.error = `${modelId}: JSON parse failed. Response started with: "${step2Text.substring(0, 100)}..."`
-          return { classification, extraction: null, rawText, stepTimings: timings, diagnostics, error: 'Could not parse extraction results.' }
-        }
-      }
-
-      diagnostics.step2.status = 'success'
-      diagnostics.step2.extractionItemCount = countExtractionItems(extraction)
-      if (modelErrors.length > 0) {
-        diagnostics.step2.error = `Models failed before success: ${modelErrors.join('; ')}`
-      }
-
-      console.log(`[Pipeline] Extraction complete via ${modelId}`)
-      return { classification, extraction, rawText, stepTimings: timings, diagnostics, error: null }
-
-    } catch (modelError) {
-      const msg = modelError instanceof Error ? modelError.message : 'Unknown error'
-      console.warn(`[Pipeline] ${modelId} failed: ${msg}`)
-      modelErrors.push(`${modelId}: ${msg}`)
-    }
-  }
-
-  // All Sonnet candidates failed — fall back to Haiku (no structured outputs, lower quality)
-  console.log('[Pipeline] All Sonnet models failed. Falling back to Haiku for analysis...')
-  diagnostics.step2.model = HAIKU_MODEL + ' (fallback)'
-
   try {
-    const fallbackResponse = await client.messages.create({
-      model: HAIKU_MODEL,
+    const step2Response = await client.messages.create({
+      model: SONNET_MODEL,
       max_tokens: 8192,
-      system: 'You are a financial document analyst. Extract data precisely from the text below. Return valid JSON matching the extraction format. Never invent values.',
+      system: 'You are a financial document analyst for UK divorce/separation cases. Extract data precisely from the provided text. Return structured JSON matching the required schema. Never invent values — only extract what is explicitly stated.',
       messages: [{
         role: 'user',
-        content: `${extractionPrompt}\n\nDOCUMENT TEXT:\n${rawText.substring(0, 15000)}\n\nIMPORTANT: Return valid JSON only. No markdown, no code fences, no explanation. Just the JSON object.`,
+        content: `${extractionPrompt}\n\nDOCUMENT TEXT:\n${rawText.substring(0, 15000)}`,
       }],
+      ...(schema ? {
+        response_format: {
+          type: 'json_schema' as const,
+          json_schema: {
+            name: `${classification.document_type}_extraction`,
+            schema,
+            strict: true,
+          },
+        },
+      } : {}),
     })
 
     timings.extract = Date.now() - step2Start
-    const fallbackText = fallbackResponse.content.find(b => b.type === 'text')?.text ?? ''
+    const step2Text = step2Response.content.find(b => b.type === 'text')?.text ?? ''
 
-    diagnostics.step2.inputTokens = fallbackResponse.usage.input_tokens
-    diagnostics.step2.outputTokens = fallbackResponse.usage.output_tokens
+    diagnostics.step2.inputTokens = step2Response.usage.input_tokens
+    diagnostics.step2.outputTokens = step2Response.usage.output_tokens
     diagnostics.step2.timeMs = timings.extract
 
-    const cleaned = fallbackText.replace(/```json?\n?/g, '').replace(/```/g, '').trim()
-    const extraction = JSON.parse(cleaned)
+    console.log(`[Pipeline] Step 2 complete: ${step2Response.usage.input_tokens} in, ${step2Response.usage.output_tokens} out, ${timings.extract}ms`)
+
+    let extraction: ExtractionResult
+    try {
+      extraction = JSON.parse(step2Text)
+    } catch {
+      const cleaned = step2Text.replace(/```json?\n?/g, '').replace(/```/g, '').trim()
+      try {
+        extraction = JSON.parse(cleaned)
+      } catch {
+        diagnostics.step2.status = 'error'
+        diagnostics.step2.error = `JSON parse failed. Response started with: "${step2Text.substring(0, 200)}..."`
+        return { classification, extraction: null, rawText, stepTimings: timings, diagnostics, error: 'Could not parse extraction results.' }
+      }
+    }
 
     diagnostics.step2.status = 'success'
     diagnostics.step2.extractionItemCount = countExtractionItems(extraction)
-    diagnostics.step2.error = `Sonnet models all failed (${modelErrors.join('; ')}). Haiku fallback succeeded — extraction quality may be lower.`
 
-    console.log('[Pipeline] Haiku fallback succeeded')
+    console.log(`[Pipeline] Extraction complete for ${classification.document_type}`)
     return { classification, extraction, rawText, stepTimings: timings, diagnostics, error: null }
 
-  } catch (fallbackError) {
-    const fallbackMsg = fallbackError instanceof Error ? fallbackError.message : 'Unknown'
-    timings.extract = Date.now() - step2Start
-    diagnostics.step2.status = 'error'
-    diagnostics.step2.timeMs = timings.extract
-    diagnostics.step2.error = `All models failed. Sonnet: ${modelErrors.join('; ')}. Haiku fallback: ${fallbackMsg}`
+  } catch (step2Error) {
+    const msg = step2Error instanceof Error ? step2Error.message : 'Unknown error'
+    console.error(`[Pipeline] ${SONNET_MODEL} failed: ${msg}`)
 
-    return {
-      classification,
-      extraction: null,
-      rawText,
-      stepTimings: timings,
-      diagnostics,
-      error: `Analysis failed with all available models. ${modelErrors[0] || fallbackMsg}`,
+    // Fall back to Haiku (lower quality, no structured outputs)
+    console.log('[Pipeline] Falling back to Haiku for analysis...')
+    diagnostics.step2.error = `${SONNET_MODEL}: ${msg}`
+
+    try {
+      const fallbackResponse = await client.messages.create({
+        model: HAIKU_MODEL,
+        max_tokens: 8192,
+        system: 'You are a financial document analyst. Extract data precisely. Return valid JSON matching the extraction format. Never invent values.',
+        messages: [{
+          role: 'user',
+          content: `${extractionPrompt}\n\nDOCUMENT TEXT:\n${rawText.substring(0, 15000)}\n\nIMPORTANT: Return valid JSON only. No markdown, no code fences, no explanation.`,
+        }],
+      })
+
+      timings.extract = Date.now() - step2Start
+      const fallbackText = fallbackResponse.content.find(b => b.type === 'text')?.text ?? ''
+      const cleaned = fallbackText.replace(/```json?\n?/g, '').replace(/```/g, '').trim()
+      const extraction = JSON.parse(cleaned)
+
+      diagnostics.step2.status = 'success'
+      diagnostics.step2.model = HAIKU_MODEL + ' (fallback)'
+      diagnostics.step2.inputTokens = fallbackResponse.usage.input_tokens
+      diagnostics.step2.outputTokens = fallbackResponse.usage.output_tokens
+      diagnostics.step2.timeMs = timings.extract
+      diagnostics.step2.extractionItemCount = countExtractionItems(extraction)
+      diagnostics.step2.error = `Sonnet failed (${msg}). Haiku fallback succeeded — quality may be lower.`
+
+      return { classification, extraction, rawText, stepTimings: timings, diagnostics, error: null }
+    } catch (fallbackError) {
+      const fallbackMsg = fallbackError instanceof Error ? fallbackError.message : 'Unknown'
+      timings.extract = Date.now() - step2Start
+      diagnostics.step2.status = 'error'
+      diagnostics.step2.timeMs = timings.extract
+      diagnostics.step2.error = `Sonnet: ${msg}. Haiku fallback: ${fallbackMsg}`
+
+      return { classification, extraction: null, rawText, stepTimings: timings, diagnostics, error: `Analysis failed: ${msg}` }
     }
   }
 }
@@ -396,7 +373,7 @@ ${CLASSIFICATION_PROMPT}`,
     const schema = getSchemaForType(classification.document_type)
 
     const step2Response = await client.messages.create({
-      model: SONNET_CANDIDATES[0],
+      model: SONNET_MODEL,
       max_tokens: 8192,
       system: 'You are a financial document analyst for UK divorce/separation cases. Extract data precisely. Return structured JSON. Never invent values.',
       messages: [{
@@ -471,7 +448,7 @@ export async function extractFromText(
     const schema = getSchemaForType(classification.document_type)
 
     const extractResponse = await client.messages.create({
-      model: SONNET_CANDIDATES[0],
+      model: SONNET_MODEL,
       max_tokens: 8192,
       system: 'You are a financial document analyst. Extract data precisely. Return structured JSON. Never invent values.',
       messages: [{
@@ -526,7 +503,7 @@ function countExtractionItems(extraction: ExtractionResult): number {
 function createEmptyDiagnostics(): PipelineDiagnostics {
   return {
     step1: { model: HAIKU_MODEL, status: 'pending', inputTokens: null, outputTokens: null, timeMs: null, textLength: null, classificationResult: null, error: null },
-    step2: { model: SONNET_CANDIDATES[0], status: 'pending', inputTokens: null, outputTokens: null, timeMs: null, promptUsed: null, schemaUsed: null, extractionItemCount: null, error: null },
+    step2: { model: SONNET_MODEL, status: 'pending', inputTokens: null, outputTokens: null, timeMs: null, promptUsed: null, schemaUsed: null, extractionItemCount: null, error: null },
   }
 }
 
