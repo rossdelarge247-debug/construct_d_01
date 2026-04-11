@@ -38,11 +38,36 @@ export type ExtractionResult =
   | CreditCardStatementExtraction
   | P60Extraction
 
+export interface PipelineDiagnostics {
+  step1: {
+    model: string
+    status: 'pending' | 'success' | 'error'
+    inputTokens: number | null
+    outputTokens: number | null
+    timeMs: number | null
+    textLength: number | null
+    classificationResult: string | null
+    error: string | null
+  }
+  step2: {
+    model: string
+    status: 'pending' | 'skipped' | 'success' | 'error'
+    inputTokens: number | null
+    outputTokens: number | null
+    timeMs: number | null
+    promptUsed: string | null
+    schemaUsed: string | null
+    extractionItemCount: number | null
+    error: string | null
+  }
+}
+
 export interface PipelineResult {
   classification: DocumentClassification
   extraction: ExtractionResult | null
   rawText: string
   stepTimings: { classify: number; extract: number }
+  diagnostics: PipelineDiagnostics
   error: string | null
 }
 
@@ -58,6 +83,10 @@ export async function extractFromPDF(
   const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY })
 
   const timings = { classify: 0, extract: 0 }
+  const diagnostics: PipelineDiagnostics = {
+    step1: { model: HAIKU_MODEL, status: 'pending', inputTokens: null, outputTokens: null, timeMs: null, textLength: null, classificationResult: null, error: null },
+    step2: { model: SONNET_MODEL, status: 'pending', inputTokens: null, outputTokens: null, timeMs: null, promptUsed: null, schemaUsed: null, extractionItemCount: null, error: null },
+  }
 
   // ═══ Step 1: Haiku reads PDF + classifies ═══
   console.log('[Pipeline] Step 1: Haiku reading PDF and classifying...')
@@ -101,6 +130,10 @@ ${CLASSIFICATION_PROMPT}`,
     timings.classify = Date.now() - step1Start
     const step1Text = step1Response.content.find(b => b.type === 'text')?.text ?? ''
 
+    diagnostics.step1.inputTokens = step1Response.usage.input_tokens
+    diagnostics.step1.outputTokens = step1Response.usage.output_tokens
+    diagnostics.step1.timeMs = timings.classify
+
     console.log(`[Pipeline] Step 1 complete: ${step1Response.usage.input_tokens} in, ${step1Response.usage.output_tokens} out, ${timings.classify}ms`)
 
     // Parse the two-part response
@@ -124,25 +157,36 @@ ${CLASSIFICATION_PROMPT}`,
       }
     }
 
+    diagnostics.step1.textLength = rawText.length
+    diagnostics.step1.classificationResult = `${classification.document_type} (${classification.confidence})`
+    diagnostics.step1.status = 'success'
+
     console.log(`[Pipeline] Classified as: ${classification.document_type} (confidence: ${classification.confidence}), text length: ${rawText.length} chars`)
 
     if (rawText.length < 50) {
+      diagnostics.step2.status = 'skipped'
+      diagnostics.step2.error = 'Insufficient text extracted from document'
       return {
         classification,
         extraction: null,
         rawText,
         stepTimings: timings,
+        diagnostics,
         error: 'Could not extract readable text from this document. Try a digital PDF from your online banking.',
       }
     }
   } catch (step1Error) {
     const msg = step1Error instanceof Error ? step1Error.message : 'Unknown error'
     console.error('[Pipeline] Step 1 failed:', msg)
+    diagnostics.step1.status = 'error'
+    diagnostics.step1.error = msg
+    diagnostics.step2.status = 'skipped'
     return {
       classification: { document_type: 'unknown', confidence: 0, provider: null, description: 'Step 1 failed' },
       extraction: null,
       rawText: '',
       stepTimings: timings,
+      diagnostics,
       error: `Could not read this document: ${msg}`,
     }
   }
@@ -153,6 +197,9 @@ ${CLASSIFICATION_PROMPT}`,
 
   const extractionPrompt = getExtractionPrompt(classification.document_type)
   const schema = getSchemaForType(classification.document_type)
+
+  diagnostics.step2.promptUsed = classification.document_type
+  diagnostics.step2.schemaUsed = schema ? `${classification.document_type}_extraction` : 'none'
 
   try {
     const step2Response = await client.messages.create({
@@ -178,6 +225,10 @@ ${CLASSIFICATION_PROMPT}`,
     timings.extract = Date.now() - step2Start
     const step2Text = step2Response.content.find(b => b.type === 'text')?.text ?? ''
 
+    diagnostics.step2.inputTokens = step2Response.usage.input_tokens
+    diagnostics.step2.outputTokens = step2Response.usage.output_tokens
+    diagnostics.step2.timeMs = timings.extract
+
     console.log(`[Pipeline] Step 2 complete: ${step2Response.usage.input_tokens} in, ${step2Response.usage.output_tokens} out, ${timings.extract}ms`)
 
     // With structured outputs, this should always be valid JSON
@@ -193,15 +244,21 @@ ${CLASSIFICATION_PROMPT}`,
       try {
         extraction = JSON.parse(cleaned)
       } catch {
+        diagnostics.step2.status = 'error'
+        diagnostics.step2.error = 'JSON parse failed even after cleanup'
         return {
           classification,
           extraction: null,
           rawText,
           stepTimings: timings,
+          diagnostics,
           error: 'Could not parse extraction results. Please try again.',
         }
       }
     }
+
+    diagnostics.step2.status = 'success'
+    diagnostics.step2.extractionItemCount = countExtractionItems(extraction)
 
     console.log(`[Pipeline] Extraction complete for ${classification.document_type}`)
     return {
@@ -209,6 +266,7 @@ ${CLASSIFICATION_PROMPT}`,
       extraction,
       rawText,
       stepTimings: timings,
+      diagnostics,
       error: null,
     }
   } catch (step2Error) {
@@ -232,20 +290,28 @@ ${CLASSIFICATION_PROMPT}`,
       const cleaned = fallbackText.replace(/```json?\n?/g, '').replace(/```/g, '').trim()
       const extraction = JSON.parse(cleaned)
 
+      diagnostics.step2.status = 'success'
+      diagnostics.step2.error = `Sonnet failed (${msg}), Haiku fallback succeeded`
+      diagnostics.step2.model = HAIKU_MODEL + ' (fallback)'
       console.log('[Pipeline] Haiku fallback succeeded')
       return {
         classification,
         extraction,
         rawText,
         stepTimings: timings,
+        diagnostics,
         error: null,
       }
     } catch (fallbackError) {
+      const fallbackMsg = fallbackError instanceof Error ? fallbackError.message : 'Unknown'
+      diagnostics.step2.status = 'error'
+      diagnostics.step2.error = `Sonnet: ${msg}. Haiku fallback: ${fallbackMsg}`
       return {
         classification,
         extraction: null,
         rawText,
         stepTimings: timings,
+        diagnostics,
         error: `Analysis failed: ${msg}. Please try again.`,
       }
     }
@@ -311,7 +377,7 @@ ${CLASSIFICATION_PROMPT}`,
     }
 
     if (rawText.length < 50) {
-      return { classification, extraction: null, rawText, stepTimings: timings, error: 'Could not read enough text from this image. Try a clearer photo or upload as PDF.' }
+      return { classification, extraction: null, rawText, stepTimings: timings, diagnostics: createEmptyDiagnostics(), error: 'Could not read enough text from this image. Try a clearer photo or upload as PDF.' }
     }
 
     // Step 2: Same as PDF pipeline
@@ -343,7 +409,7 @@ ${CLASSIFICATION_PROMPT}`,
     const step2Text = step2Response.content.find(b => b.type === 'text')?.text ?? ''
     const extraction = JSON.parse(step2Text.replace(/```json?\n?/g, '').replace(/```/g, '').trim())
 
-    return { classification, extraction, rawText, stepTimings: timings, error: null }
+    return { classification, extraction, rawText, stepTimings: timings, diagnostics: createEmptyDiagnostics(), error: null }
   } catch (error) {
     const msg = error instanceof Error ? error.message : 'Unknown error'
     return {
@@ -351,6 +417,7 @@ ${CLASSIFICATION_PROMPT}`,
       extraction: null,
       rawText: '',
       stepTimings: timings,
+      diagnostics: createEmptyDiagnostics(),
       error: `Could not process image: ${msg}`,
     }
   }
@@ -414,7 +481,7 @@ export async function extractFromText(
     const extractText = extractResponse.content.find(b => b.type === 'text')?.text ?? ''
     const extraction = JSON.parse(extractText.replace(/```json?\n?/g, '').replace(/```/g, '').trim())
 
-    return { classification, extraction, rawText: text, stepTimings: timings, error: null }
+    return { classification, extraction, rawText: text, stepTimings: timings, diagnostics: createEmptyDiagnostics(), error: null }
   } catch (error) {
     const msg = error instanceof Error ? error.message : 'Unknown error'
     return {
@@ -422,12 +489,33 @@ export async function extractFromText(
       extraction: null,
       rawText: text,
       stepTimings: timings,
+      diagnostics: createEmptyDiagnostics(),
       error: `Could not process text: ${msg}`,
     }
   }
 }
 
 // ═══ Helpers ═══
+
+function countExtractionItems(extraction: ExtractionResult): number {
+  if ('income_deposits' in extraction) {
+    return (extraction.income_deposits?.length || 0) + (extraction.regular_payments?.length || 0)
+  }
+  if ('gross_pay' in extraction) return 1
+  if ('outstanding_balance' in extraction && 'lender' in extraction) return 1
+  if ('cetv_value' in extraction) return 1
+  if ('current_balance' in extraction) return 1
+  if ('outstanding_balance' in extraction) return 1
+  if ('total_pay' in extraction) return 1
+  return 0
+}
+
+function createEmptyDiagnostics(): PipelineDiagnostics {
+  return {
+    step1: { model: HAIKU_MODEL, status: 'pending', inputTokens: null, outputTokens: null, timeMs: null, textLength: null, classificationResult: null, error: null },
+    step2: { model: SONNET_MODEL, status: 'pending', inputTokens: null, outputTokens: null, timeMs: null, promptUsed: null, schemaUsed: null, extractionItemCount: null, error: null },
+  }
+}
 
 function getSchemaForType(documentType: string) {
   switch (documentType) {

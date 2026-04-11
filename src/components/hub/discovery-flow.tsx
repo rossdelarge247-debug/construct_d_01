@@ -11,7 +11,7 @@ interface DiscoveryFlowProps {
 
 type ConfigStep = 'welcome' | 'v1_replay' | 'employment' | 'property' | 'pensions' | 'savings' | 'debts' | 'other_assets' | 'summary'
 
-const STEP_ORDER: ConfigStep[] = ['welcome', 'employment', 'property', 'pensions', 'savings', 'debts', 'other_assets', 'summary']
+const STEP_ORDER: ConfigStep[] = ['welcome', 'v1_replay', 'employment', 'property', 'pensions', 'savings', 'debts', 'other_assets', 'summary']
 
 export function DiscoveryFlow({ config, onConfigUpdate, onConfigComplete }: DiscoveryFlowProps) {
   const [currentStep, setCurrentStep] = useState<ConfigStep>('welcome')
@@ -47,6 +47,9 @@ export function DiscoveryFlow({ config, onConfigUpdate, onConfigComplete }: Disc
 
       {currentStep === 'welcome' && (
         <WelcomeStep onNext={goNext} />
+      )}
+      {currentStep === 'v1_replay' && (
+        <V1ReplayStep config={config} onUpdate={onConfigUpdate} onNext={goNext} onBack={goBack} />
       )}
       {currentStep === 'employment' && (
         <EmploymentStep config={config} onUpdate={onConfigUpdate} onNext={goNext} onBack={goBack} />
@@ -161,6 +164,77 @@ function WelcomeStep({ onNext }: { onNext: () => void }) {
       >
         Get started
       </button>
+    </div>
+  )
+}
+
+// ═══ Step: V1 Replay ═══
+// Spoofed V1 data until wired to real interview session.
+// Scenario: married, children, 1 house £500,000, mortgaged.
+
+const SPOOFED_V1_DATA = [
+  { label: 'Relationship', value: 'Married, separating' },
+  { label: 'Children', value: 'Yes' },
+  { label: 'Property', value: 'Own jointly — estimated £500,000' },
+  { label: 'Mortgage', value: 'Yes' },
+]
+
+function V1ReplayStep({
+  config,
+  onUpdate,
+  onNext,
+  onBack,
+}: {
+  config: ConfigAnswers
+  onUpdate: (u: Partial<ConfigAnswers>) => void
+  onNext: () => void
+  onBack: () => void
+}) {
+  const handleConfirm = () => {
+    // Pre-populate config from V1 data
+    onUpdate({
+      v1DataConfirmed: true,
+      ownsProperty: true,
+      propertyCount: 1,
+      propertyEstimate: 500000,
+      hasMortgage: true,
+      hasChildren: true,
+    })
+    onNext()
+  }
+
+  return (
+    <div>
+      <p className="text-xs font-semibold text-ink-tertiary uppercase tracking-wide mb-2">
+        Basics : Recap
+      </p>
+      <h3 className="text-lg font-medium text-ink">
+        Here&apos;s what we know from your plan
+      </h3>
+      <div className="mt-5 bg-blue-50 border border-blue-600/10 rounded-md p-5">
+        <div className="space-y-3">
+          {SPOOFED_V1_DATA.map((item) => (
+            <div key={item.label} className="flex items-center justify-between">
+              <span className="text-sm text-ink-secondary">{item.label}</span>
+              <span className="text-sm font-semibold text-ink">{item.value}</span>
+            </div>
+          ))}
+        </div>
+      </div>
+      <div className="mt-8 flex items-center gap-4">
+        <button
+          onClick={handleConfirm}
+          className="px-5 py-2.5 bg-ink text-white text-sm font-semibold rounded-md hover:opacity-90 transition-opacity"
+        >
+          This looks right
+        </button>
+        <button
+          onClick={onBack}
+          className="text-sm text-blue-600 hover:underline"
+        >
+          Not quite right
+        </button>
+      </div>
     </div>
   )
 }

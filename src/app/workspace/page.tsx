@@ -5,6 +5,7 @@ import { HeroPanel } from '@/components/hub/hero-panel'
 import { SectionCards } from '@/components/hub/section-cards'
 import { DiscoveryFlow } from '@/components/hub/discovery-flow'
 import { FidelityLabel } from '@/components/hub/fidelity-label'
+import { DebugPanel } from '@/components/hub/debug-panel'
 import { useHub } from '@/hooks/use-hub'
 import type { HeroPanelState } from '@/types/hub'
 
@@ -62,6 +63,14 @@ export default function WorkspacePage() {
           onCancelReview={hub.cancelReview}
           summaryAchievements={hub.summaryAchievements}
           summaryTodoItems={hub.summaryTodoItems}
+        />
+
+        <DebugPanel
+          diagnostics={hub.lastDiagnostics as any}
+          classification={hub.lastClassification as any}
+          transformedCounts={hub.lastTransformedCounts}
+          error={hub.uploadContext.error}
+          visible={!!(hub.lastDiagnostics || hub.uploadContext.error)}
         />
 
         <div

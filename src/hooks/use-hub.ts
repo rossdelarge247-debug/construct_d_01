@@ -99,6 +99,10 @@ export function useHub() {
   })
   // Financial items produced by the transformer, held until Q&A completes
   const pendingFinancialItems = useRef<FinancialItem[]>([])
+  // Pipeline diagnostics for debug panel
+  const [lastDiagnostics, setLastDiagnostics] = useState<Record<string, unknown> | null>(null)
+  const [lastClassification, setLastClassification] = useState<Record<string, unknown> | null>(null)
+  const [lastTransformedCounts, setLastTransformedCounts] = useState<{ autoConfirm: number; questions: number; financialItems: number } | null>(null)
 
   // Load persisted state on mount
   useEffect(() => {
@@ -198,8 +202,17 @@ export function useHub() {
         return
       }
 
-      const { result, transformed } = data
+      const { result, transformed, diagnostics: pipelineDiagnostics } = data
       const classification = result.classification
+
+      // Store diagnostics for debug panel
+      setLastDiagnostics(pipelineDiagnostics || null)
+      setLastClassification(classification || null)
+      setLastTransformedCounts(transformed ? {
+        autoConfirm: transformed.autoConfirmItems?.length || 0,
+        questions: transformed.questions?.length || 0,
+        financialItems: transformed.financialItems?.length || 0,
+      } : null)
 
       // Update context with classification info
       setUploadContext((prev) => ({
@@ -406,6 +419,9 @@ export function useHub() {
     resetToReady,
     summaryAchievements,
     summaryTodoItems,
+    lastDiagnostics,
+    lastClassification,
+    lastTransformedCounts,
     openManualInput,
     openSectionReview,
     addSection,

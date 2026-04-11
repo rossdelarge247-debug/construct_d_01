@@ -17,6 +17,7 @@ function buildResponse(result: PipelineResult) {
       error: result.error,
     },
     transformed,
+    diagnostics: result.diagnostics,
   })
 }
 
