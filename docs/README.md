@@ -9,7 +9,9 @@
 
 | Document | Purpose |
 |----------|---------|
-| **[`HANDOFF.md`](./HANDOFF.md)** | **Read this first.** Canonical handoff document. Current state, what's built, what's not, known issues, priorities. |
+| **[`HANDOFF-SESSION-3.md`](./HANDOFF-SESSION-3.md)** | **Read this first.** Session 3 handoff — pipeline 504 blocker, retro, remaining backlog. |
+| [`HANDOFF-SESSION-2.md`](./HANDOFF-SESSION-2.md) | Session 2 handoff — design pivot, hub architecture, AI pipeline rebuild. |
+| [`HANDOFF.md`](./HANDOFF.md) | Original handoff document — V2 build state as of 10 April. |
 
 ---
 
