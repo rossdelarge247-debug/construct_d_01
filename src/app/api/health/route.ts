@@ -33,6 +33,12 @@ export async function GET() {
     'claude-haiku-4-5-20251001',
     'claude-sonnet-4-5-20241022',
     'claude-sonnet-4-6-20250514',
+    'claude-sonnet-4-5-latest',
+    'claude-sonnet-4-6-latest',
+    'claude-3-5-sonnet-20241022',
+    'claude-3-5-sonnet-latest',
+    'claude-sonnet-4-5',
+    'claude-sonnet-4-6',
   ]
 
   for (const model of modelsToTest) {
