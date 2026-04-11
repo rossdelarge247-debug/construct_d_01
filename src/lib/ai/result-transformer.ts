@@ -130,6 +130,14 @@ function transformBankStatement(data: BankStatementExtraction): TransformedResul
     if (payment.confidence >= AUTO_CONFIRM_THRESHOLD) {
       // High confidence — auto-confirm (spec 13: obvious items)
       autoConfirmItems.push({ id, label: `${categoryLabel}: ${paymentDesc}`, detail: `Form E ${getFormEField(payment.likely_category)}`, accepted: true })
+      // Create financial item so it appears in section cards
+      financialItems.push({
+        id: `fi-${id}`, sectionKey: paymentToSection(payment.likely_category),
+        label: `${payment.payee} (${categoryLabel.toLowerCase()})`,
+        value: payment.amount, period: payment.frequency === 'monthly' || payment.frequency === 'annual' ? payment.frequency : 'monthly', ownership: 'yours', confidence: 'confirmed',
+        sourceDocumentId: null, sourceDescription: paymentDesc,
+        isInherited: false, isPreMarital: false, asAtDate: now, createdAt: now, updatedAt: now,
+      })
     } else {
       // Spec 13 decision tree: generate question based on category + signal
       const question = generatePaymentQuestion(payment)
@@ -138,6 +146,22 @@ function transformBankStatement(data: BankStatementExtraction): TransformedResul
       }
     }
   }
+
+  // ═══ Account details → Accounts section ═══
+  financialItems.push({
+    id: `fi-account-${data.provider.replace(/\s+/g, '-').toLowerCase()}-${Date.now()}`,
+    sectionKey: 'accounts',
+    label: `${data.provider} ${data.account_type === 'current' ? 'current account' : data.account_type === 'savings' ? 'savings account' : 'account'}${data.account_number_last4 ? ` ****${data.account_number_last4}` : ''}`,
+    value: data.closing_balance,
+    period: 'total',
+    ownership: data.is_joint ? 'joint' : 'yours',
+    confidence: 'confirmed',
+    sourceDocumentId: null,
+    sourceDescription: data.statement_period_start && data.statement_period_end
+      ? `Statement: ${data.statement_period_start} to ${data.statement_period_end}`
+      : `${data.provider} statement`,
+    isInherited: false, isPreMarital: false, asAtDate: now, createdAt: now, updatedAt: now,
+  })
 
   // ═══ Spec 13: Joint account detection ═══
   if (data.is_joint) {
@@ -996,5 +1020,16 @@ function getFormEField(category: string): string {
     case 'utilities': return '3.1'
     case 'council_tax': return '3.1'
     default: return '3.1'
+  }
+}
+
+function paymentToSection(category: string): SectionKey {
+  switch (category) {
+    case 'mortgage': return 'property'
+    case 'rent': return 'spending'
+    case 'pension_contribution': return 'pensions'
+    case 'loan_repayment': return 'debts'
+    case 'child_maintenance': return 'spending'
+    default: return 'spending'
   }
 }

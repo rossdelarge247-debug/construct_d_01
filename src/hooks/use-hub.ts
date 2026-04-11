@@ -316,9 +316,10 @@ export function useHub() {
 
   const acceptAutoConfirm = useCallback((acceptedIds: string[]) => {
     // Add the pre-built financial items from the transformer for accepted auto-confirm items
+    // Match by ID prefix: auto-confirm id "income-acme-123" → financial item id "fi-income-acme-123"
     const accepted = new Set(acceptedIds)
     const itemsToAdd = pendingFinancialItems.current.filter(
-      (fi) => autoConfirmItems.some((ai) => accepted.has(ai.id) && fi.label === ai.label)
+      (fi) => accepted.has(fi.id.replace(/^fi-/, ''))
     )
 
     if (itemsToAdd.length > 0) {
