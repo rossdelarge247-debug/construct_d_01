@@ -1,4 +1,6 @@
-# Workspace Design Spec — 05: Build Your Picture
+> **SUPERSEDED** — This spec is replaced by `05b-build-your-picture-revised.md` (tabbed inline model) and `12-two-tier-tabs.md` (Preparation/Summary page tabs). Retained for design history only. Do not use for new implementation work.
+
+# Workspace Design Spec — 05: Build Your Picture (ARCHIVED)
 
 ## URL: /workspace/build
 

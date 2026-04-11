@@ -1,4 +1,6 @@
-# Workspace Design Spec — 06: Category Detail
+> **SUPERSEDED** — The `/workspace/build/{category}` detail page is no longer needed. Under the tabbed model (`05b` + `12`), all category work happens inline within component-level tabs. Retained for design history only.
+
+# Workspace Design Spec — 06: Category Detail (ARCHIVED)
 
 ## URL: /workspace/build/{category}
 

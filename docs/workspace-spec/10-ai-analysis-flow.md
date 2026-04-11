@@ -1,4 +1,6 @@
-# Workspace Design Spec — 10: AI-Led Analysis Flow
+> **SUPERSEDED** — This domain-by-domain analysis approach was refined into the tiered confidence model in `10b-ai-tiered-questions.md`. The domain intelligence from this spec and `11-ai-question-mapping.md` should drive the server-side AI prompt, but the user-facing UI follows 10b's simpler tiered pattern. Retained for design context.
+
+# Workspace Design Spec — 10: AI-Led Analysis Flow (ARCHIVED)
 
 ## What this replaces
 

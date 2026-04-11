@@ -1,6 +1,6 @@
-# V2 Session Handoff Document
+# Decouple — Master Handoff Document
 
-**Date:** 10 April 2026
+**Last updated:** 11 April 2026 (Session 4 review)
 **Product:** Calm Separation Workspace (working title: Decouple)
 **Repository:** rossdelarge247-debug/construct_d_01
 **Branch:** claude/project-planning-sprint-zero-odNO5
@@ -269,20 +269,24 @@ All specs are in `docs/` and should be treated as the source of truth for UX dec
 - `docs/v2/workspace-visual-redesign.md` — Bold visual direction critique and principles
 
 ### Workspace UI/UX Specs (the detailed build specs)
-- `docs/workspace-spec/01-design-system.md` — Typography scale, spacing, rhythm
-- `docs/workspace-spec/02-page-map.md` — Workspace URL hierarchy
-- `docs/workspace-spec/03-sidebar-navigation.md` — Sidebar structure and status indicators
-- `docs/workspace-spec/04-workspace-home.md` — Mission control page
-- `docs/workspace-spec/05-build-your-picture.md` — Original Build page spec
-- `docs/workspace-spec/05b-build-your-picture-revised.md` — Revised with tabs (supersedes 05)
-- `docs/workspace-spec/06-category-detail.md` — Category deep-dive pages
-- `docs/workspace-spec/07-future-phases.md` — Placeholder pages for V3–V5
-- `docs/workspace-spec/08-interaction-patterns.md` — When to use modals vs inline vs navigation
-- **`docs/workspace-spec/09-upload-review-flow.md`** — Upload zone design, review panel, side-by-side PDF modal, celebration pattern. **Key unbuilt spec.**
-- **`docs/workspace-spec/10-ai-analysis-flow.md`** — AI-led analysis replacing generic extraction. **Core to V2.**
-- **`docs/workspace-spec/10b-ai-tiered-questions.md`** — Four-tier question UX with interaction counts. **Now implemented as step-through dialogue.**
-- `docs/workspace-spec/11-ai-question-mapping.md` — Signal→question mapping across 8 domains
-- `docs/workspace-spec/12-two-tier-tabs.md` — Page tabs + category tabs architecture
+
+**Active specs (use for implementation):**
+- `01-design-system.md` — Typography scale, spacing, rhythm, borders, shadows
+- `02-page-map.md` — Workspace URL hierarchy
+- `03-sidebar-navigation.md` — Sidebar structure and status indicators
+- `04-workspace-home.md` — Mission control page
+- **`05b-build-your-picture-revised.md`** — Current page layout: one page, three stacked zones, tabbed categories
+- `07-future-phases.md` — Educational zero-data states for V3–V5
+- `08-interaction-patterns.md` — When to use modals vs inline vs navigation
+- **`09-upload-review-flow.md`** — Upload zone, review panel, side-by-side PDF modal, celebration. **Key unbuilt spec.**
+- **`10b-ai-tiered-questions.md`** — Four-tier question UX (auto/confirm/question/gap). **Core implemented spec.**
+- **`11-ai-question-mapping.md`** — Signal→question mapping across 8 domains. **Not yet in AI prompt.**
+- **`12-two-tier-tabs.md`** — Page tabs (Preparation/Summary) + category tabs
+
+**Archived specs (superseded, retained for design history):**
+- ~~`05-build-your-picture.md`~~ — Superseded by 05b (card grid → tabbed model)
+- ~~`06-category-detail.md`~~ — Superseded by 05b+12 (separate page → inline tab)
+- ~~`10-ai-analysis-flow.md`~~ — Superseded by 10b (domain-by-domain → tiered confidence). Note: the domain intelligence from 10 + spec 11 should still drive the server-side AI prompt; only the user-facing UI follows 10b.
 
 ---
 
@@ -345,46 +349,53 @@ The build progressed through clear phases:
 
 ---
 
-## 12. Immediate Next Session Priorities
+## 12. Session History
 
-### P0 — Design work needed before more code
+| Session | Date | Focus | Key Outcomes |
+|---------|------|-------|--------------|
+| 1 | Apr 2026 | V0 + V1 foundation | Platform, auth, design tokens, 10-step interview, AI plan generation |
+| 2 | Apr 2026 | V2 workspace build | Upload pipeline, extraction, review, categories, visual redesign |
+| 3 | 10 Apr | V2 AI pipeline debug | Model fallback chain, timeout fixes, sparkle animation, step-through dialogue. Retro: jumped to fixes before diagnosing, 5+ deploy cycles wasted on model IDs |
+| 4 | 11 Apr | Documentation review | Full doc audit, archived superseded specs (05, 06, 10), identified data model gaps, created session backlog |
 
-**The analysis flow needs more design thinking before further implementation.** The current approach jumped to code too quickly. The structure, presentation, flow, and interaction patterns need deeper specification through wireframes and detailed design before building more. Specifically:
+---
 
-- **Data field combination logic**: How should the AI combine and simplify extracted data for presentation? E.g. multiple salary credits should become one "Employment income" line, not 4 separate transactions. Regular standing orders should be grouped by purpose. The rules for how raw transaction data becomes clean financial items need explicit specification.
+## 13. Session Backlog
 
-- **Assumptions and simplification heuristics**: What assumptions should the AI make to reduce the number of questions? E.g. if there's a regular £1,150 payment to a building society, assume mortgage without asking. If HMRC credits appear monthly, assume salary without confirming. The more the AI can confidently resolve, the fewer questions the user faces. These heuristics need documenting per document type.
+Each session should be focused and output a context block for the next. Priorities flow top-down.
 
-- **Dialogue interaction design**: The step-through dialogue needs wireframes showing exactly what each step looks like, how answers affect subsequent steps, what happens when a user changes their mind, and how the flow adapts based on what the document contains. The current implementation is mechanical (show card, get answer, next card) rather than conversational.
+### Session 5 — Diagnose & Fix Pipeline (NEXT)
+- **Read Vercel function logs** for `/api/documents/extract` — 11 console.log breadcrumbs will pinpoint the 504
+- **One targeted fix** based on log evidence (API key? SDK timeout? JSON parse?)
+- **Add SDK-level timeout** (`timeout: 90000` in provider.ts) — gives clean error before Vercel's 120s kills
+- **Verify end-to-end** with a real document on Vercel: upload → tiered UI → items in category tabs
+- Deliverable: pipeline works reliably on production
 
-- **Data presentation hierarchy**: How should extracted items be grouped and displayed? Currently it's a flat list of values. Should it be organised by: account → income vs outgoings → individual items? Or by confidence tier? The visual hierarchy and information architecture needs designing before building.
+### Session 6 — Two-Step Analysis + Domain Prompt
+- **Implement Haiku→Sonnet two-step**: Haiku extracts text from PDF, Sonnet analyses text with domain-aware prompt
+- **Rewrite AI prompt** using spec 11's 8-domain signal→question mapping
+- **Add combination heuristics**: multiple salary credits → one "Employment income" line, standing orders grouped by purpose
+- Deliverable: extraction quality matches spec 10b expectations (3-5 taps, intelligent questions)
 
-- **Cross-field intelligence**: Some fields inform others. If the AI detects joint account, that affects ownership of all items. If rent is detected, property questions change. If self-employment income appears, business category activates. These relationships need mapping out.
+### Session 7 — Data Model + Correction Flow
+- **Expand confidence model**: `'known' | 'estimated'` → `'known' | 'estimated' | 'unsure' | 'unknown'` per V1 spec
+- **Add source document linking** to items (prerequisite for side-by-side review)
+- **Build "Something wrong?" correction flow** (spec 10b) — inline editing of auto-confirmed items
+- **Write pipeline tests**: `parseAnalysisResponse`, `repairTruncatedJson`, category mapping
+- Deliverable: data model ready for Supabase persistence
 
-- **Document type-specific flows**: A bank statement produces a very different analysis from a pension letter or a payslip. Each document type should have its own tailored presentation and question flow, not a one-size-fits-all template. Wireframes needed per type.
+### Session 8 — Celebration + Processing Animation
+- **Confirmation celebration** (spec 09): green flash, count-up on category cards, toast
+- **Processing animation redesign**: agree visual direction first, then build (shimmer/constellation/other)
+- **Conversational processing messages**: reference detected content ("Found a Barclays statement...")
+- Deliverable: upload→confirm flow feels polished and intentional
 
-**Recommendation**: Before writing more code, produce detailed wireframes and interaction specs (similar to the level of detail in specs 09, 10b, and 11) covering the above. The specs that exist are good but were written before we saw real AI output — they need updating based on what we've learned.
-
-### P1 — Technical fixes (can run in parallel with design)
-
-1. **Two-step Sonnet upgrade** — Haiku extraction quality is insufficient (shallow, hallucinated values, missed items like rent). Implement: Haiku reads PDF text → Sonnet (`claude-3-5-sonnet-20241022`) analyses extracted text (no PDF document type needed). Vercel Pro 300s timeout gives plenty of room for two sequential calls.
-
-2. **Processing animation** — Current sparkle dots are too subtle to notice. Replace with a more visible but still elegant animation (shimmer gradient, animated SVG constellation, or larger/brighter twinkle pattern). Reference emergent 2026 AI design patterns.
-
-3. **Verify step-through dialogue works end-to-end** — The auto-advance bug was fixed (`47c18ac`) but the full flow (auto items → confirms → questions → gaps → "Add items" button → items appear in category tabs) needs testing with a real document.
-
-### P2 — Core V2 features (after design work)
-
-4. **"Something wrong?" correction flow** (spec 10b) — Make the auto-confirmed items list editable when the user clicks "Correct an item". Currently the button exists but does nothing.
-
-5. **PDF side-by-side review modal** (spec 09) — Store uploaded PDFs in Supabase Storage. Build split-view modal with PDF viewer left, editable extracted data right. The Dext pattern. This is the biggest unbuilt feature.
-
-6. **Celebration pattern** (spec 09) — Green flash, count-up animations on category cards, toast on confirmation completion.
-
-### P3 — Completeness
-
-7. **V1 → V2 data wiring** — Pipe interview session data into workspace to pre-populate categories and readiness state.
-
-8. **Supabase persistence** — Replace localStorage with Supabase. Requires auth upgrade path.
-
-9. **PDF/email export from Summary tab** — Form E equivalent structured output.
+### Future Sessions (unscheduled, order TBD)
+- PDF side-by-side review modal (spec 09) — needs document storage first
+- Supabase persistence — replace localStorage, requires auth upgrade
+- V1 → V2 data wiring — needs implementation spec for field mapping
+- Safeguarding wiring — V1 flags → V2 workspace behaviour
+- PDF/email export from Summary tab
+- Self-employment flow (needs spec first)
+- Mobile experience pass (needs spec first)
+- Cross-document intelligence
