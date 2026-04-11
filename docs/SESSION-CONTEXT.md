@@ -5,73 +5,96 @@ Stack: Next.js 16.2, React 19, TypeScript, Tailwind 4, Supabase, Claude AI, Verc
 Branch: `claude/new-session-GUZLb`
 
 ## Product Vision
-Decouple replaces the 28-page Form E paper process with an intelligent, document-led workspace. Users going through separation in England & Wales upload financial documents; AI extracts, organises, and structures everything into court-ready disclosure. The product serves the "squeezed middle" — the 96% increase in self-represented people who can't afford £5,000+ solicitor fees but need more than form-filing.
+Decouple replaces the 28-page Form E paper process with an intelligent, document-led workspace. Users going through separation in England & Wales upload financial documents; AI extracts, organises, and structures everything into court-ready disclosure.
 
 ## Principles
-- **"A warm hand on a cold day"** — compassionate, professional, never patronising, never clinical. The warmth lives in the words and guidance; the interface is sophisticated and empowering
-- **Quality first, rigour always** — no shortcuts, no MVPs. Design before code. This should feel like it was built in 2026
-- **Upload-first, review-by-exception** — AI does 90% of the work. The user confirms 10% via 3-5 taps. The appearance of magic
-- **One thing at a time** — one question per screen, one decision per moment. Reduce cognitive load at every step. These users are stressed, often alone, often late at night
-- **Every question maps to Form E** — if the answer doesn't fill a disclosure field, don't ask it. No wasted user effort
-- **Safeguarding is not an add-on** — woven into every interaction. Exit This Page on every screen. Coercive control and financial abuse screening from V1 informs V2+ behaviour
-- **Diagnose before fixing** — read logs before changing code. One targeted fix, not guessing
+- **"A warm hand on a cold day"** — compassionate, professional, never patronising
+- **Quality first, rigour always** — design before code
+- **Upload-first, review-by-exception** — AI does 90%, user confirms 10% via 3-5 taps
+- **One thing at a time** — one question per screen, one decision per moment
+- **Every question maps to Form E** — no wasted user effort
+- **Diagnose before fixing** — read logs before changing code
 
-## V2 North Star: "The Brilliant Financial Analyst"
-V2 (Prepare) is the foundation everything else builds on. V3 (Resolve) consumes V2 data for disclosure. V4/V5 (Formalise) consumes it for consent orders. If V2's data model or extraction quality is wrong, every downstream vertical breaks.
+## What Session 5 Accomplished
+The pipeline that was blocked since Session 3 now works end-to-end with real PDFs:
 
-The experience should feel like having a brilliant, patient financial analyst sitting beside you. You hand them a stack of bank statements, payslips, and pension letters. They read everything, understand what they're looking at, and come back saying: "Here's what I found. Your salary is £3,218/month from ACME Ltd. You've got a mortgage at £1,150/month to Halifax. I noticed what looks like a pension contribution — is that right?" They do the heavy lifting. You confirm, correct, or fill gaps. In 15 minutes, not 15 hours.
+1. **504 root cause found and fixed** — `response_format` (OpenAI) → `output_config` (Anthropic SDK 0.85)
+2. **Structured output schemas fixed** — added `additionalProperties: false` to all object types
+3. **Performance halved** — removed AI-generated reasoning/questions from schemas. 70s → 33s. App code generates questions via spec 13 decision trees instead
+4. **Section cards now populate** — fixed ID matching bug + added missing financial items for payments/accounts
+5. **Visual quality pass** — processing animation, typography, button sizing per spec 18
+6. **Lozenge flyout cleaned up** — concise summary instead of raw AI description
+7. **Response parsing fixed** — read text first to avoid stream-consumed bug
 
-## Current Vertical: V2 (Prepare)
-- **Architecture:** Hub page + hero panel (8-state machine). Single page, one focal point. Section cards below show the emerging financial picture
-- **AI pipeline:** Two-step Haiku→Sonnet with structured outputs (`output_config.format`). 7 doc types built. **504 fix deployed — needs end-to-end verification**
-- **Hub components built:** title-bar, hero-panel, discovery-flow, section-cards, evidence-lozenge, fidelity-label
-- **State:** localStorage only. Supabase schema ready (11 tables, RLS) but not wired
-- **Visual pass started:** Processing animation, typography, button sizing per spec 18. More work needed
+## Current State: V2 (Prepare)
+- **Pipeline:** Two-step Haiku→Sonnet with structured outputs. **Working on Vercel with real PDFs.**
+- **Timings:** Step 1 (Haiku PDF read): ~53s. Step 2 (Sonnet analysis): ~27s. Total: ~80s.
+- **Hub components:** title-bar, hero-panel, discovery-flow, section-cards, evidence-lozenge, fidelity-label
+- **Question generation:** Deterministic spec 13 decision trees in app code (not AI)
+- **Section cards:** Now populate with income, accounts, payments, spending after Q&A
+- **State:** localStorage only. Supabase schema ready but not wired
 
-## What Session 5 Fixed
-- **504 blocker resolved:** `response_format` (OpenAI pattern) → `output_config` (Anthropic SDK 0.85). All 3 pipeline paths fixed (PDF, image, text)
-- **Isolation test endpoint added:** `/api/test-pipeline` tests Step 1 and Step 2 independently
-- **Visual quality pass started:** Hero heading (24px), page title (28px), primary CTA padding (12px 24px), section card spacing (32px desktop), processing animation replaced (indeterminate progress line per spec 18 Option C)
+## What Needs Work Next
 
-## Latest Spec Delta / Gotchas
-- Active specs are **13-18** (post-pivot). Specs 03, 04, 05, 05b, 11, 12 are **superseded** (see `docs/README.md` for full index)
-- `pipeline.ts` has `[Pipeline]` console.log breadcrumbs at every step — read Vercel logs to verify the fix
-- Models: `claude-haiku-4-5-20251001` + `claude-sonnet-4-6` (plain IDs only — date-suffixed IDs return 404)
-- Structured outputs use `output_config: { format: { type: 'json_schema', schema } }` — NOT `response_format`
-- SDK timeout: 45s per call. Route `maxDuration=120`. Vercel Pro allows 300s
-- `use-hub.ts` has 3 TODO stubs: `openManualInput`, `openSectionReview`, `addSection`
+### P0 — Intelligent categorisation (spec 19, just written)
+
+**Keyword lookup table** (P1 — low complexity, high impact):
+- Before asking "What is this?" for unknown payments, check payee against keyword table
+- "therapy" → Healthcare, "DVLA" → Vehicle costs, "gym" → Personal/leisure
+- Eliminates many questions. Implementation: string matching in result-transformer.ts
+
+**Payment aggregation** (P1 — medium complexity, high impact):
+- Group multiple payments from same source into single items
+- 3x DVLA → "Vehicle costs: £477/year (3 payments)"
+- Dividends from company → "Is this from your limited company?" with annualised figure
+
+**Progressive category dropdown** (P2 — new component):
+- For truly unknown payments, show searchable Form E budget category list
+- Not radio buttons — a search-and-select dropdown
+- Categories map to Form E 3.1 spending line items
+
+### P1 — Quality issues observed in real testing
+
+- Sana Therapy showed generic "Childcare/Rent/Maintenance/Loan/Other" options — wrong. Should be healthcare or at minimum show Form E categories
+- Two council tax entries (£32 and £70 to LB Lambeth) appeared separately — should aggregate
+- Auto-confirm detail text was repetitive (now fixed with Form E references)
+- Lozenge flyout showed raw AI description (now fixed with clean summary)
+
+### P2 — Section card accuracy
+
+- After Q&A completion, all confirmed/answered items should flow into correct sections
+- Items from answered questions (not just auto-confirms) need financial item creation
+- Spending categories from AI should populate the Spending section card
+- Cross-reference: if mortgage detected in payments AND in discovery config, link them
+
+### P3 — Other items
+
+- Spec 14 wizard flows (manual input for property, pensions, debts)
+- Wire `openManualInput`, `openSectionReview`, `addSection` stubs
+- Visual quality pass completion (spec 18: lozenges, discovery flow, drag-drop zone, accessibility)
 
 ## Negative Constraints
-1. **Do not change model IDs without reading Vercel function logs first**
-2. **Verify the 504 fix works end-to-end before building new features** — use `/api/test-pipeline` first
-3. **Do not reference pre-pivot specs (03-06, 11, 12) for new work** — the architecture changed fundamentally
-4. **Do not use `response_format`** — the Anthropic SDK uses `output_config.format`
+1. **Do not use `response_format`** — Anthropic SDK uses `output_config.format`
+2. **Do not reference pre-pivot specs (03-06, 11, 12)** — architecture changed
+3. **Structured output schemas require `additionalProperties: false` on all objects**
+4. **SDK timeout is 90s per call, route maxDuration is 300s** — don't reduce these
 
 ## Session Discipline
-- **Track lines of code changed.** After every file edit, maintain a running count of net lines added/modified
-- **At ~1,500 lines, flag it.** Say: "Approaching session scope limit. Recommend wrapping up soon."
-- **At ~2,000 lines, stop writing code.** Commit, push, and generate the next session's context block (same format as this document). Quality degrades past this point
-- **Before generating the handoff:** commit all work, write `docs/HANDOFF-SESSION-{N}.md` with retro, then write `docs/SESSION-CONTEXT.md` for the next session
-
-## Session 6 Deliverables
-1. Deploy and verify pipeline fix: hit `/api/test-pipeline` on Vercel, then test full upload flow
-2. Complete visual quality pass per spec 18: lozenges, discovery flow, drag-drop zone, info boxes, accessibility
-3. If pipeline works: upload real documents and evaluate extraction quality
-4. Wire section card actions: `openManualInput`, `openSectionReview`, `addSection` stubs
-5. Begin spec 14 wizard flows for manual input (if time permits)
+- Track lines of code changed. Flag at ~1,500, stop at ~2,000
+- Before generating handoff: commit all work, write `docs/HANDOFF-SESSION-{N}.md`
+- Then write `docs/SESSION-CONTEXT.md` for the next session
 
 ## Key Files
 ```
-src/lib/ai/pipeline.ts                     — Two-step extraction, output_config structured outputs
-src/app/api/documents/extract/route.ts     — API entry, 120s maxDuration
-src/app/api/test-pipeline/route.ts         — Isolation test for Step 1 + Step 2
-src/app/api/health/route.ts                — Model availability checker
-src/hooks/use-hub.ts                       — Hub state, hero panel state machine
-src/types/hub.ts                           — Full type system
-src/components/hub/hero-panel.tsx          — 8-state hero panel with processing animation
-src/components/hub/section-cards.tsx       — Financial picture cards
-docs/HANDOFF-SESSION-5.md                  — Session 5 retro + 504 diagnosis
-docs/workspace-spec/18-visual-design-system.md — Visual spec (the reference for all styling)
-docs/workspace-spec/16-hero-panel-flow.md  — Core interaction spec
-docs/workspace-spec/13-extraction-decision-tree-documents.md — AI decision trees
+src/lib/ai/pipeline.ts                     — Two-step extraction, output_config
+src/lib/ai/extraction-schemas.ts           — Slimmed schemas (facts only, no reasoning)
+src/lib/ai/extraction-prompts.ts           — Document-type-specific prompts
+src/lib/ai/result-transformer.ts           — Spec 13 decision trees + financial item creation
+src/app/api/documents/extract/route.ts     — API entry, 300s maxDuration
+src/app/api/test-pipeline/route.ts         — Isolation test endpoint
+src/hooks/use-hub.ts                       — Hub state, hero panel, item management
+src/components/hub/hero-panel.tsx           — 8-state hero panel
+docs/workspace-spec/19-intelligent-categorisation.md — Aggregation, keywords, dropdown spec
+docs/workspace-spec/13-extraction-decision-tree-documents.md — Decision trees
+docs/workspace-spec/18-visual-design-system.md — Visual spec
 ```
