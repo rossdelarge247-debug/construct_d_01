@@ -51,6 +51,7 @@ export default function WorkspacePage() {
           questions={hub.questions}
           autoConfirmItems={hub.autoConfirmItems}
           currentQuestionIndex={hub.currentQuestionIndex}
+          uploadContext={hub.uploadContext}
           onFilesDropped={hub.handleFilesDropped}
           onReviewStart={hub.startReview}
           onAutoConfirmAccept={hub.acceptAutoConfirm}

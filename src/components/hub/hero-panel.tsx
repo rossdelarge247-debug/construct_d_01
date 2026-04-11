@@ -9,6 +9,7 @@ import type {
   ClarificationQuestion,
   AutoConfirmItem,
 } from '@/types/hub'
+import type { UploadContext } from '@/hooks/use-hub'
 
 interface HeroPanelProps {
   state: HeroPanelState
@@ -16,6 +17,7 @@ interface HeroPanelProps {
   questions: ClarificationQuestion[]
   autoConfirmItems: AutoConfirmItem[]
   currentQuestionIndex: number
+  uploadContext?: UploadContext
   onFilesDropped: (files: File[]) => void
   onReviewStart: () => void
   onAutoConfirmAccept: (acceptedIds: string[]) => void
@@ -30,6 +32,7 @@ export function HeroPanel({
   questions,
   autoConfirmItems,
   currentQuestionIndex,
+  uploadContext,
   onFilesDropped,
   onReviewStart,
   onAutoConfirmAccept,
@@ -59,11 +62,18 @@ export function HeroPanel({
         />
       )}
 
+      {/* Error display */}
+      {uploadContext?.error && state === 'ready' && (
+        <div className="mb-4 p-4 bg-red-50 border border-red-600/20 rounded-md">
+          <p className="text-sm text-red-600">{uploadContext.error}</p>
+        </div>
+      )}
+
       {/* State-specific content */}
       {state === 'ready' && <ReadyState onFilesDropped={onFilesDropped} />}
-      {state === 'uploading' && <UploadingState />}
-      {state === 'uploading_context' && <UploadingContextState />}
-      {state === 'analysing' && <AnalysingState />}
+      {state === 'uploading' && <UploadingState context={uploadContext} />}
+      {state === 'uploading_context' && <UploadingContextState context={uploadContext} />}
+      {state === 'analysing' && <AnalysingState context={uploadContext} />}
       {state === 'review_ready' && <ReviewReadyState onReview={onReviewStart} onUploadMore={onUploadMore} />}
       {state === 'auto_confirm' && <AutoConfirmState items={autoConfirmItems} onAccept={onAutoConfirmAccept} />}
       {state === 'clarification' && questions[currentQuestionIndex] && (
@@ -173,36 +183,83 @@ function ReadyState({ onFilesDropped }: { onFilesDropped: (files: File[]) => voi
 
 // ═══ State 2a: Uploading ═══
 
-function UploadingState() {
+function UploadingState({ context }: { context?: UploadContext }) {
+  const fileCount = context?.fileCount || 0
+  const fileWord = fileCount === 1 ? 'file' : 'files'
   return (
     <div className="py-12 text-center">
       <ProcessingAnimation />
-      <p className="mt-4 text-sm text-ink-secondary">Generating suggestions...</p>
+      <p className="mt-4 text-sm text-ink-secondary">
+        {fileCount > 0
+          ? `Reading your ${fileCount} ${fileWord}...`
+          : 'Generating suggestions...'
+        }
+      </p>
     </div>
   )
 }
 
 // ═══ State 2b: Uploading with context ═══
 
-function UploadingContextState() {
+function UploadingContextState({ context }: { context?: UploadContext }) {
+  const docType = context?.documentType
+  const provider = context?.providerName
+
+  // Build contextual description from classification
+  const description = docType
+    ? formatDocumentDescription(docType, provider ?? null)
+    : 'Identifying document types...'
+
   return (
     <div className="py-12 text-center">
       <ProcessingAnimation />
-      <p className="mt-4 text-sm text-ink-secondary">You are uploading files....</p>
-      <p className="mt-1 text-sm text-ink-secondary">Identifying document types...</p>
+      <p className="mt-4 text-sm text-ink-secondary">
+        {context?.fileCount
+          ? `You are uploading ${context.fileCount} ${context.fileCount === 1 ? 'file' : 'files'}....`
+          : 'Processing your upload...'
+        }
+      </p>
+      <p className="mt-1 text-sm font-medium text-ink">{description}</p>
     </div>
   )
 }
 
 // ═══ State 2c: Analysing ═══
 
-function AnalysingState() {
+function AnalysingState({ context }: { context?: UploadContext }) {
+  const messages = context?.processingMessages || []
   return (
     <div className="py-12 text-center">
       <ProcessingAnimation />
       <p className="mt-4 text-sm text-ink-secondary">Files uploaded, processing the transactions...</p>
+      {messages.length > 0 && (
+        <div className="mt-2 space-y-1">
+          {messages.slice(0, 3).map((msg, i) => (
+            <p key={i} className="text-xs text-ink-tertiary">{msg}</p>
+          ))}
+        </div>
+      )}
     </div>
   )
+}
+
+function formatDocumentDescription(docType: string, provider: string | null): string {
+  const typeLabels: Record<string, string> = {
+    bank_statement: 'bank statement',
+    payslip: 'payslip',
+    mortgage_statement: 'mortgage statement',
+    pension_cetv: 'pension CETV letter',
+    savings_statement: 'savings statement',
+    credit_card_statement: 'credit card statement',
+    tax_return: 'tax return',
+    p60: 'P60',
+    business_accounts: 'business accounts',
+    property_valuation: 'property valuation',
+  }
+  const label = typeLabels[docType] || 'document'
+  return provider
+    ? `Identified: ${provider} ${label}`
+    : `Identified: ${label}`
 }
 
 // ═══ State 2d: Review ready ═══

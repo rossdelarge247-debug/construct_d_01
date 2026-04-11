@@ -1,9 +1,24 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { extractFromPDF, extractFromImage, extractFromText } from '@/lib/ai/pipeline'
+import type { PipelineResult } from '@/lib/ai/pipeline'
+import { transformExtractionResult } from '@/lib/ai/result-transformer'
 
 // Vercel Pro allows up to 300s. Two-step pipeline (Haiku + Sonnet) typically
 // completes in 15-45s depending on document complexity.
 export const maxDuration = 120
+
+function buildResponse(result: PipelineResult) {
+  const transformed = transformExtractionResult(result.classification, result.extraction)
+  return NextResponse.json({
+    result: {
+      classification: result.classification,
+      rawText: result.rawText,
+      stepTimings: result.stepTimings,
+      error: result.error,
+    },
+    transformed,
+  })
+}
 
 export async function POST(request: NextRequest) {
   try {
@@ -11,6 +26,7 @@ export async function POST(request: NextRequest) {
       console.error('[API] ANTHROPIC_API_KEY is not set')
       return NextResponse.json({
         result: null,
+        transformed: null,
         error: 'AI service not configured. Please add your Anthropic API key.',
       }, { status: 503 })
     }
@@ -19,7 +35,7 @@ export async function POST(request: NextRequest) {
     const file = formData.get('file') as File | null
 
     if (!file) {
-      return NextResponse.json({ result: null, error: 'No file provided' }, { status: 400 })
+      return NextResponse.json({ result: null, transformed: null, error: 'No file provided' }, { status: 400 })
     }
 
     const fileName = file.name
@@ -31,6 +47,7 @@ export async function POST(request: NextRequest) {
     if (fileSize > 10 * 1024 * 1024) {
       return NextResponse.json({
         result: null,
+        transformed: null,
         error: `File too large (${(fileSize / 1024 / 1024).toFixed(1)}MB). Please upload files under 10MB.`,
       }, { status: 400 })
     }
@@ -47,7 +64,7 @@ export async function POST(request: NextRequest) {
         `step1: ${result.stepTimings.classify}ms, step2: ${result.stepTimings.extract}ms, ` +
         `error: ${result.error ?? 'none'}`)
 
-      return NextResponse.json({ result })
+      return buildResponse(result)
     }
 
     // ═══ Image documents ═══
@@ -61,7 +78,7 @@ export async function POST(request: NextRequest) {
       console.log(`[API] Image pipeline complete: ${result.classification.document_type}, ` +
         `error: ${result.error ?? 'none'}`)
 
-      return NextResponse.json({ result })
+      return buildResponse(result)
     }
 
     // ═══ Text/CSV documents ═══
@@ -70,6 +87,7 @@ export async function POST(request: NextRequest) {
     if (!text || text.trim().length < 30) {
       return NextResponse.json({
         result: null,
+        transformed: null,
         error: `Could not find readable content in ${fileName}. Try a digital PDF from your online banking.`,
       }, { status: 400 })
     }
@@ -79,13 +97,14 @@ export async function POST(request: NextRequest) {
     console.log(`[API] Text pipeline complete: ${result.classification.document_type}, ` +
       `error: ${result.error ?? 'none'}`)
 
-    return NextResponse.json({ result })
+    return buildResponse(result)
 
   } catch (error) {
     const msg = error instanceof Error ? error.message : 'Unknown error'
     console.error('[API] Unhandled error:', msg)
     return NextResponse.json({
       result: null,
+      transformed: null,
       error: `Something went wrong: ${msg.includes('API key') ? 'AI service not configured.' : 'Please try again.'}`,
     }, { status: 500 })
   }
