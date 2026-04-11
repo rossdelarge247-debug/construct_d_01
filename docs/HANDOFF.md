@@ -319,7 +319,66 @@ All specs are in `docs/` and should be treated as the source of truth for UX dec
 
 ---
 
-## 10. Environment Variables (Vercel)
+## 10. Smoke Test Protocol
+
+Before writing new code, verify the current state works end-to-end.
+
+### Prerequisites
+
+1. Confirm `ANTHROPIC_API_KEY` is set in Vercel environment variables (or `.env.local` for local dev)
+2. Confirm `AI_DRY_RUN` is `false` or unset (unless testing without API key)
+3. `npm run dev` starts without errors locally, or confirm Vercel deployment is live
+
+### Test 1: V1 Gentle Interview (sanity check)
+
+1. Navigate to `/start`
+2. Walk through all 10 steps — each should load, accept input, and advance
+3. Reach `/start/plan` — AI plan should generate (or fallback content should appear)
+4. Verify "Save" flow works and redirects to workspace
+
+### Test 2: V2 Workspace shell
+
+1. Navigate to `/workspace`
+2. Verify sidebar renders with 5 phases, "Build your picture" highlighted
+3. Click into `/workspace/build`
+4. First-time wizard should appear (3 steps: playback, category selection, ready)
+5. Complete wizard — workspace should show upload zone + category tabs + empty summary
+
+### Test 3: Document upload + AI analysis (critical path)
+
+1. On `/workspace/build`, drop a PDF bank statement into the upload zone
+2. **Expect**: Sparkle/processing animation with phased status messages
+3. **Expect**: After 3–15 seconds, transition to tiered analysis UI
+4. **Expect**: Auto-confirmed items appear (green) — verify they contain real data from the document, not hallucinated values
+5. **Expect**: Confirm/question cards appear one at a time after auto items
+6. Click through confirms/questions to completion
+7. Click "Add X items to your picture"
+8. **Expect**: Items appear in the correct category tab, counts update
+
+### Test 4: Manual entry and review
+
+1. Click "+ Add" on a category tab
+2. Manual entry modal should open with category grid
+3. Add an item — verify it appears in the category
+4. Click an item — document review modal should open with editable fields
+
+### Test 5: Summary tab
+
+1. Switch to "Summary" page tab
+2. **Expect**: Form E-mapped sections showing captured data
+3. **Expect**: Hero financial numbers (assets, liabilities, income, outgoings)
+4. **Expect**: Gaps section showing what's missing
+
+### Known failure points
+
+- If `ANTHROPIC_API_KEY` is missing and `AI_DRY_RUN` is not `true`, the upload will fail silently or error
+- Sparkle animation may be invisible on some displays (known issue #8 above)
+- Step-through dialogue previously dead-ended after auto items — fixed in `47c18ac`, verify this
+- JSON truncation can occur with complex documents — repair logic exists but may produce partial results
+
+---
+
+## 11. Environment Variables (Vercel)
 
 | Variable | Required | Notes |
 |----------|----------|-------|

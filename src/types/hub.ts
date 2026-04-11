@@ -1,0 +1,222 @@
+// Hub page types — post-pivot architecture
+
+// ═══ Fidelity model ═══
+
+export type FidelityLevel = 'sketch' | 'draft' | 'evidenced' | 'locked'
+
+export interface FidelityState {
+  level: FidelityLevel
+  label: string
+  description: string
+  canShare: boolean
+}
+
+export const FIDELITY_LABELS: Record<FidelityLevel, FidelityState> = {
+  sketch: {
+    level: 'sketch',
+    label: 'Not yet ready for first mediation conversation',
+    description: 'Based on estimates only. Upload evidence to improve accuracy.',
+    canShare: false,
+  },
+  draft: {
+    level: 'draft',
+    label: 'Ready for first mediation conversation',
+    description: 'Some evidence uploaded. Enough for an initial discussion.',
+    canShare: true,
+  },
+  evidenced: {
+    level: 'evidenced',
+    label: 'Ready for formal disclosure',
+    description: 'Full evidence provided. Meets Form E requirements.',
+    canShare: true,
+  },
+  locked: {
+    level: 'locked',
+    label: 'Complete — ready for consent order',
+    description: 'All sections confirmed and evidenced. No outstanding items.',
+    canShare: true,
+  },
+}
+
+// ═══ Section model ═══
+
+export type SectionKey =
+  | 'income'
+  | 'accounts'
+  | 'spending'
+  | 'property'
+  | 'other_property'
+  | 'pensions'
+  | 'debts'
+  | 'business'
+  | 'other_assets'
+
+export type SectionStatus = 'not_started' | 'estimate_only' | 'partial_evidence' | 'fully_evidenced'
+
+export interface SectionData {
+  key: SectionKey
+  label: string
+  formESections: string
+  status: SectionStatus
+  items: FinancialItem[]
+  visible: boolean
+  estimateFromConfig: string | null // e.g. "£3,200 gross per/month"
+  evidenceSummary: string | null // e.g. "Barclays statements, 2 of 12 months"
+  outstandingQuestions: number
+}
+
+export const SECTION_DEFINITIONS: { key: SectionKey; label: string; formESections: string }[] = [
+  { key: 'income', label: 'Income', formESections: '2.15–2.20' },
+  { key: 'accounts', label: 'Accounts', formESections: '2.3, 2.4' },
+  { key: 'spending', label: 'Spending', formESections: '3.1' },
+  { key: 'property', label: 'Property', formESections: '2.1' },
+  { key: 'other_property', label: 'Other property', formESections: '2.2' },
+  { key: 'pensions', label: 'Your pensions', formESections: '2.13' },
+  { key: 'debts', label: 'What you owe', formESections: '2.14' },
+  { key: 'business', label: 'Your business', formESections: '2.10, 2.11, 2.16' },
+  { key: 'other_assets', label: 'Other assets', formESections: '2.4–2.9' },
+]
+
+// ═══ Financial items ═══
+
+export type OwnershipType = 'yours' | 'joint' | 'partners' | 'unknown'
+export type ConfidenceLevel = 'confirmed' | 'estimated' | 'unknown'
+
+export interface FinancialItem {
+  id: string
+  sectionKey: SectionKey
+  label: string
+  value: number | null
+  period: 'monthly' | 'annual' | 'total' | null
+  ownership: OwnershipType
+  confidence: ConfidenceLevel
+  sourceDocumentId: string | null
+  sourceDescription: string | null
+  isInherited: boolean
+  isPreMarital: boolean
+  asAtDate: string | null
+  createdAt: string
+  updatedAt: string
+}
+
+// ═══ Evidence lozenges ═══
+
+export type EvidenceType =
+  | 'current_account'
+  | 'savings_account'
+  | 'pensions'
+  | 'mortgage_details'
+  | 'payslips'
+  | 'tax_returns'
+  | 'business_accounts'
+  | 'credit_cards'
+  | 'other_assets'
+
+export type LozengeStatus = 'empty' | 'uploading' | 'uploaded'
+
+export interface EvidenceLozenge {
+  type: EvidenceType
+  label: string
+  status: LozengeStatus
+  count: number
+  documents: UploadedDocument[]
+}
+
+export interface UploadedDocument {
+  id: string
+  fileName: string
+  fileType: string
+  description: string // e.g. "June 2026 Barclays statement"
+  uploadedAt: string
+  monthsCovered: number
+  monthsRequired: number
+}
+
+// ═══ Config / discovery ═══
+
+export interface ConfigAnswers {
+  v1DataConfirmed: boolean
+  employment: 'employed' | 'self_employed' | 'both' | 'not_working' | 'retired' | null
+  businessStructure: 'sole_trader' | 'limited' | 'partnership' | 'llp' | null
+  ownsProperty: boolean
+  propertyCount: number
+  propertyEstimate: number | null
+  hasMortgage: boolean
+  mortgageEstimate: number | null
+  hasPensions: boolean
+  pensionEstimate: number | null
+  cetvRequested: boolean | null
+  hasSavings: boolean
+  savingsEstimate: number | null
+  hasDebts: boolean
+  debtsEstimate: number | null
+  otherAssets: string[] // ['crypto', 'vehicle', 'valuables', 'life_insurance', 'overseas']
+  hasChildren: boolean
+  configCompleted: boolean
+}
+
+export const INITIAL_CONFIG: ConfigAnswers = {
+  v1DataConfirmed: false,
+  employment: null,
+  businessStructure: null,
+  ownsProperty: false,
+  propertyCount: 0,
+  propertyEstimate: null,
+  hasMortgage: false,
+  mortgageEstimate: null,
+  hasPensions: false,
+  pensionEstimate: null,
+  cetvRequested: null,
+  hasSavings: false,
+  savingsEstimate: null,
+  hasDebts: false,
+  debtsEstimate: null,
+  otherAssets: [],
+  hasChildren: false,
+  configCompleted: false,
+}
+
+// ═══ Hero panel state machine ═══
+
+export type HeroPanelState =
+  | 'ready'           // State 1: drag-and-drop zone visible
+  | 'uploading'       // State 2a: initial upload, no context
+  | 'uploading_context' // State 2b: file count and type identified
+  | 'analysing'       // State 2c: files uploaded, processing content
+  | 'review_ready'    // State 2d: analysis complete, ready for Q&A
+  | 'auto_confirm'    // State 3a: batch accept high-confidence items
+  | 'clarification'   // State 3b–3n: one question at a time
+  | 'summary'         // State 4: achievements + todo
+
+export interface ClarificationQuestion {
+  id: string
+  questionText: string
+  reasoning: string
+  options: { label: string; value: string }[]
+  primaryOption: string | null
+  secondaryLabel: string
+  formEField: string
+  answered: boolean
+  answer: string | null
+}
+
+export interface AutoConfirmItem {
+  id: string
+  label: string
+  detail: string
+  accepted: boolean
+}
+
+// ═══ Hub state (top-level) ═══
+
+export interface HubState {
+  config: ConfigAnswers
+  sections: SectionData[]
+  lozenges: EvidenceLozenge[]
+  items: FinancialItem[]
+  fidelity: FidelityLevel
+  heroPanelState: HeroPanelState
+  currentQuestionIndex: number
+  questions: ClarificationQuestion[]
+  autoConfirmItems: AutoConfirmItem[]
+}

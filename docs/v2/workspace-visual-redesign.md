@@ -121,10 +121,12 @@ New: **dramatic scale. Headings own the page. Numbers are heroes. Labels are cle
 
 ### New scale
 
+> **Implementation note (10 April 2026):** During build, the decision was made to use **Inter throughout** — no Lora. The design system (`docs/workspace-spec/01-design-system.md`) and `globals.css` reflect this. The dramatic scale below was adopted, but with Inter for all elements. Bold/extrabold weights achieve the confident heading presence originally envisaged for Lora. This table is retained as the original design direction; see `01-design-system.md` for the implemented scale.
+
 | Element | Font | Size | Weight |
 |---------|------|------|--------|
-| Phase title (in header block) | Lora | 32-40px | 600 |
-| Section heading | Lora | 24px | 500 |
+| Phase title (in header block) | ~~Lora~~ Inter | 32-40px | 700 |
+| Section heading | ~~Lora~~ Inter | 24px | 700 |
 | Card title | Inter | 16-18px | 600 |
 | Body text | Inter | 15-16px | 400 |
 | Hero numbers (financial summary) | Inter | 36-48px | 700 |
