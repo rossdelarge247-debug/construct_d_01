@@ -84,7 +84,7 @@ export async function extractFromPDF(
   const Anthropic = (await import('@anthropic-ai/sdk')).default
   const client = new Anthropic({
     apiKey: process.env.ANTHROPIC_API_KEY,
-    timeout: 45_000,  // 45s per-request timeout — fail fast, don't let Vercel kill us
+    timeout: 90_000,  // 90s per-request — real PDFs can take 30-60s for Haiku to read
   })
 
   const timings = { classify: 0, extract: 0 }
@@ -311,7 +311,7 @@ export async function extractFromImage(
   const Anthropic = (await import('@anthropic-ai/sdk')).default
   const client = new Anthropic({
     apiKey: process.env.ANTHROPIC_API_KEY,
-    timeout: 45_000,  // 45s per-request timeout — fail fast, don't let Vercel kill us
+    timeout: 90_000,  // 90s per-request — real PDFs can take 30-60s for Haiku to read
   })
 
   const timings = { classify: 0, extract: 0 }
@@ -416,7 +416,7 @@ export async function extractFromText(
   const Anthropic = (await import('@anthropic-ai/sdk')).default
   const client = new Anthropic({
     apiKey: process.env.ANTHROPIC_API_KEY,
-    timeout: 45_000,  // 45s per-request timeout — fail fast, don't let Vercel kill us
+    timeout: 90_000,  // 90s per-request — real PDFs can take 30-60s for Haiku to read
   })
 
   const timings = { classify: 0, extract: 0 }

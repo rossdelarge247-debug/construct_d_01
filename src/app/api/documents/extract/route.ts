@@ -3,9 +3,10 @@ import { extractFromPDF, extractFromImage, extractFromText } from '@/lib/ai/pipe
 import type { PipelineResult } from '@/lib/ai/pipeline'
 import { transformExtractionResult } from '@/lib/ai/result-transformer'
 
-// Vercel Pro allows up to 300s. Two-step pipeline (Haiku + Sonnet) typically
-// completes in 15-45s depending on document complexity.
-export const maxDuration = 120
+// Vercel Pro allows up to 300s. Two-step pipeline: Haiku PDF read (5-60s
+// depending on PDF size) + Sonnet structured output (~33s) = up to ~90s.
+// Set to 300s for safety — large PDFs with many pages can take longer.
+export const maxDuration = 300
 
 function buildResponse(result: PipelineResult) {
   const transformed = transformExtractionResult(result.classification, result.extraction)
