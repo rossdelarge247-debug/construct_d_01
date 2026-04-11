@@ -194,17 +194,17 @@ export function useHub() {
         body: formData,
       })
 
-      // Handle non-JSON responses (e.g. Next.js error pages, plain text errors)
+      // Read body as text first, then parse — avoids stream-consumed issue
+      // where response.json() fails and response.text() returns empty
+      const responseText = await response.text()
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       let data: any
       try {
-        data = await response.json()
+        data = JSON.parse(responseText)
       } catch {
-        let text = ''
-        try { text = await response.text() } catch { /* ignore */ }
         setUploadContext((prev) => ({
           ...prev,
-          error: `Server returned an invalid response (${response.status}). ${text.substring(0, 200)}`,
+          error: `Server returned an invalid response (${response.status}). ${responseText.substring(0, 300)}`,
         }))
         setHeroPanelState('ready')
         return
