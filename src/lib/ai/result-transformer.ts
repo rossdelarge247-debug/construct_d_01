@@ -1,10 +1,11 @@
 // Transforms AI pipeline extraction results into hero panel Q&A format
 // Bridge between pipeline.ts (typed extraction) and use-hub.ts (UI state)
 //
-// Grounded in decision tree specs 13 and 14:
-// - Auto-confirm: items with confidence >= 0.95 and unambiguous category
-// - Clarification: items needing user input, with reasoning shown
-// - Gaps: things expected but not found
+// Spec 13 decision tree logic lives HERE, not in the AI prompt.
+// AI extracts pure financial facts. This module generates:
+// - Auto-confirm items (confidence >= 0.95 and unambiguous)
+// - Clarification questions (deterministic, from spec 13 signal→question map)
+// - Gap detection (checks what's present vs what Form E requires)
 
 import type {
   AutoConfirmItem,
@@ -82,62 +83,31 @@ function transformBankStatement(data: BankStatementExtraction): TransformedResul
     `Categorising your spending across ${data.spending_categories.length} categories...`,
   ]
 
-  // Income deposits → auto-confirm or clarify
+  // ═══ Income: spec 13 auto-confirm rules ═══
+  // Employment with named employer + consistent amount = auto-confirm
+  // Benefits (HMRC/DWP) with known CB amounts = auto-confirm
+  // Everything else = clarify
   for (const income of data.income_deposits) {
     const id = `income-${income.source.replace(/\s+/g, '-').toLowerCase()}-${Date.now()}`
+    const sourceDesc = `${formatCurrency(income.amount)}/${income.period} from ${income.source}`
 
-    if (income.confidence >= AUTO_CONFIRM_THRESHOLD && income.type === 'employment') {
-      autoConfirmItems.push({
-        id,
-        label: `Monthly salary: ${formatCurrency(income.amount)} net from ${income.source}`,
-        detail: income.reasoning,
-        accepted: true,
-      })
+    if (income.confidence >= AUTO_CONFIRM_THRESHOLD && (income.type === 'employment' || income.type === 'benefits')) {
+      const label = income.type === 'employment'
+        ? `Monthly salary: ${formatCurrency(income.amount)} net from ${income.source}`
+        : `${income.source}: ${formatCurrency(income.amount)}/month`
+      autoConfirmItems.push({ id, label, detail: sourceDesc, accepted: true })
       financialItems.push({
-        id: `fi-${id}`,
-        sectionKey: 'income',
-        label: `Salary from ${income.source}`,
-        value: income.amount,
-        period: income.period,
-        ownership: 'yours',
-        confidence: 'confirmed',
-        sourceDocumentId: null,
-        sourceDescription: income.reasoning,
-        isInherited: false,
-        isPreMarital: false,
-        asAtDate: now,
-        createdAt: now,
-        updatedAt: now,
-      })
-    } else if (income.confidence >= AUTO_CONFIRM_THRESHOLD && income.type === 'benefits') {
-      autoConfirmItems.push({
-        id,
-        label: `${income.source}: ${formatCurrency(income.amount)}/month`,
-        detail: income.reasoning,
-        accepted: true,
-      })
-      financialItems.push({
-        id: `fi-${id}`,
-        sectionKey: 'income',
-        label: income.source,
-        value: income.amount,
-        period: income.period,
-        ownership: 'yours',
-        confidence: 'confirmed',
-        sourceDocumentId: null,
-        sourceDescription: income.reasoning,
-        isInherited: false,
-        isPreMarital: false,
-        asAtDate: now,
-        createdAt: now,
-        updatedAt: now,
+        id: `fi-${id}`, sectionKey: 'income',
+        label: income.type === 'employment' ? `Salary from ${income.source}` : income.source,
+        value: income.amount, period: income.period, ownership: 'yours', confidence: 'confirmed',
+        sourceDocumentId: null, sourceDescription: sourceDesc,
+        isInherited: false, isPreMarital: false, asAtDate: now, createdAt: now, updatedAt: now,
       })
     } else {
-      // Needs clarification
+      // Spec 13: varying income or low confidence → clarify type
       questions.push({
-        id,
-        questionText: `We found regular deposits of ${formatCurrency(income.amount)}/${income.period} from ${income.source}. What is this income?`,
-        reasoning: income.reasoning,
+        id, questionText: `We found regular deposits of ${sourceDesc}. What is this income?`,
+        reasoning: null,
         options: [
           { label: 'Employment salary', value: 'employment' },
           { label: 'Self-employment income', value: 'self_employment' },
@@ -145,72 +115,54 @@ function transformBankStatement(data: BankStatementExtraction): TransformedResul
           { label: 'Rental income', value: 'rental' },
           { label: 'Something else', value: 'other' },
         ],
-        primaryOption: null,
-        secondaryLabel: "I'm not sure",
-        formEField: '2.15-2.20',
-        answered: false,
-        answer: null,
+        primaryOption: null, secondaryLabel: "I'm not sure", formEField: '2.15-2.20',
+        answered: false, answer: null,
       })
     }
   }
 
-  // Regular payments → auto-confirm or clarify based on decision tree
+  // ═══ Payments: spec 13 decision tree ═══
   for (const payment of data.regular_payments) {
     const id = `payment-${payment.payee.replace(/\s+/g, '-').toLowerCase()}-${Date.now()}`
+    const categoryLabel = CATEGORY_LABELS[payment.likely_category] || payment.likely_category
+    const paymentDesc = `${formatCurrency(payment.amount)}/${payment.frequency} to ${payment.payee}`
 
-    if (!payment.needs_clarification && payment.confidence >= AUTO_CONFIRM_THRESHOLD) {
-      // High confidence, no clarification needed — but still show as auto-confirmed
-      const categoryLabel = CATEGORY_LABELS[payment.likely_category] || payment.likely_category
-      autoConfirmItems.push({
-        id,
-        label: `${categoryLabel}: ${formatCurrency(payment.amount)}/${payment.frequency} to ${payment.payee}`,
-        detail: payment.reasoning,
-        accepted: true,
-      })
-    } else if (payment.needs_clarification && payment.clarification_question) {
-      // Needs user input — generate question from AI's clarification data
-      questions.push({
-        id,
-        questionText: payment.clarification_question,
-        reasoning: payment.reasoning,
-        options: (payment.clarification_options || []).map((opt) => ({
-          label: opt,
-          value: opt.toLowerCase().replace(/[^a-z0-9]+/g, '_'),
-        })),
-        primaryOption: payment.clarification_options?.[0] || null,
-        secondaryLabel: "No it's something else",
-        formEField: getFormEField(payment.likely_category),
-        answered: false,
-        answer: null,
-      })
+    if (payment.confidence >= AUTO_CONFIRM_THRESHOLD) {
+      // High confidence — auto-confirm (spec 13: obvious items)
+      autoConfirmItems.push({ id, label: `${categoryLabel}: ${paymentDesc}`, detail: paymentDesc, accepted: true })
+    } else {
+      // Spec 13 decision tree: generate question based on category + signal
+      const question = generatePaymentQuestion(payment)
+      if (question) {
+        questions.push({ id, ...question, answered: false, answer: null })
+      }
     }
   }
 
-  // Joint account detection
+  // ═══ Spec 13: Joint account detection ═══
   if (data.is_joint) {
     questions.push({
       id: `joint-account-${Date.now()}`,
-      questionText: `We can see a joint account holder on this account.${data.joint_holder_name ? ` (${data.joint_holder_name})` : ''} Is this a joint account with your partner?`,
-      reasoning: 'Joint accounts need to declare the ownership split for Form E disclosure.',
+      questionText: `This account has two names.${data.joint_holder_name ? ` (${data.joint_holder_name})` : ''} Is this a joint account with your partner?`,
+      reasoning: null,
       options: [
-        { label: 'Yes it is', value: 'joint_partner' },
-        { label: "No it's something else", value: 'not_joint' },
+        { label: 'Yes, joint with partner', value: 'joint_partner' },
+        { label: 'No, it\'s sole', value: 'not_joint' },
       ],
-      primaryOption: 'Yes it is',
-      secondaryLabel: "No it's something else",
+      primaryOption: 'Yes, joint with partner',
+      secondaryLabel: 'No, it\'s sole',
       formEField: '2.3',
-      answered: false,
-      answer: null,
+      answered: false, answer: null,
     })
   }
 
-  // Spending total confirmation
+  // ═══ Spec 13: Spending total confirmation ═══
   if (data.spending_categories.length > 0) {
     const totalSpending = data.spending_categories.reduce((sum, c) => sum + c.monthly_average, 0)
     questions.push({
       id: `spending-total-${Date.now()}`,
       questionText: `We've categorised your monthly spending as roughly ${formatCurrency(totalSpending)}. Does that feel about right?`,
-      reasoning: `Based on ${data.spending_categories.length} categories across your transactions.`,
+      reasoning: null,
       options: [
         { label: 'That sounds right', value: 'correct' },
         { label: 'Let me review the categories', value: 'review' },
@@ -218,51 +170,126 @@ function transformBankStatement(data: BankStatementExtraction): TransformedResul
       primaryOption: 'That sounds right',
       secondaryLabel: 'Let me review the categories',
       formEField: '3.1',
-      answered: false,
-      answer: null,
+      answered: false, answer: null,
     })
   }
 
-  // Gaps
-  for (const gap of data.gaps) {
+  // ═══ Spec 13: Gap detection (app logic, not AI) ═══
+  const hasEmploymentIncome = data.income_deposits.some(i => i.type === 'employment')
+  const hasPensionContrib = data.regular_payments.some(p => p.likely_category === 'pension_contribution')
+  const hasCouncilTax = data.regular_payments.some(p => p.likely_category === 'council_tax')
+
+  if (hasEmploymentIncome && !hasPensionContrib) {
     questions.push({
-      id: `gap-${gap.form_e_field.replace(/\./g, '-')}-${Date.now()}`,
-      questionText: gap.question,
-      reasoning: gap.description,
-      options: gap.options.map((opt) => ({
-        label: opt,
-        value: opt.toLowerCase().replace(/[^a-z0-9]+/g, '_'),
-      })),
-      primaryOption: null,
-      secondaryLabel: "I'll answer this later",
-      formEField: gap.form_e_field,
-      answered: false,
-      answer: null,
+      id: `gap-pension-${Date.now()}`,
+      questionText: "We didn't find pension contributions in this account. Are they deducted from your salary before it reaches your bank?",
+      reasoning: null,
+      options: [
+        { label: 'Yes, deducted at source', value: 'deducted' },
+        { label: 'No pension', value: 'none' },
+        { label: 'Paid from another account', value: 'other_account' },
+        { label: "Don't know", value: 'unknown' },
+      ],
+      primaryOption: null, secondaryLabel: "I'll answer this later",
+      formEField: '2.13', answered: false, answer: null,
     })
   }
 
-  // Notable transactions (crypto, solicitors, etc.)
+  if (!hasCouncilTax) {
+    questions.push({
+      id: `gap-council-tax-${Date.now()}`,
+      questionText: "We didn't find council tax payments. Do you pay this from a different account?",
+      reasoning: null,
+      options: [
+        { label: 'Different account', value: 'other_account' },
+        { label: 'Included in rent', value: 'in_rent' },
+        { label: "Don't pay council tax", value: 'exempt' },
+        { label: 'Partner pays', value: 'partner' },
+      ],
+      primaryOption: null, secondaryLabel: "I'll answer this later",
+      formEField: '3.1', answered: false, answer: null,
+    })
+  }
+
+  // ═══ Spec 13: Notable transaction signals ═══
   for (const notable of data.notable_transactions) {
-    if (notable.reason_flagged.toLowerCase().includes('crypto')) {
+    const flagLower = notable.reason_flagged.toLowerCase()
+    if (flagLower.includes('crypto')) {
       questions.push({
         id: `notable-crypto-${Date.now()}`,
-        questionText: `We found payments to what appears to be a cryptocurrency exchange (${notable.description}). Do you hold cryptocurrency?`,
-        reasoning: 'Cryptocurrency is legally recognised as property and must be disclosed.',
+        questionText: `We found payments to ${notable.description}. Do you hold cryptocurrency?`,
+        reasoning: null,
         options: [
           { label: 'Yes', value: 'yes' },
           { label: "No, I've sold it all", value: 'sold' },
           { label: "I'd rather not say right now", value: 'skip' },
         ],
-        primaryOption: null,
-        secondaryLabel: "I'll answer this later",
-        formEField: '2.4/2.9',
-        answered: false,
-        answer: null,
+        primaryOption: null, secondaryLabel: "I'll answer this later",
+        formEField: '2.4/2.9', answered: false, answer: null,
       })
     }
   }
 
   return { autoConfirmItems, questions, financialItems, processingMessages }
+}
+
+// ═══ Spec 13 payment question generator ═══
+// Deterministic: signal → question. No AI reasoning needed.
+
+function generatePaymentQuestion(payment: { payee: string; amount: number; frequency: string; confidence: number; likely_category: string }): Omit<ClarificationQuestion, 'id' | 'answered' | 'answer'> | null {
+  const amt = formatCurrency(payment.amount)
+
+  switch (payment.likely_category) {
+    case 'mortgage':
+    case 'rent':
+      return {
+        questionText: `${amt} goes to ${payment.payee} each month. Is this your mortgage?`,
+        reasoning: null,
+        options: [
+          { label: 'Mortgage', value: 'mortgage' },
+          { label: 'Rent', value: 'rent' },
+          { label: 'Something else', value: 'other' },
+        ],
+        primaryOption: 'Mortgage', secondaryLabel: 'Something else',
+        formEField: '3.1 + 2.1',
+      }
+
+    case 'insurance':
+    case 'pension_contribution':
+      return {
+        questionText: `${amt}/month to ${payment.payee}. Is this a pension contribution or insurance?`,
+        reasoning: null,
+        options: [
+          { label: 'Pension', value: 'pension_contribution' },
+          { label: 'Life insurance', value: 'life_insurance' },
+          { label: 'Home insurance', value: 'home_insurance' },
+          { label: 'Car insurance', value: 'car_insurance' },
+          { label: 'Other', value: 'other' },
+        ],
+        primaryOption: null, secondaryLabel: 'Something else',
+        formEField: payment.likely_category === 'pension_contribution' ? '2.13' : '3.1',
+      }
+
+    case 'unknown':
+      // Standing order to a person — spec 13 catch-all
+      return {
+        questionText: `${amt} goes to ${payment.payee} each month. What is this?`,
+        reasoning: null,
+        options: [
+          { label: 'Childcare', value: 'childcare' },
+          { label: 'Rent to landlord', value: 'rent' },
+          { label: 'Maintenance payment', value: 'child_maintenance' },
+          { label: 'Loan repayment', value: 'loan_repayment' },
+          { label: 'Something else', value: 'other' },
+        ],
+        primaryOption: null, secondaryLabel: 'Something else',
+        formEField: '3.1',
+      }
+
+    default:
+      // Below threshold but category is clear — still auto-confirm
+      return null
+  }
 }
 
 // ═══ Payslip transformer ═══
@@ -566,15 +593,13 @@ function transformSavingsStatement(data: SavingsStatementExtraction): Transforme
 
   const typeLabel = ACCOUNT_TYPE_LABELS[data.account_type] || 'Savings account'
 
-  // Auto-confirm: balance (savings statements are typically unambiguous)
-  if (data.confidence >= AUTO_CONFIRM_THRESHOLD) {
-    autoConfirmItems.push({
-      id: `savings-balance-${Date.now()}`,
-      label: `${typeLabel} with ${data.provider}: ${formatCurrency(data.current_balance)}`,
-      detail: data.reasoning,
-      accepted: true,
-    })
-  }
+  // Savings statements are structured — auto-confirm balance
+  autoConfirmItems.push({
+    id: `savings-balance-${Date.now()}`,
+    label: `${typeLabel} with ${data.provider}: ${formatCurrency(data.current_balance)}`,
+    detail: `Balance: ${formatCurrency(data.current_balance)}`,
+    accepted: true,
+  })
 
   financialItems.push({
     id: `fi-savings-${Date.now()}`,
@@ -583,9 +608,9 @@ function transformSavingsStatement(data: SavingsStatementExtraction): Transforme
     value: data.current_balance,
     period: 'total',
     ownership: data.is_joint ? 'joint' : 'yours',
-    confidence: data.confidence >= AUTO_CONFIRM_THRESHOLD ? 'confirmed' : 'estimated',
+    confidence: 'confirmed',
     sourceDocumentId: null,
-    sourceDescription: data.reasoning,
+    sourceDescription: `${typeLabel} with ${data.provider}`,
     isInherited: false,
     isPreMarital: false,
     asAtDate: null,
@@ -598,7 +623,7 @@ function transformSavingsStatement(data: SavingsStatementExtraction): Transforme
     questions.push({
       id: `savings-joint-${Date.now()}`,
       questionText: `Is this ${typeLabel} a joint account with your partner?`,
-      reasoning: `The account appears to be in joint names with ${data.account_holder || 'another person'}.`,
+      reasoning: null,
       options: [
         { label: 'Yes, joint with partner', value: 'joint' },
         { label: 'No, it\'s in my name only', value: 'sole' },
@@ -616,7 +641,7 @@ function transformSavingsStatement(data: SavingsStatementExtraction): Transforme
     questions.push({
       id: `savings-withdrawal-${Date.now()}-${withdrawal.amount}`,
       questionText: `There's been a withdrawal of ${formatCurrency(withdrawal.amount)} recently. Has this been spent or moved to another account?`,
-      reasoning: withdrawal.description,
+      reasoning: null,
       options: [
         { label: 'Spent', value: 'spent' },
         { label: 'Moved to another account', value: 'moved' },
@@ -636,7 +661,7 @@ function transformSavingsStatement(data: SavingsStatementExtraction): Transforme
     questions.push({
       id: `savings-type-${Date.now()}`,
       questionText: 'Is this a Cash ISA or Stocks & Shares ISA?',
-      reasoning: 'We couldn\'t determine the exact account type. Cash ISAs and Stocks & Shares ISAs are different asset classes for disclosure.',
+      reasoning: null,
       options: [
         { label: 'Cash ISA', value: 'cash_isa' },
         { label: 'Stocks & Shares ISA', value: 'stocks_and_shares_isa' },
@@ -668,21 +693,19 @@ function transformCreditCardStatement(data: CreditCardStatementExtraction): Tran
   const financialItems: FinancialItem[] = []
   const now = new Date().toISOString()
 
-  // Auto-confirm: balance (credit card statements are structured)
+  // Credit card statements are structured — auto-confirm balance
   const balanceDetail = [
-    data.reasoning,
+    `Balance: ${formatCurrency(data.outstanding_balance)}`,
     data.credit_limit ? `Credit limit: ${formatCurrency(data.credit_limit)}` : null,
     data.interest_rate_apr ? `APR: ${data.interest_rate_apr}%` : null,
   ].filter(Boolean).join('. ')
 
-  if (data.confidence >= AUTO_CONFIRM_THRESHOLD) {
-    autoConfirmItems.push({
-      id: `cc-balance-${Date.now()}`,
-      label: `${data.provider} credit card: ${formatCurrency(data.outstanding_balance)} outstanding`,
-      detail: balanceDetail,
-      accepted: true,
-    })
-  }
+  autoConfirmItems.push({
+    id: `cc-balance-${Date.now()}`,
+    label: `${data.provider} credit card: ${formatCurrency(data.outstanding_balance)} outstanding`,
+    detail: balanceDetail,
+    accepted: true,
+  })
 
   financialItems.push({
     id: `fi-cc-${Date.now()}`,
@@ -691,7 +714,7 @@ function transformCreditCardStatement(data: CreditCardStatementExtraction): Tran
     value: data.outstanding_balance,
     period: 'total',
     ownership: data.is_joint ? 'joint' : 'yours',
-    confidence: data.confidence >= AUTO_CONFIRM_THRESHOLD ? 'confirmed' : 'estimated',
+    confidence: 'confirmed',
     sourceDocumentId: null,
     sourceDescription: balanceDetail,
     isInherited: false,
@@ -726,7 +749,7 @@ function transformCreditCardStatement(data: CreditCardStatementExtraction): Tran
     questions.push({
       id: `cc-joint-${Date.now()}`,
       questionText: `Is this ${data.provider} credit card in joint names with your partner?`,
-      reasoning: `The card appears to be a joint account.`,
+      reasoning: null,
       options: [
         { label: 'Yes, joint', value: 'joint' },
         { label: 'No, it\'s mine only', value: 'sole' },
@@ -745,7 +768,7 @@ function transformCreditCardStatement(data: CreditCardStatementExtraction): Tran
     questions.push({
       id: `cc-highbalance-${Date.now()}`,
       questionText: `This card has a balance of ${formatCurrency(data.outstanding_balance)}. Is this typical, or has spending increased recently?`,
-      reasoning: 'Balances above £5,000 may be relevant to the court\'s assessment of needs and conduct.',
+      reasoning: null,
       options: [
         { label: 'Normal for me', value: 'normal' },
         { label: 'Increased due to separation', value: 'separation' },
@@ -777,15 +800,13 @@ function transformP60(data: P60Extraction): TransformedResult {
 
   const yearLabel = data.tax_year ? ` (${data.tax_year})` : ''
 
-  // Auto-confirm: total pay and tax
-  if (data.confidence >= AUTO_CONFIRM_THRESHOLD) {
-    autoConfirmItems.push({
-      id: `p60-income-${Date.now()}`,
-      label: `Annual income${yearLabel}: ${formatCurrency(data.total_pay)} gross from ${data.employer_or_source}`,
-      detail: `Tax: ${formatCurrency(data.total_tax_deducted)}${data.total_ni ? `, NI: ${formatCurrency(data.total_ni)}` : ''}`,
-      accepted: true,
-    })
-  }
+  // P60/SA302 are structured — auto-confirm income
+  autoConfirmItems.push({
+    id: `p60-income-${Date.now()}`,
+    label: `Annual income${yearLabel}: ${formatCurrency(data.total_pay)} gross from ${data.employer_or_source}`,
+    detail: `Tax: ${formatCurrency(data.total_tax_deducted)}${data.total_ni ? `, NI: ${formatCurrency(data.total_ni)}` : ''}`,
+    accepted: true,
+  })
 
   financialItems.push({
     id: `fi-p60-income-${Date.now()}`,
@@ -794,7 +815,7 @@ function transformP60(data: P60Extraction): TransformedResult {
     value: data.total_pay,
     period: 'annual',
     ownership: 'yours',
-    confidence: data.confidence >= AUTO_CONFIRM_THRESHOLD ? 'confirmed' : 'estimated',
+    confidence: 'confirmed',
     sourceDocumentId: null,
     sourceDescription: `${data.document_type === 'p60' ? 'P60' : 'Tax return'}${yearLabel}`,
     isInherited: false,

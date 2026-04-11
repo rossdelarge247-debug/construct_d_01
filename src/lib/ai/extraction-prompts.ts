@@ -19,70 +19,33 @@ Determine the document type from its content. Common types:
 
 Return the document type, your confidence (0-1), the provider/institution name if visible, and a one-sentence description.`
 
-export const BANK_STATEMENT_PROMPT = `You are analysing a UK bank statement for someone going through separation/divorce. Your analysis directly feeds their financial disclosure (Form E).
+export const BANK_STATEMENT_PROMPT = `You are analysing a UK bank statement for someone going through separation/divorce. Extract financial FACTS only — no reasoning, no questions, no suggestions. A separate system handles user interaction.
 
-EXTRACT THE FOLLOWING — only from what is explicitly in the document:
+EXTRACT:
 
 1. ACCOUNT DETAILS
-   - Provider name (the bank)
-   - Last 4 digits of account number (if visible)
-   - Account type: current, savings, or joint (look for two names on the statement)
-   - Joint holder name (if visible)
-   - Statement period (start and end dates)
-   - Closing balance (the final balance shown)
+   - Provider (bank name), last 4 of account number, account type (current/savings/joint), joint holder name if visible, statement period dates, closing balance
 
-2. INCOME DEPOSITS (Form E section 2.15-2.20)
-   For each regular deposit pattern detected:
-   - Source name (from the deposit reference)
-   - Amount
-   - Whether it's monthly/weekly
-   - Your confidence that this is income (0-1)
-   - Your reasoning: "Regular credit of £X from [source] on [date pattern]"
-   - Type: employment (regular salary), benefits (HMRC/DWP), rental, self_employment (irregular amounts from varying sources), pension_income, maintenance, other
+2. INCOME DEPOSITS
+   For each regular deposit pattern:
+   - Source name, amount, period (monthly/annual), confidence (0-1), type (employment/benefits/rental/self_employment/pension_income/maintenance/other)
+   - Confidence guide: named employer with consistent amount = 0.95+, government reference = 0.95+, irregular amounts from varying sources = 0.5-0.8
 
-3. REGULAR PAYMENTS OUT (Form E sections 2.1, 2.13, 2.14, 3.1)
-   For each regular outgoing detected:
-   - Payee name
-   - Amount
-   - Frequency
-   - Your confidence (0-1)
-   - What you think it is: mortgage, rent, insurance, pension_contribution, childcare, loan_repayment, child_maintenance, utilities, council_tax, subscription, unknown
-   - Your reasoning: explain WHY you think it's that category
-   - Whether it needs clarification from the user (true if confidence < 0.95 or the category is ambiguous)
-   - If it needs clarification: the question to ask and the options to offer
+3. REGULAR PAYMENTS OUT
+   For each regular outgoing:
+   - Payee name, amount, frequency, confidence (0-1), likely_category (mortgage/rent/insurance/pension_contribution/childcare/loan_repayment/child_maintenance/utilities/council_tax/subscription/unknown)
+   - Confidence guide: named lender + £800+/month = mortgage 0.90, council tax DD = 0.97, named utility company = 0.93, payment to a person = 0.5
 
-   CLARIFICATION RULES:
-   - Regular payment to a building society/bank for £800+/month → likely mortgage, but ASK: "£X goes to [payee] each month. Is this your mortgage?" Options: ["Yes, it's my mortgage", "No, it's something else"]
-   - Payment to an insurance/pension company → ASK: "£X/month to [company]. Is this a pension contribution or insurance?" Options: ["Pension", "Insurance", "Something else"]
-   - Standing order to a person → ASK: "£X goes to [name] each month. What is this?" Options: ["Childcare", "Rent", "Maintenance payment", "Loan repayment", "Something else"]
-   - DO NOT ask about obvious items: Tesco = groceries, Shell = transport, Netflix = subscription, council tax = council tax
+4. SPENDING CATEGORIES
+   Group ALL outgoing transactions: category name, monthly average, transaction count. Calculate from actual transactions only.
 
-4. SPENDING CATEGORIES (Form E section 3.1)
-   Group ALL outgoing transactions into categories with monthly averages:
-   - housing, utilities, groceries, transport, childcare, insurance, subscriptions, dining_out, personal, other
-   - Calculate from ACTUAL transactions. Do not estimate or extrapolate.
-   - Show transaction count per category
+5. NOTABLE TRANSACTIONS
+   Flag only: transfers > £2,000, payments to solicitors/mediators, crypto exchanges, gambling. Include description, amount, date, reason flagged.
 
-5. GAPS — things you expected but didn't find (max 3):
-   - No pension contributions visible → "We didn't find pension contributions in this account. Are they deducted from your salary before it reaches your bank?"
-   - No council tax → "We didn't find council tax payments. Do you pay this from a different account?"
-   - Only one account visible → "Do you have any other bank accounts?"
-   Each gap must include the Form E field it relates to.
-
-6. NOTABLE TRANSACTIONS — flag unusual items:
-   - Large one-off transfers (> £2,000)
-   - Payments to solicitors or mediators
-   - Payments to crypto exchanges (Coinbase, Binance, Kraken)
-   - Gambling transactions
-   - Sudden changes in income or spending patterns
-
-CRITICAL RULES:
-- ONLY extract values EXPLICITLY STATED in the document. Never invent values.
-- Source descriptions must reference the actual document content.
-- If joint account detected, note this — the user will need to confirm.
-- Spending categories should be calculated from real transactions, not estimated.
-- DO NOT extract starting balances, individual transaction dates, or per-transaction amounts unless they're notable.
-- DO NOT ask questions about things that are obvious from the document.`
+RULES:
+- Extract ONLY values explicitly stated. Never invent.
+- Do NOT generate questions, suggestions, or gap analysis.
+- Do NOT include reasoning text — just the data.`
 
 export const PAYSLIP_PROMPT = `You are analysing a UK payslip for someone going through separation/divorce. Your analysis feeds their financial disclosure (Form E section 2.15).
 

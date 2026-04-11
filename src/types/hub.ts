@@ -191,7 +191,7 @@ export type HeroPanelState =
 export interface ClarificationQuestion {
   id: string
   questionText: string
-  reasoning: string
+  reasoning: string | null
   options: { label: string; value: string }[]
   primaryOption: string | null
   secondaryLabel: string
