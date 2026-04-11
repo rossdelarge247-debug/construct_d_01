@@ -86,7 +86,10 @@ export async function extractFromPDF(
   base64Data: string,
 ): Promise<PipelineResult> {
   const Anthropic = (await import('@anthropic-ai/sdk')).default
-  const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY })
+  const client = new Anthropic({
+    apiKey: process.env.ANTHROPIC_API_KEY,
+    timeout: 45_000,  // 45s per-request timeout — fail fast, don't let Vercel kill us
+  })
 
   const timings = { classify: 0, extract: 0 }
   const diagnostics: PipelineDiagnostics = {
@@ -331,7 +334,10 @@ export async function extractFromImage(
   mediaType: 'image/jpeg' | 'image/png' | 'image/webp',
 ): Promise<PipelineResult> {
   const Anthropic = (await import('@anthropic-ai/sdk')).default
-  const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY })
+  const client = new Anthropic({
+    apiKey: process.env.ANTHROPIC_API_KEY,
+    timeout: 45_000,  // 45s per-request timeout — fail fast, don't let Vercel kill us
+  })
 
   const timings = { classify: 0, extract: 0 }
   const step1Start = Date.now()
@@ -435,7 +441,10 @@ export async function extractFromText(
   text: string,
 ): Promise<PipelineResult> {
   const Anthropic = (await import('@anthropic-ai/sdk')).default
-  const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY })
+  const client = new Anthropic({
+    apiKey: process.env.ANTHROPIC_API_KEY,
+    timeout: 45_000,  // 45s per-request timeout — fail fast, don't let Vercel kill us
+  })
 
   const timings = { classify: 0, extract: 0 }
 
