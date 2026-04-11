@@ -1,95 +1,128 @@
 @import "tailwindcss";
 
 @theme {
-  /* ═══ Core palette ═══ */
+  /* ═══ Surfaces ═══ */
+  --color-white: #FFFFFF;
+  --color-off-white: #F7F8FA;
+  --color-grey-50: #F0F1F4;
+  --color-grey-100: #E2E4E9;
+  --color-grey-200: #C8CCD4;
+
+  /* ═══ Text ═══ */
+  --color-ink: #1A1D23;
+  --color-ink-secondary: #4A4F5C;
+  --color-ink-tertiary: #7C8291;
+  --color-ink-disabled: #B0B5BF;
+
+  /* ═══ Functional — action ═══ */
+  --color-blue-600: #2563EB;
+  --color-blue-50: #EFF6FF;
+
+  /* ═══ Functional — status ═══ */
+  --color-green-600: #16A34A;
+  --color-green-50: #F0FDF4;
+  --color-amber-600: #D97706;
+  --color-amber-50: #FFFBEB;
+  --color-red-600: #DC2626;
+  --color-red-50: #FEF2F2;
+
+  /* ═══ Structural ═══ */
+  --color-slate-700: #334155;
+  --color-slate-50: #F8FAFC;
+
+  /* ═══ Typography ═══ */
+  --font-sans: 'Inter', system-ui, -apple-system, sans-serif;
+
+  /* ═══ Shadows ═══ */
+  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.06);
+  --shadow-hero: 0 1px 4px rgba(0, 0, 0, 0.05);
+
+  /* ═══ Radius ═══ */
+  --radius-sm: 4px;
+  --radius-md: 6px;
+  --radius-lg: 8px;
+  --radius-pill: 20px;
+  --radius-full: 9999px;
+
+  /* ═══ Spacing ═══ */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 20px;
+  --space-6: 24px;
+  --space-8: 32px;
+  --space-10: 40px;
+  --space-12: 48px;
+
+  /* ═══ Layout ═══ */
+  --content-max-width: 720px;
+  --title-bar-height: 56px;
+
+  /* ═══ Animation ═══ */
+  --transition-fade: 400ms ease-out;
+  --transition-content: 200ms ease;
+  --transition-progress: 300ms ease;
+  --transition-value: 600ms ease-out;
+
+  /* ═══ Legacy — kept for V1 interview pages ═══ */
   --color-cream: #FAF6F1;
   --color-cream-dark: #F0EBE3;
-  --color-surface: #FEFDFB;
-  --color-ink: #2D2926;
-  --color-ink-light: #6B6560;
-  --color-ink-faint: #A39E99;
-
-  /* ═══ Primary accent — terracotta warmth ═══ */
   --color-warmth: #C67D5A;
   --color-warmth-light: #F0DDD2;
   --color-warmth-dark: #A8623F;
-
-  /* ═══ Secondary accent — soft teal ═══ */
   --color-teal: #5B8A8A;
   --color-teal-light: #E0EDED;
-  --color-teal-dark: #4A7272;
-
-  /* ═══ Success — sage green ═══ */
   --color-sage: #7A9E7E;
   --color-sage-light: #E4EDE5;
-  --color-sage-dark: #5C7E60;
-
-  /* ═══ Warning — amber ═══ */
   --color-amber: #D4A84B;
   --color-amber-light: #F5ECD4;
-
-  /* ═══ Depth — warm navy ═══ */
   --color-depth: #3D4F5F;
-  --color-depth-light: #E8ECF0;
-
-  /* ═══ Soft — lavender (minimal) ═══ */
-  --color-soft: #C2B5C7;
-  --color-soft-light: #EDE8EF;
-
-  /* ═══ Typography — all Inter ═══ */
+  --color-ink-light: #6B6560;
+  --color-ink-faint: #A39E99;
+  --color-surface: #FEFDFB;
   --font-heading: 'Inter', system-ui, -apple-system, sans-serif;
   --font-body: 'Inter', system-ui, -apple-system, sans-serif;
-
-  /* ═══ Shadows — warm ═══ */
-  --shadow-sm: 0 1px 3px rgba(45, 41, 38, 0.06);
   --shadow-md: 0 3px 12px rgba(45, 41, 38, 0.08);
   --shadow-lg: 0 8px 24px rgba(45, 41, 38, 0.12);
-
-  /* ═══ Radius ═══ */
-  --radius-sm: 8px;
-  --radius-md: 12px;
-  --radius-lg: 16px;
-  --radius-full: 9999px;
-
-  /* ═══ Layout ═══ */
+  --radius-sm-legacy: 8px;
+  --radius-md-legacy: 12px;
+  --radius-lg-legacy: 16px;
   --sidebar-width: 240px;
   --sidebar-collapsed: 64px;
-
-  /* ═══ Borders ═══ */
   --border-card: 2px;
   --border-accent: 5px;
 }
 
 /* ═══ Base ═══ */
 body {
-  font-family: var(--font-body);
+  font-family: var(--font-sans);
   font-size: 15px;
   color: var(--color-ink);
-  background-color: var(--color-cream);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
 
 h1, h2, h3, h4 {
-  font-family: var(--font-heading);
+  font-family: var(--font-sans);
   font-weight: 700;
   letter-spacing: -0.02em;
 }
 
 /* ═══ Focus ═══ */
 *:focus-visible {
-  outline: 2px solid var(--color-warmth);
+  outline: 2px solid var(--color-blue-600);
   outline-offset: 2px;
-  border-radius: 4px;
+  border-radius: var(--radius-sm);
 }
 
 /* ═══ Selection ═══ */
 ::selection {
-  background-color: var(--color-warmth-light);
+  background-color: var(--color-blue-50);
   color: var(--color-ink);
 }
 
-/* ═══ Scrollbar (subtle) ═══ */
+/* ═══ Scrollbar ═══ */
 ::-webkit-scrollbar {
   width: 6px;
   height: 6px;
@@ -98,11 +131,11 @@ h1, h2, h3, h4 {
   background: transparent;
 }
 ::-webkit-scrollbar-thumb {
-  background: var(--color-cream-dark);
+  background: var(--color-grey-200);
   border-radius: 3px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: var(--color-ink-faint);
+  background: var(--color-ink-tertiary);
 }
 
 /* ═══ Tabular numbers for financial data ═══ */
