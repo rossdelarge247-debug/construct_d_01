@@ -142,3 +142,37 @@ h1, h2, h3, h4 {
 .tabular-nums {
   font-variant-numeric: tabular-nums;
 }
+
+/* ═══ Processing animations (spec 18) ═══ */
+
+/* Indeterminate shimmer — sweeps across the track */
+@keyframes shimmer {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(400%); }
+}
+
+/* Sequential dot pulse — typing-indicator feel */
+@keyframes dotPulse {
+  0%, 80%, 100% { opacity: 0.3; transform: scale(0.8); }
+  40% { opacity: 1; transform: scale(1); }
+}
+
+/* Lozenge spinner to tick transition */
+@keyframes fadeInScale {
+  from { opacity: 0; transform: scale(0.5); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+/* Value count-up entrance (section cards) */
+@keyframes valueEnter {
+  from { opacity: 0; transform: translateY(4px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.animate-value-enter {
+  animation: valueEnter var(--transition-value) forwards;
+}
+
+.animate-fade-in-scale {
+  animation: fadeInScale 150ms ease-out forwards;
+}

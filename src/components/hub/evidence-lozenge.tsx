@@ -16,36 +16,49 @@ export function EvidenceLozenge({ lozenge }: EvidenceLozengeProps) {
     <div className="relative">
       <button
         onClick={() => hasDocuments && setFlyoutOpen(!flyoutOpen)}
-        className="inline-flex items-center gap-1.5 px-4 py-1.5 bg-slate-700 text-white text-xs font-medium rounded-pill transition-opacity hover:opacity-90"
+        className={`inline-flex items-center gap-1.5 px-4 py-1.5 text-white text-xs font-medium rounded-pill transition-all duration-200 ${
+          lozenge.status === 'uploaded'
+            ? 'bg-slate-700 hover:opacity-90 cursor-pointer'
+            : lozenge.status === 'uploading'
+              ? 'bg-slate-700/80'
+              : 'bg-slate-700/60'
+        }`}
         aria-expanded={flyoutOpen}
+        aria-label={`${lozenge.label}: ${lozenge.status === 'uploaded' ? 'uploaded' : lozenge.status === 'uploading' ? 'processing' : 'not yet uploaded'}`}
       >
+        {/* Status icon with transitions (spec 18 line 268: 150ms fade) */}
         {lozenge.status === 'uploading' && (
           <Loader2 size={12} className="animate-spin" />
         )}
         {lozenge.status === 'uploaded' && (
-          <Check size={12} />
+          <Check size={12} className="animate-fade-in-scale text-green-400" />
         )}
         {lozenge.count > 0 && (
-          <span>{lozenge.count}</span>
+          <span className="tabular-nums">{lozenge.count}</span>
         )}
         <span>{lozenge.label}</span>
         {lozenge.status === 'uploaded' && hasDocuments && (
           <ChevronDown
             size={12}
-            className={`transition-transform ${flyoutOpen ? 'rotate-180' : ''}`}
+            className={`transition-transform duration-200 ${flyoutOpen ? 'rotate-180' : ''}`}
           />
         )}
       </button>
 
+      {/* Flyout: document list */}
       {flyoutOpen && hasDocuments && (
-        <div className="absolute top-full left-0 mt-1 z-10 bg-white border border-grey-100 rounded-md shadow-sm py-2 px-3 min-w-[220px]">
+        <div
+          className="absolute top-full left-0 mt-1.5 z-10 bg-white border border-grey-100 rounded-md py-2 px-3 min-w-[240px] animate-value-enter"
+          style={{ boxShadow: 'var(--shadow-sm)' }}
+        >
           {lozenge.documents.map((doc) => (
-            <div key={doc.id} className="py-1 text-xs text-ink-secondary">
+            <div key={doc.id} className="py-1.5 text-xs text-ink-secondary flex items-center gap-2">
+              <Check size={10} className="text-green-600 flex-shrink-0" />
               {doc.description}
             </div>
           ))}
           {lozenge.documents[0]?.monthsRequired > 0 && (
-            <div className="pt-1 mt-1 border-t border-grey-50 text-xs text-ink-tertiary">
+            <div className="pt-1.5 mt-1 border-t border-grey-100 text-xs text-ink-tertiary">
               {lozenge.documents.reduce((sum, d) => sum + d.monthsCovered, 0)} of{' '}
               {lozenge.documents[0].monthsRequired} months provided
             </div>

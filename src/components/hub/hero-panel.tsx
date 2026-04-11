@@ -48,11 +48,33 @@ export function HeroPanel({
   summaryAchievements,
   summaryTodoItems,
 }: HeroPanelProps) {
+  const prevStateRef = useRef(state)
+  const [visible, setVisible] = useState(true)
+  const [renderState, setRenderState] = useState(state)
+
+  // Cross-fade transition: fade out → swap content → fade in (spec 18 line 249)
+  useEffect(() => {
+    if (state !== prevStateRef.current) {
+      setVisible(false)
+      const timer = setTimeout(() => {
+        setRenderState(state)
+        prevStateRef.current = state
+        setVisible(true)
+      }, 200) // 200ms fade-out before swap
+      return () => clearTimeout(timer)
+    }
+  }, [state])
+
   return (
-    <div className="bg-white rounded-lg p-8" style={{ boxShadow: 'var(--shadow-hero)' }}>
+    <div
+      className="bg-white rounded-lg p-8"
+      style={{ boxShadow: 'var(--shadow-hero)' }}
+      aria-live="polite"
+      aria-atomic="false"
+    >
       {/* Heading */}
       <h2 className="text-lg font-bold text-ink tracking-tight mb-4">
-        {getHeading(state)}
+        {getHeading(renderState)}
       </h2>
 
       {/* Lozenges — always visible */}
@@ -63,7 +85,7 @@ export function HeroPanel({
       </div>
 
       {/* Progress bar — visible during Q&A */}
-      {(state === 'auto_confirm' || state === 'clarification') && (
+      {(renderState === 'auto_confirm' || renderState === 'clarification') && (
         <ProgressBar
           current={currentQuestionIndex}
           total={questions.length + 1}
@@ -71,40 +93,48 @@ export function HeroPanel({
       )}
 
       {/* Error display */}
-      {uploadContext?.error && state === 'ready' && (
+      {uploadContext?.error && renderState === 'ready' && (
         <div className="mb-4 p-4 bg-red-50 border border-red-600/20 rounded-md">
           <p className="text-sm text-red-600">{uploadContext.error}</p>
         </div>
       )}
 
-      {/* State-specific content */}
-      {state === 'ready' && <ReadyState onFilesDropped={onFilesDropped} />}
-      {state === 'uploading' && <UploadingState context={uploadContext} />}
-      {state === 'uploading_context' && <UploadingContextState context={uploadContext} />}
-      {state === 'analysing' && <AnalysingState context={uploadContext} />}
-      {state === 'review_ready' && <ReviewReadyState onReview={onReviewStart} onUploadMore={onUploadMore} />}
-      {state === 'auto_confirm' && (
-        <AutoConfirmState
-          items={autoConfirmItems}
-          onAccept={onAutoConfirmAccept}
-          onCancel={onCancelReview}
-        />
-      )}
-      {state === 'clarification' && questions[currentQuestionIndex] && (
-        <ClarificationState
-          question={questions[currentQuestionIndex]}
-          onAnswer={onQuestionAnswer}
-          onSkip={onQuestionSkip}
-        />
-      )}
-      {state === 'summary' && (
-        <SummaryState
-          onFinish={onSummaryFinish}
-          onUploadMore={onUploadMore}
-          achievements={summaryAchievements}
-          todoItems={summaryTodoItems}
-        />
-      )}
+      {/* State-specific content with cross-fade */}
+      <div
+        className="transition-opacity"
+        style={{
+          opacity: visible ? 1 : 0,
+          transitionDuration: 'var(--transition-content)',
+        }}
+      >
+        {renderState === 'ready' && <ReadyState onFilesDropped={onFilesDropped} />}
+        {renderState === 'uploading' && <UploadingState context={uploadContext} />}
+        {renderState === 'uploading_context' && <UploadingContextState context={uploadContext} />}
+        {renderState === 'analysing' && <AnalysingState context={uploadContext} />}
+        {renderState === 'review_ready' && <ReviewReadyState onReview={onReviewStart} onUploadMore={onUploadMore} />}
+        {renderState === 'auto_confirm' && (
+          <AutoConfirmState
+            items={autoConfirmItems}
+            onAccept={onAutoConfirmAccept}
+            onCancel={onCancelReview}
+          />
+        )}
+        {renderState === 'clarification' && questions[currentQuestionIndex] && (
+          <ClarificationState
+            question={questions[currentQuestionIndex]}
+            onAnswer={onQuestionAnswer}
+            onSkip={onQuestionSkip}
+          />
+        )}
+        {renderState === 'summary' && (
+          <SummaryState
+            onFinish={onSummaryFinish}
+            onUploadMore={onUploadMore}
+            achievements={summaryAchievements}
+            todoItems={summaryTodoItems}
+          />
+        )}
+      </div>
     </div>
   )
 }
@@ -134,7 +164,14 @@ function getHeading(state: HeroPanelState): string {
 function ProgressBar({ current, total }: { current: number; total: number }) {
   const progress = Math.min(((current + 1) / total) * 100, 100)
   return (
-    <div className="w-full h-1 bg-grey-100 rounded-full mb-6 overflow-hidden">
+    <div
+      className="w-full h-1 bg-grey-100 rounded-full mb-6 overflow-hidden"
+      role="progressbar"
+      aria-valuenow={current + 1}
+      aria-valuemin={0}
+      aria-valuemax={total}
+      aria-label={`Question ${current + 1} of ${total}`}
+    >
       <div
         className="h-full bg-ink rounded-full"
         style={{
@@ -150,10 +187,12 @@ function ProgressBar({ current, total }: { current: number; total: number }) {
 
 function ReadyState({ onFilesDropped }: { onFilesDropped: (files: File[]) => void }) {
   const fileInputRef = useRef<HTMLInputElement>(null)
+  const [isDragOver, setIsDragOver] = useState(false)
 
   const handleDrop = useCallback(
     (e: React.DragEvent) => {
       e.preventDefault()
+      setIsDragOver(false)
       const files = Array.from(e.dataTransfer.files)
       if (files.length > 0) onFilesDropped(files)
     },
@@ -162,6 +201,11 @@ function ReadyState({ onFilesDropped }: { onFilesDropped: (files: File[]) => voi
 
   const handleDragOver = useCallback((e: React.DragEvent) => {
     e.preventDefault()
+    setIsDragOver(true)
+  }, [])
+
+  const handleDragLeave = useCallback(() => {
+    setIsDragOver(false)
   }, [])
 
   const handleFileSelect = useCallback(
@@ -176,7 +220,12 @@ function ReadyState({ onFilesDropped }: { onFilesDropped: (files: File[]) => voi
     <div
       onDrop={handleDrop}
       onDragOver={handleDragOver}
-      className="border-2 border-dashed border-grey-200 rounded-lg p-12 text-center hover:border-blue-600 hover:bg-blue-50 transition-colors cursor-pointer"
+      onDragLeave={handleDragLeave}
+      className={`border-2 border-dashed rounded-lg p-12 text-center transition-all duration-200 cursor-pointer ${
+        isDragOver
+          ? 'border-blue-600 bg-blue-50 scale-[1.01]'
+          : 'border-grey-200 hover:border-blue-600 hover:bg-blue-50'
+      }`}
       onClick={() => fileInputRef.current?.click()}
       role="button"
       tabIndex={0}
@@ -556,13 +605,27 @@ function SummaryItem({ type, text, linkText }: { type: 'done' | 'todo'; text: st
 }
 
 // ═══ Processing animation ═══
+// Spec 18: "precision processing" — competent and measured, not whimsical.
+// Uses indeterminate shimmer line + subtle sequential dots for dual-signal.
 
 function ProcessingAnimation() {
   return (
-    <div className="flex items-center justify-center gap-1.5">
-      <div className="w-2 h-2 bg-ink-tertiary rounded-full animate-pulse" style={{ animationDelay: '0ms' }} />
-      <div className="w-2 h-2 bg-ink-tertiary rounded-full animate-pulse" style={{ animationDelay: '200ms' }} />
-      <div className="w-2 h-2 bg-ink-tertiary rounded-full animate-pulse" style={{ animationDelay: '400ms' }} />
+    <div className="flex flex-col items-center gap-4">
+      {/* Indeterminate progress line — thin, sweeping, measured */}
+      <div className="w-48 h-0.5 bg-grey-100 rounded-full overflow-hidden relative">
+        <div
+          className="absolute inset-y-0 w-1/3 bg-ink/40 rounded-full"
+          style={{
+            animation: 'shimmer 2s ease-in-out infinite',
+          }}
+        />
+      </div>
+      {/* Sequential dots — secondary signal, typing-indicator feel */}
+      <div className="flex items-center gap-1">
+        <div className="w-1.5 h-1.5 bg-ink-tertiary rounded-full" style={{ animation: 'dotPulse 1.4s ease-in-out infinite', animationDelay: '0ms' }} />
+        <div className="w-1.5 h-1.5 bg-ink-tertiary rounded-full" style={{ animation: 'dotPulse 1.4s ease-in-out infinite', animationDelay: '200ms' }} />
+        <div className="w-1.5 h-1.5 bg-ink-tertiary rounded-full" style={{ animation: 'dotPulse 1.4s ease-in-out infinite', animationDelay: '400ms' }} />
+      </div>
     </div>
   )
 }
