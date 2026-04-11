@@ -294,6 +294,140 @@ export const PENSION_CETV_SCHEMA = {
   required: ['document_type', 'scheme_name', 'provider', 'pension_type', 'cetv_value', 'is_public_sector'],
 }
 
+// ═══ Savings / investment statement extraction ═══
+
+export interface SavingsStatementExtraction {
+  document_type: 'savings_statement'
+  provider: string
+  account_type: 'savings' | 'cash_isa' | 'stocks_and_shares_isa' | 'lifetime_isa' | 'investment_fund' | 'premium_bonds' | 'other'
+  account_holder: string | null
+  is_joint: boolean
+  current_balance: number
+  interest_rate: number | null
+  large_recent_withdrawals: { date: string | null; amount: number; description: string }[]
+  confidence: number
+  reasoning: string
+}
+
+export const SAVINGS_STATEMENT_SCHEMA = {
+  type: 'object' as const,
+  properties: {
+    document_type: { type: 'string' as const, enum: ['savings_statement'] },
+    provider: { type: 'string' as const },
+    account_type: { type: 'string' as const, enum: ['savings', 'cash_isa', 'stocks_and_shares_isa', 'lifetime_isa', 'investment_fund', 'premium_bonds', 'other'] },
+    account_holder: { type: ['string', 'null'] as const },
+    is_joint: { type: 'boolean' as const },
+    current_balance: { type: 'number' as const },
+    interest_rate: { type: ['number', 'null'] as const },
+    large_recent_withdrawals: {
+      type: 'array' as const,
+      items: {
+        type: 'object' as const,
+        properties: {
+          date: { type: ['string', 'null'] as const },
+          amount: { type: 'number' as const },
+          description: { type: 'string' as const },
+        },
+        required: ['amount', 'description'],
+      },
+    },
+    confidence: { type: 'number' as const },
+    reasoning: { type: 'string' as const },
+  },
+  required: ['document_type', 'provider', 'account_type', 'is_joint', 'current_balance', 'large_recent_withdrawals', 'confidence', 'reasoning'],
+}
+
+// ═══ Credit card statement extraction ═══
+
+export interface CreditCardStatementExtraction {
+  document_type: 'credit_card_statement'
+  provider: string
+  account_holder: string | null
+  is_joint: boolean
+  outstanding_balance: number
+  credit_limit: number | null
+  minimum_payment: number | null
+  interest_rate_apr: number | null
+  notable_transactions: { description: string; amount: number; reason_flagged: string }[]
+  confidence: number
+  reasoning: string
+}
+
+export const CREDIT_CARD_STATEMENT_SCHEMA = {
+  type: 'object' as const,
+  properties: {
+    document_type: { type: 'string' as const, enum: ['credit_card_statement'] },
+    provider: { type: 'string' as const },
+    account_holder: { type: ['string', 'null'] as const },
+    is_joint: { type: 'boolean' as const },
+    outstanding_balance: { type: 'number' as const },
+    credit_limit: { type: ['number', 'null'] as const },
+    minimum_payment: { type: ['number', 'null'] as const },
+    interest_rate_apr: { type: ['number', 'null'] as const },
+    notable_transactions: {
+      type: 'array' as const,
+      items: {
+        type: 'object' as const,
+        properties: {
+          description: { type: 'string' as const },
+          amount: { type: 'number' as const },
+          reason_flagged: { type: 'string' as const },
+        },
+        required: ['description', 'amount', 'reason_flagged'],
+      },
+    },
+    confidence: { type: 'number' as const },
+    reasoning: { type: 'string' as const },
+  },
+  required: ['document_type', 'provider', 'is_joint', 'outstanding_balance', 'notable_transactions', 'confidence', 'reasoning'],
+}
+
+// ═══ P60 / Tax return extraction ═══
+
+export interface P60Extraction {
+  document_type: 'p60' | 'tax_return'
+  employer_or_source: string
+  tax_year: string | null
+  total_pay: number
+  total_tax_deducted: number
+  total_ni: number | null
+  self_employment_profit: number | null
+  dividend_income: number | null
+  rental_income: number | null
+  other_income: { source: string; amount: number }[]
+  confidence: number
+  reasoning: string
+}
+
+export const P60_SCHEMA = {
+  type: 'object' as const,
+  properties: {
+    document_type: { type: 'string' as const, enum: ['p60', 'tax_return'] },
+    employer_or_source: { type: 'string' as const },
+    tax_year: { type: ['string', 'null'] as const },
+    total_pay: { type: 'number' as const },
+    total_tax_deducted: { type: 'number' as const },
+    total_ni: { type: ['number', 'null'] as const },
+    self_employment_profit: { type: ['number', 'null'] as const },
+    dividend_income: { type: ['number', 'null'] as const },
+    rental_income: { type: ['number', 'null'] as const },
+    other_income: {
+      type: 'array' as const,
+      items: {
+        type: 'object' as const,
+        properties: {
+          source: { type: 'string' as const },
+          amount: { type: 'number' as const },
+        },
+        required: ['source', 'amount'],
+      },
+    },
+    confidence: { type: 'number' as const },
+    reasoning: { type: 'string' as const },
+  },
+  required: ['document_type', 'employer_or_source', 'total_pay', 'total_tax_deducted', 'other_income', 'confidence', 'reasoning'],
+}
+
 // ═══ Document classification ═══
 
 export interface DocumentClassification {

@@ -194,6 +194,27 @@ CRITICAL RULES:
 - Do not list individual transactions unless they're notable (>£500 or unusual)
 - Extract ONLY values explicitly stated in the document`
 
+export const P60_PROMPT = `You are analysing a UK P60 or SA302 tax calculation for someone going through separation/divorce. This feeds Form E sections 2.15–2.16 (Income).
+
+EXTRACT:
+1. Employer name (P60) or "Self Assessment" (SA302)
+2. Tax year (e.g., "2025/26")
+3. Total pay / total income for the year
+4. Total tax deducted
+5. Total National Insurance contributions
+6. If SA302: self-employment profit, dividend income, rental income, any other income sources with amounts
+
+CROSS-REFERENCING:
+- P60 annual figures should broadly match payslip × 12 and bank statement deposits × 12
+- SA302 shows ALL income sources — dividends indicate a company, rental indicates property income
+- If this is a self-employed person, the profit figure is the key Form E disclosure value (not revenue)
+
+CRITICAL RULES:
+- The tax year matters — Form E needs current or most recent full year
+- If there are multiple income sources, extract each separately
+- Self-employment profit is NET profit after expenses, not turnover
+- Extract ONLY values explicitly stated in the document`
+
 // ═══ Prompt routing ═══
 
 export function getExtractionPrompt(documentType: string): string {
@@ -204,18 +225,23 @@ export function getExtractionPrompt(documentType: string): string {
     case 'pension_cetv': return PENSION_CETV_PROMPT
     case 'savings_statement': return SAVINGS_STATEMENT_PROMPT
     case 'credit_card_statement': return CREDIT_CARD_PROMPT
-    default: return BANK_STATEMENT_PROMPT // fallback to most comprehensive prompt
+    case 'p60':
+    case 'tax_return': return P60_PROMPT
+    default: return BANK_STATEMENT_PROMPT
   }
 }
 
 export function getExtractionSchema(documentType: string) {
-  // Dynamic import to avoid circular deps
   const schemas = require('./extraction-schemas')
   switch (documentType) {
     case 'bank_statement': return schemas.BANK_STATEMENT_SCHEMA
     case 'payslip': return schemas.PAYSLIP_SCHEMA
     case 'mortgage_statement': return schemas.MORTGAGE_STATEMENT_SCHEMA
     case 'pension_cetv': return schemas.PENSION_CETV_SCHEMA
+    case 'savings_statement': return schemas.SAVINGS_STATEMENT_SCHEMA
+    case 'credit_card_statement': return schemas.CREDIT_CARD_STATEMENT_SCHEMA
+    case 'p60':
+    case 'tax_return': return schemas.P60_SCHEMA
     default: return schemas.BANK_STATEMENT_SCHEMA
   }
 }

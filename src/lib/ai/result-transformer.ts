@@ -18,6 +18,9 @@ import type {
   PayslipExtraction,
   MortgageStatementExtraction,
   PensionCETVExtraction,
+  SavingsStatementExtraction,
+  CreditCardStatementExtraction,
+  P60Extraction,
   DocumentClassification,
 } from './extraction-schemas'
 
@@ -51,6 +54,13 @@ export function transformExtractionResult(
       return transformMortgageStatement(extraction as MortgageStatementExtraction)
     case 'pension_cetv':
       return transformPensionCETV(extraction as PensionCETVExtraction)
+    case 'savings_statement':
+      return transformSavingsStatement(extraction as SavingsStatementExtraction)
+    case 'credit_card_statement':
+      return transformCreditCardStatement(extraction as CreditCardStatementExtraction)
+    case 'p60':
+    case 'tax_return':
+      return transformP60(extraction as P60Extraction)
     default:
       return transformBankStatement(extraction as BankStatementExtraction)
   }
@@ -546,6 +556,378 @@ function transformPensionCETV(data: PensionCETVExtraction): TransformedResult {
   return { autoConfirmItems, questions, financialItems, processingMessages }
 }
 
+// ═══ Savings statement transformer ═══
+
+function transformSavingsStatement(data: SavingsStatementExtraction): TransformedResult {
+  const autoConfirmItems: AutoConfirmItem[] = []
+  const questions: ClarificationQuestion[] = []
+  const financialItems: FinancialItem[] = []
+  const now = new Date().toISOString()
+
+  const typeLabel = ACCOUNT_TYPE_LABELS[data.account_type] || 'Savings account'
+
+  // Auto-confirm: balance (savings statements are typically unambiguous)
+  if (data.confidence >= AUTO_CONFIRM_THRESHOLD) {
+    autoConfirmItems.push({
+      id: `savings-balance-${Date.now()}`,
+      label: `${typeLabel} with ${data.provider}: ${formatCurrency(data.current_balance)}`,
+      detail: data.reasoning,
+      accepted: true,
+    })
+  }
+
+  financialItems.push({
+    id: `fi-savings-${Date.now()}`,
+    sectionKey: 'accounts',
+    label: `${typeLabel} — ${data.provider}`,
+    value: data.current_balance,
+    period: 'total',
+    ownership: data.is_joint ? 'joint' : 'yours',
+    confidence: data.confidence >= AUTO_CONFIRM_THRESHOLD ? 'confirmed' : 'estimated',
+    sourceDocumentId: null,
+    sourceDescription: data.reasoning,
+    isInherited: false,
+    isPreMarital: false,
+    asAtDate: null,
+    createdAt: now,
+    updatedAt: now,
+  })
+
+  // Clarify: ownership if unclear
+  if (data.is_joint) {
+    questions.push({
+      id: `savings-joint-${Date.now()}`,
+      questionText: `Is this ${typeLabel} a joint account with your partner?`,
+      reasoning: `The account appears to be in joint names with ${data.account_holder || 'another person'}.`,
+      options: [
+        { label: 'Yes, joint with partner', value: 'joint' },
+        { label: 'No, it\'s in my name only', value: 'sole' },
+      ],
+      primaryOption: 'Yes, joint with partner',
+      secondaryLabel: 'No, it\'s in my name only',
+      formEField: '2.3',
+      answered: false,
+      answer: null,
+    })
+  }
+
+  // Clarify: large recent withdrawals
+  for (const withdrawal of data.large_recent_withdrawals) {
+    questions.push({
+      id: `savings-withdrawal-${Date.now()}-${withdrawal.amount}`,
+      questionText: `There's been a withdrawal of ${formatCurrency(withdrawal.amount)} recently. Has this been spent or moved to another account?`,
+      reasoning: withdrawal.description,
+      options: [
+        { label: 'Spent', value: 'spent' },
+        { label: 'Moved to another account', value: 'moved' },
+        { label: 'Separation costs', value: 'separation' },
+        { label: 'Other', value: 'other' },
+      ],
+      primaryOption: null,
+      secondaryLabel: 'I\'d rather not say',
+      formEField: '2.3',
+      answered: false,
+      answer: null,
+    })
+  }
+
+  // Clarify: ISA type if unclear
+  if (data.account_type === 'other') {
+    questions.push({
+      id: `savings-type-${Date.now()}`,
+      questionText: 'Is this a Cash ISA or Stocks & Shares ISA?',
+      reasoning: 'We couldn\'t determine the exact account type. Cash ISAs and Stocks & Shares ISAs are different asset classes for disclosure.',
+      options: [
+        { label: 'Cash ISA', value: 'cash_isa' },
+        { label: 'Stocks & Shares ISA', value: 'stocks_and_shares_isa' },
+        { label: 'Lifetime ISA', value: 'lifetime_isa' },
+        { label: 'Regular savings', value: 'savings' },
+        { label: 'Not sure', value: 'unknown' },
+      ],
+      primaryOption: null,
+      secondaryLabel: 'Not sure',
+      formEField: '2.3 / 2.4',
+      answered: false,
+      answer: null,
+    })
+  }
+
+  const processingMessages = [
+    `Found ${typeLabel} with ${data.provider}`,
+    `Balance: ${formatCurrency(data.current_balance)}`,
+  ]
+
+  return { autoConfirmItems, questions, financialItems, processingMessages }
+}
+
+// ═══ Credit card statement transformer ═══
+
+function transformCreditCardStatement(data: CreditCardStatementExtraction): TransformedResult {
+  const autoConfirmItems: AutoConfirmItem[] = []
+  const questions: ClarificationQuestion[] = []
+  const financialItems: FinancialItem[] = []
+  const now = new Date().toISOString()
+
+  // Auto-confirm: balance (credit card statements are structured)
+  const balanceDetail = [
+    data.reasoning,
+    data.credit_limit ? `Credit limit: ${formatCurrency(data.credit_limit)}` : null,
+    data.interest_rate_apr ? `APR: ${data.interest_rate_apr}%` : null,
+  ].filter(Boolean).join('. ')
+
+  if (data.confidence >= AUTO_CONFIRM_THRESHOLD) {
+    autoConfirmItems.push({
+      id: `cc-balance-${Date.now()}`,
+      label: `${data.provider} credit card: ${formatCurrency(data.outstanding_balance)} outstanding`,
+      detail: balanceDetail,
+      accepted: true,
+    })
+  }
+
+  financialItems.push({
+    id: `fi-cc-${Date.now()}`,
+    sectionKey: 'debts',
+    label: `${data.provider} credit card`,
+    value: data.outstanding_balance,
+    period: 'total',
+    ownership: data.is_joint ? 'joint' : 'yours',
+    confidence: data.confidence >= AUTO_CONFIRM_THRESHOLD ? 'confirmed' : 'estimated',
+    sourceDocumentId: null,
+    sourceDescription: balanceDetail,
+    isInherited: false,
+    isPreMarital: false,
+    asAtDate: null,
+    createdAt: now,
+    updatedAt: now,
+  })
+
+  // If minimum payment exists, add as expenditure item
+  if (data.minimum_payment) {
+    financialItems.push({
+      id: `fi-cc-payment-${Date.now()}`,
+      sectionKey: 'spending',
+      label: `${data.provider} credit card payment`,
+      value: data.minimum_payment,
+      period: 'monthly',
+      ownership: data.is_joint ? 'joint' : 'yours',
+      confidence: 'estimated',
+      sourceDocumentId: null,
+      sourceDescription: 'Minimum payment — actual payment may be higher',
+      isInherited: false,
+      isPreMarital: false,
+      asAtDate: null,
+      createdAt: now,
+      updatedAt: now,
+    })
+  }
+
+  // Clarify: ownership
+  if (data.is_joint) {
+    questions.push({
+      id: `cc-joint-${Date.now()}`,
+      questionText: `Is this ${data.provider} credit card in joint names with your partner?`,
+      reasoning: `The card appears to be a joint account.`,
+      options: [
+        { label: 'Yes, joint', value: 'joint' },
+        { label: 'No, it\'s mine only', value: 'sole' },
+        { label: 'It\'s my partner\'s', value: 'partners' },
+      ],
+      primaryOption: null,
+      secondaryLabel: 'It\'s my partner\'s',
+      formEField: '2.14',
+      answered: false,
+      answer: null,
+    })
+  }
+
+  // Clarify: high balance
+  if (data.outstanding_balance > 5000) {
+    questions.push({
+      id: `cc-highbalance-${Date.now()}`,
+      questionText: `This card has a balance of ${formatCurrency(data.outstanding_balance)}. Is this typical, or has spending increased recently?`,
+      reasoning: 'Balances above £5,000 may be relevant to the court\'s assessment of needs and conduct.',
+      options: [
+        { label: 'Normal for me', value: 'normal' },
+        { label: 'Increased due to separation', value: 'separation' },
+        { label: 'Increased for other reasons', value: 'other' },
+      ],
+      primaryOption: null,
+      secondaryLabel: 'I\'d rather not say',
+      formEField: '2.14',
+      answered: false,
+      answer: null,
+    })
+  }
+
+  const processingMessages = [
+    `Found ${data.provider} credit card statement`,
+    `Outstanding balance: ${formatCurrency(data.outstanding_balance)}`,
+  ]
+
+  return { autoConfirmItems, questions, financialItems, processingMessages }
+}
+
+// ═══ P60 / Tax return transformer ═══
+
+function transformP60(data: P60Extraction): TransformedResult {
+  const autoConfirmItems: AutoConfirmItem[] = []
+  const questions: ClarificationQuestion[] = []
+  const financialItems: FinancialItem[] = []
+  const now = new Date().toISOString()
+
+  const yearLabel = data.tax_year ? ` (${data.tax_year})` : ''
+
+  // Auto-confirm: total pay and tax
+  if (data.confidence >= AUTO_CONFIRM_THRESHOLD) {
+    autoConfirmItems.push({
+      id: `p60-income-${Date.now()}`,
+      label: `Annual income${yearLabel}: ${formatCurrency(data.total_pay)} gross from ${data.employer_or_source}`,
+      detail: `Tax: ${formatCurrency(data.total_tax_deducted)}${data.total_ni ? `, NI: ${formatCurrency(data.total_ni)}` : ''}`,
+      accepted: true,
+    })
+  }
+
+  financialItems.push({
+    id: `fi-p60-income-${Date.now()}`,
+    sectionKey: 'income',
+    label: `Annual income — ${data.employer_or_source}`,
+    value: data.total_pay,
+    period: 'annual',
+    ownership: 'yours',
+    confidence: data.confidence >= AUTO_CONFIRM_THRESHOLD ? 'confirmed' : 'estimated',
+    sourceDocumentId: null,
+    sourceDescription: `${data.document_type === 'p60' ? 'P60' : 'Tax return'}${yearLabel}`,
+    isInherited: false,
+    isPreMarital: false,
+    asAtDate: null,
+    createdAt: now,
+    updatedAt: now,
+  })
+
+  // Self-employment profit
+  if (data.self_employment_profit != null && data.self_employment_profit > 0) {
+    autoConfirmItems.push({
+      id: `p60-selfempl-${Date.now()}`,
+      label: `Self-employment profit${yearLabel}: ${formatCurrency(data.self_employment_profit)}`,
+      detail: 'Net profit after expenses, from tax return',
+      accepted: true,
+    })
+
+    financialItems.push({
+      id: `fi-p60-selfempl-${Date.now()}`,
+      sectionKey: 'income',
+      label: 'Self-employment profit',
+      value: data.self_employment_profit,
+      period: 'annual',
+      ownership: 'yours',
+      confidence: 'confirmed',
+      sourceDocumentId: null,
+      sourceDescription: `SA302${yearLabel}`,
+      isInherited: false,
+      isPreMarital: false,
+      asAtDate: null,
+      createdAt: now,
+      updatedAt: now,
+    })
+
+    // Clarify: is this still current?
+    questions.push({
+      id: `p60-selfempl-current-${Date.now()}`,
+      questionText: `Your tax return shows self-employment profit of ${formatCurrency(data.self_employment_profit)}. Is this still your current income level?`,
+      reasoning: 'Courts need to understand maintainable income — whether this figure is likely to continue.',
+      options: [
+        { label: 'Yes, roughly the same', value: 'same' },
+        { label: 'It\'s increased', value: 'increased' },
+        { label: 'It\'s decreased', value: 'decreased' },
+        { label: 'I\'ve stopped self-employment', value: 'stopped' },
+      ],
+      primaryOption: null,
+      secondaryLabel: 'I\'m not sure',
+      formEField: '2.16',
+      answered: false,
+      answer: null,
+    })
+  }
+
+  // Dividend income
+  if (data.dividend_income != null && data.dividend_income > 0) {
+    autoConfirmItems.push({
+      id: `p60-dividends-${Date.now()}`,
+      label: `Dividend income${yearLabel}: ${formatCurrency(data.dividend_income)}`,
+      detail: 'From tax return',
+      accepted: true,
+    })
+
+    questions.push({
+      id: `p60-dividend-source-${Date.now()}`,
+      questionText: `Your tax return shows dividend income of ${formatCurrency(data.dividend_income)}. Is this from your own company?`,
+      reasoning: 'Dividends from your own company are treated differently from investment dividends for disclosure.',
+      options: [
+        { label: 'Yes, my company', value: 'own_company' },
+        { label: 'No, investments', value: 'investments' },
+        { label: 'Both', value: 'both' },
+      ],
+      primaryOption: null,
+      secondaryLabel: 'I\'m not sure',
+      formEField: '2.16 or 2.4',
+      answered: false,
+      answer: null,
+    })
+  }
+
+  // Rental income
+  if (data.rental_income != null && data.rental_income > 0) {
+    autoConfirmItems.push({
+      id: `p60-rental-${Date.now()}`,
+      label: `Rental income${yearLabel}: ${formatCurrency(data.rental_income)}`,
+      detail: 'From tax return',
+      accepted: true,
+    })
+
+    financialItems.push({
+      id: `fi-p60-rental-${Date.now()}`,
+      sectionKey: 'income',
+      label: 'Rental income',
+      value: data.rental_income,
+      period: 'annual',
+      ownership: 'yours',
+      confidence: 'confirmed',
+      sourceDocumentId: null,
+      sourceDescription: `Tax return${yearLabel}`,
+      isInherited: false,
+      isPreMarital: false,
+      asAtDate: null,
+      createdAt: now,
+      updatedAt: now,
+    })
+  }
+
+  // Multiple income sources
+  if (data.other_income.length > 0) {
+    questions.push({
+      id: `p60-multiple-${Date.now()}`,
+      questionText: `Your tax return shows income from ${data.other_income.length + 1} sources. Are all of these current?`,
+      reasoning: 'Courts need to know your current income, not just historical.',
+      options: [
+        { label: 'Yes, all current', value: 'all_current' },
+        { label: 'Some have changed', value: 'changed' },
+      ],
+      primaryOption: 'Yes, all current',
+      secondaryLabel: 'Some have changed',
+      formEField: '2.15–2.16',
+      answered: false,
+      answer: null,
+    })
+  }
+
+  const processingMessages = [
+    `Found ${data.document_type === 'p60' ? 'P60' : 'tax return'} from ${data.employer_or_source}`,
+    `Annual income: ${formatCurrency(data.total_pay)}`,
+  ]
+
+  return { autoConfirmItems, questions, financialItems, processingMessages }
+}
+
 // ═══ Helpers ═══
 
 function formatCurrency(value: number): string {
@@ -555,6 +937,16 @@ function formatCurrency(value: number): string {
     minimumFractionDigits: 0,
     maximumFractionDigits: 0,
   }).format(value)
+}
+
+const ACCOUNT_TYPE_LABELS: Record<string, string> = {
+  savings: 'Savings account',
+  cash_isa: 'Cash ISA',
+  stocks_and_shares_isa: 'Stocks & Shares ISA',
+  lifetime_isa: 'Lifetime ISA',
+  investment_fund: 'Investment fund',
+  premium_bonds: 'Premium Bonds',
+  other: 'Savings / investment account',
 }
 
 const CATEGORY_LABELS: Record<string, string> = {

@@ -12,11 +12,17 @@ import {
   PAYSLIP_SCHEMA,
   MORTGAGE_STATEMENT_SCHEMA,
   PENSION_CETV_SCHEMA,
+  SAVINGS_STATEMENT_SCHEMA,
+  CREDIT_CARD_STATEMENT_SCHEMA,
+  P60_SCHEMA,
   type DocumentClassification,
   type BankStatementExtraction,
   type PayslipExtraction,
   type MortgageStatementExtraction,
   type PensionCETVExtraction,
+  type SavingsStatementExtraction,
+  type CreditCardStatementExtraction,
+  type P60Extraction,
 } from './extraction-schemas'
 
 // Models
@@ -28,6 +34,9 @@ export type ExtractionResult =
   | PayslipExtraction
   | MortgageStatementExtraction
   | PensionCETVExtraction
+  | SavingsStatementExtraction
+  | CreditCardStatementExtraction
+  | P60Extraction
 
 export interface PipelineResult {
   classification: DocumentClassification
@@ -426,6 +435,10 @@ function getSchemaForType(documentType: string) {
     case 'payslip': return PAYSLIP_SCHEMA
     case 'mortgage_statement': return MORTGAGE_STATEMENT_SCHEMA
     case 'pension_cetv': return PENSION_CETV_SCHEMA
-    default: return BANK_STATEMENT_SCHEMA // fallback to most comprehensive
+    case 'savings_statement': return SAVINGS_STATEMENT_SCHEMA
+    case 'credit_card_statement': return CREDIT_CARD_STATEMENT_SCHEMA
+    case 'p60':
+    case 'tax_return': return P60_SCHEMA
+    default: return BANK_STATEMENT_SCHEMA
   }
 }
