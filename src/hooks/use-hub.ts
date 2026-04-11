@@ -256,6 +256,21 @@ export function useHub() {
 
       // Update lozenge to uploaded
       if (lozengeType) {
+        // Build clean summary for flyout (not raw AI description)
+        const provider = classification.provider || ''
+        const docTypeLabels: Record<string, string> = {
+          bank_statement: 'statement',
+          payslip: 'payslip',
+          mortgage_statement: 'mortgage statement',
+          pension_cetv: 'CETV letter',
+          savings_statement: 'savings statement',
+          credit_card_statement: 'credit card statement',
+          p60: 'P60',
+          tax_return: 'tax return',
+        }
+        const typeLabel = docTypeLabels[classification.document_type] || 'document'
+        const summary = provider ? `${provider} ${typeLabel}` : file.name
+
         setLozengeState((prev) =>
           prev.map((l) => l.type === lozengeType
             ? {
@@ -265,9 +280,9 @@ export function useHub() {
                   id: `doc-${Date.now()}`,
                   fileName: file.name,
                   fileType: file.type,
-                  description: classification.description || file.name,
+                  description: summary,
                   uploadedAt: new Date().toISOString(),
-                  monthsCovered: 0,
+                  monthsCovered: 1, // TODO: calculate from statement period
                   monthsRequired: classification.document_type === 'bank_statement' ? 12 : 0,
                 }],
               }

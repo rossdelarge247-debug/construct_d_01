@@ -95,7 +95,7 @@ function transformBankStatement(data: BankStatementExtraction): TransformedResul
       const label = income.type === 'employment'
         ? `Monthly salary: ${formatCurrency(income.amount)} net from ${income.source}`
         : `${income.source}: ${formatCurrency(income.amount)}/month`
-      autoConfirmItems.push({ id, label, detail: sourceDesc, accepted: true })
+      autoConfirmItems.push({ id, label, detail: `Form E ${income.type === 'employment' ? '2.15' : '2.15-2.20'}`, accepted: true })
       financialItems.push({
         id: `fi-${id}`, sectionKey: 'income',
         label: income.type === 'employment' ? `Salary from ${income.source}` : income.source,
@@ -129,7 +129,7 @@ function transformBankStatement(data: BankStatementExtraction): TransformedResul
 
     if (payment.confidence >= AUTO_CONFIRM_THRESHOLD) {
       // High confidence — auto-confirm (spec 13: obvious items)
-      autoConfirmItems.push({ id, label: `${categoryLabel}: ${paymentDesc}`, detail: paymentDesc, accepted: true })
+      autoConfirmItems.push({ id, label: `${categoryLabel}: ${paymentDesc}`, detail: `Form E ${getFormEField(payment.likely_category)}`, accepted: true })
     } else {
       // Spec 13 decision tree: generate question based on category + signal
       const question = generatePaymentQuestion(payment)
