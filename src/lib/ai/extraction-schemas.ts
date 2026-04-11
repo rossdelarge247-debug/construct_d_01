@@ -64,6 +64,7 @@ export interface BankStatementExtraction {
 
 export const BANK_STATEMENT_SCHEMA = {
   type: 'object' as const,
+  additionalProperties: false as const,
   properties: {
     document_type: { type: 'string' as const, enum: ['bank_statement'] },
     provider: { type: 'string' as const },
@@ -78,6 +79,7 @@ export const BANK_STATEMENT_SCHEMA = {
       type: 'array' as const,
       items: {
         type: 'object' as const,
+  additionalProperties: false as const,
         properties: {
           source: { type: 'string' as const },
           amount: { type: 'number' as const },
@@ -93,6 +95,7 @@ export const BANK_STATEMENT_SCHEMA = {
       type: 'array' as const,
       items: {
         type: 'object' as const,
+  additionalProperties: false as const,
         properties: {
           payee: { type: 'string' as const },
           amount: { type: 'number' as const },
@@ -111,6 +114,7 @@ export const BANK_STATEMENT_SCHEMA = {
       type: 'array' as const,
       items: {
         type: 'object' as const,
+  additionalProperties: false as const,
         properties: {
           category: { type: 'string' as const },
           monthly_average: { type: 'number' as const },
@@ -123,6 +127,7 @@ export const BANK_STATEMENT_SCHEMA = {
       type: 'array' as const,
       items: {
         type: 'object' as const,
+  additionalProperties: false as const,
         properties: {
           description: { type: 'string' as const },
           question: { type: 'string' as const },
@@ -136,6 +141,7 @@ export const BANK_STATEMENT_SCHEMA = {
       type: 'array' as const,
       items: {
         type: 'object' as const,
+  additionalProperties: false as const,
         properties: {
           description: { type: 'string' as const },
           amount: { type: 'number' as const },
@@ -172,6 +178,7 @@ export interface PayslipExtraction {
 
 export const PAYSLIP_SCHEMA = {
   type: 'object' as const,
+  additionalProperties: false as const,
   properties: {
     document_type: { type: 'string' as const, enum: ['payslip'] },
     employer: { type: 'string' as const },
@@ -188,6 +195,7 @@ export const PAYSLIP_SCHEMA = {
       type: 'array' as const,
       items: {
         type: 'object' as const,
+  additionalProperties: false as const,
         properties: {
           label: { type: 'string' as const },
           amount: { type: 'number' as const },
@@ -226,6 +234,7 @@ export interface MortgageStatementExtraction {
 
 export const MORTGAGE_STATEMENT_SCHEMA = {
   type: 'object' as const,
+  additionalProperties: false as const,
   properties: {
     document_type: { type: 'string' as const, enum: ['mortgage_statement'] },
     lender: { type: 'string' as const },
@@ -246,6 +255,7 @@ export const MORTGAGE_STATEMENT_SCHEMA = {
       type: 'array' as const,
       items: {
         type: 'object' as const,
+  additionalProperties: false as const,
         properties: {
           balance: { type: 'number' as const },
           rate: { type: 'number' as const },
@@ -277,6 +287,7 @@ export interface PensionCETVExtraction {
 
 export const PENSION_CETV_SCHEMA = {
   type: 'object' as const,
+  additionalProperties: false as const,
   properties: {
     document_type: { type: 'string' as const, enum: ['pension_cetv'] },
     scheme_name: { type: 'string' as const },
@@ -311,6 +322,7 @@ export interface SavingsStatementExtraction {
 
 export const SAVINGS_STATEMENT_SCHEMA = {
   type: 'object' as const,
+  additionalProperties: false as const,
   properties: {
     document_type: { type: 'string' as const, enum: ['savings_statement'] },
     provider: { type: 'string' as const },
@@ -323,6 +335,7 @@ export const SAVINGS_STATEMENT_SCHEMA = {
       type: 'array' as const,
       items: {
         type: 'object' as const,
+  additionalProperties: false as const,
         properties: {
           date: { type: ['string', 'null'] as const },
           amount: { type: 'number' as const },
@@ -355,6 +368,7 @@ export interface CreditCardStatementExtraction {
 
 export const CREDIT_CARD_STATEMENT_SCHEMA = {
   type: 'object' as const,
+  additionalProperties: false as const,
   properties: {
     document_type: { type: 'string' as const, enum: ['credit_card_statement'] },
     provider: { type: 'string' as const },
@@ -368,6 +382,7 @@ export const CREDIT_CARD_STATEMENT_SCHEMA = {
       type: 'array' as const,
       items: {
         type: 'object' as const,
+  additionalProperties: false as const,
         properties: {
           description: { type: 'string' as const },
           amount: { type: 'number' as const },
@@ -401,6 +416,7 @@ export interface P60Extraction {
 
 export const P60_SCHEMA = {
   type: 'object' as const,
+  additionalProperties: false as const,
   properties: {
     document_type: { type: 'string' as const, enum: ['p60', 'tax_return'] },
     employer_or_source: { type: 'string' as const },
@@ -415,6 +431,7 @@ export const P60_SCHEMA = {
       type: 'array' as const,
       items: {
         type: 'object' as const,
+  additionalProperties: false as const,
         properties: {
           source: { type: 'string' as const },
           amount: { type: 'number' as const },
@@ -439,6 +456,7 @@ export interface DocumentClassification {
 
 export const CLASSIFICATION_SCHEMA = {
   type: 'object' as const,
+  additionalProperties: false as const,
   properties: {
     document_type: {
       type: 'string' as const,
