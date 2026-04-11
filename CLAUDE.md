@@ -1,5 +1,11 @@
 # Claude Code — Decouple
 
+## North star
+
+The experience should feel like having a brilliant, patient financial analyst sitting beside you. You hand them your bank statements and they come back saying: "Here's what I found. Your salary is £3,218/month from ACME Ltd. You've got a mortgage at £1,150/month to Halifax. I noticed what looks like a pension contribution — is that right?" They do the heavy lifting. You confirm, correct, or fill gaps. In 15 minutes, not 15 hours.
+
+**Quality bar:** This should feel like it was built in 2026. No shortcuts, no MVPs. The users are stressed, often alone, often late at night. Every interaction must be compassionate, professional, and empowering.
+
 ## Session startup (do this FIRST)
 
 1. **Fetch and checkout the development branch:**
@@ -68,6 +74,15 @@ src/app/api/documents/extract/route.ts     — Upload API, 300s maxDuration
 src/app/api/test-pipeline/route.ts         — Isolation test for pipeline steps
 docs/README.md                             — Full documentation index
 ```
+
+## Information tiers — what to read and when
+
+- **Tier 1 (always loaded):** This file. North star, rules, startup checklist.
+- **Tier 2 (read at session start):** `docs/SESSION-CONTEXT.md` — current state and priorities.
+- **Tier 3 (read when building a feature):** `docs/workspace-spec/{N}-*.md` — only the spec relevant to the current task. Don't read all specs.
+- **Tier 4 (reference only, don't read proactively):** `docs/HANDOFF-SESSION-*.md`, `docs/v2/v2-backlog.md`, `docs/v2/v2-desk-research-*.md`. Consult these only if you need historical context or are planning a large piece of work.
+
+The backlog lives at `docs/v2/v2-backlog.md` (98 items, prioritised). Don't read it every session — but consult it before proposing new work to check it's not already planned or deprioritised.
 
 ## Technical rules
 
