@@ -194,10 +194,26 @@ export function useHub() {
         body: formData,
       })
 
-      const data = await response.json()
+      // Handle non-JSON responses (e.g. Next.js error pages, plain text errors)
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      let data: any
+      try {
+        data = await response.json()
+      } catch {
+        let text = ''
+        try { text = await response.text() } catch { /* ignore */ }
+        setUploadContext((prev) => ({
+          ...prev,
+          error: `Server returned an invalid response (${response.status}). ${text.substring(0, 200)}`,
+        }))
+        setHeroPanelState('ready')
+        return
+      }
 
       if (!response.ok || data.error) {
-        setUploadContext((prev) => ({ ...prev, error: data.error || 'Upload failed' }))
+        setUploadContext((prev) => ({ ...prev, error: data.error || `Upload failed (${response.status})` }))
+        if (data.diagnostics) setLastDiagnostics(data.diagnostics)
+        if (data.result?.classification) setLastClassification(data.result.classification)
         setHeroPanelState('ready')
         return
       }

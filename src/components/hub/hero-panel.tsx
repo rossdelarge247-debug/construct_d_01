@@ -257,14 +257,27 @@ function ReadyState({ onFilesDropped }: { onFilesDropped: (files: File[]) => voi
 function UploadingState({ context }: { context?: UploadContext }) {
   const fileCount = context?.fileCount || 0
   const fileWord = fileCount === 1 ? 'file' : 'files'
+
+  // Cycle through encouraging messages while waiting for API
+  const [messageIndex, setMessageIndex] = useState(0)
+  const messages = [
+    fileCount > 0 ? `Reading your ${fileCount} ${fileWord}...` : 'Reading your document...',
+    'Identifying document type...',
+    'Extracting financial details...',
+  ]
+
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setMessageIndex((prev) => (prev + 1) % messages.length)
+    }, 2500)
+    return () => clearInterval(timer)
+  }, [messages.length])
+
   return (
-    <div className="py-12 text-center">
+    <div className="py-8 text-center">
       <ProcessingAnimation />
-      <p className="mt-4 text-sm text-ink-secondary">
-        {fileCount > 0
-          ? `Reading your ${fileCount} ${fileWord}...`
-          : 'Generating suggestions...'
-        }
+      <p className="mt-6 text-sm text-ink-secondary transition-opacity duration-300">
+        {messages[messageIndex]}
       </p>
     </div>
   )
@@ -275,22 +288,21 @@ function UploadingState({ context }: { context?: UploadContext }) {
 function UploadingContextState({ context }: { context?: UploadContext }) {
   const docType = context?.documentType
   const provider = context?.providerName
-
-  // Build contextual description from classification
   const description = docType
     ? formatDocumentDescription(docType, provider ?? null)
-    : 'Identifying document types...'
+    : 'Identifying document type...'
 
   return (
-    <div className="py-12 text-center">
+    <div className="py-8 text-center">
       <ProcessingAnimation />
-      <p className="mt-4 text-sm text-ink-secondary">
-        {context?.fileCount
-          ? `You are uploading ${context.fileCount} ${context.fileCount === 1 ? 'file' : 'files'}....`
-          : 'Processing your upload...'
-        }
-      </p>
-      <p className="mt-1 text-sm font-medium text-ink">{description}</p>
+      <div className="mt-6 space-y-2">
+        <p className="text-sm font-medium text-ink animate-value-enter">
+          {description}
+        </p>
+        <p className="text-sm text-ink-secondary">
+          Analysing the contents...
+        </p>
+      </div>
     </div>
   )
 }
@@ -299,17 +311,35 @@ function UploadingContextState({ context }: { context?: UploadContext }) {
 
 function AnalysingState({ context }: { context?: UploadContext }) {
   const messages = context?.processingMessages || []
+  const docType = context?.documentType
+
+  const analysingText = docType === 'bank_statement'
+    ? 'Categorising transactions, detecting income patterns...'
+    : docType === 'payslip'
+      ? 'Extracting pay details, tax, and deductions...'
+      : docType === 'mortgage_statement'
+        ? 'Reading mortgage balance, rates, and terms...'
+        : docType === 'pension_cetv'
+          ? 'Extracting pension valuation details...'
+          : 'Processing the financial details...'
+
   return (
-    <div className="py-12 text-center">
+    <div className="py-8 text-center">
       <ProcessingAnimation />
-      <p className="mt-4 text-sm text-ink-secondary">Files uploaded, processing the transactions...</p>
-      {messages.length > 0 && (
-        <div className="mt-2 space-y-1">
-          {messages.slice(0, 3).map((msg, i) => (
-            <p key={i} className="text-xs text-ink-tertiary">{msg}</p>
-          ))}
-        </div>
-      )}
+      <div className="mt-6 space-y-2">
+        <p className="text-sm font-medium text-ink animate-value-enter">
+          {analysingText}
+        </p>
+        {messages.length > 0 && (
+          <div className="space-y-1">
+            {messages.slice(0, 3).map((msg, i) => (
+              <p key={i} className="text-xs text-ink-tertiary animate-value-enter" style={{ animationDelay: `${i * 150}ms` }}>
+                {msg}
+              </p>
+            ))}
+          </div>
+        )}
+      </div>
     </div>
   )
 }
@@ -605,27 +635,65 @@ function SummaryItem({ type, text, linkText }: { type: 'done' | 'todo'; text: st
 }
 
 // ═══ Processing animation ═══
-// Spec 18: "precision processing" — competent and measured, not whimsical.
-// Uses indeterminate shimmer line + subtle sequential dots for dual-signal.
+// Diamond sparkle particles that appear, twinkle, and fade at random positions.
+// Four-pointed star SVG shapes in a gradient palette — feels like intelligence at work.
 
 function ProcessingAnimation() {
+  // Generate sparkle positions — deterministic seed from component mount
+  const sparkles = useRef(
+    Array.from({ length: 12 }, (_, i) => ({
+      id: i,
+      x: 15 + Math.random() * 70,      // 15-85% horizontal
+      y: 10 + Math.random() * 80,       // 10-90% vertical
+      size: 8 + Math.random() * 18,     // 8-26px
+      delay: Math.random() * 3,         // 0-3s stagger
+      duration: 1.5 + Math.random() * 2, // 1.5-3.5s cycle
+      rotation: Math.random() * 30 - 15, // -15 to 15 degrees
+    }))
+  ).current
+
   return (
-    <div className="flex flex-col items-center gap-4">
-      {/* Indeterminate progress line — thin, sweeping, measured */}
-      <div className="w-48 h-0.5 bg-grey-100 rounded-full overflow-hidden relative">
+    <div className="relative w-full h-32 overflow-hidden">
+      {sparkles.map((s) => (
         <div
-          className="absolute inset-y-0 w-1/3 bg-ink/40 rounded-full"
+          key={s.id}
+          className="absolute"
           style={{
-            animation: 'shimmer 2s ease-in-out infinite',
+            left: `${s.x}%`,
+            top: `${s.y}%`,
+            width: s.size,
+            height: s.size,
+            transform: `rotate(${s.rotation}deg)`,
+            animation: `sparkle ${s.duration}s ease-in-out ${s.delay}s infinite`,
           }}
-        />
-      </div>
-      {/* Sequential dots — secondary signal, typing-indicator feel */}
-      <div className="flex items-center gap-1">
-        <div className="w-1.5 h-1.5 bg-ink-tertiary rounded-full" style={{ animation: 'dotPulse 1.4s ease-in-out infinite', animationDelay: '0ms' }} />
-        <div className="w-1.5 h-1.5 bg-ink-tertiary rounded-full" style={{ animation: 'dotPulse 1.4s ease-in-out infinite', animationDelay: '200ms' }} />
-        <div className="w-1.5 h-1.5 bg-ink-tertiary rounded-full" style={{ animation: 'dotPulse 1.4s ease-in-out infinite', animationDelay: '400ms' }} />
-      </div>
+        >
+          <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path
+              d="M12 0C12 0 14 8.5 12 12C10 8.5 12 0 12 0Z"
+              fill="url(#sparkleGrad)"
+            />
+            <path
+              d="M12 24C12 24 14 15.5 12 12C10 15.5 12 24 12 24Z"
+              fill="url(#sparkleGrad)"
+            />
+            <path
+              d="M0 12C0 12 8.5 14 12 12C8.5 10 0 12 0 12Z"
+              fill="url(#sparkleGrad)"
+            />
+            <path
+              d="M24 12C24 12 15.5 14 12 12C15.5 10 24 12 24 12Z"
+              fill="url(#sparkleGrad)"
+            />
+            <defs>
+              <linearGradient id="sparkleGrad" x1="0" y1="0" x2="24" y2="24">
+                <stop offset="0%" stopColor="#818CF8" />
+                <stop offset="50%" stopColor="#6366F1" />
+                <stop offset="100%" stopColor="#A78BFA" />
+              </linearGradient>
+            </defs>
+          </svg>
+        </div>
+      ))}
     </div>
   )
 }

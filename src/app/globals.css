@@ -145,16 +145,20 @@ h1, h2, h3, h4 {
 
 /* ═══ Processing animations (spec 18) ═══ */
 
-/* Indeterminate shimmer — sweeps across the track */
+/* Sparkle diamond animation — appear, twinkle, fade */
+@keyframes sparkle {
+  0%, 100% { opacity: 0; transform: scale(0.3) rotate(0deg); }
+  15% { opacity: 0.9; transform: scale(1) rotate(10deg); }
+  30% { opacity: 0.6; transform: scale(0.85) rotate(-5deg); }
+  45% { opacity: 1; transform: scale(1.1) rotate(5deg); }
+  60% { opacity: 0.4; transform: scale(0.7) rotate(-10deg); }
+  80% { opacity: 0; transform: scale(0.2) rotate(0deg); }
+}
+
+/* Shimmer sweep for progress indicators */
 @keyframes shimmer {
   0% { transform: translateX(-100%); }
   100% { transform: translateX(400%); }
-}
-
-/* Sequential dot pulse — typing-indicator feel */
-@keyframes dotPulse {
-  0%, 80%, 100% { opacity: 0.3; transform: scale(0.8); }
-  40% { opacity: 1; transform: scale(1); }
 }
 
 /* Lozenge spinner to tick transition */
