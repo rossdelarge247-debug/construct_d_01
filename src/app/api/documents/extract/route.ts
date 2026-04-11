@@ -9,11 +9,19 @@ import { transformExtractionResult } from '@/lib/ai/result-transformer'
 export const maxDuration = 300
 
 function buildResponse(result: PipelineResult) {
-  const transformed = transformExtractionResult(result.classification, result.extraction)
+  let transformed
+  try {
+    transformed = transformExtractionResult(result.classification, result.extraction)
+  } catch (transformError) {
+    const msg = transformError instanceof Error ? transformError.message : 'Unknown transform error'
+    console.error('[API] Transform error:', msg, transformError instanceof Error ? transformError.stack : '')
+    transformed = { autoConfirmItems: [], questions: [], financialItems: [], processingMessages: [] }
+  }
+
   return NextResponse.json({
     result: {
       classification: result.classification,
-      rawText: result.rawText,
+      rawText: result.rawText.substring(0, 5000), // Truncate to prevent large responses
       stepTimings: result.stepTimings,
       error: result.error,
     },
