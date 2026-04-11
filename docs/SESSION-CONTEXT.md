@@ -35,6 +35,12 @@ Branch: `claude/review-handoff-docs-ZovbO`
 2. **Do not build new features until the 504 is resolved and pipeline tested end-to-end in browser**
 3. **Do not reference pre-pivot specs (03-06, 11, 12) for new work** — the architecture changed fundamentally
 
+## Session Discipline
+- **Track lines of code changed.** After every file edit, maintain a running count of net lines added/modified this session
+- **At ~1,500 lines changed, flag it.** Say: "Approaching session scope limit (~1,500 lines). Recommend wrapping up soon."
+- **At ~2,000 lines, stop writing code.** Commit, push, and generate the next session's context block (same format as this document). Quality degrades past this point — better to hand off clean than push through degraded
+- **Before generating the handoff:** commit all work, update `docs/HANDOFF-SESSION-{N}.md` with retro (what went well, what went wrong, what's unfinished), then write `docs/SESSION-CONTEXT.md` for the next session
+
 ## Session 5 Deliverables
 1. Read Vercel function logs for `/api/documents/extract` — find the `[Pipeline]` breadcrumb where it dies
 2. Test Step 1 (Haiku PDF) and Step 2 (Sonnet structured outputs) in isolation
