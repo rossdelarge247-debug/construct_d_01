@@ -99,6 +99,24 @@ Connect bank accounts via Tink Link. Fetch 12 months of enriched transactions. M
 - **Dry-run mock:** Uses the old pre-pipeline schema shape. Not useful for testing post-pipeline features. Always test with real API key.
 - **Test approach:** Push branch → Vercel auto-deploys → test in browser with real PDFs.
 
+## Carry-forward for next session
+
+### P0 — Section card: Form E category grouping
+The Spending section card currently shows a flat list of individual items. It should group items by Form E 3.1 budget categories as lead buckets with category totals, and nest individual items within each:
+```
+Vehicle costs: £143/month (Form E 3.1)
+  ├ DVLA-LS595do: £67/month
+  ├ DVLA-AF15Gzp: £38/month
+  └ DVLA-EU03Dww: £38/month
+Subscriptions: £34/month (Form E 3.1)
+  ├ TV Licence MBP: £15/month
+  └ Netflix: £19/month
+```
+Applies to all sections, not just Spending. Requires changes to `section-cards.tsx` — add a grouping layer that buckets `FinancialItem[]` by a category field and renders collapsible category headers with totals.
+
+### P1 — Most recent statement deduplication
+When multiple statements are uploaded for the same account (same provider + last4), only the most recent closing balance should be used for the section card. Compare `asAtDate` and deduplicate in `use-hub.ts` when merging items.
+
 ## Negative Constraints
 1. **Do not use `response_format`** — Anthropic SDK uses `output_config.format`
 2. **Do not reference pre-pivot specs (03-06, 11, 12)** — architecture changed
