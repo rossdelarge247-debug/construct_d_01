@@ -23,6 +23,7 @@ import type {
   CreditCardStatementExtraction,
   P60Extraction,
   DocumentClassification,
+  DetectedPayment,
 } from './extraction-schemas'
 
 import type { ExtractionResult } from './pipeline'
@@ -30,6 +31,171 @@ import type { ExtractionResult } from './pipeline'
 // Confidence thresholds (from research implications — conservative for financial disclosure)
 const AUTO_CONFIRM_THRESHOLD = 0.95
 const CLARIFICATION_THRESHOLD = 0.80
+
+// ═══ Spec 19: Keyword lookup table ═══
+// Before asking "What is this?" for unknown payments, check payee against keywords.
+// Each entry: keywords to match, resolved category, Form E field, confidence level.
+
+interface KeywordEntry {
+  keywords: string[]
+  category: string
+  categoryLabel: string
+  formEField: string
+  confidence: number
+}
+
+const KEYWORD_LOOKUP_TABLE: KeywordEntry[] = [
+  { keywords: ['therapy', 'counselling', 'physio', 'osteopath', 'chiropractor', 'psychologist', 'cbt'], category: 'healthcare', categoryLabel: 'Healthcare', formEField: '3.1', confidence: 0.90 },
+  { keywords: ['dentist', 'dental', 'orthodont'], category: 'dental', categoryLabel: 'Healthcare / dental', formEField: '3.1', confidence: 0.92 },
+  { keywords: ['dvla', 'aa', 'rac', 'halfords', 'kwik fit', 'mot'], category: 'vehicle', categoryLabel: 'Vehicle costs', formEField: '3.1', confidence: 0.92 },
+  { keywords: ['nursery', 'childminder', 'after school', 'breakfast club', 'holiday club'], category: 'childcare', categoryLabel: 'Childcare', formEField: '3.1', confidence: 0.93 },
+  { keywords: ['gym', 'fitness', 'david lloyd', 'puregym', 'better', 'nuffield'], category: 'leisure', categoryLabel: 'Personal / leisure', formEField: '3.1', confidence: 0.90 },
+  { keywords: ['school', 'tuition', 'uniform'], category: 'education', categoryLabel: 'Children / education', formEField: '3.1', confidence: 0.88 },
+  { keywords: ['solicitor', 'law', 'mediator', 'mediation', 'legal'], category: 'legal', categoryLabel: 'Legal costs', formEField: '3.1', confidence: 0.95 },
+  { keywords: ['vodafone', 'o2', 'ee', 'three', 'giffgaff', 'sky mobile'], category: 'phone', categoryLabel: 'Phone / communications', formEField: '3.1', confidence: 0.95 },
+  { keywords: ['bt', 'virgin media', 'sky', 'plusnet', 'talktalk'], category: 'broadband', categoryLabel: 'Broadband / TV', formEField: '3.1', confidence: 0.93 },
+  { keywords: ['spotify', 'netflix', 'disney', 'apple', 'amazon prime'], category: 'subscription', categoryLabel: 'Subscriptions', formEField: '3.1', confidence: 0.97 },
+  { keywords: ['pet', 'vet', 'veterinary'], category: 'pets', categoryLabel: 'Pet costs', formEField: '3.1', confidence: 0.90 },
+  { keywords: ['cleaner', 'gardener', 'window clean'], category: 'household', categoryLabel: 'Household maintenance', formEField: '3.1', confidence: 0.88 },
+  { keywords: ['insurance', 'aviva', 'vitality', 'bupa', 'axa', 'legal & general', 'admiral', 'direct line'], category: 'insurance', categoryLabel: 'Insurance', formEField: '3.1', confidence: 0.85 },
+]
+
+/**
+ * Spec 19: Check payee name against keyword lookup table.
+ * Returns matched entry or null if no match found.
+ */
+function lookupPayeeCategory(payee: string): KeywordEntry | null {
+  const normalised = payee.toLowerCase()
+  for (const entry of KEYWORD_LOOKUP_TABLE) {
+    for (const keyword of entry.keywords) {
+      if (normalised.includes(keyword)) {
+        return entry
+      }
+    }
+  }
+  return null
+}
+
+// ═══ Spec 19: Payment aggregation ═══
+// Groups multiple payments to the same payee into single line items.
+// Runs before the payment decision tree so grouped items get one question, not many.
+
+interface AggregatedPayment {
+  payee: string               // Original payee name (from first occurrence)
+  normalisedPayee: string     // Normalised for grouping
+  totalAmount: number         // Sum of all payment amounts
+  averageAmount: number       // Average per occurrence
+  count: number               // Number of payments grouped
+  frequency: 'monthly' | 'weekly' | 'quarterly' | 'annual' | 'one_off'
+  annualisedAmount: number    // Projected annual cost
+  confidence: number          // Lowest confidence in the group
+  likely_category: string     // Category from first payment (or most common)
+  isDividend: boolean         // Spec 19: dividend detection
+}
+
+function normalisePayee(payee: string): string {
+  return payee
+    .toLowerCase()
+    .replace(/\b(ltd|plc|limited|inc|co|dd|so|s\/o|d\/d)\b/gi, '')
+    .replace(/[^a-z0-9\s]/g, '')
+    .replace(/\s+/g, ' ')
+    .trim()
+}
+
+function annualise(amount: number, frequency: string): number {
+  switch (frequency) {
+    case 'weekly': return amount * 52
+    case 'monthly': return amount * 12
+    case 'quarterly': return amount * 4
+    case 'annual': return amount
+    case 'one_off': return amount
+    default: return amount * 12
+  }
+}
+
+function aggregatePayments(payments: DetectedPayment[]): AggregatedPayment[] {
+  const groups = new Map<string, DetectedPayment[]>()
+
+  for (const payment of payments) {
+    const key = normalisePayee(payment.payee)
+    const existing = groups.get(key)
+    if (existing) {
+      existing.push(payment)
+    } else {
+      groups.set(key, [payment])
+    }
+  }
+
+  const result: AggregatedPayment[] = []
+
+  for (const [normalisedPayee, group] of groups) {
+    if (group.length === 1) {
+      // Single payment — pass through as-is
+      const p = group[0]
+      result.push({
+        payee: p.payee,
+        normalisedPayee,
+        totalAmount: p.amount,
+        averageAmount: p.amount,
+        count: 1,
+        frequency: p.frequency,
+        annualisedAmount: annualise(p.amount, p.frequency),
+        confidence: p.confidence,
+        likely_category: p.likely_category,
+        isDividend: false,
+      })
+    } else {
+      // Multiple payments — aggregate
+      const totalAmount = group.reduce((sum, p) => sum + p.amount, 0)
+      const averageAmount = totalAmount / group.length
+      const lowestConfidence = Math.min(...group.map((p) => p.confidence))
+      const frequency = group[0].frequency // Use first payment's frequency
+      const mostCommonCategory = getMostCommonCategory(group)
+
+      // Spec 19: Dividend detection — irregular amounts from a company name
+      const payeeLower = group[0].payee.toLowerCase()
+      const isDividend = payeeLower.includes('dividend') ||
+        (mostCommonCategory === 'unknown' && group.every((p) => p.likely_category === 'unknown') &&
+         amountsVary(group))
+
+      result.push({
+        payee: group[0].payee,
+        normalisedPayee,
+        totalAmount,
+        averageAmount: Math.round(averageAmount),
+        count: group.length,
+        frequency,
+        annualisedAmount: annualise(averageAmount, frequency),
+        confidence: lowestConfidence,
+        likely_category: mostCommonCategory,
+        isDividend,
+      })
+    }
+  }
+
+  return result
+}
+
+function getMostCommonCategory(payments: DetectedPayment[]): DetectedPayment['likely_category'] {
+  const counts = new Map<string, number>()
+  for (const p of payments) {
+    counts.set(p.likely_category, (counts.get(p.likely_category) || 0) + 1)
+  }
+  let maxCategory: DetectedPayment['likely_category'] = payments[0].likely_category
+  let maxCount = 0
+  for (const [cat, count] of counts) {
+    if (count > maxCount) { maxCount = count; maxCategory = cat as DetectedPayment['likely_category'] }
+  }
+  return maxCategory
+}
+
+function amountsVary(payments: DetectedPayment[]): boolean {
+  if (payments.length < 2) return false
+  const amounts = payments.map((p) => p.amount)
+  const min = Math.min(...amounts)
+  const max = Math.max(...amounts)
+  return min > 0 && (max - min) / min > 0.1 // >10% variation
+}
 
 export interface TransformedResult {
   autoConfirmItems: AutoConfirmItem[]
@@ -121,26 +287,88 @@ function transformBankStatement(data: BankStatementExtraction): TransformedResul
     }
   }
 
-  // ═══ Payments: spec 13 decision tree ═══
-  for (const payment of data.regular_payments) {
+  // ═══ Payments: spec 19 aggregation + spec 13 decision tree ═══
+  const aggregated = aggregatePayments(data.regular_payments)
+
+  for (const payment of aggregated) {
     const id = `payment-${payment.payee.replace(/\s+/g, '-').toLowerCase()}-${Date.now()}`
     const categoryLabel = CATEGORY_LABELS[payment.likely_category] || payment.likely_category
-    const paymentDesc = `${formatCurrency(payment.amount)}/${payment.frequency} to ${payment.payee}`
+    const countNote = payment.count > 1 ? ` (${payment.count} payments)` : ''
+    const displayAmount = payment.count > 1 ? payment.averageAmount : payment.totalAmount
+    const paymentDesc = `${formatCurrency(displayAmount)}/${payment.frequency} to ${payment.payee}${countNote}`
+
+    // Spec 19: Dividend detection → limited company question
+    if (payment.isDividend && payment.count >= 2) {
+      const annualised = formatCurrency(payment.totalAmount)
+      questions.push({
+        id,
+        questionText: `You received ${annualised} in dividends from ${payment.payee} this year. Is this from your own limited company?`,
+        reasoning: 'Dividends from your own company are treated differently from investment dividends for disclosure.',
+        options: [
+          { label: 'Yes, my company', value: 'own_company' },
+          { label: 'No, investment dividends', value: 'investment' },
+          { label: 'Something else', value: 'other' },
+        ],
+        primaryOption: null, secondaryLabel: "I'm not sure",
+        formEField: '2.16 or 2.4',
+        answered: false, answer: null,
+      })
+      continue
+    }
 
     if (payment.confidence >= AUTO_CONFIRM_THRESHOLD) {
       // High confidence — auto-confirm (spec 13: obvious items)
       autoConfirmItems.push({ id, label: `${categoryLabel}: ${paymentDesc}`, detail: `Form E ${getFormEField(payment.likely_category)}`, accepted: true })
-      // Create financial item so it appears in section cards
       financialItems.push({
         id: `fi-${id}`, sectionKey: paymentToSection(payment.likely_category),
         label: `${payment.payee} (${categoryLabel.toLowerCase()})`,
-        value: payment.amount, period: payment.frequency === 'monthly' || payment.frequency === 'annual' ? payment.frequency : 'monthly', ownership: 'yours', confidence: 'confirmed',
+        value: displayAmount, period: payment.frequency === 'monthly' || payment.frequency === 'annual' ? payment.frequency : 'monthly',
+        ownership: 'yours', confidence: 'confirmed',
         sourceDocumentId: null, sourceDescription: paymentDesc,
         isInherited: false, isPreMarital: false, asAtDate: now, createdAt: now, updatedAt: now,
       })
+    } else if (payment.likely_category === 'unknown') {
+      // Spec 19: keyword lookup before falling through to generic question
+      const keywordMatch = lookupPayeeCategory(payment.payee)
+      if (keywordMatch && keywordMatch.confidence >= 0.90) {
+        // High-confidence keyword match → auto-confirm
+        autoConfirmItems.push({
+          id, label: `${keywordMatch.categoryLabel}: ${paymentDesc}`,
+          detail: `Form E ${keywordMatch.formEField} (matched from payee name)`, accepted: true,
+        })
+        financialItems.push({
+          id: `fi-${id}`, sectionKey: 'spending',
+          label: `${payment.payee} (${keywordMatch.categoryLabel.toLowerCase()})`,
+          value: displayAmount, period: payment.frequency === 'monthly' || payment.frequency === 'annual' ? payment.frequency : 'monthly',
+          ownership: 'yours', confidence: 'confirmed',
+          sourceDocumentId: null, sourceDescription: paymentDesc,
+          isInherited: false, isPreMarital: false, asAtDate: now, createdAt: now, updatedAt: now,
+        })
+      } else if (keywordMatch) {
+        // Lower-confidence keyword match → targeted confirmation question
+        questions.push({
+          id,
+          questionText: `${paymentDesc}. Is this ${keywordMatch.categoryLabel.toLowerCase()}?`,
+          reasoning: null,
+          options: [
+            { label: `Yes, ${keywordMatch.categoryLabel.toLowerCase()}`, value: keywordMatch.category },
+            { label: 'No, something else', value: 'other' },
+          ],
+          primaryOption: `Yes, ${keywordMatch.categoryLabel.toLowerCase()}`,
+          secondaryLabel: 'No, something else',
+          formEField: keywordMatch.formEField,
+          answered: false, answer: null,
+        })
+      } else {
+        // No keyword match → fall through to generic question (spec 13)
+        const question = generatePaymentQuestion({ payee: payment.payee, amount: displayAmount, frequency: payment.frequency, confidence: payment.confidence, likely_category: payment.likely_category })
+        if (question) {
+          questions.push({ id, ...question, answered: false, answer: null })
+        }
+      }
     } else {
-      // Spec 13 decision tree: generate question based on category + signal
-      const question = generatePaymentQuestion(payment)
+      // Known category but below confidence threshold → spec 13 decision tree
+      const question = generatePaymentQuestion({ payee: payment.payee, amount: displayAmount, frequency: payment.frequency, confidence: payment.confidence, likely_category: payment.likely_category })
       if (question) {
         questions.push({ id, ...question, answered: false, answer: null })
       }
