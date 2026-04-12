@@ -28,11 +28,9 @@
 
 ### Tink integration status
 
-- **Credentials:** Valid. Client token obtained successfully (~290ms).
-- **Tink Link URL generation:** Working. URL generated correctly.
-- **Tink Link loading:** Partially working. The no-auth-code flow loads Tink Link, but requires redirect URI whitelisting in Tink Console.
-- **Blocker:** `INVALID_STATE_REDIRECT_URI` — the Vercel preview URL needs to be added to Tink Console's allowed redirect URIs. Vercel preview URLs change per deployment. Solution: use a stable production domain or custom domain and add `https://{domain}/api/bank/callback` to Tink Console.
-- **Previous issue resolved:** `REQUEST_FAILED_FETCH_EXISTING_USER` was caused by the user creation + delegation flow. Switching to the simpler no-auth-code Tink Link flow bypassed this entirely.
+- **Full flow working end-to-end.** Tink Link → sandbox bank auth → callback → tink-transformer → BankStatementExtraction → transformExtractionResult → Q&A pipeline.
+- **Redirect URI:** Must use stable Vercel production domain (`construct-dev.vercel.app`), not preview URLs.
+- **Sandbox:** Test bank at `demobank.production.global.tink.se` works with sandbox credentials.
 
 ### Tink API lessons learned
 

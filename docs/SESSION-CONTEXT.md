@@ -39,7 +39,7 @@ Stack: Next.js 16.2, React 19, TypeScript, Tailwind 4, Supabase, Claude AI, Verc
 - **Section cards:** Group items by Form E category with totals.
 - **Statement dedup:** Same provider+last4 → keep most recent by asAtDate.
 - **Dry-run mode:** Realistic mock data through real pipeline when no API key.
-- **Open Banking:** Tink client, transformer, API routes, debug panel all built. Needs redirect URI configuration in Tink Console to complete testing.
+- **Open Banking:** Full Tink flow working end-to-end. Sandbox tested. Must use stable production domain for redirect URI.
 - **Hero panel:** Shows "Connect your bank" (Open Banking) + drag-drop upload zone.
 - **State:** localStorage only. Supabase schema ready but not wired.
 
