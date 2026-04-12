@@ -93,6 +93,12 @@ Connect bank accounts via Tink Link. Fetch 12 months of enriched transactions. M
 - **90-day re-consent:** PSD2 requirement. Non-issue for Form E (point-in-time disclosure).
 - **Key insight:** Tink handles 80% of categorisation. Your code handles the divorce-specific 20% (pension vs insurance, maintenance vs rent, company dividends). That 20% IS the product differentiator.
 
+## Testing & Deployment
+- **Vercel:** Deployed and working. Real PDFs tested on Vercel Pro (300s timeout).
+- **ANTHROPIC_API_KEY:** Configured in Vercel env vars. Real AI pipeline works — no need for dry-run mode.
+- **Dry-run mock:** Uses the old pre-pipeline schema shape. Not useful for testing post-pipeline features. Always test with real API key.
+- **Test approach:** Push branch → Vercel auto-deploys → test in browser with real PDFs.
+
 ## Negative Constraints
 1. **Do not use `response_format`** — Anthropic SDK uses `output_config.format`
 2. **Do not reference pre-pivot specs (03-06, 11, 12)** — architecture changed
