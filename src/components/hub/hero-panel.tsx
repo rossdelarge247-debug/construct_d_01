@@ -473,11 +473,13 @@ function ClarificationState({
 }) {
   const [selectedValue, setSelectedValue] = useState<string | null>(null)
   const [showMoreOptions, setShowMoreOptions] = useState(false)
+  const [showCategorySelector, setShowCategorySelector] = useState(false)
 
   // Reset selection when question changes
   useEffect(() => {
     setSelectedValue(null)
     setShowMoreOptions(false)
+    setShowCategorySelector(false)
   }, [question.id])
 
   const isBinary = question.options.length <= 2
@@ -490,6 +492,10 @@ function ClarificationState({
 
   // Progressive disclosure: "Something else" on income questions reveals more Form E income types
   const hasProgressiveOther = question.options.some((o) => o.value === 'other_income')
+
+  // Any question with an "Other" / "Something else" option gets the Form E category fallback
+  const hasGenericOther = !hasProgressiveOther && !usesCategoryDropdown &&
+    question.options.some((o) => o.value === 'other' || o.label === 'Something else')
 
   if (usesCategoryDropdown) {
     return (
@@ -537,7 +543,7 @@ function ClarificationState({
         // Radio options with tracked selection
         <div className="mt-4 space-y-2.5">
           {question.options
-            .filter((o) => o.value !== 'other_income')
+            .filter((o) => o.value !== 'other_income' && !(hasGenericOther && (o.value === 'other' || o.label === 'Something else')))
             .map((option) => (
             <label
               key={option.value}
@@ -552,18 +558,18 @@ function ClarificationState({
                 name={question.id}
                 value={option.value}
                 checked={selectedValue === option.value}
-                onChange={() => { setSelectedValue(option.value); setShowMoreOptions(false) }}
+                onChange={() => { setSelectedValue(option.value); setShowMoreOptions(false); setShowCategorySelector(false) }}
                 className="w-4 h-4 border-grey-200 text-blue-600 focus:ring-blue-600"
               />
               <span className="text-sm text-ink">{option.label}</span>
             </label>
           ))}
 
-          {/* Progressive disclosure: "Something else" expands to more Form E income types */}
+          {/* Progressive disclosure: "Something else" on income questions reveals more Form E income types */}
           {hasProgressiveOther && (
             <>
               <button
-                onClick={() => { setShowMoreOptions(!showMoreOptions); setSelectedValue(null) }}
+                onClick={() => { setShowMoreOptions(!showMoreOptions); setSelectedValue(null); setShowCategorySelector(false) }}
                 className={`w-full flex items-center gap-3 p-3 rounded-md cursor-pointer transition-colors text-left ${
                   showMoreOptions ? 'bg-blue-50 border border-blue-600/20' : 'hover:bg-grey-50'
                 }`}
@@ -600,6 +606,33 @@ function ClarificationState({
             </>
           )}
 
+          {/* Generic "Other" on any question → expands to Form E category selector */}
+          {hasGenericOther && (
+            <>
+              <button
+                onClick={() => { setShowCategorySelector(!showCategorySelector); setSelectedValue(null); setShowMoreOptions(false) }}
+                className={`w-full flex items-center gap-3 p-3 rounded-md cursor-pointer transition-colors text-left ${
+                  showCategorySelector ? 'bg-blue-50 border border-blue-600/20' : 'hover:bg-grey-50'
+                }`}
+              >
+                <span className="w-4 h-4 flex items-center justify-center text-xs text-ink-secondary">
+                  {showCategorySelector ? '▾' : '▸'}
+                </span>
+                <span className="text-sm text-ink">Something else</span>
+              </button>
+              {showCategorySelector && (
+                <div className="ml-4 mt-1">
+                  <CategorySelector
+                    questionText={question.questionText}
+                    onSelect={(category) => onAnswer(question.id, category)}
+                    onSkip={() => onSkip(question.id)}
+                  />
+                </div>
+              )}
+            </>
+          )}
+
+          {!showCategorySelector && (
           <div className="mt-5 flex items-center gap-4">
             <button
               onClick={() => {
@@ -621,6 +654,7 @@ function ClarificationState({
               I&apos;ll answer this later
             </button>
           </div>
+          )}
         </div>
       )}
     </div>
