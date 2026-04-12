@@ -86,9 +86,9 @@ export async function createUser(externalUserId: string): Promise<{ userId: stri
     method: 'POST',
     headers: {
       'Authorization': `Bearer ${token}`,
-      'Content-Type': 'application/x-www-form-urlencoded',
+      'Content-Type': 'application/json',
     },
-    body: new URLSearchParams({
+    body: JSON.stringify({
       external_user_id: externalUserId,
       market: 'GB',
       locale: 'en_GB',
