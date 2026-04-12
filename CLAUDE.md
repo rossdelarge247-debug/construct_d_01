@@ -54,13 +54,15 @@ When the session is ending (user says wrap up, or you hit ~2,000 lines), do thes
 
 ## Branch
 
-Development branch: `claude/decouple-v2-workspace-1cX72`
+Development branch: `claude/decouple-v2-workspace-fX7nK`
 
 ## Key files
 
 ```
 docs/SESSION-CONTEXT.md                    — START HERE every session
-docs/HANDOFF-SESSION-7.md                  — Most recent session retro
+docs/HANDOFF-SESSION-8.md                  — Most recent session retro
+docs/workspace-spec/20-bank-first-journey.md   — Bank-first journey redesign
+docs/workspace-spec/21-evidence-model.md       — Evidence model + gap analysis
 src/lib/ai/pipeline.ts                     — Two-step AI extraction (Haiku→Sonnet)
 src/lib/ai/result-transformer.ts           — Spec 13 decision trees + spec 19 keyword lookup
 src/lib/ai/extraction-schemas.ts           — Structured output schemas (facts only)
