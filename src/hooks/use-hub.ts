@@ -323,7 +323,7 @@ export function useHub() {
     )
 
     if (itemsToAdd.length > 0) {
-      setItems((prev) => [...prev, ...itemsToAdd])
+      setItems((prev) => mergeItemsDeduped(prev, itemsToAdd))
     }
 
     if (questions.length > 0) {
@@ -360,18 +360,12 @@ export function useHub() {
       if (preCreatedItem) {
         // Refine the pre-created item based on the answer
         const refinedItem = { ...preCreatedItem, ...resolveAnswerToSection(answer, preCreatedItem) }
-        setItems((prev) => {
-          if (prev.some((i) => i.id === refinedItem.id)) return prev
-          return [...prev, refinedItem]
-        })
+        setItems((prev) => mergeItemsDeduped(prev, [refinedItem]))
       } else {
         // No pre-created item — create one from the question + answer
         const newItem = createItemFromAnswer(answeredQ, answer)
         if (newItem) {
-          setItems((prev) => {
-            if (prev.some((i) => i.id === newItem.id)) return prev
-            return [...prev, newItem]
-          })
+          setItems((prev) => mergeItemsDeduped(prev, [newItem]))
         }
       }
     }
@@ -380,12 +374,8 @@ export function useHub() {
     if (nextIndex < questions.length) {
       setCurrentQuestionIndex(nextIndex)
     } else {
-      // Add any remaining pending items not yet added
-      setItems((prev) => {
-        const existingIds = new Set(prev.map((i) => i.id))
-        const remaining = pendingFinancialItems.current.filter((i) => !existingIds.has(i.id))
-        return remaining.length > 0 ? [...prev, ...remaining] : prev
-      })
+      // Add any remaining pending items not yet added (with account dedup)
+      setItems((prev) => mergeItemsDeduped(prev, pendingFinancialItems.current))
       setHeroPanelState('summary')
     }
   }, [currentQuestionIndex, questions])
@@ -410,11 +400,7 @@ export function useHub() {
     if (nextIndex < questions.length) {
       setCurrentQuestionIndex(nextIndex)
     } else {
-      setItems((prev) => {
-        const existingIds = new Set(prev.map((i) => i.id))
-        const remaining = pendingFinancialItems.current.filter((i) => !existingIds.has(i.id))
-        return remaining.length > 0 ? [...prev, ...remaining] : prev
-      })
+      setItems((prev) => mergeItemsDeduped(prev, pendingFinancialItems.current))
       setHeroPanelState('summary')
     }
   }, [currentQuestionIndex, questions])
@@ -714,6 +700,62 @@ function generateTodoItems(
   }
 
   return todos
+}
+
+// ═══ Statement deduplication ═══
+// When the same account is uploaded twice (same provider + last4),
+// keep only the most recent closing balance (by asAtDate).
+
+/**
+ * Extract an account key from a financial item's label.
+ * Returns "account-{provider}-{last4}" or "overdraft-{provider}-{last4}",
+ * or null if the item isn't an account/overdraft item.
+ */
+function getAccountKey(item: FinancialItem): string | null {
+  const isAccount = item.sectionKey === 'accounts'
+  const isOverdraft = item.sectionKey === 'debts' && item.label.includes('— overdraft')
+  if (!isAccount && !isOverdraft) return null
+
+  // Match: "Your [joint] {Provider} {type}[ ending {last4}]"
+  const match = item.label.match(/Your (?:joint )?(.+?) (?:current account|savings account|account)(?: ending (\d+))?/)
+  if (!match) return null
+
+  const provider = match[1].toLowerCase().trim()
+  const last4 = match[2] || 'unknown'
+  const prefix = isOverdraft ? 'overdraft-' : 'account-'
+  return `${prefix}${provider}-${last4}`
+}
+
+/**
+ * Merge incoming items into existing items with deduplication:
+ * - Skip items whose ID already exists (existing behaviour)
+ * - For account/overdraft items: replace older statement with newer one (by asAtDate)
+ */
+function mergeItemsDeduped(existing: FinancialItem[], incoming: FinancialItem[]): FinancialItem[] {
+  const result = [...existing]
+
+  for (const item of incoming) {
+    // Skip exact ID duplicates
+    if (result.some((i) => i.id === item.id)) continue
+
+    // Account dedup: same provider+last4 → keep the newer statement
+    const key = getAccountKey(item)
+    if (key) {
+      const existingIdx = result.findIndex((i) => getAccountKey(i) === key)
+      if (existingIdx >= 0) {
+        const existingDate = result[existingIdx].asAtDate ? new Date(result[existingIdx].asAtDate!).getTime() : 0
+        const incomingDate = item.asAtDate ? new Date(item.asAtDate).getTime() : 0
+        if (incomingDate > existingDate) {
+          result[existingIdx] = item // Replace with newer statement
+        }
+        continue
+      }
+    }
+
+    result.push(item)
+  }
+
+  return result
 }
 
 // ═══ Answer → Financial item helpers ═══
