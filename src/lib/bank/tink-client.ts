@@ -111,9 +111,9 @@ export async function getAuthorizationCode(userId: string): Promise<string> {
     method: 'POST',
     headers: {
       'Authorization': `Bearer ${token}`,
-      'Content-Type': 'application/json',
+      'Content-Type': 'application/x-www-form-urlencoded',
     },
-    body: JSON.stringify({
+    body: new URLSearchParams({
       user_id: userId,
       scope: 'accounts:read,transactions:read',
     }),
