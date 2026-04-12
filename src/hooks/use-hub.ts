@@ -338,19 +338,29 @@ export function useHub() {
       prev.map((q) => (q.id === questionId ? { ...q, answered: true, answer } : q))
     )
 
-    // Add any remaining financial items that correspond to answered questions
-    // (the transformer pre-creates items; answers refine ownership/category)
     const answeredQ = questions.find((q) => q.id === questionId)
-    if (answeredQ) {
-      const matchingItems = pendingFinancialItems.current.filter(
-        (fi) => fi.sourceDescription?.includes(answeredQ.questionText.substring(0, 20))
+    if (answeredQ && answer !== 'skipped') {
+      // First, check if the transformer pre-created a financial item for this question (ID-based match)
+      const preCreatedItem = pendingFinancialItems.current.find(
+        (fi) => fi.id === `fi-${questionId}`
       )
-      if (matchingItems.length > 0) {
+
+      if (preCreatedItem) {
+        // Refine the pre-created item based on the answer
+        const refinedItem = { ...preCreatedItem, ...resolveAnswerToSection(answer, preCreatedItem) }
         setItems((prev) => {
-          const existingIds = new Set(prev.map((i) => i.id))
-          const newItems = matchingItems.filter((i) => !existingIds.has(i.id))
-          return newItems.length > 0 ? [...prev, ...newItems] : prev
+          if (prev.some((i) => i.id === refinedItem.id)) return prev
+          return [...prev, refinedItem]
         })
+      } else {
+        // No pre-created item — create one from the question + answer
+        const newItem = createItemFromAnswer(answeredQ, answer)
+        if (newItem) {
+          setItems((prev) => {
+            if (prev.some((i) => i.id === newItem.id)) return prev
+            return [...prev, newItem]
+          })
+        }
       }
     }
 
@@ -692,4 +702,94 @@ function generateTodoItems(
   }
 
   return todos
+}
+
+// ═══ Answer → Financial item helpers ═══
+
+// Maps user answers to the correct section key
+const ANSWER_TO_SECTION: Record<string, SectionKey> = {
+  mortgage: 'property',
+  rent: 'spending',
+  employment: 'income',
+  self_employment: 'income',
+  benefits: 'income',
+  rental: 'income',
+  pension_contribution: 'pensions',
+  workplace: 'pensions',
+  personal: 'pensions',
+  loan_repayment: 'debts',
+  child_maintenance: 'spending',
+  childcare: 'spending',
+  car_insurance: 'spending',
+  home_insurance: 'spending',
+  life_insurance: 'spending',
+  healthcare: 'spending',
+  dental: 'spending',
+  vehicle: 'spending',
+  leisure: 'spending',
+  education: 'spending',
+  legal: 'spending',
+  phone: 'spending',
+  broadband: 'spending',
+  subscription: 'spending',
+  pets: 'spending',
+  household: 'spending',
+  joint_partner: 'accounts',
+}
+
+/**
+ * When a pre-created financial item exists, refine its section/confidence based on the answer.
+ */
+function resolveAnswerToSection(
+  answer: string,
+  existing: FinancialItem,
+): Partial<FinancialItem> {
+  const sectionKey = ANSWER_TO_SECTION[answer] || existing.sectionKey
+  return {
+    sectionKey,
+    confidence: 'confirmed',
+    ownership: answer === 'joint_partner' || answer === 'joint' ? 'joint' : existing.ownership,
+    updatedAt: new Date().toISOString(),
+  }
+}
+
+/**
+ * Create a new financial item from a clarification question + user answer.
+ * Extracts amount from question text (£X,XXX pattern) and maps answer to section.
+ */
+function createItemFromAnswer(
+  question: ClarificationQuestion,
+  answer: string,
+): FinancialItem | null {
+  // Don't create items for informational questions (learn_more, understood, skip, etc.)
+  const nonItemAnswers = ['learn_more', 'understood', 'skip', 'noted', 'review', 'correct', 'will_request', 'have_newer']
+  if (nonItemAnswers.includes(answer)) return null
+
+  // Extract amount from question text — matches £1,234 or £1234 patterns
+  const amountMatch = question.questionText.match(/£([\d,]+)/)
+  const amount = amountMatch ? parseInt(amountMatch[1].replace(/,/g, ''), 10) : null
+
+  // Derive a label from the answer and question
+  const answerOption = question.options.find((o) => o.value === answer)
+  const label = answerOption ? answerOption.label : answer
+
+  const sectionKey = ANSWER_TO_SECTION[answer] || 'spending'
+  const now = new Date().toISOString()
+
+  return {
+    id: `fi-${question.id}`,
+    sectionKey,
+    label,
+    value: amount,
+    period: 'monthly',
+    ownership: answer === 'joint_partner' || answer === 'joint' ? 'joint' : 'yours',
+    confidence: 'confirmed',
+    sourceDocumentId: null,
+    sourceDescription: `From question: ${question.questionText.substring(0, 60)}...`,
+    isInherited: false,
+    isPreMarital: answer === 'pre_marital',
+    asAtDate: now,
+    createdAt: now,
+    updatedAt: now,
+  }
 }
