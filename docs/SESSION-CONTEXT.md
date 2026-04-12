@@ -5,7 +5,7 @@ Stack: Next.js 16.2, React 19, TypeScript, Tailwind 4, Supabase, Claude AI, Verc
 Branch: `claude/new-session-GUZLb`
 
 ## Product Vision
-Decouple replaces the 28-page Form E paper process with an intelligent, document-led workspace. Users going through separation in England & Wales upload financial documents; AI extracts, organises, and structures everything into court-ready disclosure.
+Decouple replaces the 28-page Form E paper process with an intelligent, document-led workspace. Users going through separation in England & Wales upload financial documents — or connect their bank directly — and AI + Open Banking extracts, organises, and structures everything into court-ready disclosure.
 
 ## Principles
 - **"A warm hand on a cold day"** — compassionate, professional, never patronising
@@ -16,68 +16,71 @@ Decouple replaces the 28-page Form E paper process with an intelligent, document
 - **Diagnose before fixing** — read logs before changing code
 
 ## What Session 5 Accomplished
-The pipeline that was blocked since Session 3 now works end-to-end with real PDFs:
-
-1. **504 root cause found and fixed** — `response_format` (OpenAI) → `output_config` (Anthropic SDK 0.85)
-2. **Structured output schemas fixed** — added `additionalProperties: false` to all object types
-3. **Performance halved** — removed AI-generated reasoning/questions from schemas. 70s → 33s. App code generates questions via spec 13 decision trees instead
-4. **Section cards now populate** — fixed ID matching bug + added missing financial items for payments/accounts
-5. **Visual quality pass** — processing animation, typography, button sizing per spec 18
-6. **Lozenge flyout cleaned up** — concise summary instead of raw AI description
-7. **Response parsing fixed** — read text first to avoid stream-consumed bug
+The AI pipeline that was blocked since Session 3 now works end-to-end with real PDFs. 504 root causes fixed (3 separate issues), performance halved (70s→33s), section cards populate, visual quality pass started. See `docs/HANDOFF-SESSION-5.md` for full details.
 
 ## Current State: V2 (Prepare)
-- **Pipeline:** Two-step Haiku→Sonnet with structured outputs. **Working on Vercel with real PDFs.**
-- **Timings:** Step 1 (Haiku PDF read): ~53s. Step 2 (Sonnet analysis): ~27s. Total: ~80s.
+- **AI pipeline:** Two-step Haiku→Sonnet with structured outputs. Working on Vercel with real PDFs. ~80s total.
+- **Open Banking:** Not yet integrated. Tink (Visa) selected as provider. Sandbox credentials being set up.
 - **Hub components:** title-bar, hero-panel, discovery-flow, section-cards, evidence-lozenge, fidelity-label
 - **Question generation:** Deterministic spec 13 decision trees in app code (not AI)
-- **Section cards:** Now populate with income, accounts, payments, spending after Q&A
+- **Section cards:** Populate with income, accounts, payments, spending after Q&A
 - **State:** localStorage only. Supabase schema ready but not wired
 
-## What Needs Work Next
+## Two data paths — same downstream pipeline
 
-### P0 — Intelligent categorisation (spec 19, just written)
+```
+Path A (instant):  Bank connection → Tink API → tink-transformer.ts ─┐
+                                                                      ├→ TransformedResult → hero panel → section cards
+Path B (80s):      PDF upload → Haiku → Sonnet → result-transformer.ts┘
+```
 
-**Keyword lookup table** (P1 — low complexity, high impact):
-- Before asking "What is this?" for unknown payments, check payee against keyword table
-- "therapy" → Healthcare, "DVLA" → Vehicle costs, "gym" → Personal/leisure
-- Eliminates many questions. Implementation: string matching in result-transformer.ts
+Both paths produce the same `TransformedResult` type (auto-confirms, questions, financial items). The hero panel, section cards, and Q&A flow are shared. Path B remains essential for pensions, payslips, mortgage letters — documents that don't live in a bank API.
 
-**Payment aggregation** (P1 — medium complexity, high impact):
-- Group multiple payments from same source into single items
-- 3x DVLA → "Vehicle costs: £477/year (3 payments)"
-- Dividends from company → "Is this from your limited company?" with annualised figure
+## Session 6 Deliverables (in order)
 
-**Progressive category dropdown** (P2 — new component):
-- For truly unknown payments, show searchable Form E budget category list
-- Not radio buttons — a search-and-select dropdown
-- Categories map to Form E 3.1 spending line items
+### 1. Spec 19: Keyword lookup table (~100 lines)
+Before asking "What is this?" for unknown payments, check payee against a keyword table. "therapy" → Healthcare, "DVLA" → Vehicle costs. This benefits BOTH the Tink path and the PDF path — the same categorisation logic is used by both transformers.
+- File: `src/lib/ai/result-transformer.ts` (add lookup function + table)
 
-### P1 — Quality issues observed in real testing
+### 2. Spec 19: Payment aggregation (~150 lines)
+Group multiple payments from the same source. 3x DVLA → "Vehicle costs: £477/year". Dividends → annualised company income question. Again, shared by both paths.
+- File: `src/lib/ai/result-transformer.ts` (add grouping logic)
 
-- Sana Therapy showed generic "Childcare/Rent/Maintenance/Loan/Other" options — wrong. Should be healthcare or at minimum show Form E categories
-- Two council tax entries (£32 and £70 to LB Lambeth) appeared separately — should aggregate
-- Auto-confirm detail text was repetitive (now fixed with Form E references)
-- Lozenge flyout showed raw AI description (now fixed with clean summary)
+### 3. Tink Open Banking integration (~250 lines)
+Connect bank accounts via Tink Link. Fetch 12 months of enriched transactions. Map Tink's ~150 categories → Form E line items using the keyword/categorisation layer from steps 1-2.
+- Prerequisites: Tink sandbox `client_id` and `client_secret` in Vercel env vars (`TINK_CLIENT_ID`, `TINK_CLIENT_SECRET`)
+- New files:
+  - `src/app/api/bank/connect/route.ts` — generates Tink Link URL (market=GB, scopes)
+  - `src/app/api/bank/callback/route.ts` — exchanges auth code, fetches accounts + transactions
+  - `src/lib/bank/tink-transformer.ts` — maps Tink data → TransformedResult
+- Hero panel: add "Connect your bank" alongside upload drop zone
 
-### P2 — Section card accuracy
+### 4. Answered questions → financial items (~80 lines)
+When user answers a clarification question (e.g. "Yes, it's my mortgage"), create a financial item in the correct section card. Currently only auto-confirmed items flow through.
+- File: `src/hooks/use-hub.ts` (enhance `answerQuestion` callback)
 
-- After Q&A completion, all confirmed/answered items should flow into correct sections
-- Items from answered questions (not just auto-confirms) need financial item creation
-- Spending categories from AI should populate the Spending section card
-- Cross-reference: if mortgage detected in payments AND in discovery config, link them
+### 5. If time permits: Progressive category dropdown
+For truly unknown payments, show searchable Form E budget categories instead of generic radio buttons.
+- New component: `src/components/hub/category-selector.tsx`
 
-### P3 — Other items
+**Estimated total: ~580 lines. Within session limits.**
 
-- Spec 14 wizard flows (manual input for property, pensions, debts)
-- Wire `openManualInput`, `openSectionReview`, `addSection` stubs
-- Visual quality pass completion (spec 18: lozenges, discovery flow, drag-drop zone, accessibility)
+## Tink Integration Notes
+
+- **Sandbox:** Free at console.tink.com, no sales call needed
+- **Production:** Commercial agreement with Visa/Tink required. They provide FCA AISP licence coverage.
+- **Tink Link:** URL-based redirect/iframe (no React component). Generate URL server-side with market=GB.
+- **Auth flow:** OAuth2. Exchange auth code for access token. Bearer token for API calls.
+- **Data Enrichment:** ~150 transaction categories + merchant names + logos. Available in sandbox.
+- **90-day re-consent:** PSD2 requirement. Non-issue for Form E (point-in-time disclosure).
+- **Key insight:** Tink handles 80% of categorisation. Your code handles the divorce-specific 20% (pension vs insurance, maintenance vs rent, company dividends). That 20% IS the product differentiator.
 
 ## Negative Constraints
 1. **Do not use `response_format`** — Anthropic SDK uses `output_config.format`
 2. **Do not reference pre-pivot specs (03-06, 11, 12)** — architecture changed
 3. **Structured output schemas require `additionalProperties: false` on all objects**
 4. **SDK timeout is 90s per call, route maxDuration is 300s** — don't reduce these
+5. **Tink env vars:** `TINK_CLIENT_ID`, `TINK_CLIENT_SECRET` — check these exist before building Tink routes
 
 ## Session Discipline
 - Track lines of code changed. Flag at ~1,500, stop at ~2,000
@@ -89,12 +92,12 @@ The pipeline that was blocked since Session 3 now works end-to-end with real PDF
 src/lib/ai/pipeline.ts                     — Two-step extraction, output_config
 src/lib/ai/extraction-schemas.ts           — Slimmed schemas (facts only, no reasoning)
 src/lib/ai/extraction-prompts.ts           — Document-type-specific prompts
-src/lib/ai/result-transformer.ts           — Spec 13 decision trees + financial item creation
-src/app/api/documents/extract/route.ts     — API entry, 300s maxDuration
+src/lib/ai/result-transformer.ts           — Spec 13 decision trees + financial items + keyword lookup
+src/app/api/documents/extract/route.ts     — Upload API, 300s maxDuration
 src/app/api/test-pipeline/route.ts         — Isolation test endpoint
 src/hooks/use-hub.ts                       — Hub state, hero panel, item management
-src/components/hub/hero-panel.tsx           — 8-state hero panel
-docs/workspace-spec/19-intelligent-categorisation.md — Aggregation, keywords, dropdown spec
-docs/workspace-spec/13-extraction-decision-tree-documents.md — Decision trees
+src/components/hub/hero-panel.tsx           — 8-state hero panel UI
+docs/workspace-spec/19-intelligent-categorisation.md — Keyword lookup, aggregation, dropdown spec
+docs/workspace-spec/13-extraction-decision-tree-documents.md — Decision trees per document type
 docs/workspace-spec/18-visual-design-system.md — Visual spec
 ```
