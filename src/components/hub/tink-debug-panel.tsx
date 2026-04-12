@@ -36,6 +36,7 @@ export function TinkDebugPanel({ bankDiagnostics }: TinkDebugPanelProps) {
   const [testResult, setTestResult] = useState<TinkTestResult | null>(null)
   const [testing, setTesting] = useState(false)
   const [connectUrl, setConnectUrl] = useState<string | null>(null)
+  const [connectDebug, setConnectDebug] = useState<Record<string, unknown> | null>(null)
 
   const toggleVisible = useCallback(() => {
     setVisible((prev) => {
@@ -63,9 +64,11 @@ export function TinkDebugPanel({ bankDiagnostics }: TinkDebugPanelProps) {
 
   const testConnect = useCallback(async () => {
     setConnectUrl(null)
+    setConnectDebug(null)
     try {
       const res = await fetch('/api/bank/connect', { method: 'POST' })
       const data = await res.json()
+      if (data.debug) setConnectDebug(data.debug)
       if (data.url) {
         setConnectUrl(data.url)
       } else {
@@ -188,6 +191,14 @@ export function TinkDebugPanel({ bankDiagnostics }: TinkDebugPanelProps) {
                     </a>
                   </>
                 )}
+              </div>
+            )}
+            {connectDebug && (
+              <div className="mt-1">
+                <p className="text-ink-tertiary font-semibold">Server response:</p>
+                <pre className="font-mono text-ink text-[10px] bg-white/60 p-2 rounded border border-blue-600/10 overflow-x-auto whitespace-pre-wrap">
+                  {JSON.stringify(connectDebug, null, 2)}
+                </pre>
               </div>
             )}
           </div>

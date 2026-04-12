@@ -79,24 +79,45 @@ export async function getClientToken(scope: string): Promise<string> {
   return data.access_token
 }
 
-/**
- * Create an authorization code that also creates a Tink user implicitly.
- * Uses /authorization-grant (not /delegate) — combines user creation + auth in one step.
- * This avoids the REQUEST_FAILED_FETCH_EXISTING_USER error from separate user creation.
- */
-export async function getAuthorizationCode(externalUserId: string): Promise<string> {
-  const { clientId } = getConfig()
-  const token = await getClientToken('user:create,authorization:grant')
+export async function createUser(externalUserId: string): Promise<{ userId: string; raw: Record<string, unknown> }> {
+  const token = await getClientToken('user:create')
 
-  const res = await fetch(`${TINK_BASE_URL}/api/v1/oauth/authorization-grant`, {
+  const res = await fetch(`${TINK_BASE_URL}/api/v1/user/create`, {
     method: 'POST',
     headers: {
       'Authorization': `Bearer ${token}`,
       'Content-Type': 'application/x-www-form-urlencoded',
     },
     body: new URLSearchParams({
-      actor_client_id: clientId,
       external_user_id: externalUserId,
+      market: 'GB',
+      locale: 'en_GB',
+    }),
+  })
+
+  if (!res.ok) {
+    const text = await res.text()
+    throw new Error(`Tink create user failed (${res.status}): ${text}`)
+  }
+
+  const data = await res.json()
+  // Return raw response for debugging
+  return { userId: data.user_id, raw: data }
+}
+
+export async function getAuthorizationCode(userId: string): Promise<string> {
+  const { clientId } = getConfig()
+  const token = await getClientToken('authorization:grant')
+
+  const res = await fetch(`${TINK_BASE_URL}/api/v1/oauth/authorization-grant/delegate`, {
+    method: 'POST',
+    headers: {
+      'Authorization': `Bearer ${token}`,
+      'Content-Type': 'application/x-www-form-urlencoded',
+    },
+    body: new URLSearchParams({
+      user_id: userId,
+      actor_client_id: clientId,
       scope: 'accounts:read,transactions:read',
     }),
   })
