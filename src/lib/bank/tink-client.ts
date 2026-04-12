@@ -105,6 +105,7 @@ export async function createUser(externalUserId: string): Promise<string> {
 }
 
 export async function getAuthorizationCode(userId: string): Promise<string> {
+  const { clientId } = getConfig()
   const token = await getClientToken('authorization:grant')
 
   const res = await fetch(`${TINK_BASE_URL}/api/v1/oauth/authorization-grant/delegate`, {
@@ -115,6 +116,7 @@ export async function getAuthorizationCode(userId: string): Promise<string> {
     },
     body: new URLSearchParams({
       user_id: userId,
+      actor_client_id: clientId,
       scope: 'accounts:read,transactions:read',
     }),
   })
