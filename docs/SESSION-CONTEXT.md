@@ -46,7 +46,15 @@ Before asking "What is this?" for unknown payments, check payee against a keywor
 Group multiple payments from the same source. 3x DVLA → "Vehicle costs: £477/year". Dividends → annualised company income question. Again, shared by both paths.
 - File: `src/lib/ai/result-transformer.ts` (add grouping logic)
 
-### 3. Tink Open Banking integration (~250 lines)
+### 3. Answered questions → financial items (~80 lines)
+When user answers a clarification question (e.g. "Yes, it's my mortgage"), create a financial item in the correct section card. Currently only auto-confirmed items flow through.
+- File: `src/hooks/use-hub.ts` (enhance `answerQuestion` callback)
+
+### 4. Progressive category dropdown (~150 lines)
+For truly unknown payments, show searchable Form E budget categories instead of generic radio buttons.
+- New component: `src/components/hub/category-selector.tsx`
+
+### 5. If time permits: Tink Open Banking integration (~250 lines)
 Connect bank accounts via Tink Link. Fetch 12 months of enriched transactions. Map Tink's ~150 categories → Form E line items using the keyword/categorisation layer from steps 1-2.
 - Prerequisites: Tink sandbox `client_id` and `client_secret` in Vercel env vars (`TINK_CLIENT_ID`, `TINK_CLIENT_SECRET`)
 - New files:
@@ -55,15 +63,7 @@ Connect bank accounts via Tink Link. Fetch 12 months of enriched transactions. M
   - `src/lib/bank/tink-transformer.ts` — maps Tink data → TransformedResult
 - Hero panel: add "Connect your bank" alongside upload drop zone
 
-### 4. Answered questions → financial items (~80 lines)
-When user answers a clarification question (e.g. "Yes, it's my mortgage"), create a financial item in the correct section card. Currently only auto-confirmed items flow through.
-- File: `src/hooks/use-hub.ts` (enhance `answerQuestion` callback)
-
-### 5. If time permits: Progressive category dropdown
-For truly unknown payments, show searchable Form E budget categories instead of generic radio buttons.
-- New component: `src/components/hub/category-selector.tsx`
-
-**Estimated total: ~580 lines. Within session limits.**
+**Estimated total: ~480 lines core (1-4), ~730 with Tink stretch. Within session limits.**
 
 ## Tink Integration Notes
 
