@@ -103,6 +103,14 @@ export function useHub() {
   const [lastDiagnostics, setLastDiagnostics] = useState<Record<string, unknown> | null>(null)
   const [lastClassification, setLastClassification] = useState<Record<string, unknown> | null>(null)
   const [lastTransformedCounts, setLastTransformedCounts] = useState<{ autoConfirm: number; questions: number; financialItems: number } | null>(null)
+  // Open Banking diagnostics for Tink debug panel
+  const [lastBankDiagnostics, setLastBankDiagnostics] = useState<{
+    accountsFound: number
+    providers: string[]
+    autoConfirmItems: number
+    questions: number
+    financialItems: number
+  } | null>(null)
 
   // Load persisted state on mount
   useEffect(() => {
@@ -153,6 +161,15 @@ export function useHub() {
       pendingFinancialItems.current = allItems
       setCurrentQuestionIndex(0)
       setHeroPanelState('review_ready')
+
+      // Track diagnostics for debug panel
+      setLastBankDiagnostics({
+        accountsFound: results.length,
+        providers: results.map((r: { result: { classification: { provider: string } } }) => r.result.classification.provider).filter(Boolean),
+        autoConfirmItems: allAutoConfirm.length,
+        questions: allQuestions.length,
+        financialItems: allItems.length,
+      })
     } catch (e) {
       console.error('[Hub] Failed to process bank data:', e)
     }
@@ -537,6 +554,7 @@ export function useHub() {
     lastDiagnostics,
     lastClassification,
     lastTransformedCounts,
+    lastBankDiagnostics,
     openManualInput,
     openSectionReview,
     addSection,

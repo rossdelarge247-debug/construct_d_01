@@ -6,6 +6,7 @@ import { SectionCards } from '@/components/hub/section-cards'
 import { DiscoveryFlow } from '@/components/hub/discovery-flow'
 import { FidelityLabel } from '@/components/hub/fidelity-label'
 import { DebugPanel } from '@/components/hub/debug-panel'
+import { TinkDebugPanel } from '@/components/hub/tink-debug-panel'
 import { useHub } from '@/hooks/use-hub'
 import type { HeroPanelState } from '@/types/hub'
 
@@ -73,6 +74,8 @@ export default function WorkspacePage() {
           error={hub.uploadContext.error}
           visible={!!(hub.lastDiagnostics || hub.uploadContext.error)}
         />
+
+        <TinkDebugPanel bankDiagnostics={hub.lastBankDiagnostics} />
 
         <div
           className="mt-10 transition-opacity"
