@@ -131,16 +131,19 @@ export async function getAuthorizationCode(userId: string): Promise<string> {
   return data.code
 }
 
-export function buildTinkLinkUrl(authCode: string, redirectUri: string): string {
+export function buildTinkLinkUrl(authCode: string | null, redirectUri: string): string {
   const { clientId } = getConfig()
 
   const params = new URLSearchParams({
     client_id: clientId,
     redirect_uri: redirectUri,
-    authorization_code: authCode,
     market: 'GB',
     locale: 'en_GB',
   })
+
+  if (authCode) {
+    params.set('authorization_code', authCode)
+  }
 
   return `https://link.tink.com/1.0/transactions/connect-accounts?${params}`
 }
