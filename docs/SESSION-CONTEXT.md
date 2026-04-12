@@ -61,6 +61,26 @@ This session should produce a revised spec or spec amendment covering:
 - Does the summary/todo system need reworking to guide users from Draft → Evidenced?
 - How does the lozenge system adapt? (Bank-connected lozenges vs document-uploaded lozenges)
 
+**Open Banking as evidence — strategic direction:**
+
+Bank data is arguably superior evidence to PDF statements: it's tamper-proof, comes direct from the bank via FCA-regulated APIs, covers all transactions (no selective omission), and is digitally authenticated. Form E Practice Direction 9A requires "bank statements for 12 months" but doesn't specify format. The Data (Use and Access) Act 2025 puts Open Banking on permanent statutory footing, and the FCA's Open Finance roadmap (March 2026) will extend beyond bank accounts.
+
+A 12-month bank feed provides direct evidence or inference signals for every Form E section:
+- **Income** — salary deposits, benefits, dividends, rental income (source, amount, frequency all visible)
+- **Property** — mortgage payments (lender + amount), council tax (borough/band), buildings insurance, ground rent
+- **Accounts** — the account itself + transfers revealing savings accounts, ISAs, investment platforms, second current accounts
+- **Debts** — credit card payments, loan repayments, BNPL, overdraft balance, student loan
+- **Pensions** — personal pension contributions (provider visible), though CETVs still need formal valuation
+- **Business** — dividends from own company, HMRC self-assessment, Companies House, accountancy fees, VAT payments
+- **Spending** — complete 12-month budget across all Form E 3.1 categories
+- **Children** — child benefit (number of children inferrable), childcare, school fees, activities
+- **Other assets** — crypto exchange payments, car finance, DVLA, storage units, overseas transfers
+- **Red flags** — gambling, large unexplained transfers, sudden payment stops, cash withdrawal patterns
+
+What bank data genuinely can't replace (yet): pension CETVs, property valuations, mortgage terms/rates, gross payslip detail, business accounts. But even these are on the Open Finance roadmap.
+
+**Product positioning opportunity:** Decouple could be the first platform to frame bank-verified data as a higher standard of evidence than PDFs — "Your bank data is verified directly from your bank. No PDFs needed for accounts and spending. We'll tell you exactly which 3-4 documents you still need." This reframes the upload step from "gather 15 documents" to "fill 3-4 specific gaps."
+
 Reference: `docs/v2/v2-desk-research-technology.md` (section 2: Open Banking), fidelity model in `src/types/hub.ts`, existing UX patterns in session 6-7 handoffs.
 
 ### P1 — Spec 14 wizard flows
