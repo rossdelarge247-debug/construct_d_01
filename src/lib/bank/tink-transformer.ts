@@ -150,13 +150,13 @@ function identifyIncome(credits: TinkTransaction[]): ExtractedIncome[] {
 
   for (const [, group] of bySource) {
     // Only include sources with 2+ occurrences or from income categories
-    const isIncomeCategory = group.some((t) => INCOME_CATEGORIES.has(t.categories.pfm.id))
+    const isIncomeCategory = group.some((t) => INCOME_CATEGORIES.has(t.categories?.pfm?.id || ''))
     if (group.length < 2 && !isIncomeCategory) continue
 
     const amounts = group.map((t) => parseTinkAmount(t.amount))
     const avgAmount = Math.round(amounts.reduce((a, b) => a + b, 0) / amounts.length)
     const source = group[0].merchantInformation?.merchantName || group[0].descriptions.display
-    const categoryId = group[0].categories.pfm.id
+    const categoryId = group[0].categories?.pfm?.id || ''
 
     // Confidence: high if amounts are consistent, lower if they vary
     const variation = amounts.length > 1
@@ -199,7 +199,7 @@ function identifyRegularPayments(debits: TinkTransaction[]): DetectedPayment[] {
     const amounts = group.map((t) => Math.abs(parseTinkAmount(t.amount)))
     const avgAmount = Math.round(amounts.reduce((a, b) => a + b, 0) / amounts.length)
     const payee = group[0].merchantInformation?.merchantName || group[0].descriptions.display
-    const categoryId = group[0].categories.pfm.id
+    const categoryId = group[0].categories?.pfm?.id || ''
 
     // Infer frequency from transaction spacing
     const frequency = inferFrequency(group)
@@ -226,7 +226,7 @@ function aggregateSpendingCategories(debits: TinkTransaction[]): SpendingCategor
   const categories = new Map<string, { total: number; count: number }>()
 
   for (const tx of debits) {
-    const categoryName = tx.categories.pfm.name || 'Other'
+    const categoryName = tx.categories?.pfm?.name || 'Other'
     const amount = Math.abs(parseTinkAmount(tx.amount))
     const existing = categories.get(categoryName) || { total: 0, count: 0 }
     existing.total += amount
