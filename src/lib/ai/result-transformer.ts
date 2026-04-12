@@ -381,49 +381,50 @@ function transformBankStatement(data: BankStatementExtraction): TransformedResul
     }
   }
 
-  // ═══ Account details → route by balance (positive=asset, negative=debt) ═══
-  const accountTypeLabel = data.account_type === 'current' ? 'current account'
-    : data.account_type === 'savings' ? 'savings account'
-    : data.account_type === 'joint_current' ? 'current account'
-    : data.account_type === 'joint_savings' ? 'savings account'
+  // ═══ Account details → human-readable labels ═══
+  const accountTypeLabel = data.account_type === 'current' || data.account_type === 'joint_current'
+    ? 'current account'
+    : data.account_type === 'savings' || data.account_type === 'joint_savings'
+    ? 'savings account'
     : 'account'
-  const ownershipLabel = data.is_joint ? 'joint' : 'sole'
-  const accountRef = data.account_number_last4 ? ` ****${data.account_number_last4}` : ''
-  const accountLabel = `${data.provider} ${accountTypeLabel}${accountRef} (${ownershipLabel})`
+  const ownershipPrefix = data.is_joint ? 'Your joint' : 'Your'
+  const accountRef = data.account_number_last4 ? ` ending ${data.account_number_last4}` : ''
+  const accountLabel = `${ownershipPrefix} ${data.provider} ${accountTypeLabel}${accountRef}`
 
-  // Calculate months covered from statement period
+  // Calculate months covered and remaining
   let monthsCovered = 1
   if (data.statement_period_start && data.statement_period_end) {
     const start = new Date(data.statement_period_start)
     const end = new Date(data.statement_period_end)
     monthsCovered = Math.max(1, Math.round((end.getTime() - start.getTime()) / (1000 * 60 * 60 * 24 * 30)))
   }
-  const monthsNote = `${monthsCovered} of 12 months provided`
-
-  const statementPeriod = data.statement_period_start && data.statement_period_end
-    ? `${data.statement_period_start} to ${data.statement_period_end}`
-    : null
+  const monthsRemaining = Math.max(0, 12 - monthsCovered)
+  const monthsNote = monthsRemaining > 0
+    ? `${monthsRemaining} month${monthsRemaining !== 1 ? 's' : ''} remaining for full disclosure`
+    : 'Full 12 months provided'
 
   const isOverdrawn = data.closing_balance !== null && data.closing_balance < 0
 
-  // Account always appears in Accounts section (Form E 2.3) — it's an account regardless of balance
+  // Account always appears in Accounts section — it's an account regardless of balance
   financialItems.push({
     id: `fi-account-${data.provider.replace(/\s+/g, '-').toLowerCase()}-${Date.now()}`,
     sectionKey: 'accounts',
-    label: isOverdrawn ? `${accountLabel} — overdrawn` : accountLabel,
+    label: accountLabel,
     value: data.closing_balance,
     period: 'total',
     ownership: data.is_joint ? 'joint' : 'yours',
     confidence: 'confirmed',
     sourceDocumentId: null,
-    sourceDescription: [statementPeriod, monthsNote].filter(Boolean).join(' · '),
+    sourceDescription: isOverdrawn
+      ? `Overdrawn by ${formatCurrency(Math.abs(data.closing_balance!))} · ${monthsNote}`
+      : monthsNote,
     formECategory: null,
     isInherited: false, isPreMarital: false,
     asAtDate: data.statement_period_end || now,
     createdAt: now, updatedAt: now,
   })
 
-  // Overdraft also appears in Debts section (Form E 2.14) — it's a liability
+  // Overdraft also appears in Debts section — it's a liability
   if (isOverdrawn) {
     financialItems.push({
       id: `fi-overdraft-${data.provider.replace(/\s+/g, '-').toLowerCase()}-${Date.now()}`,
@@ -434,7 +435,7 @@ function transformBankStatement(data: BankStatementExtraction): TransformedResul
       ownership: data.is_joint ? 'joint' : 'yours',
       confidence: 'confirmed',
       sourceDocumentId: null,
-      sourceDescription: [statementPeriod, monthsNote].filter(Boolean).join(' · '),
+      sourceDescription: monthsNote,
       formECategory: 'Overdraft',
       isInherited: false, isPreMarital: false,
       asAtDate: data.statement_period_end || now,
