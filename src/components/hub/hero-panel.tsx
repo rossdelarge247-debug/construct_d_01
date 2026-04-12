@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { Upload } from 'lucide-react'
 import { EvidenceLozenge } from './evidence-lozenge'
+import { CategorySelector } from './category-selector'
 import type {
   HeroPanelState,
   EvidenceLozenge as LozengeType,
@@ -470,6 +471,22 @@ function ClarificationState({
   }, [question.id])
 
   const isBinary = question.options.length <= 2
+
+  // Spec 19: Use category selector for unknown payments instead of generic radio buttons
+  // Detected by: payment question where the question asks "What is this?" with the generic options
+  const usesCategoryDropdown = question.id.startsWith('payment-') &&
+    question.questionText.includes('What is this?') &&
+    question.options.some((o) => o.value === 'other')
+
+  if (usesCategoryDropdown) {
+    return (
+      <CategorySelector
+        questionText={question.questionText}
+        onSelect={(category) => onAnswer(question.id, category)}
+        onSkip={() => onSkip(question.id)}
+      />
+    )
+  }
 
   return (
     <div>
