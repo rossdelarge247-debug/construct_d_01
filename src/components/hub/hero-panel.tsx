@@ -484,28 +484,12 @@ function ClarificationState({
 
   const isBinary = question.options.length <= 2
 
-  // Spec 19: Use category selector for unknown payments instead of generic radio buttons
-  // Detected by: payment question where the question asks "What is this?" with the generic options
-  const usesCategoryDropdown = question.id.startsWith('payment-') &&
-    question.questionText.includes('What is this?') &&
-    question.options.some((o) => o.value === 'other')
-
   // Progressive disclosure: "Something else" on income questions reveals more Form E income types
   const hasProgressiveOther = question.options.some((o) => o.value === 'other_income')
 
-  // Any question with an "Other" / "Something else" option gets the Form E category fallback
-  const hasGenericOther = !hasProgressiveOther && !usesCategoryDropdown &&
+  // Any question with an "Other" / "Something else" option expands to Form E category selector
+  const hasGenericOther = !hasProgressiveOther &&
     question.options.some((o) => o.value === 'other' || o.label === 'Something else')
-
-  if (usesCategoryDropdown) {
-    return (
-      <CategorySelector
-        questionText={question.questionText}
-        onSelect={(category) => onAnswer(question.id, category)}
-        onSkip={() => onSkip(question.id)}
-      />
-    )
-  }
 
   return (
     <div>

@@ -70,7 +70,7 @@ export function CategorySelector({ questionText, onSelect, onSkip }: CategorySel
           type="text"
           value={search}
           onChange={(e) => setSearch(e.target.value)}
-          placeholder="Search categories\u2026"
+          placeholder="Search categories..."
           className="w-full px-4 py-2.5 text-sm border-2 border-grey-200 rounded-md focus:border-blue-600 focus:outline-none transition-colors"
         />
       </div>
