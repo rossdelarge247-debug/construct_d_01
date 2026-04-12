@@ -549,20 +549,23 @@ function ClarificationState({
             </label>
           ))}
 
-          {/* Progressive disclosure: "Something else" on income questions reveals more Form E income types */}
+          {/* Progressive disclosure: "Something else" as radio — reveals sub-options when selected */}
           {hasProgressiveOther && (
             <>
-              <button
-                onClick={() => { setShowMoreOptions(!showMoreOptions); setSelectedValue(null); setShowCategorySelector(false) }}
-                className={`w-full flex items-center gap-3 p-3 rounded-md cursor-pointer transition-colors text-left ${
+              <label
+                className={`flex items-center gap-3 p-3 rounded-md cursor-pointer transition-colors ${
                   showMoreOptions ? 'bg-blue-50 border border-blue-600/20' : 'hover:bg-grey-50'
                 }`}
               >
-                <span className="w-4 h-4 flex items-center justify-center text-xs text-ink-secondary">
-                  {showMoreOptions ? '▾' : '▸'}
-                </span>
+                <input
+                  type="radio"
+                  name={question.id}
+                  checked={showMoreOptions}
+                  onChange={() => { setShowMoreOptions(true); setSelectedValue(null); setShowCategorySelector(false) }}
+                  className="w-4 h-4 border-grey-200 text-blue-600 focus:ring-blue-600"
+                />
                 <span className="text-sm text-ink">Something else</span>
-              </button>
+              </label>
               {showMoreOptions && (
                 <div className="ml-7 space-y-2 border-l-2 border-grey-100 pl-4">
                   {PROGRESSIVE_INCOME_OPTIONS.map((option) => (
@@ -576,7 +579,7 @@ function ClarificationState({
                     >
                       <input
                         type="radio"
-                        name={question.id}
+                        name={`${question.id}-sub`}
                         value={option.value}
                         checked={selectedValue === option.value}
                         onChange={() => setSelectedValue(option.value)}
@@ -590,22 +593,25 @@ function ClarificationState({
             </>
           )}
 
-          {/* Generic "Other" on any question → expands to Form E category selector */}
+          {/* Generic "Other" as radio — reveals Form E category selector when selected */}
           {hasGenericOther && (
             <>
-              <button
-                onClick={() => { setShowCategorySelector(!showCategorySelector); setSelectedValue(null); setShowMoreOptions(false) }}
-                className={`w-full flex items-center gap-3 p-3 rounded-md cursor-pointer transition-colors text-left ${
+              <label
+                className={`flex items-center gap-3 p-3 rounded-md cursor-pointer transition-colors ${
                   showCategorySelector ? 'bg-blue-50 border border-blue-600/20' : 'hover:bg-grey-50'
                 }`}
               >
-                <span className="w-4 h-4 flex items-center justify-center text-xs text-ink-secondary">
-                  {showCategorySelector ? '▾' : '▸'}
-                </span>
+                <input
+                  type="radio"
+                  name={question.id}
+                  checked={showCategorySelector}
+                  onChange={() => { setShowCategorySelector(true); setSelectedValue(null); setShowMoreOptions(false) }}
+                  className="w-4 h-4 border-grey-200 text-blue-600 focus:ring-blue-600"
+                />
                 <span className="text-sm text-ink">Something else</span>
-              </button>
+              </label>
               {showCategorySelector && (
-                <div className="ml-4 mt-1">
+                <div className="ml-7 border-l-2 border-grey-100 pl-3 mt-1">
                   <CategorySelector
                     questionText={question.questionText}
                     onSelect={(category) => onAnswer(question.id, category)}
