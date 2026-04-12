@@ -1,20 +1,20 @@
-# Session 6 Context Block
+# Session 7 Context Block
 
 Product: **Decouple** — financial disclosure workspace for UK divorce (Form E replacement).
 Stack: Next.js 16.2, React 19, TypeScript, Tailwind 4, Supabase, Claude AI, Vercel Pro.
 
 ## Branch Status (start-of-session checklist)
 
-**Canonical branch:** `main` at commit `9d884b6` — this is the source of truth.
+**Canonical branch:** `claude/read-session-context-jOy6a` at commit `8142ff8` — merge to `main` pending.
 
 | Branch | Status | Action |
 |--------|--------|--------|
-| `main` | `9d884b6` — latest code | Start new work from here |
-| `claude/new-session-GUZLb` | Same as `main` (`9d884b6`) | Can be deleted — fully merged |
-| `claude/project-planning-sprint-zero-odNO5` | Behind `main` | Can be deleted — superseded |
-| `claude/review-handoff-docs-ZovbO` | Behind `main` | Can be deleted — superseded |
-| `claude/review-handoff-session-4-8Isd9` | Behind `main` | Can be deleted — superseded |
-| `claude/read-session-context-jOy6a` | Active session 6 branch | Current working branch |
+| `main` | `9d884b6` — behind session 6 work | Merge session 6 branch into main |
+| `claude/read-session-context-jOy6a` | `8142ff8` — session 6 work | Merge to main, then delete |
+| `claude/new-session-GUZLb` | Same as old `main` | Delete via GitHub UI |
+| `claude/project-planning-sprint-zero-odNO5` | Superseded | Delete via GitHub UI |
+| `claude/review-handoff-docs-ZovbO` | Archived in `docs/archive/` | Delete via GitHub UI |
+| `claude/review-handoff-session-4-8Isd9` | Archived in `docs/archive/` | Delete via GitHub UI |
 
 **Session start protocol:**
 1. Run `git log --oneline -1 origin/main` to confirm the latest commit on `main`
@@ -22,76 +22,48 @@ Stack: Next.js 16.2, React 19, TypeScript, Tailwind 4, Supabase, Claude AI, Verc
 3. Create your session branch from `main` (or rebase onto it)
 4. At session end: merge to `main`, record final commit SHA here, mark old branches for deletion
 
-## Product Vision
-Decouple replaces the 28-page Form E paper process with an intelligent, document-led workspace. Users going through separation in England & Wales upload financial documents — or connect their bank directly — and AI + Open Banking extracts, organises, and structures everything into court-ready disclosure.
+## What Session 6 Accomplished
 
-## Principles
-- **"A warm hand on a cold day"** — compassionate, professional, never patronising
-- **Quality first, rigour always** — design before code
-- **Upload-first, review-by-exception** — AI does 90%, user confirms 10% via 3-5 taps
-- **One thing at a time** — one question per screen, one decision per moment
-- **Every question maps to Form E** — no wasted user effort
-- **Diagnose before fixing** — read logs before changing code
+All 4 core deliverables completed + 5 UX refinements from live testing:
 
-## What Session 5 Accomplished
-The AI pipeline that was blocked since Session 3 now works end-to-end with real PDFs. 504 root causes fixed (3 separate issues), performance halved (70s→33s), section cards populate, visual quality pass started. See `docs/HANDOFF-SESSION-5.md` for full details.
+1. **Keyword lookup table** — 13 categories, auto-confirms common payees (therapy→Healthcare, DVLA→Vehicle costs, Netflix→Subscriptions)
+2. **Payment aggregation** — groups multiple payments to same payee, dividend detection for company disclosure
+3. **Answered questions → financial items** — ID-based matching + answer-driven item creation with proper section routing
+4. **Progressive category dropdown** — searchable Form E 3.1 categories, replaces generic radio buttons
+5. **Form E category grouping** — section cards group items by Form E budget category with totals
+6. **Income question redesign** — "Dividends from my own company" / "Salary from my own company" distinguished from generic self-employment
+7. **Progressive disclosure standardised** — "Something else" is a radio button that reveals sub-options
+8. **Account display humanised** — "Your Barclays current account ending 8598", "11 months remaining for full disclosure"
+9. **Overdraft routing** — account always in Accounts, overdraft additionally in Debts
 
 ## Current State: V2 (Prepare)
+
 - **AI pipeline:** Two-step Haiku→Sonnet with structured outputs. Working on Vercel with real PDFs. ~80s total.
-- **Open Banking:** Not yet integrated. Tink (Visa) selected as provider. Sandbox credentials being set up.
-- **Hub components:** title-bar, hero-panel, discovery-flow, section-cards, evidence-lozenge, fidelity-label
-- **Question generation:** Deterministic spec 13 decision trees in app code (not AI)
-- **Section cards:** Populate with income, accounts, payments, spending after Q&A
-- **State:** localStorage only. Supabase schema ready but not wired
+- **Keyword lookup:** 13 categories, runs before generic questions. Eliminates many unnecessary questions.
+- **Payment aggregation:** Groups payments by normalised payee name. Dividend detection for company disclosure.
+- **Category selector:** Searchable Form E 3.1 dropdown, used as progressive disclosure under "Something else" radio.
+- **Section cards:** Now group items by Form E category with totals as headers. `formECategory` field on `FinancialItem`.
+- **Question → item flow:** Answering a clarification question now reliably creates a financial item in the correct section.
+- **Open Banking:** Not yet integrated. Tink deferred to backlog. Keyword/aggregation layer is ready for it.
+- **State:** localStorage only. Supabase schema ready but not wired.
 
-## Two data paths — same downstream pipeline
+## Session 7 Deliverables (suggested)
 
-```
-Path A (instant):  Bank connection → Tink API → tink-transformer.ts ─┐
-                                                                      ├→ TransformedResult → hero panel → section cards
-Path B (80s):      PDF upload → Haiku → Sonnet → result-transformer.ts┘
-```
+### P0 — Most recent statement deduplication
+When multiple statements are uploaded for the same account (same provider + last4), only the most recent closing balance should appear. Compare `asAtDate` and deduplicate in `use-hub.ts`.
 
-Both paths produce the same `TransformedResult` type (auto-confirms, questions, financial items). The hero panel, section cards, and Q&A flow are shared. Path B remains essential for pensions, payslips, mortgage letters — documents that don't live in a bank API.
+### P1 — Update dry-run mock data
+The dry-run mock in `provider.ts` uses the old pre-pipeline schema shape (items/gaps/spending). Update it to match the current `BankStatementExtraction` shape so features can be tested without an API key.
 
-## Session 6 Deliverables (in order)
+### P2 — Tink Open Banking integration
+Connect bank accounts via Tink Link. Fetch 12 months of enriched transactions. Map Tink categories → Form E items using the keyword/categorisation layer.
+- Prerequisites: Tink sandbox env vars (`TINK_CLIENT_ID`, `TINK_CLIENT_SECRET`)
+- New files: `src/app/api/bank/connect/route.ts`, `callback/route.ts`, `src/lib/bank/tink-transformer.ts`
 
-### 1. Spec 19: Keyword lookup table (~100 lines)
-Before asking "What is this?" for unknown payments, check payee against a keyword table. "therapy" → Healthcare, "DVLA" → Vehicle costs. This benefits BOTH the Tink path and the PDF path — the same categorisation logic is used by both transformers.
-- File: `src/lib/ai/result-transformer.ts` (add lookup function + table)
-
-### 2. Spec 19: Payment aggregation (~150 lines)
-Group multiple payments from the same source. 3x DVLA → "Vehicle costs: £477/year". Dividends → annualised company income question. Again, shared by both paths.
-- File: `src/lib/ai/result-transformer.ts` (add grouping logic)
-
-### 3. Answered questions → financial items (~80 lines)
-When user answers a clarification question (e.g. "Yes, it's my mortgage"), create a financial item in the correct section card. Currently only auto-confirmed items flow through.
-- File: `src/hooks/use-hub.ts` (enhance `answerQuestion` callback)
-
-### 4. Progressive category dropdown (~150 lines)
-For truly unknown payments, show searchable Form E budget categories instead of generic radio buttons.
-- New component: `src/components/hub/category-selector.tsx`
-
-### 5. If time permits: Tink Open Banking integration (~250 lines)
-Connect bank accounts via Tink Link. Fetch 12 months of enriched transactions. Map Tink's ~150 categories → Form E line items using the keyword/categorisation layer from steps 1-2.
-- Prerequisites: Tink sandbox `client_id` and `client_secret` in Vercel env vars (`TINK_CLIENT_ID`, `TINK_CLIENT_SECRET`)
-- New files:
-  - `src/app/api/bank/connect/route.ts` — generates Tink Link URL (market=GB, scopes)
-  - `src/app/api/bank/callback/route.ts` — exchanges auth code, fetches accounts + transactions
-  - `src/lib/bank/tink-transformer.ts` — maps Tink data → TransformedResult
-- Hero panel: add "Connect your bank" alongside upload drop zone
-
-**Estimated total: ~480 lines core (1-4), ~730 with Tink stretch. Within session limits.**
-
-## Tink Integration Notes
-
-- **Sandbox:** Free at console.tink.com, no sales call needed
-- **Production:** Commercial agreement with Visa/Tink required. They provide FCA AISP licence coverage.
-- **Tink Link:** URL-based redirect/iframe (no React component). Generate URL server-side with market=GB.
-- **Auth flow:** OAuth2. Exchange auth code for access token. Bearer token for API calls.
-- **Data Enrichment:** ~150 transaction categories + merchant names + logos. Available in sandbox.
-- **90-day re-consent:** PSD2 requirement. Non-issue for Form E (point-in-time disclosure).
-- **Key insight:** Tink handles 80% of categorisation. Your code handles the divorce-specific 20% (pension vs insurance, maintenance vs rent, company dividends). That 20% IS the product differentiator.
+### P3 — Other items from backlog
+- Spec 14 wizard flows (manual input for property, pensions, debts)
+- Wire `openManualInput`, `openSectionReview`, `addSection` stubs
+- Visual quality pass (spec 18)
 
 ## Testing & Deployment
 - **Vercel:** Deployed and working. Real PDFs tested on Vercel Pro (300s timeout).
@@ -99,23 +71,15 @@ Connect bank accounts via Tink Link. Fetch 12 months of enriched transactions. M
 - **Dry-run mock:** Uses the old pre-pipeline schema shape. Not useful for testing post-pipeline features. Always test with real API key.
 - **Test approach:** Push branch → Vercel auto-deploys → test in browser with real PDFs.
 
-## Carry-forward for next session
+## UX Patterns Established (session 6)
 
-### P0 — Section card: Form E category grouping
-The Spending section card currently shows a flat list of individual items. It should group items by Form E 3.1 budget categories as lead buckets with category totals, and nest individual items within each:
-```
-Vehicle costs: £143/month (Form E 3.1)
-  ├ DVLA-LS595do: £67/month
-  ├ DVLA-AF15Gzp: £38/month
-  └ DVLA-EU03Dww: £38/month
-Subscriptions: £34/month (Form E 3.1)
-  ├ TV Licence MBP: £15/month
-  └ Netflix: £19/month
-```
-Applies to all sections, not just Spending. Requires changes to `section-cards.tsx` — add a grouping layer that buckets `FinancialItem[]` by a category field and renders collapsible category headers with totals.
+These patterns should be followed consistently in future work:
 
-### P1 — Most recent statement deduplication
-When multiple statements are uploaded for the same account (same provider + last4), only the most recent closing balance should be used for the section card. Compare `asAtDate` and deduplicate in `use-hub.ts` when merging items.
+1. **Progressive disclosure via radio** — "Something else" is always a radio button in the same group. Selecting it reveals sub-options beneath. Selecting another radio collapses the disclosure. Never use a separate toggle button.
+2. **Form E category selector** — when "Other" is selected on any question, reveal the searchable Form E category dropdown. Don't submit a dead-end "other" value.
+3. **Human-readable labels** — never show Form E section codes to users. Use descriptive labels ("Vehicle costs — monthly spending", not "Form E 3.1").
+4. **Account display** — "Your [joint] {Provider} {type} ending {last4}". Months framed as remaining ("11 months remaining"), not provided.
+5. **Category grouping** — section cards group items by `formECategory` when 2+ items share a category. Show category total as header, individual items nested within.
 
 ## Negative Constraints
 1. **Do not use `response_format`** — Anthropic SDK uses `output_config.format`
@@ -123,6 +87,7 @@ When multiple statements are uploaded for the same account (same provider + last
 3. **Structured output schemas require `additionalProperties: false` on all objects**
 4. **SDK timeout is 90s per call, route maxDuration is 300s** — don't reduce these
 5. **Tink env vars:** `TINK_CLIENT_ID`, `TINK_CLIENT_SECRET` — check these exist before building Tink routes
+6. **Never show Form E codes to users** — use human-readable labels always
 
 ## Session Discipline
 - Track lines of code changed. Flag at ~1,500, stop at ~2,000
@@ -134,12 +99,14 @@ When multiple statements are uploaded for the same account (same provider + last
 src/lib/ai/pipeline.ts                     — Two-step extraction, output_config
 src/lib/ai/extraction-schemas.ts           — Slimmed schemas (facts only, no reasoning)
 src/lib/ai/extraction-prompts.ts           — Document-type-specific prompts
-src/lib/ai/result-transformer.ts           — Spec 13 decision trees + financial items + keyword lookup
+src/lib/ai/result-transformer.ts           — Spec 13 decision trees + spec 19 keyword lookup + aggregation
 src/app/api/documents/extract/route.ts     — Upload API, 300s maxDuration
-src/app/api/test-pipeline/route.ts         — Isolation test endpoint
-src/hooks/use-hub.ts                       — Hub state, hero panel, item management
-src/components/hub/hero-panel.tsx           — 8-state hero panel UI
+src/hooks/use-hub.ts                       — Hub state, hero panel, item management, answer→item creation
+src/components/hub/hero-panel.tsx           — 8-state hero panel, progressive disclosure pattern
+src/components/hub/category-selector.tsx   — Searchable Form E 3.1 category dropdown
+src/components/hub/section-cards.tsx       — Form E category grouping with totals
+src/types/hub.ts                           — FinancialItem with formECategory field
 docs/workspace-spec/19-intelligent-categorisation.md — Keyword lookup, aggregation, dropdown spec
 docs/workspace-spec/13-extraction-decision-tree-documents.md — Decision trees per document type
-docs/workspace-spec/18-visual-design-system.md — Visual spec
+docs/HANDOFF-SESSION-6.md                  — Session 6 retro
 ```
