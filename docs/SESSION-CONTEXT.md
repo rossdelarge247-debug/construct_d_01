@@ -2,7 +2,25 @@
 
 Product: **Decouple** — financial disclosure workspace for UK divorce (Form E replacement).
 Stack: Next.js 16.2, React 19, TypeScript, Tailwind 4, Supabase, Claude AI, Vercel Pro.
-Branch: `claude/new-session-GUZLb`
+
+## Branch Status (start-of-session checklist)
+
+**Canonical branch:** `main` at commit `9d884b6` — this is the source of truth.
+
+| Branch | Status | Action |
+|--------|--------|--------|
+| `main` | `9d884b6` — latest code | Start new work from here |
+| `claude/new-session-GUZLb` | Same as `main` (`9d884b6`) | Can be deleted — fully merged |
+| `claude/project-planning-sprint-zero-odNO5` | Behind `main` | Can be deleted — superseded |
+| `claude/review-handoff-docs-ZovbO` | Behind `main` | Can be deleted — superseded |
+| `claude/review-handoff-session-4-8Isd9` | Behind `main` | Can be deleted — superseded |
+| `claude/read-session-context-jOy6a` | Active session 6 branch | Current working branch |
+
+**Session start protocol:**
+1. Run `git log --oneline -1 origin/main` to confirm the latest commit on `main`
+2. Run `git branch -r` to see all remote branches
+3. Create your session branch from `main` (or rebase onto it)
+4. At session end: merge to `main`, record final commit SHA here, mark old branches for deletion
 
 ## Product Vision
 Decouple replaces the 28-page Form E paper process with an intelligent, document-led workspace. Users going through separation in England & Wales upload financial documents — or connect their bank directly — and AI + Open Banking extracts, organises, and structures everything into court-ready disclosure.
