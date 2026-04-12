@@ -1,98 +1,86 @@
-# Session 7 Context Block
+# Session 8 Context Block
 
 Product: **Decouple** — financial disclosure workspace for UK divorce (Form E replacement).
 Stack: Next.js 16.2, React 19, TypeScript, Tailwind 4, Supabase, Claude AI, Vercel Pro.
 
 ## Branch Status (start-of-session checklist)
 
-**Canonical branch:** `claude/read-session-context-jOy6a` at commit `8142ff8` — merge to `main` pending.
+**Canonical branch:** `claude/decouple-v2-workspace-1cX72` at commit `fd237fd` — merge to `main` pending.
 
 | Branch | Status | Action |
 |--------|--------|--------|
-| `main` | `9d884b6` — behind session 6 work | Merge session 6 branch into main |
-| `claude/read-session-context-jOy6a` | `8142ff8` — session 6 work | Merge to main, then delete |
-| `claude/new-session-GUZLb` | Same as old `main` | Delete via GitHub UI |
-| `claude/project-planning-sprint-zero-odNO5` | Superseded | Delete via GitHub UI |
-| `claude/review-handoff-docs-ZovbO` | Archived in `docs/archive/` | Delete via GitHub UI |
-| `claude/review-handoff-session-4-8Isd9` | Archived in `docs/archive/` | Delete via GitHub UI |
+| `main` | `dc398f9` — session 6 work merged | Merge session 7 branch into main |
+| `claude/decouple-v2-workspace-1cX72` | `fd237fd` — session 7 work | Merge to main, then delete |
+| `claude/read-session-context-jOy6a` | Merged to main in session 7 | Delete via GitHub UI |
+| `claude/new-session-GUZLb` | Superseded | Delete via GitHub UI |
+| `claude/review-handoff-docs-ZovbO` | Archived | Delete via GitHub UI |
+| `claude/review-handoff-session-4-8Isd9` | Archived | Delete via GitHub UI |
 
 **Session start protocol:**
 1. Run `git log --oneline -1 origin/main` to confirm the latest commit on `main`
-2. Run `git branch -r` to see all remote branches
-3. Create your session branch from `main` (or rebase onto it)
-4. At session end: merge to `main`, record final commit SHA here, mark old branches for deletion
+2. Merge `claude/decouple-v2-workspace-1cX72` into main if not already done
+3. Create your session branch from `main`
+4. At session end: merge to `main`, record final commit SHA here
 
-## What Session 6 Accomplished
+## What Session 7 Accomplished
 
-All 4 core deliverables completed + 5 UX refinements from live testing:
+3 deliverables completed + Tink Open Banking integration (partially blocked by config):
 
-1. **Keyword lookup table** — 13 categories, auto-confirms common payees (therapy→Healthcare, DVLA→Vehicle costs, Netflix→Subscriptions)
-2. **Payment aggregation** — groups multiple payments to same payee, dividend detection for company disclosure
-3. **Answered questions → financial items** — ID-based matching + answer-driven item creation with proper section routing
-4. **Progressive category dropdown** — searchable Form E 3.1 categories, replaces generic radio buttons
-5. **Form E category grouping** — section cards group items by Form E budget category with totals
-6. **Income question redesign** — "Dividends from my own company" / "Salary from my own company" distinguished from generic self-employment
-7. **Progressive disclosure standardised** — "Something else" is a radio button that reveals sub-options
-8. **Account display humanised** — "Your Barclays current account ending 8598", "11 months remaining for full disclosure"
-9. **Overdraft routing** — account always in Accounts, overdraft additionally in Debts
+1. **Statement deduplication (P0)** — Same account uploaded twice → keep latest balance only. `getAccountKey()` + `mergeItemsDeduped()` in use-hub.ts, applied to all 5 item-merge paths.
+2. **Dry-run mock data (P1)** — Extract route returns realistic BankStatementExtraction mock through real transformer when no API key. Full downstream (keyword lookup, aggregation, Q&A, section cards) works for testing.
+3. **Tink Open Banking (P2)** — Full server-side infrastructure + UI wiring. Tink Link URL generates successfully. **Blocked on:** redirect URI whitelist in Tink Console (Vercel preview URLs change per deployment — need stable production domain).
 
 ## Current State: V2 (Prepare)
 
-- **AI pipeline:** Two-step Haiku→Sonnet with structured outputs. Working on Vercel with real PDFs. ~80s total.
-- **Keyword lookup:** 13 categories, runs before generic questions. Eliminates many unnecessary questions.
-- **Payment aggregation:** Groups payments by normalised payee name. Dividend detection for company disclosure.
-- **Category selector:** Searchable Form E 3.1 dropdown, used as progressive disclosure under "Something else" radio.
-- **Section cards:** Now group items by Form E category with totals as headers. `formECategory` field on `FinancialItem`.
-- **Question → item flow:** Answering a clarification question now reliably creates a financial item in the correct section.
-- **Open Banking:** Not yet integrated. Tink deferred to backlog. Keyword/aggregation layer is ready for it.
+- **AI pipeline:** Two-step Haiku→Sonnet. Working on Vercel with real PDFs. ~80s total.
+- **Keyword lookup:** 13 categories. Eliminates many unnecessary questions.
+- **Payment aggregation:** Groups by normalised payee. Dividend detection.
+- **Category selector:** Searchable Form E 3.1 dropdown.
+- **Section cards:** Group items by Form E category with totals.
+- **Statement dedup:** Same provider+last4 → keep most recent by asAtDate.
+- **Dry-run mode:** Realistic mock data through real pipeline when no API key.
+- **Open Banking:** Tink client, transformer, API routes, debug panel all built. Needs redirect URI configuration in Tink Console to complete testing.
+- **Hero panel:** Shows "Connect your bank" (Open Banking) + drag-drop upload zone.
 - **State:** localStorage only. Supabase schema ready but not wired.
 
-## Session 7 Deliverables (suggested)
+## Session 8 Deliverables (suggested)
 
-### P0 — Most recent statement deduplication
-When multiple statements are uploaded for the same account (same provider + last4), only the most recent closing balance should appear. Compare `asAtDate` and deduplicate in `use-hub.ts`.
+### P0 — Complete Tink Open Banking testing
+Fix the redirect URI configuration: use a stable Vercel production URL or custom domain. Add it to Tink Console. Test the full flow: connect → bank selection → callback → Q&A. May need to reinstate the auth-code flow once the redirect URI works (the no-auth-code flow may not return enough user context).
 
-### P1 — Update dry-run mock data
-The dry-run mock in `provider.ts` uses the old pre-pipeline schema shape (items/gaps/spending). Update it to match the current `BankStatementExtraction` shape so features can be tested without an API key.
+### P1 — Spec 14 wizard flows
+Wire the manual input stubs: `openManualInput`, `openSectionReview`, `addSection`. Start with property, pensions, and debts wizards — these are the sections most likely to need manual input when no document is uploaded.
 
-### P2 — Tink Open Banking integration
-Connect bank accounts via Tink Link. Fetch 12 months of enriched transactions. Map Tink categories → Form E items using the keyword/categorisation layer.
-- Prerequisites: Tink sandbox env vars (`TINK_CLIENT_ID`, `TINK_CLIENT_SECRET`)
-- New files: `src/app/api/bank/connect/route.ts`, `callback/route.ts`, `src/lib/bank/tink-transformer.ts`
+### P2 — Visual quality pass (spec 18)
+Lozenges, drag-drop zone refinement, accessibility review. The Tink debug panel should be hidden by default in production.
 
-### P3 — Other items from backlog
-- Spec 14 wizard flows (manual input for property, pensions, debts)
-- Wire `openManualInput`, `openSectionReview`, `addSection` stubs
-- Visual quality pass (spec 18)
+### P3 — Cross-document intelligence
+Same account across multiple statements. Missing months detection. Requires statement dedup (P0 done) as foundation.
 
 ## Testing & Deployment
 - **Vercel:** Deployed and working. Real PDFs tested on Vercel Pro (300s timeout).
-- **ANTHROPIC_API_KEY:** Configured in Vercel env vars. Real AI pipeline works — no need for dry-run mode.
-- **Dry-run mock:** Uses the old pre-pipeline schema shape. Not useful for testing post-pipeline features. Always test with real API key.
-- **Test approach:** Push branch → Vercel auto-deploys → test in browser with real PDFs.
+- **ANTHROPIC_API_KEY:** Configured in Vercel env vars.
+- **TINK_CLIENT_ID / TINK_CLIENT_SECRET:** Configured in Vercel env vars. Sandbox credentials valid.
+- **Tink redirect URI:** Needs stable URL added to Tink Console. Preview URLs change per deployment.
+- **Dry-run mock:** Now uses current BankStatementExtraction schema. Works without API key.
 
-## UX Patterns Established (session 6)
+## UX Patterns Established (sessions 6-7)
 
-These patterns should be followed consistently in future work:
-
-1. **Progressive disclosure via radio** — "Something else" is always a radio button in the same group. Selecting it reveals sub-options beneath. Selecting another radio collapses the disclosure. Never use a separate toggle button.
-2. **Form E category selector** — when "Other" is selected on any question, reveal the searchable Form E category dropdown. Don't submit a dead-end "other" value.
-3. **Human-readable labels** — never show Form E section codes to users. Use descriptive labels ("Vehicle costs — monthly spending", not "Form E 3.1").
-4. **Account display** — "Your [joint] {Provider} {type} ending {last4}". Months framed as remaining ("11 months remaining"), not provided.
-5. **Category grouping** — section cards group items by `formECategory` when 2+ items share a category. Show category total as header, individual items nested within.
+1. **Progressive disclosure via radio** — "Something else" is always a radio button. Reveals sub-options beneath.
+2. **Form E category selector** — Searchable dropdown under "Other". Never submit a dead-end "other" value.
+3. **Human-readable labels** — Never show Form E codes to users.
+4. **Account display** — "Your [joint] {Provider} {type} ending {last4}". Months as remaining.
+5. **Category grouping** — Section cards group by `formECategory` when 2+ items share a category.
+6. **Connect or upload** — Hero panel shows both options: Open Banking connect + drag-drop upload.
 
 ## Negative Constraints
 1. **Do not use `response_format`** — Anthropic SDK uses `output_config.format`
 2. **Do not reference pre-pivot specs (03-06, 11, 12)** — architecture changed
 3. **Structured output schemas require `additionalProperties: false` on all objects**
-4. **SDK timeout is 90s per call, route maxDuration is 300s** — don't reduce these
-5. **Tink env vars:** `TINK_CLIENT_ID`, `TINK_CLIENT_SECRET` — check these exist before building Tink routes
-6. **Never show Form E codes to users** — use human-readable labels always
-
-## Session Discipline
-- Track lines of code changed. Flag at ~1,500, stop at ~2,000
-- Before generating handoff: commit all work, write `docs/HANDOFF-SESSION-{N}.md`
-- Then write `docs/SESSION-CONTEXT.md` for the next session
+4. **SDK timeout is 90s per call, route maxDuration is 300s** — don't reduce
+5. **Never show Form E codes to users** — human-readable labels always
+6. **Tink user creation endpoint requires JSON** — not form-encoded (all other Tink v1 OAuth endpoints use form-encoded)
+7. **Tink redirect URIs must be whitelisted** — in Tink Console, per domain
 
 ## Key Files
 ```
@@ -100,13 +88,19 @@ src/lib/ai/pipeline.ts                     — Two-step extraction, output_confi
 src/lib/ai/extraction-schemas.ts           — Slimmed schemas (facts only, no reasoning)
 src/lib/ai/extraction-prompts.ts           — Document-type-specific prompts
 src/lib/ai/result-transformer.ts           — Spec 13 decision trees + spec 19 keyword lookup + aggregation
-src/app/api/documents/extract/route.ts     — Upload API, 300s maxDuration
-src/hooks/use-hub.ts                       — Hub state, hero panel, item management, answer→item creation
-src/components/hub/hero-panel.tsx           — 8-state hero panel, progressive disclosure pattern
+src/app/api/documents/extract/route.ts     — Upload API, 300s maxDuration, dry-run mock
+src/hooks/use-hub.ts                       — Hub state, hero panel, item management, dedup, bank data pickup
+src/components/hub/hero-panel.tsx           — 8-state hero panel, connect + upload options
 src/components/hub/category-selector.tsx   — Searchable Form E 3.1 category dropdown
 src/components/hub/section-cards.tsx       — Form E category grouping with totals
+src/components/hub/tink-debug-panel.tsx    — Tink debug: credentials test, connect flow, diagnostics
+src/lib/bank/tink-client.ts               — Tink API client (OAuth, user management, data fetch)
+src/lib/bank/tink-transformer.ts          — Tink transactions → BankStatementExtraction
+src/app/api/bank/connect/route.ts         — Generate Tink Link URL
+src/app/api/bank/callback/route.ts        — Handle Tink redirect, fetch + transform data
+src/app/api/bank/test/route.ts            — Test Tink credentials
 src/types/hub.ts                           — FinancialItem with formECategory field
 docs/workspace-spec/19-intelligent-categorisation.md — Keyword lookup, aggregation, dropdown spec
 docs/workspace-spec/13-extraction-decision-tree-documents.md — Decision trees per document type
-docs/HANDOFF-SESSION-6.md                  — Session 6 retro
+docs/HANDOFF-SESSION-7.md                  — Session 7 retro
 ```

@@ -54,25 +54,26 @@ When the session is ending (user says wrap up, or you hit ~2,000 lines), do thes
 
 ## Branch
 
-Development branch: `claude/new-session-GUZLb`
+Development branch: `claude/decouple-v2-workspace-1cX72`
 
 ## Key files
 
 ```
 docs/SESSION-CONTEXT.md                    — START HERE every session
-docs/HANDOFF-SESSION-5.md                  — Most recent session retro
-docs/workspace-spec/19-intelligent-categorisation.md — Next feature spec (keyword lookup, aggregation)
-docs/workspace-spec/13-extraction-decision-tree-documents.md — Decision trees per document type
-docs/workspace-spec/18-visual-design-system.md — Visual spec
+docs/HANDOFF-SESSION-7.md                  — Most recent session retro
 src/lib/ai/pipeline.ts                     — Two-step AI extraction (Haiku→Sonnet)
-src/lib/ai/result-transformer.ts           — Spec 13 decision trees + financial items
+src/lib/ai/result-transformer.ts           — Spec 13 decision trees + spec 19 keyword lookup
 src/lib/ai/extraction-schemas.ts           — Structured output schemas (facts only)
 src/lib/ai/extraction-prompts.ts           — Document-type-specific prompts
-src/hooks/use-hub.ts                       — Hub state, hero panel, item management
-src/components/hub/hero-panel.tsx           — 8-state hero panel UI
-src/app/api/documents/extract/route.ts     — Upload API, 300s maxDuration
-src/app/api/test-pipeline/route.ts         — Isolation test for pipeline steps
-docs/README.md                             — Full documentation index
+src/hooks/use-hub.ts                       — Hub state, hero panel, dedup, bank data pickup
+src/components/hub/hero-panel.tsx           — 8-state hero panel, connect + upload
+src/app/api/documents/extract/route.ts     — Upload API, 300s maxDuration, dry-run mock
+src/lib/bank/tink-client.ts               — Tink Open Banking API client
+src/lib/bank/tink-transformer.ts          — Tink → BankStatementExtraction
+src/app/api/bank/connect/route.ts         — Generate Tink Link URL
+src/app/api/bank/callback/route.ts        — Handle Tink redirect + transform
+docs/workspace-spec/13-extraction-decision-tree-documents.md — Decision trees per document type
+docs/workspace-spec/18-visual-design-system.md — Visual spec
 ```
 
 ## Information tiers — what to read and when
