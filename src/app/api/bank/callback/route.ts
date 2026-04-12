@@ -75,7 +75,7 @@ export async function GET(request: NextRequest) {
 <script>
   try {
     sessionStorage.setItem('pendingBankData', JSON.stringify(${JSON.stringify(results)}));
-    window.location.href = '/hub?source=openbanking';
+    window.location.href = '/workspace?source=openbanking';
   } catch (e) {
     document.body.innerHTML = '<p>Something went wrong storing your bank data. Please try again.</p>';
   }
@@ -88,24 +88,23 @@ export async function GET(request: NextRequest) {
 
   } catch (error) {
     const msg = error instanceof Error ? error.message : 'Unknown error'
-    console.error('[Bank Callback] Error:', msg)
+    console.error('[Bank Callback] Error:', msg, error instanceof Error ? error.stack : '')
     return redirectWithError(`Bank connection failed: ${msg}`)
   }
 }
 
 function redirectWithError(message: string) {
+  const safeMessage = message.replace(/</g, '&lt;').replace(/>/g, '&gt;')
   const html = `<!DOCTYPE html>
-<html><head><title>Bank connection error</title></head>
+<html><head><title>Bank connection error</title>
+<style>body{font-family:system-ui;max-width:600px;margin:80px auto;padding:0 20px}
+pre{background:#f5f5f5;padding:12px;border-radius:6px;white-space:pre-wrap;font-size:13px}
+a{color:#2563eb}</style>
+</head>
 <body>
-<p>${message}</p>
-<script>
-  try {
-    sessionStorage.setItem('bankConnectionError', ${JSON.stringify(message)});
-    window.location.href = '/hub?source=openbanking&error=true';
-  } catch (e) {
-    // If sessionStorage fails, at least show the error
-  }
-</script>
+<h2>Bank connection error</h2>
+<pre>${safeMessage}</pre>
+<p><a href="/workspace">Back to workspace</a></p>
 </body></html>`
 
   return new Response(html, {
