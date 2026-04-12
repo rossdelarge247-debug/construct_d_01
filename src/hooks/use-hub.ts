@@ -114,6 +114,50 @@ export function useHub() {
     setLoaded(true)
   }, [])
 
+  // Pick up pending bank data from Open Banking callback (sessionStorage)
+  useEffect(() => {
+    if (!loaded) return
+    if (typeof window === 'undefined') return
+    const pending = sessionStorage.getItem('pendingBankData')
+    if (!pending) return
+
+    sessionStorage.removeItem('pendingBankData')
+    // Clean URL params from callback redirect
+    if (window.location.search.includes('source=openbanking')) {
+      window.history.replaceState({}, '', window.location.pathname)
+    }
+
+    try {
+      const results = JSON.parse(pending)
+      if (!Array.isArray(results) || results.length === 0) return
+
+      const allAutoConfirm: AutoConfirmItem[] = []
+      const allQuestions: ClarificationQuestion[] = []
+      const allItems: FinancialItem[] = []
+
+      for (const { result, transformed } of results) {
+        setUploadContext({
+          fileCount: 0, fileNames: [],
+          documentType: result.classification.document_type,
+          providerName: result.classification.provider,
+          processingMessages: transformed.processingMessages || [],
+          error: null,
+        })
+        allAutoConfirm.push(...(transformed.autoConfirmItems || []))
+        allQuestions.push(...(transformed.questions || []))
+        allItems.push(...(transformed.financialItems || []))
+      }
+
+      setAutoConfirmItems(allAutoConfirm)
+      setQuestions(allQuestions)
+      pendingFinancialItems.current = allItems
+      setCurrentQuestionIndex(0)
+      setHeroPanelState('review_ready')
+    } catch (e) {
+      console.error('[Hub] Failed to process bank data:', e)
+    }
+  }, [loaded])
+
   // Auto-save on changes
   useEffect(() => {
     if (!loaded) return
@@ -310,6 +354,36 @@ export function useHub() {
     }
   }, [])
 
+  const handleBankConnect = useCallback(async () => {
+    setHeroPanelState('uploading')
+    setUploadContext({
+      fileCount: 0, fileNames: [],
+      documentType: null, providerName: null,
+      processingMessages: ['Connecting to your bank via Open Banking...'],
+      error: null,
+    })
+
+    try {
+      const res = await fetch('/api/bank/connect', { method: 'POST' })
+      const data = await res.json()
+
+      if (!res.ok || data.error) {
+        setUploadContext((prev) => ({ ...prev, error: data.error || 'Failed to connect' }))
+        setHeroPanelState('ready')
+        return
+      }
+
+      // Redirect to Tink Link — user connects their bank there.
+      // On completion, Tink redirects to /api/bank/callback which stores
+      // the result in sessionStorage and redirects back to /workspace
+      window.location.href = data.url
+    } catch (error) {
+      const msg = error instanceof Error ? error.message : 'Something went wrong'
+      setUploadContext((prev) => ({ ...prev, error: msg }))
+      setHeroPanelState('ready')
+    }
+  }, [])
+
   const startReview = useCallback(() => {
     setHeroPanelState('auto_confirm')
   }, [])
@@ -450,6 +524,7 @@ export function useHub() {
     updateConfig,
     completeConfig,
     handleFilesDropped,
+    handleBankConnect,
     startReview,
     acceptAutoConfirm,
     answerQuestion,

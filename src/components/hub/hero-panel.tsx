@@ -1,7 +1,7 @@
 'use client'
 
 import { useCallback, useEffect, useRef, useState } from 'react'
-import { Upload } from 'lucide-react'
+import { Upload, Landmark } from 'lucide-react'
 import { EvidenceLozenge } from './evidence-lozenge'
 import { CategorySelector } from './category-selector'
 import type {
@@ -28,6 +28,7 @@ interface HeroPanelProps {
   currentQuestionIndex: number
   uploadContext?: UploadContext
   onFilesDropped: (files: File[]) => void
+  onBankConnect: () => void
   onReviewStart: () => void
   onAutoConfirmAccept: (acceptedIds: string[]) => void
   onQuestionAnswer: (questionId: string, answer: string) => void
@@ -47,6 +48,7 @@ export function HeroPanel({
   currentQuestionIndex,
   uploadContext,
   onFilesDropped,
+  onBankConnect,
   onReviewStart,
   onAutoConfirmAccept,
   onQuestionAnswer,
@@ -116,7 +118,7 @@ export function HeroPanel({
           transitionDuration: 'var(--transition-content)',
         }}
       >
-        {renderState === 'ready' && <ReadyState onFilesDropped={onFilesDropped} />}
+        {renderState === 'ready' && <ReadyState onFilesDropped={onFilesDropped} onBankConnect={onBankConnect} />}
         {renderState === 'uploading' && <UploadingState context={uploadContext} />}
         {renderState === 'uploading_context' && <UploadingContextState context={uploadContext} />}
         {renderState === 'analysing' && <AnalysingState context={uploadContext} />}
@@ -194,7 +196,7 @@ function ProgressBar({ current, total }: { current: number; total: number }) {
 
 // ═══ State 1: Ready ═══
 
-function ReadyState({ onFilesDropped }: { onFilesDropped: (files: File[]) => void }) {
+function ReadyState({ onFilesDropped, onBankConnect }: { onFilesDropped: (files: File[]) => void; onBankConnect: () => void }) {
   const fileInputRef = useRef<HTMLInputElement>(null)
   const [isDragOver, setIsDragOver] = useState(false)
 
@@ -226,37 +228,54 @@ function ReadyState({ onFilesDropped }: { onFilesDropped: (files: File[]) => voi
   )
 
   return (
-    <div
-      onDrop={handleDrop}
-      onDragOver={handleDragOver}
-      onDragLeave={handleDragLeave}
-      className={`border-2 border-dashed rounded-lg p-12 text-center transition-all duration-200 cursor-pointer ${
-        isDragOver
-          ? 'border-blue-600 bg-blue-50 scale-[1.01]'
-          : 'border-grey-200 hover:border-blue-600 hover:bg-blue-50'
-      }`}
-      onClick={() => fileInputRef.current?.click()}
-      role="button"
-      tabIndex={0}
-      aria-label="Upload files"
-    >
-      <Upload size={24} className="mx-auto mb-3 text-ink-tertiary" />
-      <p className="text-sm text-ink-secondary italic">
-        Drag and drop your files in any order and we&apos;ll do the rest..
-      </p>
-      <p className="text-sm text-ink-secondary">
-        (or{' '}
-        <span className="text-blue-600 underline">upload</span>
-        )
-      </p>
-      <input
-        ref={fileInputRef}
-        type="file"
-        multiple
-        accept=".pdf,.jpg,.jpeg,.png"
-        className="hidden"
-        onChange={handleFileSelect}
-      />
+    <div className="space-y-4">
+      {/* Open Banking connect option */}
+      <button
+        onClick={onBankConnect}
+        className="w-full flex items-center gap-4 p-5 border border-grey-200 rounded-lg text-left hover:border-blue-600 hover:bg-blue-50 transition-colors group"
+      >
+        <Landmark size={24} className="text-ink-tertiary flex-shrink-0 group-hover:text-blue-600 transition-colors" />
+        <div>
+          <p className="text-sm font-semibold text-ink">Connect your bank</p>
+          <p className="text-xs text-ink-tertiary">Securely link your accounts via Open Banking</p>
+        </div>
+      </button>
+
+      <p className="text-xs text-ink-tertiary text-center">or</p>
+
+      {/* Upload option — existing drag-drop zone */}
+      <div
+        onDrop={handleDrop}
+        onDragOver={handleDragOver}
+        onDragLeave={handleDragLeave}
+        className={`border-2 border-dashed rounded-lg p-12 text-center transition-all duration-200 cursor-pointer ${
+          isDragOver
+            ? 'border-blue-600 bg-blue-50 scale-[1.01]'
+            : 'border-grey-200 hover:border-blue-600 hover:bg-blue-50'
+        }`}
+        onClick={() => fileInputRef.current?.click()}
+        role="button"
+        tabIndex={0}
+        aria-label="Upload files"
+      >
+        <Upload size={24} className="mx-auto mb-3 text-ink-tertiary" />
+        <p className="text-sm text-ink-secondary italic">
+          Drag and drop your files in any order and we&apos;ll do the rest..
+        </p>
+        <p className="text-sm text-ink-secondary">
+          (or{' '}
+          <span className="text-blue-600 underline">upload</span>
+          )
+        </p>
+        <input
+          ref={fileInputRef}
+          type="file"
+          multiple
+          accept=".pdf,.jpg,.jpeg,.png"
+          className="hidden"
+          onChange={handleFileSelect}
+        />
+      </div>
     </div>
   )
 }

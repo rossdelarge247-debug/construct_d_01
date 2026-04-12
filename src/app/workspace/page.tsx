@@ -54,6 +54,7 @@ export default function WorkspacePage() {
           currentQuestionIndex={hub.currentQuestionIndex}
           uploadContext={hub.uploadContext}
           onFilesDropped={hub.handleFilesDropped}
+          onBankConnect={hub.handleBankConnect}
           onReviewStart={hub.startReview}
           onAutoConfirmAccept={hub.acceptAutoConfirm}
           onQuestionAnswer={hub.answerQuestion}
