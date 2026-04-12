@@ -378,21 +378,64 @@ function transformBankStatement(data: BankStatementExtraction): TransformedResul
     }
   }
 
-  // ═══ Account details → Accounts section ═══
-  financialItems.push({
-    id: `fi-account-${data.provider.replace(/\s+/g, '-').toLowerCase()}-${Date.now()}`,
-    sectionKey: 'accounts',
-    label: `${data.provider} ${data.account_type === 'current' ? 'current account' : data.account_type === 'savings' ? 'savings account' : 'account'}${data.account_number_last4 ? ` ****${data.account_number_last4}` : ''}`,
-    value: data.closing_balance,
-    period: 'total',
-    ownership: data.is_joint ? 'joint' : 'yours',
-    confidence: 'confirmed',
-    sourceDocumentId: null,
-    sourceDescription: data.statement_period_start && data.statement_period_end
-      ? `Statement: ${data.statement_period_start} to ${data.statement_period_end}`
-      : `${data.provider} statement`,
-    isInherited: false, isPreMarital: false, asAtDate: now, createdAt: now, updatedAt: now,
-  })
+  // ═══ Account details → route by balance (positive=asset, negative=debt) ═══
+  const accountTypeLabel = data.account_type === 'current' ? 'current account'
+    : data.account_type === 'savings' ? 'savings account'
+    : data.account_type === 'joint_current' ? 'current account'
+    : data.account_type === 'joint_savings' ? 'savings account'
+    : 'account'
+  const ownershipLabel = data.is_joint ? 'joint' : 'sole'
+  const accountRef = data.account_number_last4 ? ` ****${data.account_number_last4}` : ''
+  const accountLabel = `${data.provider} ${accountTypeLabel}${accountRef} (${ownershipLabel})`
+
+  // Calculate months covered from statement period
+  let monthsCovered = 1
+  if (data.statement_period_start && data.statement_period_end) {
+    const start = new Date(data.statement_period_start)
+    const end = new Date(data.statement_period_end)
+    monthsCovered = Math.max(1, Math.round((end.getTime() - start.getTime()) / (1000 * 60 * 60 * 24 * 30)))
+  }
+  const monthsNote = `${monthsCovered} of 12 months provided`
+
+  const statementPeriod = data.statement_period_start && data.statement_period_end
+    ? `${data.statement_period_start} to ${data.statement_period_end}`
+    : null
+
+  const isOverdrawn = data.closing_balance !== null && data.closing_balance < 0
+
+  if (isOverdrawn) {
+    // Negative balance = overdraft → debt (Form E 2.14)
+    financialItems.push({
+      id: `fi-account-${data.provider.replace(/\s+/g, '-').toLowerCase()}-${Date.now()}`,
+      sectionKey: 'debts',
+      label: `${accountLabel} — overdraft`,
+      value: Math.abs(data.closing_balance!),
+      period: 'total',
+      ownership: data.is_joint ? 'joint' : 'yours',
+      confidence: 'confirmed',
+      sourceDocumentId: null,
+      sourceDescription: [statementPeriod, monthsNote].filter(Boolean).join(' · '),
+      isInherited: false, isPreMarital: false,
+      asAtDate: data.statement_period_end || now,
+      createdAt: now, updatedAt: now,
+    })
+  } else {
+    // Positive or zero balance = asset (Form E 2.3)
+    financialItems.push({
+      id: `fi-account-${data.provider.replace(/\s+/g, '-').toLowerCase()}-${Date.now()}`,
+      sectionKey: 'accounts',
+      label: accountLabel,
+      value: data.closing_balance,
+      period: 'total',
+      ownership: data.is_joint ? 'joint' : 'yours',
+      confidence: 'confirmed',
+      sourceDocumentId: null,
+      sourceDescription: [statementPeriod, monthsNote].filter(Boolean).join(' · '),
+      isInherited: false, isPreMarital: false,
+      asAtDate: data.statement_period_end || now,
+      createdAt: now, updatedAt: now,
+    })
+  }
 
   // ═══ Spec 13: Joint account detection ═══
   if (data.is_joint) {
