@@ -271,15 +271,18 @@ function transformBankStatement(data: BankStatementExtraction): TransformedResul
       })
     } else {
       // Spec 13: varying income or low confidence → clarify type
+      // Options refined per UX feedback: distinguish company dividends from self-employment,
+      // and provide progressive disclosure for less common income types
       questions.push({
         id, questionText: `We found regular deposits of ${sourceDesc}. What is this income?`,
         reasoning: null,
         options: [
-          { label: 'Employment salary', value: 'employment' },
-          { label: 'Self-employment income', value: 'self_employment' },
+          { label: 'Salary from my employer', value: 'employment' },
+          { label: 'Dividends from my own company', value: 'own_company_dividends' },
+          { label: 'Salary from my own company', value: 'own_company_salary' },
           { label: 'Benefits', value: 'benefits' },
           { label: 'Rental income', value: 'rental' },
-          { label: 'Something else', value: 'other' },
+          { label: 'Something else', value: 'other_income' },
         ],
         primaryOption: null, secondaryLabel: "I'm not sure", formEField: '2.15-2.20',
         answered: false, answer: null,

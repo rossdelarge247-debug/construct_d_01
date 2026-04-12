@@ -340,6 +340,18 @@ export function useHub() {
 
     const answeredQ = questions.find((q) => q.id === questionId)
     if (answeredQ && answer !== 'skipped') {
+      // Own company answer → capture business name and enable business section
+      if (OWN_COMPANY_ANSWERS.has(answer)) {
+        const businessName = extractSourceName(answeredQ.questionText)
+        if (businessName) {
+          setConfig((prev) => ({
+            ...prev,
+            employment: prev.employment === 'employed' ? 'both' : 'self_employed',
+            businessStructure: prev.businessStructure || 'limited',
+          }))
+        }
+      }
+
       // First, check if the transformer pre-created a financial item for this question (ID-based match)
       const preCreatedItem = pendingFinancialItems.current.find(
         (fi) => fi.id === `fi-${questionId}`
@@ -711,9 +723,13 @@ const ANSWER_TO_SECTION: Record<string, SectionKey> = {
   mortgage: 'property',
   rent: 'spending',
   employment: 'income',
-  self_employment: 'income',
+  own_company_dividends: 'income',
+  own_company_salary: 'income',
   benefits: 'income',
   rental: 'income',
+  pension_income: 'income',
+  maintenance_received: 'income',
+  investment_return: 'income',
   pension_contribution: 'pensions',
   workplace: 'pensions',
   personal: 'pensions',
@@ -737,6 +753,9 @@ const ANSWER_TO_SECTION: Record<string, SectionKey> = {
   joint_partner: 'accounts',
 }
 
+// Answers that indicate "own company" — triggers business section + captures company name
+const OWN_COMPANY_ANSWERS = new Set(['own_company_dividends', 'own_company_salary', 'own_company'])
+
 /**
  * When a pre-created financial item exists, refine its section/confidence based on the answer.
  */
@@ -754,6 +773,16 @@ function resolveAnswerToSection(
 }
 
 /**
+ * Extract a source/payee name from question text.
+ * Matches "from SOURCE_NAME" at end of sentence, e.g.
+ * "We found regular deposits of £2,000/monthly from User Need Ltd."
+ */
+function extractSourceName(questionText: string): string | null {
+  const match = questionText.match(/from\s+(.+?)(?:\.|,|\?|$)/)
+  return match ? match[1].trim() : null
+}
+
+/**
  * Create a new financial item from a clarification question + user answer.
  * Extracts amount from question text (£X,XXX pattern) and maps answer to section.
  */
@@ -762,16 +791,25 @@ function createItemFromAnswer(
   answer: string,
 ): FinancialItem | null {
   // Don't create items for informational questions (learn_more, understood, skip, etc.)
-  const nonItemAnswers = ['learn_more', 'understood', 'skip', 'noted', 'review', 'correct', 'will_request', 'have_newer']
+  const nonItemAnswers = ['learn_more', 'understood', 'skip', 'noted', 'review', 'correct', 'will_request', 'have_newer', 'other_income']
   if (nonItemAnswers.includes(answer)) return null
 
   // Extract amount from question text — matches £1,234 or £1234 patterns
   const amountMatch = question.questionText.match(/£([\d,]+)/)
   const amount = amountMatch ? parseInt(amountMatch[1].replace(/,/g, ''), 10) : null
+  const sourceName = extractSourceName(question.questionText)
 
-  // Derive a label from the answer and question
-  const answerOption = question.options.find((o) => o.value === answer)
-  const label = answerOption ? answerOption.label : answer
+  // Build a meaningful label based on the answer type
+  let label: string
+  if (OWN_COMPANY_ANSWERS.has(answer)) {
+    const companyName = sourceName || 'your company'
+    label = answer === 'own_company_dividends'
+      ? `Dividends from ${companyName}`
+      : `Salary from ${companyName} (director)`
+  } else {
+    const answerOption = question.options.find((o) => o.value === answer)
+    label = answerOption ? answerOption.label : answer
+  }
 
   const sectionKey = ANSWER_TO_SECTION[answer] || 'spending'
   const now = new Date().toISOString()
@@ -785,7 +823,9 @@ function createItemFromAnswer(
     ownership: answer === 'joint_partner' || answer === 'joint' ? 'joint' : 'yours',
     confidence: 'confirmed',
     sourceDocumentId: null,
-    sourceDescription: `From question: ${question.questionText.substring(0, 60)}...`,
+    sourceDescription: sourceName
+      ? `From ${sourceName}: ${question.questionText.substring(0, 60)}`
+      : `From question: ${question.questionText.substring(0, 60)}`,
     isInherited: false,
     isPreMarital: answer === 'pre_marital',
     asAtDate: now,

@@ -12,6 +12,14 @@ import type {
 } from '@/types/hub'
 import type { UploadContext } from '@/hooks/use-hub'
 
+// Progressive disclosure options for "Something else" on income questions
+const PROGRESSIVE_INCOME_OPTIONS = [
+  { label: 'Pension income', value: 'pension_income' },
+  { label: 'Maintenance received', value: 'maintenance_received' },
+  { label: 'Investment return', value: 'investment_return' },
+  { label: 'Other income', value: 'other' },
+]
+
 interface HeroPanelProps {
   state: HeroPanelState
   lozenges: LozengeType[]
@@ -464,10 +472,12 @@ function ClarificationState({
   onSkip: (questionId: string) => void
 }) {
   const [selectedValue, setSelectedValue] = useState<string | null>(null)
+  const [showMoreOptions, setShowMoreOptions] = useState(false)
 
   // Reset selection when question changes
   useEffect(() => {
     setSelectedValue(null)
+    setShowMoreOptions(false)
   }, [question.id])
 
   const isBinary = question.options.length <= 2
@@ -477,6 +487,9 @@ function ClarificationState({
   const usesCategoryDropdown = question.id.startsWith('payment-') &&
     question.questionText.includes('What is this?') &&
     question.options.some((o) => o.value === 'other')
+
+  // Progressive disclosure: "Something else" on income questions reveals more Form E income types
+  const hasProgressiveOther = question.options.some((o) => o.value === 'other_income')
 
   if (usesCategoryDropdown) {
     return (
@@ -523,7 +536,9 @@ function ClarificationState({
       ) : (
         // Radio options with tracked selection
         <div className="mt-4 space-y-2.5">
-          {question.options.map((option) => (
+          {question.options
+            .filter((o) => o.value !== 'other_income')
+            .map((option) => (
             <label
               key={option.value}
               className={`flex items-center gap-3 p-3 rounded-md cursor-pointer transition-colors ${
@@ -537,12 +552,54 @@ function ClarificationState({
                 name={question.id}
                 value={option.value}
                 checked={selectedValue === option.value}
-                onChange={() => setSelectedValue(option.value)}
+                onChange={() => { setSelectedValue(option.value); setShowMoreOptions(false) }}
                 className="w-4 h-4 border-grey-200 text-blue-600 focus:ring-blue-600"
               />
               <span className="text-sm text-ink">{option.label}</span>
             </label>
           ))}
+
+          {/* Progressive disclosure: "Something else" expands to more Form E income types */}
+          {hasProgressiveOther && (
+            <>
+              <button
+                onClick={() => { setShowMoreOptions(!showMoreOptions); setSelectedValue(null) }}
+                className={`w-full flex items-center gap-3 p-3 rounded-md cursor-pointer transition-colors text-left ${
+                  showMoreOptions ? 'bg-blue-50 border border-blue-600/20' : 'hover:bg-grey-50'
+                }`}
+              >
+                <span className="w-4 h-4 flex items-center justify-center text-xs text-ink-secondary">
+                  {showMoreOptions ? '▾' : '▸'}
+                </span>
+                <span className="text-sm text-ink">Something else</span>
+              </button>
+              {showMoreOptions && (
+                <div className="ml-7 space-y-2 border-l-2 border-grey-100 pl-4">
+                  {PROGRESSIVE_INCOME_OPTIONS.map((option) => (
+                    <label
+                      key={option.value}
+                      className={`flex items-center gap-3 p-2.5 rounded-md cursor-pointer transition-colors ${
+                        selectedValue === option.value
+                          ? 'bg-blue-50 border border-blue-600/20'
+                          : 'hover:bg-grey-50'
+                      }`}
+                    >
+                      <input
+                        type="radio"
+                        name={question.id}
+                        value={option.value}
+                        checked={selectedValue === option.value}
+                        onChange={() => setSelectedValue(option.value)}
+                        className="w-4 h-4 border-grey-200 text-blue-600 focus:ring-blue-600"
+                      />
+                      <span className="text-sm text-ink">{option.label}</span>
+                    </label>
+                  ))}
+                </div>
+              )}
+            </>
+          )}
+
           <div className="mt-5 flex items-center gap-4">
             <button
               onClick={() => {
@@ -554,7 +611,7 @@ function ClarificationState({
               className="px-6 py-3 bg-ink text-white text-[15px] font-semibold rounded-md hover:opacity-90 transition-opacity disabled:opacity-40 disabled:cursor-not-allowed"
             >
               {selectedValue
-                ? question.options.find((o) => o.value === selectedValue)?.label || 'Confirm'
+                ? [...question.options, ...PROGRESSIVE_INCOME_OPTIONS].find((o) => o.value === selectedValue)?.label || 'Confirm'
                 : 'Select an option'}
             </button>
             <button
