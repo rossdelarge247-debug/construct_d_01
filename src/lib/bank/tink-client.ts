@@ -192,7 +192,7 @@ export async function getAccounts(userToken: string): Promise<TinkAccount[]> {
 export async function getTransactions(
   userToken: string,
   accountId: string,
-  pageSize = 500,
+  pageSize = 100,
 ): Promise<TinkTransaction[]> {
   const all: TinkTransaction[] = []
   let pageToken: string | null = null
