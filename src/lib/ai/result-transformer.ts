@@ -406,10 +406,27 @@ function transformBankStatement(data: BankStatementExtraction): TransformedResul
 
   const isOverdrawn = data.closing_balance !== null && data.closing_balance < 0
 
+  // Account always appears in Accounts section (Form E 2.3) — it's an account regardless of balance
+  financialItems.push({
+    id: `fi-account-${data.provider.replace(/\s+/g, '-').toLowerCase()}-${Date.now()}`,
+    sectionKey: 'accounts',
+    label: isOverdrawn ? `${accountLabel} — overdrawn` : accountLabel,
+    value: data.closing_balance,
+    period: 'total',
+    ownership: data.is_joint ? 'joint' : 'yours',
+    confidence: 'confirmed',
+    sourceDocumentId: null,
+    sourceDescription: [statementPeriod, monthsNote].filter(Boolean).join(' · '),
+    formECategory: null,
+    isInherited: false, isPreMarital: false,
+    asAtDate: data.statement_period_end || now,
+    createdAt: now, updatedAt: now,
+  })
+
+  // Overdraft also appears in Debts section (Form E 2.14) — it's a liability
   if (isOverdrawn) {
-    // Negative balance = overdraft → debt (Form E 2.14)
     financialItems.push({
-      id: `fi-account-${data.provider.replace(/\s+/g, '-').toLowerCase()}-${Date.now()}`,
+      id: `fi-overdraft-${data.provider.replace(/\s+/g, '-').toLowerCase()}-${Date.now()}`,
       sectionKey: 'debts',
       label: `${accountLabel} — overdraft`,
       value: Math.abs(data.closing_balance!),
@@ -418,24 +435,7 @@ function transformBankStatement(data: BankStatementExtraction): TransformedResul
       confidence: 'confirmed',
       sourceDocumentId: null,
       sourceDescription: [statementPeriod, monthsNote].filter(Boolean).join(' · '),
-      formECategory: null,
-      isInherited: false, isPreMarital: false,
-      asAtDate: data.statement_period_end || now,
-      createdAt: now, updatedAt: now,
-    })
-  } else {
-    // Positive or zero balance = asset (Form E 2.3)
-    financialItems.push({
-      id: `fi-account-${data.provider.replace(/\s+/g, '-').toLowerCase()}-${Date.now()}`,
-      sectionKey: 'accounts',
-      label: accountLabel,
-      value: data.closing_balance,
-      period: 'total',
-      ownership: data.is_joint ? 'joint' : 'yours',
-      confidence: 'confirmed',
-      sourceDocumentId: null,
-      sourceDescription: [statementPeriod, monthsNote].filter(Boolean).join(' · '),
-      formECategory: null,
+      formECategory: 'Overdraft',
       isInherited: false, isPreMarital: false,
       asAtDate: data.statement_period_end || now,
       createdAt: now, updatedAt: now,
