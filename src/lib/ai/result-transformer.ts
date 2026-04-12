@@ -261,7 +261,7 @@ function transformBankStatement(data: BankStatementExtraction): TransformedResul
       const label = income.type === 'employment'
         ? `Monthly salary: ${formatCurrency(income.amount)} net from ${income.source}`
         : `${income.source}: ${formatCurrency(income.amount)}/month`
-      autoConfirmItems.push({ id, label, detail: `Form E ${income.type === 'employment' ? '2.15' : '2.15-2.20'}`, accepted: true })
+      autoConfirmItems.push({ id, label, detail: income.type === 'employment' ? 'Employment income' : 'Benefits income', accepted: true })
       financialItems.push({
         id: `fi-${id}`, sectionKey: 'income',
         label: income.type === 'employment' ? `Salary from ${income.source}` : income.source,
@@ -322,7 +322,7 @@ function transformBankStatement(data: BankStatementExtraction): TransformedResul
 
     if (payment.confidence >= AUTO_CONFIRM_THRESHOLD) {
       // High confidence — auto-confirm (spec 13: obvious items)
-      autoConfirmItems.push({ id, label: `${categoryLabel}: ${paymentDesc}`, detail: `Form E ${getFormEField(payment.likely_category)}`, accepted: true })
+      autoConfirmItems.push({ id, label: `${categoryLabel}: ${paymentDesc}`, detail: `${categoryLabel} — monthly spending`, accepted: true })
       financialItems.push({
         id: `fi-${id}`, sectionKey: paymentToSection(payment.likely_category),
         label: `${payment.payee} (${categoryLabel.toLowerCase()})`,
@@ -339,7 +339,7 @@ function transformBankStatement(data: BankStatementExtraction): TransformedResul
         // High-confidence keyword match → auto-confirm
         autoConfirmItems.push({
           id, label: `${keywordMatch.categoryLabel}: ${paymentDesc}`,
-          detail: `Form E ${keywordMatch.formEField} (matched from payee name)`, accepted: true,
+          detail: `${keywordMatch.categoryLabel} (matched from payee name)`, accepted: true,
         })
         financialItems.push({
           id: `fi-${id}`, sectionKey: 'spending',
