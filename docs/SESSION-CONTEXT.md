@@ -45,8 +45,23 @@ Stack: Next.js 16.2, React 19, TypeScript, Tailwind 4, Supabase, Claude AI, Verc
 
 ## Session 8 Deliverables (suggested)
 
-### P0 — Complete Tink Open Banking testing
-Fix the redirect URI configuration: use a stable Vercel production URL or custom domain. Add it to Tink Console. Test the full flow: connect → bank selection → callback → Q&A. May need to reinstate the auth-code flow once the redirect URI works (the no-auth-code flow may not return enough user context).
+### P0 — Journey redesign: bank-first workflow planning
+Now that Tink Open Banking is working end-to-end, the UX journey assumptions need pressure-testing. The current flow is upload-first (PDF → AI → Q&A). With bank connectivity, the natural golden path becomes:
+
+1. **Connect** → bank feed auto-populates 60-70% of the financial picture in seconds
+2. **Review** → confirm/correct what the bank data found
+3. **Share** → "ready for first mediation conversation" (draft fidelity)
+4. **Evidence** → upload specific documents to fill gaps for formal disclosure (evidenced fidelity)
+
+This session should produce a revised spec or spec amendment covering:
+- Which fidelity level does bank data alone achieve? (Draft — enough for first conversation)
+- What's the minimal document set to reach Evidenced? (Pension CETVs, property valuations, mortgage statements, payslips)
+- How does the hero panel flow change? (Connect-first with upload as the evidence layer)
+- How do section cards communicate "bank data found this, but formal disclosure needs X"?
+- Does the summary/todo system need reworking to guide users from Draft → Evidenced?
+- How does the lozenge system adapt? (Bank-connected lozenges vs document-uploaded lozenges)
+
+Reference: `docs/v2/v2-desk-research-technology.md` (section 2: Open Banking), fidelity model in `src/types/hub.ts`, existing UX patterns in session 6-7 handoffs.
 
 ### P1 — Spec 14 wizard flows
 Wire the manual input stubs: `openManualInput`, `openSectionReview`, `addSection`. Start with property, pensions, and debts wizards — these are the sections most likely to need manual input when no document is uploaded.
