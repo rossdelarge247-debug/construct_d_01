@@ -92,6 +92,7 @@ export interface FinancialItem {
   confidence: ConfidenceLevel
   sourceDocumentId: string | null
   sourceDescription: string | null
+  formECategory: string | null  // Form E budget category for grouping (e.g. "Vehicle costs", "Healthcare")
   isInherited: boolean
   isPreMarital: boolean
   asAtDate: string | null

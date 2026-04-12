@@ -756,6 +756,54 @@ const ANSWER_TO_SECTION: Record<string, SectionKey> = {
 // Answers that indicate "own company" — triggers business section + captures company name
 const OWN_COMPANY_ANSWERS = new Set(['own_company_dividends', 'own_company_salary', 'own_company'])
 
+// Maps answers to Form E category labels for section card grouping
+const ANSWER_TO_FORM_E_CATEGORY: Record<string, string> = {
+  mortgage: 'Mortgage',
+  rent: 'Housing',
+  employment: 'Employment income',
+  own_company_dividends: 'Dividends',
+  own_company_salary: 'Employment income',
+  benefits: 'Benefits',
+  rental: 'Rental income',
+  pension_income: 'Pension income',
+  maintenance_received: 'Maintenance received',
+  investment_return: 'Investment income',
+  pension_contribution: 'Pensions',
+  workplace: 'Pensions',
+  loan_repayment: 'Loan repayments',
+  child_maintenance: 'Child maintenance',
+  childcare: 'Childcare',
+  car_insurance: 'Car — insurance',
+  home_insurance: 'Insurance',
+  life_insurance: 'Insurance',
+  healthcare: 'Healthcare',
+  dental: 'Healthcare / dental',
+  vehicle: 'Vehicle costs',
+  leisure: 'Personal / leisure',
+  education: 'Children / education',
+  legal: 'Legal costs',
+  phone: 'Phone / communications',
+  broadband: 'Broadband / TV',
+  subscription: 'Subscriptions',
+  pets: 'Pet costs',
+  household: 'Household maintenance',
+  // Form E category selector values
+  housing: 'Housing',
+  council_tax: 'Council tax',
+  gas: 'Gas', electricity: 'Electricity', water: 'Water',
+  food: 'Food / groceries',
+  car_fuel: 'Car — fuel', car_tax_mot: 'Car — tax / MOT', car_maintenance: 'Car — maintenance',
+  public_transport: 'Public transport',
+  school_fees: 'School fees / activities',
+  subscriptions: 'Subscriptions',
+  eating_out: 'Eating out',
+  personal: 'Personal',
+  gifts: 'Gifts',
+  savings_investments: 'Savings / investments',
+  loan_repayments: 'Loan repayments',
+  credit_card_payments: 'Credit card payments',
+}
+
 /**
  * When a pre-created financial item exists, refine its section/confidence based on the answer.
  */
@@ -826,6 +874,7 @@ function createItemFromAnswer(
     sourceDescription: sourceName
       ? `From ${sourceName}: ${question.questionText.substring(0, 60)}`
       : `From question: ${question.questionText.substring(0, 60)}`,
+    formECategory: ANSWER_TO_FORM_E_CATEGORY[answer] || null,
     isInherited: false,
     isPreMarital: answer === 'pre_marital',
     asAtDate: now,

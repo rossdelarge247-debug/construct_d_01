@@ -62,9 +62,7 @@ function SectionCard({ section, index, onManualInput, onReview }: SectionCardPro
               </p>
             )}
 
-            {section.items.map((item) => (
-              <AnimatedItem key={item.id} item={item} />
-            ))}
+            <GroupedItems items={section.items} />
 
             {section.evidenceSummary && (
               <p className="mt-2 text-xs text-ink-tertiary">{section.evidenceSummary}</p>
@@ -84,6 +82,100 @@ function SectionCard({ section, index, onManualInput, onReview }: SectionCardPro
             Nothing to show yet, upload your evidence to quickly build your picture
           </p>
         )}
+      </div>
+    </div>
+  )
+}
+
+// ═══ Form E category grouping ═══
+// Groups items by formECategory. Ungrouped items (null category or single items) render flat.
+// Groups of 2+ items render as a collapsible category header with a total.
+
+interface CategoryGroup {
+  category: string
+  items: FinancialItem[]
+  total: number
+  period: 'monthly' | 'annual' | 'total' | null
+}
+
+function groupItemsByCategory(items: FinancialItem[]): { groups: CategoryGroup[]; ungrouped: FinancialItem[] } {
+  const categoryMap = new Map<string, FinancialItem[]>()
+  const ungrouped: FinancialItem[] = []
+
+  for (const item of items) {
+    if (item.formECategory) {
+      const existing = categoryMap.get(item.formECategory)
+      if (existing) {
+        existing.push(item)
+      } else {
+        categoryMap.set(item.formECategory, [item])
+      }
+    } else {
+      ungrouped.push(item)
+    }
+  }
+
+  const groups: CategoryGroup[] = []
+  for (const [category, groupItems] of categoryMap) {
+    if (groupItems.length === 1) {
+      // Single item in category — render flat, not as a group
+      ungrouped.push(groupItems[0])
+    } else {
+      const total = groupItems.reduce((sum, i) => sum + (i.value ?? 0), 0)
+      // Use the most common period in the group
+      const periods = groupItems.map((i) => i.period).filter(Boolean)
+      const period = periods.length > 0 ? periods[0] : null
+      groups.push({ category, items: groupItems, total, period })
+    }
+  }
+
+  return { groups, ungrouped }
+}
+
+function GroupedItems({ items }: { items: FinancialItem[] }) {
+  if (items.length === 0) return null
+
+  const { groups, ungrouped } = groupItemsByCategory(items)
+
+  return (
+    <>
+      {groups.map((group) => (
+        <CategoryGroupCard key={group.category} group={group} />
+      ))}
+      {ungrouped.map((item) => (
+        <AnimatedItem key={item.id} item={item} />
+      ))}
+    </>
+  )
+}
+
+function CategoryGroupCard({ group }: { group: CategoryGroup }) {
+  const animatedTotal = useCountUp(group.total)
+
+  return (
+    <div className="mt-2 animate-value-enter">
+      <div className="flex items-baseline justify-between">
+        <p className="text-sm font-semibold text-ink">
+          {group.category}:{' '}
+          <span className="tabular-nums">
+            {formatAnimatedValue(animatedTotal, group.period)}
+          </span>
+        </p>
+        <span className="text-xs text-ink-tertiary">
+          {group.items.length} items
+        </span>
+      </div>
+      <div className="ml-3 border-l-2 border-grey-100 pl-3 mt-1">
+        {group.items.map((item) => (
+          <div key={item.id} className="mt-1">
+            <p className="text-xs text-ink-secondary">
+              {item.label}:{' '}
+              <span className="tabular-nums">
+                {item.value !== null ? formatAnimatedValue(item.value, item.period) : 'Unknown'}
+              </span>
+            </p>
+          </div>
+        ))}
       </div>
     </div>
   )
