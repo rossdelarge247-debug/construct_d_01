@@ -440,11 +440,11 @@ function TaskRow({ task, delay }: { task: GeneratedTask; delay: number }) {
         <button
           className="shrink-0 px-4 py-2 text-[13px] font-medium text-white transition-colors active:scale-[0.98]"
           style={{
-            backgroundColor: 'var(--color-ink)',
+            backgroundColor: 'var(--color-red-500)',
             borderRadius: 'var(--radius-card)',
           }}
-          onMouseEnter={(e) => (e.currentTarget.style.opacity = '0.9')}
-          onMouseLeave={(e) => (e.currentTarget.style.opacity = '1')}
+          onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = 'var(--color-red-600)')}
+          onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = 'var(--color-red-500)')}
         >
           {task.actionLabel}
         </button>
@@ -476,11 +476,11 @@ function SharingTaskRow({ label, actionLabel }: { label: string; actionLabel: st
       <button
         className="shrink-0 px-4 py-2 text-[13px] font-medium text-white transition-colors active:scale-[0.98]"
         style={{
-          backgroundColor: 'var(--color-ink)',
+          backgroundColor: 'var(--color-red-500)',
           borderRadius: 'var(--radius-card)',
         }}
-        onMouseEnter={(e) => (e.currentTarget.style.opacity = '0.9')}
-        onMouseLeave={(e) => (e.currentTarget.style.opacity = '1')}
+        onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = 'var(--color-red-600)')}
+        onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = 'var(--color-red-500)')}
       >
         {actionLabel}
       </button>
@@ -509,11 +509,11 @@ function UploadTaskRow({ task, index }: { task: GeneratedTask; index: number }) 
       <button
         className="shrink-0 flex items-center gap-1.5 px-4 py-2 text-[13px] font-medium text-white transition-colors active:scale-[0.98]"
         style={{
-          backgroundColor: 'var(--color-ink)',
+          backgroundColor: 'var(--color-red-500)',
           borderRadius: 'var(--radius-card)',
         }}
-        onMouseEnter={(e) => (e.currentTarget.style.opacity = '0.9')}
-        onMouseLeave={(e) => (e.currentTarget.style.opacity = '1')}
+        onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = 'var(--color-red-600)')}
+        onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = 'var(--color-red-500)')}
       >
         <Upload size={14} />
         Upload
