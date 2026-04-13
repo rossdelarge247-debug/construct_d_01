@@ -23,7 +23,7 @@ function SourceBadge({ variant, bankName }: { variant: BadgeVariant; bankName?: 
         color: variant === 'bank' ? 'var(--color-green-600)' : 'var(--color-amber-600)',
       }}
     >
-      {variant === 'bank' ? `${bankName ?? 'Bank'} confirmed` : 'Your estimate'}
+      {variant === 'bank' ? `${bankName ?? 'Bank'} confirmed` : 'Self disclosed'}
     </span>
   )
 }
