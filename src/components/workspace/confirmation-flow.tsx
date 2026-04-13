@@ -211,9 +211,12 @@ export function ConfirmationFlow({
           >
             <div className="mt-3 ml-7 space-y-2">
               {completedSections.map((s: SectionSummaryData) => (
-                <div key={s.sectionKey} className="flex items-center gap-2 text-[13px] text-ink-secondary">
-                  <Check size={13} className="text-green-600 shrink-0" />
-                  <span>{s.accordionLabel}</span>
+                <div key={s.sectionKey} className="flex items-center justify-between gap-2 text-[13px]">
+                  <div className="flex items-center gap-2 text-ink-secondary">
+                    <Check size={13} className="text-green-600 shrink-0" />
+                    <span>{s.accordionLabel}</span>
+                  </div>
+                  <button className="text-blue-600 hover:underline shrink-0">Edit</button>
                 </div>
               ))}
             </div>
@@ -448,19 +451,6 @@ function FinalSummary({
 }) {
   return (
     <div className="animate-fade-in">
-      <div className="mb-6 space-y-2">
-        {completedSections.map((s: SectionSummaryData, i: number) => (
-          <div
-            key={s.sectionKey}
-            className="flex items-center gap-2 text-[13px] text-ink-secondary animate-fade-in"
-            style={{ animationDelay: `${i * 80}ms`, animationFillMode: 'both' }}
-          >
-            <Check size={13} className="text-green-600 shrink-0" />
-            <span>{s.accordionLabel}</span>
-          </div>
-        ))}
-      </div>
-
       <p className="text-[12px] font-semibold text-ink-tertiary uppercase tracking-wider mb-2">
         End of the beginning
       </p>
