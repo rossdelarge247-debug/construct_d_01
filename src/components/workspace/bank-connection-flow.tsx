@@ -296,24 +296,26 @@ function TinkModal({
   onCancel: () => void
 }) {
   const [tinkUrl, setTinkUrl] = useState<string | null>(null)
-  const [loading, setLoading] = useState(false)
+  const [loading, setLoading] = useState(true)
+  const [tinkAvailable, setTinkAvailable] = useState(false)
   const iframeRef = useRef<HTMLIFrameElement>(null)
 
   // Fetch Tink Link URL on mount
   useEffect(() => {
     let cancelled = false
-    setLoading(true)
 
     fetch('/api/bank/connect', { method: 'POST' })
       .then((res) => res.json())
       .then((data) => {
-        if (!cancelled && data.url) {
+        if (cancelled) return
+        if (data.url && !data.error) {
           setTinkUrl(data.url)
+          setTinkAvailable(true)
         }
         setLoading(false)
       })
       .catch(() => {
-        setLoading(false)
+        if (!cancelled) setLoading(false)
       })
 
     return () => { cancelled = true }
@@ -323,7 +325,6 @@ function TinkModal({
   useEffect(() => {
     function handleMessage(event: MessageEvent) {
       if (event.data?.type === 'tink-complete') {
-        // Store results for the hub to pick up
         try {
           sessionStorage.setItem('pendingBankData', JSON.stringify(event.data.results))
         } catch { /* ignore storage errors */ }
@@ -346,9 +347,16 @@ function TinkModal({
       <div className="w-full max-w-md bg-white rounded-xl shadow-lg p-5 sm:p-8 animate-modal-appear">
         <h3 className="text-lg font-bold text-ink mb-2">Connect your bank</h3>
 
-        {/* Iframe area — shows Tink Link or placeholder */}
+        {/* Iframe area — real Tink Link or loading state */}
         <div className="h-80 bg-grey-50 rounded-lg flex items-center justify-center mb-6 overflow-hidden">
-          {tinkUrl ? (
+          {loading ? (
+            <div className="text-center">
+              <div className="h-1 w-24 bg-grey-100 rounded-full overflow-hidden mx-auto mb-3">
+                <div className="h-full w-1/3 bg-ink rounded-full animate-shimmer" />
+              </div>
+              <span className="text-ink-tertiary text-sm">Preparing secure connection...</span>
+            </div>
+          ) : tinkUrl ? (
             <iframe
               ref={iframeRef}
               src={tinkUrl}
@@ -357,22 +365,35 @@ function TinkModal({
               sandbox="allow-scripts allow-same-origin allow-forms allow-popups allow-top-navigation"
             />
           ) : (
-            <span className="text-ink-tertiary text-sm">
-              {loading ? 'Preparing secure connection...' : 'Tink Link drop-in area'}
-            </span>
+            <div className="text-center px-6">
+              <p className="text-sm text-ink-secondary mb-1">
+                Open Banking is not configured yet.
+              </p>
+              <p className="text-xs text-ink-tertiary">
+                Tink credentials need to be added to connect a real bank account.
+              </p>
+            </div>
           )}
         </div>
 
         <div className="flex gap-3">
-          <button
-            onClick={onComplete}
-            className="flex-1 py-3 bg-ink text-white text-sm font-semibold rounded-md hover:opacity-90 transition-opacity active:scale-[0.98]"
-          >
-            Simulate connection
-          </button>
+          {/* In production: user completes in iframe, this area just has Cancel.
+              Without Tink configured: show demo button to test the rest of the flow. */}
+          {!tinkAvailable && !loading && (
+            <button
+              onClick={onComplete}
+              className="flex-1 py-3 bg-ink text-white text-sm font-semibold rounded-md hover:opacity-90 transition-opacity active:scale-[0.98]"
+            >
+              Continue with demo data
+            </button>
+          )}
           <button
             onClick={onCancel}
-            className="px-5 py-3 text-sm font-medium text-ink-secondary border border-grey-100 rounded-md hover:bg-grey-50 transition-colors"
+            className={`py-3 text-sm font-medium rounded-md transition-colors ${
+              tinkAvailable
+                ? 'flex-1 bg-grey-50 text-ink-secondary hover:bg-grey-100'
+                : 'px-5 text-ink-secondary border border-grey-100 hover:bg-grey-50'
+            }`}
           >
             Cancel
           </button>
