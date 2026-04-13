@@ -1,125 +1,118 @@
-# Session 9 Context Block
+# Session 10 Context Block
 
 Product: **Decouple** — financial disclosure workspace for UK divorce (Form E replacement).
 Stack: Next.js 16.2, React 19, TypeScript, Tailwind 4, Supabase, Claude AI, Vercel Pro.
+Deployment: Vercel — preview deployments per branch, production at `construct-dev.vercel.app`.
 
-## CRITICAL: Read before writing any code
+## What session 9 accomplished
 
-**Session 8 was a major design session.** 30 wireframes were reviewed. The entire UX architecture has changed. Before writing code, you MUST read:
+**Foundation build — ~960 lines changed across 9 files.**
 
-1. **Specs 24-25** (`docs/workspace-spec/24-wireframe-spec-part1.md` and `25-wireframe-spec-part2.md`) — screen-by-screen wireframe spec. Every interaction, every state, every copy pattern. **Implement these exactly.**
-2. **Spec 26** (`docs/workspace-spec/26-transitions-animations.md`) — every transition, animation, and micro-interaction. **These are not optional.**
-3. **Spec 22** (`docs/workspace-spec/22-confirmation-flow-tree.md`) — the decision logic for every Form E section.
-4. **CLAUDE.md** — updated with visual direction (Airbnb + Emma), wireframe fidelity rules, new product rules.
+New components built:
+- `WelcomeCarousel` (screens 1a-1c) — 3-slide onboarding with fade transitions (200ms) and segmented progress bar (300ms)
+- `TaskListHome` (screen 2a) — three-phase task list with first-time and post-connection states
+- `BankConnectionFlow` (screens 3, 3b-3e) — loader → dim overlay → Tink modal → progressive reveal → completion
+- `TinkModal` — iframe-based Tink Link integration with postMessage callback; graceful fallback when credentials not configured
 
-**The user may reshare specific wireframe images** during the session for reference. Always defer to the wireframes over the text specs if there's any ambiguity.
+New types added to `src/types/hub.ts`:
+- `Phase`, `WorkspaceView`, `BankConnectionPhase`, `ConnectedAccount`, `RevealItem`, `TaskItem`, `SectionConfirmation`, `WorkspaceState`
 
-## What session 8 accomplished
+Workspace page rewritten:
+- Flow state machine: carousel → task_list → bank_connection → financial_summary
+- Old hub components (hero panel, discovery flow, etc.) bypassed but preserved
 
-**Planning only — no code changes.**
+Tink integration fixed:
+- Connect route now uses authorization grant (not delegate) with correct Tink Link scopes
+- Callback route supports both iframe (postMessage) and redirect modes
+- Tested live on Vercel — Tink Link iframe loads and connects to real bank data
 
-7 new spec documents:
-- Spec 20: Bank-first journey redesign (flow, hero panel revision)
-- Spec 21: Evidence model (what bank data proves per Form E section)
-- Spec 22: Confirmation flow tree (complete decision tree for all sections)
-- Spec 23: Post-confirmation gap summary (what's proved vs what needs docs)
-- Spec 24: Wireframe spec part 1 (carousel, task list, bank connection, reveal)
-- Spec 25: Wireframe spec part 2 (confirmation flow, summaries, financial hub, task list)
-- Spec 26: Transitions and animations (every state change, timing, easing)
+CSS animations added per spec 26:
+- fadeIn, slideInLeft, modalAppear, shimmer
+- `prefers-reduced-motion` fallback: all animations instant
 
-Updated CLAUDE.md with:
-- Visual direction: Airbnb colour palette/minimalism + Emma IxD/forms
-- Wireframe fidelity rule: implement as designed, do not reinterpret
-- "Connect-first, confirm-by-exception" replaces "Upload-first, review-by-exception"
-- "Show, don't ask" principle
-- "Delight matters" — transitions are not optional
+Mobile responsiveness pass:
+- Stacked layouts on narrow viewports
+- Responsive padding (p-5 mobile, p-8 desktop)
+- Responsive graphic heights
 
-## Architecture changes from wireframes
+**Quality checkpoint results (all passed):**
+- [x] Can navigate: carousel → task list → bank connect → reveal → completion
+- [x] Transitions match spec 26 timings
+- [x] Tink opens in modal, not redirect (tested live on Vercel)
+- [x] Responsive on mobile
+- [x] `prefers-reduced-motion` fallbacks work
 
-The wireframes introduce a fundamentally new page architecture:
+## Current state of the codebase
 
-| Old (sessions 1-7) | New (wireframes) |
-|---|---|
-| Hero panel as primary component | Task list as home page |
-| 8-state hero panel state machine | Section-by-section confirmation within task list |
-| Static lozenges from config | Dynamic task list from bank data analysis |
-| Upload-first flow | Connect-first flow |
-| Single hub page | Task list home + financial summary sub-page |
-| Fidelity labels | Three-phase model (Preparation → Sharing → Finalisation) |
+**What's real:**
+- Full navigation skeleton end-to-end
+- Tink iframe integration (real bank connections work)
+- All spec 26 animations for carousel, bank connection, and reveal
 
-**Components to retire:** `hero-panel.tsx`, `evidence-lozenge.tsx`, `discovery-flow.tsx`, `fidelity-label.tsx`
+**What's mock/placeholder:**
+- Reveal tick items use hardcoded wireframe data — not wired to Tink transformer output yet
+- Completion screen accounts are mock data
+- Task list post-connection is a static placeholder
+- Financial summary is a placeholder page
+- Confirmation flow does not exist yet
 
-**Components to build:**
-- `TaskListHome` — three-phase task list (screens 2a, 2j)
-- `WelcomeCarousel` — onboarding slides (screens 1a-1c)
-- `BankConnectionFlow` — loader, dim, modal, reveal (screens 3, 3b-3e)
-- `ConfirmationFlow` — section-by-section Q&A within task list frame (screens 2b-2i)
-- `SectionMiniSummary` — per-section summary with gap messages (screens 2d-a/b/c)
-- `FinancialSummary` — full financial picture with source badges (screen 3a)
+**Old components still present but unused:**
+- `src/components/hub/hero-panel.tsx` — bypassed, not imported
+- `src/components/hub/discovery-flow.tsx` — bypassed
+- `src/components/hub/evidence-lozenge.tsx` — bypassed
+- `src/components/hub/fidelity-label.tsx` — bypassed
+- `src/hooks/use-hub.ts` — not imported by new workspace page
 
-**Types to update:**
-- Retire `HeroPanelState` — replace with `ConfirmationSection` and `Phase`
-- Add `evidenceSource: 'bank_connection' | 'self_disclosed' | 'document'` to `FinancialItem`
-- Add `TaskItem`, `Phase`, `SectionConfirmation` types
-- Update `HubState` with `completedSections`, `currentSection`, `phase`
+## Session 10 deliverables
 
-## Three-session build plan
+### Goal: Confirmation flow + financial summary with real data
 
-### Session 9 — Foundation (this session)
-**Goal:** New page structure running with placeholders. The app navigates the full flow skeleton.
+**Priority order:**
 
-Tasks:
-1. New types (`TaskItem`, `Phase`, `SectionConfirmation`, updated `FinancialItem`)
-2. `WelcomeCarousel` component (screens 1a-1c)
-3. `TaskListHome` component (screen 2a first-time state)
-4. `BankConnectionFlow` component (screens 3, 3b-3e) — switch Tink to iframe/drop-in mode
-5. Reveal animation (screen 3d) — progressive tick list
-6. Page routing: task list as home, financial summary as sub-route
+1. **Wire reveal to real Tink data** — replace mock `MOCK_REVEAL_ITEMS` and `MOCK_ACCOUNTS` with data from `tink-transformer.ts`. The reveal should show what the bank connection actually found.
 
-**Quality checkpoint before ending session 9:**
-- [ ] Can navigate: carousel → task list → bank connect → reveal → completion
-- [ ] Transitions match spec 26 timings
-- [ ] Tink opens in modal, not redirect
-- [ ] Responsive on mobile
-- [ ] `prefers-reduced-motion` fallbacks work
+2. **ConfirmationFlow component** (screens 2b-2i) — section-by-section Q&A within the task list frame:
+   - Persistent frame: bank connection row with accordion, progress stepper, locked phases
+   - Income section: salary detection, yes/no branching, gap planting
+   - Property section: strong signal / no signal / ambiguous signal variants
+   - Accounts section: transfer detection
+   - Pensions section: no-signal path
+   - Debts section: no-signal path
+   - Read spec 25 carefully before building
 
-### Session 10 — Confirmation flow + financial summary
-**Goal:** Full confirmation flow working with bank data, financial summary populated.
+3. **SectionMiniSummary component** (screens 2d-a/b/c) — per-section summary:
+   - Tick list of confirmed facts
+   - Inline gap messages (info boxes)
+   - Calculated values (e.g. equity = property value - mortgage)
+   - "This looks correct" / "I need to go back" actions
+   - Accordion expansion to show completed sub-tab
 
-Tasks:
-1. `ConfirmationFlow` component — section-by-section Q&A (screens 2b-2i)
-2. `SectionMiniSummary` component with gap messages (screens 2d-a/b/c)
-3. Accordion expand/collapse behaviour
-4. Progress stepper advancing per section
-5. `FinancialSummary` page with source badges (screen 3a)
-6. Wire confirmation answers to financial summary data
-7. Placeholder cards for spending and debts panels
+4. **Progress stepper** — advances per section, filled segments per spec 26 timing
 
-**Quality checkpoint before ending session 10:**
+5. **FinancialSummary page** (screen 3a) — replace placeholder:
+   - Section cards stacked vertically with stagger animation
+   - Source badges: green (bank connection) / orange (self disclosed)
+   - Calculated values, contextual guidance inline
+   - "+ Add" buttons per section
+   - Back to dashboard link
+
+6. **Placeholder cards** for spending and debts (TBC panels in wireframes)
+
+### Quality checkpoint before ending session 10:
 - [ ] Full flow: carousel → task list → connect → reveal → confirm all sections → summary → financial hub
 - [ ] Source badges (green/orange) render correctly
 - [ ] Accordion expand/collapse animations match spec 26
 - [ ] Mini-summaries show calculated values (equity)
 - [ ] Gap messages appear inline with correct copy
 - [ ] Every "Skip for now" works without breaking the flow
+- [ ] Reveal shows real data from Tink transformer (not mock)
 
-### Session 11 — Task list evolution + visual polish
-**Goal:** Post-connection task list fully dynamic. Visual design pass begins.
+## CRITICAL reads before any code
 
-Tasks:
-1. `TaskListHome` post-connection state (screen 2j) — dynamic task generation from confirmation data
-2. Finalisation section with specific upload tasks
-3. Sharing & collaboration section (placeholder CTAs)
-4. Slot in spending categorisation wireframes (if available by then)
-5. Begin visual design pass: Airbnb palette, Emma IxD patterns
-6. Upload flow within finalisation (if wireframes available)
-
-**Quality checkpoint before ending session 11:**
-- [ ] Task list dynamically generates from bank data + confirmation answers
-- [ ] Gap documents appear as specific upload tasks in Finalisation
-- [ ] Visual design matches Airbnb/Emma direction
-- [ ] All transitions from spec 26 implemented
-- [ ] Mobile responsive throughout
+1. **Spec 25** (`docs/workspace-spec/25-wireframe-spec-part2.md`) — confirmation flow screens, mini-summaries, financial hub, post-connection task list. **This is the primary spec for session 10.**
+2. **Spec 22** (`docs/workspace-spec/22-confirmation-flow-tree.md`) — decision logic for every Form E section. Drives the confirmation Q&A.
+3. **Spec 26** (`docs/workspace-spec/26-transitions-animations.md`) — sections 5-8 cover confirmation flow, mini-summary, final summary, and financial hub transitions.
+4. **Spec 23** (`docs/workspace-spec/23-post-confirm-gap-summary.md`) — what's proved vs gaps after bank connect. Drives gap messages.
 
 ## Wireframes still pending from user
 
@@ -138,21 +131,23 @@ Tasks:
 3. **Do not reinterpret wireframes** — implement specs 24-25 as written
 4. **Transitions are not optional** — implement spec 26 for every state change
 5. **Never show Form E codes to users** — human-readable labels always
-6. **Tink redirect URIs must be whitelisted** — and now use iframe/drop-in mode
+6. **Tink redirect URIs must be whitelisted** — iframe mode uses postMessage callback
+7. **Reveal mock data must be replaced** — don't ship wireframe placeholder copy as real data
 
 ## Key files
 ```
-docs/workspace-spec/24-wireframe-spec-part1.md — START HERE: screens 1a-3e
-docs/workspace-spec/25-wireframe-spec-part2.md — Screens 2b-2j
-docs/workspace-spec/26-transitions-animations.md — All animations
+src/components/workspace/welcome-carousel.tsx  — Carousel (done)
+src/components/workspace/task-list-home.tsx     — Task list home (done, needs post-connection dynamic state)
+src/components/workspace/bank-connection-flow.tsx — Bank connection + TinkModal + reveal (done, needs real data)
+src/app/workspace/page.tsx                      — Flow state machine orchestrator
+src/app/api/bank/connect/route.ts               — Tink Link auth + URL generation
+src/app/api/bank/callback/route.ts              — Tink callback (iframe postMessage + redirect)
+src/lib/bank/tink-client.ts                     — Tink API client (createTinkLinkAuthCode is the key function)
+src/lib/bank/tink-transformer.ts                — Tink → BankStatementExtraction (wire to reveal)
+src/lib/ai/result-transformer.ts                — Decision trees (drives confirmation Q&A)
+src/types/hub.ts                                — All types (workspace types at top, legacy below)
+src/app/globals.css                             — Animations + prefers-reduced-motion
+docs/workspace-spec/25-wireframe-spec-part2.md  — PRIMARY SPEC for session 10
 docs/workspace-spec/22-confirmation-flow-tree.md — Decision logic
-docs/workspace-spec/23-post-confirm-gap-summary.md — Gap analysis reference
-docs/workspace-spec/20-bank-first-journey.md    — Journey overview
-docs/workspace-spec/21-evidence-model.md        — Evidence model
-src/hooks/use-hub.ts                            — To be refactored (retire hero panel state)
-src/components/hub/hero-panel.tsx                — To be retired
-src/lib/bank/tink-client.ts                     — Tink API (needs iframe mode)
-src/lib/bank/tink-transformer.ts                — Tink → BankStatementExtraction
-src/lib/ai/result-transformer.ts                — Decision trees (still valid)
-src/types/hub.ts                                — Types (needs major update)
+docs/workspace-spec/26-transitions-animations.md — Animation timings
 ```

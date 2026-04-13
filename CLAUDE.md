@@ -54,33 +54,37 @@ When the session is ending (user says wrap up, or you hit ~2,000 lines), do thes
 
 ## Branch
 
-Development branch: `claude/decouple-v2-workspace-fX7nK`
+Development branch: `claude/decouple-v2-financial-disclosure-j9xdZ`
+
+## Deployment
+
+Vercel — preview deployments per branch, production at `construct-dev.vercel.app`.
+Tink credentials (`TINK_CLIENT_ID`, `TINK_CLIENT_SECRET`) must be set in Vercel env vars.
+Tink Console must whitelist `https://construct-dev.vercel.app/api/bank/callback` as redirect URI.
 
 ## Key files
 
 ```
 docs/SESSION-CONTEXT.md                    — START HERE every session
-docs/HANDOFF-SESSION-8.md                  — Most recent session retro
-docs/workspace-spec/20-bank-first-journey.md   — Bank-first journey redesign
-docs/workspace-spec/21-evidence-model.md       — Evidence model + gap analysis
-docs/workspace-spec/22-confirmation-flow-tree.md — Complete decision tree for all Form E sections
-docs/workspace-spec/23-post-confirm-gap-summary.md — What's proved vs gaps after bank connect
+docs/HANDOFF-SESSION-9.md                  — Most recent session retro
 docs/workspace-spec/24-wireframe-spec-part1.md — Wireframes: carousel, task list, bank connection, reveal
 docs/workspace-spec/25-wireframe-spec-part2.md — Wireframes: confirmation flow, summaries, financial hub
 docs/workspace-spec/26-transitions-animations.md — Every transition, animation, and micro-interaction
-src/lib/ai/pipeline.ts                     — Two-step AI extraction (Haiku→Sonnet)
-src/lib/ai/result-transformer.ts           — Spec 13 decision trees + spec 19 keyword lookup
-src/lib/ai/extraction-schemas.ts           — Structured output schemas (facts only)
-src/lib/ai/extraction-prompts.ts           — Document-type-specific prompts
-src/hooks/use-hub.ts                       — Hub state, hero panel, dedup, bank data pickup
-src/components/hub/hero-panel.tsx           — 8-state hero panel, connect + upload
-src/app/api/documents/extract/route.ts     — Upload API, 300s maxDuration, dry-run mock
-src/lib/bank/tink-client.ts               — Tink Open Banking API client
-src/lib/bank/tink-transformer.ts          — Tink → BankStatementExtraction
-src/app/api/bank/connect/route.ts         — Generate Tink Link URL
-src/app/api/bank/callback/route.ts        — Handle Tink redirect + transform
+docs/workspace-spec/22-confirmation-flow-tree.md — Complete decision tree for all Form E sections
+docs/workspace-spec/23-post-confirm-gap-summary.md — What's proved vs gaps after bank connect
+src/components/workspace/welcome-carousel.tsx  — Carousel (screens 1a-1c)
+src/components/workspace/task-list-home.tsx     — Task list home (screen 2a)
+src/components/workspace/bank-connection-flow.tsx — Bank connection + TinkModal + reveal (screens 3-3e)
+src/app/workspace/page.tsx                     — Flow state machine orchestrator
+src/app/api/bank/connect/route.ts              — Tink Link auth + URL generation
+src/app/api/bank/callback/route.ts             — Tink callback (iframe postMessage + redirect)
+src/lib/bank/tink-client.ts                    — Tink API client
+src/lib/bank/tink-transformer.ts               — Tink → BankStatementExtraction
+src/lib/ai/result-transformer.ts               — Spec 13 decision trees + spec 19 keyword lookup
+src/lib/ai/extraction-schemas.ts               — Structured output schemas (facts only)
+src/types/hub.ts                               — All types (workspace types at top, legacy below)
+src/app/globals.css                            — Animations + prefers-reduced-motion
 docs/workspace-spec/13-extraction-decision-tree-documents.md — Decision trees per document type
-docs/workspace-spec/18-visual-design-system.md — Visual spec
 ```
 
 ## Information tiers — what to read and when
