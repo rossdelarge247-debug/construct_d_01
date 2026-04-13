@@ -21,19 +21,14 @@ function generatePreparationTasks(
 ): GeneratedTask[] {
   const tasks: GeneratedTask[] = []
 
-  // Pension CETV task — if user has pensions
-  const hasPension = confirmations.some(
-    (c) => c.sectionKey === 'pensions' && c.confirmedFacts.some((f) => f.includes('at least one')),
-  )
-  if (hasPension) {
-    tasks.push({
-      id: 'cetv',
-      label: "Have you applied for your pension CETV yet? (Don\u2019t forget it takes a while)",
-      actionLabel: 'Take action',
-      actionStyle: 'outlined',
-      completed: false,
-    })
-  }
+  // Pension CETV task — always shown (even without pension, it's a prompt to check)
+  tasks.push({
+    id: 'cetv',
+    label: "Have you applied for your pension CETV yet? (Don\u2019t forget it takes a while)",
+    actionLabel: 'Take action',
+    actionStyle: 'outlined',
+    completed: false,
+  })
 
   // Children outline — always shown
   tasks.push({
