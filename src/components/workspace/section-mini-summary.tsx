@@ -11,20 +11,17 @@ interface SectionMiniSummaryProps {
 
 export function SectionMiniSummary({ data, onConfirm, onGoBack }: SectionMiniSummaryProps) {
   return (
-    <div
-      className="animate-fade-in"
-      style={{ willChange: 'opacity, transform' }}
-    >
+    <div className="animate-fade-in" style={{ willChange: 'opacity, transform' }}>
       {/* Section label */}
-      <p className="text-xs font-semibold text-ink-tertiary uppercase tracking-wider mb-1">
+      <p className="text-[12px] font-semibold text-ink-tertiary uppercase tracking-wider mb-2">
         {data.sectionLabel}
       </p>
 
       {/* Heading */}
-      <h3 className="text-xl font-bold text-ink mb-5">{data.heading}</h3>
+      <h3 className="text-[22px] font-bold text-ink mb-6">{data.heading}</h3>
 
       {/* Confirmed facts */}
-      <div className="space-y-3">
+      <div className="space-y-4">
         {data.facts.map((fact, i) => (
           <div
             key={i}
@@ -34,7 +31,6 @@ export function SectionMiniSummary({ data, onConfirm, onGoBack }: SectionMiniSum
               animationFillMode: 'both',
             }}
           >
-            {/* Fact row */}
             <div className="flex items-start gap-2.5">
               <div className="w-5 h-5 mt-0.5 rounded-full bg-green-600 flex items-center justify-center shrink-0">
                 <Check size={11} className="text-white" strokeWidth={3} />
@@ -42,17 +38,18 @@ export function SectionMiniSummary({ data, onConfirm, onGoBack }: SectionMiniSum
               <span className="text-[15px] text-ink">{fact.label}</span>
             </div>
 
-            {/* Gap message (spec 25: info box beneath relevant fact) */}
             {fact.gapMessage && (
               <div
-                className="ml-7 mt-2 flex items-start gap-2 rounded-md bg-blue-50 px-3 py-2.5 animate-fade-in"
+                className="ml-7 mt-2 flex items-start gap-2.5 px-4 py-3 animate-fade-in"
                 style={{
+                  backgroundColor: 'var(--color-blue-50)',
+                  borderRadius: 'var(--radius-md)',
                   animationDelay: `${i * 150 + 100}ms`,
                   animationFillMode: 'both',
                 }}
               >
                 <Info size={14} className="text-blue-600 mt-0.5 shrink-0" />
-                <p className="text-sm text-ink-secondary leading-snug">{fact.gapMessage}</p>
+                <p className="text-[13px] text-ink-secondary leading-snug">{fact.gapMessage}</p>
               </div>
             )}
           </div>
@@ -61,7 +58,7 @@ export function SectionMiniSummary({ data, onConfirm, onGoBack }: SectionMiniSum
 
       {/* Calculated values */}
       {data.calculatedValues && data.calculatedValues.length > 0 && (
-        <div className="mt-4 space-y-2">
+        <div className="mt-5 space-y-3">
           {data.calculatedValues.map((cv, i) => (
             <div key={i} className="flex items-start gap-2.5">
               <div className="w-5 h-5 mt-0.5 rounded-full bg-green-600 flex items-center justify-center shrink-0">
@@ -74,18 +71,24 @@ export function SectionMiniSummary({ data, onConfirm, onGoBack }: SectionMiniSum
       )}
 
       {/* Actions */}
-      <div className="mt-6 flex items-center gap-4">
+      <div className="mt-8 flex items-center gap-4">
         <button
           onClick={onConfirm}
-          className="px-5 py-2.5 bg-ink text-white text-sm font-semibold rounded-md hover:opacity-90 transition-opacity active:scale-[0.98]"
+          className="px-8 py-3.5 text-white text-[15px] font-semibold transition-colors active:scale-[0.98]"
+          style={{
+            backgroundColor: 'var(--color-red-500)',
+            borderRadius: 'var(--radius-card)',
+          }}
+          onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = 'var(--color-red-600)')}
+          onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = 'var(--color-red-500)')}
         >
           This looks correct
         </button>
         <button
           onClick={onGoBack}
-          className="text-sm text-ink-tertiary hover:text-ink-secondary transition-colors"
+          className="text-[13px] text-ink-tertiary hover:text-ink-secondary transition-colors"
         >
-          I need to go back and review these again
+          Go back and review
         </button>
       </div>
     </div>

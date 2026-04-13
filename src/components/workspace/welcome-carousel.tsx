@@ -9,21 +9,19 @@ interface CarouselSlide {
 
 const SLIDES: CarouselSlide[] = [
   {
-    headline: 'Connect to your bank and be financially disclosed in minutes',
+    headline: 'Connect your bank and be disclosed in minutes',
     supporting:
-      'We use secure Open Banking to read your transactions — the same technology used by every major bank in the UK.',
+      'Secure Open Banking reads your transactions — the same technology used by every major UK bank.',
   },
   {
-    headline:
-      'Once you have connected to your bank account we will process and populate your financial disclosure (Form E)',
+    headline: 'We process and populate your financial disclosure automatically',
     supporting:
       'No typing, no hunting for paperwork. We do the heavy lifting so you can focus on what matters.',
   },
   {
-    headline:
-      'About 80% of the data in your bank account is enough to get most people through mediation',
+    headline: '80% of bank data is enough to get most people through mediation',
     supporting:
-      'You can always add more later. But most people are surprised how far bank data alone gets them.',
+      'You can always add more later. Most people are surprised how far bank data alone gets them.',
   },
 ]
 
@@ -41,7 +39,6 @@ export function WelcomeCarousel({ onComplete }: WelcomeCarouselProps) {
     if (transitioning) return
     setTransitioning(true)
 
-    // Fade out, then swap content and fade in (spec 26: 200ms each, 50ms overlap)
     setTimeout(() => {
       if (currentStep < SLIDES.length - 1) {
         setCurrentStep((s) => s + 1)
@@ -55,10 +52,16 @@ export function WelcomeCarousel({ onComplete }: WelcomeCarouselProps) {
   const slide = SLIDES[currentStep]
 
   return (
-    <div className="flex items-start justify-center pt-12 px-6">
-      <div className="w-full max-w-[560px] bg-white rounded-lg border border-grey-100 shadow-sm overflow-hidden">
+    <div className="flex items-start justify-center pt-4">
+      <div
+        className="w-full max-w-[var(--content-narrow)] bg-white overflow-hidden"
+        style={{
+          borderRadius: 'var(--radius-card)',
+          boxShadow: 'var(--shadow-card)',
+        }}
+      >
         {/* Progress indicator — segmented bar */}
-        <div className="flex gap-1.5 px-6 pt-6">
+        <div className="flex gap-1.5 px-8 pt-8">
           {Array.from({ length: TOTAL_SEGMENTS }).map((_, i) => (
             <div
               key={i}
@@ -68,7 +71,7 @@ export function WelcomeCarousel({ onComplete }: WelcomeCarouselProps) {
                 className="h-full rounded-full transition-all"
                 style={{
                   width: i <= currentStep ? '100%' : '0%',
-                  backgroundColor: i <= currentStep ? 'var(--color-ink)' : 'transparent',
+                  backgroundColor: i <= currentStep ? 'var(--color-red-500)' : 'transparent',
                   transitionDuration: '300ms',
                   transitionTimingFunction: 'ease',
                 }}
@@ -77,30 +80,39 @@ export function WelcomeCarousel({ onComplete }: WelcomeCarouselProps) {
           ))}
         </div>
 
-        {/* Graphic placeholder — shorter on mobile */}
-        <div className="mx-6 mt-6 rounded-md bg-grey-50 flex items-center justify-center h-40 sm:h-[220px]">
+        {/* Graphic placeholder */}
+        <div
+          className="mx-8 mt-6 bg-grey-50 flex items-center justify-center h-40 sm:h-[220px]"
+          style={{ borderRadius: 'var(--radius-md)' }}
+        >
           <span className="text-ink-tertiary text-sm">Illustration</span>
         </div>
 
-        {/* Content — fades per spec 26 */}
+        {/* Content */}
         <div
-          className="px-6 pt-6 pb-8 transition-opacity"
+          className="px-8 pt-8 pb-10 transition-opacity"
           style={{
             opacity: transitioning ? 0 : 1,
             transitionDuration: '200ms',
             transitionTimingFunction: transitioning ? 'ease-out' : 'ease-in',
           }}
         >
-          <h2 className="text-xl font-bold text-ink leading-snug">
+          <h2 className="text-[22px] font-bold text-ink leading-snug">
             {slide.headline}
           </h2>
-          <p className="mt-3 text-sm text-ink-secondary leading-relaxed">
+          <p className="mt-3 text-[15px] text-ink-secondary leading-relaxed">
             {slide.supporting}
           </p>
 
           <button
             onClick={advance}
-            className="mt-6 px-6 py-3 bg-ink text-white text-sm font-semibold rounded-md hover:opacity-90 transition-opacity active:scale-[0.98] transition-transform"
+            className="mt-8 w-full sm:w-auto px-8 py-3.5 text-white text-[15px] font-semibold transition-colors active:scale-[0.98] transition-transform"
+            style={{
+              backgroundColor: 'var(--color-red-500)',
+              borderRadius: 'var(--radius-card)',
+            }}
+            onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = 'var(--color-red-600)')}
+            onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = 'var(--color-red-500)')}
           >
             {currentStep < SLIDES.length - 1 ? 'Next' : 'Get started'}
           </button>

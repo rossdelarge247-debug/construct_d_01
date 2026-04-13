@@ -69,9 +69,13 @@ export default function WorkspacePage() {
 
   return (
     <div className="min-h-screen bg-off-white">
-      <TitleBar {...titleProps} />
+      <TitleBar
+        {...titleProps}
+        showBack={view === 'financial_summary'}
+        onBack={() => setView('task_list')}
+      />
 
-      <main className="mx-auto max-w-[var(--content-max-width)] py-2">
+      <main className="mx-auto max-w-[var(--content-max-width)] px-6 py-8">
         {/* Welcome carousel (screens 1a-1c) */}
         {view === 'carousel' && (
           <WelcomeCarousel onComplete={handleCarouselComplete} />

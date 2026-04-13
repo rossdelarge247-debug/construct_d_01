@@ -41,13 +41,11 @@ export function ConfirmationFlow({
   const accountCount = connectedAccounts.length
   const bankName = connectedAccounts[0]?.bankName ?? 'your bank'
 
-  // Generate steps for current section
   const allSteps = useMemo(
     () => generateSectionSteps(currentSectionKey, extractions),
     [currentSectionKey, extractions],
   )
 
-  // Filter visible steps based on conditional showWhen
   const visibleSteps = useMemo(() => {
     return allSteps.filter((step: ConfirmationStep) => {
       if (!step.showWhen) return true
@@ -57,7 +55,6 @@ export function ConfirmationFlow({
 
   const currentStep = visibleSteps[stepIndex] as ConfirmationStep | undefined
 
-  // Section questions complete — open accordion to show new tab, wait for user
   const handleSectionQuestionsComplete = useCallback(() => {
     const summary = generateSectionSummary(currentSectionKey, answers, extractions)
     setCompletedSections((prev: SectionSummaryData[]) => [...prev, summary])
@@ -65,11 +62,9 @@ export function ConfirmationFlow({
     setPhase('mini_summary')
   }, [currentSectionKey, answers, extractions])
 
-  // Handle answer selection + advance
   const handleNext = useCallback(() => {
     if (!currentStep) return
 
-    // Store answer
     if (currentStep.type === 'question' && selectedOption) {
       setAnswers((prev: Record<string, string>) => ({ ...prev, [currentStep.id]: selectedOption }))
     } else if (currentStep.type === 'input' && inputValue) {
@@ -80,7 +75,6 @@ export function ConfirmationFlow({
       }))
     }
 
-    // Recalculate visible steps after this answer
     const nextAnswers = {
       ...answers,
       ...(currentStep.type === 'question' && selectedOption ? { [currentStep.id]: selectedOption } : {}),
@@ -94,7 +88,6 @@ export function ConfirmationFlow({
 
     const nextStepIndex = stepIndex + 1
     if (nextStepIndex >= nextVisibleSteps.length) {
-      // Section complete — open accordion + show mini-summary
       handleSectionQuestionsComplete()
     } else {
       setStepIndex(nextStepIndex)
@@ -123,32 +116,28 @@ export function ConfirmationFlow({
     setInputValue('')
   }, [currentStep, stepIndex, allSteps, answers, handleSectionQuestionsComplete])
 
-  // Mini-summary confirmed ("This looks correct") — close accordion, advance
   const handleSectionConfirm = useCallback(() => {
     const nextSection = sectionIndex + 1
     if (nextSection >= CONFIRMATION_SECTIONS.length) {
       setPhase('final_summary')
       setAccordionOpen(true)
     } else {
-      // Accordion slides shut → next section question fades in
       setPhase('transitioning')
       setAccordionOpen(false)
       setTimeout(() => {
         setSectionIndex(nextSection)
         setStepIndex(0)
         setPhase('question')
-      }, 300) // wait for accordion collapse animation
+      }, 300)
     }
   }, [sectionIndex])
 
-  // Go back to re-answer section questions
   const handleGoBack = useCallback(() => {
     setStepIndex(0)
     setPhase('question')
     setSelectedOption(null)
   }, [])
 
-  // Final summary — complete
   const handleFinish = useCallback(() => {
     const confirmations: SectionConfirmation[] = completedSections.map((s: SectionSummaryData) => ({
       sectionKey: s.sectionKey,
@@ -160,132 +149,132 @@ export function ConfirmationFlow({
     onComplete(confirmations)
   }, [completedSections, answers, onComplete])
 
-  // Can advance?
   const canAdvance = currentStep?.type === 'confirmation_message'
     || (currentStep?.type === 'question' && selectedOption !== null)
     || (currentStep?.type === 'input' && inputValue.length > 0)
 
   return (
-    <div className="px-6 pt-8">
-      <div className="max-w-[var(--content-max-width)] mx-auto">
-        {/* Header */}
-        <div className="mb-6">
-          <h2 className="text-xl font-bold text-ink">
-            Let&apos;s go through what you just shared with us
-          </h2>
-        </div>
+    <div className="max-w-[var(--content-narrow)] mx-auto">
+      {/* Header */}
+      <div className="mb-8">
+        <h2 className="text-[28px] font-bold text-ink leading-tight">
+          Let&apos;s go through what you shared
+        </h2>
+      </div>
 
-        {/* ═══ Preparation card ═══ */}
-        <div className="bg-white rounded-lg border border-grey-100 overflow-hidden">
-          <div className="px-5 py-3 border-b border-grey-100">
-            <span className="text-xs font-semibold text-ink-secondary uppercase tracking-wider">
-              Preparation
-            </span>
-          </div>
-
-          {/* Bank connection row + accordion */}
-          <div className="px-5 py-4 border-b border-grey-100">
-            <button
-              onClick={() => setAccordionOpen(!accordionOpen)}
-              className="w-full flex items-center justify-between"
-            >
-              <div className="flex items-center gap-2">
-                <div className="w-5 h-5 rounded-full bg-green-600 flex items-center justify-center">
-                  <Check size={12} className="text-white" strokeWidth={3} />
-                </div>
-                <span className="text-[15px] font-medium text-ink">
-                  {accountCount} {bankName} bank account{accountCount !== 1 ? 's' : ''}
-                </span>
-                {accordionOpen
-                  ? <ChevronUp size={16} className="text-ink-tertiary transition-transform" />
-                  : <ChevronDown size={16} className="text-ink-tertiary transition-transform" />
-                }
+      {/* ═══ Preparation card ═══ */}
+      <div
+        className="bg-white overflow-hidden"
+        style={{
+          borderRadius: 'var(--radius-card)',
+          boxShadow: 'var(--shadow-card)',
+        }}
+      >
+        {/* Bank connection row + accordion */}
+        <div className="px-6 py-5" style={{ borderBottom: '1px solid var(--color-grey-100)' }}>
+          <button
+            onClick={() => setAccordionOpen(!accordionOpen)}
+            className="w-full flex items-center justify-between"
+          >
+            <div className="flex items-center gap-2.5">
+              <div className="w-5 h-5 rounded-full bg-green-600 flex items-center justify-center">
+                <Check size={12} className="text-white" strokeWidth={3} />
               </div>
-              <span className="text-xs font-medium text-green-600 bg-green-50 px-2.5 py-1 rounded-full">
-                Connected
+              <span className="text-[15px] font-medium text-ink">
+                {accountCount} {bankName} account{accountCount !== 1 ? 's' : ''}
               </span>
-            </button>
-            <p className="text-xs text-red-600 mt-1 ml-7">
-              This connection lasts for 90 days
-            </p>
-
-            {/* Accordion: completed section sub-tabs */}
-            <div
-              className="overflow-hidden transition-all"
-              style={{
-                maxHeight: accordionOpen ? `${completedSections.length * 40 + 8}px` : '0',
-                opacity: accordionOpen ? 1 : 0,
-                transitionDuration: '300ms',
-                transitionTimingFunction: 'ease-out',
-              }}
+              {accordionOpen
+                ? <ChevronUp size={16} className="text-ink-tertiary transition-transform" />
+                : <ChevronDown size={16} className="text-ink-tertiary transition-transform" />
+              }
+            </div>
+            <span
+              className="text-[11px] font-medium px-2.5 py-1 rounded-full"
+              style={{ backgroundColor: 'var(--color-green-50)', color: 'var(--color-green-600)' }}
             >
-              <div className="mt-3 ml-7 space-y-1.5">
-                {completedSections.map((s: SectionSummaryData) => (
-                  <div key={s.sectionKey} className="flex items-center gap-2 text-sm text-ink-secondary">
-                    <Check size={13} className="text-green-600 shrink-0" />
-                    <span>{s.accordionLabel}</span>
-                  </div>
-                ))}
-              </div>
+              Connected
+            </span>
+          </button>
+          <p className="text-[12px] text-ink-tertiary mt-1 ml-7">
+            This connection lasts for 90 days
+          </p>
+
+          {/* Accordion: completed section sub-tabs */}
+          <div
+            className="overflow-hidden transition-all"
+            style={{
+              maxHeight: accordionOpen ? `${completedSections.length * 40 + 8}px` : '0',
+              opacity: accordionOpen ? 1 : 0,
+              transitionDuration: '300ms',
+              transitionTimingFunction: 'ease-out',
+            }}
+          >
+            <div className="mt-3 ml-7 space-y-2">
+              {completedSections.map((s: SectionSummaryData) => (
+                <div key={s.sectionKey} className="flex items-center gap-2 text-[13px] text-ink-secondary">
+                  <Check size={13} className="text-green-600 shrink-0" />
+                  <span>{s.accordionLabel}</span>
+                </div>
+              ))}
             </div>
           </div>
-
-          {/* Progress stepper */}
-          <div className="px-5 pt-4">
-            <ProgressStepper
-              sections={CONFIRMATION_SECTIONS}
-              currentIndex={sectionIndex}
-              completedCount={completedSections.length}
-            />
-          </div>
-
-          {/* ═══ Question / Mini-summary / Final summary area ═══ */}
-          <div className="px-5 py-6">
-            {phase === 'question' && currentStep && (
-              <QuestionCard
-                step={currentStep}
-                selectedOption={selectedOption}
-                onSelectOption={setSelectedOption}
-                inputValue={inputValue}
-                onInputChange={setInputValue}
-                inputQualifier={inputQualifier}
-                onQualifierChange={setInputQualifier}
-                onNext={handleNext}
-                onSkip={handleSkip}
-                canAdvance={canAdvance}
-              />
-            )}
-
-            {phase === 'mini_summary' && (
-              <SectionMiniSummary
-                data={generateSectionSummary(currentSectionKey, answers, extractions)}
-                onConfirm={handleSectionConfirm}
-                onGoBack={handleGoBack}
-              />
-            )}
-
-            {phase === 'final_summary' && (
-              <FinalSummary
-                completedSections={completedSections}
-                onFinish={handleFinish}
-              />
-            )}
-          </div>
         </div>
 
-        {/* ═══ Locked phases ═══ */}
-        {phase !== 'final_summary' && (
-          <>
-            <LockedPhaseCard label="Sharing & collaboration" />
-            <LockedPhaseCard label="Finalisation" />
-          </>
-        )}
+        {/* Progress stepper */}
+        <div className="px-6 pt-5">
+          <ProgressStepper
+            sections={CONFIRMATION_SECTIONS}
+            currentIndex={sectionIndex}
+            completedCount={completedSections.length}
+          />
+        </div>
+
+        {/* ═══ Question / Mini-summary / Final summary area ═══ */}
+        <div className="px-6 py-8">
+          {phase === 'question' && currentStep && (
+            <QuestionCard
+              step={currentStep}
+              selectedOption={selectedOption}
+              onSelectOption={setSelectedOption}
+              inputValue={inputValue}
+              onInputChange={setInputValue}
+              inputQualifier={inputQualifier}
+              onQualifierChange={setInputQualifier}
+              onNext={handleNext}
+              onSkip={handleSkip}
+              canAdvance={canAdvance}
+            />
+          )}
+
+          {phase === 'mini_summary' && (
+            <SectionMiniSummary
+              data={generateSectionSummary(currentSectionKey, answers, extractions)}
+              onConfirm={handleSectionConfirm}
+              onGoBack={handleGoBack}
+            />
+          )}
+
+          {phase === 'final_summary' && (
+            <FinalSummary
+              completedSections={completedSections}
+              onFinish={handleFinish}
+            />
+          )}
+        </div>
       </div>
+
+      {/* ═══ Locked phases ═══ */}
+      {phase !== 'final_summary' && (
+        <>
+          <LockedPhaseCard label="Sharing & collaboration" />
+          <LockedPhaseCard label="Finalisation" />
+        </>
+      )}
     </div>
   )
 }
 
-// ═══ QuestionCard ═══
+// ═══ QuestionCard — Habito-style radio cards ═══
 
 function QuestionCard({
   step,
@@ -312,107 +301,133 @@ function QuestionCard({
 }) {
   return (
     <div className="animate-fade-in">
-      <p className="text-xs font-semibold text-ink-tertiary uppercase tracking-wider mb-1">
+      <p className="text-[12px] font-semibold text-ink-tertiary uppercase tracking-wider mb-2">
         {step.sectionLabel}
       </p>
-      <h3 className="text-xl font-bold text-ink mb-1">{step.text}</h3>
+      <h3 className="text-[22px] font-bold text-ink leading-snug">{step.text}</h3>
       {step.subtext && (
-        <p className="text-sm text-ink-secondary mb-4">{step.subtext}</p>
+        <p className="text-[13px] text-ink-secondary mt-2 mb-1">{step.subtext}</p>
       )}
 
-      {/* Radio options */}
+      {/* Habito-style radio option cards */}
       {step.options && (
-        <div className="mt-4 space-y-2">
-          {step.options.map((opt) => (
-            <button
-              key={opt.value}
-              onClick={() => onSelectOption(opt.value)}
-              className="w-full text-left px-4 py-3 rounded-md border transition-all"
-              style={{
-                borderColor: selectedOption === opt.value ? 'var(--color-ink)' : 'var(--color-grey-100)',
-                backgroundColor: selectedOption === opt.value ? 'var(--color-grey-50)' : 'white',
-                transitionDuration: '150ms',
-              }}
-            >
-              <div className="flex items-center gap-3">
-                <div
-                  className="w-4 h-4 rounded-full border-2 flex items-center justify-center shrink-0 transition-colors"
-                  style={{
-                    borderColor: selectedOption === opt.value ? 'var(--color-ink)' : 'var(--color-grey-200)',
-                  }}
-                >
-                  {selectedOption === opt.value && (
-                    <div className="w-2 h-2 rounded-full bg-ink" />
-                  )}
+        <div className="mt-6 space-y-2">
+          {step.options.map((opt) => {
+            const isSelected = selectedOption === opt.value
+            return (
+              <button
+                key={opt.value}
+                onClick={() => onSelectOption(opt.value)}
+                className="w-full text-left px-5 py-4 transition-all"
+                style={{
+                  borderRadius: 'var(--radius-card)',
+                  border: `1.5px solid ${isSelected ? 'var(--color-ink)' : 'var(--color-grey-100)'}`,
+                  backgroundColor: isSelected ? 'var(--color-ink)' : 'white',
+                  color: isSelected ? 'white' : 'var(--color-ink)',
+                  transitionDuration: '200ms',
+                  transitionTimingFunction: 'ease',
+                }}
+              >
+                <div className="flex items-center gap-3">
+                  {/* Radio circle */}
+                  <div
+                    className="w-5 h-5 rounded-full flex items-center justify-center shrink-0 transition-all"
+                    style={{
+                      border: isSelected ? '2px solid white' : '2px solid var(--color-grey-200)',
+                      transitionDuration: '200ms',
+                    }}
+                  >
+                    {isSelected && (
+                      <div className="w-2.5 h-2.5 rounded-full bg-white" />
+                    )}
+                  </div>
+                  <span className="text-[15px] font-medium">{opt.label}</span>
                 </div>
-                <span className="text-[15px] text-ink">{opt.label}</span>
-              </div>
-            </button>
-          ))}
+              </button>
+            )
+          })}
         </div>
       )}
 
       {/* Input field (property value) */}
       {step.type === 'input' && (
-        <div className="mt-4">
-          <div className="flex items-center gap-1 mb-3">
+        <div className="mt-6">
+          <div className="flex items-center gap-2 mb-3">
             {step.inputPrefix && (
-              <span className="text-lg font-medium text-ink">{step.inputPrefix}</span>
+              <span className="text-[18px] font-semibold text-ink">{step.inputPrefix}</span>
             )}
             <input
               type="text"
               value={inputValue}
               onChange={(e: { target: { value: string } }) => onInputChange(e.target.value)}
               placeholder={step.inputPlaceholder}
-              className="flex-1 px-3 py-2.5 border border-grey-100 rounded-md text-[15px] text-ink focus:border-ink focus:outline-none transition-colors"
+              className="flex-1 px-4 py-3 text-[15px] text-ink focus:outline-none transition-colors"
+              style={{
+                border: '1.5px solid var(--color-grey-100)',
+                borderRadius: 'var(--radius-card)',
+              }}
+              onFocus={(e) => (e.currentTarget.style.borderColor = 'var(--color-ink)')}
+              onBlur={(e) => (e.currentTarget.style.borderColor = 'var(--color-grey-100)')}
             />
           </div>
           {step.inputQualifiers && (
             <div className="space-y-2">
-              {step.inputQualifiers.map((q) => (
-                <button
-                  key={q.value}
-                  onClick={() => onQualifierChange(q.value)}
-                  className="w-full text-left px-4 py-2.5 rounded-md border transition-all"
-                  style={{
-                    borderColor: inputQualifier === q.value ? 'var(--color-ink)' : 'var(--color-grey-100)',
-                    backgroundColor: inputQualifier === q.value ? 'var(--color-grey-50)' : 'white',
-                    transitionDuration: '150ms',
-                  }}
-                >
-                  <div className="flex items-center gap-3">
-                    <div
-                      className="w-4 h-4 rounded-full border-2 flex items-center justify-center shrink-0"
-                      style={{
-                        borderColor: inputQualifier === q.value ? 'var(--color-ink)' : 'var(--color-grey-200)',
-                      }}
-                    >
-                      {inputQualifier === q.value && (
-                        <div className="w-2 h-2 rounded-full bg-ink" />
-                      )}
+              {step.inputQualifiers.map((q) => {
+                const isQSelected = inputQualifier === q.value
+                return (
+                  <button
+                    key={q.value}
+                    onClick={() => onQualifierChange(q.value)}
+                    className="w-full text-left px-5 py-4 transition-all"
+                    style={{
+                      borderRadius: 'var(--radius-card)',
+                      border: `1.5px solid ${isQSelected ? 'var(--color-ink)' : 'var(--color-grey-100)'}`,
+                      backgroundColor: isQSelected ? 'var(--color-ink)' : 'white',
+                      color: isQSelected ? 'white' : 'var(--color-ink)',
+                      transitionDuration: '200ms',
+                      transitionTimingFunction: 'ease',
+                    }}
+                  >
+                    <div className="flex items-center gap-3">
+                      <div
+                        className="w-5 h-5 rounded-full flex items-center justify-center shrink-0"
+                        style={{
+                          border: isQSelected ? '2px solid white' : '2px solid var(--color-grey-200)',
+                        }}
+                      >
+                        {isQSelected && (
+                          <div className="w-2.5 h-2.5 rounded-full bg-white" />
+                        )}
+                      </div>
+                      <span className="text-[15px] font-medium">{q.label}</span>
                     </div>
-                    <span className="text-sm text-ink">{q.label}</span>
-                  </div>
-                </button>
-              ))}
+                  </button>
+                )
+              })}
             </div>
           )}
         </div>
       )}
 
-      {/* Actions */}
-      <div className="mt-6 flex items-center gap-4">
+      {/* Actions — red Continue + ghost Skip */}
+      <div className="mt-8 flex items-center gap-4">
         <button
           onClick={onNext}
           disabled={!canAdvance}
-          className="px-5 py-2.5 bg-ink text-white text-sm font-semibold rounded-md hover:opacity-90 transition-opacity active:scale-[0.98] disabled:opacity-40 disabled:cursor-not-allowed"
+          className="px-8 py-3.5 text-white text-[15px] font-semibold transition-all active:scale-[0.98] disabled:opacity-40 disabled:cursor-not-allowed"
+          style={{
+            backgroundColor: canAdvance ? 'var(--color-red-500)' : 'var(--color-red-500)',
+            borderRadius: 'var(--radius-card)',
+          }}
+          onMouseEnter={(e) => { if (canAdvance) e.currentTarget.style.backgroundColor = 'var(--color-red-600)' }}
+          onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = 'var(--color-red-500)' }}
         >
-          {step.type === 'confirmation_message' ? 'OK, next' : 'Next'}
+          {step.type === 'confirmation_message' ? 'OK, next' : 'Continue'}
         </button>
         {step.type !== 'confirmation_message' && (
           <button
             onClick={onSkip}
-            className="text-sm text-ink-tertiary hover:text-ink-secondary transition-colors"
+            className="text-[13px] text-ink-tertiary hover:text-ink-secondary transition-colors"
           >
             Skip for now
           </button>
@@ -422,7 +437,7 @@ function QuestionCard({
   )
 }
 
-// ═══ FinalSummary (screen 2i) ═══
+// ═══ FinalSummary ═══
 
 function FinalSummary({
   completedSections,
@@ -433,12 +448,11 @@ function FinalSummary({
 }) {
   return (
     <div className="animate-fade-in">
-      {/* Expanded accordion showing all sections */}
-      <div className="mb-6 space-y-1.5">
+      <div className="mb-6 space-y-2">
         {completedSections.map((s: SectionSummaryData, i: number) => (
           <div
             key={s.sectionKey}
-            className="flex items-center gap-2 text-sm text-ink-secondary animate-fade-in"
+            className="flex items-center gap-2 text-[13px] text-ink-secondary animate-fade-in"
             style={{ animationDelay: `${i * 80}ms`, animationFillMode: 'both' }}
           >
             <Check size={13} className="text-green-600 shrink-0" />
@@ -447,19 +461,25 @@ function FinalSummary({
         ))}
       </div>
 
-      <p className="text-xs font-semibold text-ink-tertiary uppercase tracking-wider mb-1">
+      <p className="text-[12px] font-semibold text-ink-tertiary uppercase tracking-wider mb-2">
         End of the beginning
       </p>
-      <h3 className="text-xl font-bold text-ink mb-3">This is great progress</h3>
-      <p className="text-sm text-ink-secondary mb-6 leading-relaxed">
-        We will now take you to your financial summary which can be shared with your
-        spouse/partner and/or a third party such as a mediator or solicitor.
+      <h3 className="text-[22px] font-bold text-ink mb-3">This is great progress</h3>
+      <p className="text-[15px] text-ink-secondary mb-8 leading-relaxed">
+        We&apos;ll now take you to your financial summary which can be shared with your
+        spouse/partner, mediator or solicitor.
       </p>
       <button
         onClick={onFinish}
-        className="px-5 py-2.5 bg-ink text-white text-sm font-semibold rounded-md hover:opacity-90 transition-opacity active:scale-[0.98]"
+        className="px-8 py-3.5 text-white text-[15px] font-semibold transition-colors active:scale-[0.98]"
+        style={{
+          backgroundColor: 'var(--color-red-500)',
+          borderRadius: 'var(--radius-card)',
+        }}
+        onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = 'var(--color-red-600)')}
+        onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = 'var(--color-red-500)')}
       >
-        Take me to my financial summary
+        View financial summary
       </button>
     </div>
   )
@@ -469,14 +489,20 @@ function FinalSummary({
 
 function LockedPhaseCard({ label }: { label: string }) {
   return (
-    <div className="mt-4 bg-white rounded-lg border border-grey-100 overflow-hidden opacity-60">
-      <div className="px-5 py-4 flex flex-col gap-1.5 sm:flex-row sm:items-center sm:justify-between">
-        <span className="text-xs font-semibold text-ink-secondary uppercase tracking-wider">
+    <div
+      className="mt-4 bg-white overflow-hidden opacity-50"
+      style={{
+        borderRadius: 'var(--radius-card)',
+        boxShadow: 'var(--shadow-card)',
+      }}
+    >
+      <div className="px-6 py-5 flex flex-col gap-1.5 sm:flex-row sm:items-center sm:justify-between">
+        <span className="text-[12px] font-semibold text-ink-tertiary uppercase tracking-wider">
           {label}
         </span>
-        <div className="flex items-center gap-1.5 text-ink-tertiary">
+        <div className="flex items-center gap-1.5 text-ink-disabled">
           <Lock size={13} className="shrink-0" />
-          <span className="text-xs">Available after confirmation</span>
+          <span className="text-[12px]">After confirmation</span>
         </div>
       </div>
     </div>

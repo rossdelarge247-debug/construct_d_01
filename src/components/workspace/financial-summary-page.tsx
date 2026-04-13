@@ -17,20 +17,20 @@ type BadgeVariant = 'bank' | 'self'
 function SourceBadge({ variant, bankName }: { variant: BadgeVariant; bankName?: string }) {
   return (
     <span
-      className="text-xs font-medium px-2 py-0.5 rounded-full whitespace-nowrap"
+      className="text-[11px] font-medium px-2.5 py-1 rounded-full whitespace-nowrap"
       style={{
         backgroundColor: variant === 'bank' ? 'var(--color-green-50)' : 'var(--color-amber-50)',
         color: variant === 'bank' ? 'var(--color-green-600)' : 'var(--color-amber-600)',
       }}
     >
-      {variant === 'bank' ? `${bankName ?? 'Bank'} connection` : 'Self disclosed'}
+      {variant === 'bank' ? `${bankName ?? 'Bank'} confirmed` : 'Your estimate'}
     </span>
   )
 }
 
 function SummaryRow({ label, badge, bankName }: { label: string; badge: BadgeVariant; bankName?: string }) {
   return (
-    <div className="flex items-start justify-between gap-3 py-2">
+    <div className="flex items-start justify-between gap-3 py-2.5">
       <div className="flex items-start gap-2.5">
         <div className="w-5 h-5 mt-0.5 rounded-full bg-green-600 flex items-center justify-center shrink-0">
           <Check size={11} className="text-white" strokeWidth={3} />
@@ -66,105 +66,103 @@ export function FinancialSummaryPage({
   )
 
   return (
-    <div className="px-6 pt-8 pb-12">
-      <div className="max-w-[var(--content-max-width)] mx-auto">
-        <button
-          onClick={onBack}
-          className="text-sm font-medium text-blue-600 hover:underline mb-6"
-        >
-          &larr; Back to your dashboard
-        </button>
+    <div className="max-w-[var(--content-max-width)] mx-auto pb-12">
+      <button
+        onClick={onBack}
+        className="text-[13px] font-medium text-blue-600 hover:underline mb-8 inline-block"
+      >
+        &larr; Back to dashboard
+      </button>
 
-        <h2 className="text-2xl font-bold text-ink mb-6">Your financial picture</h2>
+      <h2 className="text-[28px] font-bold text-ink mb-8">Your financial picture</h2>
 
-        {/* ═══ Accounts card ═══ */}
-        <SectionCard title="Accounts" delay={0}>
-          <SummaryRow
-            label={`${accountCount} ${bankName} bank account${accountCount !== 1 ? 's' : ''}`}
-            badge="bank"
-            bankName={bankName}
-          />
-          <p className="text-xs text-ink-tertiary ml-7 -mt-1 mb-2">
-            12 months of transaction data
-          </p>
-          <AddButton label="Connect another bank account" />
-        </SectionCard>
+      {/* ═══ Accounts card ═══ */}
+      <SectionCard title="Accounts" delay={0}>
+        <SummaryRow
+          label={`${accountCount} ${bankName} account${accountCount !== 1 ? 's' : ''}`}
+          badge="bank"
+          bankName={bankName}
+        />
+        <p className="text-[12px] text-ink-tertiary ml-7 -mt-1 mb-2">
+          12 months of transaction data
+        </p>
+        <AddButton label="Connect another bank account" />
+      </SectionCard>
 
-        {/* ═══ Income card ═══ */}
-        <SectionCard title="Income" delay={100}>
-          {salary && (
-            <>
-              <SummaryRow label={`You are employed by ${salary.source}`} badge="bank" bankName={bankName} />
-              <SummaryRow label={`You receive £${salary.amount.toLocaleString()} net monthly salary`} badge="bank" bankName={bankName} />
-            </>
-          )}
-          {benefits.map((b, i) => (
-            <div key={i}>
-              <SummaryRow label={`You receive £${b.amount}/month in ${b.source}`} badge="bank" bankName={bankName} />
-            </div>
-          ))}
-          <AddButton label={`Manually add income not shown in connected ${bankName} account`} />
-        </SectionCard>
-
-        {/* ═══ Property card ═══ */}
-        <SectionCard title="Property" delay={200}>
-          {propertyValue && (
-            <SummaryRow
-              label={`You ${isJoint ? 'jointly own' : 'own'} a property estimated value £${propertyValue.toLocaleString()}`}
-              badge="self"
-            />
-          )}
-          {mortgageBalance && (
-            <SummaryRow label={`You have an estimated mortgage balance of £${mortgageBalance.toLocaleString()}`} badge="self" />
-          )}
-          {isJoint && (
-            <SummaryRow label="You share the ownership of this property, the starting position for marriage is 50/50" badge="self" />
-          )}
-          {equity && equity > 0 && (
-            <SummaryRow
-              label={`Your property has an estimated equity value of £${equity.toLocaleString()}${isJoint ? ` — £${Math.round(equity / 2).toLocaleString()} each` : ''}`}
-              badge="self"
-            />
-          )}
-          {mortgage && (
-            <SummaryRow label={`You have a mortgage with ${mortgage.payee}`} badge="bank" bankName={bankName} />
-          )}
-          <SummaryRow label="You have no second property" badge="self" />
-          <AddButton label="Declare further property interests" />
-        </SectionCard>
-
-        {/* ═══ Spending card (TBC) ═══ */}
-        <SectionCard title="Spending" delay={300}>
-          <div className="py-4 text-center">
-            <p className="text-sm text-ink-tertiary">Panel design pending</p>
+      {/* ═══ Income card ═══ */}
+      <SectionCard title="Income" delay={100}>
+        {salary && (
+          <>
+            <SummaryRow label={`Employed by ${salary.source}`} badge="bank" bankName={bankName} />
+            <SummaryRow label={`\u00A3${salary.amount.toLocaleString()} net monthly salary`} badge="bank" bankName={bankName} />
+          </>
+        )}
+        {benefits.map((b, i) => (
+          <div key={i}>
+            <SummaryRow label={`\u00A3${b.amount}/month in ${b.source}`} badge="bank" bankName={bankName} />
           </div>
-          <AddButton label="Add spending details" />
-        </SectionCard>
+        ))}
+        <AddButton label="Add income not in connected account" />
+      </SectionCard>
 
-        {/* ═══ Debts card (TBC) ═══ */}
-        <SectionCard title="Debts" delay={400}>
-          {hasDebts ? (
-            <div className="py-2">
-              <SummaryRow label="You have debts to disclose" badge="self" />
-            </div>
-          ) : (
-            <div className="py-4 text-center">
-              <p className="text-sm text-ink-tertiary">No debts disclosed</p>
-            </div>
-          )}
-          <AddButton label="Add debt details" />
-        </SectionCard>
+      {/* ═══ Property card ═══ */}
+      <SectionCard title="Property" delay={200}>
+        {propertyValue && (
+          <SummaryRow
+            label={`${isJoint ? 'Jointly own' : 'Own'} property — estimated \u00A3${propertyValue.toLocaleString()}`}
+            badge="self"
+          />
+        )}
+        {mortgageBalance && (
+          <SummaryRow label={`Mortgage balance — estimated \u00A3${mortgageBalance.toLocaleString()}`} badge="self" />
+        )}
+        {isJoint && (
+          <SummaryRow label="Shared ownership — starting position 50/50" badge="self" />
+        )}
+        {equity && equity > 0 && (
+          <SummaryRow
+            label={`Equity \u00A3${equity.toLocaleString()}${isJoint ? ` — \u00A3${Math.round(equity / 2).toLocaleString()} each` : ''}`}
+            badge="self"
+          />
+        )}
+        {mortgage && (
+          <SummaryRow label={`Mortgage with ${mortgage.payee}`} badge="bank" bankName={bankName} />
+        )}
+        <SummaryRow label="No second property" badge="self" />
+        <AddButton label="Declare further property" />
+      </SectionCard>
 
-        {/* ═══ Empty sections ═══ */}
-        <EmptySection label={hasPension ? 'Pensions disclosed' : 'No pensions disclosed'} delay={500} />
-        <EmptySection label="No businesses disclosed" delay={600} />
-        <EmptySection label="No other assets disclosed" delay={700} />
-
-        {/* ═══ Non-financial sections ═══ */}
-        <div className="mt-6 space-y-3">
-          <NonFinancialCard label="Build your children picture now" action="Start outline now" />
-          <NonFinancialCard label="Your needs after separation" action="Complete needs picture" />
+      {/* ═══ Spending card (TBC) ═══ */}
+      <SectionCard title="Spending" delay={300}>
+        <div className="py-6 text-center">
+          <p className="text-[13px] text-ink-tertiary">Panel design pending</p>
         </div>
+        <AddButton label="Add spending details" />
+      </SectionCard>
+
+      {/* ═══ Debts card (TBC) ═══ */}
+      <SectionCard title="Debts" delay={400}>
+        {hasDebts ? (
+          <div className="py-2">
+            <SummaryRow label="Debts to disclose" badge="self" />
+          </div>
+        ) : (
+          <div className="py-6 text-center">
+            <p className="text-[13px] text-ink-tertiary">No debts disclosed</p>
+          </div>
+        )}
+        <AddButton label="Add debt details" />
+      </SectionCard>
+
+      {/* ═══ Empty sections ═══ */}
+      <EmptySection label={hasPension ? 'Pensions disclosed' : 'No pensions disclosed'} delay={500} />
+      <EmptySection label="No businesses disclosed" delay={600} />
+      <EmptySection label="No other assets disclosed" delay={700} />
+
+      {/* ═══ Non-financial sections ═══ */}
+      <div className="mt-8 space-y-4">
+        <NonFinancialCard label="Build your children picture" action="Start outline" />
+        <NonFinancialCard label="Your needs after separation" action="Complete needs picture" />
       </div>
     </div>
   )
@@ -183,20 +181,25 @@ function SectionCard({
 }) {
   return (
     <div
-      className="mb-3 bg-white rounded-lg border border-grey-100 overflow-hidden animate-fade-in"
-      style={{ animationDelay: `${delay}ms`, animationFillMode: 'both' }}
+      className="mb-4 bg-white overflow-hidden animate-fade-in"
+      style={{
+        borderRadius: 'var(--radius-card)',
+        boxShadow: 'var(--shadow-card)',
+        animationDelay: `${delay}ms`,
+        animationFillMode: 'both',
+      }}
     >
-      <div className="px-5 py-3 border-b border-grey-100">
-        <span className="text-xs font-semibold text-ink-secondary uppercase tracking-wider">{title}</span>
+      <div className="px-6 py-4" style={{ borderBottom: '1px solid var(--color-grey-100)' }}>
+        <span className="text-[16px] font-semibold text-ink">{title}</span>
       </div>
-      <div className="px-5 py-2">{children}</div>
+      <div className="px-6 py-3">{children}</div>
     </div>
   )
 }
 
 function AddButton({ label }: { label: string }) {
   return (
-    <button className="flex items-center gap-2 text-sm text-blue-600 hover:underline py-2 mt-1">
+    <button className="flex items-center gap-2 text-[13px] text-blue-600 hover:underline py-2 mt-1">
       <Plus size={14} />
       <span>{label}</span>
     </button>
@@ -206,10 +209,15 @@ function AddButton({ label }: { label: string }) {
 function EmptySection({ label, delay }: { label: string; delay: number }) {
   return (
     <div
-      className="mb-3 bg-white rounded-lg border border-grey-100 px-5 py-4 flex items-center justify-between animate-fade-in"
-      style={{ animationDelay: `${delay}ms`, animationFillMode: 'both' }}
+      className="mb-4 bg-white px-6 py-5 flex items-center justify-between animate-fade-in"
+      style={{
+        borderRadius: 'var(--radius-card)',
+        boxShadow: 'var(--shadow-card)',
+        animationDelay: `${delay}ms`,
+        animationFillMode: 'both',
+      }}
     >
-      <span className="text-sm text-ink-secondary">{label}</span>
+      <span className="text-[13px] text-ink-secondary">{label}</span>
       <button className="text-blue-600 hover:underline">
         <Plus size={16} />
       </button>
@@ -219,9 +227,15 @@ function EmptySection({ label, delay }: { label: string; delay: number }) {
 
 function NonFinancialCard({ label, action }: { label: string; action: string }) {
   return (
-    <div className="bg-white rounded-lg border border-grey-100 px-5 py-4 flex items-center justify-between">
+    <div
+      className="bg-white px-6 py-5 flex items-center justify-between"
+      style={{
+        borderRadius: 'var(--radius-card)',
+        boxShadow: 'var(--shadow-card)',
+      }}
+    >
       <span className="text-[15px] text-ink">{label}</span>
-      <button className="text-sm font-medium text-blue-600 hover:underline">{action}</button>
+      <button className="text-[13px] font-medium text-blue-600 hover:underline">{action}</button>
     </div>
   )
 }

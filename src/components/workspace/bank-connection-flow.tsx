@@ -27,12 +27,10 @@ export function BankConnectionFlow({
   const [progressPercent, setProgressPercent] = useState(0)
   const revealTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
-  // Bank data state — populated from real Tink data or demo fallback
   const [extractions, setExtractions] = useState<BankStatementExtraction[]>([])
   const [accounts, setAccounts] = useState<ConnectedAccount[]>([])
   const [revealItems, setRevealItems] = useState<RevealItem[]>([])
 
-  // Hydrate bank data from a list of extractions (real or demo)
   const hydrateBankData = useCallback((exts: BankStatementExtraction[]) => {
     setExtractions(exts)
     setAccounts(extractionsToConnectedAccounts(exts))
@@ -52,7 +50,6 @@ export function BankConnectionFlow({
     }
   }, [phase, onPhaseChange])
 
-  // Tink completion — read real data from sessionStorage or use demo
   const handleTinkComplete = useCallback((useDemoData: boolean) => {
     let exts: BankStatementExtraction[]
 
@@ -78,7 +75,7 @@ export function BankConnectionFlow({
     setProgressPercent(15)
   }, [onPhaseChange, hydrateBankData])
 
-  // Progressive reveal: stagger tick items per spec 26
+  // Progressive reveal
   useEffect(() => {
     if (phase !== 'reveal') return
     if (revealItems.length === 0) return
@@ -90,7 +87,6 @@ export function BankConnectionFlow({
       return () => clearTimeout(t)
     }
 
-    // Stagger delays: 0, 400, 600, 800, 1000, 1200 (spec 26)
     const delays = [0, 400, 600, 800, 1000, 1200]
     const delay = delays[visibleRevealItems] ?? 400
 
@@ -104,7 +100,6 @@ export function BankConnectionFlow({
     }
   }, [phase, visibleRevealItems, revealItems.length, onPhaseChange])
 
-  // Reset when phase goes back to idle
   useEffect(() => {
     if (phase === 'idle') {
       setVisibleRevealItems(0)
@@ -116,7 +111,7 @@ export function BankConnectionFlow({
 
   return (
     <>
-      {/* Dark overlay for dimming/modal phases (spec 26: 300ms fade) */}
+      {/* Dark overlay */}
       {(phase === 'dimming' || phase === 'tink_modal') && (
         <div
           className="fixed inset-0 z-40 transition-colors"
@@ -130,7 +125,7 @@ export function BankConnectionFlow({
         />
       )}
 
-      {/* Tink modal — iframe drop-in mode (screen 3c) */}
+      {/* Tink modal */}
       {phase === 'tink_modal' && (
         <TinkModal
           onComplete={() => handleTinkComplete(false)}
@@ -139,45 +134,48 @@ export function BankConnectionFlow({
         />
       )}
 
-      {/* Main content card — loader, reveal, and complete screens */}
+      {/* Main content card */}
       {phase !== 'tink_modal' && phase !== 'dimming' && (
-        <div className="flex items-start justify-center pt-12 px-6">
-          <div className="w-full max-w-[560px] bg-white rounded-lg border border-grey-100 shadow-sm overflow-hidden">
-            {/* ═══ Screen 3: Loader ═══ */}
+        <div className="flex items-start justify-center pt-4">
+          <div
+            className="w-full max-w-[var(--content-narrow)] bg-white overflow-hidden"
+            style={{
+              borderRadius: 'var(--radius-card)',
+              boxShadow: 'var(--shadow-card)',
+            }}
+          >
+            {/* ═══ Loader ═══ */}
             {phase === 'loader' && (
-              <div className="p-5 sm:p-8">
-                <div className="h-40 bg-grey-50 rounded-md flex items-center justify-center mb-6">
-                  <span className="text-ink-tertiary text-sm">Graphic</span>
+              <div className="p-8">
+                <div
+                  className="h-40 bg-grey-50 flex items-center justify-center mb-6"
+                  style={{ borderRadius: 'var(--radius-md)' }}
+                >
+                  <span className="text-ink-tertiary text-[13px]">Graphic</span>
                 </div>
-                <h2 className="text-xl font-bold text-ink mb-4">
+                <h2 className="text-[22px] font-bold text-ink mb-5">
                   Connect to your bank account/s
                 </h2>
                 <ProgressBar percent={progressPercent} indeterminate />
               </div>
             )}
 
-            {/* ═══ Screen 3d: Reveal ═══ */}
+            {/* ═══ Reveal ═══ */}
             {(phase === 'reveal' || phase === 'processing') && (
-              <div className="p-5 sm:p-8">
-                <h2
-                  className="text-xl font-bold text-ink mb-3 animate-fade-in"
-                >
+              <div className="p-8">
+                <h2 className="text-[22px] font-bold text-ink mb-4 animate-fade-in">
                   Connected to your bank
                 </h2>
                 <ProgressBar percent={progressPercent} />
 
-                <div className="mt-6">
-                  {/* Per-account processing block */}
+                <div className="mt-8">
                   {accounts[0] && (
-                    <p
-                      className="text-sm font-medium text-ink-secondary mb-3 animate-slide-in-left"
-                    >
+                    <p className="text-[13px] font-medium text-ink-secondary mb-4 animate-slide-in-left">
                       Processing {accounts[0].bankName} {accounts[0].accountType} account xxxx{accounts[0].lastFour}
                     </p>
                   )}
 
-                  {/* Tick items — staggered reveal */}
-                  <div className="space-y-2">
+                  <div className="space-y-3">
                     {revealItems.map((item, i) => (
                       <RevealTickItem
                         key={item.id}
@@ -191,16 +189,16 @@ export function BankConnectionFlow({
               </div>
             )}
 
-            {/* ═══ Screen 3e: Complete ═══ */}
+            {/* ═══ Complete ═══ */}
             {phase === 'complete' && (
-              <div className="p-5 sm:p-8">
-                <h2 className="text-xl font-bold text-ink mb-3">
+              <div className="p-8">
+                <h2 className="text-[22px] font-bold text-ink mb-4">
                   Connected to your bank
                 </h2>
                 <ProgressBar percent={100} />
 
-                <div className="mt-6">
-                  <p className="text-lg font-semibold text-ink mb-4">
+                <div className="mt-8">
+                  <p className="text-[18px] font-semibold text-ink mb-5">
                     We have finished having a look
                   </p>
 
@@ -213,7 +211,7 @@ export function BankConnectionFlow({
                         <p className="text-[15px] font-medium text-ink">
                           1 {account.bankName} {account.accountType} account xxxx{account.lastFour}
                         </p>
-                        <p className="text-sm text-ink-secondary">
+                        <p className="text-[13px] text-ink-secondary">
                           {account.monthsOfData} months of transactions
                         </p>
                       </div>
@@ -222,7 +220,13 @@ export function BankConnectionFlow({
 
                   <button
                     onClick={() => onComplete(accounts, revealItems, extractions)}
-                    className="mt-4 px-6 py-3 bg-ink text-white text-sm font-semibold rounded-md hover:opacity-90 transition-opacity active:scale-[0.98]"
+                    className="mt-5 w-full sm:w-auto px-8 py-3.5 text-white text-[15px] font-semibold transition-colors active:scale-[0.98]"
+                    style={{
+                      backgroundColor: 'var(--color-red-500)',
+                      borderRadius: 'var(--radius-card)',
+                    }}
+                    onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = 'var(--color-red-600)')}
+                    onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = 'var(--color-red-500)')}
                   >
                     Next
                   </button>
@@ -242,12 +246,16 @@ function ProgressBar({ percent, indeterminate }: { percent: number; indeterminat
   return (
     <div className="h-1.5 w-full bg-grey-100 rounded-full overflow-hidden">
       {indeterminate ? (
-        <div className="h-full w-1/3 bg-ink rounded-full animate-shimmer" />
+        <div
+          className="h-full w-1/3 rounded-full animate-shimmer"
+          style={{ backgroundColor: 'var(--color-red-500)' }}
+        />
       ) : (
         <div
-          className="h-full bg-ink rounded-full transition-all"
+          className="h-full rounded-full transition-all"
           style={{
             width: `${percent}%`,
+            backgroundColor: 'var(--color-red-500)',
             transitionDuration: '500ms',
             transitionTimingFunction: 'ease',
           }}
@@ -260,7 +268,6 @@ function ProgressBar({ percent, indeterminate }: { percent: number; indeterminat
 function RevealTickItem({
   item,
   visible,
-  index,
 }: {
   item: RevealItem
   visible: boolean
@@ -274,11 +281,9 @@ function RevealTickItem({
         transform: visible ? 'translateY(0)' : 'translateY(8px)',
         transitionDuration: '250ms',
         transitionTimingFunction: 'ease-out',
-        // GPU acceleration per spec 26
         willChange: visible ? 'auto' : 'opacity, transform',
       }}
     >
-      {/* Tick appears first (spec 26: tick then text 50ms later) */}
       <div
         className="w-5 h-5 mt-0.5 rounded-full bg-green-600 flex items-center justify-center shrink-0 transition-all"
         style={{
@@ -306,14 +311,6 @@ function RevealTickItem({
   )
 }
 
-/**
- * Tink modal — supports two modes:
- * 1. Iframe mode: loads the Tink Link URL in an iframe, listens for postMessage completion
- * 2. Simulation mode (dev): shows a placeholder with a simulate button
- *
- * The iframe receives the callback URL which now posts a message to parent
- * window instead of redirecting, keeping the user in the app context.
- */
 function TinkModal({
   onComplete,
   onDemoComplete,
@@ -328,7 +325,6 @@ function TinkModal({
   const [tinkAvailable, setTinkAvailable] = useState(false)
   const iframeRef = useRef<HTMLIFrameElement>(null)
 
-  // Fetch Tink Link URL on mount
   useEffect(() => {
     let cancelled = false
 
@@ -349,7 +345,6 @@ function TinkModal({
     return () => { cancelled = true }
   }, [])
 
-  // Listen for postMessage from iframe callback
   useEffect(() => {
     function handleMessage(event: MessageEvent) {
       if (event.data?.type === 'tink-complete') {
@@ -372,32 +367,44 @@ function TinkModal({
       className="fixed inset-0 z-50 flex items-center justify-center px-4"
       onClick={(e) => e.stopPropagation()}
     >
-      <div className="w-full max-w-md bg-white rounded-xl shadow-lg p-5 sm:p-8 animate-modal-appear">
-        <h3 className="text-lg font-bold text-ink mb-2">Connect your bank</h3>
+      <div
+        className="w-full max-w-md bg-white p-8 animate-modal-appear"
+        style={{
+          borderRadius: 'var(--radius-lg)',
+          boxShadow: '0 8px 32px rgba(0,0,0,0.18)',
+        }}
+      >
+        <h3 className="text-[18px] font-bold text-ink mb-4">Connect your bank</h3>
 
-        {/* Iframe area — real Tink Link or loading state */}
-        <div className="h-80 bg-grey-50 rounded-lg flex items-center justify-center mb-6 overflow-hidden">
+        <div
+          className="h-80 bg-grey-50 flex items-center justify-center mb-6 overflow-hidden"
+          style={{ borderRadius: 'var(--radius-card)' }}
+        >
           {loading ? (
             <div className="text-center">
               <div className="h-1 w-24 bg-grey-100 rounded-full overflow-hidden mx-auto mb-3">
-                <div className="h-full w-1/3 bg-ink rounded-full animate-shimmer" />
+                <div
+                  className="h-full w-1/3 rounded-full animate-shimmer"
+                  style={{ backgroundColor: 'var(--color-red-500)' }}
+                />
               </div>
-              <span className="text-ink-tertiary text-sm">Preparing secure connection...</span>
+              <span className="text-ink-tertiary text-[13px]">Preparing secure connection...</span>
             </div>
           ) : tinkUrl ? (
             <iframe
               ref={iframeRef}
               src={tinkUrl}
-              className="w-full h-full border-0 rounded-lg"
+              className="w-full h-full border-0"
+              style={{ borderRadius: 'var(--radius-card)' }}
               title="Connect your bank securely"
               sandbox="allow-scripts allow-same-origin allow-forms allow-popups allow-top-navigation"
             />
           ) : (
             <div className="text-center px-6">
-              <p className="text-sm text-ink-secondary mb-1">
+              <p className="text-[13px] text-ink-secondary mb-1">
                 Open Banking is not configured yet.
               </p>
-              <p className="text-xs text-ink-tertiary">
+              <p className="text-[12px] text-ink-tertiary">
                 Tink credentials need to be added to connect a real bank account.
               </p>
             </div>
@@ -405,23 +412,31 @@ function TinkModal({
         </div>
 
         <div className="flex gap-3">
-          {/* In production: user completes in iframe, this area just has Cancel.
-              Without Tink configured: show demo button to test the rest of the flow. */}
           {!tinkAvailable && !loading && (
             <button
               onClick={onDemoComplete}
-              className="flex-1 py-3 bg-ink text-white text-sm font-semibold rounded-md hover:opacity-90 transition-opacity active:scale-[0.98]"
+              className="flex-1 py-3.5 text-white text-[15px] font-semibold transition-colors active:scale-[0.98]"
+              style={{
+                backgroundColor: 'var(--color-red-500)',
+                borderRadius: 'var(--radius-card)',
+              }}
+              onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = 'var(--color-red-600)')}
+              onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = 'var(--color-red-500)')}
             >
               Continue with demo data
             </button>
           )}
           <button
             onClick={onCancel}
-            className={`py-3 text-sm font-medium rounded-md transition-colors ${
+            className={`py-3.5 text-[15px] font-medium transition-colors ${
               tinkAvailable
                 ? 'flex-1 bg-grey-50 text-ink-secondary hover:bg-grey-100'
-                : 'px-5 text-ink-secondary border border-grey-100 hover:bg-grey-50'
+                : 'px-5 text-ink-secondary hover:bg-grey-50'
             }`}
+            style={{
+              borderRadius: 'var(--radius-card)',
+              border: tinkAvailable ? 'none' : '1px solid var(--color-grey-100)',
+            }}
           >
             Cancel
           </button>
