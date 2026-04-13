@@ -320,12 +320,14 @@ function TinkModal({
   onDemoComplete: () => void
   onCancel: () => void
 }) {
-  const [tinkUrl, setTinkUrl] = useState<string | null>(null)
   const [loading, setLoading] = useState(true)
   const [tinkAvailable, setTinkAvailable] = useState(false)
+  const [popupOpen, setPopupOpen] = useState(false)
   const [connectError, setConnectError] = useState<string | null>(null)
-  const iframeRef = useRef<HTMLIFrameElement>(null)
+  const popupRef = useRef<Window | null>(null)
+  const pollRef = useRef<ReturnType<typeof setInterval> | null>(null)
 
+  // Fetch Tink Link URL and open popup
   useEffect(() => {
     let cancelled = false
 
@@ -334,18 +336,26 @@ function TinkModal({
       .then((data) => {
         if (cancelled) return
         if (data.url && !data.error) {
-          setTinkUrl(data.url)
           setTinkAvailable(true)
-          if (data.debug) console.log('[Tink Connect] Debug:', data.debug)
+          // Open in popup window
+          const popup = window.open(
+            data.url,
+            'tink-connect',
+            'width=480,height=720,scrollbars=yes,resizable=yes',
+          )
+          if (popup) {
+            popupRef.current = popup
+            setPopupOpen(true)
+          } else {
+            setConnectError('Popup was blocked. Please allow popups for this site.')
+          }
         } else if (data.error) {
-          console.warn('[Tink Connect]', data.error, data.debug)
           setConnectError(data.error)
         }
         setLoading(false)
       })
-      .catch((err) => {
+      .catch(() => {
         if (!cancelled) {
-          console.warn('[Tink Connect] Network error:', err)
           setConnectError('Could not reach the server')
           setLoading(false)
         }
@@ -354,15 +364,26 @@ function TinkModal({
     return () => { cancelled = true }
   }, [])
 
+  // Listen for postMessage from popup callback
   useEffect(() => {
     function handleMessage(event: MessageEvent) {
       if (event.data?.type === 'tink-complete') {
+        if (popupRef.current && !popupRef.current.closed) {
+          popupRef.current.close()
+        }
+        popupRef.current = null
+        setPopupOpen(false)
         try {
           sessionStorage.setItem('pendingBankData', JSON.stringify(event.data.results))
         } catch { /* ignore storage errors */ }
         onComplete()
       }
       if (event.data?.type === 'tink-error') {
+        if (popupRef.current && !popupRef.current.closed) {
+          popupRef.current.close()
+        }
+        popupRef.current = null
+        setPopupOpen(false)
         onCancel()
       }
     }
@@ -370,6 +391,37 @@ function TinkModal({
     window.addEventListener('message', handleMessage)
     return () => window.removeEventListener('message', handleMessage)
   }, [onComplete, onCancel])
+
+  // Poll to detect if user closed the popup manually
+  useEffect(() => {
+    if (!popupOpen) return
+    pollRef.current = setInterval(() => {
+      if (popupRef.current?.closed) {
+        popupRef.current = null
+        setPopupOpen(false)
+        if (pollRef.current) clearInterval(pollRef.current)
+        onCancel()
+      }
+    }, 500)
+    return () => {
+      if (pollRef.current) clearInterval(pollRef.current)
+    }
+  }, [popupOpen, onCancel])
+
+  // Clean up popup on unmount
+  useEffect(() => {
+    return () => {
+      if (popupRef.current && !popupRef.current.closed) {
+        popupRef.current.close()
+      }
+    }
+  }, [])
+
+  const handleReopenPopup = useCallback(() => {
+    if (popupRef.current && !popupRef.current.closed) {
+      popupRef.current.focus()
+    }
+  }, [])
 
   return (
     <div
@@ -386,10 +438,7 @@ function TinkModal({
         {loading ? (
           <>
             <h3 className="text-[18px] font-bold text-ink mb-4">Connect your bank</h3>
-            <div
-              className="h-80 bg-grey-50 flex items-center justify-center mb-6 overflow-hidden"
-              style={{ borderRadius: 'var(--radius-card)' }}
-            >
+            <div className="flex items-center justify-center py-12">
               <div className="text-center">
                 <div className="h-1 w-24 bg-grey-100 rounded-full overflow-hidden mx-auto mb-3">
                   <div
@@ -401,22 +450,33 @@ function TinkModal({
               </div>
             </div>
           </>
-        ) : tinkUrl ? (
+        ) : popupOpen ? (
           <>
-            <h3 className="text-[18px] font-bold text-ink mb-4">Connect your bank</h3>
-            <div
-              className="h-80 bg-grey-50 flex items-center justify-center mb-6 overflow-hidden"
-              style={{ borderRadius: 'var(--radius-card)' }}
-            >
-              <iframe
-                ref={iframeRef}
-                src={tinkUrl}
-                className="w-full h-full border-0"
-                style={{ borderRadius: 'var(--radius-card)' }}
-                title="Connect your bank securely"
-                sandbox="allow-scripts allow-same-origin allow-forms allow-popups allow-top-navigation"
-              />
+            <h3 className="text-[22px] font-bold text-ink mb-3">Complete your bank connection</h3>
+            <p className="text-[15px] text-ink-secondary mb-2 leading-relaxed">
+              A secure window has opened for you to connect your bank account.
+            </p>
+            <p className="text-[13px] text-ink-tertiary mb-6">
+              Once connected, we&apos;ll automatically import your financial data.
+            </p>
+            <div className="flex items-center justify-center py-6">
+              <div className="text-center">
+                <div className="h-1 w-32 bg-grey-100 rounded-full overflow-hidden mx-auto mb-3">
+                  <div
+                    className="h-full w-1/3 rounded-full animate-shimmer"
+                    style={{ backgroundColor: 'var(--color-red-500)' }}
+                  />
+                </div>
+                <span className="text-ink-tertiary text-[13px]">Waiting for bank connection...</span>
+              </div>
             </div>
+          </>
+        ) : tinkAvailable ? (
+          <>
+            <h3 className="text-[18px] font-bold text-ink mb-4">Connection window closed</h3>
+            <p className="text-[15px] text-ink-secondary mb-6">
+              The bank connection window was closed before completing.
+            </p>
           </>
         ) : (
           <>
@@ -424,7 +484,7 @@ function TinkModal({
             <p className="text-[15px] text-ink-secondary mb-2 leading-relaxed">
               We&apos;ll walk you through the full journey using sample bank data — a realistic picture of what your financial disclosure will look like.
             </p>
-            <p className="text-[13px] text-ink-tertiary mb-8">
+            <p className="text-[13px] text-ink-tertiary mb-6">
               Open Banking connection will be available when we go live.
             </p>
             {connectError && (
@@ -436,6 +496,20 @@ function TinkModal({
         )}
 
         <div className="flex gap-3">
+          {popupOpen && (
+            <button
+              onClick={handleReopenPopup}
+              className="flex-1 py-3.5 text-[15px] font-medium transition-colors"
+              style={{
+                border: '1px solid var(--color-grey-100)',
+                borderRadius: 'var(--radius-card)',
+              }}
+              onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = 'var(--color-grey-50)')}
+              onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = 'transparent')}
+            >
+              Bring window to front
+            </button>
+          )}
           {!tinkAvailable && !loading && (
             <button
               onClick={onDemoComplete}
@@ -451,15 +525,16 @@ function TinkModal({
             </button>
           )}
           <button
-            onClick={onCancel}
-            className={`py-3.5 text-[15px] font-medium transition-colors ${
-              tinkAvailable
-                ? 'flex-1 bg-grey-50 text-ink-secondary hover:bg-grey-100'
-                : 'px-5 text-ink-secondary hover:bg-grey-50'
-            }`}
+            onClick={() => {
+              if (popupRef.current && !popupRef.current.closed) {
+                popupRef.current.close()
+              }
+              onCancel()
+            }}
+            className="px-5 py-3.5 text-[15px] font-medium text-ink-secondary hover:bg-grey-50 transition-colors"
             style={{
               borderRadius: 'var(--radius-card)',
-              border: tinkAvailable ? 'none' : '1px solid var(--color-grey-100)',
+              border: '1px solid var(--color-grey-100)',
             }}
           >
             Cancel

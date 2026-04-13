@@ -67,21 +67,26 @@ export async function GET(request: NextRequest) {
       })
     }
 
-    // Return HTML page that either:
-    // 1. Posts message to parent (iframe/drop-in mode)
-    // 2. Stores in sessionStorage and redirects (legacy redirect mode)
+    // Return HTML page that detects context and communicates results:
+    // 1. Popup mode (window.opener) — post to opener and close
+    // 2. Iframe mode (window.parent) — post to parent
+    // 3. Redirect mode — store in sessionStorage and navigate
     const html = `<!DOCTYPE html>
 <html><head><title>Connecting your bank...</title></head>
 <body>
-<p>Bank connected successfully. Redirecting...</p>
+<p>Bank connected successfully. Closing...</p>
 <script>
   try {
     var data = ${JSON.stringify(results)};
-    if (window.parent !== window) {
+    if (window.opener) {
+      // Popup mode — post results to opener and close
+      window.opener.postMessage({ type: 'tink-complete', results: data }, '*');
+      window.close();
+    } else if (window.parent !== window) {
       // Iframe mode — post results to parent window
       window.parent.postMessage({ type: 'tink-complete', results: data }, '*');
     } else {
-      // Redirect mode (legacy) — store in sessionStorage
+      // Redirect mode — store in sessionStorage
       sessionStorage.setItem('pendingBankData', JSON.stringify(data));
       window.location.href = '/workspace?source=openbanking';
     }
