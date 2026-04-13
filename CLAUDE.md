@@ -54,7 +54,7 @@ When the session is ending (user says wrap up, or you hit ~2,000 lines), do thes
 
 ## Branch
 
-Development branch: `claude/decouple-v2-financial-disclosure-j9xdZ`
+Development branch: `claude/decouple-v2-financial-disclosure-EZACb`
 
 ## Deployment
 
@@ -66,7 +66,7 @@ Tink Console must whitelist `https://construct-dev.vercel.app/api/bank/callback`
 
 ```
 docs/SESSION-CONTEXT.md                    — START HERE every session
-docs/HANDOFF-SESSION-9.md                  — Most recent session retro
+docs/HANDOFF-SESSION-10.md                 — Most recent session retro
 docs/workspace-spec/24-wireframe-spec-part1.md — Wireframes: carousel, task list, bank connection, reveal
 docs/workspace-spec/25-wireframe-spec-part2.md — Wireframes: confirmation flow, summaries, financial hub
 docs/workspace-spec/26-transitions-animations.md — Every transition, animation, and micro-interaction
@@ -75,6 +75,12 @@ docs/workspace-spec/23-post-confirm-gap-summary.md — What's proved vs gaps aft
 src/components/workspace/welcome-carousel.tsx  — Carousel (screens 1a-1c)
 src/components/workspace/task-list-home.tsx     — Task list home (screen 2a)
 src/components/workspace/bank-connection-flow.tsx — Bank connection + TinkModal + reveal (screens 3-3e)
+src/components/workspace/confirmation-flow.tsx  — Confirmation Q&A (screens 2b-2i)
+src/components/workspace/section-mini-summary.tsx — Per-section summaries (screens 2d-a/b/c)
+src/components/workspace/progress-stepper.tsx   — Progress bar
+src/components/workspace/financial-summary-page.tsx — Financial summary with source badges (screen 3a)
+src/lib/bank/bank-data-utils.ts               — Extraction → UI types + demo factory
+src/lib/bank/confirmation-questions.ts         — Spec 22 question + summary generation
 src/app/workspace/page.tsx                     — Flow state machine orchestrator
 src/app/api/bank/connect/route.ts              — Tink Link auth + URL generation
 src/app/api/bank/callback/route.ts             — Tink callback (iframe postMessage + redirect)

@@ -1,153 +1,137 @@
-# Session 10 Context Block
+# Session 11 Context Block
 
 Product: **Decouple** — financial disclosure workspace for UK divorce (Form E replacement).
 Stack: Next.js 16.2, React 19, TypeScript, Tailwind 4, Supabase, Claude AI, Vercel Pro.
 Deployment: Vercel — preview deployments per branch, production at `construct-dev.vercel.app`.
 
-## What session 9 accomplished
+## What session 10 accomplished
 
-**Foundation build — ~960 lines changed across 9 files.**
+**Confirmation flow + financial summary — ~1,550 lines across 10 files.**
 
-New components built:
-- `WelcomeCarousel` (screens 1a-1c) — 3-slide onboarding with fade transitions (200ms) and segmented progress bar (300ms)
-- `TaskListHome` (screen 2a) — three-phase task list with first-time and post-connection states
-- `BankConnectionFlow` (screens 3, 3b-3e) — loader → dim overlay → Tink modal → progressive reveal → completion
-- `TinkModal` — iframe-based Tink Link integration with postMessage callback; graceful fallback when credentials not configured
+Built the core confirmation interaction:
+- Wired real Tink bank data through entire journey (replaced all mock data)
+- Confirmation flow: income → property → accounts → pensions → debts Q&A
+- Section mini-summaries with confirmed facts, gap messages, equity calculation
+- Progress stepper, accordion with completed section tabs
+- Financial summary page (screen 3a) with green/orange source badges
+- Mortgage balance question for proper equity calculation (value − balance)
+- Accordion choreography: opens on section complete, stays open during review, closes on continue
 
-New types added to `src/types/hub.ts`:
-- `Phase`, `WorkspaceView`, `BankConnectionPhase`, `ConnectedAccount`, `RevealItem`, `TaskItem`, `SectionConfirmation`, `WorkspaceState`
-
-Workspace page rewritten:
-- Flow state machine: carousel → task_list → bank_connection → financial_summary
-- Old hub components (hero panel, discovery flow, etc.) bypassed but preserved
-
-Tink integration fixed:
-- Connect route now uses authorization grant (not delegate) with correct Tink Link scopes
-- Callback route supports both iframe (postMessage) and redirect modes
-- Tested live on Vercel — Tink Link iframe loads and connects to real bank data
-
-CSS animations added per spec 26:
-- fadeIn, slideInLeft, modalAppear, shimmer
-- `prefers-reduced-motion` fallback: all animations instant
-
-Mobile responsiveness pass:
-- Stacked layouts on narrow viewports
-- Responsive padding (p-5 mobile, p-8 desktop)
-- Responsive graphic heights
-
-**Quality checkpoint results (all passed):**
-- [x] Can navigate: carousel → task list → bank connect → reveal → completion
-- [x] Transitions match spec 26 timings
-- [x] Tink opens in modal, not redirect (tested live on Vercel)
-- [x] Responsive on mobile
-- [x] `prefers-reduced-motion` fallbacks work
+**Quality checkpoint results:**
+- [x] Full flow: carousel → task list → connect → reveal → confirm all sections → summary
+- [x] Source badges (green/orange) render correctly
+- [x] Accordion expand/collapse with completed section tabs
+- [x] Mini-summaries show calculated equity value
+- [x] Gap messages appear inline
+- [x] "Skip for now" works without breaking flow
+- [x] Reveal shows data from pipeline (demo extraction, same code path as real Tink)
+- [ ] Post-connection task list (screen 2j) — not built yet
+- [ ] Visual polish — functional but needs design pass
 
 ## Current state of the codebase
 
 **What's real:**
-- Full navigation skeleton end-to-end
-- Tink iframe integration (real bank connections work)
-- All spec 26 animations for carousel, bank connection, and reveal
+- Full navigation: carousel → task list → bank connect → reveal → confirmation → financial summary
+- Bank data pipeline: Tink callback → transformer → extraction → reveal items + confirmation questions
+- Demo fallback through identical pipeline when Tink not configured
+- Confirmation flow with branching logic (salary yes/no, mortgage detected/not, joint/sole ownership)
+- Financial summary with source badges, equity calculations, section cards
 
 **What's mock/placeholder:**
-- Reveal tick items use hardcoded wireframe data — not wired to Tink transformer output yet
-- Completion screen accounts are mock data
-- Task list post-connection is a static placeholder
-- Financial summary is a placeholder page
-- Confirmation flow does not exist yet
+- Demo `BankStatementExtraction` covers employed homeowner only (session 12 fidelity pass)
+- Spending panel: "Panel design pending" placeholder (blocked on user wireframe)
+- Debts panel: placeholder (blocked on user wireframe)
+- Post-connection task list (screen 2j): not yet dynamic
+- No persistence (state resets on refresh)
 
 **Old components still present but unused:**
-- `src/components/hub/hero-panel.tsx` — bypassed, not imported
-- `src/components/hub/discovery-flow.tsx` — bypassed
-- `src/components/hub/evidence-lozenge.tsx` — bypassed
-- `src/components/hub/fidelity-label.tsx` — bypassed
-- `src/hooks/use-hub.ts` — not imported by new workspace page
+- `src/components/hub/hero-panel.tsx`, `discovery-flow.tsx`, `evidence-lozenge.tsx`, `fidelity-label.tsx`
+- `src/hooks/use-hub.ts`
+- `src/components/workspace/financial-summary.tsx` (legacy v1 component, different from new `financial-summary-page.tsx`)
 
-## Session 10 deliverables
+## Session 11 deliverables
 
-### Goal: Confirmation flow + financial summary with real data
+### Goal: Visual design pass + post-connection task list
 
 **Priority order:**
 
-1. **Wire reveal to real Tink data** — replace mock `MOCK_REVEAL_ITEMS` and `MOCK_ACCOUNTS` with data from `tink-transformer.ts`. The reveal should show what the bank connection actually found.
+1. **Visual design pass** — the journey works end-to-end but looks like raw Tailwind. This is the priority:
+   - Typography hierarchy (heading sizes, weights, letter-spacing across all screens)
+   - Card styling (border treatment, shadows, corner radius consistency)
+   - Button system (primary/secondary/ghost states, hover/active/disabled)
+   - Spacing rhythm (consistent padding/margins across carousel, task list, confirmation, summary)
+   - Colour refinement (green/orange badges, info boxes, progress bar, locked phases)
+   - Mobile responsive polish
+   - Animation easing curves refined to match spec 26 exactly
+   - Reference: Airbnb minimalism for palette/spacing, Emma app for interaction patterns
+   - Spec 18 tokens (spacing, typography, shadows) are still valid — colour palette superseded
 
-2. **ConfirmationFlow component** (screens 2b-2i) — section-by-section Q&A within the task list frame:
-   - Persistent frame: bank connection row with accordion, progress stepper, locked phases
-   - Income section: salary detection, yes/no branching, gap planting
-   - Property section: strong signal / no signal / ambiguous signal variants
-   - Accounts section: transfer detection
-   - Pensions section: no-signal path
-   - Debts section: no-signal path
-   - Read spec 25 carefully before building
+2. **Post-connection task list (screen 2j)** — the home page after confirmation:
+   - Dynamic tasks generated from confirmation answers
+   - Gap documents become specific upload actions (payslips, mortgage statement, CETV)
+   - All three phases active (Preparation, Sharing, Finalisation)
+   - "View financial summary" link
+   - Pension CETV action task
+   - MIAM booking, divorce application tasks
+   - "+ Add more tasks" per phase
+   - Fully specced in `docs/workspace-spec/25-wireframe-spec-part2.md` screen 2j
 
-3. **SectionMiniSummary component** (screens 2d-a/b/c) — per-section summary:
-   - Tick list of confirmed facts
-   - Inline gap messages (info boxes)
-   - Calculated values (e.g. equity = property value - mortgage)
-   - "This looks correct" / "I need to go back" actions
-   - Accordion expansion to show completed sub-tab
+3. **Edit flows from financial summary** — [Edit] links from section cards back to confirmation questions
 
-4. **Progress stepper** — advances per section, filled segments per spec 26 timing
+4. **Connect another bank account** — "+" button on accounts card
 
-5. **FinancialSummary page** (screen 3a) — replace placeholder:
-   - Section cards stacked vertically with stagger animation
-   - Source badges: green (bank connection) / orange (self disclosed)
-   - Calculated values, contextual guidance inline
-   - "+ Add" buttons per section
-   - Back to dashboard link
-
-6. **Placeholder cards** for spending and debts (TBC panels in wireframes)
-
-### Quality checkpoint before ending session 10:
-- [ ] Full flow: carousel → task list → connect → reveal → confirm all sections → summary → financial hub
-- [ ] Source badges (green/orange) render correctly
-- [ ] Accordion expand/collapse animations match spec 26
-- [ ] Mini-summaries show calculated values (equity)
-- [ ] Gap messages appear inline with correct copy
-- [ ] Every "Skip for now" works without breaking the flow
-- [ ] Reveal shows real data from Tink transformer (not mock)
+### Quality checkpoint before ending session 11:
+- [ ] Visual quality feels like a premium fintech product (Airbnb-level)
+- [ ] Typography, spacing, and colour are consistent across ALL screens
+- [ ] Post-connection task list shows dynamic tasks from confirmation answers
+- [ ] Gap documents appear as specific upload tasks in Finalisation phase
+- [ ] All three phases active on task list after confirmation
+- [ ] "View financial summary" navigates to screen 3a
+- [ ] Responsive on mobile — all screens
+- [ ] prefers-reduced-motion fallbacks still work after visual pass
 
 ## CRITICAL reads before any code
 
-1. **Spec 25** (`docs/workspace-spec/25-wireframe-spec-part2.md`) — confirmation flow screens, mini-summaries, financial hub, post-connection task list. **This is the primary spec for session 10.**
-2. **Spec 22** (`docs/workspace-spec/22-confirmation-flow-tree.md`) — decision logic for every Form E section. Drives the confirmation Q&A.
-3. **Spec 26** (`docs/workspace-spec/26-transitions-animations.md`) — sections 5-8 cover confirmation flow, mini-summary, final summary, and financial hub transitions.
-4. **Spec 23** (`docs/workspace-spec/23-post-confirm-gap-summary.md`) — what's proved vs gaps after bank connect. Drives gap messages.
+1. **Spec 18** (`docs/workspace-spec/18-visual-design-system.md`) — spacing, typography, shadow tokens. Colour palette superseded but tokens valid.
+2. **Spec 25** (`docs/workspace-spec/25-wireframe-spec-part2.md`) — screen 2j (post-connection task list) is the primary new build.
+3. **Spec 26** (`docs/workspace-spec/26-transitions-animations.md`) — section 9: post-connection task list animations.
 
-## Wireframes still pending from user
+## Deferred work (NOT session 11)
 
-| Wireframe | Priority | Blocks |
-|-----------|----------|--------|
-| Spending categorisation dialogue | **Urgent** | Session 10 spending section |
-| Spending panel (financial summary) | Soon | Session 10 financial summary |
-| Debts panel (financial summary) | Soon | Session 10 financial summary |
-| Build children picture flow | Later | Session 11+ |
-| Needs after separation flow | Later | Session 11+ |
-| Share & collaborate screens | Later | Session 11+ |
+| What | When | Why deferred |
+|---|---|---|
+| Spending panel + flow | When user delivers wireframe | Blocked on user design work |
+| Debts panel | When user delivers wireframe | Blocked on user design work |
+| Decision tree fidelity (spec 22) | Session 12+ | Pair with Tink sandbox test bank for real signal coverage |
+| Tink sandbox test bank | Session 12+ | Pair with decision tree fidelity pass |
+| Supabase persistence | Session 13+ | Backlog item #65, requires auth upgrade |
 
 ## Negative constraints
-1. **Do not use `response_format`** — Anthropic SDK uses `output_config.format`
-2. **Do not reference pre-pivot specs (03-06, 11, 12)** — architecture changed
-3. **Do not reinterpret wireframes** — implement specs 24-25 as written
-4. **Transitions are not optional** — implement spec 26 for every state change
-5. **Never show Form E codes to users** — human-readable labels always
-6. **Tink redirect URIs must be whitelisted** — iframe mode uses postMessage callback
-7. **Reveal mock data must be replaced** — don't ship wireframe placeholder copy as real data
+1. **Do not build spending panel** — wireframe not delivered yet, placeholder is fine
+2. **Do not build debts flow** — wireframe not delivered yet
+3. **Do not expand decision tree** — session 12 work, paired with test bank data
+4. **Do not connect Tink sandbox** — deferred to session 12 alongside fidelity pass
+5. **Do not apply spec 18 colours to new components** — colour palette superseded, will be updated in visual pass
+6. **Do not reference pre-pivot specs (03-06, 11, 12)**
+7. **Transitions are not optional** — spec 26 for every state change
 
 ## Key files
 ```
+docs/SESSION-CONTEXT.md                    — START HERE every session
+docs/HANDOFF-SESSION-10.md                 — Most recent session retro
+docs/workspace-spec/18-visual-design-system.md — Token system (spacing, typography, shadows)
+docs/workspace-spec/25-wireframe-spec-part2.md — Screen 2j post-connection task list + all confirmation screens
+docs/workspace-spec/26-transitions-animations.md — Animation timings (section 9 for task list)
 src/components/workspace/welcome-carousel.tsx  — Carousel (done)
-src/components/workspace/task-list-home.tsx     — Task list home (done, needs post-connection dynamic state)
-src/components/workspace/bank-connection-flow.tsx — Bank connection + TinkModal + reveal (done, needs real data)
-src/app/workspace/page.tsx                      — Flow state machine orchestrator
-src/app/api/bank/connect/route.ts               — Tink Link auth + URL generation
-src/app/api/bank/callback/route.ts              — Tink callback (iframe postMessage + redirect)
-src/lib/bank/tink-client.ts                     — Tink API client (createTinkLinkAuthCode is the key function)
-src/lib/bank/tink-transformer.ts                — Tink → BankStatementExtraction (wire to reveal)
-src/lib/ai/result-transformer.ts                — Decision trees (drives confirmation Q&A)
-src/types/hub.ts                                — All types (workspace types at top, legacy below)
-src/app/globals.css                             — Animations + prefers-reduced-motion
-docs/workspace-spec/25-wireframe-spec-part2.md  — PRIMARY SPEC for session 10
-docs/workspace-spec/22-confirmation-flow-tree.md — Decision logic
-docs/workspace-spec/26-transitions-animations.md — Animation timings
+src/components/workspace/task-list-home.tsx     — Task list home (needs 2j dynamic state)
+src/components/workspace/bank-connection-flow.tsx — Bank connection + reveal (done)
+src/components/workspace/confirmation-flow.tsx  — Confirmation Q&A (done)
+src/components/workspace/section-mini-summary.tsx — Per-section summaries (done)
+src/components/workspace/progress-stepper.tsx   — Progress bar (done)
+src/components/workspace/financial-summary-page.tsx — Financial summary with badges (done)
+src/lib/bank/bank-data-utils.ts               — Extraction → UI type converters + demo factory
+src/lib/bank/confirmation-questions.ts         — Spec 22 question + summary generation
+src/app/workspace/page.tsx                     — Flow state machine orchestrator
+src/types/hub.ts                               — All types
+src/app/globals.css                            — Animations + tokens
 ```
