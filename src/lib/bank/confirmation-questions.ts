@@ -27,8 +27,8 @@ export interface ConfirmationStep {
   inputPrefix?: string
   inputPlaceholder?: string
   inputQualifiers?: ConfirmationOption[]
-  // Show only when a previous answer matches
-  showWhen?: { questionId: string; value: string }
+  // Show only when a previous answer matches (array = any of these values)
+  showWhen?: { questionId: string; value: string | string[] }
 }
 
 export interface SectionSummaryFact {
@@ -127,82 +127,196 @@ function generateIncomeSteps(extractions: BankStatementExtraction[]): Confirmati
   ]
 }
 
-// ═══ Property (spec 22 §2, spec 25 screens 2e-a/b/c, 2f, 2g) ═══
+// ═══ Property (spec 22 §2) ═══
+//
+// Ladder:
+//   1. Entry: mortgage detected → confirm, OR no signal → housing situation
+//   2. Government scheme check (if mortgaged)
+//   3. Shared ownership % (if applicable)
+//   4. Sole / joint ownership
+//   5. Property value
+//   6. Mortgage balance (if mortgaged)
+//   7. Help to Buy balance (if applicable)
+//   8. Who lives there
+//   9. Property status
+//
+// Cross-section impacts:
+//   → Spending: expect council tax + buildings insurance if owns
+//   → Debts: mortgage noted, don't re-ask
+//   → Finalisation: mortgage statement + valuations
 
 function generatePropertySteps(extractions: BankStatementExtraction[]): ConfirmationStep[] {
   const allPayments = extractions.flatMap((e) => e.regular_payments)
   const mortgage = allPayments.find((p) => p.likely_category === 'mortgage')
   const steps: ConfirmationStep[] = []
 
+  // ── Entry question ──
+
   if (mortgage) {
-    // Strong signal — known lender
     steps.push({
       id: 'property-mortgage',
       sectionKey: 'property',
       sectionLabel: 'Property',
       type: 'question',
-      text: `£${mortgage.amount.toLocaleString()} goes to ${mortgage.payee} on the 1st of each month. Is this your mortgage?`,
+      text: `£${mortgage.amount.toLocaleString()}/month to ${mortgage.payee}. Is this your mortgage?`,
       options: [
-        { label: 'Yes', value: 'yes' },
+        { label: 'Yes, that\'s my mortgage', value: 'yes' },
         { label: 'No, I rent', value: 'rent' },
         { label: 'Something else', value: 'other' },
       ],
     })
   } else {
-    // No signal
     steps.push({
       id: 'property-no-signal',
       sectionKey: 'property',
       sectionLabel: 'Property',
       type: 'question',
-      text: "We didn't detect anything that looked like a mortgage payment, do you own any property?",
+      text: "We didn't find mortgage or rent payments. What's your housing situation?",
       options: [
-        { label: 'Yes', value: 'yes' },
-        { label: 'No', value: 'no' },
+        { label: 'I own with a mortgage (paid elsewhere)', value: 'yes_mortgage' },
+        { label: 'I own outright — no mortgage', value: 'yes_outright' },
+        { label: 'I rent (paid from another account)', value: 'rent' },
+        { label: 'Partner or family pays housing', value: 'partner_pays' },
+        { label: 'Living with family or friends', value: 'family' },
       ],
     })
   }
 
-  // Follow-ups if mortgage/ownership confirmed
-  const mortgageQuestionId = mortgage ? 'property-mortgage' : 'property-no-signal'
+  // ── Values for "owns property" condition ──
+  const entryId = mortgage ? 'property-mortgage' : 'property-no-signal'
+  const ownsValues = mortgage ? 'yes' : ['yes_mortgage', 'yes_outright']
+  const hasMortgageValues = mortgage ? 'yes' : 'yes_mortgage'
+
+  // ── Government scheme check (only if mortgaged) ──
+
+  steps.push({
+    id: 'property-scheme',
+    sectionKey: 'property',
+    sectionLabel: 'Property',
+    type: 'question',
+    text: 'Is there a government scheme on this property?',
+    subtext: 'Help to Buy, shared ownership, and Right to Buy all affect your equity.',
+    options: [
+      { label: 'No, standard mortgage', value: 'standard' },
+      { label: 'Help to Buy equity loan', value: 'help_to_buy' },
+      { label: 'Shared ownership', value: 'shared_ownership' },
+      { label: 'Right to Buy', value: 'right_to_buy' },
+    ],
+    showWhen: { questionId: entryId, value: hasMortgageValues },
+  })
+
+  // ── Shared ownership: what percentage do you own? ──
+
+  steps.push({
+    id: 'property-ownership-pct',
+    sectionKey: 'property',
+    sectionLabel: 'Property',
+    type: 'question',
+    text: 'What percentage of the property do you own?',
+    subtext: 'This is the share you purchased — the rest is owned by the housing association.',
+    options: [
+      { label: '25%', value: '25' },
+      { label: '40%', value: '40' },
+      { label: '50%', value: '50' },
+      { label: '75%', value: '75' },
+      { label: 'Other', value: 'other' },
+    ],
+    showWhen: { questionId: 'property-scheme', value: 'shared_ownership' },
+  })
+
+  // ── Sole / joint ──
 
   steps.push({
     id: 'property-joint',
     sectionKey: 'property',
     sectionLabel: 'Property',
     type: 'question',
-    text: 'Do you jointly own your property with your spouse/partner?',
+    text: 'Do you own this property...',
     options: [
-      { label: 'Yes', value: 'yes' },
-      { label: 'No', value: 'no' },
+      { label: 'In my name only', value: 'sole' },
+      { label: 'Jointly with my partner', value: 'joint_partner' },
+      { label: 'Jointly with someone else', value: 'joint_other' },
     ],
-    showWhen: { questionId: mortgageQuestionId, value: 'yes' },
+    showWhen: { questionId: entryId, value: ownsValues },
   })
+
+  // ── Property value ──
 
   steps.push({
     id: 'property-value',
     sectionKey: 'property',
     sectionLabel: 'Property',
     type: 'input',
-    text: 'What is the current market value of your property?',
+    text: 'Roughly, what is the property worth?',
     inputPrefix: '£',
-    inputPlaceholder: 'e.g. 500,000',
+    inputPlaceholder: 'e.g. 350,000',
     inputQualifiers: [
-      { label: 'This is an estimate', value: 'estimate' },
-      { label: 'I recently had my property valued by an estate agent', value: 'valued' },
+      { label: 'This is a rough estimate', value: 'estimate' },
+      { label: 'Recently valued by an estate agent', value: 'valued' },
     ],
-    showWhen: { questionId: mortgageQuestionId, value: 'yes' },
+    showWhen: { questionId: entryId, value: ownsValues },
   })
+
+  // ── Mortgage balance (only if mortgaged) ──
 
   steps.push({
     id: 'property-mortgage-balance',
     sectionKey: 'property',
     sectionLabel: 'Property',
     type: 'input',
-    text: 'What is your estimated outstanding mortgage balance?',
+    text: 'What is the outstanding mortgage balance?',
+    subtext: 'An estimate is fine — we\'ll get the exact figure from a mortgage statement later.',
     inputPrefix: '£',
-    inputPlaceholder: 'e.g. 320,000',
-    showWhen: { questionId: mortgageQuestionId, value: 'yes' },
+    inputPlaceholder: 'e.g. 220,000',
+    showWhen: { questionId: entryId, value: hasMortgageValues },
+  })
+
+  // ── Help to Buy equity loan balance ──
+
+  steps.push({
+    id: 'property-htb-balance',
+    sectionKey: 'property',
+    sectionLabel: 'Property',
+    type: 'input',
+    text: 'What is the outstanding Help to Buy loan balance?',
+    subtext: 'This is the government equity loan, separate from your mortgage.',
+    inputPrefix: '£',
+    inputPlaceholder: 'e.g. 60,000',
+    showWhen: { questionId: 'property-scheme', value: 'help_to_buy' },
+  })
+
+  // ── Who lives there ──
+
+  steps.push({
+    id: 'property-occupation',
+    sectionKey: 'property',
+    sectionLabel: 'Property',
+    type: 'question',
+    text: 'Who currently lives in this property?',
+    options: [
+      { label: 'I do', value: 'me' },
+      { label: 'My partner does', value: 'partner' },
+      { label: 'We both still live there', value: 'both' },
+      { label: 'Neither — it\'s empty or rented out', value: 'neither' },
+    ],
+    showWhen: { questionId: entryId, value: ownsValues },
+  })
+
+  // ── Property status ──
+
+  steps.push({
+    id: 'property-status',
+    sectionKey: 'property',
+    sectionLabel: 'Property',
+    type: 'question',
+    text: "What's the current situation with the property?",
+    options: [
+      { label: 'It\'s our family home', value: 'family_home' },
+      { label: 'It\'s on the market', value: 'on_market' },
+      { label: 'Sale agreed or under offer', value: 'under_offer' },
+      { label: 'Being rented out since separation', value: 'rented_out' },
+    ],
+    showWhen: { questionId: entryId, value: ownsValues },
   })
 
   return steps
@@ -371,51 +485,136 @@ function generatePropertySummary(
   const facts: SectionSummaryFact[] = []
   const calculated: { label: string; value: string }[] = []
 
-  const ownsProperty = answers['property-mortgage'] === 'yes' || answers['property-no-signal'] === 'yes'
-  const isJoint = answers['property-joint'] === 'yes'
+  // ── Determine ownership from either entry path ──
+  const ownsProperty =
+    answers['property-mortgage'] === 'yes' ||
+    answers['property-no-signal'] === 'yes_mortgage' ||
+    answers['property-no-signal'] === 'yes_outright'
+  const isRenting =
+    answers['property-mortgage'] === 'rent' ||
+    answers['property-no-signal'] === 'rent'
+
+  const jointAnswer = answers['property-joint']
+  const isJoint = jointAnswer === 'joint_partner'
+  const scheme = answers['property-scheme']
+  const ownershipPct = answers['property-ownership-pct'] ? parseInt(answers['property-ownership-pct'], 10) : null
   const propertyValue = answers['property-value'] ? parseInt(answers['property-value'].replace(/,/g, ''), 10) : null
   const mortgageBalance = answers['property-mortgage-balance'] ? parseInt(answers['property-mortgage-balance'].replace(/,/g, ''), 10) : null
+  const htbBalance = answers['property-htb-balance'] ? parseInt(answers['property-htb-balance'].replace(/,/g, ''), 10) : null
+  const occupation = answers['property-occupation']
+  const status = answers['property-status']
 
-  if (ownsProperty) {
-    const jointLabel = isJoint ? 'jointly own' : 'own'
-    const valueLabel = propertyValue ? ` estimated value £${propertyValue.toLocaleString()}` : ''
-    facts.push({ label: `You ${jointLabel} a property${valueLabel}`, source: 'self' })
-  }
-
-  if (mortgageBalance) {
-    facts.push({
-      label: `You have an estimated mortgage balance of £${mortgageBalance.toLocaleString()}`,
-      source: 'self',
-    })
-    if (isJoint) {
-      facts.push({ label: 'You share the ownership of this property, the starting position for marriage is 50/50', source: 'self' })
+  if (isRenting) {
+    facts.push({ label: 'You rent your home — no property to disclose', source: 'self' })
+    return {
+      sectionKey: 'property',
+      sectionLabel: 'Property',
+      heading: "That's it for property",
+      facts,
+      accordionLabel: 'No property to disclose',
     }
   }
 
-  if (mortgage) {
-    facts.push({
-      label: `You have a mortgage with ${mortgage.payee}`,
-      source: 'bank',
-      gapMessage: 'When we get to finalisation, we will need a mortgage statement for the exact balance and terms, but this estimate is fine for the mediation process. We will add an action to your task list.',
-    })
+  if (!ownsProperty) {
+    const situation = answers['property-no-signal']
+    if (situation === 'partner_pays') {
+      facts.push({ label: 'Your partner or family pays your housing costs', source: 'self' })
+    } else if (situation === 'family') {
+      facts.push({ label: 'You\'re living with family or friends', source: 'self' })
+    }
+    return {
+      sectionKey: 'property',
+      sectionLabel: 'Property',
+      heading: "That's it for property",
+      facts: facts.length > 0 ? facts : [{ label: 'No property to disclose', source: 'self' }],
+      accordionLabel: 'No property to disclose',
+    }
   }
 
-  if (propertyValue && mortgageBalance) {
-    const estimatedEquity = propertyValue - mortgageBalance
-    if (estimatedEquity > 0) {
-      const perPerson = isJoint ? Math.round(estimatedEquity / 2) : estimatedEquity
+  // ── Owns property ──
+
+  // Ownership type
+  const ownershipLabel = jointAnswer === 'sole' ? 'own' : jointAnswer === 'joint_partner' ? 'jointly own with your partner' : 'jointly own'
+  const schemeLabel = scheme === 'shared_ownership' && ownershipPct ? ` (${ownershipPct}% shared ownership)` : scheme === 'help_to_buy' ? ' (Help to Buy)' : scheme === 'right_to_buy' ? ' (Right to Buy)' : ''
+  const valueLabel = propertyValue ? `, estimated value £${propertyValue.toLocaleString()}` : ''
+  facts.push({ label: `You ${ownershipLabel} a property${schemeLabel}${valueLabel}`, source: 'self' })
+
+  // Mortgage balance
+  if (mortgageBalance) {
+    facts.push({ label: `Outstanding mortgage balance: £${mortgageBalance.toLocaleString()}`, source: mortgage ? 'bank' : 'self' })
+  }
+
+  // Help to Buy balance
+  if (htbBalance) {
+    facts.push({ label: `Outstanding Help to Buy loan: £${htbBalance.toLocaleString()}`, source: 'self' })
+  }
+
+  // Joint ownership note
+  if (isJoint) {
+    facts.push({ label: 'Jointly owned — the starting position in marriage is 50/50', source: 'self' })
+  }
+
+  // Occupation
+  if (occupation === 'me') facts.push({ label: 'You currently live in the property', source: 'self' })
+  else if (occupation === 'partner') facts.push({ label: 'Your partner currently lives in the property', source: 'self' })
+  else if (occupation === 'both') facts.push({ label: 'You both currently live in the property', source: 'self' })
+  else if (occupation === 'neither') facts.push({ label: 'The property is currently empty or rented out', source: 'self' })
+
+  // Status
+  if (status === 'on_market') facts.push({ label: 'The property is currently on the market', source: 'self' })
+  else if (status === 'under_offer') facts.push({ label: 'Sale agreed or under offer', source: 'self' })
+  else if (status === 'rented_out') facts.push({ label: 'The property is being rented out since separation', source: 'self' })
+
+  // ── Equity calculation ──
+  if (propertyValue) {
+    let equity: number
+
+    if (scheme === 'shared_ownership' && ownershipPct) {
+      // Shared ownership: your share of value minus your mortgage
+      const yourShare = Math.round(propertyValue * (ownershipPct / 100))
+      equity = yourShare - (mortgageBalance ?? 0)
       calculated.push({
-        label: `Your property has an estimated equity value of £${estimatedEquity.toLocaleString()}${isJoint ? ` — £${perPerson.toLocaleString()} each` : ''}`,
-        value: `£${estimatedEquity.toLocaleString()}`,
+        label: `Your ${ownershipPct}% share is worth £${yourShare.toLocaleString()}, equity £${equity.toLocaleString()}`,
+        value: `£${equity.toLocaleString()}`,
+      })
+    } else if (scheme === 'help_to_buy' && htbBalance) {
+      // Help to Buy: value minus mortgage minus equity loan
+      equity = propertyValue - (mortgageBalance ?? 0) - htbBalance
+      calculated.push({
+        label: `Estimated equity: £${equity.toLocaleString()} (after mortgage and Help to Buy loan)`,
+        value: `£${equity.toLocaleString()}`,
+      })
+    } else if (mortgageBalance) {
+      // Standard: value minus mortgage
+      equity = propertyValue - mortgageBalance
+      const label = equity >= 0
+        ? `Estimated equity: £${equity.toLocaleString()}${isJoint ? ` — £${Math.round(equity / 2).toLocaleString()} each` : ''}`
+        : `Negative equity: the mortgage exceeds the property value by £${Math.abs(equity).toLocaleString()}`
+      calculated.push({ label, value: `£${equity.toLocaleString()}` })
+    } else {
+      // Own outright — full value is equity
+      equity = propertyValue
+      calculated.push({
+        label: `No mortgage — full equity £${equity.toLocaleString()}${isJoint ? ` — £${Math.round(equity / 2).toLocaleString()} each` : ''}`,
+        value: `£${equity.toLocaleString()}`,
       })
     }
   }
 
-  if (propertyValue && answers['property-value-qualifier'] === 'estimate') {
+  // ── Gap messages ──
+  if (mortgage) {
+    facts.push({
+      label: `Mortgage with ${mortgage.payee}`,
+      source: 'bank',
+      gapMessage: 'For finalisation, we\'ll need a mortgage statement for exact balance and terms. This estimate is fine for mediation.',
+    })
+  }
+
+  if (answers['property-value-qualifier'] === 'estimate') {
     facts.push({
       label: 'Property value is an estimate',
       source: 'self',
-      gapMessage: 'When we get to finalisation, we will need ideally 3 separate property valuations from different estate agents. This estimate is fine for mediation, we will add an action to your task list.',
+      gapMessage: 'For finalisation, we\'ll need 3 estate agent valuations. This estimate is fine for mediation.',
     })
   }
 
@@ -425,7 +624,7 @@ function generatePropertySummary(
     heading: "That's it for property",
     facts,
     calculatedValues: calculated.length > 0 ? calculated : undefined,
-    accordionLabel: 'Property disclosed, ready for sharing & collaboration',
+    accordionLabel: ownsProperty ? 'Property disclosed, ready for sharing & collaboration' : 'No property to disclose',
   }
 }
 

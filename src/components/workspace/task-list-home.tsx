@@ -82,9 +82,10 @@ function generateFinalisationTasks(
   const tasks: GeneratedTask[] = []
   const answers = confirmations.reduce((acc, c) => ({ ...acc, ...c.answers }), {} as Record<string, string>)
 
-  // Property valuation — if property confirmed
+  // Property valuation — if property confirmed (new answer values)
   const hasProperty = answers['property-mortgage'] === 'yes' ||
-    answers['property-own'] === 'yes'
+    answers['property-no-signal'] === 'yes_mortgage' ||
+    answers['property-no-signal'] === 'yes_outright'
   if (hasProperty) {
     tasks.push({
       id: 'valuation',

@@ -49,7 +49,11 @@ export function ConfirmationFlow({
   const visibleSteps = useMemo(() => {
     return allSteps.filter((step: ConfirmationStep) => {
       if (!step.showWhen) return true
-      return answers[step.showWhen.questionId] === step.showWhen.value
+      const answer = answers[step.showWhen.questionId]
+      if (Array.isArray(step.showWhen.value)) {
+        return step.showWhen.value.includes(answer)
+      }
+      return answer === step.showWhen.value
     })
   }, [allSteps, answers])
 
@@ -83,7 +87,11 @@ export function ConfirmationFlow({
 
     const nextVisibleSteps = allSteps.filter((step: ConfirmationStep) => {
       if (!step.showWhen) return true
-      return nextAnswers[step.showWhen.questionId] === step.showWhen.value
+      const answer = nextAnswers[step.showWhen.questionId]
+      if (Array.isArray(step.showWhen.value)) {
+        return step.showWhen.value.includes(answer)
+      }
+      return answer === step.showWhen.value
     })
 
     const nextStepIndex = stepIndex + 1
@@ -104,7 +112,11 @@ export function ConfirmationFlow({
     const nextStepIndex = stepIndex + 1
     const nextVisibleSteps = allSteps.filter((step: ConfirmationStep) => {
       if (!step.showWhen) return true
-      return answers[step.showWhen.questionId] === step.showWhen.value
+      const answer = answers[step.showWhen.questionId]
+      if (Array.isArray(step.showWhen.value)) {
+        return step.showWhen.value.includes(answer)
+      }
+      return answer === step.showWhen.value
     })
 
     if (nextStepIndex >= nextVisibleSteps.length) {

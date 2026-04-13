@@ -53,11 +53,28 @@ export function FinancialSummaryPage({
   const salary = extractions.flatMap((e) => e.income_deposits).find((i) => i.type === 'employment')
   const benefits = extractions.flatMap((e) => e.income_deposits).filter((i) => i.type === 'benefits')
   const mortgage = extractions.flatMap((e) => e.regular_payments).find((p) => p.likely_category === 'mortgage')
-  const answers = confirmations[0]?.answers ?? {}
+  const answers = confirmations.reduce((acc: Record<string, string>, c: SectionConfirmation) => ({ ...acc, ...c.answers }), {})
   const propertyValue = answers['property-value'] ? parseInt(answers['property-value'].replace(/,/g, ''), 10) : null
   const mortgageBalance = answers['property-mortgage-balance'] ? parseInt(answers['property-mortgage-balance'].replace(/,/g, ''), 10) : null
-  const isJoint = answers['property-joint'] === 'yes'
-  const equity = propertyValue && mortgageBalance ? propertyValue - mortgageBalance : null
+  const htbBalance = answers['property-htb-balance'] ? parseInt(answers['property-htb-balance'].replace(/,/g, ''), 10) : null
+  const isJoint = answers['property-joint'] === 'joint_partner'
+  const scheme = answers['property-scheme']
+  const ownershipPct = answers['property-ownership-pct'] ? parseInt(answers['property-ownership-pct'], 10) : null
+  const ownsProperty = answers['property-mortgage'] === 'yes' || answers['property-no-signal'] === 'yes_mortgage' || answers['property-no-signal'] === 'yes_outright'
+
+  // Equity calculation matching the new property tree
+  let equity: number | null = null
+  if (propertyValue) {
+    if (scheme === 'shared_ownership' && ownershipPct) {
+      equity = Math.round(propertyValue * (ownershipPct / 100)) - (mortgageBalance ?? 0)
+    } else if (scheme === 'help_to_buy' && htbBalance) {
+      equity = propertyValue - (mortgageBalance ?? 0) - htbBalance
+    } else if (mortgageBalance) {
+      equity = propertyValue - mortgageBalance
+    } else {
+      equity = propertyValue // own outright
+    }
+  }
   const hasPension = confirmations.some((c: SectionConfirmation) =>
     c.sectionKey === 'pensions' && c.confirmedFacts.some((f: string) => f.includes('at least one')),
   )
@@ -107,28 +124,38 @@ export function FinancialSummaryPage({
 
       {/* ═══ Property card ═══ */}
       <SectionCard title="Property" delay={200}>
-        {propertyValue && (
-          <SummaryRow
-            label={`${isJoint ? 'Jointly own' : 'Own'} property — estimated \u00A3${propertyValue.toLocaleString()}`}
-            badge="self"
-          />
+        {ownsProperty && propertyValue ? (
+          <>
+            <SummaryRow
+              label={`${isJoint ? 'Jointly own' : 'Own'} property${scheme === 'shared_ownership' && ownershipPct ? ` (${ownershipPct}% shared ownership)` : scheme === 'help_to_buy' ? ' (Help to Buy)' : ''} — estimated \u00A3${propertyValue.toLocaleString()}`}
+              badge="self"
+            />
+            {mortgageBalance && (
+              <SummaryRow label={`Mortgage balance: \u00A3${mortgageBalance.toLocaleString()}`} badge={mortgage ? 'bank' : 'self'} bankName={bankName} />
+            )}
+            {htbBalance && (
+              <SummaryRow label={`Help to Buy loan: \u00A3${htbBalance.toLocaleString()}`} badge="self" />
+            )}
+            {isJoint && (
+              <SummaryRow label="Jointly owned — starting position 50/50" badge="self" />
+            )}
+            {equity !== null && (
+              <SummaryRow
+                label={equity >= 0
+                  ? `Equity: \u00A3${equity.toLocaleString()}${isJoint ? ` — \u00A3${Math.round(equity / 2).toLocaleString()} each` : ''}`
+                  : `Negative equity: mortgage exceeds value by \u00A3${Math.abs(equity).toLocaleString()}`}
+                badge="self"
+              />
+            )}
+            {mortgage && (
+              <SummaryRow label={`Mortgage with ${mortgage.payee}`} badge="bank" bankName={bankName} />
+            )}
+          </>
+        ) : ownsProperty ? (
+          <SummaryRow label="Property owned — details to be confirmed" badge="self" />
+        ) : (
+          <SummaryRow label="No property to disclose" badge="self" />
         )}
-        {mortgageBalance && (
-          <SummaryRow label={`Mortgage balance — estimated \u00A3${mortgageBalance.toLocaleString()}`} badge="self" />
-        )}
-        {isJoint && (
-          <SummaryRow label="Shared ownership — starting position 50/50" badge="self" />
-        )}
-        {equity && equity > 0 && (
-          <SummaryRow
-            label={`Equity \u00A3${equity.toLocaleString()}${isJoint ? ` — \u00A3${Math.round(equity / 2).toLocaleString()} each` : ''}`}
-            badge="self"
-          />
-        )}
-        {mortgage && (
-          <SummaryRow label={`Mortgage with ${mortgage.payee}`} badge="bank" bankName={bankName} />
-        )}
-        <SummaryRow label="No second property" badge="self" />
         <AddButton label="Declare further property" />
       </SectionCard>
 
