@@ -105,7 +105,11 @@ export async function createUser(externalUserId: string): Promise<{ userId: stri
   return { userId: data.user_id, raw: data }
 }
 
-export async function getAuthorizationCode(userId: string): Promise<string> {
+// Default scope for data access. Tink Link needs TINK_LINK_SCOPE instead.
+const DATA_ACCESS_SCOPE = 'accounts:read,transactions:read'
+export const TINK_LINK_SCOPE = 'authorization:read,credentials:refresh,credentials:read,credentials:write,providers:read,user:read'
+
+export async function getAuthorizationCode(userId: string, scope?: string): Promise<string> {
   const { clientId } = getConfig()
   const token = await getClientToken('authorization:grant')
 
@@ -118,7 +122,7 @@ export async function getAuthorizationCode(userId: string): Promise<string> {
     body: new URLSearchParams({
       user_id: userId,
       actor_client_id: clientId,
-      scope: 'accounts:read,transactions:read',
+      scope: scope ?? DATA_ACCESS_SCOPE,
     }),
   })
 
