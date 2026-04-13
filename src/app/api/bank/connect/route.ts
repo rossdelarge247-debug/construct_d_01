@@ -1,15 +1,16 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createUser, createTinkLinkAuthCode, buildTinkLinkUrl } from '@/lib/bank/tink-client'
-import { randomUUID } from 'crypto'
+import { buildTinkLinkUrl } from '@/lib/bank/tink-client'
 
 /**
  * POST /api/bank/connect
  *
  * Initiates a Tink Link session for Open Banking bank connection.
- * Returns a URL that the client opens in a popup window (not iframe —
- * Tink blocks iframe embedding with INVALID_STATE_EMBED_NOT_ALLOWED).
+ * Opens in a popup window (Tink blocks iframe embedding).
  *
- * Flow: create Tink user → get auth code → build Tink Link URL.
+ * Uses client_id-only mode — Tink Link creates a temporary user internally.
+ * The authorization-grant API has changed and no longer auto-creates users
+ * from external_user_id, and createUser + user_id produces auth codes that
+ * Tink Link can't resolve (REQUEST_FAILED_FETCH_EXISTING_USER).
  */
 export async function POST(request: NextRequest) {
   try {
@@ -22,10 +23,7 @@ export async function POST(request: NextRequest) {
     const origin = request.headers.get('origin') || request.nextUrl.origin
     const redirectUri = `${origin}/api/bank/callback`
 
-    const externalUserId = `decouple-${randomUUID()}`
-    const { userId } = await createUser(externalUserId)
-    const authCode = await createTinkLinkAuthCode(userId)
-    const tinkLinkUrl = buildTinkLinkUrl(authCode, redirectUri)
+    const tinkLinkUrl = buildTinkLinkUrl(null, redirectUri)
 
     return NextResponse.json({ url: tinkLinkUrl })
 
