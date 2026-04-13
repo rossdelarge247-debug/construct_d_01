@@ -194,6 +194,17 @@ function generatePropertySteps(extractions: BankStatementExtraction[]): Confirma
     showWhen: { questionId: mortgageQuestionId, value: 'yes' },
   })
 
+  steps.push({
+    id: 'property-mortgage-balance',
+    sectionKey: 'property',
+    sectionLabel: 'Property',
+    type: 'input',
+    text: 'What is your estimated outstanding mortgage balance?',
+    inputPrefix: '£',
+    inputPlaceholder: 'e.g. 320,000',
+    showWhen: { questionId: mortgageQuestionId, value: 'yes' },
+  })
+
   return steps
 }
 
@@ -363,6 +374,7 @@ function generatePropertySummary(
   const ownsProperty = answers['property-mortgage'] === 'yes' || answers['property-no-signal'] === 'yes'
   const isJoint = answers['property-joint'] === 'yes'
   const propertyValue = answers['property-value'] ? parseInt(answers['property-value'].replace(/,/g, ''), 10) : null
+  const mortgageBalance = answers['property-mortgage-balance'] ? parseInt(answers['property-mortgage-balance'].replace(/,/g, ''), 10) : null
 
   if (ownsProperty) {
     const jointLabel = isJoint ? 'jointly own' : 'own'
@@ -370,25 +382,32 @@ function generatePropertySummary(
     facts.push({ label: `You ${jointLabel} a property${valueLabel}`, source: 'self' })
   }
 
+  if (mortgageBalance) {
+    facts.push({
+      label: `You have an estimated mortgage balance of £${mortgageBalance.toLocaleString()}`,
+      source: 'self',
+    })
+    if (isJoint) {
+      facts.push({ label: 'You share the ownership of this property, the starting position for marriage is 50/50', source: 'self' })
+    }
+  }
+
   if (mortgage) {
     facts.push({
       label: `You have a mortgage with ${mortgage.payee}`,
       source: 'bank',
-      gapMessage: 'When we get to finalisation, we will need a mortgage statement balance, but this is fine for the mediation process. We will add an action to your task list.',
+      gapMessage: 'When we get to finalisation, we will need a mortgage statement for the exact balance and terms, but this estimate is fine for the mediation process. We will add an action to your task list.',
     })
+  }
 
-    if (propertyValue) {
-      const equity = propertyValue - (mortgage.amount * 12 * 25) // rough estimate
-      // Use the mortgage balance estimate if available, otherwise calculate from payments
-      const mortgageBalance = mortgage.amount * 278 // ~23 years typical remaining
-      const estimatedEquity = propertyValue - mortgageBalance
-      if (estimatedEquity > 0) {
-        const perPerson = isJoint ? Math.round(estimatedEquity / 2) : estimatedEquity
-        calculated.push({
-          label: `Your property has an estimated equity value of £${estimatedEquity.toLocaleString()}${isJoint ? ` — £${perPerson.toLocaleString()} each` : ''}`,
-          value: `£${estimatedEquity.toLocaleString()}`,
-        })
-      }
+  if (propertyValue && mortgageBalance) {
+    const estimatedEquity = propertyValue - mortgageBalance
+    if (estimatedEquity > 0) {
+      const perPerson = isJoint ? Math.round(estimatedEquity / 2) : estimatedEquity
+      calculated.push({
+        label: `Your property has an estimated equity value of £${estimatedEquity.toLocaleString()}${isJoint ? ` — £${perPerson.toLocaleString()} each` : ''}`,
+        value: `£${estimatedEquity.toLocaleString()}`,
+      })
     }
   }
 

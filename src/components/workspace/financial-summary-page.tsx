@@ -55,7 +55,9 @@ export function FinancialSummaryPage({
   const mortgage = extractions.flatMap((e) => e.regular_payments).find((p) => p.likely_category === 'mortgage')
   const answers = confirmations[0]?.answers ?? {}
   const propertyValue = answers['property-value'] ? parseInt(answers['property-value'].replace(/,/g, ''), 10) : null
+  const mortgageBalance = answers['property-mortgage-balance'] ? parseInt(answers['property-mortgage-balance'].replace(/,/g, ''), 10) : null
   const isJoint = answers['property-joint'] === 'yes'
+  const equity = propertyValue && mortgageBalance ? propertyValue - mortgageBalance : null
   const hasPension = confirmations.some((c: SectionConfirmation) =>
     c.sectionKey === 'pensions' && c.confirmedFacts.some((f: string) => f.includes('at least one')),
   )
@@ -109,6 +111,18 @@ export function FinancialSummaryPage({
           {propertyValue && (
             <SummaryRow
               label={`You ${isJoint ? 'jointly own' : 'own'} a property estimated value £${propertyValue.toLocaleString()}`}
+              badge="self"
+            />
+          )}
+          {mortgageBalance && (
+            <SummaryRow label={`You have an estimated mortgage balance of £${mortgageBalance.toLocaleString()}`} badge="self" />
+          )}
+          {isJoint && (
+            <SummaryRow label="You share the ownership of this property, the starting position for marriage is 50/50" badge="self" />
+          )}
+          {equity && equity > 0 && (
+            <SummaryRow
+              label={`Your property has an estimated equity value of £${equity.toLocaleString()}${isJoint ? ` — £${Math.round(equity / 2).toLocaleString()} each` : ''}`}
               badge="self"
             />
           )}
