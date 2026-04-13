@@ -323,6 +323,7 @@ function TinkModal({
   const [tinkUrl, setTinkUrl] = useState<string | null>(null)
   const [loading, setLoading] = useState(true)
   const [tinkAvailable, setTinkAvailable] = useState(false)
+  const [connectError, setConnectError] = useState<string | null>(null)
   const iframeRef = useRef<HTMLIFrameElement>(null)
 
   useEffect(() => {
@@ -335,11 +336,18 @@ function TinkModal({
         if (data.url && !data.error) {
           setTinkUrl(data.url)
           setTinkAvailable(true)
+        } else if (data.error) {
+          console.warn('[Tink Connect]', data.error)
+          setConnectError(data.error)
         }
         setLoading(false)
       })
-      .catch(() => {
-        if (!cancelled) setLoading(false)
+      .catch((err) => {
+        if (!cancelled) {
+          console.warn('[Tink Connect] Network error:', err)
+          setConnectError('Could not reach the server')
+          setLoading(false)
+        }
       })
 
     return () => { cancelled = true }
@@ -418,6 +426,11 @@ function TinkModal({
             <p className="text-[13px] text-ink-tertiary mb-8">
               Open Banking connection will be available when we go live.
             </p>
+            {connectError && (
+              <p className="text-[11px] text-ink-disabled mb-4 font-mono">
+                Debug: {connectError}
+              </p>
+            )}
           </>
         )}
 
