@@ -1,135 +1,134 @@
 'use client'
 
+import { useState, useCallback } from 'react'
 import { TitleBar } from '@/components/hub/title-bar'
-import { HeroPanel } from '@/components/hub/hero-panel'
-import { SectionCards } from '@/components/hub/section-cards'
-import { DiscoveryFlow } from '@/components/hub/discovery-flow'
-import { FidelityLabel } from '@/components/hub/fidelity-label'
-import { DebugPanel } from '@/components/hub/debug-panel'
-import { TinkDebugPanel } from '@/components/hub/tink-debug-panel'
-import { useHub } from '@/hooks/use-hub'
-import type { HeroPanelState } from '@/types/hub'
-
-const ACTIVE_HERO_STATES: HeroPanelState[] = [
-  'uploading', 'uploading_context', 'analysing', 'review_ready',
-  'auto_confirm', 'clarification', 'summary',
-]
+import { WelcomeCarousel } from '@/components/workspace/welcome-carousel'
+import { TaskListHome } from '@/components/workspace/task-list-home'
+import { BankConnectionFlow } from '@/components/workspace/bank-connection-flow'
+import type { WorkspaceView, BankConnectionPhase, ConnectedAccount, RevealItem } from '@/types/hub'
 
 export default function WorkspacePage() {
-  const hub = useHub()
-  const isHeroActive = ACTIVE_HERO_STATES.includes(hub.heroPanelState)
-  const showConfig = !hub.config.configCompleted
+  const [view, setView] = useState<WorkspaceView>('carousel')
+  const [bankPhase, setBankPhase] = useState<BankConnectionPhase>('idle')
+  const [bankConnected, setBankConnected] = useState(false)
+  const [connectedAccounts, setConnectedAccounts] = useState<ConnectedAccount[]>([])
+  const [confirmationComplete] = useState(false) // Session 10: will wire up confirmation flow
 
-  if (showConfig) {
-    return (
-      <div className="min-h-screen bg-off-white">
-        <TitleBar
-          title="Overview"
-          subtitle="Configuring the service"
-          showShareButton={false}
-        />
-        <main className="mx-auto max-w-[var(--content-max-width)] px-6 py-10">
-          <DiscoveryFlow
-            config={hub.config}
-            onConfigUpdate={hub.updateConfig}
-            onConfigComplete={hub.completeConfig}
-          />
-        </main>
-      </div>
-    )
-  }
+  // ═══ Navigation callbacks ═══
+
+  const handleCarouselComplete = useCallback(() => {
+    setView('task_list')
+  }, [])
+
+  const handleGetStarted = useCallback(() => {
+    setView('bank_connection')
+    setBankPhase('loader')
+  }, [])
+
+  const handleSkip = useCallback(() => {
+    // "Skip for now, I want to have a look around" — stay on task list
+  }, [])
+
+  const handleBankComplete = useCallback(
+    (accounts: ConnectedAccount[], _revealItems: RevealItem[]) => {
+      setConnectedAccounts(accounts)
+      setBankConnected(true)
+      setBankPhase('idle')
+      setView('task_list')
+    },
+    []
+  )
+
+  const handleBankCancel = useCallback(() => {
+    setBankPhase('idle')
+    setView('task_list')
+  }, [])
+
+  const handleViewSummary = useCallback(() => {
+    setView('financial_summary')
+  }, [])
+
+  // ═══ Title bar context ═══
+
+  const titleProps = getTitleProps(view, bankPhase)
 
   return (
     <div className="min-h-screen bg-off-white">
-      <TitleBar
-        title="Overview"
-        subtitle={isHeroActive ? 'Preparation' : undefined}
-        showShareButton={hub.fidelity !== 'sketch'}
-      />
-      <main className="mx-auto max-w-[var(--content-max-width)] px-6 py-10">
-        <HeroPanel
-          state={hub.heroPanelState}
-          lozenges={hub.lozenges}
-          questions={hub.questions}
-          autoConfirmItems={hub.autoConfirmItems}
-          currentQuestionIndex={hub.currentQuestionIndex}
-          uploadContext={hub.uploadContext}
-          onFilesDropped={hub.handleFilesDropped}
-          onBankConnect={hub.handleBankConnect}
-          onReviewStart={hub.startReview}
-          onAutoConfirmAccept={hub.acceptAutoConfirm}
-          onQuestionAnswer={hub.answerQuestion}
-          onQuestionSkip={hub.skipQuestion}
-          onSummaryFinish={hub.finishSession}
-          onUploadMore={hub.resetToReady}
-          onCancelReview={hub.cancelReview}
-          summaryAchievements={hub.summaryAchievements}
-          summaryTodoItems={hub.summaryTodoItems}
-        />
+      <TitleBar {...titleProps} />
 
-        <DebugPanel
-          diagnostics={hub.lastDiagnostics as any}
-          classification={hub.lastClassification as any}
-          transformedCounts={hub.lastTransformedCounts}
-          error={hub.uploadContext.error}
-          visible={!!(hub.lastDiagnostics || hub.uploadContext.error)}
-        />
+      <main className="mx-auto max-w-[var(--content-max-width)] py-2">
+        {/* Welcome carousel (screens 1a-1c) */}
+        {view === 'carousel' && (
+          <WelcomeCarousel onComplete={handleCarouselComplete} />
+        )}
 
-        <TinkDebugPanel bankDiagnostics={hub.lastBankDiagnostics} />
-
-        <div
-          className="mt-10 transition-opacity"
-          style={{
-            opacity: isHeroActive ? 0.3 : 1,
-            transitionDuration: 'var(--transition-fade)',
-          }}
-        >
-          <div className="flex items-center justify-between mb-8">
-            <h2 className="text-xl font-bold text-ink tracking-tight">
-              Financial picture summary
-            </h2>
-            <FidelityLabel level={hub.fidelity} />
-          </div>
-
-          <SectionCards
-            sections={hub.sections}
-            onManualInput={hub.openManualInput}
-            onReviewSection={hub.openSectionReview}
+        {/* Task list home (screen 2a / 2j) */}
+        {view === 'task_list' && (
+          <TaskListHome
+            bankConnected={bankConnected}
+            connectedAccounts={connectedAccounts}
+            confirmationComplete={confirmationComplete}
+            onGetStarted={handleGetStarted}
+            onSkip={handleSkip}
+            onViewSummary={handleViewSummary}
           />
+        )}
 
-          <button
-            onClick={hub.addSection}
-            className="mt-8 w-full py-4 text-center text-sm font-medium text-ink-secondary border border-grey-100 rounded-md hover:bg-grey-50 transition-colors"
-          >
-            + More to disclose
-          </button>
+        {/* Bank connection flow (screens 3, 3b-3e) */}
+        {view === 'bank_connection' && (
+          <BankConnectionFlow
+            phase={bankPhase}
+            onPhaseChange={setBankPhase}
+            onComplete={handleBankComplete}
+            onCancel={handleBankCancel}
+          />
+        )}
 
-          {hub.config.hasChildren && (
-            <div className="mt-8 bg-white border border-grey-100 rounded-md p-6">
-              <h3 className="text-base font-semibold text-ink">Your children</h3>
-              <p className="mt-1 text-sm text-ink-secondary">
-                Nothing to show yet, start building your financial picture now..
-              </p>
-              <button className="mt-4 px-5 py-2.5 bg-ink text-white text-sm font-semibold rounded-md hover:opacity-90 transition-opacity">
-                Begin plan
+        {/* Financial summary placeholder (screen 3a — session 10) */}
+        {view === 'financial_summary' && (
+          <div className="px-6 pt-8">
+            <div className="max-w-[var(--content-max-width)] mx-auto">
+              <button
+                onClick={() => setView('task_list')}
+                className="text-sm font-medium text-blue-600 hover:underline mb-6"
+              >
+                &larr; Back to your dashboard
               </button>
-            </div>
-          )}
-
-          <div className="mt-8">
-            <div className="flex items-center justify-between mb-4">
-              <h2 className="text-xl font-bold text-ink tracking-tight">
-                Life after separation
+              <h2 className="text-2xl font-bold text-ink mb-6">
+                Your financial picture
               </h2>
-              <FidelityLabel level="sketch" />
-            </div>
-            <div className="bg-white border border-grey-100 rounded-md p-6">
-              <p className="text-sm text-ink-tertiary">….</p>
-              <p className="text-sm text-ink-tertiary">….</p>
+              <div className="bg-white rounded-lg border border-grey-100 p-8 text-center">
+                <p className="text-ink-secondary text-sm">
+                  Financial summary will be built in session 10.
+                </p>
+              </div>
             </div>
           </div>
-        </div>
+        )}
       </main>
     </div>
   )
+}
+
+// ═══ Title bar helpers ═══
+
+function getTitleProps(
+  view: WorkspaceView,
+  bankPhase: BankConnectionPhase
+): { title: string; subtitle?: string; showShareButton: boolean } {
+  switch (view) {
+    case 'carousel':
+      return { title: 'Overview', subtitle: 'Welcome', showShareButton: false }
+    case 'task_list':
+      return { title: 'Overview', subtitle: 'Home', showShareButton: false }
+    case 'bank_connection':
+      if (bankPhase === 'complete' || bankPhase === 'reveal') {
+        return { title: 'Connected to your bank', showShareButton: false }
+      }
+      return { title: 'Overview', subtitle: 'Preparation', showShareButton: false }
+    case 'financial_summary':
+      return { title: 'Financial summary', showShareButton: true }
+    default:
+      return { title: 'Overview', showShareButton: false }
+  }
 }

@@ -1,4 +1,78 @@
 // Hub page types — post-pivot architecture
+// Session 9: New workspace types below, legacy types retained for backward compatibility
+
+// ═══ Workspace types (v2 — wireframe-driven) ═══
+
+export type Phase = 'preparation' | 'sharing' | 'finalisation'
+
+export type EvidenceSource = 'bank_connection' | 'self_disclosed' | 'document'
+
+export type WorkspaceView =
+  | 'carousel'
+  | 'task_list'
+  | 'bank_connection'
+  | 'confirmation'
+  | 'financial_summary'
+
+export type BankConnectionPhase =
+  | 'idle'
+  | 'loader'
+  | 'dimming'
+  | 'tink_modal'
+  | 'processing'
+  | 'reveal'
+  | 'complete'
+
+export interface ConnectedAccount {
+  id: string
+  bankName: string
+  accountType: 'current' | 'savings' | 'credit_card'
+  lastFour: string
+  monthsOfData: number
+}
+
+export interface RevealItem {
+  id: string
+  accountId: string
+  label: string
+  detail: string
+  icon: 'income' | 'spending' | 'mortgage' | 'balance' | 'commitments' | 'pension'
+}
+
+export interface TaskItem {
+  id: string
+  phase: Phase
+  label: string
+  description: string
+  status: 'not_started' | 'in_progress' | 'completed' | 'locked'
+  action?: {
+    label: string
+    type: 'primary' | 'secondary'
+  }
+  skipLabel?: string
+  badge?: { label: string; variant: 'green' | 'orange' | 'grey' }
+}
+
+export interface SectionConfirmation {
+  sectionKey: SectionKey
+  status: 'pending' | 'confirmed' | 'skipped'
+  answers: Record<string, string>
+  confirmedFacts: string[]
+  gapMessages: string[]
+}
+
+export interface WorkspaceState {
+  view: WorkspaceView
+  carouselStep: number
+  carouselComplete: boolean
+  bankConnected: boolean
+  bankConnectionPhase: BankConnectionPhase
+  connectedAccounts: ConnectedAccount[]
+  revealItems: RevealItem[]
+  completedSections: SectionConfirmation[]
+  currentSection: SectionKey | null
+  tasks: TaskItem[]
+}
 
 // ═══ Fidelity model ═══
 

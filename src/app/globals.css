@@ -180,3 +180,60 @@ h1, h2, h3, h4 {
 .animate-fade-in-scale {
   animation: fadeInScale 150ms ease-out forwards;
 }
+
+/* ═══ Workspace animations (spec 26) ═══ */
+
+/* Fade in — general content appearance */
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.animate-fade-in {
+  animation: fadeIn 300ms ease-out forwards;
+}
+
+/* Slide in from left — reveal account labels */
+@keyframes slideInLeft {
+  from { opacity: 0; transform: translateX(-20px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+
+.animate-slide-in-left {
+  animation: slideInLeft 300ms ease-out forwards;
+}
+
+/* Modal appear — Tink modal (spring-like: fast start, gentle settle) */
+@keyframes modalAppear {
+  from { opacity: 0; transform: scale(0.95) translateY(8px); }
+  to { opacity: 1; transform: scale(1) translateY(0); }
+}
+
+.animate-modal-appear {
+  animation: modalAppear 300ms cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+/* Shimmer — indeterminate progress bar */
+.animate-shimmer {
+  animation: shimmer 1.5s ease-in-out infinite;
+}
+
+/* ═══ prefers-reduced-motion: spec 26 — instant transitions, no stagger ═══ */
+@media (prefers-reduced-motion: reduce) {
+  .animate-fade-in,
+  .animate-slide-in-left,
+  .animate-modal-appear,
+  .animate-shimmer,
+  .animate-fade-in-scale,
+  .animate-value-enter {
+    animation: none !important;
+    opacity: 1 !important;
+    transform: none !important;
+  }
+
+  /* Disable all transition durations */
+  *, *::before, *::after {
+    transition-duration: 0.01ms !important;
+    animation-duration: 0.01ms !important;
+  }
+}
