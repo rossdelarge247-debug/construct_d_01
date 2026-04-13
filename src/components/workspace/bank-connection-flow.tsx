@@ -336,8 +336,9 @@ function TinkModal({
         if (data.url && !data.error) {
           setTinkUrl(data.url)
           setTinkAvailable(true)
+          if (data.debug) console.log('[Tink Connect] Debug:', data.debug)
         } else if (data.error) {
-          console.warn('[Tink Connect]', data.error)
+          console.warn('[Tink Connect]', data.error, data.debug)
           setConnectError(data.error)
         }
         setLoading(false)

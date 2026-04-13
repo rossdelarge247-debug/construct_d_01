@@ -22,17 +22,16 @@ export async function POST(request: NextRequest) {
     const origin = request.headers.get('origin') || request.nextUrl.origin
     const redirectUri = `${origin}/api/bank/callback`
 
-    // Step 1: Create a Tink user
+    // Create user + get auth code
     const externalUserId = `decouple-${randomUUID()}`
     const { userId } = await createUser(externalUserId)
-
-    // Step 2: Get authorization code for Tink Link (uses non-delegate grant with user_id)
     const authCode = await createTinkLinkAuthCode(userId)
 
-    // Step 3: Build the Tink Link URL
+    console.log(`[Bank Connect] User created: ${userId}, redirect: ${redirectUri}`)
+
     const tinkLinkUrl = buildTinkLinkUrl(authCode, redirectUri)
 
-    return NextResponse.json({ url: tinkLinkUrl })
+    return NextResponse.json({ url: tinkLinkUrl, debug: { redirectUri, userId } })
 
   } catch (error) {
     const msg = error instanceof Error ? error.message : 'Unknown error'
