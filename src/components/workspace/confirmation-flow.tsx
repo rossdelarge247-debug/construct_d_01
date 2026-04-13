@@ -20,7 +20,7 @@ interface ConfirmationFlowProps {
   onComplete: (confirmations: SectionConfirmation[]) => void
 }
 
-type FlowPhase = 'question' | 'mini_summary' | 'final_summary'
+type FlowPhase = 'question' | 'mini_summary' | 'transitioning' | 'final_summary'
 
 export function ConfirmationFlow({
   extractions,
@@ -115,7 +115,7 @@ export function ConfirmationFlow({
     setInputValue('')
   }, [currentStep, stepIndex, allSteps, answers])
 
-  // Mini-summary confirmed — advance to next section
+  // Mini-summary confirmed — briefly show new accordion tab, then advance
   const handleSectionConfirm = useCallback(() => {
     const summary = generateSectionSummary(currentSectionKey, answers, extractions)
     setCompletedSections((prev: SectionSummaryData[]) => [...prev, summary])
@@ -123,11 +123,19 @@ export function ConfirmationFlow({
     const nextSection = sectionIndex + 1
     if (nextSection >= CONFIRMATION_SECTIONS.length) {
       setPhase('final_summary')
+      setAccordionOpen(true)
     } else {
-      setSectionIndex(nextSection)
-      setStepIndex(0)
-      setPhase('question')
-      setAccordionOpen(false)
+      // Spec 26 §6: sub-tab slides in → brief pause → slides away → next section
+      setPhase('transitioning')
+      setAccordionOpen(true)
+      setTimeout(() => {
+        setAccordionOpen(false)
+        setTimeout(() => {
+          setSectionIndex(nextSection)
+          setStepIndex(0)
+          setPhase('question')
+        }, 300) // wait for accordion collapse animation
+      }, 800) // show the new tab for 800ms
     }
   }, [currentSectionKey, sectionIndex, answers, extractions])
 
