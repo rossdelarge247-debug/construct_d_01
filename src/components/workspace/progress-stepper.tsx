@@ -32,7 +32,7 @@ export function ProgressStepper({ sections, currentIndex, completedCount }: Prog
                   : i === currentIndex
                     ? 'var(--color-red-500)'
                     : 'var(--color-grey-100)',
-              opacity: i === currentIndex && i >= completedCount ? 0.5 : 1,
+              opacity: 1,
               transitionDuration: '300ms',
               transitionTimingFunction: 'ease',
             }}
