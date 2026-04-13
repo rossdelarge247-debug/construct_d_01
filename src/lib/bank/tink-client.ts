@@ -136,13 +136,11 @@ export async function getAuthorizationCode(userId: string, scope?: string): Prom
 }
 
 /**
- * Create an authorization code for Tink Link — handles user creation automatically.
- * Uses the authorization grant endpoint (not delegate) with external_user_id,
- * which creates the user if they don't exist.
- *
- * The scope must match what Tink Link expects for the product (transactions/connect-accounts).
+ * Create an authorization code for Tink Link.
+ * Uses the authorization grant endpoint with user_id (Tink internal ID).
+ * The user must be created first via createUser().
  */
-export async function createTinkLinkAuthCode(externalUserId: string): Promise<string> {
+export async function createTinkLinkAuthCode(userId: string): Promise<string> {
   const token = await getClientToken('authorization:grant')
 
   const res = await fetch(`${TINK_BASE_URL}/api/v1/oauth/authorization-grant`, {
@@ -152,8 +150,8 @@ export async function createTinkLinkAuthCode(externalUserId: string): Promise<st
       'Content-Type': 'application/x-www-form-urlencoded',
     },
     body: new URLSearchParams({
-      external_user_id: externalUserId,
-      scope: 'authorization:read,credentials:refresh,credentials:read,credentials:write,providers:read,user:read',
+      user_id: userId,
+      scope: TINK_LINK_SCOPE,
     }),
   })
 

@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createUser, getAuthorizationCode, buildTinkLinkUrl, TINK_LINK_SCOPE } from '@/lib/bank/tink-client'
+import { createUser, createTinkLinkAuthCode, buildTinkLinkUrl } from '@/lib/bank/tink-client'
 import { randomUUID } from 'crypto'
 
 /**
@@ -26,8 +26,8 @@ export async function POST(request: NextRequest) {
     const externalUserId = `decouple-${randomUUID()}`
     const { userId } = await createUser(externalUserId)
 
-    // Step 2: Get authorization code for Tink Link (needs connection scopes, not data access)
-    const authCode = await getAuthorizationCode(userId, TINK_LINK_SCOPE)
+    // Step 2: Get authorization code for Tink Link (uses non-delegate grant with user_id)
+    const authCode = await createTinkLinkAuthCode(userId)
 
     // Step 3: Build the Tink Link URL
     const tinkLinkUrl = buildTinkLinkUrl(authCode, redirectUri)
