@@ -12,7 +12,7 @@ export function extractionsToConnectedAccounts(
   return extractions.map((ext, i) => ({
     id: `acc-${i + 1}`,
     bankName: ext.provider,
-    accountType: ext.account_type === 'savings' ? 'savings' : ext.account_type === 'credit_card' ? 'credit_card' : 'current',
+    accountType: ext.account_type === 'savings' ? 'savings' : 'current',
     lastFour: ext.account_number_last4 ?? '0000',
     monthsOfData: getMonthsCovered(ext.statement_period_start, ext.statement_period_end),
   }))
