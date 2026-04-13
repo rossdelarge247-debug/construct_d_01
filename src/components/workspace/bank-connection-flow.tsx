@@ -374,42 +374,52 @@ function TinkModal({
           boxShadow: '0 8px 32px rgba(0,0,0,0.18)',
         }}
       >
-        <h3 className="text-[18px] font-bold text-ink mb-4">Connect your bank</h3>
-
-        <div
-          className="h-80 bg-grey-50 flex items-center justify-center mb-6 overflow-hidden"
-          style={{ borderRadius: 'var(--radius-card)' }}
-        >
-          {loading ? (
-            <div className="text-center">
-              <div className="h-1 w-24 bg-grey-100 rounded-full overflow-hidden mx-auto mb-3">
-                <div
-                  className="h-full w-1/3 rounded-full animate-shimmer"
-                  style={{ backgroundColor: 'var(--color-red-500)' }}
-                />
-              </div>
-              <span className="text-ink-tertiary text-[13px]">Preparing secure connection...</span>
-            </div>
-          ) : tinkUrl ? (
-            <iframe
-              ref={iframeRef}
-              src={tinkUrl}
-              className="w-full h-full border-0"
+        {loading ? (
+          <>
+            <h3 className="text-[18px] font-bold text-ink mb-4">Connect your bank</h3>
+            <div
+              className="h-80 bg-grey-50 flex items-center justify-center mb-6 overflow-hidden"
               style={{ borderRadius: 'var(--radius-card)' }}
-              title="Connect your bank securely"
-              sandbox="allow-scripts allow-same-origin allow-forms allow-popups allow-top-navigation"
-            />
-          ) : (
-            <div className="text-center px-6">
-              <p className="text-[13px] text-ink-secondary mb-1">
-                Open Banking is not configured yet.
-              </p>
-              <p className="text-[12px] text-ink-tertiary">
-                Tink credentials need to be added to connect a real bank account.
-              </p>
+            >
+              <div className="text-center">
+                <div className="h-1 w-24 bg-grey-100 rounded-full overflow-hidden mx-auto mb-3">
+                  <div
+                    className="h-full w-1/3 rounded-full animate-shimmer"
+                    style={{ backgroundColor: 'var(--color-red-500)' }}
+                  />
+                </div>
+                <span className="text-ink-tertiary text-[13px]">Preparing secure connection...</span>
+              </div>
             </div>
-          )}
-        </div>
+          </>
+        ) : tinkUrl ? (
+          <>
+            <h3 className="text-[18px] font-bold text-ink mb-4">Connect your bank</h3>
+            <div
+              className="h-80 bg-grey-50 flex items-center justify-center mb-6 overflow-hidden"
+              style={{ borderRadius: 'var(--radius-card)' }}
+            >
+              <iframe
+                ref={iframeRef}
+                src={tinkUrl}
+                className="w-full h-full border-0"
+                style={{ borderRadius: 'var(--radius-card)' }}
+                title="Connect your bank securely"
+                sandbox="allow-scripts allow-same-origin allow-forms allow-popups allow-top-navigation"
+              />
+            </div>
+          </>
+        ) : (
+          <>
+            <h3 className="text-[22px] font-bold text-ink mb-3">Try the experience</h3>
+            <p className="text-[15px] text-ink-secondary mb-2 leading-relaxed">
+              We&apos;ll walk you through the full journey using sample bank data — a realistic picture of what your financial disclosure will look like.
+            </p>
+            <p className="text-[13px] text-ink-tertiary mb-8">
+              Open Banking connection will be available when we go live.
+            </p>
+          </>
+        )}
 
         <div className="flex gap-3">
           {!tinkAvailable && !loading && (
@@ -423,7 +433,7 @@ function TinkModal({
               onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = 'var(--color-red-600)')}
               onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = 'var(--color-red-500)')}
             >
-              Continue with demo data
+              Start demo walkthrough
             </button>
           )}
           <button
