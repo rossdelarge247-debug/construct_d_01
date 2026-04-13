@@ -6,98 +6,102 @@ Deployment: Vercel — preview deployments per branch, production at `construct-
 
 ## What session 11 accomplished
 
-**Visual design pass + post-connection task list — ~822 net lines across 11 files.**
+**Visual design pass + post-connection task list + bug fixes — merged to main.**
 
-Transformed the entire UI from raw Tailwind to a cohesive fintech design language:
-- New visual direction doc (`docs/workspace-spec/27-visual-direction-session11.md`) synthesised from Airbnb, Emma, and Habito references
-- Decouple red accent `#E5484D` for primary CTAs and progress bars
-- Shadow-based card separation (no borders), 12px border-radius throughout
-- Page width widened from 720px to 1080px, 600px content column for forms
-- Centred "Decouple" logo header with hamburger flyout nav + bell/cog icons
-- Habito-style radio cards: near-black inversion on selection, explicit "Continue" button
-- Progress stepper: red fill, "N of M" counter, bar matches counter
-- Post-connection task list (screen 2j): dynamic tasks from confirmation data, all three phases active
-- Multiple bug fixes: duplicate section list, missing Edit links, badge labels, stepper sync, header back/hamburger
+- New visual direction synthesised from Airbnb, Emma, Habito screenshots (spec 27)
+- Decouple red accent `#E5484D` for ALL primary CTAs and progress bars
+- Shadow-based card separation (no borders), 12px border-radius
+- Page width 1080px, 600px form column
+- Centred "Decouple" logo header, hamburger flyout nav, bell/cog placeholders
+- Habito-style radio cards with black inversion + explicit red "Continue"
+- Post-connection task list (screen 2j) with dynamic tasks from confirmations
+- 7 bug fixes from user review (duplicates, badges, stepper, header, button colours)
 
 ## Current state of the codebase
 
-**What's real:**
-- Full navigation: carousel → task list → bank connect → reveal → confirmation → financial summary
-- Visual design: Airbnb/Emma/Habito direction applied to every screen
-- Bank data pipeline: Tink callback → transformer → extraction → reveal + confirmation
-- Demo fallback through identical pipeline when Tink not configured
-- Post-connection task list (screen 2j): dynamic preparation/sharing/finalisation tasks
-- Habito-style Q&A with Decouple red CTAs and black-inversion radio cards
-- Hamburger nav with Airbnb-style flyout placeholder
+**What's working end-to-end:**
+- Full flow: carousel → task list → bank connect → reveal → confirmation → financial summary → task list (2j)
+- Tink test bank works on production URL (`construct-dev.vercel.app`) — merged to main
+- Demo fallback when Tink creds not set
+- Visual design: Airbnb/Emma/Habito direction on every screen
+- Dynamic task generation: preparation, sharing, finalisation tasks from confirmation data
+- All buttons follow red accent hierarchy
 
-**What's mock/placeholder:**
-- Demo `BankStatementExtraction` covers employed homeowner with pension and savings
-- Spending panel: "Panel design pending" placeholder (blocked on user wireframe)
-- Debts panel: placeholder (blocked on user wireframe)
-- Edit flows from financial summary: [Edit] links exist but not wired (blocked on wireframe)
-- Connect another bank account: not built (blocked on wireframe)
-- Hamburger nav flyout: placeholder items (Help Centre, My profile, My cases, Sign out)
-- Bell + cog icons: placeholder (no functionality)
+**What's placeholder/mock:**
+- Spending panel: "Panel design pending" (blocked on wireframe)
+- Debts panel: placeholder (blocked on wireframe)
+- Edit flows: [Edit] links in accordion exist but not wired (blocked on wireframe)
+- Connect another bank: not built (blocked on wireframe)
+- Hamburger flyout: placeholder menu items
+- Bell + cog icons: no functionality
 - No persistence (state resets on refresh)
 
-## Session 12 deliverables
+## Session 12 deliverables — priority order
 
-### Priority order:
+### Tier 1: Ready to build now (no wireframes needed)
 
-1. **Merge to main and verify Tink test bank** — branch needs merging so Tink iframe works on production URL. Verify the full flow with test bank credentials.
+1. **Verify Tink test bank on production** — branch is now on main. Walk through full flow with Tink sandbox to confirm iframe, callback, and data extraction work end-to-end with the new visual design.
 
-2. **Edit flows from financial summary** — [Edit] links back to confirmation questions. BLOCKED: needs wireframe from user.
+2. **Decision tree fidelity pass (spec 22)** — improve question branching for edge cases. Pair with Tink sandbox test bank data to see what real signals look like vs demo data. The demo persona covers employed homeowner with pension + savings — test other profiles.
 
-3. **Connect another bank account** — "+" button re-enters Tink flow. BLOCKED: needs wireframe from user.
+3. **Celebration patterns (backlog #84)** — green flash on section complete, value count-up on financial summary cards. Spec 26 already defines the animations. Quick visual polish.
 
-4. **Decision tree fidelity pass (spec 22)** — pair with Tink sandbox test bank for real signal coverage. Improve question branching and demo data.
+4. **Demo data enrichment** — add edge case personas (renting, no pension, self-employed). Test the confirmation flow handles each correctly.
 
-5. **Celebration patterns (#84)** — green flash on section complete, value count-up on financial summary cards. Spec 26 already defines animations.
+5. **Copy/content pass** — tighten remaining copy across all screens to match the brevity standard (Emma-style: if it can be said in 4 words, don't use 8).
 
-6. **Demo data enrichment** — richer persona coverage, edge cases.
+### Tier 2: Good candidates, no wireframes needed
 
-### Candidates not blocked on wireframes:
-- AI pipeline: structured outputs (#45-47), two-step extraction
-- Test suite (#70): zero tests currently
-- Structured summary export (#60): shareable with mediator
-- Error retry on AI failure (#73)
-- Copy/content pass: tighten remaining copy
+6. **AI pipeline: structured outputs (#45-47, #69)** — replace JSON parsing with Anthropic schema-constrained generation. Eliminates the most fragile part of the pipeline. Spec 13 defines everything needed.
 
-### Still blocked on wireframes:
-- Spending panel + categorisation flow
-- Debts panel
-- Edit flows from financial summary
-- Connect another bank account
+7. **Test suite (#70)** — zero tests currently. Core extraction logic, confirmation question generation, and state management all need coverage.
+
+8. **Structured summary export (#60)** — plain language summary at current fidelity level, shareable with mediator/solicitor. Data is all there, just needs a render.
+
+9. **Error retry on AI failure (#73)** — automatic retry with backoff on extraction failures.
+
+### Tier 3: Blocked on user wireframes
+
+10. **Edit flows from financial summary** — [Edit] links back to confirmation questions
+11. **Connect another bank account** — "+" button re-enters Tink flow
+12. **Spending panel + categorisation flow**
+13. **Debts panel**
+
+### Tier 4: Larger initiatives (future sessions)
+
+- Supabase persistence (#65) — requires auth upgrade
+- Side-by-side PDF review modal (#38)
+- Multi-document upload (#36)
+- Auth upgrade: magic link + Google (#67)
 
 ## Negative constraints
-1. **Do not build spending panel** — wireframe not delivered yet
-2. **Do not build debts flow** — wireframe not delivered yet
-3. **Do not apply old spec 18 colours** — superseded by session 11 visual direction (spec 27)
+1. **Do not build spending panel** — wireframe not delivered
+2. **Do not build debts flow** — wireframe not delivered
+3. **Do not apply old spec 18 colours** — superseded by spec 27
 4. **Do not reference pre-pivot specs (03-06, 11, 12)**
-5. **Transitions are not optional** — spec 26 for every state change
-6. **Red `#E5484D` is for CTAs only** — not for status, errors, or decoration
-7. **Shadow-based card separation** — no borders on cards
+5. **Red `#E5484D` is for primary CTAs only** — not status, not decoration
+6. **Shadow-based card separation** — no borders on cards
+7. **All filled buttons are red** — no black/ink filled buttons
 
 ## Key files
 ```
 docs/SESSION-CONTEXT.md                    — START HERE every session
 docs/HANDOFF-SESSION-11.md                 — Most recent session retro
-docs/workspace-spec/27-visual-direction-session11.md — NEW: Visual direction (Airbnb/Emma/Habito synthesis)
-docs/workspace-spec/24-wireframe-spec-part1.md — Wireframes: carousel, task list, bank connection, reveal
+docs/workspace-spec/27-visual-direction-session11.md — Visual direction (Airbnb/Emma/Habito)
 docs/workspace-spec/25-wireframe-spec-part2.md — Wireframes: confirmation flow, summaries, screen 2j
-docs/workspace-spec/26-transitions-animations.md — Every transition, animation, and micro-interaction
-docs/workspace-spec/22-confirmation-flow-tree.md — Complete decision tree for all Form E sections
-src/components/workspace/welcome-carousel.tsx  — Carousel (visual pass done)
-src/components/workspace/task-list-home.tsx     — Task list with dynamic screen 2j (visual pass done)
-src/components/workspace/bank-connection-flow.tsx — Bank connection + reveal (visual pass done)
-src/components/workspace/confirmation-flow.tsx  — Habito-style Q&A (visual pass done)
-src/components/workspace/section-mini-summary.tsx — Per-section summaries (visual pass done)
-src/components/workspace/progress-stepper.tsx   — Red progress bar with step counter (visual pass done)
-src/components/workspace/financial-summary-page.tsx — Financial summary with source badges (visual pass done)
-src/components/hub/title-bar.tsx               — Centred logo header with hamburger flyout + bell/cog
+docs/workspace-spec/26-transitions-animations.md — Transitions and animations
+docs/workspace-spec/22-confirmation-flow-tree.md — Decision tree for all Form E sections
+src/components/workspace/welcome-carousel.tsx  — Carousel
+src/components/workspace/task-list-home.tsx     — Task list with dynamic screen 2j
+src/components/workspace/bank-connection-flow.tsx — Bank connection + reveal
+src/components/workspace/confirmation-flow.tsx  — Habito-style Q&A
+src/components/workspace/section-mini-summary.tsx — Per-section summaries
+src/components/workspace/progress-stepper.tsx   — Red progress bar with step counter
+src/components/workspace/financial-summary-page.tsx — Financial summary with source badges
+src/components/hub/title-bar.tsx               — Header: logo, hamburger flyout, bell/cog
 src/lib/bank/bank-data-utils.ts               — Extraction → UI types + demo factory
-src/lib/bank/confirmation-questions.ts         — Spec 22 question + summary generation
-src/app/workspace/page.tsx                     — Flow state machine orchestrator
-src/app/globals.css                            — Design tokens (red accent, shadows, 12px radius, 1080px width)
+src/lib/bank/confirmation-questions.ts         — Question + summary generation
+src/app/workspace/page.tsx                     — Flow state machine
+src/app/globals.css                            — Design tokens
 src/types/hub.ts                               — All types
 ```

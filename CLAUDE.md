@@ -54,7 +54,7 @@ When the session is ending (user says wrap up, or you hit ~2,000 lines), do thes
 
 ## Branch
 
-Development branch: `claude/decouple-v2-financial-8RxiM`
+Development branch: `main` (session 11 merged — next session creates new branch)
 
 ## Deployment
 

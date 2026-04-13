@@ -1,8 +1,9 @@
 # Session 11 Handoff — Visual Design Pass + Screen 2j
 
 **Date:** 13 April 2026
-**Branch:** `claude/decouple-v2-financial-8RxiM`
-**Lines changed:** ~822 net (1,379 added, 557 removed) across 11 files + 1 new spec doc
+**Branch:** `claude/decouple-v2-financial-8RxiM` → merged to `main`
+**Lines changed:** ~870 net (1,541 added, 668 removed) across 14 files
+**Commits:** 10 (1 design pass, 1 screen 2j, 8 bug fixes)
 
 ---
 
@@ -10,75 +11,73 @@
 
 ### 1. Visual direction synthesis
 
-User provided screenshots from Airbnb (5 screenshots), Emma app (5 screenshots), and Habito mortgage flow (4 screenshots). We discussed what to take from each:
+User provided 14 screenshots across three reference apps. We discussed each batch and what to take:
 
-- **Airbnb:** Shadow-based card separation, generous whitespace, pill CTAs, minimal borders
-- **Emma:** Financial values as hero elements, restrained colour, content brevity
-- **Habito:** Full-width radio cards with black inversion on selection, bold progress bar, one question per screen
+- **Airbnb (5 screenshots):** Shadow-based card separation, generous whitespace, minimal borders, full-width CTAs, pill-shaped elements, login modal generosity
+- **Emma web + app (6 screenshots):** Financial values as hero elements, restrained colour (only for values), card treatment (almost invisible containers), content brevity, scannable rows. Dark palette explicitly rejected — light theme only.
+- **Habito (4 screenshots):** Full-width radio cards with black inversion on selection, bold progress bar with step counter, one question per screen, helper text hierarchy
 
-Synthesised into `docs/workspace-spec/27-visual-direction-session11.md` — a comprehensive design direction doc covering surfaces, typography, colour, layout, buttons, Q&A pattern, animations, and what changed from spec 18.
+Synthesised into `docs/workspace-spec/27-visual-direction-session11.md`.
 
 **Key design decisions made with user:**
-- Decouple red accent `#E5484D` — introduced as the brand action colour (like Airbnb's pink-red)
-- Explicit "Continue" button kept (not auto-advance) — needed for progressive disclosure when "Other" selected
-- Page width widened to 1080px (from 720px) with 600px form column
+- Decouple red accent `#E5484D` — the ONE brand colour, used for all primary CTAs
+- Explicit "Continue" button (not auto-advance) — needed for progressive disclosure
+- Page width 1080px (from 720px), 600px form column
+- 12px card radius (from 6px), shadow separation (no borders)
 - Centred "Decouple" logo in header
-- Hamburger menu always left (never replaced by back arrow), with Airbnb-style flyout
-- Bell + cog placeholder icons on right
+- Hamburger always left with Airbnb-style flyout, bell + cog right
+- All filled buttons are red — no black/ink filled buttons (late fix from user)
 
-### 2. Visual pass across all screens
+### 2. Visual pass — all screens
 
-Applied the design direction to every component:
-- `globals.css` — new tokens: red accent, shadow-card, 12px radius, 1080px width, 64px header
-- `title-bar.tsx` — complete rewrite: centred logo, hamburger with flyout, bell/cog icons
-- `welcome-carousel.tsx` — shadow card, red CTA, updated typography
-- `task-list-home.tsx` — shadow cards, red CTA, wider layout
-- `bank-connection-flow.tsx` — shadow cards, red progress bar, red CTAs
-- `confirmation-flow.tsx` — Habito radio cards (black inversion), red Continue, 22px questions
-- `progress-stepper.tsx` — red fill, "N of M" counter, thicker bar
-- `section-mini-summary.tsx` — red CTA, updated spacing
-- `financial-summary-page.tsx` — shadow cards, wider layout, source badges
+Applied to every component: globals.css, title-bar, carousel, task list, bank connection, confirmation flow, progress stepper, mini-summary, financial summary.
 
 ### 3. Post-connection task list (screen 2j)
 
-Built the dynamic task list matching the wireframe exactly:
-- **Preparation tasks:** CETV (conditional on pension), children outline, budgetary needs, divorce application, MIAM booking
-- **Sharing & collaboration tasks:** Invite ex-partner, mediator, solicitor
+Built dynamic task list matching wireframe:
+- **Preparation:** CETV (conditional on pension), children outline, budgetary needs, divorce application (with "for guidance click here" link), MIAM booking
+- **Sharing:** Invite ex-partner, mediator, solicitor
 - **Finalisation:** Numbered upload tasks (property valuation, mortgage statement, payslips, pension CETV), generate final docs
-- All three phases unlock after confirmation
-- Button styles differentiated: filled (dark) for action tasks, outlined+chevron for "Take action" dropdowns
+- Button styles differentiated: red filled for actions, outlined+chevron for "Take action" dropdowns
 
-### 4. Bug fixes
+### 4. Bug fixes (7)
 
-- Removed duplicate completed sections list from FinalSummary (was showing both in accordion AND below stepper)
-- Added [Edit] links to accordion completed section items
-- Fixed "Your estimate" badge → "Self disclosed" per spec
-- Fixed progress stepper: bar now matches "N of M" counter (current segment was at 0.5 opacity)
-- Fixed header: hamburger always present (was being replaced by back arrow on financial summary)
-- Task list copy aligned exactly to wireframe
+1. Removed duplicate completed sections list from FinalSummary
+2. Added [Edit] links to accordion items
+3. "Your estimate" → "Self disclosed" badge label
+4. Progress stepper bar matches "N of M" counter
+5. Hamburger always present (was replaced by back arrow)
+6. Task list copy/buttons aligned exactly to wireframe
+7. All filled buttons changed from black to red
 
 ## What went well
 
-- Screenshot-driven design discussion was very productive — gave concrete visual targets
-- The Airbnb/Emma/Habito synthesis created a clear, implementable direction
-- User caught several wire accuracy issues that improved fidelity
-- Build passed on every commit — no regressions
+- Screenshot-driven design discussion was highly productive
+- Airbnb/Emma/Habito synthesis created a clear, implementable direction
+- User caught wire accuracy issues quickly — improved fidelity
+- Build passed on every commit
+- Clean merge to main
 
 ## What could improve
 
-- Should have read the wireframe more carefully before building screen 2j — several copy and button style differences needed fixing
-- The "always show CETV" vs "conditional on pension" went back and forth — should have checked the demo flow behaviour first
+- Should have matched wireframe copy more carefully on first pass of screen 2j
+- Button colour hierarchy (red not black) should have been caught in the design direction doc
+- The CETV conditional logic caused a brief back-and-forth — should have tested the demo flow first
 
 ## Key decisions
 
-1. **Red accent colour:** `#E5484D` (Radix Red 9) — confident but not aggressive
-2. **Keep explicit submit:** Auto-advance rejected — progressive disclosure needs a commit step
-3. **Shadow over borders:** All cards separated by shadow, not border lines
-4. **12px radius:** Up from 6px — softer, more modern
-5. **Hamburger persists:** Never replaced by back arrow; back navigation is in-page content
-6. **Badge labels:** "Bank confirmed" (green) / "Self disclosed" (orange)
-7. **Button hierarchy:** Red for primary CTA, dark for action buttons (Start outline, Upload, Invite), outlined for Take action dropdowns
+| Decision | Choice | Rationale |
+|---|---|---|
+| Accent colour | `#E5484D` (Radix Red 9) | Confident but not aggressive, like Airbnb's pink-red |
+| Auto-advance | No — explicit Continue | Progressive disclosure needs commit step |
+| Card separation | Shadow, no borders | Airbnb pattern — cleaner, more modern |
+| Card radius | 12px (from 6px) | Softer, matches Airbnb/Emma |
+| Page width | 1080px (from 720px) | Airbnb-level breathing room |
+| Hamburger | Always left, never replaced | Back navigation stays in page content |
+| Badge labels | "Bank confirmed" / "Self disclosed" | Clearer than "Connected" / "Your estimate" |
+| Button hierarchy | Red for ALL filled buttons | One colour hierarchy, no black CTAs |
+| CETV task | Conditional on pension answer | Correctly hidden when no pensions |
 
 ## Tink status
 
-Tink iframe code is unchanged functionally. It works when `TINK_CLIENT_ID` and `TINK_CLIENT_SECRET` are set (on Vercel production). Branch needs merging to main for the production URL callback to work. Demo data fallback works when credentials aren't set.
+Code unchanged. Works on production (`construct-dev.vercel.app`) where env vars are set. Branch merged to main — Tink test bank should work on next deploy. Demo data fallback works when credentials not set.
