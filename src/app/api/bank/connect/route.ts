@@ -1,14 +1,15 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createUser, createTinkLinkAuthCode, buildTinkLinkUrl } from '@/lib/bank/tink-client'
-import { randomUUID } from 'crypto'
+import { buildTinkLinkUrl } from '@/lib/bank/tink-client'
 
 /**
  * POST /api/bank/connect
  *
  * Initiates a Tink Link session for Open Banking bank connection.
- * Returns a URL that the client should open in an iframe.
+ * Returns a URL that the client should open in an iframe or popup.
  *
- * Flow: create Tink user → get authorization code → build Tink Link URL.
+ * Uses client_id-only mode: Tink Link handles user creation internally.
+ * No authorization_code needed — simpler and avoids the
+ * REQUEST_FAILED_FETCH_EXISTING_USER error in iframe context.
  */
 export async function POST(request: NextRequest) {
   try {
@@ -22,16 +23,12 @@ export async function POST(request: NextRequest) {
     const origin = request.headers.get('origin') || request.nextUrl.origin
     const redirectUri = `${origin}/api/bank/callback`
 
-    // Create user + get auth code
-    const externalUserId = `decouple-${randomUUID()}`
-    const { userId } = await createUser(externalUserId)
-    const authCode = await createTinkLinkAuthCode(userId)
+    // Let Tink Link handle user creation — no auth code needed
+    const tinkLinkUrl = buildTinkLinkUrl(null, redirectUri)
 
-    console.log(`[Bank Connect] User created: ${userId}, redirect: ${redirectUri}`)
+    console.log(`[Bank Connect] Tink Link URL built, redirect: ${redirectUri}`)
 
-    const tinkLinkUrl = buildTinkLinkUrl(authCode, redirectUri)
-
-    return NextResponse.json({ url: tinkLinkUrl, debug: { redirectUri, userId } })
+    return NextResponse.json({ url: tinkLinkUrl, debug: { redirectUri } })
 
   } catch (error) {
     const msg = error instanceof Error ? error.message : 'Unknown error'
