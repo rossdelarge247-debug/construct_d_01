@@ -57,6 +57,14 @@ export function ConfirmationFlow({
 
   const currentStep = visibleSteps[stepIndex] as ConfirmationStep | undefined
 
+  // Section questions complete — open accordion to show new tab, wait for user
+  const handleSectionQuestionsComplete = useCallback(() => {
+    const summary = generateSectionSummary(currentSectionKey, answers, extractions)
+    setCompletedSections((prev: SectionSummaryData[]) => [...prev, summary])
+    setAccordionOpen(true)
+    setPhase('mini_summary')
+  }, [currentSectionKey, answers, extractions])
+
   // Handle answer selection + advance
   const handleNext = useCallback(() => {
     if (!currentStep) return
@@ -86,8 +94,8 @@ export function ConfirmationFlow({
 
     const nextStepIndex = stepIndex + 1
     if (nextStepIndex >= nextVisibleSteps.length) {
-      // Section complete — show mini-summary
-      setPhase('mini_summary')
+      // Section complete — open accordion + show mini-summary
+      handleSectionQuestionsComplete()
     } else {
       setStepIndex(nextStepIndex)
     }
@@ -95,7 +103,7 @@ export function ConfirmationFlow({
     setSelectedOption(null)
     setInputValue('')
     setInputQualifier(null)
-  }, [currentStep, selectedOption, inputValue, inputQualifier, answers, allSteps, stepIndex])
+  }, [currentStep, selectedOption, inputValue, inputQualifier, answers, allSteps, stepIndex, handleSectionQuestionsComplete])
 
   const handleSkip = useCallback(() => {
     if (!currentStep) return
@@ -107,37 +115,31 @@ export function ConfirmationFlow({
     })
 
     if (nextStepIndex >= nextVisibleSteps.length) {
-      setPhase('mini_summary')
+      handleSectionQuestionsComplete()
     } else {
       setStepIndex(nextStepIndex)
     }
     setSelectedOption(null)
     setInputValue('')
-  }, [currentStep, stepIndex, allSteps, answers])
+  }, [currentStep, stepIndex, allSteps, answers, handleSectionQuestionsComplete])
 
-  // Mini-summary confirmed — briefly show new accordion tab, then advance
+  // Mini-summary confirmed ("This looks correct") — close accordion, advance
   const handleSectionConfirm = useCallback(() => {
-    const summary = generateSectionSummary(currentSectionKey, answers, extractions)
-    setCompletedSections((prev: SectionSummaryData[]) => [...prev, summary])
-
     const nextSection = sectionIndex + 1
     if (nextSection >= CONFIRMATION_SECTIONS.length) {
       setPhase('final_summary')
       setAccordionOpen(true)
     } else {
-      // Spec 26 §6: sub-tab slides in → brief pause → slides away → next section
+      // Accordion slides shut → next section question fades in
       setPhase('transitioning')
-      setAccordionOpen(true)
+      setAccordionOpen(false)
       setTimeout(() => {
-        setAccordionOpen(false)
-        setTimeout(() => {
-          setSectionIndex(nextSection)
-          setStepIndex(0)
-          setPhase('question')
-        }, 300) // wait for accordion collapse animation
-      }, 800) // show the new tab for 800ms
+        setSectionIndex(nextSection)
+        setStepIndex(0)
+        setPhase('question')
+      }, 300) // wait for accordion collapse animation
     }
-  }, [currentSectionKey, sectionIndex, answers, extractions])
+  }, [sectionIndex])
 
   // Go back to re-answer section questions
   const handleGoBack = useCallback(() => {
