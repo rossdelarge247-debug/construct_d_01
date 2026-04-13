@@ -63,6 +63,11 @@ docs/SESSION-CONTEXT.md                    — START HERE every session
 docs/HANDOFF-SESSION-8.md                  — Most recent session retro
 docs/workspace-spec/20-bank-first-journey.md   — Bank-first journey redesign
 docs/workspace-spec/21-evidence-model.md       — Evidence model + gap analysis
+docs/workspace-spec/22-confirmation-flow-tree.md — Complete decision tree for all Form E sections
+docs/workspace-spec/23-post-confirm-gap-summary.md — What's proved vs gaps after bank connect
+docs/workspace-spec/24-wireframe-spec-part1.md — Wireframes: carousel, task list, bank connection, reveal
+docs/workspace-spec/25-wireframe-spec-part2.md — Wireframes: confirmation flow, summaries, financial hub
+docs/workspace-spec/26-transitions-animations.md — Every transition, animation, and micro-interaction
 src/lib/ai/pipeline.ts                     — Two-step AI extraction (Haiku→Sonnet)
 src/lib/ai/result-transformer.ts           — Spec 13 decision trees + spec 19 keyword lookup
 src/lib/ai/extraction-schemas.ts           — Structured output schemas (facts only)
@@ -95,11 +100,21 @@ The backlog lives at `docs/v2/v2-backlog.md` (98 items, prioritised). Don't read
 - **Anthropic SDK uses `output_config.format`** — NOT `response_format` (that's OpenAI's API)
 - **All JSON schema objects need `additionalProperties: false`** — Anthropic structured outputs require this
 - **SDK timeout: 90s per call. Route maxDuration: 300s** — real PDFs need this headroom. Don't reduce.
-- **Do not reference pre-pivot specs (03-06, 11, 12)** — the architecture changed. Active specs are 13-19.
+- **Do not reference pre-pivot specs (03-06, 11, 12)** — the architecture changed. Active specs are 13-26.
+- **Wireframes are definitive** — implement screens 1a–3a and 2a–2j exactly as wireframed in specs 24-25. Do not reinterpret or simplify. When in doubt, re-read the spec or ask the user to reshare the wireframe.
+- **Transitions and animations are specced** — see spec 26. Every state change must have the specified animation. Provide `prefers-reduced-motion` fallbacks.
+
+## Visual direction
+
+- **Colour palette & minimalism:** Airbnb — clean, white-forward, generous spacing, restrained colour use
+- **Forms & IxD approach:** Emma app — the interaction patterns, radio groups, progressive disclosure, card layouts. NOT Emma's colour palette.
+- **Spec 18 is partially superseded** — tokens (spacing, typography, shadows) still valid. The colour palette and component designs will be updated in a visual design pass. Do not apply spec 18 colours to new components.
 
 ## Product rules
 
 - **"A warm hand on a cold day"** — compassionate, professional, never patronising
 - **Every question must map to a Form E field** — if the answer doesn't fill a disclosure value, don't ask it
 - **One thing at a time** — one question per screen, one decision per moment
-- **Upload-first, review-by-exception** — AI does 90%, user confirms 10%
+- **Connect-first, confirm-by-exception** — bank data does 70%, user confirms the rest, uploads 3-4 specific gap documents
+- **Show, don't ask** — never ask a cold-start question when a bank signal exists. Show what was found, ask for confirmation.
+- **Delight matters** — transitions, animations, and micro-interactions are not optional. See spec 26.

@@ -1,55 +1,79 @@
 # Session 8 Handoff
 
-**Date:** 2026-04-12
+**Date:** 2026-04-13
 **Branch:** `claude/decouple-v2-workspace-fX7nK`
-**Lines changed:** ~390 (docs only, no code changes)
-**Type:** Planning/design session
+**Lines changed:** ~1,800 (docs only, no code changes)
+**Type:** Major design/planning session
 
 ---
 
 ## What happened
 
-Session 8 was a planning session to design the bank-first journey redesign. Tink Open Banking was completed in session 7 — this session answers "now that we have bank data, how does the UX change?"
+Session 8 was the most significant design session yet. Two phases:
 
-### Deliverable: Specs 20 + 21
+**Phase 1: Spec writing** — Produced specs 20-23 covering the bank-first journey redesign, evidence model, confirmation flow tree, and gap analysis.
 
-**Spec 20 — Bank-First Journey** covers:
-- Revised hero panel state machine with bank connect as primary action
-- New State 1 wireframe: prominent bank connect card with FCA trust signals, secondary upload zone
-- New State 5: targeted upload zone showing only the 3-4 specific gap documents needed
-- Config flow amendments (connect CTA on summary screen)
-- Lozenge system: two new states (Connected + Gap)
-- Summary redesign: specific gap lists naming providers
+**Phase 2: Wireframe review** — User shared 30 wireframe screens covering the entire first-time experience from sign-up to populated financial picture. These wireframes introduced a fundamentally new page architecture that replaces the hero panel with a task list home page.
 
-**Spec 21 — Evidence Model** covers:
-- Four-tier evidence classification: Proved / Inferred / Gap / Invisible
-- Complete mapping of every Form E section to bank data signals
-- Key finding: bank connection alone achieves Draft fidelity (income + spending + accounts)
-- Only 3-4 document types needed to reach Evidenced: pension CETVs, property valuations, mortgage statements, payslips
-- Gap analysis engine design: detection rules, priority ordering, provider-specific messages
-- Section card evidence badges: Bank verified / Document / Estimate / Confirm?
-- Revised fidelity thresholds: bank connection = Draft
+### Documents produced (7 new specs)
+
+| Spec | File | Content |
+|------|------|---------|
+| 20 | `20-bank-first-journey.md` | Journey redesign: bank connect as primary, upload as secondary |
+| 21 | `21-evidence-model.md` | What bank data proves per Form E section, fidelity thresholds |
+| 22 | `22-confirmation-flow-tree.md` | Complete decision tree for all 10 Form E sections |
+| 23 | `23-post-confirm-gap-summary.md` | Post-confirmation gap analysis: what's proved vs what needs docs |
+| 24 | `24-wireframe-spec-part1.md` | Screen-by-screen spec: carousel, task list, bank connection, reveal |
+| 25 | `25-wireframe-spec-part2.md` | Screen-by-screen spec: confirmation flow, summaries, financial hub |
+| 26 | `26-transitions-animations.md` | Every transition, animation, timing, and micro-interaction |
+
+### CLAUDE.md updated with
+- Visual direction: Airbnb colour palette/minimalism + Emma app IxD/forms
+- Wireframe fidelity rule: implement as designed, do not reinterpret
+- New product rules: "Connect-first", "Show don't ask", "Delight matters"
+- Updated key files list with all new specs
+
+---
 
 ## Key decisions
 
-1. **Bank connect is the primary action, not upload.** The hero panel's default state leads with a prominent bank connect card. Upload is the secondary path. This inverts the current design.
+1. **Task list replaces hero panel** — The home page is now a three-phase task list (Preparation → Sharing → Finalisation) that starts with one task (connect bank) and grows dynamically. The hero panel's 8-state machine is retired.
 
-2. **Bank connection alone = Draft fidelity.** A 12-month bank feed provides income, spending, and accounts — enough for a first mediation conversation. Previously Draft required uploading and processing PDF statements.
+2. **Welcome carousel before task list** — 3+ onboarding slides educate before asking. Sets expectations ("80% from bank data alone").
 
-3. **Gap analysis is specific, not generic.** After bank data, the system tells users exactly which 3-4 documents they need, naming providers: "Pension CETV from Aviva" not "Upload pension details." This reframes upload from "gather 15 documents" to "fill 3-4 specific gaps."
+3. **Tink as modal, not redirect** — Bank connection opens Tink Link in an iframe/lightbox overlay. User stays in the app. Requires switching from redirect to drop-in integration mode.
 
-4. **Four evidence tiers, not binary.** Proved (direct bank evidence), Inferred (strong signal, user confirms), Gap (document needed), Invisible (no signal). This drives UI decisions: proved items get "Bank verified" badges, inferred items get "Confirm?" prompts, gaps get specific upload requests.
+4. **Progressive reveal is the magic moment** — After bank connection, findings appear one by one with staggered animations (screen 3d). This is the centrepiece of the experience.
 
-5. **Lozenges become dynamic.** Currently generated from config answers (static). After bank connection, they're generated from bank data analysis — showing "Connected" accounts and "Gap" documents dynamically.
+5. **Section-by-section confirmation within task list** — The Q&A flow is embedded in the task list frame, not a separate flow. Completed sections collapse into an accordion. Each section ends with a mini-summary + gap messages.
+
+6. **Financial summary is a sub-page** — Reached from the task list via "View financial summary". The task list IS the home page.
+
+7. **Source badges on financial summary** — Green "Bank connection" for bank-verified data, orange "Self disclosed" for estimates. Every item shows its evidence source.
+
+8. **Three-session build plan** — Session 9: foundation (types, carousel, task list, bank connection). Session 10: confirmation flow + financial summary. Session 11: dynamic task list + visual polish.
+
+9. **Visual direction set** — Airbnb colour palette and minimalism. Emma app forms and IxD patterns. Spec 18 partially superseded.
+
+---
 
 ## What went well
 
-- The planning brief in SESSION-CONTEXT.md was exceptionally detailed — the strategic analysis of Open Banking as evidence, the section-by-section mapping, and the specific questions to answer made the spec writing focused
-- Splitting into two specs (journey + evidence model) keeps each focused and readable
-- The evidence tier model (Proved/Inferred/Gap/Invisible) provides a clean framework for all downstream UI decisions
+- The wireframe review process worked well — batched screenshots with annotations, studied and noted before synthesis
+- The decision to split specs into focused files (journey, evidence, flow tree, wireframe part 1, wireframe part 2, transitions) keeps each readable
+- The wireframes faithfully implement the "confirm, don't discover" concept from the earlier specs — the design conversation built on the spec work rather than starting over
 
 ## What could improve
 
-- The spec doesn't address multi-bank scenarios (user has Barclays + Monzo). State 5 could allow connecting additional banks before uploading documents.
-- Credit card statements are in the gap list but Tink Open Banking covers credit cards too — the gap analysis should check if the credit card is already connected before flagging it.
-- The config flow amendments are light — a future iteration could skip savings/debts/other config questions entirely when bank data can infer them.
+- The session was very long — the spec writing + wireframe review + spec encoding was a lot for one session
+- Some wireframe screens appear twice with the same annotation (2c-b and 2c-c are identical) — could consolidate
+- The section label on the debt question wireframe says "Pension" — likely a wireframe labelling error, noted in the spec
+
+## Wireframes pending from user
+
+- Spending categorisation dialogue (urgent — blocks session 10)
+- Spending and debt panels on financial summary
+- Children picture flow
+- Needs after separation flow
+- Share & collaborate screens
+- Visual design pass (Airbnb + Emma direction)
