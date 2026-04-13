@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createTinkLinkAuthCode, buildTinkLinkUrl } from '@/lib/bank/tink-client'
+import { createUser, getAuthorizationCode, buildTinkLinkUrl } from '@/lib/bank/tink-client'
 import { randomUUID } from 'crypto'
 
 /**
@@ -8,8 +8,7 @@ import { randomUUID } from 'crypto'
  * Initiates a Tink Link session for Open Banking bank connection.
  * Returns a URL that the client should open in an iframe.
  *
- * Uses the authorization grant endpoint which creates the Tink user
- * automatically via external_user_id — no separate user creation step.
+ * Flow: create Tink user → get authorization code → build Tink Link URL.
  */
 export async function POST(request: NextRequest) {
   try {
@@ -23,10 +22,14 @@ export async function POST(request: NextRequest) {
     const origin = request.headers.get('origin') || request.nextUrl.origin
     const redirectUri = `${origin}/api/bank/callback`
 
-    // Single-step: authorization grant creates the user and returns an auth code
+    // Step 1: Create a Tink user
     const externalUserId = `decouple-${randomUUID()}`
-    const authCode = await createTinkLinkAuthCode(externalUserId)
+    const { userId } = await createUser(externalUserId)
 
+    // Step 2: Get authorization code for Tink Link
+    const authCode = await getAuthorizationCode(userId)
+
+    // Step 3: Build the Tink Link URL
     const tinkLinkUrl = buildTinkLinkUrl(authCode, redirectUri)
 
     return NextResponse.json({ url: tinkLinkUrl })
