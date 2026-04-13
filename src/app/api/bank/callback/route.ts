@@ -63,6 +63,7 @@ export async function GET(request: NextRequest) {
           error: null,
         },
         transformed,
+        extraction,
       })
     }
 

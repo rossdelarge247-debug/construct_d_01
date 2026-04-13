@@ -5,14 +5,19 @@ import { TitleBar } from '@/components/hub/title-bar'
 import { WelcomeCarousel } from '@/components/workspace/welcome-carousel'
 import { TaskListHome } from '@/components/workspace/task-list-home'
 import { BankConnectionFlow } from '@/components/workspace/bank-connection-flow'
-import type { WorkspaceView, BankConnectionPhase, ConnectedAccount, RevealItem } from '@/types/hub'
+import { ConfirmationFlow } from '@/components/workspace/confirmation-flow'
+import { FinancialSummaryPage } from '@/components/workspace/financial-summary-page'
+import type { WorkspaceView, BankConnectionPhase, ConnectedAccount, SectionConfirmation } from '@/types/hub'
+import type { BankStatementExtraction } from '@/lib/ai/extraction-schemas'
 
 export default function WorkspacePage() {
   const [view, setView] = useState<WorkspaceView>('carousel')
   const [bankPhase, setBankPhase] = useState<BankConnectionPhase>('idle')
   const [bankConnected, setBankConnected] = useState(false)
   const [connectedAccounts, setConnectedAccounts] = useState<ConnectedAccount[]>([])
-  const [confirmationComplete] = useState(false) // Session 10: will wire up confirmation flow
+  const [bankExtractions, setBankExtractions] = useState<BankStatementExtraction[]>([])
+  const [confirmationComplete, setConfirmationComplete] = useState(false)
+  const [confirmations, setConfirmations] = useState<SectionConfirmation[]>([])
 
   // ═══ Navigation callbacks ═══
 
@@ -30,11 +35,12 @@ export default function WorkspacePage() {
   }, [])
 
   const handleBankComplete = useCallback(
-    (accounts: ConnectedAccount[], _revealItems: RevealItem[]) => {
+    (accounts: ConnectedAccount[], _revealItems: unknown, extractions: BankStatementExtraction[]) => {
       setConnectedAccounts(accounts)
+      setBankExtractions(extractions)
       setBankConnected(true)
       setBankPhase('idle')
-      setView('task_list')
+      setView('confirmation')
     },
     []
   )
@@ -43,6 +49,15 @@ export default function WorkspacePage() {
     setBankPhase('idle')
     setView('task_list')
   }, [])
+
+  const handleConfirmationComplete = useCallback(
+    (sectionConfirmations: SectionConfirmation[]) => {
+      setConfirmations(sectionConfirmations)
+      setConfirmationComplete(true)
+      setView('financial_summary')
+    },
+    []
+  )
 
   const handleViewSummary = useCallback(() => {
     setView('financial_summary')
@@ -84,26 +99,23 @@ export default function WorkspacePage() {
           />
         )}
 
-        {/* Financial summary placeholder (screen 3a — session 10) */}
+        {/* Confirmation flow (screens 2b-2i) */}
+        {view === 'confirmation' && (
+          <ConfirmationFlow
+            extractions={bankExtractions}
+            connectedAccounts={connectedAccounts}
+            onComplete={handleConfirmationComplete}
+          />
+        )}
+
+        {/* Financial summary (screen 3a) */}
         {view === 'financial_summary' && (
-          <div className="px-6 pt-8">
-            <div className="max-w-[var(--content-max-width)] mx-auto">
-              <button
-                onClick={() => setView('task_list')}
-                className="text-sm font-medium text-blue-600 hover:underline mb-6"
-              >
-                &larr; Back to your dashboard
-              </button>
-              <h2 className="text-2xl font-bold text-ink mb-6">
-                Your financial picture
-              </h2>
-              <div className="bg-white rounded-lg border border-grey-100 p-8 text-center">
-                <p className="text-ink-secondary text-sm">
-                  Financial summary will be built in session 10.
-                </p>
-              </div>
-            </div>
-          </div>
+          <FinancialSummaryPage
+            extractions={bankExtractions}
+            connectedAccounts={connectedAccounts}
+            confirmations={confirmations}
+            onBack={() => setView('task_list')}
+          />
         )}
       </main>
     </div>
@@ -126,6 +138,8 @@ function getTitleProps(
         return { title: 'Connected to your bank', showShareButton: false }
       }
       return { title: 'Overview', subtitle: 'Preparation', showShareButton: false }
+    case 'confirmation':
+      return { title: 'Preparation', showShareButton: true }
     case 'financial_summary':
       return { title: 'Financial summary', showShareButton: true }
     default:

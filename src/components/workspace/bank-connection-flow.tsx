@@ -3,26 +3,17 @@
 import { useState, useEffect, useCallback, useRef } from 'react'
 import { Check } from 'lucide-react'
 import type { BankConnectionPhase, ConnectedAccount, RevealItem } from '@/types/hub'
-
-// ═══ Mock data for the reveal demo ═══
-const MOCK_ACCOUNTS: ConnectedAccount[] = [
-  { id: 'acc-1', bankName: 'Barclays', accountType: 'current', lastFour: '2392', monthsOfData: 12 },
-  { id: 'acc-2', bankName: 'Barclays', accountType: 'savings', lastFour: '2657', monthsOfData: 12 },
-]
-
-const MOCK_REVEAL_ITEMS: RevealItem[] = [
-  { id: 'r1', accountId: 'acc-1', label: 'Income identified', detail: '£3,216/month from ACME Ltd', icon: 'income' },
-  { id: 'r2', accountId: 'acc-1', label: 'Spending mapped', detail: '£2,400/month, 8 categories', icon: 'spending' },
-  { id: 'r3', accountId: 'acc-1', label: 'Mortgage found', detail: '£1,150/month to Halifax', icon: 'mortgage' },
-  { id: 'r4', accountId: 'acc-1', label: 'Account balance', detail: 'Barclays current, £1,842', icon: 'balance' },
-  { id: 'r5', accountId: 'acc-1', label: 'Regular commitments', detail: '12 payments identified', icon: 'commitments' },
-  { id: 'r6', accountId: 'acc-1', label: 'Pension contributions', detail: '£200/month to Aviva', icon: 'pension' },
-]
+import type { BankStatementExtraction } from '@/lib/ai/extraction-schemas'
+import {
+  extractionsToConnectedAccounts,
+  extractionsToRevealItems,
+  createDemoExtractions,
+} from '@/lib/bank/bank-data-utils'
 
 interface BankConnectionFlowProps {
   phase: BankConnectionPhase
   onPhaseChange: (phase: BankConnectionPhase) => void
-  onComplete: (accounts: ConnectedAccount[], revealItems: RevealItem[]) => void
+  onComplete: (accounts: ConnectedAccount[], revealItems: RevealItem[], extractions: BankStatementExtraction[]) => void
   onCancel: () => void
 }
 
@@ -35,6 +26,18 @@ export function BankConnectionFlow({
   const [visibleRevealItems, setVisibleRevealItems] = useState<number>(0)
   const [progressPercent, setProgressPercent] = useState(0)
   const revealTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+
+  // Bank data state — populated from real Tink data or demo fallback
+  const [extractions, setExtractions] = useState<BankStatementExtraction[]>([])
+  const [accounts, setAccounts] = useState<ConnectedAccount[]>([])
+  const [revealItems, setRevealItems] = useState<RevealItem[]>([])
+
+  // Hydrate bank data from a list of extractions (real or demo)
+  const hydrateBankData = useCallback((exts: BankStatementExtraction[]) => {
+    setExtractions(exts)
+    setAccounts(extractionsToConnectedAccounts(exts))
+    setRevealItems(extractionsToRevealItems(exts))
+  }, [])
 
   // Auto-advance: loader → dimming → tink_modal
   useEffect(() => {
@@ -49,17 +52,37 @@ export function BankConnectionFlow({
     }
   }, [phase, onPhaseChange])
 
-  // Simulate Tink completion → reveal
-  const simulateTinkComplete = useCallback(() => {
+  // Tink completion — read real data from sessionStorage or use demo
+  const handleTinkComplete = useCallback((useDemoData: boolean) => {
+    let exts: BankStatementExtraction[]
+
+    if (useDemoData) {
+      exts = createDemoExtractions()
+    } else {
+      try {
+        const raw = sessionStorage.getItem('pendingBankData')
+        if (raw) {
+          const parsed = JSON.parse(raw) as { extraction?: BankStatementExtraction }[]
+          exts = parsed.map((r) => r.extraction).filter(Boolean) as BankStatementExtraction[]
+          sessionStorage.removeItem('pendingBankData')
+        } else {
+          exts = createDemoExtractions()
+        }
+      } catch {
+        exts = createDemoExtractions()
+      }
+    }
+
+    hydrateBankData(exts)
     onPhaseChange('reveal')
     setProgressPercent(15)
-  }, [onPhaseChange])
+  }, [onPhaseChange, hydrateBankData])
 
   // Progressive reveal: stagger tick items per spec 26
   useEffect(() => {
     if (phase !== 'reveal') return
-    if (visibleRevealItems >= MOCK_REVEAL_ITEMS.length) {
-      // All items revealed — advance to complete after a beat
+    if (revealItems.length === 0) return
+    if (visibleRevealItems >= revealItems.length) {
       const t = setTimeout(() => {
         setProgressPercent(100)
         onPhaseChange('complete')
@@ -73,13 +96,13 @@ export function BankConnectionFlow({
 
     revealTimerRef.current = setTimeout(() => {
       setVisibleRevealItems((n) => n + 1)
-      setProgressPercent(15 + ((visibleRevealItems + 1) / MOCK_REVEAL_ITEMS.length) * 80)
+      setProgressPercent(15 + ((visibleRevealItems + 1) / revealItems.length) * 80)
     }, delay)
 
     return () => {
       if (revealTimerRef.current) clearTimeout(revealTimerRef.current)
     }
-  }, [phase, visibleRevealItems, onPhaseChange])
+  }, [phase, visibleRevealItems, revealItems.length, onPhaseChange])
 
   // Reset when phase goes back to idle
   useEffect(() => {
@@ -110,7 +133,8 @@ export function BankConnectionFlow({
       {/* Tink modal — iframe drop-in mode (screen 3c) */}
       {phase === 'tink_modal' && (
         <TinkModal
-          onComplete={simulateTinkComplete}
+          onComplete={() => handleTinkComplete(false)}
+          onDemoComplete={() => handleTinkComplete(true)}
           onCancel={onCancel}
         />
       )}
@@ -144,15 +168,17 @@ export function BankConnectionFlow({
 
                 <div className="mt-6">
                   {/* Per-account processing block */}
-                  <p
-                    className="text-sm font-medium text-ink-secondary mb-3 animate-slide-in-left"
-                  >
-                    Processing {MOCK_ACCOUNTS[0].bankName} current account xxxx{MOCK_ACCOUNTS[0].lastFour}
-                  </p>
+                  {accounts[0] && (
+                    <p
+                      className="text-sm font-medium text-ink-secondary mb-3 animate-slide-in-left"
+                    >
+                      Processing {accounts[0].bankName} {accounts[0].accountType} account xxxx{accounts[0].lastFour}
+                    </p>
+                  )}
 
                   {/* Tick items — staggered reveal */}
                   <div className="space-y-2">
-                    {MOCK_REVEAL_ITEMS.map((item, i) => (
+                    {revealItems.map((item, i) => (
                       <RevealTickItem
                         key={item.id}
                         item={item}
@@ -178,7 +204,7 @@ export function BankConnectionFlow({
                     We have finished having a look
                   </p>
 
-                  {MOCK_ACCOUNTS.map((account) => (
+                  {accounts.map((account) => (
                     <div key={account.id} className="flex items-start gap-3 mb-4">
                       <div className="w-5 h-5 mt-0.5 rounded-full bg-green-600 flex items-center justify-center shrink-0">
                         <Check size={12} className="text-white" strokeWidth={3} />
@@ -195,7 +221,7 @@ export function BankConnectionFlow({
                   ))}
 
                   <button
-                    onClick={() => onComplete(MOCK_ACCOUNTS, MOCK_REVEAL_ITEMS)}
+                    onClick={() => onComplete(accounts, revealItems, extractions)}
                     className="mt-4 px-6 py-3 bg-ink text-white text-sm font-semibold rounded-md hover:opacity-90 transition-opacity active:scale-[0.98]"
                   >
                     Next
@@ -290,9 +316,11 @@ function RevealTickItem({
  */
 function TinkModal({
   onComplete,
+  onDemoComplete,
   onCancel,
 }: {
   onComplete: () => void
+  onDemoComplete: () => void
   onCancel: () => void
 }) {
   const [tinkUrl, setTinkUrl] = useState<string | null>(null)
@@ -381,7 +409,7 @@ function TinkModal({
               Without Tink configured: show demo button to test the rest of the flow. */}
           {!tinkAvailable && !loading && (
             <button
-              onClick={onComplete}
+              onClick={onDemoComplete}
               className="flex-1 py-3 bg-ink text-white text-sm font-semibold rounded-md hover:opacity-90 transition-opacity active:scale-[0.98]"
             >
               Continue with demo data
