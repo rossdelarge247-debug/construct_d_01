@@ -107,38 +107,12 @@ export function BankConnectionFlow({
         />
       )}
 
-      {/* Tink modal placeholder (screen 3c) */}
+      {/* Tink modal — iframe drop-in mode (screen 3c) */}
       {phase === 'tink_modal' && (
-        <div
-          className="fixed inset-0 z-50 flex items-center justify-center px-4"
-          onClick={(e) => e.stopPropagation()}
-        >
-          <div
-            className="w-full max-w-md bg-white rounded-xl shadow-lg p-8 animate-modal-appear"
-          >
-            <h3 className="text-lg font-bold text-ink mb-2">Connect your bank</h3>
-            <p className="text-sm text-ink-secondary mb-6">
-              This is where the Tink Link drop-in will appear. Select your bank and authenticate securely.
-            </p>
-            <div className="h-48 bg-grey-50 rounded-lg flex items-center justify-center mb-6">
-              <span className="text-ink-tertiary text-sm">Tink Link drop-in area</span>
-            </div>
-            <div className="flex gap-3">
-              <button
-                onClick={simulateTinkComplete}
-                className="flex-1 py-3 bg-ink text-white text-sm font-semibold rounded-md hover:opacity-90 transition-opacity active:scale-[0.98]"
-              >
-                Simulate connection
-              </button>
-              <button
-                onClick={onCancel}
-                className="px-5 py-3 text-sm font-medium text-ink-secondary border border-grey-100 rounded-md hover:bg-grey-50 transition-colors"
-              >
-                Cancel
-              </button>
-            </div>
-          </div>
-        </div>
+        <TinkModal
+          onComplete={simulateTinkComplete}
+          onCancel={onCancel}
+        />
       )}
 
       {/* Main content card — loader, reveal, and complete screens */}
@@ -147,7 +121,7 @@ export function BankConnectionFlow({
           <div className="w-full max-w-[560px] bg-white rounded-lg border border-grey-100 shadow-sm overflow-hidden">
             {/* ═══ Screen 3: Loader ═══ */}
             {phase === 'loader' && (
-              <div className="p-8">
+              <div className="p-5 sm:p-8">
                 <div className="h-40 bg-grey-50 rounded-md flex items-center justify-center mb-6">
                   <span className="text-ink-tertiary text-sm">Graphic</span>
                 </div>
@@ -160,7 +134,7 @@ export function BankConnectionFlow({
 
             {/* ═══ Screen 3d: Reveal ═══ */}
             {(phase === 'reveal' || phase === 'processing') && (
-              <div className="p-8">
+              <div className="p-5 sm:p-8">
                 <h2
                   className="text-xl font-bold text-ink mb-3 animate-fade-in"
                 >
@@ -193,7 +167,7 @@ export function BankConnectionFlow({
 
             {/* ═══ Screen 3e: Complete ═══ */}
             {phase === 'complete' && (
-              <div className="p-8">
+              <div className="p-5 sm:p-8">
                 <h2 className="text-xl font-bold text-ink mb-3">
                   Connected to your bank
                 </h2>
@@ -301,6 +275,108 @@ function RevealTickItem({
       >
         <span className="text-[15px] font-medium text-ink">{item.label}</span>
         <span className="text-[15px] text-ink-secondary"> — {item.detail}</span>
+      </div>
+    </div>
+  )
+}
+
+/**
+ * Tink modal — supports two modes:
+ * 1. Iframe mode: loads the Tink Link URL in an iframe, listens for postMessage completion
+ * 2. Simulation mode (dev): shows a placeholder with a simulate button
+ *
+ * The iframe receives the callback URL which now posts a message to parent
+ * window instead of redirecting, keeping the user in the app context.
+ */
+function TinkModal({
+  onComplete,
+  onCancel,
+}: {
+  onComplete: () => void
+  onCancel: () => void
+}) {
+  const [tinkUrl, setTinkUrl] = useState<string | null>(null)
+  const [loading, setLoading] = useState(false)
+  const iframeRef = useRef<HTMLIFrameElement>(null)
+
+  // Fetch Tink Link URL on mount
+  useEffect(() => {
+    let cancelled = false
+    setLoading(true)
+
+    fetch('/api/bank/connect', { method: 'POST' })
+      .then((res) => res.json())
+      .then((data) => {
+        if (!cancelled && data.url) {
+          setTinkUrl(data.url)
+        }
+        setLoading(false)
+      })
+      .catch(() => {
+        setLoading(false)
+      })
+
+    return () => { cancelled = true }
+  }, [])
+
+  // Listen for postMessage from iframe callback
+  useEffect(() => {
+    function handleMessage(event: MessageEvent) {
+      if (event.data?.type === 'tink-complete') {
+        // Store results for the hub to pick up
+        try {
+          sessionStorage.setItem('pendingBankData', JSON.stringify(event.data.results))
+        } catch { /* ignore storage errors */ }
+        onComplete()
+      }
+      if (event.data?.type === 'tink-error') {
+        onCancel()
+      }
+    }
+
+    window.addEventListener('message', handleMessage)
+    return () => window.removeEventListener('message', handleMessage)
+  }, [onComplete, onCancel])
+
+  return (
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center px-4"
+      onClick={(e) => e.stopPropagation()}
+    >
+      <div className="w-full max-w-md bg-white rounded-xl shadow-lg p-5 sm:p-8 animate-modal-appear">
+        <h3 className="text-lg font-bold text-ink mb-2">Connect your bank</h3>
+
+        {/* Iframe area — shows Tink Link or placeholder */}
+        <div className="h-80 bg-grey-50 rounded-lg flex items-center justify-center mb-6 overflow-hidden">
+          {tinkUrl ? (
+            <iframe
+              ref={iframeRef}
+              src={tinkUrl}
+              className="w-full h-full border-0 rounded-lg"
+              title="Connect your bank securely"
+              sandbox="allow-scripts allow-same-origin allow-forms allow-popups allow-top-navigation"
+            />
+          ) : (
+            <span className="text-ink-tertiary text-sm">
+              {loading ? 'Preparing secure connection...' : 'Tink Link drop-in area'}
+            </span>
+          )}
+        </div>
+
+        <div className="flex gap-3">
+          <button
+            onClick={onComplete}
+            className="flex-1 py-3 bg-ink text-white text-sm font-semibold rounded-md hover:opacity-90 transition-opacity active:scale-[0.98]"
+          >
+            Simulate connection
+          </button>
+          <button
+            onClick={onCancel}
+            className="px-5 py-3 text-sm font-medium text-ink-secondary border border-grey-100 rounded-md hover:bg-grey-50 transition-colors"
+          >
+            Cancel
+          </button>
+        </div>
       </div>
     </div>
   )

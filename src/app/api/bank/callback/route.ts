@@ -66,16 +66,24 @@ export async function GET(request: NextRequest) {
       })
     }
 
-    // Return HTML page that stores results and redirects to hub
-    // Uses sessionStorage so the hub can pick up the data on load
+    // Return HTML page that either:
+    // 1. Posts message to parent (iframe/drop-in mode)
+    // 2. Stores in sessionStorage and redirects (legacy redirect mode)
     const html = `<!DOCTYPE html>
 <html><head><title>Connecting your bank...</title></head>
 <body>
 <p>Bank connected successfully. Redirecting...</p>
 <script>
   try {
-    sessionStorage.setItem('pendingBankData', JSON.stringify(${JSON.stringify(results)}));
-    window.location.href = '/workspace?source=openbanking';
+    var data = ${JSON.stringify(results)};
+    if (window.parent !== window) {
+      // Iframe mode — post results to parent window
+      window.parent.postMessage({ type: 'tink-complete', results: data }, '*');
+    } else {
+      // Redirect mode (legacy) — store in sessionStorage
+      sessionStorage.setItem('pendingBankData', JSON.stringify(data));
+      window.location.href = '/workspace?source=openbanking';
+    }
   } catch (e) {
     document.body.innerHTML = '<p>Something went wrong storing your bank data. Please try again.</p>';
   }

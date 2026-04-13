@@ -49,22 +49,18 @@ export function TaskListHome({
           {!bankConnected ? (
             /* First-time state: single bank connect task */
             <div className="p-5">
-              <div className="flex items-start justify-between gap-4">
-                <div className="flex-1">
-                  <p className="text-[15px] font-medium text-ink leading-snug">
-                    Connect your bank account and be ready for financial disclosure in 3 minutes
-                  </p>
-                </div>
-                <button
-                  onClick={onGetStarted}
-                  className="shrink-0 px-5 py-2.5 bg-ink text-white text-sm font-semibold rounded-md hover:opacity-90 transition-opacity active:scale-[0.98]"
-                >
-                  Get started
-                </button>
-              </div>
+              <p className="text-[15px] font-medium text-ink leading-snug">
+                Connect your bank account and be ready for financial disclosure in 3 minutes
+              </p>
+              <button
+                onClick={onGetStarted}
+                className="mt-4 w-full sm:w-auto px-5 py-2.5 bg-ink text-white text-sm font-semibold rounded-md hover:opacity-90 transition-opacity active:scale-[0.98]"
+              >
+                Get started
+              </button>
               <button
                 onClick={onSkip}
-                className="mt-3 text-sm text-ink-tertiary hover:text-ink-secondary transition-colors"
+                className="mt-3 block text-sm text-ink-tertiary hover:text-ink-secondary transition-colors"
               >
                 Skip for now, I want to have a look around
               </button>
@@ -117,12 +113,12 @@ export function TaskListHome({
 
         {/* ═══ Sharing & collaboration phase ═══ */}
         <div className="mt-4 bg-white rounded-lg border border-grey-100 overflow-hidden opacity-60">
-          <div className="px-5 py-4 flex items-center justify-between">
+          <div className="px-5 py-4 flex flex-col gap-1.5 sm:flex-row sm:items-center sm:justify-between">
             <span className="text-xs font-semibold text-ink-secondary uppercase tracking-wider">
               Sharing &amp; collaboration
             </span>
             <div className="flex items-center gap-1.5 text-ink-tertiary">
-              <Lock size={13} />
+              <Lock size={13} className="shrink-0" />
               <span className="text-xs">
                 {bankConnected ? 'Available after confirmation' : 'Available after bank connection'}
               </span>
@@ -132,12 +128,12 @@ export function TaskListHome({
 
         {/* ═══ Finalisation phase ═══ */}
         <div className="mt-4 bg-white rounded-lg border border-grey-100 overflow-hidden opacity-60">
-          <div className="px-5 py-4 flex items-center justify-between">
+          <div className="px-5 py-4 flex flex-col gap-1.5 sm:flex-row sm:items-center sm:justify-between">
             <span className="text-xs font-semibold text-ink-secondary uppercase tracking-wider">
               Finalisation
             </span>
             <div className="flex items-center gap-1.5 text-ink-tertiary">
-              <Lock size={13} />
+              <Lock size={13} className="shrink-0" />
               <span className="text-xs">Not available yet, collate final evidence</span>
             </div>
           </div>

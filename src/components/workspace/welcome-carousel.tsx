@@ -77,8 +77,8 @@ export function WelcomeCarousel({ onComplete }: WelcomeCarouselProps) {
           ))}
         </div>
 
-        {/* Graphic placeholder */}
-        <div className="mx-6 mt-6 rounded-md bg-grey-50 flex items-center justify-center" style={{ height: 220 }}>
+        {/* Graphic placeholder — shorter on mobile */}
+        <div className="mx-6 mt-6 rounded-md bg-grey-50 flex items-center justify-center h-40 sm:h-[220px]">
           <span className="text-ink-tertiary text-sm">Illustration</span>
         </div>
 
