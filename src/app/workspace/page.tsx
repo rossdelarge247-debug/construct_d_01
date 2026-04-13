@@ -87,6 +87,8 @@ export default function WorkspacePage() {
             bankConnected={bankConnected}
             connectedAccounts={connectedAccounts}
             confirmationComplete={confirmationComplete}
+            confirmations={confirmations}
+            extractions={bankExtractions}
             onGetStarted={handleGetStarted}
             onSkip={handleSkip}
             onViewSummary={handleViewSummary}
