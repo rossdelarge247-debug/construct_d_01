@@ -295,7 +295,6 @@ export function ConfirmationFlow({
           <ProgressStepper
             sections={[...CONFIRMATION_SECTIONS, 'spending'] as string[]}
             currentIndex={phase === 'spending' ? CONFIRMATION_SECTIONS.length : sectionIndex}
-            completedCount={completedSections.length}
           />
         </div>
 
