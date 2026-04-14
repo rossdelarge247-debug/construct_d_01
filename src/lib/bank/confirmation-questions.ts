@@ -832,13 +832,16 @@ function generatePensionsSteps(extractions: BankStatementExtraction[]): Confirma
 //
 // Ladder:
 //   1. Detect loan repayments, credit cards, BNPL by payee pattern
-//   2. Auto-confirm obvious debts (credit cards, BNPL)
-//   3. Classify ambiguous payments (loan vs car finance vs student loan)
-//   4. Check for overdraft usage
-//   5. Catch-all: any other debts?
+//   2. Credit cards: confirm + ask outstanding balance + sole/joint
+//   3. Loans: classify type + balance + purpose + sole/joint
+//   4. Car finance: PCP vs HP vs lease (affects whether car is an asset)
+//   5. Student loans: SLC vs private (SLC often excluded from settlement)
+//   6. Overdraft: auto-confirm
+//   7. Catch-all: any other debts (including informal, tax, collections)?
 //
 // Cross-section impacts:
-//   → Property: secured loans already captured as second charge
+//   → Property: secured loans captured as second charge
+//   → Other assets: HP car finance means car IS an asset (Form E 2.8)
 //   → Spending: debt repayments are committed spending
 
 const CREDIT_CARD_PROVIDERS = [
@@ -855,7 +858,7 @@ function generateDebtsSteps(extractions: BankStatementExtraction[]): Confirmatio
   const allPayments = extractions.flatMap((e) => e.regular_payments)
   const steps: ConfirmationStep[] = []
 
-  // ── Detect different debt types by category + payee pattern ──
+  // ── Detect different debt types ──
   const loans = allPayments.filter((p) => p.likely_category === 'loan_repayment')
   const creditCards = allPayments.filter((p) =>
     matchesPayee(p.payee, CREDIT_CARD_PROVIDERS),
@@ -865,23 +868,47 @@ function generateDebtsSteps(extractions: BankStatementExtraction[]): Confirmatio
   )
   const hasOverdraft = extractions.some((e) => (e.closing_balance ?? 0) < 0)
 
-  // ── Credit cards: auto-confirm ──
+  // ── Credit cards: confirm + balance + sole/joint ──
   if (creditCards.length > 0) {
     const cc = creditCards[0]
     steps.push({
-      id: 'debts-credit-card',
+      id: 'debts-cc-0-confirm',
       sectionKey: 'debts',
       sectionLabel: 'Debts',
       type: 'confirmation_message',
-      text: `Credit card payment: £${cc.amount}/month to ${cc.payee}. We've noted this as a debt.`,
+      text: `Credit card: £${cc.amount}/month to ${cc.payee}.`,
     })
+    steps.push({
+      id: 'debts-cc-0-balance',
+      sectionKey: 'debts',
+      sectionLabel: 'Debts',
+      type: 'input',
+      text: `What's the outstanding balance on your ${cc.payee} card?`,
+      inputPrefix: '£',
+      inputPlaceholder: 'e.g. 3,200',
+    })
+    steps.push({
+      id: 'debts-cc-0-joint',
+      sectionKey: 'debts',
+      sectionLabel: 'Debts',
+      type: 'question',
+      text: 'Is this card in your name only, or joint?',
+      options: [
+        { label: 'My name only', value: 'sole' },
+        { label: 'Joint with my partner', value: 'joint' },
+      ],
+    })
+
     if (creditCards.length > 1) {
+      const cc2 = creditCards[1]
       steps.push({
-        id: 'debts-credit-card-2',
+        id: 'debts-cc-1-balance',
         sectionKey: 'debts',
         sectionLabel: 'Debts',
-        type: 'confirmation_message',
-        text: `Also: £${creditCards[1].amount}/month to ${creditCards[1].payee}.`,
+        type: 'input',
+        text: `You also pay £${cc2.amount}/month to ${cc2.payee}. Outstanding balance?`,
+        inputPrefix: '£',
+        inputPlaceholder: 'e.g. 1,500',
       })
     }
   }
@@ -898,7 +925,7 @@ function generateDebtsSteps(extractions: BankStatementExtraction[]): Confirmatio
     })
   }
 
-  // ── Loans: classify (top 2) ──
+  // ── Loans: classify + balance + purpose + sole/joint (top 2) ──
   for (let i = 0; i < Math.min(loans.length, 2); i++) {
     const loan = loans[i]
     steps.push({
@@ -909,12 +936,14 @@ function generateDebtsSteps(extractions: BankStatementExtraction[]): Confirmatio
       text: `£${loan.amount}/month to ${loan.payee}. What is this?`,
       options: [
         { label: 'Personal loan', value: 'personal_loan' },
-        { label: 'Car finance (PCP/HP)', value: 'car_finance' },
+        { label: 'Car finance', value: 'car_finance' },
         { label: 'Student loan', value: 'student_loan' },
         { label: 'Secured loan on property', value: 'secured' },
         { label: 'Something else', value: 'other' },
       ],
     })
+
+    // Balance (not for student loan — SLC handles that)
     steps.push({
       id: `debts-loan-${i}-balance`,
       sectionKey: 'debts',
@@ -924,6 +953,70 @@ function generateDebtsSteps(extractions: BankStatementExtraction[]): Confirmatio
       inputPrefix: '£',
       inputPlaceholder: 'e.g. 8,000',
       showWhen: { questionId: `debts-loan-${i}`, value: ['personal_loan', 'car_finance', 'secured'] },
+    })
+
+    // Purpose (personal loan / secured)
+    steps.push({
+      id: `debts-loan-${i}-purpose`,
+      sectionKey: 'debts',
+      sectionLabel: 'Debts',
+      type: 'question',
+      text: 'What was this loan for?',
+      options: [
+        { label: 'Home improvements', value: 'home' },
+        { label: 'Car purchase', value: 'car' },
+        { label: 'Debt consolidation', value: 'consolidation' },
+        { label: 'Business purposes', value: 'business' },
+        { label: 'Something else', value: 'other' },
+      ],
+      showWhen: { questionId: `debts-loan-${i}`, value: ['personal_loan', 'secured'] },
+    })
+
+    // Sole / joint (personal loan / secured)
+    steps.push({
+      id: `debts-loan-${i}-joint`,
+      sectionKey: 'debts',
+      sectionLabel: 'Debts',
+      type: 'question',
+      text: 'Is this debt in your name only, or joint?',
+      options: [
+        { label: 'My name only', value: 'sole' },
+        { label: 'Joint with my partner', value: 'joint' },
+        { label: 'In my partner\'s name (I pay it)', value: 'partner' },
+      ],
+      showWhen: { questionId: `debts-loan-${i}`, value: ['personal_loan', 'secured'] },
+    })
+
+    // Car finance type (PCP/HP/lease — affects whether car is an asset)
+    steps.push({
+      id: `debts-loan-${i}-car-type`,
+      sectionKey: 'debts',
+      sectionLabel: 'Debts',
+      type: 'question',
+      text: 'What type of car finance?',
+      subtext: 'This matters because some types mean you own the car and some don\'t.',
+      options: [
+        { label: 'HP (Hire Purchase) — I\'ll own the car when paid off', value: 'hp' },
+        { label: 'PCP (Personal Contract Purchase) — balloon payment at end', value: 'pcp' },
+        { label: 'Lease — I never own the car', value: 'lease' },
+        { label: 'Not sure', value: 'unsure' },
+      ],
+      showWhen: { questionId: `debts-loan-${i}`, value: 'car_finance' },
+    })
+
+    // Student loan type (SLC vs private)
+    steps.push({
+      id: `debts-loan-${i}-student-type`,
+      sectionKey: 'debts',
+      sectionLabel: 'Debts',
+      type: 'question',
+      text: 'Is this a government student loan or private?',
+      subtext: 'Government loans (SLC) are repaid through your salary and written off after 25-30 years.',
+      options: [
+        { label: 'Student Loans Company (government)', value: 'slc' },
+        { label: 'Private student loan', value: 'private' },
+      ],
+      showWhen: { questionId: `debts-loan-${i}`, value: 'student_loan' },
     })
   }
 
@@ -939,7 +1032,7 @@ function generateDebtsSteps(extractions: BankStatementExtraction[]): Confirmatio
     })
   }
 
-  // ── No debts detected: catch-all ──
+  // ── Catch-all ──
   const hasAnyDetected = creditCards.length > 0 || bnpl.length > 0 || loans.length > 0 || hasOverdraft
 
   steps.push({
@@ -956,6 +1049,7 @@ function generateDebtsSteps(extractions: BankStatementExtraction[]): Confirmatio
           { label: 'Yes, credit card(s)', value: 'credit_cards' },
           { label: 'Yes, personal loan(s)', value: 'loans' },
           { label: 'Yes, money owed to family or friends', value: 'informal' },
+          { label: 'Yes, outstanding tax (HMRC)', value: 'tax' },
           { label: 'Yes, other debts', value: 'other' },
         ]
       : [
@@ -964,6 +1058,7 @@ function generateDebtsSteps(extractions: BankStatementExtraction[]): Confirmatio
           { label: 'Yes, personal loan(s)', value: 'loans' },
           { label: 'Yes, car finance', value: 'car_finance' },
           { label: 'Yes, money owed to family or friends', value: 'informal' },
+          { label: 'Yes, outstanding tax (HMRC)', value: 'tax' },
           { label: 'Yes, other debts', value: 'other' },
         ],
   })
@@ -976,7 +1071,7 @@ function generateDebtsSteps(extractions: BankStatementExtraction[]): Confirmatio
     text: 'Roughly, what is the total amount owed?',
     inputPrefix: '£',
     inputPlaceholder: 'e.g. 5,000',
-    showWhen: { questionId: 'debts-other', value: ['credit_cards', 'loans', 'car_finance', 'informal', 'other'] },
+    showWhen: { questionId: 'debts-other', value: ['credit_cards', 'loans', 'car_finance', 'informal', 'tax', 'other'] },
   })
 
   return steps
@@ -1369,31 +1464,63 @@ function generateDebtsSummary(answers: Record<string, string>, extractions: Bank
   const allPayments = extractions.flatMap((e) => e.regular_payments)
   const facts: SectionSummaryFact[] = []
 
-  // ── Auto-detected debts ──
+  // ── Credit cards (with balance + sole/joint) ──
   const creditCards = allPayments.filter((p) => matchesPayee(p.payee, CREDIT_CARD_PROVIDERS))
-  const bnpl = allPayments.filter((p) => matchesPayee(p.payee, BNPL_PROVIDERS))
-  const hasOverdraft = extractions.some((e) => (e.closing_balance ?? 0) < 0)
-
-  for (const cc of creditCards) {
-    facts.push({ label: `Credit card: £${cc.amount}/month to ${cc.payee}`, source: 'bank', gapMessage: 'For finalisation, we\'ll need a credit card statement showing the outstanding balance.' })
+  for (let i = 0; i < Math.min(creditCards.length, 2); i++) {
+    const cc = creditCards[i]
+    const balance = answers[`debts-cc-${i}-balance`]
+    const joint = answers[`debts-cc-${i}-joint`]
+    const balanceLabel = balance ? `, £${parseInt(balance.replace(/,/g, ''), 10).toLocaleString()} outstanding` : ''
+    const jointLabel = joint === 'joint' ? ' (joint)' : ''
+    facts.push({
+      label: `Credit card: ${cc.payee}${jointLabel}${balanceLabel}`,
+      source: 'bank',
+      gapMessage: 'For finalisation, we\'ll need a statement showing the outstanding balance.',
+    })
   }
+
+  // ── BNPL ──
+  const bnpl = allPayments.filter((p) => matchesPayee(p.payee, BNPL_PROVIDERS))
   for (const b of bnpl) {
     facts.push({ label: `Buy now pay later: ${b.payee}`, source: 'bank' })
   }
-  if (hasOverdraft) {
+
+  // ── Overdraft ──
+  if (extractions.some((e) => (e.closing_balance ?? 0) < 0)) {
     facts.push({ label: 'Overdraft facility used', source: 'bank' })
   }
 
-  // ── Classified loans ──
+  // ── Classified loans (with balance, purpose, sole/joint, sub-type) ──
   for (let i = 0; i < 2; i++) {
     const loanType = answers[`debts-loan-${i}`]
-    const balance = answers[`debts-loan-${i}-balance`]
-    const balanceLabel = balance ? ` — ~£${parseInt(balance.replace(/,/g, ''), 10).toLocaleString()} outstanding` : ''
+    if (!loanType || loanType === 'other') continue
 
-    if (loanType === 'personal_loan') facts.push({ label: `Personal loan${balanceLabel}`, source: 'bank', gapMessage: 'For finalisation, we\'ll need a loan statement.' })
-    else if (loanType === 'car_finance') facts.push({ label: `Car finance${balanceLabel}`, source: 'bank', gapMessage: 'For finalisation, we\'ll need the finance agreement.' })
-    else if (loanType === 'student_loan') facts.push({ label: 'Student loan', source: 'bank' })
-    else if (loanType === 'secured') facts.push({ label: `Secured loan on property${balanceLabel}`, source: 'bank' })
+    const balance = answers[`debts-loan-${i}-balance`]
+    const purpose = answers[`debts-loan-${i}-purpose`]
+    const joint = answers[`debts-loan-${i}-joint`]
+    const carType = answers[`debts-loan-${i}-car-type`]
+    const studentType = answers[`debts-loan-${i}-student-type`]
+    const balanceLabel = balance ? ` — ~£${parseInt(balance.replace(/,/g, ''), 10).toLocaleString()} outstanding` : ''
+    const jointLabel = joint === 'joint' ? ' (joint)' : joint === 'partner' ? ' (partner\'s name)' : ''
+
+    const purposeLabels: Record<string, string> = { home: 'home improvements', car: 'car purchase', consolidation: 'debt consolidation', business: 'business purposes' }
+
+    if (loanType === 'personal_loan') {
+      const purposeText = purpose && purposeLabels[purpose] ? ` for ${purposeLabels[purpose]}` : ''
+      facts.push({ label: `Personal loan${purposeText}${jointLabel}${balanceLabel}`, source: 'bank', gapMessage: 'For finalisation, we\'ll need a loan statement.' })
+    } else if (loanType === 'car_finance') {
+      const carLabels: Record<string, string> = { hp: 'HP — car is an asset', pcp: 'PCP — balloon payment at end', lease: 'Lease — not an asset' }
+      const typeText = carType && carLabels[carType] ? ` (${carLabels[carType]})` : ''
+      facts.push({ label: `Car finance${typeText}${balanceLabel}`, source: 'bank', gapMessage: 'For finalisation, we\'ll need the finance agreement.' })
+    } else if (loanType === 'student_loan') {
+      if (studentType === 'slc') {
+        facts.push({ label: 'Student loan (SLC) — repaid through salary, often excluded from settlement', source: 'bank' })
+      } else {
+        facts.push({ label: 'Private student loan', source: 'bank', gapMessage: 'For finalisation, we\'ll need a statement of the outstanding balance.' })
+      }
+    } else if (loanType === 'secured') {
+      facts.push({ label: `Secured loan on property${jointLabel}${balanceLabel}`, source: 'bank' })
+    }
   }
 
   // ── Other debts from catch-all ──
@@ -1405,6 +1532,7 @@ function generateDebtsSummary(answers: Record<string, string>, extractions: Bank
   else if (otherDebts === 'loans') facts.push({ label: `Additional loan(s)${otherLabel}`, source: 'self' })
   else if (otherDebts === 'car_finance') facts.push({ label: `Car finance${otherLabel}`, source: 'self' })
   else if (otherDebts === 'informal') facts.push({ label: `Money owed to family or friends${otherLabel}`, source: 'self' })
+  else if (otherDebts === 'tax') facts.push({ label: `Outstanding tax (HMRC)${otherLabel}`, source: 'self' })
   else if (otherDebts === 'other') facts.push({ label: `Other debts${otherLabel}`, source: 'self' })
 
   const hasAnyDebts = facts.length > 0
