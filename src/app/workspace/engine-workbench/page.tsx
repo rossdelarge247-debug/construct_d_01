@@ -11,6 +11,8 @@ import { generateSectionSteps, CONFIRMATION_SECTIONS } from '@/lib/bank/confirma
 import { getAllTestScenarios, type TestScenario, type ExpectedPayment, type ExpectedIncome } from '@/lib/bank/test-scenarios'
 import { toNtropyInput, type NtropyEnrichedTransaction } from '@/lib/bank/ntropy-client'
 import { runSignalDetection, type SignalDetectionResult } from '@/lib/bank/signal-rules'
+import { addCorrection } from '@/lib/bank/user-corrections'
+import { normaliseDescription } from '@/lib/bank/csv-parser'
 import type { BankStatementExtraction, DetectedPayment, ExtractedIncome } from '@/lib/ai/extraction-schemas'
 
 // ═══ Scenario runner ═══
@@ -382,6 +384,39 @@ export default function EngineWorkbenchPage() {
     return activeResult.classifications.filter((c) => c.autoCategory === filterCategory)
   }, [activeResult, filterCategory])
 
+  const ALL_CATEGORIES: DetectedPayment['likely_category'][] = [
+    'mortgage', 'rent', 'insurance', 'pension_contribution', 'childcare',
+    'loan_repayment', 'child_maintenance', 'utilities', 'council_tax', 'subscription',
+    'credit_card', 'investment', 'gambling', 'groceries', 'dining', 'fuel',
+    'transport', 'education', 'healthcare', 'unknown',
+  ]
+
+  const handleCategoryOverride = useCallback((index: number, newCategory: DetectedPayment['likely_category']) => {
+    if (!activeResult) return
+    const classification = activeResult.classifications[index]
+    if (!classification || classification.autoCategory === newCategory) return
+
+    // Save correction to persistent store
+    addCorrection({
+      normalisedPayee: normaliseDescription(classification.payee),
+      rawDescription: classification.payee,
+      autoCategory: classification.autoCategory as DetectedPayment['likely_category'],
+      correctedCategory: newCategory,
+      amount: classification.amount,
+      timestamp: new Date().toISOString(),
+    })
+
+    // Update in-place for immediate visual feedback
+    classification.autoCategory = newCategory
+    classification.confidence = 1.0
+    // Force re-render
+    if (csvResult) {
+      setCsvResult({ ...csvResult })
+    } else if (result) {
+      setResult({ ...result })
+    }
+  }, [activeResult, csvResult, result])
+
   return (
     <div className="min-h-screen bg-white p-6 max-w-7xl mx-auto font-mono text-sm">
       <h1 className="text-2xl font-bold mb-1">Engine Workbench</h1>
@@ -510,27 +545,43 @@ export default function EngineWorkbenchPage() {
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-gray-100">
-                    {filteredClassifications.map((c, i) => (
-                      <tr key={i} className={c.isCorrect === false ? 'bg-red-50' : c.isCorrect === true ? '' : 'bg-gray-50/50'}>
-                        <td className="px-4 py-2 max-w-[280px] truncate" title={c.payee}>{c.payee}</td>
-                        <td className="px-4 py-2 text-right tabular-nums">£{c.amount.toLocaleString()}</td>
-                        <td className="px-4 py-2 text-gray-500">{c.frequency}</td>
-                        <td className="px-4 py-2">
-                          <span className={`px-2 py-0.5 rounded-full text-xs ${
-                            c.autoCategory === 'unknown' ? 'bg-amber-100 text-amber-800' : 'bg-blue-100 text-blue-800'
-                          }`}>
-                            {c.autoCategory}
-                          </span>
-                        </td>
-                        <td className="px-4 py-2 text-gray-500">{c.expectedCategory ?? '—'}</td>
-                        <td className="px-4 py-2 tabular-nums text-gray-500">{(c.confidence * 100).toFixed(0)}%</td>
-                        <td className="px-4 py-2 text-center">
-                          {c.isCorrect === true && <span className="text-green-600 font-bold">✓</span>}
-                          {c.isCorrect === false && <span className="text-red-600 font-bold">✗</span>}
-                          {c.isCorrect === null && <span className="text-gray-300">—</span>}
-                        </td>
-                      </tr>
-                    ))}
+                    {filteredClassifications.map((c, i) => {
+                      const globalIdx = activeResult!.classifications.indexOf(c)
+                      return (
+                        <tr key={i} className={c.isCorrect === false ? 'bg-red-50' : c.isCorrect === true ? '' : c.autoCategory === 'unknown' ? 'bg-amber-50/30' : 'bg-gray-50/50'}>
+                          <td className="px-4 py-2 max-w-[280px] truncate" title={c.payee}>{c.payee}</td>
+                          <td className="px-4 py-2 text-right tabular-nums">£{c.amount.toLocaleString()}</td>
+                          <td className="px-4 py-2 text-gray-500">{c.frequency}</td>
+                          <td className="px-4 py-2">
+                            <select
+                              value={c.autoCategory}
+                              onChange={(e) => handleCategoryOverride(globalIdx, e.target.value as DetectedPayment['likely_category'])}
+                              className={`px-2 py-0.5 rounded-full text-xs border-0 cursor-pointer ${
+                                c.confidence >= 1.0 ? 'bg-green-100 text-green-800'
+                                : c.autoCategory === 'unknown' ? 'bg-amber-100 text-amber-800'
+                                : 'bg-blue-100 text-blue-800'
+                              }`}
+                            >
+                              {ALL_CATEGORIES.map((cat) => (
+                                <option key={cat} value={cat}>{cat}</option>
+                              ))}
+                            </select>
+                          </td>
+                          <td className="px-4 py-2 text-gray-500">{c.expectedCategory ?? '—'}</td>
+                          <td className="px-4 py-2 tabular-nums text-gray-500">
+                            {c.confidence >= 1.0
+                              ? <span className="text-green-600 font-medium">user</span>
+                              : `${(c.confidence * 100).toFixed(0)}%`
+                            }
+                          </td>
+                          <td className="px-4 py-2 text-center">
+                            {c.isCorrect === true && <span className="text-green-600 font-bold">✓</span>}
+                            {c.isCorrect === false && <span className="text-red-600 font-bold">✗</span>}
+                            {c.isCorrect === null && <span className="text-gray-300">—</span>}
+                          </td>
+                        </tr>
+                      )
+                    })}
                   </tbody>
                 </table>
               </div>
