@@ -154,6 +154,17 @@ export default function WorkspacePage() {
     setView('financial_summary')
   }, [])
 
+  const handleDisconnect = useCallback(() => {
+    setBankConnected(false)
+    setConnectedAccounts([])
+    setBankExtractions([])
+    setConfirmationComplete(false)
+    setConfirmations([])
+    setSpendingResult(null)
+    setView('task_list')
+    try { sessionStorage.removeItem(STORAGE_KEY) } catch { /* ignore */ }
+  }, [])
+
   // ═══ Title bar context ═══
 
   const titleProps = getTitleProps(view, bankPhase)
@@ -242,6 +253,7 @@ export default function WorkspacePage() {
             spendingResult={spendingResult}
             onBack={() => setView('task_list')}
             onStartSpending={handleStartSpending}
+            onDisconnect={handleDisconnect}
           />
         )}
       </main>

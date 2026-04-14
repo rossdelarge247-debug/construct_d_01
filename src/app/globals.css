@@ -225,6 +225,41 @@ h1, h2, h3, h4 {
   animation: shimmer 1.5s ease-in-out infinite;
 }
 
+/* ═══ Celebration patterns (backlog #84) ═══ */
+
+/* Green flash — card pulse on section confirm */
+@keyframes celebrateFlash {
+  0% { background-color: white; }
+  20% { background-color: var(--color-green-50); }
+  100% { background-color: white; }
+}
+
+.animate-celebrate {
+  animation: celebrateFlash 800ms ease-out forwards;
+}
+
+/* Tick bounce — the checkmark that appears on confirm */
+@keyframes tickBounce {
+  0% { transform: scale(0); opacity: 0; }
+  60% { transform: scale(1.2); opacity: 1; }
+  100% { transform: scale(1); opacity: 1; }
+}
+
+.animate-tick-bounce {
+  animation: tickBounce 400ms cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+}
+
+/* Progress bar completion pulse */
+@keyframes progressPulse {
+  0% { opacity: 1; }
+  50% { opacity: 0.6; }
+  100% { opacity: 1; }
+}
+
+.animate-progress-complete {
+  animation: progressPulse 600ms ease-out 1;
+}
+
 /* ═══ prefers-reduced-motion: spec 26 — instant transitions, no stagger ═══ */
 @media (prefers-reduced-motion: reduce) {
   .animate-fade-in,
@@ -232,7 +267,10 @@ h1, h2, h3, h4 {
   .animate-modal-appear,
   .animate-shimmer,
   .animate-fade-in-scale,
-  .animate-value-enter {
+  .animate-value-enter,
+  .animate-celebrate,
+  .animate-tick-bounce,
+  .animate-progress-complete {
     animation: none !important;
     opacity: 1 !important;
     transform: none !important;

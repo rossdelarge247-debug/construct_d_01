@@ -3,6 +3,7 @@
 import { useState, useCallback, useMemo } from 'react'
 import { Check, ChevronDown, ChevronUp, Lock } from 'lucide-react'
 import type { BankStatementExtraction } from '@/lib/ai/extraction-schemas'
+import { useCountUp } from '@/hooks/use-count-up'
 import type { ConnectedAccount, SectionConfirmation, SpendingFlowResult } from '@/types/hub'
 import {
   CONFIRMATION_SECTIONS,
@@ -37,6 +38,7 @@ export function ConfirmationFlow({
   const [inputQualifier, setInputQualifier] = useState<string | null>(null)
   const [accordionOpen, setAccordionOpen] = useState(false)
   const [completedSections, setCompletedSections] = useState<SectionSummaryData[]>([])
+  const [lastConfirmedKey, setLastConfirmedKey] = useState<string | null>(null)
 
   const currentSectionKey = CONFIRMATION_SECTIONS[sectionIndex]
   const accountCount = connectedAccounts.length
@@ -66,6 +68,7 @@ export function ConfirmationFlow({
       const filtered = prev.filter((s) => s.sectionKey !== currentSectionKey)
       return [...filtered, summary]
     })
+    setLastConfirmedKey(currentSectionKey)
     setAccordionOpen(true)
     setPhase('mini_summary')
   }, [currentSectionKey, answers, extractions])
@@ -277,21 +280,30 @@ export function ConfirmationFlow({
             }}
           >
             <div className="mt-3 ml-7 space-y-2">
-              {completedSections.map((s: SectionSummaryData) => (
-                <div key={s.sectionKey} className="flex items-center justify-between gap-2 text-[13px]">
-                  <div className="flex items-center gap-2 text-ink-secondary">
-                    <Check size={13} className="text-green-600 shrink-0" />
-                    <span>{s.accordionLabel}</span>
+              {completedSections.map((s: SectionSummaryData) => {
+                const isNew = s.sectionKey === lastConfirmedKey
+                return (
+                  <div
+                    key={s.sectionKey}
+                    className={`flex items-center justify-between gap-2 text-[13px] ${isNew ? 'animate-celebrate' : ''}`}
+                    style={{ borderRadius: '6px', padding: '2px 4px', margin: '-2px -4px' }}
+                  >
+                    <div className="flex items-center gap-2 text-ink-secondary">
+                      <div className={isNew ? 'animate-tick-bounce' : ''}>
+                        <Check size={13} className="text-green-600 shrink-0" />
+                      </div>
+                      <span>{s.accordionLabel}</span>
+                    </div>
+                    <button className="text-blue-600 hover:underline shrink-0">Edit</button>
                   </div>
-                  <button className="text-blue-600 hover:underline shrink-0">Edit</button>
-                </div>
-              ))}
+                )
+              })}
             </div>
           </div>
         </div>
 
         {/* Progress stepper — 5 confirmation sections + spending */}
-        <div className="px-6 pt-5">
+        <div className={`px-6 pt-5 ${phase === 'final_summary' ? 'animate-progress-complete' : ''}`}>
           <ProgressStepper
             sections={[...CONFIRMATION_SECTIONS, 'spending'] as string[]}
             currentIndex={phase === 'spending' ? CONFIRMATION_SECTIONS.length : sectionIndex}
@@ -527,12 +539,19 @@ function FinalSummary({
   completedSections: SectionSummaryData[]
   onFinish: () => void
 }) {
+  const sectionCount = completedSections.length
+  const displayCount = useCountUp(sectionCount, 600)
+
   return (
     <div className="animate-fade-in">
       <p className="text-[12px] font-semibold text-ink-tertiary uppercase tracking-wider mb-2">
         End of the beginning
       </p>
       <h3 className="text-[22px] font-bold text-ink mb-3">This is great progress</h3>
+      <p className="text-[15px] text-ink-secondary mb-2 leading-relaxed">
+        <span className="text-[28px] font-bold text-ink">{displayCount}</span>{' '}
+        {sectionCount === 1 ? 'section' : 'sections'} disclosed and ready for sharing.
+      </p>
       <p className="text-[15px] text-ink-secondary mb-8 leading-relaxed">
         We&apos;ll now take you to your financial summary which can be shared with your
         spouse/partner, mediator or solicitor.

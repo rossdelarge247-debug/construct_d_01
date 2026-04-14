@@ -14,6 +14,7 @@ interface FinancialSummaryPageProps {
   spendingResult?: SpendingFlowResult | null
   onBack: () => void
   onStartSpending?: () => void
+  onDisconnect?: () => void
 }
 
 const SPENDING_ICONS: Record<SpendingSubCategory, typeof Home> = {
@@ -62,6 +63,7 @@ export function FinancialSummaryPage({
   spendingResult,
   onBack,
   onStartSpending,
+  onDisconnect,
 }: FinancialSummaryPageProps) {
   const bankName = connectedAccounts[0]?.bankName ?? 'Bank'
   const accountCount = connectedAccounts.length
@@ -106,7 +108,23 @@ export function FinancialSummaryPage({
         &larr; Back to dashboard
       </button>
 
-      <h2 className="text-[28px] font-bold text-ink mb-8">Your financial picture</h2>
+      <div className="flex items-center justify-between mb-8">
+        <h2 className="text-[28px] font-bold text-ink">Your financial picture</h2>
+        {onDisconnect && (
+          <button
+            onClick={onDisconnect}
+            className="px-4 py-2 text-[12px] font-medium text-white transition-colors active:scale-[0.98]"
+            style={{
+              backgroundColor: 'var(--color-ink)',
+              borderRadius: 'var(--radius-card)',
+            }}
+            onMouseEnter={(e) => (e.currentTarget.style.opacity = '0.85')}
+            onMouseLeave={(e) => (e.currentTarget.style.opacity = '1')}
+          >
+            Disconnect &amp; clear data
+          </button>
+        )}
+      </div>
 
       {/* ═══ Accounts card ═══ */}
       <SectionCard title="Accounts" delay={0}>
