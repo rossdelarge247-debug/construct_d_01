@@ -59,7 +59,7 @@ export default function PathwayPage() {
           '£500 government voucher available towards mediation costs',
           isAmicable ? 'Since your relationship is amicable, mediation often works well' : 'Mediation can work even when communication is difficult',
         ],
-        serviceHint: 'We help you prepare — organised disclosure and clear proposals make mediation more productive',
+        serviceHint: 'Part of Share & Negotiate — organised disclosure and clear proposals make mediation more productive',
         isMajor: false,
       })
     }
@@ -73,7 +73,7 @@ export default function PathwayPage() {
         'Pensions are often the largest asset — sometimes worth more than the home',
         'Request pension valuations (CETVs) early — they take up to 3 months',
       ],
-      serviceHint: 'Upload documents and we extract, structure, and organise everything automatically. Track proposals, counter-proposals, and what\'s agreed.',
+      serviceHint: 'Part of Prepare — connect your bank and we extract everything automatically. Part of Share & Negotiate — track proposals and agreements.',
       isMajor: true,
     })
 
@@ -87,7 +87,7 @@ export default function PathwayPage() {
           'A parenting plan helps formalise what you\'ve agreed',
           'Child maintenance (financial support) is a separate process via CMS',
         ],
-        serviceHint: 'Build detailed arrangements ready to share with a mediator or formalise in a parenting plan',
+        serviceHint: 'Part of Share & Negotiate — build detailed arrangements ready for mediation',
         isMajor: true,
       })
     }
@@ -101,7 +101,7 @@ export default function PathwayPage() {
         'Requires a professionally drafted document — not just the D81 form',
         'Court fee: £60 · Usually no hearing required',
       ],
-      serviceHint: 'We structure your agreement into the information needed for a consent order, reducing solicitor costs',
+      serviceHint: 'Part of Finalise — court-ready documentation at the press of a button',
       isMajor: true,
     })
 
@@ -156,7 +156,7 @@ export default function PathwayPage() {
           '£500 government voucher available if children are involved',
           'Written agreements are strongly recommended even if informal',
         ],
-        serviceHint: 'We help you prepare a clear financial picture and structured proposals for discussion',
+        serviceHint: 'Part of Prepare — bank connection builds your financial picture automatically',
         isMajor: false,
       })
     }
@@ -171,7 +171,7 @@ export default function PathwayPage() {
           'Get a property valuation — estate agents offer free appraisals',
           'Consider a Declaration of Trust if one person is staying in the property',
         ],
-        serviceHint: 'Upload documents and we build a structured financial picture automatically. Track what\'s agreed and what\'s outstanding.',
+        serviceHint: 'Part of Prepare — connect your bank and we build everything. Part of Share — track agreements.',
         isMajor: true,
       })
     } else {
@@ -183,7 +183,7 @@ export default function PathwayPage() {
           'Agree who is responsible for shared debts',
           'Update any shared financial commitments (utilities, subscriptions)',
         ],
-        serviceHint: 'We help you build a clear financial picture and track what\'s been agreed',
+        serviceHint: 'Part of Prepare — clear financial picture from your bank data.',
         isMajor: true,
       })
     }
@@ -198,7 +198,7 @@ export default function PathwayPage() {
           'Child maintenance calculated through CMS (separate process)',
           'A parenting plan helps prevent future misunderstandings',
         ],
-        serviceHint: 'Build detailed arrangements ready for mediation or a parenting plan',
+        serviceHint: 'Part of Share & Negotiate — structured arrangements for mediation',
         isMajor: true,
       })
     }
@@ -212,7 +212,7 @@ export default function PathwayPage() {
         'For property, you may need a formal legal document (deed of trust)',
         'Legal advice is recommended to protect both parties',
       ],
-      serviceHint: 'We help structure your agreement clearly, ready for legal review',
+      serviceHint: 'Part of Finalise — structured agreement ready for legal review',
       isMajor: true,
     })
   }
@@ -239,7 +239,7 @@ export default function PathwayPage() {
         {/* Waypoint header */}
         <div>
           <div className="flex items-center gap-2">
-            <div className="h-3 w-3 rotate-45 bg-warmth" />
+            <div className="h-3 w-3 rotate-45 bg-[#E5484D]" />
             <span className="text-xs font-medium uppercase tracking-wide text-[#E5484D]">Your pathway</span>
           </div>
           <h1 className="mt-3 font-heading text-2xl font-bold text-ink">
