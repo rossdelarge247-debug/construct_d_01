@@ -37,7 +37,7 @@ export function BankConnectionFlow({
   const [extractions, setExtractions] = useState<BankStatementExtraction[]>([])
   const [accounts, setAccounts] = useState<ConnectedAccount[]>([])
   const [revealItems, setRevealItems] = useState<RevealItem[]>([])
-
+  const [devChooserData, setDevChooserData] = useState<BankStatementExtraction[] | null>(null)
   const hydrateBankData = useCallback((exts: BankStatementExtraction[]) => {
     setExtractions(exts)
     setAccounts(extractionsToConnectedAccounts(exts))
@@ -77,10 +77,24 @@ export function BankConnectionFlow({
       }
     }
 
+    // In dev: show chooser interstitial so we can swap data sets
+    if (!useDemoData) {
+      setDevChooserData(exts)
+      return
+    }
+
     hydrateBankData(exts)
     onPhaseChange('reveal')
     setProgressPercent(15)
   }, [onPhaseChange, hydrateBankData])
+
+  const handleDevChoose = useCallback((personaId?: string) => {
+    const exts = personaId ? createDemoExtractions(personaId) : (devChooserData ?? createDemoExtractions())
+    setDevChooserData(null)
+    hydrateBankData(exts)
+    onPhaseChange('reveal')
+    setProgressPercent(15)
+  }, [devChooserData, onPhaseChange, hydrateBankData])
 
   // Progressive reveal
   useEffect(() => {
@@ -133,12 +147,60 @@ export function BankConnectionFlow({
       )}
 
       {/* Tink modal */}
-      {phase === 'tink_modal' && (
+      {phase === 'tink_modal' && !devChooserData && (
         <TinkModal
           onComplete={() => handleTinkComplete(false)}
           onDemoComplete={(personaId) => handleTinkComplete(true, personaId)}
           onCancel={onCancel}
         />
+      )}
+
+      {/* Dev data chooser — shown after Tink returns real data */}
+      {devChooserData && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center px-4">
+          <div
+            className="fixed inset-0 bg-black/50"
+            onClick={() => handleDevChoose()}
+          />
+          <div
+            className="relative w-full max-w-md bg-white p-6 animate-modal-appear"
+            style={{ borderRadius: 'var(--radius-lg)', boxShadow: '0 8px 32px rgba(0,0,0,0.18)' }}
+          >
+            <p className="text-[11px] font-semibold text-ink-tertiary uppercase tracking-wider mb-1">
+              Dev mode
+            </p>
+            <h3 className="text-[18px] font-bold text-ink mb-2">
+              Tink data received
+            </h3>
+            <p className="text-[13px] text-ink-secondary mb-5">
+              {devChooserData.length} account{devChooserData.length !== 1 ? 's' : ''},{' '}
+              {devChooserData.reduce((n, e) => n + (e.income_deposits?.length ?? 0) + (e.regular_payments?.length ?? 0), 0)} items detected.
+              Use this data or swap in a test persona.
+            </p>
+
+            <button
+              onClick={() => handleDevChoose()}
+              className="w-full mb-3 px-4 py-3 text-white text-[14px] font-semibold transition-colors active:scale-[0.98]"
+              style={{ backgroundColor: 'var(--color-green-600)', borderRadius: 'var(--radius-card)' }}
+            >
+              Use real Tink data
+            </button>
+
+            <div className="space-y-2">
+              {TEST_PERSONAS.map((p) => (
+                <button
+                  key={p.id}
+                  onClick={() => handleDevChoose(p.id)}
+                  className="w-full text-left px-4 py-2.5 transition-colors hover:bg-grey-50"
+                  style={{ border: '1px solid var(--color-grey-100)', borderRadius: 'var(--radius-card)' }}
+                >
+                  <span className="text-[13px] font-medium text-ink">{p.label}</span>
+                  <p className="text-[11px] text-ink-tertiary">{p.description}</p>
+                </button>
+              ))}
+            </div>
+          </div>
+        </div>
       )}
 
       {/* Main content card */}
