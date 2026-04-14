@@ -65,66 +65,223 @@ export function generateSectionSteps(
   }
 }
 
-// ═══ Income (spec 22 §1, spec 25 screens 2c-a/b) ═══
+// ═══ Income (spec 22 §1) ═══
+//
+// Ladder:
+//   1. For each detected employment source: confirm as salary or classify
+//   2. Benefits: auto-confirm HMRC, ask about DWP
+//   3. Unclassified regular deposits: ask what they are
+//   4. No income path: expanded options (retired, self-employed, carer, etc.)
+//
+// Cross-section impacts:
+//   → Dividends from own company → triggers Business section
+//   → Rental income → cross-ref with Property
+//   → Child Benefit → infer child count for Children section
+//   → Retired → pension section becomes critical
 
 function generateIncomeSteps(extractions: BankStatementExtraction[]): ConfirmationStep[] {
   const allIncome = extractions.flatMap((e) => e.income_deposits)
-  const salary = allIncome.find((i) => i.type === 'employment')
+  const employment = allIncome.filter((i) => i.type === 'employment')
+  const benefits = allIncome.filter((i) => i.type === 'benefits')
+  const otherIncome = allIncome.filter((i) =>
+    i.type !== 'employment' && i.type !== 'benefits',
+  )
+  const steps: ConfirmationStep[] = []
 
-  if (salary) {
-    return [
-      {
-        id: 'income-salary',
+  // ── Primary employment income ──
+
+  if (employment.length > 0) {
+    const primary = employment[0]
+    steps.push({
+      id: 'income-salary',
+      sectionKey: 'income',
+      sectionLabel: 'Income',
+      type: 'question',
+      text: `We found £${primary.amount.toLocaleString()}/month from ${primary.source}. Is this your salary?`,
+      options: [
+        { label: 'Yes, that\'s my salary', value: 'yes' },
+        { label: 'No', value: 'no' },
+      ],
+    })
+
+    steps.push({
+      id: 'income-salary-confirmed',
+      sectionKey: 'income',
+      sectionLabel: 'Income',
+      type: 'confirmation_message',
+      text: `Your employer is ${primary.source}, £${primary.amount.toLocaleString()} net monthly. We'll need payslips for finalisation.`,
+      showWhen: { questionId: 'income-salary', value: 'yes' },
+    })
+
+    steps.push({
+      id: 'income-not-salary',
+      sectionKey: 'income',
+      sectionLabel: 'Income',
+      type: 'question',
+      text: `What are these payments from ${primary.source}?`,
+      options: [
+        { label: 'Dividends from my own company', value: 'dividends' },
+        { label: 'Rental income', value: 'rental' },
+        { label: 'Maintenance from ex-partner', value: 'maintenance' },
+        { label: 'Money from family or friends', value: 'family' },
+        { label: 'Something else', value: 'other' },
+      ],
+      showWhen: { questionId: 'income-salary', value: 'no' },
+    })
+
+    // ── Second employer (if detected) ──
+    if (employment.length > 1) {
+      const second = employment[1]
+      steps.push({
+        id: 'income-second-employer',
         sectionKey: 'income',
         sectionLabel: 'Income',
         type: 'question',
-        text: `We can see regular payments from ${salary.source}, is this your salary?`,
+        text: `We also found £${second.amount.toLocaleString()}/month from ${second.source}. Is this a second job?`,
         options: [
-          { label: 'Yes', value: 'yes' },
-          { label: 'No', value: 'no' },
+          { label: 'Yes, second job', value: 'yes' },
+          { label: 'No, something else', value: 'no' },
         ],
-      },
-      {
-        id: 'income-salary-confirmed',
-        sectionKey: 'income',
-        sectionLabel: 'Income',
-        type: 'confirmation_message',
-        text: `OK then so your employer is ${salary.source}, you'll need to share your payslips for finalisation`,
-        showWhen: { questionId: 'income-salary', value: 'yes' },
-      },
-      {
-        id: 'income-not-salary',
-        sectionKey: 'income',
-        sectionLabel: 'Income',
-        type: 'question',
-        text: 'If these payments are not your salary, are they',
-        options: [
-          { label: 'Dividends from self employment', value: 'dividends' },
-          { label: 'Rental income', value: 'rental' },
-          { label: 'Money from family or friends', value: 'family' },
-          { label: 'Other', value: 'other' },
-        ],
-        showWhen: { questionId: 'income-salary', value: 'no' },
-      },
-    ]
-  }
-
-  // No salary signal
-  return [
-    {
+      })
+    }
+  } else {
+    // ── No employment income detected ──
+    steps.push({
       id: 'income-none',
       sectionKey: 'income',
       sectionLabel: 'Income',
       type: 'question',
-      text: "We can't see employment income. Are you currently...",
+      text: "We can't see employment income in your bank data. What's your situation?",
+      subtext: 'Salary is sometimes paid to a different account.',
       options: [
-        { label: 'Not working', value: 'not_working' },
+        { label: 'Employed, but paid into another account', value: 'different_account' },
+        { label: 'Self-employed', value: 'self_employed' },
+        { label: 'Not currently working', value: 'not_working' },
         { label: 'Retired', value: 'retired' },
-        { label: 'Paid in cash', value: 'cash' },
-        { label: 'Income goes to a different account', value: 'different_account' },
+        { label: 'Full-time parent or carer', value: 'carer' },
+        { label: 'On long-term sick or disability', value: 'sick' },
       ],
-    },
-  ]
+    })
+
+    // Follow-up for "paid elsewhere"
+    steps.push({
+      id: 'income-other-account-amount',
+      sectionKey: 'income',
+      sectionLabel: 'Income',
+      type: 'input',
+      text: 'Roughly, what is your monthly take-home pay?',
+      subtext: 'We recommend connecting that account too — for now an estimate is fine.',
+      inputPrefix: '£',
+      inputPlaceholder: 'e.g. 2,800',
+      showWhen: { questionId: 'income-none', value: 'different_account' },
+    })
+
+    // Follow-up for self-employed
+    steps.push({
+      id: 'income-self-employed-structure',
+      sectionKey: 'income',
+      sectionLabel: 'Income',
+      type: 'question',
+      text: "What's your business structure?",
+      options: [
+        { label: 'Sole trader', value: 'sole_trader' },
+        { label: 'Limited company', value: 'limited' },
+        { label: 'Partnership', value: 'partnership' },
+      ],
+      showWhen: { questionId: 'income-none', value: 'self_employed' },
+    })
+
+    // Follow-up for retired
+    steps.push({
+      id: 'income-retired-pension',
+      sectionKey: 'income',
+      sectionLabel: 'Income',
+      type: 'question',
+      text: 'Do you receive a pension?',
+      options: [
+        { label: 'Yes, private and/or state pension', value: 'yes' },
+        { label: 'State pension only', value: 'state_only' },
+        { label: 'Not yet drawing a pension', value: 'not_yet' },
+      ],
+      showWhen: { questionId: 'income-none', value: 'retired' },
+    })
+  }
+
+  // ── Benefits: auto-confirm HMRC, ask about DWP ──
+
+  const hmrc = benefits.filter((b) =>
+    b.source.toLowerCase().includes('hmrc') ||
+    b.source.toLowerCase().includes('child benefit'),
+  )
+  const dwp = benefits.filter((b) =>
+    b.source.toLowerCase().includes('dwp'),
+  )
+  const otherBenefits = benefits.filter((b) =>
+    !b.source.toLowerCase().includes('hmrc') &&
+    !b.source.toLowerCase().includes('child benefit') &&
+    !b.source.toLowerCase().includes('dwp'),
+  )
+
+  if (hmrc.length > 0) {
+    steps.push({
+      id: 'income-hmrc-confirmed',
+      sectionKey: 'income',
+      sectionLabel: 'Income',
+      type: 'confirmation_message',
+      text: `${hmrc[0].source}: £${hmrc[0].amount}/month confirmed from your bank data.`,
+    })
+  }
+
+  if (dwp.length > 0) {
+    steps.push({
+      id: 'income-dwp-type',
+      sectionKey: 'income',
+      sectionLabel: 'Income',
+      type: 'question',
+      text: `£${dwp[0].amount}/month from DWP — what benefit is this?`,
+      options: [
+        { label: 'Universal Credit', value: 'universal_credit' },
+        { label: 'PIP', value: 'pip' },
+        { label: 'ESA', value: 'esa' },
+        { label: 'Carer\'s Allowance', value: 'carers' },
+        { label: 'State Pension', value: 'state_pension' },
+        { label: 'Other', value: 'other' },
+      ],
+    })
+  }
+
+  if (otherBenefits.length > 0) {
+    const b = otherBenefits[0]
+    steps.push({
+      id: 'income-other-benefit',
+      sectionKey: 'income',
+      sectionLabel: 'Income',
+      type: 'confirmation_message',
+      text: `${b.source}: £${b.amount}/month confirmed from your bank data.`,
+    })
+  }
+
+  // ── Unclassified income (rental, maintenance, other) ──
+
+  if (otherIncome.length > 0) {
+    const oi = otherIncome[0]
+    steps.push({
+      id: 'income-unclassified',
+      sectionKey: 'income',
+      sectionLabel: 'Income',
+      type: 'question',
+      text: `£${oi.amount}/month from ${oi.source} — what is this?`,
+      options: [
+        { label: 'Rental income', value: 'rental' },
+        { label: 'Maintenance from ex-partner', value: 'maintenance' },
+        { label: 'Lodger income', value: 'lodger' },
+        { label: 'Family support', value: 'family' },
+        { label: 'Something else', value: 'other' },
+      ],
+    })
+  }
+
+  return steps
 }
 
 // ═══ Property (spec 22 §2) ═══
@@ -448,31 +605,82 @@ function generateIncomeSummary(
   answers: Record<string, string>,
   extractions: BankStatementExtraction[],
 ): SectionSummaryData {
-  const salary = extractions.flatMap((e) => e.income_deposits).find((i) => i.type === 'employment')
+  const allIncome = extractions.flatMap((e) => e.income_deposits)
+  const employment = allIncome.filter((i) => i.type === 'employment')
+  const benefits = allIncome.filter((i) => i.type === 'benefits')
   const facts: SectionSummaryFact[] = []
 
-  if (salary && answers['income-salary'] === 'yes') {
+  // ── Employment ──
+  if (employment.length > 0 && answers['income-salary'] === 'yes') {
+    const primary = employment[0]
+    facts.push({ label: `Employed by ${primary.source}`, source: 'bank' })
     facts.push({
-      label: `You are employed by ${salary.source}`,
+      label: `£${primary.amount.toLocaleString()} net monthly salary`,
       source: 'bank',
+      gapMessage: 'For finalisation, we\'ll need your payslips and P60 for gross pay breakdown.',
     })
-    facts.push({
-      label: `You receive £${salary.amount.toLocaleString()} net monthly salary`,
-      source: 'bank',
-      gapMessage: 'When we get to finalisation, we will need your payslips and P60 for gross pay breakdown. We will add an action to your task list.',
-    })
+    if (employment.length > 1 && answers['income-second-employer'] === 'yes') {
+      const second = employment[1]
+      facts.push({ label: `Second job: £${second.amount.toLocaleString()}/month from ${second.source}`, source: 'bank' })
+    }
+  } else if (answers['income-salary'] === 'no') {
+    const notSalary = answers['income-not-salary']
+    if (notSalary === 'dividends') {
+      facts.push({ label: 'Income is dividends from own company', source: 'self', gapMessage: 'For finalisation, we\'ll need company accounts and tax returns.' })
+    } else if (notSalary === 'rental') {
+      facts.push({ label: 'Income is rental income', source: 'self' })
+    } else if (notSalary === 'maintenance') {
+      facts.push({ label: 'Income is maintenance from ex-partner', source: 'self' })
+    }
   }
 
-  const benefits = extractions.flatMap((e) => e.income_deposits).filter((i) => i.type === 'benefits')
-  for (const b of benefits) {
-    facts.push({ label: `You receive £${b.amount}/month in ${b.source}`, source: 'bank' })
+  // ── No employment path ──
+  const noIncome = answers['income-none']
+  if (noIncome === 'different_account') {
+    const amount = answers['income-other-account-amount']
+    facts.push({ label: `Employed, paid into another account${amount ? ` — ~£${amount}/month` : ''}`, source: 'self' })
+  } else if (noIncome === 'self_employed') {
+    const structure = answers['income-self-employed-structure']
+    facts.push({ label: `Self-employed${structure ? ` (${structure.replace('_', ' ')})` : ''}`, source: 'self', gapMessage: 'For finalisation, we\'ll need business accounts and tax returns (SA302).' })
+  } else if (noIncome === 'retired') {
+    facts.push({ label: 'Retired', source: 'self' })
+  } else if (noIncome === 'not_working') {
+    facts.push({ label: 'Not currently working', source: 'self' })
+  } else if (noIncome === 'carer') {
+    facts.push({ label: 'Full-time parent or carer', source: 'self' })
+  } else if (noIncome === 'sick') {
+    facts.push({ label: 'On long-term sick or disability', source: 'self' })
   }
+
+  // ── Benefits ──
+  for (const b of benefits) {
+    facts.push({ label: `${b.source}: £${b.amount}/month`, source: 'bank' })
+  }
+
+  // ── DWP type ──
+  const dwpType = answers['income-dwp-type']
+  if (dwpType && dwpType !== 'other') {
+    const labels: Record<string, string> = {
+      universal_credit: 'Universal Credit',
+      pip: 'PIP',
+      esa: 'ESA',
+      carers: 'Carer\'s Allowance',
+      state_pension: 'State Pension',
+    }
+    facts.push({ label: `DWP benefit type: ${labels[dwpType] ?? dwpType}`, source: 'self' })
+  }
+
+  // ── Unclassified ──
+  const unclassified = answers['income-unclassified']
+  if (unclassified === 'rental') facts.push({ label: 'Rental income identified', source: 'self' })
+  else if (unclassified === 'maintenance') facts.push({ label: 'Maintenance received from ex-partner', source: 'self' })
+  else if (unclassified === 'lodger') facts.push({ label: 'Lodger income identified', source: 'self' })
 
   return {
     sectionKey: 'income',
     sectionLabel: 'Income',
     heading: "That's it for income",
-    facts,
+    facts: facts.length > 0 ? facts : [{ label: 'No income sources identified', source: 'self' }],
     accordionLabel: 'Income disclosed, ready for sharing & collaboration',
   }
 }
