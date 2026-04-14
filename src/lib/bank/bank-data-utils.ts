@@ -241,58 +241,146 @@ export function getDetectedSpendingItems(
 // Generates a realistic BankStatementExtraction for the "Continue with demo data" fallback.
 // Matches the wireframe copy closely so the reveal feels real.
 
-export function createDemoExtractions(): BankStatementExtraction[] {
-  return [
-    {
-      document_type: 'bank_statement',
-      provider: 'Barclays',
-      account_number_last4: '2392',
-      account_type: 'current',
-      is_joint: false,
-      joint_holder_name: null,
-      statement_period_start: '2025-04-09',
-      statement_period_end: '2026-04-09',
-      closing_balance: 1842,
-      income_deposits: [
-        { source: 'Acme Ltd', amount: 3400, period: 'monthly', confidence: 0.97, type: 'employment' },
-        { source: 'HMRC Child Benefit', amount: 120, period: 'monthly', confidence: 0.98, type: 'benefits' },
-      ],
-      regular_payments: [
-        { payee: 'Halifax', amount: 1150, frequency: 'monthly', confidence: 0.95, likely_category: 'mortgage' },
-        { payee: 'Aviva', amount: 200, frequency: 'monthly', confidence: 0.92, likely_category: 'pension_contribution' },
-        { payee: 'Council Tax', amount: 185, frequency: 'monthly', confidence: 0.96, likely_category: 'council_tax' },
-        { payee: 'British Gas', amount: 120, frequency: 'monthly', confidence: 0.90, likely_category: 'utilities' },
-        { payee: 'Sky', amount: 45, frequency: 'monthly', confidence: 0.93, likely_category: 'subscription' },
-        { payee: 'Vodafone', amount: 35, frequency: 'monthly', confidence: 0.95, likely_category: 'subscription' },
-        { payee: 'Admiral Insurance', amount: 42, frequency: 'monthly', confidence: 0.88, likely_category: 'insurance' },
-        { payee: 'HL Savings', amount: 300, frequency: 'monthly', confidence: 0.85, likely_category: 'unknown' },
-      ],
-      spending_categories: [
-        { category: 'Housing', monthly_average: 1150, transaction_count: 12 },
-        { category: 'Groceries', monthly_average: 480, transaction_count: 48 },
-        { category: 'Transport', monthly_average: 175, transaction_count: 24 },
-        { category: 'Utilities', monthly_average: 210, transaction_count: 12 },
-        { category: 'Dining & entertainment', monthly_average: 220, transaction_count: 36 },
-        { category: 'Childcare', monthly_average: 600, transaction_count: 12 },
-        { category: 'Subscriptions', monthly_average: 85, transaction_count: 12 },
-        { category: 'Insurance', monthly_average: 120, transaction_count: 6 },
-      ],
-      notable_transactions: [],
-    },
-    {
-      document_type: 'bank_statement',
-      provider: 'Barclays',
-      account_number_last4: '2657',
-      account_type: 'savings',
-      is_joint: false,
-      joint_holder_name: null,
-      statement_period_start: '2025-04-09',
-      statement_period_end: '2026-04-09',
-      closing_balance: 8450,
-      income_deposits: [],
-      regular_payments: [],
-      spending_categories: [],
-      notable_transactions: [],
-    },
-  ]
+export function createDemoExtractions(personaId?: string): BankStatementExtraction[] {
+  switch (personaId) {
+    case 'self-employed': return createSelfEmployedPersona()
+    case 'retired': return createRetiredPersona()
+    case 'part-time': return createPartTimePersona()
+    default: return createDefaultPersona()
+  }
+}
+
+// ═══ Persona A: Sarah — employed homeowner (the original demo data) ═══
+function createDefaultPersona(): BankStatementExtraction[] {
+  return [{
+    document_type: 'bank_statement', provider: 'Barclays', account_number_last4: '2392',
+    account_type: 'current', is_joint: false, joint_holder_name: null,
+    statement_period_start: '2025-04-09', statement_period_end: '2026-04-09', closing_balance: 1842,
+    income_deposits: [
+      { source: 'Acme Ltd', amount: 3400, period: 'monthly', confidence: 0.97, type: 'employment' },
+      { source: 'HMRC Child Benefit', amount: 120, period: 'monthly', confidence: 0.98, type: 'benefits' },
+    ],
+    regular_payments: [
+      { payee: 'Halifax', amount: 1150, frequency: 'monthly', confidence: 0.95, likely_category: 'mortgage' },
+      { payee: 'Aviva', amount: 200, frequency: 'monthly', confidence: 0.92, likely_category: 'pension_contribution' },
+      { payee: 'Council Tax', amount: 185, frequency: 'monthly', confidence: 0.96, likely_category: 'council_tax' },
+      { payee: 'British Gas', amount: 120, frequency: 'monthly', confidence: 0.90, likely_category: 'utilities' },
+      { payee: 'Sky', amount: 45, frequency: 'monthly', confidence: 0.93, likely_category: 'subscription' },
+      { payee: 'Vodafone', amount: 35, frequency: 'monthly', confidence: 0.95, likely_category: 'subscription' },
+      { payee: 'Admiral Insurance', amount: 42, frequency: 'monthly', confidence: 0.88, likely_category: 'insurance' },
+      { payee: 'HL Savings', amount: 300, frequency: 'monthly', confidence: 0.85, likely_category: 'unknown' },
+    ],
+    spending_categories: [
+      { category: 'Housing', monthly_average: 1150, transaction_count: 12 },
+      { category: 'Groceries', monthly_average: 480, transaction_count: 48 },
+      { category: 'Transport', monthly_average: 175, transaction_count: 24 },
+      { category: 'Utilities', monthly_average: 210, transaction_count: 12 },
+      { category: 'Dining & entertainment', monthly_average: 220, transaction_count: 36 },
+      { category: 'Childcare', monthly_average: 600, transaction_count: 12 },
+      { category: 'Subscriptions', monthly_average: 85, transaction_count: 12 },
+      { category: 'Insurance', monthly_average: 120, transaction_count: 6 },
+    ],
+    notable_transactions: [],
+  }, {
+    document_type: 'bank_statement', provider: 'Barclays', account_number_last4: '2657',
+    account_type: 'savings', is_joint: false, joint_holder_name: null,
+    statement_period_start: '2025-04-09', statement_period_end: '2026-04-09', closing_balance: 8450,
+    income_deposits: [], regular_payments: [], spending_categories: [], notable_transactions: [],
+  }]
+}
+
+// ═══ Persona B: Marcus — self-employed renter ═══
+function createSelfEmployedPersona(): BankStatementExtraction[] {
+  return [{
+    document_type: 'bank_statement', provider: 'Monzo', account_number_last4: '8841',
+    account_type: 'current', is_joint: false, joint_holder_name: null,
+    statement_period_start: '2025-04-09', statement_period_end: '2026-04-09', closing_balance: 4210,
+    income_deposits: [
+      { source: 'Client invoices (various)', amount: 5200, period: 'monthly', confidence: 0.75, type: 'other' },
+      { source: 'Stripe Payments', amount: 1800, period: 'monthly', confidence: 0.70, type: 'other' },
+    ],
+    regular_payments: [
+      { payee: 'Foxtons Lettings', amount: 1650, frequency: 'monthly', confidence: 0.96, likely_category: 'rent' },
+      { payee: 'Council Tax', amount: 165, frequency: 'monthly', confidence: 0.96, likely_category: 'council_tax' },
+      { payee: 'EDF Energy', amount: 95, frequency: 'monthly', confidence: 0.90, likely_category: 'utilities' },
+      { payee: 'Three Mobile', amount: 28, frequency: 'monthly', confidence: 0.95, likely_category: 'subscription' },
+      { payee: 'Coinbase', amount: 200, frequency: 'monthly', confidence: 0.60, likely_category: 'unknown' },
+      { payee: 'HMRC Self Assessment', amount: 850, frequency: 'quarterly', confidence: 0.92, likely_category: 'unknown' },
+    ],
+    spending_categories: [
+      { category: 'Housing', monthly_average: 1650, transaction_count: 12 },
+      { category: 'Groceries', monthly_average: 320, transaction_count: 36 },
+      { category: 'Transport', monthly_average: 90, transaction_count: 18 },
+      { category: 'Utilities', monthly_average: 140, transaction_count: 8 },
+      { category: 'Dining & entertainment', monthly_average: 380, transaction_count: 42 },
+      { category: 'Subscriptions', monthly_average: 65, transaction_count: 8 },
+    ],
+    notable_transactions: [],
+  }]
+}
+
+// ═══ Persona C: Jean — retired, multiple pensions ═══
+function createRetiredPersona(): BankStatementExtraction[] {
+  return [{
+    document_type: 'bank_statement', provider: 'Nationwide', account_number_last4: '5519',
+    account_type: 'current', is_joint: false, joint_holder_name: null,
+    statement_period_start: '2025-04-09', statement_period_end: '2026-04-09', closing_balance: 3280,
+    income_deposits: [
+      { source: 'DWP State Pension', amount: 960, period: 'monthly', confidence: 0.98, type: 'benefits' },
+      { source: 'Teachers Pension Scheme', amount: 1450, period: 'monthly', confidence: 0.95, type: 'pension_income' },
+      { source: 'Aviva Pension', amount: 380, period: 'monthly', confidence: 0.90, type: 'pension_income' },
+    ],
+    regular_payments: [
+      { payee: 'Council Tax', amount: 210, frequency: 'monthly', confidence: 0.96, likely_category: 'council_tax' },
+      { payee: 'Southern Water', amount: 48, frequency: 'monthly', confidence: 0.90, likely_category: 'utilities' },
+      { payee: 'British Gas', amount: 135, frequency: 'monthly', confidence: 0.90, likely_category: 'utilities' },
+      { payee: 'BT', amount: 42, frequency: 'monthly', confidence: 0.93, likely_category: 'subscription' },
+      { payee: 'HL ISA', amount: 500, frequency: 'monthly', confidence: 0.85, likely_category: 'unknown' },
+    ],
+    spending_categories: [
+      { category: 'Groceries', monthly_average: 380, transaction_count: 36 },
+      { category: 'Utilities', monthly_average: 225, transaction_count: 10 },
+      { category: 'Transport', monthly_average: 85, transaction_count: 12 },
+      { category: 'Healthcare', monthly_average: 60, transaction_count: 6 },
+      { category: 'Subscriptions', monthly_average: 55, transaction_count: 6 },
+    ],
+    notable_transactions: [],
+  }, {
+    document_type: 'bank_statement', provider: 'Nationwide', account_number_last4: '7703',
+    account_type: 'savings', is_joint: false, joint_holder_name: null,
+    statement_period_start: '2025-04-09', statement_period_end: '2026-04-09', closing_balance: 42500,
+    income_deposits: [], regular_payments: [], spending_categories: [], notable_transactions: [],
+  }]
+}
+
+// ═══ Persona D: Aisha — part-time with benefits ═══
+function createPartTimePersona(): BankStatementExtraction[] {
+  return [{
+    document_type: 'bank_statement', provider: 'HSBC', account_number_last4: '3364',
+    account_type: 'current', is_joint: true, joint_holder_name: 'Partner',
+    statement_period_start: '2025-04-09', statement_period_end: '2026-04-09', closing_balance: 620,
+    income_deposits: [
+      { source: 'NHS Trust', amount: 1450, period: 'monthly', confidence: 0.95, type: 'employment' },
+      { source: 'DWP', amount: 680, period: 'monthly', confidence: 0.96, type: 'benefits' },
+      { source: 'HMRC Child Benefit', amount: 170, period: 'monthly', confidence: 0.98, type: 'benefits' },
+    ],
+    regular_payments: [
+      { payee: 'L&Q Housing', amount: 820, frequency: 'monthly', confidence: 0.95, likely_category: 'mortgage' },
+      { payee: 'Council Tax', amount: 145, frequency: 'monthly', confidence: 0.96, likely_category: 'council_tax' },
+      { payee: 'Octopus Energy', amount: 110, frequency: 'monthly', confidence: 0.90, likely_category: 'utilities' },
+      { payee: 'EE', amount: 32, frequency: 'monthly', confidence: 0.95, likely_category: 'subscription' },
+      { payee: 'Barclaycard', amount: 85, frequency: 'monthly', confidence: 0.88, likely_category: 'credit_card' },
+      { payee: 'Klarna', amount: 45, frequency: 'monthly', confidence: 0.80, likely_category: 'bnpl' },
+      { payee: 'Thames Water', amount: 38, frequency: 'monthly', confidence: 0.90, likely_category: 'utilities' },
+    ],
+    spending_categories: [
+      { category: 'Housing', monthly_average: 820, transaction_count: 12 },
+      { category: 'Groceries', monthly_average: 520, transaction_count: 52 },
+      { category: 'Transport', monthly_average: 140, transaction_count: 20 },
+      { category: 'Utilities', monthly_average: 186, transaction_count: 10 },
+      { category: 'Childcare', monthly_average: 450, transaction_count: 12 },
+      { category: 'Dining & entertainment', monthly_average: 95, transaction_count: 12 },
+    ],
+    notable_transactions: [],
+  }]
 }

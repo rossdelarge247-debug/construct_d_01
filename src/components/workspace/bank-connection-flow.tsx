@@ -10,6 +10,13 @@ import {
   createDemoExtractions,
 } from '@/lib/bank/bank-data-utils'
 
+const TEST_PERSONAS = [
+  { id: 'default', label: 'Sarah — employed homeowner', description: 'Salary, mortgage, child benefit, pension contributions, joint property' },
+  { id: 'self-employed', label: 'Marcus — self-employed renter', description: 'Sole trader, rents, no children, crypto, multiple income sources' },
+  { id: 'retired', label: 'Jean — retired, multiple pensions', description: 'State + private pension, savings accounts, no mortgage, investments' },
+  { id: 'part-time', label: 'Aisha — part-time with benefits', description: 'Part-time employed, Universal Credit, shared ownership, debts' },
+]
+
 interface BankConnectionFlowProps {
   phase: BankConnectionPhase
   onPhaseChange: (phase: BankConnectionPhase) => void
@@ -50,11 +57,11 @@ export function BankConnectionFlow({
     }
   }, [phase, onPhaseChange])
 
-  const handleTinkComplete = useCallback((useDemoData: boolean) => {
+  const handleTinkComplete = useCallback((useDemoData: boolean, personaId?: string) => {
     let exts: BankStatementExtraction[]
 
     if (useDemoData) {
-      exts = createDemoExtractions()
+      exts = createDemoExtractions(personaId)
     } else {
       try {
         const raw = sessionStorage.getItem('pendingBankData')
@@ -129,7 +136,7 @@ export function BankConnectionFlow({
       {phase === 'tink_modal' && (
         <TinkModal
           onComplete={() => handleTinkComplete(false)}
-          onDemoComplete={() => handleTinkComplete(true)}
+          onDemoComplete={(personaId) => handleTinkComplete(true, personaId)}
           onCancel={onCancel}
         />
       )}
@@ -317,7 +324,7 @@ function TinkModal({
   onCancel,
 }: {
   onComplete: () => void
-  onDemoComplete: () => void
+  onDemoComplete: (personaId?: string) => void
   onCancel: () => void
 }) {
   const [loading, setLoading] = useState(true)
@@ -490,20 +497,38 @@ function TinkModal({
           <>
             <h3 className="text-[22px] font-bold text-ink mb-3">Try the experience</h3>
             <p className="text-[15px] text-ink-secondary mb-2 leading-relaxed">
-              We&apos;ll walk you through the full journey using sample bank data — a realistic picture of what your financial disclosure will look like.
-            </p>
-            <p className="text-[13px] text-ink-tertiary mb-6">
-              Open Banking connection will be available when we go live.
+              Walk through the full journey using sample bank data — a realistic picture of what your financial disclosure will look like.
             </p>
             {connectError && (
-              <p className="text-[11px] text-ink-disabled mb-4 font-mono">
+              <p className="text-[11px] text-ink-disabled mb-3 font-mono">
                 Debug: {connectError}
               </p>
             )}
+
+            {/* ═══ Dev mode: test data personas ═══ */}
+            <div className="mt-4 space-y-2">
+              <p className="text-[11px] font-semibold text-ink-tertiary uppercase tracking-wider">
+                Choose a test persona
+              </p>
+              {TEST_PERSONAS.map((p) => (
+                <button
+                  key={p.id}
+                  onClick={() => onDemoComplete(p.id)}
+                  className="w-full text-left px-4 py-3 transition-colors hover:bg-grey-50"
+                  style={{
+                    border: '1px solid var(--color-grey-100)',
+                    borderRadius: 'var(--radius-card)',
+                  }}
+                >
+                  <span className="text-[14px] font-medium text-ink">{p.label}</span>
+                  <p className="text-[12px] text-ink-tertiary mt-0.5">{p.description}</p>
+                </button>
+              ))}
+            </div>
           </>
         )}
 
-        <div className="flex gap-3">
+        <div className="flex gap-3 mt-4">
           {popupOpen && (
             <button
               onClick={handleReopenPopup}
@@ -516,20 +541,6 @@ function TinkModal({
               onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = 'transparent')}
             >
               Bring window to front
-            </button>
-          )}
-          {!tinkAvailable && !loading && (
-            <button
-              onClick={onDemoComplete}
-              className="flex-1 py-3.5 text-white text-[15px] font-semibold transition-colors active:scale-[0.98]"
-              style={{
-                backgroundColor: 'var(--color-red-500)',
-                borderRadius: 'var(--radius-card)',
-              }}
-              onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = 'var(--color-red-600)')}
-              onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = 'var(--color-red-500)')}
-            >
-              Start demo walkthrough
             </button>
           )}
           <button
