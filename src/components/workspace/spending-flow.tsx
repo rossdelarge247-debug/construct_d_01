@@ -36,6 +36,8 @@ interface SpendingFlowProps {
   hasChildren: boolean
   onComplete: (result: SpendingFlowResult) => void
   onSkip: () => void
+  /** Skip the fork and go straight to bank data categorisation (re-entry from estimates) */
+  startInCategorise?: boolean
 }
 
 const CATEGORY_ICONS: Record<SpendingSubCategory, typeof Home> = {
@@ -53,8 +55,9 @@ export function SpendingFlow({
   hasChildren,
   onComplete,
   onSkip,
+  startInCategorise,
 }: SpendingFlowProps) {
-  const [phase, setPhase] = useState<SpendingPhase>('fork')
+  const [phase, setPhase] = useState<SpendingPhase>(startInCategorise ? 'categorise' : 'fork')
   const [estimateValues, setEstimateValues] = useState<Partial<Record<SpendingSubCategory, number>>>({})
   const [categoryResults, setCategoryResults] = useState<Record<string, SpendingItem[]>>({})
 

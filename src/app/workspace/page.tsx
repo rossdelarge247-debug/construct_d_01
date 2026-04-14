@@ -7,8 +7,11 @@ import { TaskListHome } from '@/components/workspace/task-list-home'
 import { BankConnectionFlow } from '@/components/workspace/bank-connection-flow'
 import { ConfirmationFlow } from '@/components/workspace/confirmation-flow'
 import { FinancialSummaryPage } from '@/components/workspace/financial-summary-page'
-import type { WorkspaceView, BankConnectionPhase, ConnectedAccount, SectionConfirmation, SpendingFlowResult } from '@/types/hub'
+import type { BankConnectionPhase, ConnectedAccount, SectionConfirmation, SpendingFlowResult } from '@/types/hub'
 import type { BankStatementExtraction } from '@/lib/ai/extraction-schemas'
+import { SpendingFlow } from '@/components/workspace/spending-flow'
+
+type WorkspaceView = 'carousel' | 'task_list' | 'bank_connection' | 'confirmation' | 'financial_summary' | 'spending_upgrade'
 
 export default function WorkspacePage() {
   const [view, setView] = useState<WorkspaceView>('carousel')
@@ -65,6 +68,15 @@ export default function WorkspacePage() {
     setView('financial_summary')
   }, [])
 
+  const handleStartSpending = useCallback(() => {
+    setView('spending_upgrade')
+  }, [])
+
+  const handleSpendingUpgradeComplete = useCallback((result: SpendingFlowResult) => {
+    setSpendingResult(result)
+    setView('financial_summary')
+  }, [])
+
   // ═══ Title bar context ═══
 
   const titleProps = getTitleProps(view, bankPhase)
@@ -87,9 +99,11 @@ export default function WorkspacePage() {
             confirmationComplete={confirmationComplete}
             confirmations={confirmations}
             extractions={bankExtractions}
+            spendingResult={spendingResult}
             onGetStarted={handleGetStarted}
             onSkip={handleSkip}
             onViewSummary={handleViewSummary}
+            onStartSpending={handleStartSpending}
           />
         )}
 
@@ -112,6 +126,30 @@ export default function WorkspacePage() {
           />
         )}
 
+        {/* Spending upgrade (re-entry from estimates → full bank data) */}
+        {view === 'spending_upgrade' && (
+          <div className="max-w-[var(--content-narrow)] mx-auto">
+            <div
+              className="bg-white overflow-hidden p-6"
+              style={{
+                borderRadius: 'var(--radius-card)',
+                boxShadow: 'var(--shadow-card)',
+              }}
+            >
+              <SpendingFlow
+                extractions={bankExtractions}
+                connectedAccounts={connectedAccounts}
+                hasChildren={bankExtractions.some((e) =>
+                  e.income_deposits.some((d) => d.type === 'benefits' && d.source.toLowerCase().includes('child')),
+                )}
+                onComplete={handleSpendingUpgradeComplete}
+                onSkip={() => setView('task_list')}
+                startInCategorise
+              />
+            </div>
+          </div>
+        )}
+
         {/* Financial summary (screen 3a) */}
         {view === 'financial_summary' && (
           <FinancialSummaryPage
@@ -120,6 +158,7 @@ export default function WorkspacePage() {
             confirmations={confirmations}
             spendingResult={spendingResult}
             onBack={() => setView('task_list')}
+            onStartSpending={handleStartSpending}
           />
         )}
       </main>
@@ -147,6 +186,8 @@ function getTitleProps(
       return { title: 'Preparation', showShareButton: true }
     case 'financial_summary':
       return { title: 'Financial summary', showShareButton: true }
+    case 'spending_upgrade':
+      return { title: 'Preparation', subtitle: 'Spending', showShareButton: false }
     default:
       return { title: 'Overview', showShareButton: false }
   }

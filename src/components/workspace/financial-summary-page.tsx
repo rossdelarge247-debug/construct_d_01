@@ -13,6 +13,7 @@ interface FinancialSummaryPageProps {
   confirmations: SectionConfirmation[]
   spendingResult?: SpendingFlowResult | null
   onBack: () => void
+  onStartSpending?: () => void
 }
 
 const SPENDING_ICONS: Record<SpendingSubCategory, typeof Home> = {
@@ -60,6 +61,7 @@ export function FinancialSummaryPage({
   confirmations,
   spendingResult,
   onBack,
+  onStartSpending,
 }: FinancialSummaryPageProps) {
   const bankName = connectedAccounts[0]?.bankName ?? 'Bank'
   const accountCount = connectedAccounts.length
@@ -177,6 +179,7 @@ export function FinancialSummaryPage({
         spendingResult={spendingResult}
         bankName={bankName}
         delay={300}
+        onStartSpending={onStartSpending}
       />
 
       {/* ═══ Debts card (TBC) ═══ */}
@@ -268,10 +271,12 @@ function SpendingCard({
   spendingResult,
   bankName,
   delay,
+  onStartSpending,
 }: {
   spendingResult?: SpendingFlowResult | null
   bankName: string
   delay: number
+  onStartSpending?: () => void
 }) {
   if (!spendingResult) {
     return (
@@ -338,6 +343,7 @@ function SpendingCard({
       {isEstimated && (
         <div className="mt-3">
           <button
+            onClick={onStartSpending}
             className="px-6 py-3 text-white text-[13px] font-semibold transition-colors active:scale-[0.98]"
             style={{
               backgroundColor: 'var(--color-red-500)',

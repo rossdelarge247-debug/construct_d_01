@@ -1,7 +1,7 @@
 'use client'
 
 import { Check, ChevronDown, Lock, Plus, Upload } from 'lucide-react'
-import type { ConnectedAccount, SectionConfirmation } from '@/types/hub'
+import type { ConnectedAccount, SectionConfirmation, SpendingFlowResult } from '@/types/hub'
 import type { BankStatementExtraction } from '@/lib/ai/extraction-schemas'
 
 // ═══ Task generation from confirmation data ═══
@@ -13,13 +13,28 @@ interface GeneratedTask {
   actionLabel: string
   actionStyle: 'filled' | 'outlined'
   completed: boolean
+  onAction?: () => void
 }
 
 function generatePreparationTasks(
   confirmations: SectionConfirmation[],
   extractions: BankStatementExtraction[],
+  spendingResult?: SpendingFlowResult | null,
+  onStartSpending?: () => void,
 ): GeneratedTask[] {
   const tasks: GeneratedTask[] = []
+
+  // Spending upgrade task — if estimates were used, prompt full disclosure
+  if (spendingResult?.mode === 'estimates') {
+    tasks.unshift({
+      id: 'spending-upgrade',
+      label: 'Complete your spending disclosure from bank data — it takes 5 minutes',
+      actionLabel: 'Complete now',
+      actionStyle: 'filled',
+      completed: false,
+      onAction: onStartSpending,
+    })
+  }
 
   // Pension CETV task — only if user confirmed they have pensions
   const hasPension = confirmations.some(
@@ -149,9 +164,11 @@ interface TaskListHomeProps {
   confirmationComplete: boolean
   confirmations: SectionConfirmation[]
   extractions: BankStatementExtraction[]
+  spendingResult?: SpendingFlowResult | null
   onGetStarted: () => void
   onSkip: () => void
   onViewSummary: () => void
+  onStartSpending?: () => void
 }
 
 export function TaskListHome({
@@ -160,15 +177,17 @@ export function TaskListHome({
   confirmationComplete,
   confirmations,
   extractions,
+  spendingResult,
   onGetStarted,
   onSkip,
   onViewSummary,
+  onStartSpending,
 }: TaskListHomeProps) {
   const accountCount = connectedAccounts.length
   const bankName = connectedAccounts[0]?.bankName ?? 'your bank'
 
   const prepTasks = confirmationComplete
-    ? generatePreparationTasks(confirmations, extractions)
+    ? generatePreparationTasks(confirmations, extractions, spendingResult, onStartSpending)
     : []
   const finalTasks = confirmationComplete
     ? generateFinalisationTasks(confirmations, extractions)
@@ -439,6 +458,7 @@ function TaskRow({ task, delay }: { task: GeneratedTask; delay: number }) {
       </div>
       {task.actionStyle === 'filled' ? (
         <button
+          onClick={task.onAction}
           className="shrink-0 px-4 py-2 text-[13px] font-medium text-white transition-colors active:scale-[0.98]"
           style={{
             backgroundColor: 'var(--color-red-500)',
