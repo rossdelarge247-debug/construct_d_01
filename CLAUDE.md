@@ -54,7 +54,7 @@ When the session is ending (user says wrap up, or you hit ~2,000 lines), do thes
 
 ## Branch
 
-Development branch: `claude/decouple-v2-financial-disclosure-Nxt2G` (session 14 — bug fixes, business + other assets, dev mode)
+Development branch: `claude/decouple-v2-financial-disclosure-6jPX0` (session 15 — V1 overhaul, visual unification, decisioning engine flagged)
 
 ## Deployment
 
@@ -66,7 +66,9 @@ Tink Console must whitelist `https://construct-dev.vercel.app/api/bank/callback`
 
 ```
 docs/SESSION-CONTEXT.md                    — START HERE every session
-docs/HANDOFF-SESSION-14.md                 — Most recent session retro
+docs/HANDOFF-SESSION-15.md                 — Most recent session retro
+docs/workspace-spec/28-v1-public-site-overhaul.md — V1 overhaul spec (tier model, visual, interview)
+docs/workspace-spec/29-v2-personalisation-opportunities.md — V2 personalisation backlog
 docs/workspace-spec/27-visual-direction-session11.md — Visual direction (Airbnb/Emma/Habito)
 docs/workspace-spec/24-wireframe-spec-part1.md — Wireframes: carousel, task list, bank connection, reveal
 docs/workspace-spec/25-wireframe-spec-part2.md — Wireframes: confirmation flow, summaries, financial hub

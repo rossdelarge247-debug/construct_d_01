@@ -1,97 +1,106 @@
-# Session 15 Context Block
+# Session 16 Context Block
 
 Product: **Decouple** — financial disclosure workspace for UK divorce (Form E replacement).
 Stack: Next.js 16.2, React 19, TypeScript, Tailwind 4, Supabase, Claude AI, Vercel Pro.
 Deployment: Vercel — preview deployments per branch, production at `construct-dev.vercel.app`.
 
-## What session 14 accomplished
+## What session 15 accomplished
 
-**Bug fixes, testing infrastructure, and two new confirmation sections.**
+**V1 public site overhaul, visual unification, and Tier 3 bug fixes. ~1,800 net lines across 32 files.**
 
-- **7 bug fixes**: Tink popup race condition (postMessage vs close poll), duplicate income in accordion (dedup guard), progress stepper off-by-one (use currentIndex not completedCount), spending upgrade missing back link (dynamic return tracking), spending fork missing selection feedback (select then Continue), badge text inconsistency ("Bank confirmed"), TypeScript issues (SectionSummaryData type, WorkspaceView location, useState anti-pattern).
-- **sessionStorage persistence**: All workspace state survives page reloads. Bridge until Supabase (#65).
-- **Mega footer**: 4-column layout (Support with 6 links, Preparation/Sharing/Finalisation placeholders), bottom bar with Privacy + Copyright.
-- **Celebration patterns**: Green flash + tick bounce on section confirm, count-up animation on final summary, progress bar pulse on completion. All respect prefers-reduced-motion.
-- **Disconnect and clear data**: Black button on financial summary, clears all state + sessionStorage.
-- **Dev mode fork panel**: After Tink returns, interstitial shows data receipt + 4 test persona buttons. Works with and without Tink credentials.
-- **4 test personas**: Sarah (employed homeowner), Marcus (self-employed renter + crypto), Jean (retired + pensions), Aisha (part-time + benefits + debts).
-- **Business section**: Signal detection (Companies House, HMRC SA), structure/value/accountant questions.
-- **Other assets section**: New checklist step type for multi-select. Vehicle, crypto, investments, life insurance, valuables, overseas. Per-item value follow-ups.
-- **Progress stepper**: Now 8 confirmation sections + spending = 9 segments.
+### Tier 3 fixes (done first)
+- **Tink provider name fix**: `fetchProviderDisplayNames()` resolves UUID → human-readable bank name via Tink providers API. Hardcoded fallback map preserved.
+- **Commonly omitted prompts**: App-based banks (Monzo/Revolut/Starling, conditional on what's connected), closed accounts in last 12 months, director's loan account (for Ltd companies). All map to Form E fields, summaries updated.
+- **CSV import for dev testing**: `csv-parser.ts` auto-detects Monzo, Barclays, Starling, generic formats. File input in dev chooser panel and TinkModal.
+
+### V1 public site overhaul (bulk of session)
+- **4-tier model established**: Orientate (free) → Prepare (£49) → Share & Negotiate (£99) → Finalise (£149)
+- **Visual unification**: Entire V1 migrated to V2 design system — one palette, one header (centred), one footer (mega), shadow cards, ink-inversion selection, red-500 buttons. Zero legacy warmth/cream/sage refs remain.
+- **Landing page**: New hero ("Financial disclosure, sorted"), 4-phase journey, pain-point solution cards, dual CTAs.
+- **Pricing page**: Goldilocks 3-tier with free Orientate callout. Indicative pricing.
+- **Features page**: 4-phase layout with feature cards and real copy per phase.
+- **Interview restructure**: Finances merged from 4 → 2 screens. New partner awareness question. Readiness matrix cut (redirect). Next-steps replaced by /start/choose (Goldilocks pricing).
+- **Login/logout stubs**: Navy "Log in" on V1 header, LogOut icon on V2 title bar.
+
+### Specs written
+- **Spec 28**: V1 public site overhaul (tier model, visual unification, interview streamline, data bridge, implementation priority)
+- **Spec 29**: V2 personalisation opportunities (V1→V2 matrix, cross-section intelligence, 20-item prioritised backlog, design principles)
+
+### Critical finding at end of session
+- **User tested CSV import with real bank data** and the decisioning engine (result-transformer.ts, confirmation-questions.ts) showed significant issues with real-world transactions. This is the **top priority for session 16**.
 
 ## Current state of the codebase
 
 **What works end-to-end:**
-- Full flow: carousel, task list, bank connect (popup), dev chooser, reveal, confirmation (7 sections), spending (8th), financial summary, task list
-- 7 confirmation sections: income, property, accounts, pensions, debts, business, other assets
-- Spending: both estimates and bank data paths complete
-- State persists across page reloads (sessionStorage)
-- 4 test personas for decision tree testing
-- Celebration animations on section completion
-- Disconnect and clear data from financial summary
-- Mega footer on all workspace screens
+- V1 public site: landing → features → pricing → interview (situation → pathway → children/home → finances → plan → choose/save)
+- V2 workspace: carousel → task list → bank connect → dev chooser (4 personas + CSV import) → reveal → confirmation (7 sections) → spending → financial summary → task list
+- Unified visual design across V1 and V2 (one palette, one header, one footer)
+- CSV import for real bank data testing (Monzo, Barclays, Starling, generic)
+- Tink provider names resolved via API (no more UUIDs)
 
-**What is placeholder/mock:**
+**What needs urgent attention:**
+- **Decisioning engine effectiveness** — real CSV data exposed issues with how transactions are classified, categorised, and turned into confirmation questions. The extraction → question pipeline needs audit and improvement.
 - Edit flows: links exist but not wired
-- Children picture section: not built, wireframes needed
-- Post-divorce life/needs section: not built, wireframes needed
-- Mega footer: Support links populated, other 3 columns Coming soon
-- Bank name shows as UUID with real Tink data (transformer uses provider ID)
-- CSV import for own banking data: not built
+- Children section: research done, design pending (user thinking)
+- Post-divorce life/needs: not built
+- Data bridge: V1 → V2 state not yet wired
+- Auth + Supabase: not started
 
-## Session 15 deliverables, priority order
+## Session 16 deliverables, priority order
 
-### Tier 1: User wireframes
-1. **Children picture section** — wireframes needed, maps to Form E Part 4
-2. **Post-divorce life / needs section** — wireframes needed, maps to Form E 3.1
+### P0: Decisioning engine audit and improvement
+1. **Audit result-transformer.ts with real data** — test with CSV import, identify classification failures
+2. **Audit confirmation-questions.ts** — do the right questions fire for real transaction patterns?
+3. **Improve keyword matching** — the current keyword lookup may miss common UK transaction descriptions
+4. **Test all 4 personas + real CSV** — systematic comparison of what's detected vs what should be
+5. **Fix false positives and false negatives** — tune confidence thresholds, expand payee matching
 
-### Tier 2: Core gaps
-3. **Edit/review flow** — wireframe needed for consistent edit pattern across confirmed data
-4. **Structured summary export** — plain language summary shareable with mediator
-5. **Return visit experience** — what does the user see when they come back?
+### P1: Core gaps
+6. **Data bridge: V1 → V2** — V1 interview answers gate V2 sections (no children = no children section)
+7. **Edit/review flow** — wireframe needed
+8. **Structured summary export** — plain language summary for mediator/solicitor
 
-### Tier 3: Quality
-6. **Tink provider name fix** — human-readable bank names from Tink API
-7. **Commonly omitted prompts** — director's loan, app-based accounts, closed accounts
-8. **CSV import for dev testing** — load own bank data for realistic testing
+### P2: Children & needs sections
+9. **Children section** — user designing options, may have wireframes
+10. **Post-divorce life / needs** — user designing
 
-### Tier 4: Infrastructure
-9. **Auth + Supabase persistence** — data survives beyond browser session
-10. **Test suite** — Vitest, currently 0 tests
+### P3: Infrastructure
+11. **Auth + Supabase persistence**
+12. **Test suite** — Vitest, currently 0 tests
 
 ## Negative constraints
-1. Do not apply old spec 18 colours — superseded by spec 27
-2. Do not reference pre-pivot specs (03-06, 11, 12)
-3. Red #E5484D is for primary CTAs only — not status, not decoration
-4. Shadow-based card separation — no borders on cards
-5. All filled buttons are red — no black/ink filled buttons (except disconnect/destructive)
-6. Tink uses popup, not iframe — Tink blocks iframe embedding
-7. Edit flows are placeholder — do not wire up without wireframes
+1. V1 legacy palette is gone — do not reintroduce warmth/cream/sage colours
+2. Red #E5484D is for primary CTAs only — not status, not decoration
+3. Shadow-based card separation — no borders on cards
+4. Ink inversion for selection states (Habito pattern) — not colour borders
+5. Tink uses popup, not iframe
+6. Edit flows are placeholder — do not wire up without wireframes
+7. Do not reference pre-pivot specs (03-06, 11, 12)
 
 ## Key files
 ```
 docs/SESSION-CONTEXT.md                    — START HERE every session
-docs/HANDOFF-SESSION-14.md                 — Most recent session retro
-docs/workspace-spec/27-visual-direction-session11.md — Visual direction
-docs/workspace-spec/22-confirmation-flow-tree.md — Decision tree spec
-docs/workspace-spec/26-transitions-animations.md — Transitions and animations
-src/components/workspace/welcome-carousel.tsx  — Carousel
-src/components/workspace/task-list-home.tsx     — Task list with spending upgrade task
-src/components/workspace/bank-connection-flow.tsx — Bank connection (popup) + dev chooser + reveal
+docs/HANDOFF-SESSION-15.md                 — Most recent session retro
+docs/workspace-spec/28-v1-public-site-overhaul.md — V1 overhaul spec (tier model, visual, interview)
+docs/workspace-spec/29-v2-personalisation-opportunities.md — V2 personalisation backlog
+docs/workspace-spec/27-visual-direction-session11.md — Visual direction (now applied everywhere)
+docs/workspace-spec/22-confirmation-flow-tree.md — Decision tree spec (audit against real data)
+docs/workspace-spec/13-extraction-decision-tree-documents.md — Extraction decision trees
+src/lib/ai/result-transformer.ts               — CRITICAL: decision trees + keyword lookup (audit target)
+src/lib/bank/confirmation-questions.ts         — CRITICAL: question + summary generation (audit target)
+src/lib/bank/csv-parser.ts                    — CSV import (test tool for decisioning audit)
+src/lib/bank/bank-data-utils.ts               — Extraction utils + 4 test personas
+src/lib/bank/tink-transformer.ts              — Tink → BankStatementExtraction
 src/components/workspace/confirmation-flow.tsx  — Q&A (7 sections) + checklist step type
-src/components/workspace/spending-fork.tsx      — S1a: now vs estimates fork
-src/components/workspace/spending-estimates.tsx — S1b/S1c-1: estimates form + summary
-src/components/workspace/spending-search.tsx    — S2d: transaction search with typeahead
-src/components/workspace/spending-categorise.tsx — S2a-S2f: per-category confirmation loop
-src/components/workspace/spending-flow.tsx      — Thin orchestrator + S1c-2 full summary
-src/components/workspace/section-mini-summary.tsx — Per-section summaries
-src/components/workspace/progress-stepper.tsx   — Red progress bar (9 segments)
-src/components/workspace/financial-summary-page.tsx — Financial summary + disconnect button
-src/components/workspace/mega-footer.tsx       — 4-column footer
-src/lib/bank/bank-data-utils.ts               — Extraction utils + 4 test personas + transaction search
-src/lib/bank/confirmation-questions.ts         — Question + summary generation (7 sections)
-src/hooks/use-count-up.ts                      — Count-up animation hook
-src/app/workspace/page.tsx                     — Flow state machine (sessionStorage persistence)
-src/app/globals.css                            — Design tokens + animations + celebration keyframes
-src/types/hub.ts                               — All types including spending + workspace view
+src/app/workspace/page.tsx                     — Flow state machine
+src/app/page.tsx                               — Landing page (4-phase model)
+src/app/pricing/page.tsx                       — Goldilocks pricing
+src/app/features/page.tsx                      — 4-phase feature detail
+src/app/start/finances/page.tsx               — Streamlined (priorities+worries, partner awareness)
+src/app/start/choose/page.tsx                  — In-flow pricing chooser
+src/components/layout/header.tsx               — Unified header (centred, login stub)
+src/components/layout/footer.tsx               — Mega footer (3-column)
+src/components/ui/button.tsx                   — Red-500 primary, 12px radius
+src/components/interview/card-select.tsx       — Ink inversion selection
+src/types/interview.ts                         — Interview types (added partner_awareness)
 ```
