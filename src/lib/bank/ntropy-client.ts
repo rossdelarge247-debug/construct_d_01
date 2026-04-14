@@ -41,7 +41,7 @@ export interface NtropyEnrichResult {
 
 // ═══ Client ═══
 
-const NTROPY_API_URL = 'https://api.ntropy.com/v3/transactions'
+const NTROPY_API_URL = 'https://api.ntropy.com/v2/transactions/sync'
 
 export async function enrichTransactions(
   transactions: NtropyTransactionInput[],
