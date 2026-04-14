@@ -326,6 +326,7 @@ function TinkModal({
   const [connectError, setConnectError] = useState<string | null>(null)
   const popupRef = useRef<Window | null>(null)
   const pollRef = useRef<ReturnType<typeof setInterval> | null>(null)
+  const tinkCompleteRef = useRef(false)
 
   // Fetch Tink Link URL and open popup
   useEffect(() => {
@@ -368,6 +369,7 @@ function TinkModal({
   useEffect(() => {
     function handleMessage(event: MessageEvent) {
       if (event.data?.type === 'tink-complete') {
+        tinkCompleteRef.current = true
         if (popupRef.current && !popupRef.current.closed) {
           popupRef.current.close()
         }
@@ -398,9 +400,15 @@ function TinkModal({
     pollRef.current = setInterval(() => {
       if (popupRef.current?.closed) {
         popupRef.current = null
-        setPopupOpen(false)
         if (pollRef.current) clearInterval(pollRef.current)
-        onCancel()
+        // Grace period: the popup posts a message before closing itself.
+        // Wait for the postMessage to arrive before treating this as a cancel.
+        setTimeout(() => {
+          if (!tinkCompleteRef.current) {
+            setPopupOpen(false)
+            onCancel()
+          }
+        }, 1500)
       }
     }, 500)
     return () => {
