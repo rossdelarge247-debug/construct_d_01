@@ -481,35 +481,172 @@ function generatePropertySteps(extractions: BankStatementExtraction[]): Confirma
 
 // ═══ Accounts (spec 22 §3, spec 25 screen 2h) ═══
 
+// ═══ Accounts (spec 22 §3) ═══
+//
+// Ladder:
+//   1. Connected accounts: auto-confirm, check if joint
+//   2. Transfers to unknown accounts: classify (savings/ISA/investment/pension)
+//   3. Payments to investment platforms: detect by payee name
+//   4. Catch-all: any other accounts, savings, or investments?
+//
+// Cross-section impacts:
+//   → If pension contribution → reclassify to Pensions section
+//   → If investment → income from dividends/interest
+
+const INVESTMENT_PLATFORMS = [
+  'hargreaves', 'lansdown', 'vanguard', 'aj bell', 'fidelity',
+  'interactive investor', 'nutmeg', 'wealthify', 'moneybox',
+  'freetrade', 'trading 212', 'etoro', 'hl ',
+]
+
+const CRYPTO_EXCHANGES = [
+  'coinbase', 'binance', 'kraken', 'crypto.com', 'gemini',
+  'bitstamp', 'bitfinex', 'revolut crypto',
+]
+
+function matchesPayee(payee: string, patterns: string[]): boolean {
+  const lower = payee.toLowerCase()
+  return patterns.some((p) => lower.includes(p))
+}
+
 function generateAccountsSteps(extractions: BankStatementExtraction[]): ConfirmationStep[] {
   const allPayments = extractions.flatMap((e) => e.regular_payments)
-  const transfers = allPayments.filter((p) => p.likely_category === 'unknown' && p.confidence < 0.9)
+  const steps: ConfirmationStep[] = []
 
-  if (transfers.length > 0) {
-    const transfer = transfers[0]
-    return [{
-      id: 'accounts-transfer',
+  // ── Joint account check on connected accounts ──
+  const jointAccounts = extractions.filter((e) => e.is_joint || e.account_type === 'joint_current' || e.account_type === 'joint_savings')
+  if (jointAccounts.length > 0) {
+    const ja = jointAccounts[0]
+    steps.push({
+      id: 'accounts-joint',
       sectionKey: 'accounts',
       sectionLabel: 'Accounts',
       type: 'question',
-      text: `What are the regular payments to ${transfer.payee}?`,
+      text: `Your ${ja.provider} account ending ${ja.account_number_last4 ?? '****'} looks like a joint account. Who is it with?`,
       options: [
-        { label: 'Savings account', value: 'savings' },
-        { label: 'ISA', value: 'isa' },
-        { label: 'Pension', value: 'pension' },
-        { label: 'Other', value: 'other' },
+        { label: 'My partner', value: 'partner' },
+        { label: 'Someone else', value: 'other' },
+        { label: 'It\'s actually a sole account', value: 'sole' },
       ],
-    }]
+    })
   }
 
-  // No transfers — auto-complete
-  return [{
-    id: 'accounts-none',
+  // ── Transfers to savings / unknown accounts (top 3) ──
+  const transfers = allPayments
+    .filter((p) => p.likely_category === 'unknown' && p.confidence < 0.9)
+    .slice(0, 3)
+
+  for (let i = 0; i < transfers.length; i++) {
+    const transfer = transfers[i]
+    const isInvestment = matchesPayee(transfer.payee, INVESTMENT_PLATFORMS)
+    const isCrypto = matchesPayee(transfer.payee, CRYPTO_EXCHANGES)
+
+    if (isCrypto) {
+      // ── Crypto exchange detected ──
+      steps.push({
+        id: `accounts-crypto-${i}`,
+        sectionKey: 'accounts',
+        sectionLabel: 'Accounts',
+        type: 'question',
+        text: `We see payments to ${transfer.payee}. Do you hold cryptocurrency?`,
+        options: [
+          { label: 'Yes', value: 'yes' },
+          { label: 'No, I\'ve sold it all', value: 'sold' },
+        ],
+      })
+      steps.push({
+        id: `accounts-crypto-${i}-value`,
+        sectionKey: 'accounts',
+        sectionLabel: 'Accounts',
+        type: 'input',
+        text: 'Roughly, what is your cryptocurrency worth today?',
+        inputPrefix: '£',
+        inputPlaceholder: 'e.g. 5,000',
+        showWhen: { questionId: `accounts-crypto-${i}`, value: 'yes' },
+      })
+    } else if (isInvestment) {
+      // ── Investment platform detected ──
+      steps.push({
+        id: `accounts-investment-${i}`,
+        sectionKey: 'accounts',
+        sectionLabel: 'Accounts',
+        type: 'question',
+        text: `You make payments to ${transfer.payee}. What is this?`,
+        options: [
+          { label: 'Stocks & shares ISA', value: 'isa' },
+          { label: 'General investment account', value: 'investment' },
+          { label: 'Pension (SIPP)', value: 'sipp' },
+          { label: 'I\'ve closed this', value: 'closed' },
+        ],
+      })
+      steps.push({
+        id: `accounts-investment-${i}-value`,
+        sectionKey: 'accounts',
+        sectionLabel: 'Accounts',
+        type: 'input',
+        text: 'Roughly, what is the current value?',
+        inputPrefix: '£',
+        inputPlaceholder: 'e.g. 15,000',
+        showWhen: { questionId: `accounts-investment-${i}`, value: ['isa', 'investment', 'sipp'] },
+      })
+    } else {
+      // ── Unknown transfer ──
+      steps.push({
+        id: `accounts-transfer-${i}`,
+        sectionKey: 'accounts',
+        sectionLabel: 'Accounts',
+        type: 'question',
+        text: `£${transfer.amount}/month to ${transfer.payee}. What is this?`,
+        options: [
+          { label: 'Savings account', value: 'savings' },
+          { label: 'ISA', value: 'isa' },
+          { label: 'Investment account', value: 'investment' },
+          { label: 'Pension contribution', value: 'pension' },
+          { label: 'Transfer to my partner', value: 'partner' },
+          { label: 'Something else', value: 'other' },
+        ],
+      })
+      steps.push({
+        id: `accounts-transfer-${i}-value`,
+        sectionKey: 'accounts',
+        sectionLabel: 'Accounts',
+        type: 'input',
+        text: 'Roughly, what is the balance or value?',
+        inputPrefix: '£',
+        inputPlaceholder: 'e.g. 8,000',
+        showWhen: { questionId: `accounts-transfer-${i}`, value: ['savings', 'isa', 'investment'] },
+      })
+    }
+  }
+
+  // ── Catch-all: any other accounts not detected? ──
+  steps.push({
+    id: 'accounts-other',
     sectionKey: 'accounts',
     sectionLabel: 'Accounts',
-    type: 'confirmation_message',
-    text: 'We have all the account information we need from your bank connection.',
-  }]
+    type: 'question',
+    text: 'Do you have any other savings, ISAs, investments, or premium bonds we haven\'t covered?',
+    options: [
+      { label: 'No, that\'s everything', value: 'none' },
+      { label: 'Yes, savings account(s)', value: 'savings' },
+      { label: 'Yes, ISA(s)', value: 'isa' },
+      { label: 'Yes, investments', value: 'investments' },
+      { label: 'Yes, premium bonds', value: 'premium_bonds' },
+    ],
+  })
+
+  steps.push({
+    id: 'accounts-other-value',
+    sectionKey: 'accounts',
+    sectionLabel: 'Accounts',
+    type: 'input',
+    text: 'Roughly, what is the total value?',
+    inputPrefix: '£',
+    inputPlaceholder: 'e.g. 12,000',
+    showWhen: { questionId: 'accounts-other', value: ['savings', 'isa', 'investments', 'premium_bonds'] },
+  })
+
+  return steps
 }
 
 // ═══ Pensions (spec 22 §4, spec 25 screen 2g) ═══
@@ -595,7 +732,7 @@ export function generateSectionSummary(
   switch (sectionKey) {
     case 'income': return generateIncomeSummary(answers, extractions)
     case 'property': return generatePropertySummary(answers, extractions)
-    case 'accounts': return generateAccountsSummary(extractions)
+    case 'accounts': return generateAccountsSummary(extractions, answers)
     case 'pensions': return generatePensionsSummary(answers)
     case 'debts': return generateDebtsSummary(answers)
   }
@@ -836,15 +973,55 @@ function generatePropertySummary(
   }
 }
 
-function generateAccountsSummary(extractions: BankStatementExtraction[]): SectionSummaryData {
+function generateAccountsSummary(
+  extractions: BankStatementExtraction[],
+  answers: Record<string, string>,
+): SectionSummaryData {
   const facts: SectionSummaryFact[] = []
 
+  // Connected accounts
   for (const ext of extractions) {
+    const jointLabel = ext.is_joint ? ' (joint)' : ''
     facts.push({
-      label: `${ext.provider} ${ext.account_type} account xxxx${ext.account_number_last4 ?? '****'}, balance £${(ext.closing_balance ?? 0).toLocaleString()}`,
+      label: `${ext.provider} ${ext.account_type} account xxxx${ext.account_number_last4 ?? '****'}${jointLabel}, balance £${(ext.closing_balance ?? 0).toLocaleString()}`,
       source: 'bank',
     })
   }
+
+  // Joint account clarification
+  if (answers['accounts-joint'] === 'partner') {
+    facts.push({ label: 'Joint account held with your partner — 50/50 starting position', source: 'self' })
+  }
+
+  // Detected transfers (iterate possible IDs)
+  for (let i = 0; i < 3; i++) {
+    const transferType = answers[`accounts-transfer-${i}`]
+    const investmentType = answers[`accounts-investment-${i}`]
+    const cryptoAnswer = answers[`accounts-crypto-${i}`]
+    const value = answers[`accounts-transfer-${i}-value`] || answers[`accounts-investment-${i}-value`] || answers[`accounts-crypto-${i}-value`]
+    const valueLabel = value ? ` — estimated £${parseInt(value.replace(/,/g, ''), 10).toLocaleString()}` : ''
+
+    if (transferType === 'savings') facts.push({ label: `Savings account disclosed${valueLabel}`, source: 'self', gapMessage: 'For finalisation, we\'ll need a statement for this account.' })
+    else if (transferType === 'isa') facts.push({ label: `ISA disclosed${valueLabel}`, source: 'self', gapMessage: 'For finalisation, we\'ll need a latest ISA statement.' })
+    else if (transferType === 'investment') facts.push({ label: `Investment account disclosed${valueLabel}`, source: 'self', gapMessage: 'For finalisation, we\'ll need a latest valuation statement.' })
+    else if (transferType === 'pension') facts.push({ label: 'Pension contribution identified — added to pensions section', source: 'self' })
+
+    if (investmentType === 'isa') facts.push({ label: `Stocks & shares ISA${valueLabel}`, source: 'self', gapMessage: 'For finalisation, we\'ll need a latest valuation.' })
+    else if (investmentType === 'investment') facts.push({ label: `Investment account${valueLabel}`, source: 'self', gapMessage: 'For finalisation, we\'ll need a latest valuation.' })
+    else if (investmentType === 'sipp') facts.push({ label: `SIPP pension${valueLabel} — added to pensions section`, source: 'self' })
+
+    if (cryptoAnswer === 'yes') facts.push({ label: `Cryptocurrency held${valueLabel}`, source: 'self' })
+  }
+
+  // Other accounts catch-all
+  const otherType = answers['accounts-other']
+  const otherValue = answers['accounts-other-value']
+  const otherLabel = otherValue ? ` — estimated £${parseInt(otherValue.replace(/,/g, ''), 10).toLocaleString()}` : ''
+
+  if (otherType === 'savings') facts.push({ label: `Additional savings account${otherLabel}`, source: 'self' })
+  else if (otherType === 'isa') facts.push({ label: `Additional ISA${otherLabel}`, source: 'self' })
+  else if (otherType === 'investments') facts.push({ label: `Additional investments${otherLabel}`, source: 'self' })
+  else if (otherType === 'premium_bonds') facts.push({ label: `Premium bonds${otherLabel}`, source: 'self' })
 
   return {
     sectionKey: 'accounts',
