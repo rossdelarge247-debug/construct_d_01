@@ -22,7 +22,7 @@ export interface DetectedPayment {
   amount: number
   frequency: 'monthly' | 'weekly' | 'quarterly' | 'annual' | 'one_off'
   confidence: number
-  likely_category: 'mortgage' | 'rent' | 'insurance' | 'pension_contribution' | 'childcare' | 'loan_repayment' | 'child_maintenance' | 'utilities' | 'council_tax' | 'subscription' | 'unknown'
+  likely_category: 'mortgage' | 'rent' | 'insurance' | 'pension_contribution' | 'childcare' | 'loan_repayment' | 'child_maintenance' | 'utilities' | 'council_tax' | 'subscription' | 'credit_card' | 'investment' | 'gambling' | 'groceries' | 'dining' | 'fuel' | 'transport' | 'education' | 'healthcare' | 'unknown'
 }
 
 export interface SpendingCategory {
@@ -92,7 +92,7 @@ export const BANK_STATEMENT_SCHEMA = {
           amount: { type: 'number' as const },
           frequency: { type: 'string' as const, enum: ['monthly', 'weekly', 'quarterly', 'annual', 'one_off'] },
           confidence: { type: 'number' as const },
-          likely_category: { type: 'string' as const, enum: ['mortgage', 'rent', 'insurance', 'pension_contribution', 'childcare', 'loan_repayment', 'child_maintenance', 'utilities', 'council_tax', 'subscription', 'unknown'] },
+          likely_category: { type: 'string' as const, enum: ['mortgage', 'rent', 'insurance', 'pension_contribution', 'childcare', 'loan_repayment', 'child_maintenance', 'utilities', 'council_tax', 'subscription', 'credit_card', 'investment', 'gambling', 'groceries', 'dining', 'fuel', 'transport', 'education', 'healthcare', 'unknown'] },
         },
         required: ['payee', 'amount', 'frequency', 'confidence', 'likely_category'],
       },

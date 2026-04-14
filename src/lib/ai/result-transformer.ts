@@ -695,6 +695,54 @@ function generatePaymentQuestion(payment: { payee: string; amount: number; frequ
         formEField: '3.1',
       }
 
+    case 'credit_card':
+      return {
+        questionText: `${amt}/month to ${payment.payee}. Is this a credit card payment?`,
+        reasoning: null,
+        options: [
+          { label: 'Yes, credit card', value: 'credit_card' },
+          { label: 'Something else', value: 'other' },
+        ],
+        primaryOption: 'Yes, credit card', secondaryLabel: 'Something else',
+        formEField: '2.14',
+      }
+
+    case 'investment':
+      return {
+        questionText: `${amt}/month to ${payment.payee}. Do you have investments or savings here?`,
+        reasoning: null,
+        options: [
+          { label: 'Yes, investments', value: 'investment' },
+          { label: 'Cryptocurrency', value: 'crypto' },
+          { label: 'Closed / no longer active', value: 'closed' },
+          { label: 'Something else', value: 'other' },
+        ],
+        primaryOption: null, secondaryLabel: 'Something else',
+        formEField: '2.4',
+      }
+
+    case 'gambling':
+      // Red flag per spec 22 §10 — flagged internally, but confirm with user
+      return {
+        questionText: `${amt} to ${payment.payee}. Is this a gambling transaction?`,
+        reasoning: null,
+        options: [
+          { label: 'Yes', value: 'gambling' },
+          { label: 'Something else', value: 'other' },
+        ],
+        primaryOption: 'Yes', secondaryLabel: 'Something else',
+        formEField: 'flag',
+      }
+
+    // Spending categories — auto-confirm at high confidence, question only at low
+    case 'groceries':
+    case 'dining':
+    case 'fuel':
+    case 'transport':
+    case 'healthcare':
+    case 'education':
+      return null  // Spending categories auto-confirm; no question needed
+
     default:
       // Truly unhandled category — should not happen but don't silently drop
       return {

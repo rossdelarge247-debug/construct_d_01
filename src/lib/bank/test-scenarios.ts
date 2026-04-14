@@ -215,13 +215,14 @@ function createSarahScenario(): TestScenario {
     ],
     expectedPayments: [
       { payeeSubstring: 'halifax', expectedCategory: 'mortgage', minAmount: 1100, maxAmount: 1200 },
-      { payeeSubstring: 'exeter', expectedCategory: 'council_tax', minAmount: 170, maxAmount: 200 },
+      { payeeSubstring: 'council tax', expectedCategory: 'council_tax', minAmount: 170, maxAmount: 200 },
       { payeeSubstring: 'british gas', expectedCategory: 'utilities', minAmount: 100, maxAmount: 140 },
       { payeeSubstring: 'sw water', expectedCategory: 'utilities', minAmount: 40, maxAmount: 55 },
       { payeeSubstring: 'aviva', expectedCategory: 'pension_contribution', minAmount: 190, maxAmount: 210 },
       { payeeSubstring: 'admiral', expectedCategory: 'insurance', minAmount: 38, maxAmount: 46 },
       { payeeSubstring: 'nursery', expectedCategory: 'childcare', minAmount: 580, maxAmount: 620 },
       { payeeSubstring: 'vodafone', expectedCategory: 'subscription', minAmount: 30, maxAmount: 40 },
+      { payeeSubstring: 'hl savings', expectedCategory: 'investment', minAmount: 280, maxAmount: 320 },
     ],
     expectedQuestions: [
       { sectionKey: 'income', idSubstring: 'income-salary', shouldFire: true },
@@ -310,9 +311,10 @@ function createMarcusScenario(): TestScenario {
     ],
     expectedPayments: [
       { payeeSubstring: 'foxtons', expectedCategory: 'rent', minAmount: 1600, maxAmount: 1700 },
-      { payeeSubstring: 'camden', expectedCategory: 'council_tax', minAmount: 200, maxAmount: 220 },
+      { payeeSubstring: 'council tax', expectedCategory: 'council_tax', minAmount: 200, maxAmount: 220 },
       { payeeSubstring: 'edf', expectedCategory: 'utilities', minAmount: 80, maxAmount: 110 },
-      { payeeSubstring: 'coinbase', expectedCategory: 'unknown', minAmount: 180, maxAmount: 220 },
+      { payeeSubstring: 'coinbase', expectedCategory: 'investment', minAmount: 180, maxAmount: 220 },
+      { payeeSubstring: 'hmrc ndds', expectedCategory: 'unknown', minAmount: 1800, maxAmount: 2800 },
     ],
     expectedQuestions: [
       { sectionKey: 'income', idSubstring: 'income-none', shouldFire: false }, // income IS visible, just not employment
@@ -407,7 +409,9 @@ function createJeanScenario(): TestScenario {
       { payeeSubstring: 'devon', expectedCategory: 'council_tax', minAmount: 200, maxAmount: 220 },
       { payeeSubstring: 'south west water', expectedCategory: 'utilities', minAmount: 48, maxAmount: 56 },
       { payeeSubstring: 'british gas', expectedCategory: 'utilities', minAmount: 110, maxAmount: 160 },
-      { payeeSubstring: 'legal', expectedCategory: 'insurance', minAmount: 60, maxAmount: 70 },
+      { payeeSubstring: 'legal and general', expectedCategory: 'insurance', minAmount: 60, maxAmount: 70 },
+      { payeeSubstring: 'hl isa', expectedCategory: 'investment', minAmount: 480, maxAmount: 520 },
+      { payeeSubstring: 'bt group', expectedCategory: 'subscription', minAmount: 38, maxAmount: 46 },
     ],
     expectedQuestions: [
       { sectionKey: 'income', idSubstring: 'income-none', shouldFire: false }, // pension income IS visible
@@ -499,12 +503,13 @@ function createAishaScenario(): TestScenario {
       { sourceSubstring: 'hmrc', expectedType: 'benefits', minAmount: 150, maxAmount: 190 },
     ],
     expectedPayments: [
-      { payeeSubstring: 'l&q', expectedCategory: 'mortgage', minAmount: 800, maxAmount: 850 },
+      { payeeSubstring: 'l&q', expectedCategory: 'unknown', minAmount: 800, maxAmount: 850 },
       { payeeSubstring: 'newham', expectedCategory: 'council_tax', minAmount: 135, maxAmount: 155 },
       { payeeSubstring: 'octopus', expectedCategory: 'utilities', minAmount: 95, maxAmount: 125 },
       { payeeSubstring: 'thames', expectedCategory: 'utilities', minAmount: 35, maxAmount: 42 },
-      { payeeSubstring: 'barclaycard', expectedCategory: 'loan_repayment', minAmount: 80, maxAmount: 90 },
+      { payeeSubstring: 'barclaycard', expectedCategory: 'credit_card', minAmount: 80, maxAmount: 90 },
       { payeeSubstring: 'klarna', expectedCategory: 'loan_repayment', minAmount: 40, maxAmount: 50 },
+      { payeeSubstring: 'childm', expectedCategory: 'childcare', minAmount: 430, maxAmount: 470 },
     ],
     expectedQuestions: [
       { sectionKey: 'income', idSubstring: 'income-salary', shouldFire: true },
@@ -607,6 +612,9 @@ function createDavidScenario(): TestScenario {
       { payeeSubstring: 'santander', expectedCategory: 'mortgage', minAmount: 2050, maxAmount: 2150 },
       { payeeSubstring: 'rbkc', expectedCategory: 'council_tax', minAmount: 370, maxAmount: 390 },
       { payeeSubstring: 'bmw', expectedCategory: 'loan_repayment', minAmount: 470, maxAmount: 500 },
+      { payeeSubstring: 'hargreaves', expectedCategory: 'investment', minAmount: 950, maxAmount: 1050 },
+      { payeeSubstring: 'bet365', expectedCategory: 'gambling', minAmount: 30, maxAmount: 200 },
+      { payeeSubstring: 'paddy power', expectedCategory: 'gambling', minAmount: 20, maxAmount: 100 },
     ],
     expectedQuestions: [
       { sectionKey: 'income', idSubstring: 'income-salary', shouldFire: true },

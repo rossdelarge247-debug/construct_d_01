@@ -228,12 +228,13 @@ const CATEGORY_KEYWORDS: Record<DetectedPayment['likely_category'], string[]> = 
   ],
   rent: [
     'rent', 'letting', 'lettings', 'openrent', 'estate agent',
-    'property management', 'housing assoc', 'l&q', 'peabody',
-    'housing trust', 'notting hill', 'clarion',
+    'property management',
+    // Housing associations omitted — ambiguous (rent vs shared ownership mortgage).
+    // Falls to 'unknown' and triggers mortgage/rent disambiguation question.
   ],
   insurance: [
     'insurance', 'admiral', 'direct line', 'axa', 'lv=', 'lv ',
-    'zurich', 'vitality', 'bupa', 'hastings', 'more than',
+    'zurich', 'vitality', 'bupa', 'hastings', 'more than', 'legal and general', 'legal & general',
     'esure', 'churchill', 'privilege', 'swiftcover',
     'rac', 'aa insurance', 'nfu mutual',
   ],
@@ -244,7 +245,7 @@ const CATEGORY_KEYWORDS: Record<DetectedPayment['likely_category'], string[]> = 
   ],
   childcare: [
     'childcare', 'nursery', 'nurseries', 'after school', 'breakfast club',
-    'holiday club', 'childminder', 'nanny', 'kids club',
+    'holiday club', 'childminder', 'childm', 'nanny', 'kids club',
     'bright horizons', 'busy bees',
   ],
   loan_repayment: [
@@ -252,7 +253,7 @@ const CATEGORY_KEYWORDS: Record<DetectedPayment['likely_category'], string[]> = 
     'hitachi', 'creation', 'ikano', 'novuna', 'shawbrook',
     'bamboo', 'oakbrook', 'everyday loans',
     // Car finance
-    'bmw finance', 'volkswagen finance', 'pcp', 'black horse',
+    'bmw financ', 'volkswagen financ', 'pcp', 'black horse',
     'moneybarn', 'startline', 'blue motor',
     // Student loans
     'student loan', 'slc',
@@ -278,9 +279,57 @@ const CATEGORY_KEYWORDS: Record<DetectedPayment['likely_category'], string[]> = 
     'netflix', 'spotify', 'amazon prime', 'disney', 'now tv',
     'apple', 'google', 'youtube', 'audible', 'tidal',
     // Broadband / TV / mobile
-    'sky', 'bt broadband', 'virgin media', 'talktalk', 'plusnet',
-    'vodafone', 'ee mobile', 'o2', 'three', 'giffgaff',
+    'sky', 'bt broadband', 'bt group', 'virgin media', 'talktalk', 'plusnet',
+    'vodafone', 'ee limited', 'ee mobile', 'o2', 'three', 'giffgaff',
     'sky mobile', 'id mobile', 'tesco mobile', 'voxi',
+    // Gym / leisure (subscription in Form E terms)
+    'david lloyd', 'puregym', 'the gym', 'nuffield', 'virgin active',
+    'anytime fitness', 'jd gyms', 'bannatyne',
+  ],
+  credit_card: [
+    'barclaycard', 'amex', 'american express', 'mbna', 'capital one',
+    'vanquis', 'aqua', 'marbles', 'newday', 'tesco bank card',
+    'sainsburys bank card', 'virgin money card',
+  ],
+  investment: [
+    'hargreaves lansdown', 'vanguard', 'aj bell', 'interactive investor',
+    'fidelity', 'nutmeg', 'wealthify', 'moneybox', 'freetrade',
+    'trading 212', 'etoro', 'hl isa', 'hl savings',
+    // Crypto exchanges
+    'coinbase', 'binance', 'kraken', 'crypto.com', 'gemini', 'bitstamp',
+  ],
+  gambling: [
+    'bet365', 'paddy power', 'william hill', 'betfair', 'ladbrokes',
+    'coral', 'sky bet', 'betfred', 'tombola', 'lottoland',
+    'national lottery', 'camelot', 'gala bingo', 'unibet', 'fanduel',
+  ],
+  groceries: [
+    'tesco', 'sainsbury', 'asda', 'morrisons', 'aldi', 'lidl',
+    'waitrose', 'co-op', 'coop', 'co op', 'marks spencer', 'm&s ',
+    'iceland', 'ocado', 'farmfoods', 'heron foods',
+  ],
+  dining: [
+    'mcdonalds', 'mcdonald', 'kfc', 'burger king', 'pizza hut', 'dominos',
+    'nandos', 'greggs', 'costa coffee', 'starbucks', 'pret a manger',
+    'wetherspoon', 'deliveroo', 'uber eats', 'just eat',
+    'dishoom', 'hakkasan', 'wagamama', 'the ivy', 'zizzi', 'prezzo',
+    'franco manca', 'wahaca', 'tortilla', 'leon ', 'itsu',
+  ],
+  fuel: [
+    'shell', 'bp ', 'esso', 'texaco', 'jet ', 'total energies',
+    'gulf', 'murco', 'applegreen',
+  ],
+  transport: [
+    'tfl', 'transport for london', 'oyster', 'trainline', 'national rail',
+    'northern rail', 'gwr', 'avanti', 'lner', 'scotrail',
+  ],
+  education: [
+    'school', 'academy', 'college', 'university', 'tuition',
+  ],
+  healthcare: [
+    'pharmacy', 'chemist', 'boots pharmacy', 'lloyds pharmacy',
+    'dentist', 'dental', 'mydentist', 'orthodont',
+    'optician', 'specsavers',
   ],
   unknown: [],
 }
