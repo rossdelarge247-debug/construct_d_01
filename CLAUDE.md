@@ -54,7 +54,7 @@ When the session is ending (user says wrap up, or you hit ~2,000 lines), do thes
 
 ## Branch
 
-Development branch: `claude/decouple-v2-financial-disclosure-8BLB4` (session 12 — decision tree fidelity + Tink fix)
+Development branch: `claude/decouple-v2-financial-disclosure-Xr4V4` (session 13 — spending flow)
 
 ## Deployment
 
@@ -66,7 +66,7 @@ Tink Console must whitelist `https://construct-dev.vercel.app/api/bank/callback`
 
 ```
 docs/SESSION-CONTEXT.md                    — START HERE every session
-docs/HANDOFF-SESSION-12.md                 — Most recent session retro
+docs/HANDOFF-SESSION-13.md                 — Most recent session retro
 docs/workspace-spec/27-visual-direction-session11.md — Visual direction (Airbnb/Emma/Habito)
 docs/workspace-spec/24-wireframe-spec-part1.md — Wireframes: carousel, task list, bank connection, reveal
 docs/workspace-spec/25-wireframe-spec-part2.md — Wireframes: confirmation flow, summaries, financial hub
@@ -79,8 +79,13 @@ src/components/workspace/bank-connection-flow.tsx — Bank connection + TinkModa
 src/components/workspace/confirmation-flow.tsx  — Confirmation Q&A (screens 2b-2i)
 src/components/workspace/section-mini-summary.tsx — Per-section summaries (screens 2d-a/b/c)
 src/components/workspace/progress-stepper.tsx   — Progress bar
-src/components/workspace/financial-summary-page.tsx — Financial summary with source badges (screen 3a)
-src/lib/bank/bank-data-utils.ts               — Extraction → UI types + demo factory
+src/components/workspace/spending-fork.tsx      — S1a: now vs estimates fork
+src/components/workspace/spending-estimates.tsx — S1b/S1c-1: estimates form + summary
+src/components/workspace/spending-search.tsx    — S2d: transaction search with typeahead
+src/components/workspace/spending-categorise.tsx — S2a-S2f: per-category confirmation loop
+src/components/workspace/spending-flow.tsx      — Thin orchestrator + S1c-2 full summary
+src/components/workspace/financial-summary-page.tsx — Financial summary with spending card (screen 3a)
+src/lib/bank/bank-data-utils.ts               — Extraction → UI types + demo factory + transaction search
 src/lib/bank/confirmation-questions.ts         — Spec 22 question + summary generation
 src/app/workspace/page.tsx                     — Flow state machine orchestrator
 src/app/api/bank/connect/route.ts              — Tink Link auth + URL generation
