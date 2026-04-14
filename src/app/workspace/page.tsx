@@ -127,6 +127,12 @@ export default function WorkspacePage() {
         {/* Spending upgrade (re-entry from estimates → full bank data) */}
         {view === 'spending_upgrade' && (
           <div className="max-w-[var(--content-narrow)] mx-auto">
+            <button
+              onClick={() => setView('financial_summary')}
+              className="text-[13px] font-medium text-blue-600 hover:underline mb-6 inline-block"
+            >
+              &larr; Back to financial summary
+            </button>
             <div
               className="bg-white overflow-hidden p-6"
               style={{
@@ -141,7 +147,7 @@ export default function WorkspacePage() {
                   e.income_deposits.some((d) => d.type === 'benefits' && d.source.toLowerCase().includes('child')),
                 )}
                 onComplete={handleSpendingUpgradeComplete}
-                onSkip={() => setView('task_list')}
+                onSkip={() => setView('financial_summary')}
                 startInCategorise
               />
             </div>
