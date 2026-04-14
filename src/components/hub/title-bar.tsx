@@ -73,7 +73,7 @@ export function TitleBar({}: TitleBarProps) {
           Decouple
         </span>
 
-        {/* Right — bell + cog placeholders */}
+        {/* Right — bell + cog + logout */}
         <div className="flex items-center gap-1">
           <button
             className="p-2 text-ink-tertiary hover:text-ink hover:bg-grey-50 rounded-[var(--radius-md)] transition-colors"
@@ -86,6 +86,13 @@ export function TitleBar({}: TitleBarProps) {
             aria-label="Settings"
           >
             <Settings size={18} />
+          </button>
+          <button
+            className="p-2 text-ink-tertiary hover:text-ink hover:bg-grey-50 rounded-[var(--radius-md)] transition-colors"
+            aria-label="Log out"
+            onClick={() => {/* Auth stub — wired up when Supabase is integrated */}}
+          >
+            <LogOut size={18} />
           </button>
         </div>
       </div>
