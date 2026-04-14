@@ -10,6 +10,7 @@ import { FinancialSummaryPage } from '@/components/workspace/financial-summary-p
 import type { BankConnectionPhase, ConnectedAccount, SectionConfirmation, SpendingFlowResult, WorkspaceView } from '@/types/hub'
 import type { BankStatementExtraction } from '@/lib/ai/extraction-schemas'
 import { SpendingFlow } from '@/components/workspace/spending-flow'
+import { MegaFooter } from '@/components/workspace/mega-footer'
 
 // ═══ Session persistence ═══
 // Bridge until Supabase (#65). Saves workspace progress to sessionStorage
@@ -244,6 +245,8 @@ export default function WorkspacePage() {
           />
         )}
       </main>
+
+      <MegaFooter />
     </div>
   )
 }
