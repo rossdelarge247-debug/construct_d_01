@@ -1,9 +1,7 @@
 'use client'
 
-import type { ConfirmationSectionKey } from '@/lib/bank/confirmation-questions'
-
 interface ProgressStepperProps {
-  sections: ConfirmationSectionKey[]
+  sections: string[]
   currentIndex: number
   completedCount: number
 }

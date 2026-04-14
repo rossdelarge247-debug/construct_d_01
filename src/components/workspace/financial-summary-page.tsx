@@ -2,14 +2,26 @@
 
 import type { ReactNode } from 'react'
 import { Check, Plus } from 'lucide-react'
+import { Home, Zap, ShoppingBag, Car, Users, Sparkles, AlertTriangle } from 'lucide-react'
 import type { BankStatementExtraction } from '@/lib/ai/extraction-schemas'
-import type { ConnectedAccount, SectionConfirmation } from '@/types/hub'
+import type { ConnectedAccount, SectionConfirmation, SpendingFlowResult, SpendingSubCategory } from '@/types/hub'
+import { SPENDING_CATEGORIES } from '@/types/hub'
 
 interface FinancialSummaryPageProps {
   extractions: BankStatementExtraction[]
   connectedAccounts: ConnectedAccount[]
   confirmations: SectionConfirmation[]
+  spendingResult?: SpendingFlowResult | null
   onBack: () => void
+}
+
+const SPENDING_ICONS: Record<SpendingSubCategory, typeof Home> = {
+  housing: Home,
+  utilities: Zap,
+  personal: ShoppingBag,
+  transport: Car,
+  children: Users,
+  leisure: Sparkles,
 }
 
 type BadgeVariant = 'bank' | 'self'
@@ -46,6 +58,7 @@ export function FinancialSummaryPage({
   extractions,
   connectedAccounts,
   confirmations,
+  spendingResult,
   onBack,
 }: FinancialSummaryPageProps) {
   const bankName = connectedAccounts[0]?.bankName ?? 'Bank'
@@ -159,13 +172,12 @@ export function FinancialSummaryPage({
         <AddButton label="Declare further property" />
       </SectionCard>
 
-      {/* ═══ Spending card (TBC) ═══ */}
-      <SectionCard title="Spending" delay={300}>
-        <div className="py-6 text-center">
-          <p className="text-[13px] text-ink-tertiary">Panel design pending</p>
-        </div>
-        <AddButton label="Add spending details" />
-      </SectionCard>
+      {/* ═══ Spending card ═══ */}
+      <SpendingCard
+        spendingResult={spendingResult}
+        bankName={bankName}
+        delay={300}
+      />
 
       {/* ═══ Debts card (TBC) ═══ */}
       <SectionCard title="Debts" delay={400}>
@@ -249,6 +261,97 @@ function EmptySection({ label, delay }: { label: string; delay: number }) {
         <Plus size={16} />
       </button>
     </div>
+  )
+}
+
+function SpendingCard({
+  spendingResult,
+  bankName,
+  delay,
+}: {
+  spendingResult?: SpendingFlowResult | null
+  bankName: string
+  delay: number
+}) {
+  if (!spendingResult) {
+    return (
+      <SectionCard title="Spending" delay={delay}>
+        <div className="py-6 text-center">
+          <p className="text-[13px] text-ink-tertiary">No spending disclosed</p>
+        </div>
+        <AddButton label="Add spending details" />
+      </SectionCard>
+    )
+  }
+
+  const isEstimated = spendingResult.mode === 'estimates'
+
+  return (
+    <SectionCard title="Spending" delay={delay}>
+      {/* Amber nudge for estimates */}
+      {isEstimated && (
+        <div
+          className="flex items-start gap-3 px-4 py-3 mb-3 -mx-2"
+          style={{
+            backgroundColor: 'var(--color-amber-50)',
+            borderRadius: '8px',
+          }}
+        >
+          <AlertTriangle size={16} className="text-amber-600 shrink-0 mt-0.5" />
+          <p className="text-[12px] text-ink-secondary leading-relaxed">
+            Complete your spending disclosure based on your real banking transaction data now
+          </p>
+        </div>
+      )}
+
+      {!isEstimated && (
+        <div className="flex justify-end mb-1">
+          <button className="text-[13px] text-blue-600 hover:opacity-80">Edit all</button>
+        </div>
+      )}
+
+      {spendingResult.categories.map((cat) => {
+        const def = SPENDING_CATEGORIES.find((c) => c.key === cat.key)
+        const Icon = SPENDING_ICONS[cat.key] ?? Home
+        return (
+          <div key={cat.key} className="flex items-center gap-3 py-2">
+            <Icon size={16} className="text-ink-secondary shrink-0" />
+            <span className="text-[15px] text-ink flex-1">
+              {def?.label ?? cat.key}: £{cat.totalMonthly.toLocaleString()} p/m
+            </span>
+            <span
+              className="text-[11px] font-medium px-2.5 py-1 rounded-full whitespace-nowrap"
+              style={{
+                backgroundColor: isEstimated ? 'var(--color-amber-50)' : 'var(--color-green-50)',
+                color: isEstimated ? 'var(--color-amber-600)' : 'var(--color-green-600)',
+              }}
+            >
+              {isEstimated ? 'Estimated' : `${bankName} Bank connection`}
+            </span>
+            {!isEstimated && (
+              <button className="text-[13px] text-blue-600 hover:opacity-80 shrink-0">Edit</button>
+            )}
+          </div>
+        )
+      })}
+
+      {isEstimated && (
+        <div className="mt-3">
+          <button
+            className="px-6 py-3 text-white text-[13px] font-semibold transition-colors active:scale-[0.98]"
+            style={{
+              backgroundColor: 'var(--color-red-500)',
+              borderRadius: 'var(--radius-card)',
+            }}
+          >
+            Complete your spending disclosure
+          </button>
+          <p className="text-[11px] text-ink-tertiary mt-2">
+            (You won&apos;t be able to finalise until this is done)
+          </p>
+        </div>
+      )}
+    </SectionCard>
   )
 }
 

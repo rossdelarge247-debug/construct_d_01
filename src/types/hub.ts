@@ -174,6 +174,89 @@ export interface FinancialItem {
   updatedAt: string
 }
 
+// ═══ Spending flow types ═══
+
+export type SpendingSubCategory =
+  | 'housing'
+  | 'utilities'
+  | 'personal'
+  | 'transport'
+  | 'children'
+  | 'leisure'
+
+export interface SpendingSubCategoryDef {
+  key: SpendingSubCategory
+  label: string
+  formERef: string
+  /** Sub-sub-categories for the "Other costs" dropdown */
+  otherOptions: string[]
+}
+
+export const SPENDING_CATEGORIES: SpendingSubCategoryDef[] = [
+  {
+    key: 'housing',
+    label: 'Housing',
+    formERef: '3.1(a)',
+    otherOptions: ['Ground rent', 'Service charges', 'Buildings insurance', 'Contents insurance', 'Repairs & maintenance', 'Other housing costs'],
+  },
+  {
+    key: 'utilities',
+    label: 'Household utilities & maintenance',
+    formERef: '3.1(b)',
+    otherOptions: ['Water rates', 'TV licence', 'Landline', 'Window cleaning', 'Garden maintenance', 'Other utility costs'],
+  },
+  {
+    key: 'personal',
+    label: 'Personal & living expenses',
+    formERef: '3.1(c)',
+    otherOptions: ['Toiletries', 'Hairdressing', 'Clothing', 'Medical & dental', 'Prescriptions', 'Dry cleaning', 'Other personal costs'],
+  },
+  {
+    key: 'transport',
+    label: 'Transportation costs',
+    formERef: '3.1(d)',
+    otherOptions: ['Car insurance', 'MOT & servicing', 'Road tax', 'Parking', 'Public transport', 'Congestion charges', 'Other transport costs'],
+  },
+  {
+    key: 'children',
+    label: 'Child expenses',
+    formERef: '3.1(e)',
+    otherOptions: ['School fees', 'School meals & uniform', 'Activities & clubs', 'Pocket money', 'Tutoring', 'Other child costs'],
+  },
+  {
+    key: 'leisure',
+    label: 'Leisure & other expenditure',
+    formERef: '3.1(f)',
+    otherOptions: ['Holidays', 'Eating out', 'Hobbies', 'Gifts', 'Pets', 'Charitable donations', 'Other leisure costs'],
+  },
+]
+
+export type SpendingMode = 'estimates' | 'bank_data'
+
+export interface SpendingItem {
+  id: string
+  subCategory: SpendingSubCategory
+  label: string
+  amount: number
+  frequency: 'monthly' | 'quarterly' | 'annual' | 'one_off'
+  monthlyEquivalent: number
+  source: 'bank' | 'manual' | 'search'
+  transactionIds?: string[]
+}
+
+export interface SpendingCategoryResult {
+  key: SpendingSubCategory
+  items: SpendingItem[]
+  totalMonthly: number
+  confirmed: boolean
+}
+
+export interface SpendingFlowResult {
+  mode: SpendingMode
+  categories: SpendingCategoryResult[]
+  totalMonthly: number
+}
+
 // ═══ Evidence lozenges ═══
 
 export type EvidenceType =

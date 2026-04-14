@@ -7,7 +7,7 @@ import { TaskListHome } from '@/components/workspace/task-list-home'
 import { BankConnectionFlow } from '@/components/workspace/bank-connection-flow'
 import { ConfirmationFlow } from '@/components/workspace/confirmation-flow'
 import { FinancialSummaryPage } from '@/components/workspace/financial-summary-page'
-import type { WorkspaceView, BankConnectionPhase, ConnectedAccount, SectionConfirmation } from '@/types/hub'
+import type { WorkspaceView, BankConnectionPhase, ConnectedAccount, SectionConfirmation, SpendingFlowResult } from '@/types/hub'
 import type { BankStatementExtraction } from '@/lib/ai/extraction-schemas'
 
 export default function WorkspacePage() {
@@ -18,6 +18,7 @@ export default function WorkspacePage() {
   const [bankExtractions, setBankExtractions] = useState<BankStatementExtraction[]>([])
   const [confirmationComplete, setConfirmationComplete] = useState(false)
   const [confirmations, setConfirmations] = useState<SectionConfirmation[]>([])
+  const [spendingResult, setSpendingResult] = useState<SpendingFlowResult | null>(null)
 
   // ═══ Navigation callbacks ═══
 
@@ -51,8 +52,9 @@ export default function WorkspacePage() {
   }, [])
 
   const handleConfirmationComplete = useCallback(
-    (sectionConfirmations: SectionConfirmation[]) => {
+    (sectionConfirmations: SectionConfirmation[], spending?: SpendingFlowResult) => {
       setConfirmations(sectionConfirmations)
+      if (spending) setSpendingResult(spending)
       setConfirmationComplete(true)
       setView('financial_summary')
     },
@@ -116,6 +118,7 @@ export default function WorkspacePage() {
             extractions={bankExtractions}
             connectedAccounts={connectedAccounts}
             confirmations={confirmations}
+            spendingResult={spendingResult}
             onBack={() => setView('task_list')}
           />
         )}

@@ -3,7 +3,7 @@
 import { useState, useCallback, useMemo } from 'react'
 import { Check, ChevronDown, ChevronUp, Lock } from 'lucide-react'
 import type { BankStatementExtraction } from '@/lib/ai/extraction-schemas'
-import type { ConnectedAccount, SectionConfirmation } from '@/types/hub'
+import type { ConnectedAccount, SectionConfirmation, SpendingFlowResult } from '@/types/hub'
 import {
   CONFIRMATION_SECTIONS,
   generateSectionSteps,
@@ -13,14 +13,15 @@ import {
 } from '@/lib/bank/confirmation-questions'
 import { ProgressStepper } from './progress-stepper'
 import { SectionMiniSummary } from './section-mini-summary'
+import { SpendingFlow } from './spending-flow'
 
 interface ConfirmationFlowProps {
   extractions: BankStatementExtraction[]
   connectedAccounts: ConnectedAccount[]
-  onComplete: (confirmations: SectionConfirmation[]) => void
+  onComplete: (confirmations: SectionConfirmation[], spendingResult?: SpendingFlowResult) => void
 }
 
-type FlowPhase = 'question' | 'mini_summary' | 'transitioning' | 'final_summary'
+type FlowPhase = 'question' | 'mini_summary' | 'transitioning' | 'spending' | 'final_summary'
 
 export function ConfirmationFlow({
   extractions,
@@ -128,11 +129,14 @@ export function ConfirmationFlow({
     setInputValue('')
   }, [currentStep, stepIndex, allSteps, answers, handleSectionQuestionsComplete])
 
+  const [spendingResult, setSpendingResult] = useState<SpendingFlowResult | null>(null)
+
   const handleSectionConfirm = useCallback(() => {
     const nextSection = sectionIndex + 1
     if (nextSection >= CONFIRMATION_SECTIONS.length) {
-      setPhase('final_summary')
-      setAccordionOpen(true)
+      // After last confirmation section (debts), go to spending
+      setPhase('spending')
+      setAccordionOpen(false)
     } else {
       setPhase('transitioning')
       setAccordionOpen(false)
@@ -144,6 +148,31 @@ export function ConfirmationFlow({
     }
   }, [sectionIndex])
 
+  const handleSpendingComplete = useCallback((result: SpendingFlowResult) => {
+    setSpendingResult(result)
+    const spendingLabel = result.mode === 'estimates'
+      ? 'Spending estimates disclosed, ready for starter conversations (complete full disclosure asap)'
+      : 'Spending fully disclosed'
+    setCompletedSections((prev: SectionSummaryData[]) => [...prev, {
+      sectionKey: 'spending' as SectionSummaryData['sectionKey'],
+      sectionLabel: 'Spending',
+      heading: 'Spending disclosed',
+      accordionLabel: spendingLabel,
+      facts: result.categories.map((c) => ({
+        label: `${c.key}: £${c.totalMonthly}/month`,
+        value: `£${c.totalMonthly}`,
+        source: result.mode === 'bank_data' ? 'bank' as const : 'self' as const,
+      })),
+    }])
+    setPhase('final_summary')
+    setAccordionOpen(true)
+  }, [])
+
+  const handleSpendingSkip = useCallback(() => {
+    setPhase('final_summary')
+    setAccordionOpen(true)
+  }, [])
+
   const handleGoBack = useCallback(() => {
     setStepIndex(0)
     setPhase('question')
@@ -151,15 +180,35 @@ export function ConfirmationFlow({
   }, [])
 
   const handleFinish = useCallback(() => {
-    const confirmations: SectionConfirmation[] = completedSections.map((s: SectionSummaryData) => ({
-      sectionKey: s.sectionKey,
-      status: 'confirmed' as const,
-      answers,
-      confirmedFacts: s.facts.map((f: SectionSummaryData['facts'][0]) => f.label),
-      gapMessages: s.facts.filter((f: SectionSummaryData['facts'][0]) => f.gapMessage).map((f: SectionSummaryData['facts'][0]) => f.gapMessage!),
-    }))
-    onComplete(confirmations)
-  }, [completedSections, answers, onComplete])
+    const confirmations: SectionConfirmation[] = completedSections
+      .filter((s: SectionSummaryData) => (s.sectionKey as string) !== 'spending')
+      .map((s: SectionSummaryData) => ({
+        sectionKey: s.sectionKey,
+        status: 'confirmed' as const,
+        answers,
+        confirmedFacts: s.facts.map((f: SectionSummaryData['facts'][0]) => f.label),
+        gapMessages: s.facts.filter((f: SectionSummaryData['facts'][0]) => f.gapMessage).map((f: SectionSummaryData['facts'][0]) => f.gapMessage!),
+      }))
+
+    // Add spending as a confirmation if completed
+    if (spendingResult) {
+      confirmations.push({
+        sectionKey: 'spending',
+        status: 'confirmed',
+        answers: {
+          ...answers,
+          'spending-mode': spendingResult.mode,
+          'spending-total': String(spendingResult.totalMonthly),
+        },
+        confirmedFacts: spendingResult.categories.map((c: SpendingFlowResult['categories'][0]) => `${c.key}: £${c.totalMonthly}/month`),
+        gapMessages: spendingResult.mode === 'estimates'
+          ? ['Complete full spending disclosure from bank data']
+          : [],
+      })
+    }
+
+    onComplete(confirmations, spendingResult ?? undefined)
+  }, [completedSections, answers, spendingResult, onComplete])
 
   const canAdvance = currentStep?.type === 'confirmation_message'
     || (currentStep?.type === 'question' && selectedOption !== null)
@@ -235,11 +284,11 @@ export function ConfirmationFlow({
           </div>
         </div>
 
-        {/* Progress stepper */}
+        {/* Progress stepper — 5 confirmation sections + spending */}
         <div className="px-6 pt-5">
           <ProgressStepper
-            sections={CONFIRMATION_SECTIONS}
-            currentIndex={sectionIndex}
+            sections={[...CONFIRMATION_SECTIONS, 'spending'] as string[]}
+            currentIndex={phase === 'spending' ? CONFIRMATION_SECTIONS.length : sectionIndex}
             completedCount={completedSections.length}
           />
         </div>
@@ -266,6 +315,18 @@ export function ConfirmationFlow({
               data={generateSectionSummary(currentSectionKey, answers, extractions)}
               onConfirm={handleSectionConfirm}
               onGoBack={handleGoBack}
+            />
+          )}
+
+          {phase === 'spending' && (
+            <SpendingFlow
+              extractions={extractions}
+              connectedAccounts={connectedAccounts}
+              hasChildren={extractions.some((e) =>
+                e.income_deposits.some((d) => d.type === 'benefits' && d.source.toLowerCase().includes('child')),
+              )}
+              onComplete={handleSpendingComplete}
+              onSkip={handleSpendingSkip}
             />
           )}
 
