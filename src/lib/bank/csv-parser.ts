@@ -8,6 +8,7 @@ import type {
   DetectedPayment,
   SpendingCategory,
 } from '@/lib/ai/extraction-schemas'
+import { lookupCorrection } from '@/lib/bank/user-corrections'
 
 // ═══ Format detection ═══
 
@@ -132,7 +133,7 @@ function parseGeneric(headers: string[], rows: string[][]): ParsedTransaction[] 
 
 // ═══ Transaction → Extraction ═══
 
-function normaliseDescription(desc: string): string {
+export function normaliseDescription(desc: string): string {
   return desc
     .toLowerCase()
     // Strip common bank prefixes
@@ -441,7 +442,12 @@ function identifyPaymentsFromCSV(debits: Map<string, ParsedTransaction[]>): Dete
     // High-value payments (£100+) or known-category payments are relevant even with 1 occurrence
     // (e.g., annual insurance, quarterly HMRC). Low-value unknowns still need ≥2 to filter noise.
     const payee = group[0].description
-    const category = inferCategory(payee)
+    const normalisedKey = normaliseDescription(payee)
+
+    // User corrections always win (confidence = 1.0) — layered pipeline top priority
+    const userOverride = lookupCorrection(normalisedKey)
+
+    const category = userOverride ?? inferCategory(payee)
     const maxAmount = Math.max(...group.map((t) => Math.abs(t.amount)))
     if (group.length < 2 && category === 'unknown' && maxAmount < 100) continue
     const amounts = group.map((t) => Math.abs(t.amount))
@@ -449,15 +455,18 @@ function identifyPaymentsFromCSV(debits: Map<string, ParsedTransaction[]>): Dete
     const dates = group.map((t) => new Date(t.date).getTime()).sort()
     const gaps = dates.slice(1).map((d, i) => (d - dates[i]) / (24 * 60 * 60 * 1000))
     const avgGap = gaps.length > 0 ? gaps.reduce((a, b) => a + b, 0) / gaps.length : 30
-    // Category-aware confidence: known categories get higher confidence than 'unknown'
-    // More occurrences also increase confidence (3+ months = reliable pattern)
-    // Amount-range guard: plausible amounts get full confidence, implausible amounts get downgraded
-    const plausible = isAmountPlausible(category, avg)
-    const categoryConfidence = category !== 'unknown'
-      ? (plausible ? 0.92 : 0.72)  // Implausible amount → lower confidence than unknown
-      : 0.75
-    const recurrenceBoost = group.length >= 6 ? 0.03 : group.length >= 3 ? 0.01 : 0
-    const confidence = Math.min(0.96, categoryConfidence + recurrenceBoost)
+    // Confidence scoring: user corrections = 1.0, then category-aware with amount guards
+    let confidence: number
+    if (userOverride) {
+      confidence = 1.0  // User corrections are highest authority
+    } else {
+      const plausible = isAmountPlausible(category, avg)
+      const categoryConfidence = category !== 'unknown'
+        ? (plausible ? 0.92 : 0.72)  // Implausible amount → lower confidence than unknown
+        : 0.75
+      const recurrenceBoost = group.length >= 6 ? 0.03 : group.length >= 3 ? 0.01 : 0
+      confidence = Math.min(0.96, categoryConfidence + recurrenceBoost)
+    }
 
     result.push({
       payee,
