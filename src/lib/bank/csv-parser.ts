@@ -340,6 +340,54 @@ const BNPL_KEYWORDS = [
   'paypal credit', 'splitit', 'divido',
 ]
 
+// Levenshtein distance for fuzzy matching truncated BACS payee names.
+// UK BACS descriptions are max 18 chars, so "SAINSBURY" often appears as "SAINSBUR".
+function levenshtein(a: string, b: string): number {
+  const m = a.length, n = b.length
+  if (m === 0) return n
+  if (n === 0) return m
+  const dp: number[] = Array.from({ length: n + 1 }, (_, i) => i)
+  for (let i = 1; i <= m; i++) {
+    let prev = dp[0]
+    dp[0] = i
+    for (let j = 1; j <= n; j++) {
+      const tmp = dp[j]
+      dp[j] = a[i - 1] === b[j - 1] ? prev : 1 + Math.min(prev, dp[j], dp[j - 1])
+      prev = tmp
+    }
+  }
+  return dp[n]
+}
+
+// Check if words in the description fuzzy-match a keyword.
+// Handles both single-word keywords and multi-word keywords (e.g. "hargreaves lansdown").
+// Only tries fuzzy matching for keywords ≥5 chars. Threshold: ≤2 edits per word.
+function fuzzyMatchesKeyword(description: string, keyword: string): boolean {
+  if (keyword.length < 5) return false
+  const descWords = description.split(/\s+/)
+  const kwWords = keyword.split(/\s+/)
+
+  if (kwWords.length === 1) {
+    // Single-word keyword: check each description word
+    for (const word of descWords) {
+      if (word.length < 4) continue
+      if (keyword.startsWith(word) && word.length >= keyword.length - 3) return true
+      if (levenshtein(word, keyword) <= 2) return true
+    }
+    return false
+  }
+
+  // Multi-word keyword: every keyword word must fuzzy-match a description word
+  return kwWords.every((kw) => {
+    if (kw.length < 4) return descWords.some((w) => w === kw)
+    return descWords.some((w) => {
+      if (w.length < 4) return false
+      if (kw.startsWith(w) && w.length >= kw.length - 3) return true
+      return levenshtein(w, kw) <= 2
+    })
+  })
+}
+
 function inferCategory(description: string): DetectedPayment['likely_category'] {
   const d = description.toLowerCase()
   // Check BNPL first — these are loan_repayment for Form E purposes
@@ -348,11 +396,43 @@ function inferCategory(description: string): DetectedPayment['likely_category'] 
   if (d.includes('aviva')) {
     return d.includes('pension') ? 'pension_contribution' : 'insurance'
   }
+  // Exact substring match first (fast path)
   for (const [category, keywords] of Object.entries(CATEGORY_KEYWORDS)) {
     if (category === 'unknown') continue
     if (keywords.some((kw) => d.includes(kw))) return category as DetectedPayment['likely_category']
   }
+  // Fuzzy match for truncated BACS descriptions (slow path, only if exact failed)
+  for (const [category, keywords] of Object.entries(CATEGORY_KEYWORDS)) {
+    if (category === 'unknown') continue
+    if (keywords.some((kw) => fuzzyMatchesKeyword(d, kw))) return category as DetectedPayment['likely_category']
+  }
   return 'unknown'
+}
+
+// Amount-range guards: plausible per-occurrence ranges (£) for each category.
+// If keyword-matched amount falls outside the range, the category is kept but
+// confidence is downgraded — the keyword match is still informative, just less certain.
+const AMOUNT_RANGE_GUARDS: Partial<Record<DetectedPayment['likely_category'], { min: number; max: number }>> = {
+  mortgage: { min: 200, max: 5000 },
+  rent: { min: 150, max: 4000 },
+  insurance: { min: 8, max: 500 },
+  pension_contribution: { min: 20, max: 2000 },
+  childcare: { min: 50, max: 3000 },
+  loan_repayment: { min: 15, max: 3000 },
+  child_maintenance: { min: 30, max: 2000 },
+  utilities: { min: 10, max: 500 },
+  council_tax: { min: 50, max: 500 },
+  subscription: { min: 3, max: 300 },
+  credit_card: { min: 10, max: 5000 },
+  investment: { min: 5, max: 15000 },
+  // gambling: no range — any amount is valid for red-flag detection
+  education: { min: 50, max: 25000 },
+}
+
+function isAmountPlausible(category: DetectedPayment['likely_category'], amount: number): boolean {
+  const range = AMOUNT_RANGE_GUARDS[category]
+  if (!range) return true // No guard for this category
+  return amount >= range.min && amount <= range.max
 }
 
 function identifyPaymentsFromCSV(debits: Map<string, ParsedTransaction[]>): DetectedPayment[] {
@@ -371,7 +451,11 @@ function identifyPaymentsFromCSV(debits: Map<string, ParsedTransaction[]>): Dete
     const avgGap = gaps.length > 0 ? gaps.reduce((a, b) => a + b, 0) / gaps.length : 30
     // Category-aware confidence: known categories get higher confidence than 'unknown'
     // More occurrences also increase confidence (3+ months = reliable pattern)
-    const categoryConfidence = category !== 'unknown' ? 0.92 : 0.75
+    // Amount-range guard: plausible amounts get full confidence, implausible amounts get downgraded
+    const plausible = isAmountPlausible(category, avg)
+    const categoryConfidence = category !== 'unknown'
+      ? (plausible ? 0.92 : 0.72)  // Implausible amount → lower confidence than unknown
+      : 0.75
     const recurrenceBoost = group.length >= 6 ? 0.03 : group.length >= 3 ? 0.01 : 0
     const confidence = Math.min(0.96, categoryConfidence + recurrenceBoost)
 
