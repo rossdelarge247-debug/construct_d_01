@@ -8,7 +8,7 @@ import type { BankStatementExtraction } from '@/lib/ai/extraction-schemas'
 
 // ═══ Types ═══
 
-export type ConfirmationSectionKey = 'income' | 'property' | 'accounts' | 'pensions' | 'debts'
+export type ConfirmationSectionKey = 'income' | 'property' | 'accounts' | 'pensions' | 'debts' | 'business' | 'other_assets'
 
 export interface ConfirmationOption {
   label: string
@@ -19,7 +19,7 @@ export interface ConfirmationStep {
   id: string
   sectionKey: ConfirmationSectionKey
   sectionLabel: string
-  type: 'question' | 'confirmation_message' | 'input'
+  type: 'question' | 'confirmation_message' | 'input' | 'checklist'
   text: string
   subtext?: string
   options?: ConfirmationOption[]
@@ -47,7 +47,7 @@ export interface SectionSummaryData {
 }
 
 export const CONFIRMATION_SECTIONS: ConfirmationSectionKey[] = [
-  'income', 'property', 'accounts', 'pensions', 'debts',
+  'income', 'property', 'accounts', 'pensions', 'debts', 'business', 'other_assets',
 ]
 
 // ═══ Question generation ═══
@@ -62,6 +62,8 @@ export function generateSectionSteps(
     case 'accounts': return generateAccountsSteps(extractions)
     case 'pensions': return generatePensionsSteps(extractions)
     case 'debts': return generateDebtsSteps(extractions)
+    case 'business': return generateBusinessSteps(extractions)
+    case 'other_assets': return generateOtherAssetsSteps(extractions)
   }
 }
 
@@ -1090,6 +1092,8 @@ export function generateSectionSummary(
     case 'accounts': return generateAccountsSummary(extractions, answers)
     case 'pensions': return generatePensionsSummary(answers)
     case 'debts': return generateDebtsSummary(answers, extractions)
+    case 'business': return generateBusinessSummary(answers)
+    case 'other_assets': return generateOtherAssetsSummary(answers)
   }
 }
 
@@ -1547,5 +1551,321 @@ function generateDebtsSummary(answers: Record<string, string>, extractions: Bank
     heading: "That's it for debts",
     facts,
     accordionLabel: hasAnyDebts ? 'Debts disclosed, ready for sharing & collaboration' : 'No debts to disclose',
+  }
+}
+
+// ═══ Business (Form E 2.10, 2.11, 2.16) ═══
+//
+// Ladder:
+//   1. Check for signals (Companies House, HMRC SA, dividends answer from income)
+//   2. Cold ask if no signals
+//   3. If yes: structure, value, accountant
+//
+// Cross-section: income answer 'dividends' or 'self_employed' implies business
+
+const BUSINESS_PAYEES = ['companies house', 'hmrc self assessment', 'hmrc sa', 'accountant']
+
+function generateBusinessSteps(extractions: BankStatementExtraction[]): ConfirmationStep[] {
+  const allPayments = extractions.flatMap((e) => e.regular_payments)
+  const businessSignals = allPayments.filter((p) =>
+    BUSINESS_PAYEES.some((bp) => p.payee.toLowerCase().includes(bp)),
+  )
+  const steps: ConfirmationStep[] = []
+
+  if (businessSignals.length > 0) {
+    const signalPayees = businessSignals.map((s) => s.payee).join(', ')
+    steps.push({
+      id: 'business-detected',
+      sectionKey: 'business',
+      sectionLabel: 'Business',
+      type: 'question',
+      text: `We noticed payments to ${signalPayees} — do you have business interests?`,
+      options: [
+        { label: 'Yes, I have a business', value: 'yes' },
+        { label: 'No, that\'s something else', value: 'no' },
+      ],
+    })
+  } else {
+    steps.push({
+      id: 'business-cold',
+      sectionKey: 'business',
+      sectionLabel: 'Business',
+      type: 'question',
+      text: 'Do you have any business interests?',
+      subtext: 'This includes sole trading, a limited company, a partnership, or shares in a business.',
+      options: [
+        { label: 'Yes', value: 'yes' },
+        { label: 'No', value: 'no' },
+      ],
+    })
+  }
+
+  steps.push({
+    id: 'business-structure',
+    sectionKey: 'business',
+    sectionLabel: 'Business',
+    type: 'question',
+    text: "What's your business structure?",
+    options: [
+      { label: 'Sole trader', value: 'sole_trader' },
+      { label: 'Limited company (Ltd)', value: 'limited' },
+      { label: 'Partnership / LLP', value: 'partnership' },
+      { label: 'Shares in someone else\'s business', value: 'shares' },
+    ],
+    showWhen: { questionId: businessSignals.length > 0 ? 'business-detected' : 'business-cold', value: 'yes' },
+  })
+
+  steps.push({
+    id: 'business-value',
+    sectionKey: 'business',
+    sectionLabel: 'Business',
+    type: 'input',
+    text: "What's the approximate value of your business interest?",
+    subtext: 'A rough estimate is fine for now.',
+    inputPrefix: '£',
+    inputPlaceholder: 'e.g. 50,000',
+    showWhen: { questionId: businessSignals.length > 0 ? 'business-detected' : 'business-cold', value: 'yes' },
+  })
+
+  steps.push({
+    id: 'business-accountant',
+    sectionKey: 'business',
+    sectionLabel: 'Business',
+    type: 'question',
+    text: 'Do you have an accountant who can provide business accounts?',
+    options: [
+      { label: 'Yes, I have an accountant', value: 'yes' },
+      { label: 'No', value: 'no' },
+      { label: "I'm not sure", value: 'unsure' },
+    ],
+    showWhen: { questionId: businessSignals.length > 0 ? 'business-detected' : 'business-cold', value: 'yes' },
+  })
+
+  return steps
+}
+
+function generateBusinessSummary(answers: Record<string, string>): SectionSummaryData {
+  const hasBusiness = answers['business-detected'] === 'yes' || answers['business-cold'] === 'yes'
+  const facts: SectionSummaryFact[] = []
+
+  if (hasBusiness) {
+    const structures: Record<string, string> = {
+      sole_trader: 'Sole trader',
+      limited: 'Limited company',
+      partnership: 'Partnership / LLP',
+      shares: 'Shares in a business',
+    }
+    const structure = structures[answers['business-structure']] ?? 'Business'
+    facts.push({ label: structure, source: 'self' })
+
+    if (answers['business-value']) {
+      facts.push({ label: `Estimated value: £${parseInt(answers['business-value'].replace(/,/g, ''), 10).toLocaleString()}`, source: 'self' })
+    }
+
+    const accountantLabels: Record<string, string> = {
+      yes: 'Has an accountant',
+      no: 'No accountant',
+      unsure: 'Accountant status uncertain',
+    }
+    if (answers['business-accountant']) {
+      facts.push({ label: accountantLabels[answers['business-accountant']] ?? 'Accountant unknown', source: 'self' })
+    }
+  } else {
+    facts.push({ label: 'No business interests to disclose', source: 'self' })
+  }
+
+  return {
+    sectionKey: 'business',
+    sectionLabel: 'Business',
+    heading: "That's it for business",
+    facts,
+    accordionLabel: hasBusiness ? 'Business interests disclosed, ready for sharing & collaboration' : 'No business interests to disclose',
+  }
+}
+
+// ═══ Other assets (Form E 2.4–2.9) ═══
+//
+// Uses checklist step type — multi-select with follow-up value questions.
+// Signals: crypto exchanges, car insurance, investment platforms.
+
+const CRYPTO_PAYEES = ['coinbase', 'binance', 'kraken', 'crypto.com', 'bitstamp']
+const INVESTMENT_PAYEES = ['hargreaves lansdown', 'hl ', 'aj bell', 'vanguard', 'interactive investor', 'trading 212', 'freetrade']
+
+function generateOtherAssetsSteps(extractions: BankStatementExtraction[]): ConfirmationStep[] {
+  const allPayments = extractions.flatMap((e) => e.regular_payments)
+  const steps: ConfirmationStep[] = []
+
+  // Detect signals for pre-checking
+  const hasCryptoSignal = allPayments.some((p) =>
+    CRYPTO_PAYEES.some((cp) => p.payee.toLowerCase().includes(cp)),
+  )
+  const hasInvestmentSignal = allPayments.some((p) =>
+    INVESTMENT_PAYEES.some((ip) => p.payee.toLowerCase().includes(ip)),
+  )
+  const hasVehicleSignal = allPayments.some((p) =>
+    p.likely_category === 'insurance' && !p.payee.toLowerCase().includes('life'),
+  )
+
+  const hints: string[] = []
+  if (hasCryptoSignal) hints.push('crypto payments')
+  if (hasInvestmentSignal) hints.push('investment transfers')
+  if (hasVehicleSignal) hints.push('vehicle insurance')
+
+  steps.push({
+    id: 'assets-checklist',
+    sectionKey: 'other_assets',
+    sectionLabel: 'Other assets',
+    type: 'checklist',
+    text: 'Do you have any of these assets?',
+    subtext: hints.length > 0
+      ? `We noticed ${hints.join(', ')} in your bank data. Tick all that apply.`
+      : 'Tick all that apply — we\'ll ask about each one briefly.',
+    options: [
+      { label: 'A vehicle (car, motorbike, etc.)', value: 'vehicle' },
+      { label: 'Cryptocurrency or digital assets', value: 'crypto' },
+      { label: 'Investments (stocks, ISAs, bonds, funds)', value: 'investments' },
+      { label: 'Life insurance or endowment policies', value: 'life_insurance' },
+      { label: 'Valuables worth over £500 (jewellery, art, antiques)', value: 'valuables' },
+      { label: 'Property or assets held overseas', value: 'overseas' },
+      { label: 'None of the above', value: 'none' },
+    ],
+  })
+
+  // Follow-up value questions — each shown when the parent checklist includes that value
+  steps.push({
+    id: 'assets-vehicle-value',
+    sectionKey: 'other_assets',
+    sectionLabel: 'Other assets',
+    type: 'input',
+    text: "What's the approximate value of your vehicle(s)?",
+    inputPrefix: '£',
+    inputPlaceholder: 'e.g. 8,000',
+    showWhen: { questionId: 'assets-checklist', value: 'vehicle' },
+  })
+
+  steps.push({
+    id: 'assets-crypto-value',
+    sectionKey: 'other_assets',
+    sectionLabel: 'Other assets',
+    type: 'input',
+    text: "What's the approximate value of your crypto / digital assets?",
+    inputPrefix: '£',
+    inputPlaceholder: 'e.g. 5,000',
+    showWhen: { questionId: 'assets-checklist', value: 'crypto' },
+  })
+
+  steps.push({
+    id: 'assets-investments-value',
+    sectionKey: 'other_assets',
+    sectionLabel: 'Other assets',
+    type: 'input',
+    text: "What's the approximate value of your investments?",
+    subtext: 'Include ISAs, stocks & shares, bonds, and funds.',
+    inputPrefix: '£',
+    inputPlaceholder: 'e.g. 25,000',
+    showWhen: { questionId: 'assets-checklist', value: 'investments' },
+  })
+
+  steps.push({
+    id: 'assets-life-insurance-type',
+    sectionKey: 'other_assets',
+    sectionLabel: 'Other assets',
+    type: 'question',
+    text: 'What type of life insurance do you have?',
+    options: [
+      { label: 'Term life (no cash value)', value: 'term' },
+      { label: 'Whole of life / endowment (has a cash value)', value: 'whole_of_life' },
+      { label: "I'm not sure", value: 'unsure' },
+    ],
+    showWhen: { questionId: 'assets-checklist', value: 'life_insurance' },
+  })
+
+  steps.push({
+    id: 'assets-life-insurance-value',
+    sectionKey: 'other_assets',
+    sectionLabel: 'Other assets',
+    type: 'input',
+    text: "What's the current surrender value of your life insurance?",
+    inputPrefix: '£',
+    inputPlaceholder: 'e.g. 15,000',
+    showWhen: { questionId: 'assets-life-insurance-type', value: ['whole_of_life', 'unsure'] },
+  })
+
+  steps.push({
+    id: 'assets-valuables-value',
+    sectionKey: 'other_assets',
+    sectionLabel: 'Other assets',
+    type: 'input',
+    text: "What's the approximate total value of your valuables?",
+    subtext: 'Jewellery, art, antiques, or other items worth over £500.',
+    inputPrefix: '£',
+    inputPlaceholder: 'e.g. 3,000',
+    showWhen: { questionId: 'assets-checklist', value: 'valuables' },
+  })
+
+  steps.push({
+    id: 'assets-overseas-value',
+    sectionKey: 'other_assets',
+    sectionLabel: 'Other assets',
+    type: 'input',
+    text: "What's the approximate value of your overseas assets?",
+    inputPrefix: '£',
+    inputPlaceholder: 'e.g. 40,000',
+    showWhen: { questionId: 'assets-checklist', value: 'overseas' },
+  })
+
+  return steps
+}
+
+function generateOtherAssetsSummary(answers: Record<string, string>): SectionSummaryData {
+  const checklist = answers['assets-checklist'] ?? ''
+  const selected = checklist.split(',').filter(Boolean)
+  const hasNone = selected.includes('none') || selected.length === 0
+  const facts: SectionSummaryFact[] = []
+
+  if (hasNone) {
+    facts.push({ label: 'No other assets to disclose', source: 'self' })
+  } else {
+    const formatValue = (key: string) => {
+      const raw = answers[key]
+      if (!raw) return null
+      const num = parseInt(raw.replace(/,/g, ''), 10)
+      return isNaN(num) ? null : `£${num.toLocaleString()}`
+    }
+
+    if (selected.includes('vehicle')) {
+      const v = formatValue('assets-vehicle-value')
+      facts.push({ label: `Vehicle${v ? ` — estimated ${v}` : ''}`, source: 'self' })
+    }
+    if (selected.includes('crypto')) {
+      const v = formatValue('assets-crypto-value')
+      facts.push({ label: `Cryptocurrency${v ? ` — estimated ${v}` : ''}`, source: 'self' })
+    }
+    if (selected.includes('investments')) {
+      const v = formatValue('assets-investments-value')
+      facts.push({ label: `Investments${v ? ` — estimated ${v}` : ''}`, source: 'self' })
+    }
+    if (selected.includes('life_insurance')) {
+      const liType = answers['assets-life-insurance-type']
+      const v = formatValue('assets-life-insurance-value')
+      const typeLabel = liType === 'term' ? 'Term life (no cash value)' : liType === 'whole_of_life' ? `Whole of life${v ? ` — surrender value ${v}` : ''}` : `Life insurance${v ? ` — estimated ${v}` : ''}`
+      facts.push({ label: typeLabel, source: 'self' })
+    }
+    if (selected.includes('valuables')) {
+      const v = formatValue('assets-valuables-value')
+      facts.push({ label: `Valuables${v ? ` — estimated ${v}` : ''}`, source: 'self' })
+    }
+    if (selected.includes('overseas')) {
+      const v = formatValue('assets-overseas-value')
+      facts.push({ label: `Overseas assets${v ? ` — estimated ${v}` : ''}`, source: 'self' })
+    }
+  }
+
+  return {
+    sectionKey: 'other_assets',
+    sectionLabel: 'Other assets',
+    heading: "That's it for other assets",
+    facts,
+    accordionLabel: hasNone ? 'No other assets to disclose' : 'Other assets disclosed, ready for sharing & collaboration',
   }
 }

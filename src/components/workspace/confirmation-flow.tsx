@@ -36,6 +36,7 @@ export function ConfirmationFlow({
   const [selectedOption, setSelectedOption] = useState<string | null>(null)
   const [inputValue, setInputValue] = useState('')
   const [inputQualifier, setInputQualifier] = useState<string | null>(null)
+  const [checkedItems, setCheckedItems] = useState<string[]>([])
   const [accordionOpen, setAccordionOpen] = useState(false)
   const [completedSections, setCompletedSections] = useState<SectionSummaryData[]>([])
   const [lastConfirmedKey, setLastConfirmedKey] = useState<string | null>(null)
@@ -53,10 +54,13 @@ export function ConfirmationFlow({
     return allSteps.filter((step: ConfirmationStep) => {
       if (!step.showWhen) return true
       const answer = answers[step.showWhen.questionId]
+      if (!answer) return false
+      // Checklist answers are comma-separated — check if any value matches
+      const answerParts = answer.split(',')
       if (Array.isArray(step.showWhen.value)) {
-        return step.showWhen.value.includes(answer)
+        return step.showWhen.value.some((v) => answerParts.includes(v))
       }
-      return answer === step.showWhen.value
+      return answerParts.includes(step.showWhen.value)
     })
   }, [allSteps, answers])
 
@@ -84,21 +88,26 @@ export function ConfirmationFlow({
         [currentStep.id]: inputValue,
         ...(inputQualifier ? { [`${currentStep.id}-qualifier`]: inputQualifier } : {}),
       }))
+    } else if (currentStep.type === 'checklist') {
+      setAnswers((prev: Record<string, string>) => ({ ...prev, [currentStep.id]: checkedItems.join(',') }))
     }
 
     const nextAnswers = {
       ...answers,
       ...(currentStep.type === 'question' && selectedOption ? { [currentStep.id]: selectedOption } : {}),
       ...(currentStep.type === 'input' && inputValue ? { [currentStep.id]: inputValue } : {}),
+      ...(currentStep.type === 'checklist' ? { [currentStep.id]: checkedItems.join(',') } : {}),
     }
 
     const nextVisibleSteps = allSteps.filter((step: ConfirmationStep) => {
       if (!step.showWhen) return true
       const answer = nextAnswers[step.showWhen.questionId]
+      if (!answer) return false
+      const answerParts = answer.split(',')
       if (Array.isArray(step.showWhen.value)) {
-        return step.showWhen.value.includes(answer)
+        return step.showWhen.value.some((v) => answerParts.includes(v))
       }
-      return answer === step.showWhen.value
+      return answerParts.includes(step.showWhen.value)
     })
 
     const nextStepIndex = stepIndex + 1
@@ -111,6 +120,7 @@ export function ConfirmationFlow({
     setSelectedOption(null)
     setInputValue('')
     setInputQualifier(null)
+    setCheckedItems([])
   }, [currentStep, selectedOption, inputValue, inputQualifier, answers, allSteps, stepIndex, handleSectionQuestionsComplete])
 
   const handleSkip = useCallback(() => {
@@ -120,10 +130,12 @@ export function ConfirmationFlow({
     const nextVisibleSteps = allSteps.filter((step: ConfirmationStep) => {
       if (!step.showWhen) return true
       const answer = answers[step.showWhen.questionId]
+      if (!answer) return false
+      const answerParts = answer.split(',')
       if (Array.isArray(step.showWhen.value)) {
-        return step.showWhen.value.includes(answer)
+        return step.showWhen.value.some((v) => answerParts.includes(v))
       }
-      return answer === step.showWhen.value
+      return answerParts.includes(step.showWhen.value)
     })
 
     if (nextStepIndex >= nextVisibleSteps.length) {
@@ -222,6 +234,7 @@ export function ConfirmationFlow({
   const canAdvance = currentStep?.type === 'confirmation_message'
     || (currentStep?.type === 'question' && selectedOption !== null)
     || (currentStep?.type === 'input' && inputValue.length > 0)
+    || (currentStep?.type === 'checklist' && checkedItems.length > 0)
 
   return (
     <div className="max-w-[var(--content-narrow)] mx-auto">
@@ -321,6 +334,10 @@ export function ConfirmationFlow({
               onInputChange={setInputValue}
               inputQualifier={inputQualifier}
               onQualifierChange={setInputQualifier}
+              checkedItems={checkedItems}
+              onToggleCheck={(v) => setCheckedItems((prev) =>
+                prev.includes(v) ? prev.filter((x) => x !== v) : v === 'none' ? ['none'] : [...prev.filter((x) => x !== 'none'), v]
+              )}
               onNext={handleNext}
               onSkip={handleSkip}
               canAdvance={canAdvance}
@@ -377,6 +394,8 @@ function QuestionCard({
   onInputChange,
   inputQualifier,
   onQualifierChange,
+  checkedItems,
+  onToggleCheck,
   onNext,
   onSkip,
   canAdvance,
@@ -388,6 +407,8 @@ function QuestionCard({
   onInputChange: (v: string) => void
   inputQualifier: string | null
   onQualifierChange: (v: string) => void
+  checkedItems: string[]
+  onToggleCheck: (v: string) => void
   onNext: () => void
   onSkip: () => void
   canAdvance: boolean
@@ -437,6 +458,46 @@ function QuestionCard({
                   <span className="text-[15px] font-medium">{opt.label}</span>
                 </div>
               </button>
+            )
+          })}
+        </div>
+      )}
+
+      {/* Checklist (multi-select checkboxes) */}
+      {step.type === 'checklist' && step.options && (
+        <div className="mt-6 space-y-2">
+          {step.options.map((opt) => {
+            const isChecked = checkedItems.includes(opt.value)
+            return (
+              <label
+                key={opt.value}
+                className="flex items-center gap-3 px-5 py-4 cursor-pointer transition-colors hover:bg-grey-50"
+                style={{
+                  border: `1.5px solid ${isChecked ? 'var(--color-ink)' : 'var(--color-grey-100)'}`,
+                  borderRadius: 'var(--radius-card)',
+                  backgroundColor: isChecked ? 'var(--color-ink)' : 'white',
+                  color: isChecked ? 'white' : 'var(--color-ink)',
+                  transitionDuration: '200ms',
+                }}
+              >
+                <input
+                  type="checkbox"
+                  checked={isChecked}
+                  onChange={() => onToggleCheck(opt.value)}
+                  className="sr-only"
+                />
+                <div
+                  className="w-5 h-5 rounded flex items-center justify-center shrink-0"
+                  style={{
+                    border: isChecked ? '2px solid white' : '2px solid var(--color-grey-200)',
+                  }}
+                >
+                  {isChecked && (
+                    <Check size={12} className="text-white" strokeWidth={3} />
+                  )}
+                </div>
+                <span className="text-[15px] font-medium">{opt.label}</span>
+              </label>
             )
           })}
         </div>
