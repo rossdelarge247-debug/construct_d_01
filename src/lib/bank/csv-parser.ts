@@ -230,6 +230,13 @@ const CATEGORY_KEYWORDS: Record<DetectedPayment['likely_category'], string[]> = 
   rent: [
     'rent', 'letting', 'lettings', 'openrent', 'estate agent',
     'property management',
+    // Major UK letting agents
+    'marsh and parsons', 'marsh & parsons', 'foxtons', 'knight frank',
+    'savills', 'chestertons', 'winkworth', 'dexters', 'hamptons',
+    'ludlow thompson', 'benham and reeves', 'benham & reeves',
+    'jll', 'jones lang', 'kfh', 'kinleigh folkard',
+    'barnard marcus', 'haart', 'countrywide', 'connells',
+    'leaders', 'romans', 'martin co',
     // Housing associations omitted — ambiguous (rent vs shared ownership mortgage).
     // Falls to 'unknown' and triggers mortgage/rent disambiguation question.
   ],
