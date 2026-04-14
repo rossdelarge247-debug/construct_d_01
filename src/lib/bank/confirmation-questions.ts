@@ -621,6 +621,61 @@ function generateAccountsSteps(extractions: BankStatementExtraction[]): Confirma
     }
   }
 
+  // ── App-based bank accounts (commonly omitted) ──
+  const APP_BANKS = ['monzo', 'revolut', 'starling', 'chase', 'atom']
+  const connectedProviders = extractions.map((e) => e.provider.toLowerCase())
+  const missingAppBanks = APP_BANKS.filter((b) => !connectedProviders.some((p) => p.includes(b)))
+
+  if (missingAppBanks.length > 0) {
+    const bankNames = missingAppBanks.map((b) => b.charAt(0).toUpperCase() + b.slice(1)).join(', ')
+    steps.push({
+      id: 'accounts-app-banks',
+      sectionKey: 'accounts',
+      sectionLabel: 'Accounts',
+      type: 'question',
+      text: `Do you have any accounts with app-based banks like ${bankNames}?`,
+      subtext: 'These are easy to forget but must be disclosed.',
+      options: [
+        { label: 'Yes', value: 'yes' },
+        { label: 'No', value: 'no' },
+      ],
+    })
+    steps.push({
+      id: 'accounts-app-banks-detail',
+      sectionKey: 'accounts',
+      sectionLabel: 'Accounts',
+      type: 'input',
+      text: 'Roughly, what is the total balance across these accounts?',
+      inputPrefix: '£',
+      inputPlaceholder: 'e.g. 500',
+      showWhen: { questionId: 'accounts-app-banks', value: 'yes' },
+    })
+  }
+
+  // ── Closed accounts in last 12 months (commonly omitted) ──
+  steps.push({
+    id: 'accounts-closed',
+    sectionKey: 'accounts',
+    sectionLabel: 'Accounts',
+    type: 'question',
+    text: 'Have you closed any bank or savings accounts in the last 12 months?',
+    subtext: 'Form E requires disclosure of recently closed accounts.',
+    options: [
+      { label: 'Yes', value: 'yes' },
+      { label: 'No', value: 'no' },
+    ],
+  })
+  steps.push({
+    id: 'accounts-closed-detail',
+    sectionKey: 'accounts',
+    sectionLabel: 'Accounts',
+    type: 'input',
+    text: 'Roughly, what was the balance when the account was closed?',
+    inputPrefix: '£',
+    inputPlaceholder: 'e.g. 2,000',
+    showWhen: { questionId: 'accounts-closed', value: 'yes' },
+  })
+
   // ── Catch-all: any other accounts not detected? ──
   steps.push({
     id: 'accounts-other',
@@ -1372,6 +1427,20 @@ function generateAccountsSummary(
     if (cryptoAnswer === 'yes') facts.push({ label: `Cryptocurrency held${valueLabel}`, source: 'self' })
   }
 
+  // App-based banks
+  if (answers['accounts-app-banks'] === 'yes') {
+    const appValue = answers['accounts-app-banks-detail']
+    const appLabel = appValue ? ` — estimated £${parseInt(appValue.replace(/,/g, ''), 10).toLocaleString()}` : ''
+    facts.push({ label: `App-based bank account(s) disclosed${appLabel}`, source: 'self', gapMessage: 'For finalisation, connect these accounts or provide screenshots.' })
+  }
+
+  // Closed accounts
+  if (answers['accounts-closed'] === 'yes') {
+    const closedValue = answers['accounts-closed-detail']
+    const closedLabel = closedValue ? ` — balance at closure £${parseInt(closedValue.replace(/,/g, ''), 10).toLocaleString()}` : ''
+    facts.push({ label: `Recently closed account(s)${closedLabel}`, source: 'self', gapMessage: 'For finalisation, we\'ll need closing statements.' })
+  }
+
   // Other accounts catch-all
   const otherType = answers['accounts-other']
   const otherValue = answers['accounts-other-value']
@@ -1641,6 +1710,34 @@ function generateBusinessSteps(extractions: BankStatementExtraction[]): Confirma
     showWhen: { questionId: businessSignals.length > 0 ? 'business-detected' : 'business-cold', value: 'yes' },
   })
 
+  // ── Director's loan account (commonly omitted, Form E 2.10/2.16) ──
+  steps.push({
+    id: 'business-directors-loan',
+    sectionKey: 'business',
+    sectionLabel: 'Business',
+    type: 'question',
+    text: "Do you have a director's loan account with your company?",
+    subtext: "This is money you've lent to or borrowed from your company — it must be disclosed.",
+    options: [
+      { label: 'Yes, the company owes me money', value: 'owed_to_me' },
+      { label: 'Yes, I owe the company money', value: 'i_owe' },
+      { label: 'No', value: 'no' },
+      { label: "I'm not sure", value: 'unsure' },
+    ],
+    showWhen: { questionId: 'business-structure', value: 'limited' },
+  })
+
+  steps.push({
+    id: 'business-directors-loan-amount',
+    sectionKey: 'business',
+    sectionLabel: 'Business',
+    type: 'input',
+    text: "What's the balance on your director's loan account?",
+    inputPrefix: '£',
+    inputPlaceholder: 'e.g. 15,000',
+    showWhen: { questionId: 'business-directors-loan', value: ['owed_to_me', 'i_owe'] },
+  })
+
   return steps
 }
 
@@ -1669,6 +1766,16 @@ function generateBusinessSummary(answers: Record<string, string>): SectionSummar
     }
     if (answers['business-accountant']) {
       facts.push({ label: accountantLabels[answers['business-accountant']] ?? 'Accountant unknown', source: 'self' })
+    }
+
+    // Director's loan account
+    const loanAnswer = answers['business-directors-loan']
+    const loanAmount = answers['business-directors-loan-amount']
+    const loanLabel = loanAmount ? ` — £${parseInt(loanAmount.replace(/,/g, ''), 10).toLocaleString()}` : ''
+    if (loanAnswer === 'owed_to_me') {
+      facts.push({ label: `Director's loan: company owes you${loanLabel}`, source: 'self' })
+    } else if (loanAnswer === 'i_owe') {
+      facts.push({ label: `Director's loan: you owe the company${loanLabel}`, source: 'self' })
     }
   } else {
     facts.push({ label: 'No business interests to disclose', source: 'self' })

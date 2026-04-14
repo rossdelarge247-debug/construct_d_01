@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect, useCallback, useRef } from 'react'
-import { Check } from 'lucide-react'
+import { Check, Upload } from 'lucide-react'
 import type { BankConnectionPhase, ConnectedAccount, RevealItem } from '@/types/hub'
 import type { BankStatementExtraction } from '@/lib/ai/extraction-schemas'
 import {
@@ -9,6 +9,7 @@ import {
   extractionsToRevealItems,
   createDemoExtractions,
 } from '@/lib/bank/bank-data-utils'
+import { parseCSVToExtraction } from '@/lib/bank/csv-parser'
 
 const TEST_PERSONAS = [
   { id: 'default', label: 'Sarah — employed homeowner', description: 'Salary, mortgage, child benefit, pension contributions, joint property' },
@@ -96,6 +97,30 @@ export function BankConnectionFlow({
     setProgressPercent(15)
   }, [devChooserData, onPhaseChange, hydrateBankData])
 
+  const [csvError, setCsvError] = useState<string | null>(null)
+  const csvInputRef = useRef<HTMLInputElement>(null)
+
+  const handleCSVImport = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+    setCsvError(null)
+    const reader = new FileReader()
+    reader.onload = () => {
+      try {
+        const result = parseCSVToExtraction(reader.result as string, file.name)
+        setDevChooserData(null)
+        hydrateBankData([result.extraction])
+        onPhaseChange('reveal')
+        setProgressPercent(15)
+      } catch (err) {
+        setCsvError(err instanceof Error ? err.message : 'Failed to parse CSV')
+      }
+    }
+    reader.readAsText(file)
+    // Reset input so the same file can be re-selected
+    e.target.value = ''
+  }, [hydrateBankData, onPhaseChange])
+
   // Progressive reveal
   useEffect(() => {
     if (phase !== 'reveal') return
@@ -151,6 +176,11 @@ export function BankConnectionFlow({
         <TinkModal
           onComplete={() => handleTinkComplete(false)}
           onDemoComplete={(personaId) => handleTinkComplete(true, personaId)}
+          onCSVImport={(extraction) => {
+            hydrateBankData([extraction])
+            onPhaseChange('reveal')
+            setProgressPercent(15)
+          }}
           onCancel={onCancel}
         />
       )}
@@ -198,6 +228,33 @@ export function BankConnectionFlow({
                   <p className="text-[11px] text-ink-tertiary">{p.description}</p>
                 </button>
               ))}
+            </div>
+
+            {/* CSV import for dev testing */}
+            <div className="mt-4 pt-4" style={{ borderTop: '1px solid var(--color-grey-100)' }}>
+              <input
+                ref={csvInputRef}
+                type="file"
+                accept=".csv"
+                onChange={handleCSVImport}
+                className="hidden"
+              />
+              <button
+                onClick={() => csvInputRef.current?.click()}
+                className="w-full flex items-center justify-center gap-2 px-4 py-2.5 transition-colors hover:bg-grey-50"
+                style={{ border: '1px dashed var(--color-grey-200)', borderRadius: 'var(--radius-card)' }}
+              >
+                <Upload size={14} className="text-ink-tertiary" />
+                <span className="text-[13px] font-medium text-ink-secondary">Import bank CSV</span>
+              </button>
+              <p className="text-[11px] text-ink-tertiary mt-1.5 text-center">
+                Supports Monzo, Barclays, Starling, and generic CSV formats
+              </p>
+              {csvError && (
+                <p className="text-[11px] mt-1.5 text-center" style={{ color: 'var(--color-red-500)' }}>
+                  {csvError}
+                </p>
+              )}
             </div>
           </div>
         </div>
@@ -383,16 +440,20 @@ function RevealTickItem({
 function TinkModal({
   onComplete,
   onDemoComplete,
+  onCSVImport,
   onCancel,
 }: {
   onComplete: () => void
   onDemoComplete: (personaId?: string) => void
+  onCSVImport: (extraction: BankStatementExtraction) => void
   onCancel: () => void
 }) {
   const [loading, setLoading] = useState(true)
   const [tinkAvailable, setTinkAvailable] = useState(false)
   const [popupOpen, setPopupOpen] = useState(false)
   const [connectError, setConnectError] = useState<string | null>(null)
+  const [csvError, setCsvError] = useState<string | null>(null)
+  const csvFileRef = useRef<HTMLInputElement>(null)
   const popupRef = useRef<Window | null>(null)
   const pollRef = useRef<ReturnType<typeof setInterval> | null>(null)
   const tinkCompleteRef = useRef(false)
@@ -586,6 +647,46 @@ function TinkModal({
                   <p className="text-[12px] text-ink-tertiary mt-0.5">{p.description}</p>
                 </button>
               ))}
+
+              {/* CSV import */}
+              <input
+                ref={csvFileRef}
+                type="file"
+                accept=".csv"
+                onChange={(e) => {
+                  const file = e.target.files?.[0]
+                  if (!file) return
+                  setCsvError(null)
+                  const reader = new FileReader()
+                  reader.onload = () => {
+                    try {
+                      const result = parseCSVToExtraction(reader.result as string, file.name)
+                      onCSVImport(result.extraction)
+                    } catch (err) {
+                      setCsvError(err instanceof Error ? err.message : 'Failed to parse CSV')
+                    }
+                  }
+                  reader.readAsText(file)
+                  e.target.value = ''
+                }}
+                className="hidden"
+              />
+              <button
+                onClick={() => csvFileRef.current?.click()}
+                className="w-full flex items-center justify-center gap-2 px-4 py-3 transition-colors hover:bg-grey-50"
+                style={{
+                  border: '1px dashed var(--color-grey-200)',
+                  borderRadius: 'var(--radius-card)',
+                }}
+              >
+                <Upload size={14} className="text-ink-tertiary" />
+                <span className="text-[14px] font-medium text-ink-secondary">Import bank CSV</span>
+              </button>
+              {csvError && (
+                <p className="text-[11px] text-center" style={{ color: 'var(--color-red-500)' }}>
+                  {csvError}
+                </p>
+              )}
             </div>
           </>
         )}

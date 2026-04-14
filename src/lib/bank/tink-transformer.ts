@@ -101,8 +101,9 @@ function mapAccountType(tinkType: TinkAccount['type']): BankStatementExtraction[
 export function transformTinkAccount(
   account: TinkAccount,
   transactions: TinkTransaction[],
+  resolvedProviderName?: string,
 ): BankStatementExtraction {
-  const provider = getProviderName(account.financialInstitutionId)
+  const provider = resolvedProviderName || getProviderName(account.financialInstitutionId)
   const last4 = extractLast4(account)
   const balance = parseTinkAmount(account.balances.booked.amount)
 

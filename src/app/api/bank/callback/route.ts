@@ -1,5 +1,5 @@
 import { NextRequest } from 'next/server'
-import { getUserToken, getAccounts, getTransactions } from '@/lib/bank/tink-client'
+import { getUserToken, getAccounts, getTransactions, fetchProviderDisplayNames } from '@/lib/bank/tink-client'
 import { transformTinkAccount } from '@/lib/bank/tink-transformer'
 import { transformExtractionResult } from '@/lib/ai/result-transformer'
 import type { DocumentClassification } from '@/lib/ai/extraction-schemas'
@@ -34,6 +34,11 @@ export async function GET(request: NextRequest) {
 
     console.log(`[Bank Callback] Found ${accounts.length} account(s)`)
 
+    // Resolve human-readable provider names for all unique financial institutions
+    const uniqueInstitutionIds = [...new Set(accounts.map((a) => a.financialInstitutionId))]
+    const providerNames = await fetchProviderDisplayNames(uniqueInstitutionIds)
+    console.log(`[Bank Callback] Resolved ${Object.keys(providerNames).length}/${uniqueInstitutionIds.length} provider names`)
+
     // Process each account: fetch transactions → transform → pass through pipeline
     const results = []
 
@@ -42,7 +47,8 @@ export async function GET(request: NextRequest) {
       console.log(`[Bank Callback] Account ${account.id}: ${transactions.length} transactions`)
 
       // Transform Tink data → BankStatementExtraction shape
-      const extraction = transformTinkAccount(account, transactions)
+      const resolvedName = providerNames[account.financialInstitutionId]
+      const extraction = transformTinkAccount(account, transactions, resolvedName)
 
       // Build classification (we know the type — no AI classification needed)
       const classification: DocumentClassification = {

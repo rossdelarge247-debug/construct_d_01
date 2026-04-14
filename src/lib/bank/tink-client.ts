@@ -255,6 +255,62 @@ export async function getTransactions(
   return all
 }
 
+// ═══ Provider name resolution ═══
+
+/**
+ * Fetch human-readable display names for financial institution IDs.
+ * Uses client credentials with providers:read scope.
+ * Returns a map of institutionId → displayName.
+ */
+export async function fetchProviderDisplayNames(
+  institutionIds: string[],
+): Promise<Record<string, string>> {
+  const names: Record<string, string> = {}
+  if (institutionIds.length === 0) return names
+
+  try {
+    const token = await getClientToken('providers:read')
+
+    // Fetch all GB providers in one call and filter
+    const res = await fetch(`${TINK_BASE_URL}/api/v1/providers/gb`, {
+      headers: { 'Authorization': `Bearer ${token}` },
+    })
+
+    if (res.ok) {
+      const data = await res.json()
+      const providers: Array<{ name: string; displayName: string; financialInstitutionId: string }> =
+        data.providers || data || []
+
+      for (const provider of providers) {
+        const id = provider.financialInstitutionId || provider.name
+        if (institutionIds.includes(id)) {
+          names[id] = provider.displayName || provider.name
+        }
+      }
+    }
+
+    // For any IDs not found via the list, try individual lookup
+    for (const id of institutionIds) {
+      if (names[id]) continue
+      try {
+        const provRes = await fetch(`${TINK_BASE_URL}/api/v1/providers/${id}`, {
+          headers: { 'Authorization': `Bearer ${token}` },
+        })
+        if (provRes.ok) {
+          const provData = await provRes.json()
+          names[id] = provData.displayName || provData.name || id
+        }
+      } catch {
+        // Individual lookup failed — fall through to transformer's hardcoded map
+      }
+    }
+  } catch (error) {
+    console.warn('[Tink] Provider name lookup failed, using fallback:', error)
+  }
+
+  return names
+}
+
 // ═══ Helpers ═══
 
 /** Parse Tink's unscaled amount format: { unscaledValue: "12345", scale: "2" } → 123.45 */
