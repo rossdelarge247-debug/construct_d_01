@@ -649,14 +649,29 @@ function generateAccountsSteps(extractions: BankStatementExtraction[]): Confirma
   return steps
 }
 
-// ═══ Pensions (spec 22 §4, spec 25 screen 2g) ═══
+// ═══ Pensions (spec 22 §4) ═══
+//
+// Ladder:
+//   1. Pension contribution detected → confirm, or no signal → ask
+//   2. How many pensions?
+//   3. DB vs DC (affects valuation significantly)
+//   4. CETV status + education
+//   5. Already drawing? (changes what documents needed)
+//
+// Cross-section impacts:
+//   → Income: if retired/drawing, pension income captured there
+//   → Accounts: SIPP may have been flagged in Accounts section
+//   → Finalisation: CETV has 6-8 week lead time — longest gap document
 
 function generatePensionsSteps(extractions: BankStatementExtraction[]): ConfirmationStep[] {
   const allPayments = extractions.flatMap((e) => e.regular_payments)
   const pension = allPayments.find((p) => p.likely_category === 'pension_contribution')
+  const steps: ConfirmationStep[] = []
+
+  // ── Entry: detected or not ──
 
   if (pension) {
-    return [{
+    steps.push({
       id: 'pensions-detected',
       sectionKey: 'pensions',
       sectionLabel: 'Pensions',
@@ -667,21 +682,148 @@ function generatePensionsSteps(extractions: BankStatementExtraction[]): Confirma
         { label: 'No, it\'s insurance', value: 'insurance' },
         { label: 'Not sure', value: 'unsure' },
       ],
-    }]
+    })
+  } else {
+    steps.push({
+      id: 'pensions-no-signal',
+      sectionKey: 'pensions',
+      sectionLabel: 'Pensions',
+      type: 'question',
+      text: "We can't see pension contributions — they're often deducted from your pay before it reaches your bank.",
+      subtext: 'Most employees enrolled after 2012 have a workplace pension.',
+      options: [
+        { label: 'I have a workplace pension', value: 'workplace' },
+        { label: 'I have a personal or private pension', value: 'personal' },
+        { label: 'I have more than one pension', value: 'multiple' },
+        { label: 'I\'m already drawing my pension', value: 'drawing' },
+        { label: 'I\'m not sure', value: 'unsure' },
+        { label: 'No pensions', value: 'none' },
+      ],
+    })
   }
 
-  return [{
-    id: 'pensions-no-signal',
+  // ── How many pensions? (if detected or has pension) ──
+  const hasPensionId = pension ? 'pensions-detected' : 'pensions-no-signal'
+  const hasPensionValues = pension ? 'yes' : ['workplace', 'personal']
+
+  steps.push({
+    id: 'pensions-count',
     sectionKey: 'pensions',
     sectionLabel: 'Pensions',
     type: 'question',
-    text: "We didn't see any pension payments, what's your pension situation?",
-    subtext: 'Workplace pensions are often deducted before pay reaches your bank.',
+    text: 'How many pensions do you have in total?',
+    subtext: 'Include workplace, personal, and any old pensions from previous jobs.',
     options: [
-      { label: 'I have at least one private pension', value: 'has_pension' },
-      { label: 'No private pensions', value: 'none' },
+      { label: 'Just one', value: '1' },
+      { label: 'Two', value: '2' },
+      { label: 'Three or more', value: '3+' },
     ],
-  }]
+    showWhen: { questionId: hasPensionId, value: hasPensionValues },
+  })
+
+  // ── DB vs DC — affects valuation significantly ──
+
+  steps.push({
+    id: 'pensions-type',
+    sectionKey: 'pensions',
+    sectionLabel: 'Pensions',
+    type: 'question',
+    text: 'What type of pension is your main one?',
+    subtext: 'If unsure, a defined benefit pension promises a specific income in retirement. Defined contribution is a pot of money you\'ve built up.',
+    options: [
+      { label: 'Defined benefit (final salary / career average)', value: 'db' },
+      { label: 'Defined contribution (money purchase / pot)', value: 'dc' },
+      { label: 'I\'m not sure', value: 'unsure' },
+    ],
+    showWhen: { questionId: hasPensionId, value: hasPensionValues },
+  })
+
+  // ── CETV status ──
+
+  steps.push({
+    id: 'pensions-cetv',
+    sectionKey: 'pensions',
+    sectionLabel: 'Pensions',
+    type: 'question',
+    text: 'Have you requested a CETV from your pension provider?',
+    subtext: 'A CETV (Cash Equivalent Transfer Value) shows the transfer value of your pension. It takes 6-8 weeks, so we\'d recommend starting now.',
+    options: [
+      { label: 'Yes, already requested', value: 'requested' },
+      { label: 'No, not yet', value: 'not_yet' },
+      { label: 'What\'s a CETV?', value: 'education' },
+    ],
+    showWhen: { questionId: hasPensionId, value: hasPensionValues },
+  })
+
+  // ── CETV education (if they asked) ──
+
+  steps.push({
+    id: 'pensions-cetv-education',
+    sectionKey: 'pensions',
+    sectionLabel: 'Pensions',
+    type: 'confirmation_message',
+    text: 'A CETV is the cash value your pension provider puts on your pension if you were to transfer it. It\'s required for financial disclosure. Contact your provider to request one — it\'s free but takes 6-8 weeks.',
+    showWhen: { questionId: 'pensions-cetv', value: 'education' },
+  })
+
+  // ── Already drawing pension (from no-signal path) ──
+
+  steps.push({
+    id: 'pensions-drawing-other',
+    sectionKey: 'pensions',
+    sectionLabel: 'Pensions',
+    type: 'question',
+    text: 'Do you have any other pensions you\'re not yet drawing from?',
+    options: [
+      { label: 'Yes', value: 'yes' },
+      { label: 'No, just the one I\'m drawing', value: 'no' },
+    ],
+    showWhen: { questionId: 'pensions-no-signal', value: 'drawing' },
+  })
+
+  // ── Multiple pensions (from no-signal path) ──
+
+  steps.push({
+    id: 'pensions-multiple-count',
+    sectionKey: 'pensions',
+    sectionLabel: 'Pensions',
+    type: 'question',
+    text: 'How many pensions do you have?',
+    options: [
+      { label: 'Two', value: '2' },
+      { label: 'Three', value: '3' },
+      { label: 'Four or more', value: '4+' },
+    ],
+    showWhen: { questionId: 'pensions-no-signal', value: 'multiple' },
+  })
+
+  steps.push({
+    id: 'pensions-multiple-cetv',
+    sectionKey: 'pensions',
+    sectionLabel: 'Pensions',
+    type: 'question',
+    text: 'Have you requested CETVs for your pensions?',
+    subtext: 'You\'ll need a CETV for each pension. They take 6-8 weeks.',
+    options: [
+      { label: 'Yes, for all of them', value: 'all' },
+      { label: 'Yes, for some', value: 'some' },
+      { label: 'No, not yet', value: 'not_yet' },
+    ],
+    showWhen: { questionId: 'pensions-no-signal', value: 'multiple' },
+  })
+
+  // ── Not sure path ──
+
+  steps.push({
+    id: 'pensions-unsure-help',
+    sectionKey: 'pensions',
+    sectionLabel: 'Pensions',
+    type: 'confirmation_message',
+    text: 'Check your payslip — your workplace pension provider is usually listed there. You can also ask your employer\'s HR team. If you\'ve changed jobs, you may have pensions from previous employers too.',
+    showWhen: { questionId: 'pensions-no-signal', value: 'unsure' },
+  })
+
+  return steps
 }
 
 // ═══ Debts (spec 22 §5, spec 25 screen 2h) ═══
@@ -1033,25 +1175,75 @@ function generateAccountsSummary(
 }
 
 function generatePensionsSummary(answers: Record<string, string>): SectionSummaryData {
-  const hasPension = answers['pensions-detected'] === 'yes' || answers['pensions-no-signal'] === 'has_pension'
+  const detectedYes = answers['pensions-detected'] === 'yes'
+  const noSignalAnswer = answers['pensions-no-signal']
+  const hasPension = detectedYes ||
+    noSignalAnswer === 'workplace' ||
+    noSignalAnswer === 'personal' ||
+    noSignalAnswer === 'multiple' ||
+    noSignalAnswer === 'drawing'
   const facts: SectionSummaryFact[] = []
 
-  if (hasPension) {
-    facts.push({
-      label: 'You have at least one private pension',
-      source: 'self',
-      gapMessage: 'You will need to request a CETV (Cash Equivalent Transfer Value) from your pension provider. This can take 6-8 weeks, so we recommend starting now. We will add an action to your task list.',
-    })
-  } else {
-    facts.push({ label: 'No private pensions to disclose', source: 'self' })
+  if (!hasPension) {
+    if (noSignalAnswer === 'unsure') {
+      facts.push({ label: 'Pension situation uncertain — check your payslip or ask your employer', source: 'self' })
+    } else {
+      facts.push({ label: 'No pensions to disclose', source: 'self' })
+    }
+    return {
+      sectionKey: 'pensions',
+      sectionLabel: 'Pensions',
+      heading: "That's it for pensions",
+      facts,
+      accordionLabel: 'No pensions to disclose',
+    }
   }
+
+  // ── Pension type ──
+  if (noSignalAnswer === 'drawing') {
+    facts.push({ label: 'Already drawing pension income', source: 'self' })
+    if (answers['pensions-drawing-other'] === 'yes') {
+      facts.push({ label: 'Additional pensions not yet in payment', source: 'self', gapMessage: 'You\'ll need a CETV for each pension not yet in payment. This takes 6-8 weeks.' })
+    }
+  } else {
+    // Count
+    const count = answers['pensions-count'] || answers['pensions-multiple-count']
+    if (count === '1') facts.push({ label: 'One pension', source: 'self' })
+    else if (count) facts.push({ label: `${count} pensions`, source: 'self' })
+    else facts.push({ label: 'Pension(s) to disclose', source: 'self' })
+
+    // DB vs DC
+    const pensionType = answers['pensions-type']
+    if (pensionType === 'db') {
+      facts.push({ label: 'Defined benefit (final salary / career average)', source: 'self' })
+    } else if (pensionType === 'dc') {
+      facts.push({ label: 'Defined contribution (money purchase)', source: 'self' })
+    }
+
+    // CETV status
+    const cetvStatus = answers['pensions-cetv'] || answers['pensions-multiple-cetv']
+    if (cetvStatus === 'requested' || cetvStatus === 'all') {
+      facts.push({ label: 'CETV already requested', source: 'self' })
+    } else {
+      facts.push({
+        label: 'CETV not yet requested',
+        source: 'self',
+        gapMessage: 'Request a CETV from your pension provider(s) now — it takes 6-8 weeks and is required for disclosure.',
+      })
+    }
+  }
+
+  // Source label
+  const sourceLabel = noSignalAnswer === 'workplace' ? 'Workplace pension' :
+    noSignalAnswer === 'personal' ? 'Personal pension' :
+    detectedYes ? 'Personal pension' : 'Pension'
 
   return {
     sectionKey: 'pensions',
     sectionLabel: 'Pensions',
     heading: "That's it for pensions",
     facts,
-    accordionLabel: hasPension ? 'Pensions disclosed, ready for sharing & collaboration' : 'No private pensions to disclose',
+    accordionLabel: `${sourceLabel} disclosed, ready for sharing & collaboration`,
   }
 }
 
