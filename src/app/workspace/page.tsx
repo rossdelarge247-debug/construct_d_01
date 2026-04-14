@@ -20,6 +20,7 @@ export default function WorkspacePage() {
   const [confirmationComplete, setConfirmationComplete] = useState(false)
   const [confirmations, setConfirmations] = useState<SectionConfirmation[]>([])
   const [spendingResult, setSpendingResult] = useState<SpendingFlowResult | null>(null)
+  const [spendingReturnTo, setSpendingReturnTo] = useState<'task_list' | 'financial_summary'>('financial_summary')
 
   // ═══ Navigation callbacks ═══
 
@@ -67,8 +68,9 @@ export default function WorkspacePage() {
   }, [])
 
   const handleStartSpending = useCallback(() => {
+    setSpendingReturnTo(view === 'financial_summary' ? 'financial_summary' : 'task_list')
     setView('spending_upgrade')
-  }, [])
+  }, [view])
 
   const handleSpendingUpgradeComplete = useCallback((result: SpendingFlowResult) => {
     setSpendingResult(result)
@@ -128,10 +130,10 @@ export default function WorkspacePage() {
         {view === 'spending_upgrade' && (
           <div className="max-w-[var(--content-narrow)] mx-auto">
             <button
-              onClick={() => setView('financial_summary')}
+              onClick={() => setView(spendingReturnTo)}
               className="text-[13px] font-medium text-blue-600 hover:underline mb-6 inline-block"
             >
-              &larr; Back to financial summary
+              &larr; {spendingReturnTo === 'financial_summary' ? 'Back to financial summary' : 'Back to workspace'}
             </button>
             <div
               className="bg-white overflow-hidden p-6"
@@ -147,7 +149,7 @@ export default function WorkspacePage() {
                   e.income_deposits.some((d) => d.type === 'benefits' && d.source.toLowerCase().includes('child')),
                 )}
                 onComplete={handleSpendingUpgradeComplete}
-                onSkip={() => setView('financial_summary')}
+                onSkip={() => setView(spendingReturnTo)}
                 startInCategorise
               />
             </div>
