@@ -331,18 +331,37 @@ export default function EngineWorkbenchPage() {
         amount: c.amount,
       }))
       const ntropyInput = toNtropyInput(payments)
-      const res = await fetch('/api/ntropy/enrich', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(ntropyInput),
-      })
-      const data = await res.json()
-      if (data.error) {
-        setNtropyResult({ comparisons: [], latencyMs: 0, creditsUsed: 0, error: data.error })
-        return
+
+      // Chunk into batches of 100 (API limit per request)
+      const BATCH_SIZE = 100
+      const batches: typeof ntropyInput[] = []
+      for (let i = 0; i < ntropyInput.length; i += BATCH_SIZE) {
+        batches.push(ntropyInput.slice(i, i + BATCH_SIZE))
       }
+
+      // Send all batches and combine results
+      let totalLatency = 0
+      let totalCredits = 0
+      const allEnriched: NtropyEnrichedTransaction[] = []
+
+      for (const batch of batches) {
+        const res = await fetch('/api/ntropy/enrich', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(batch),
+        })
+        const data = await res.json()
+        if (data.error) {
+          setNtropyResult({ comparisons: [], latencyMs: totalLatency, creditsUsed: totalCredits, error: `Batch error: ${data.error}` })
+          return
+        }
+        allEnriched.push(...(data.enriched ?? []))
+        totalLatency += data.latencyMs ?? 0
+        totalCredits += data.creditsUsed ?? 0
+      }
+
       const enrichedMap = new Map<string, NtropyEnrichedTransaction>()
-      for (const e of data.enriched) {
+      for (const e of allEnriched) {
         enrichedMap.set(e.transaction_id, e)
       }
       const comparisons: NtropyComparison[] = activeResult.classifications.map((c, i) => {
@@ -354,13 +373,13 @@ export default function EngineWorkbenchPage() {
           ourCategory: c.autoCategory,
           ntropyMerchant: enriched?.merchant ?? null,
           ntropyLabels: enriched?.labels ?? [],
-          agree: null,  // Manual comparison — categories don't map 1:1
+          agree: null,
         }
       })
       setNtropyResult({
         comparisons,
-        latencyMs: data.latencyMs,
-        creditsUsed: data.creditsUsed,
+        latencyMs: totalLatency,
+        creditsUsed: totalCredits,
         error: null,
       })
       setActiveTab('ntropy')
@@ -383,6 +402,115 @@ export default function EngineWorkbenchPage() {
     if (filterCategory === 'all') return activeResult.classifications
     return activeResult.classifications.filter((c) => c.autoCategory === filterCategory)
   }, [activeResult, filterCategory])
+
+  // Ntropy lookup: match by payee + amount for inline display on classifications tab
+  const ntropyLookup = useMemo(() => {
+    if (!ntropyResult?.comparisons) return new Map<string, NtropyComparison>()
+    const map = new Map<string, NtropyComparison>()
+    for (const c of ntropyResult.comparisons) {
+      map.set(`${c.payee}:${c.amount}`, c)
+    }
+    return map
+  }, [ntropyResult])
+
+  // Question → trigger mapping: which classification/signal caused each question to fire
+  const questionTriggers = useMemo(() => {
+    if (!activeResult) return new Map<string, { type: 'classification' | 'signal' | 'absence'; label: string; ruleId?: string }>()
+    const map = new Map<string, { type: 'classification' | 'signal' | 'absence'; label: string; ruleId?: string }>()
+
+    // Map question ID prefixes to the data that triggers them
+    const payments = activeResult.extractions.flatMap(e => e.regular_payments)
+    const incomes = activeResult.extractions.flatMap(e => e.income_deposits)
+    const signals = signalResult?.signals ?? []
+
+    // Income section
+    const employment = incomes.filter(i => i.type === 'employment')
+    if (employment.length > 0) {
+      const p = employment[0]
+      map.set('income-salary', { type: 'classification', label: `${p.source}: £${p.amount}/mo (employment)` })
+      map.set('income-salary-confirmed', { type: 'classification', label: `${p.source}: £${p.amount}/mo` })
+      map.set('income-not-salary', { type: 'classification', label: `${p.source}: £${p.amount}/mo` })
+    }
+    const benefits = incomes.filter(i => i.type === 'benefits')
+    for (const b of benefits) {
+      const key = b.source.toLowerCase().includes('hmrc') ? 'income-benefits-hmrc' : 'income-benefits-dwp'
+      map.set(key, { type: 'classification', label: `${b.source}: £${b.amount}/mo (benefits)` })
+    }
+    const selfEmp = incomes.filter(i => i.type === 'self_employment')
+    if (selfEmp.length > 0) {
+      map.set('income-self-employment', { type: 'classification', label: `${selfEmp[0].source} (self-employment)` })
+    }
+    if (incomes.length === 0) {
+      map.set('income-no-income', { type: 'absence', label: 'No income detected', ruleId: 'income.none-visible' })
+    }
+
+    // Property section
+    const mortgage = payments.find(p => p.likely_category === 'mortgage')
+    if (mortgage) {
+      map.set('property-mortgage-confirm', { type: 'classification', label: `${mortgage.payee}: £${mortgage.amount}/mo (mortgage)`, ruleId: 'property.mortgage-detected' })
+      map.set('property-mortgage-ownership', { type: 'classification', label: `${mortgage.payee} (mortgage)` })
+      map.set('property-mortgage-value', { type: 'classification', label: `${mortgage.payee} (mortgage)` })
+    }
+    const rent = payments.find(p => p.likely_category === 'rent')
+    if (rent) {
+      map.set('property-rent-confirm', { type: 'classification', label: `${rent.payee}: £${rent.amount}/mo (rent)`, ruleId: 'property.rent-detected' })
+    }
+    const ct = payments.find(p => p.likely_category === 'council_tax')
+    if (ct) {
+      map.set('property-council-tax', { type: 'classification', label: `${ct.payee}: £${ct.amount}/mo (council tax)`, ruleId: 'property.council-tax' })
+    }
+
+    // Accounts section
+    const investments = payments.filter(p => p.likely_category === 'investment')
+    for (const inv of investments) {
+      map.set(`accounts-investment-${inv.payee.slice(0, 15).replace(/\s/g, '-').toLowerCase()}`, { type: 'classification', label: `${inv.payee}: £${inv.amount}/mo`, ruleId: 'accounts.investment-platform' })
+    }
+
+    // Pensions
+    const pensions = payments.filter(p => p.likely_category === 'pension_contribution')
+    for (const pen of pensions) {
+      map.set(`pensions-contribution-${pen.payee.slice(0, 15).replace(/\s/g, '-').toLowerCase()}`, { type: 'classification', label: `${pen.payee}: £${pen.amount}/mo`, ruleId: 'pension.contribution-detected' })
+    }
+
+    // Debts
+    const cards = payments.filter(p => p.likely_category === 'credit_card')
+    for (const c of cards) {
+      map.set(`debts-credit-card-${c.payee.slice(0, 15).replace(/\s/g, '-').toLowerCase()}`, { type: 'classification', label: `${c.payee}: £${c.amount}/mo`, ruleId: 'debt.credit-card' })
+    }
+    const loans = payments.filter(p => p.likely_category === 'loan_repayment')
+    for (const l of loans) {
+      map.set(`debts-loan-${l.payee.slice(0, 15).replace(/\s/g, '-').toLowerCase()}`, { type: 'classification', label: `${l.payee}: £${l.amount}/mo`, ruleId: 'debt.loan' })
+    }
+
+    // Also map signals directly: any signal's ruleId can be looked up
+    for (const s of signals) {
+      // Use signal ruleId for questions that don't have a direct classification mapping
+      const existing = Array.from(map.entries()).find(([, v]) => v.ruleId === s.ruleId)
+      if (!existing) {
+        map.set(s.ruleId, { type: 'signal', label: s.determination, ruleId: s.ruleId })
+      }
+    }
+
+    return map
+  }, [activeResult, signalResult])
+
+  // Fuzzy lookup for question triggers — match by prefix since question IDs may not exactly match
+  const getQuestionTrigger = useCallback((questionId: string) => {
+    // Exact match first
+    const exact = questionTriggers.get(questionId)
+    if (exact) return exact
+    // Prefix match: question IDs like "property-mortgage-confirm" should match "property-mortgage"
+    for (const [key, value] of questionTriggers) {
+      if (questionId.startsWith(key) || key.startsWith(questionId)) return value
+    }
+    // Section match: link to any signal in the same section
+    const section = questionId.split('-')[0]
+    if (signalResult) {
+      const sectionSignal = signalResult.signals.find(s => s.section === section)
+      if (sectionSignal) return { type: 'signal' as const, label: sectionSignal.determination, ruleId: sectionSignal.ruleId }
+    }
+    return null
+  }, [questionTriggers, signalResult])
 
   const ALL_CATEGORIES: DetectedPayment['likely_category'][] = [
     'mortgage', 'rent', 'insurance', 'pension_contribution', 'childcare',
@@ -452,7 +580,7 @@ export default function EngineWorkbenchPage() {
               disabled={ntropyLoading}
               className="px-4 py-2 bg-purple-600 text-white rounded-lg text-sm font-medium hover:bg-purple-700 transition-colors disabled:opacity-50"
             >
-              {ntropyLoading ? 'Enriching...' : `Compare with Ntropy (${activeResult.classifications.length} txns)`}
+              {ntropyLoading ? 'Enriching...' : `Compare with Ntropy (${activeResult.classifications.length} txns${activeResult.classifications.length > 100 ? `, ${Math.ceil(activeResult.classifications.length / 100)} batches` : ''})`}
             </button>
           </>
         )}
@@ -539,6 +667,8 @@ export default function EngineWorkbenchPage() {
                       <th className="px-4 py-3 font-medium text-gray-600 text-right">Amount</th>
                       <th className="px-4 py-3 font-medium text-gray-600">Freq</th>
                       <th className="px-4 py-3 font-medium text-gray-600">Auto category</th>
+                      {ntropyResult && <th className="px-4 py-3 font-medium text-purple-600">Ntropy merchant</th>}
+                      {ntropyResult && <th className="px-4 py-3 font-medium text-purple-600">Ntropy labels</th>}
                       <th className="px-4 py-3 font-medium text-gray-600">Expected</th>
                       <th className="px-4 py-3 font-medium text-gray-600">Conf</th>
                       <th className="px-4 py-3 font-medium text-gray-600 text-center">Match</th>
@@ -567,6 +697,24 @@ export default function EngineWorkbenchPage() {
                               ))}
                             </select>
                           </td>
+                          {ntropyResult && (() => {
+                            const ntr = ntropyLookup.get(`${c.payee}:${c.amount}`)
+                            return (
+                              <>
+                                <td className="px-4 py-2 text-sm">
+                                  {ntr?.ntropyMerchant ?? <span className="text-gray-300">—</span>}
+                                </td>
+                                <td className="px-4 py-2">
+                                  {ntr && ntr.ntropyLabels.length > 0
+                                    ? ntr.ntropyLabels.map((l, j) => (
+                                        <span key={j} className="px-1.5 py-0.5 rounded-full text-xs bg-purple-100 text-purple-800 mr-1">{l}</span>
+                                      ))
+                                    : <span className="text-gray-300">—</span>
+                                  }
+                                </td>
+                              </>
+                            )
+                          })()}
                           <td className="px-4 py-2 text-gray-500">{c.expectedCategory ?? '—'}</td>
                           <td className="px-4 py-2 tabular-nums text-gray-500">
                             {c.confidence >= 1.0
@@ -633,22 +781,49 @@ export default function EngineWorkbenchPage() {
                     <th className="px-4 py-3 font-medium text-gray-600">Section</th>
                     <th className="px-4 py-3 font-medium text-gray-600">ID</th>
                     <th className="px-4 py-3 font-medium text-gray-600">Question text</th>
+                    <th className="px-4 py-3 font-medium text-gray-600">Triggered by</th>
                     <th className="px-4 py-3 font-medium text-gray-600 text-center">Fires?</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-100">
-                  {activeResult.questions.map((q, i) => (
-                    <tr key={i} className={q.fired ? '' : 'opacity-40'}>
-                      <td className="px-4 py-2">
-                        <span className="px-2 py-0.5 rounded-full text-xs bg-purple-100 text-purple-800">{q.sectionKey}</span>
-                      </td>
-                      <td className="px-4 py-2 text-gray-500 text-xs">{q.id}</td>
-                      <td className="px-4 py-2 max-w-[400px] truncate" title={q.text}>{q.text}</td>
-                      <td className="px-4 py-2 text-center">
-                        {q.fired ? <span className="text-green-600 font-bold">●</span> : <span className="text-gray-300">○</span>}
-                      </td>
-                    </tr>
-                  ))}
+                  {activeResult.questions.map((q, i) => {
+                    const trigger = getQuestionTrigger(q.id)
+                    return (
+                      <tr key={i} className={q.fired ? '' : 'opacity-40'}>
+                        <td className="px-4 py-2">
+                          <span className="px-2 py-0.5 rounded-full text-xs bg-purple-100 text-purple-800">{q.sectionKey}</span>
+                        </td>
+                        <td className="px-4 py-2 text-gray-500 text-xs">{q.id}</td>
+                        <td className="px-4 py-2 max-w-[350px] truncate" title={q.text}>{q.text}</td>
+                        <td className="px-4 py-2 max-w-[250px]">
+                          {trigger ? (
+                            <div className="flex items-center gap-1.5">
+                              <span className={`w-1.5 h-1.5 rounded-full flex-shrink-0 ${
+                                trigger.type === 'classification' ? 'bg-blue-500'
+                                : trigger.type === 'signal' ? 'bg-green-500'
+                                : 'bg-gray-400'
+                              }`} />
+                              <span className="text-xs text-gray-600 truncate" title={trigger.label}>{trigger.label}</span>
+                              {trigger.ruleId && (
+                                <button
+                                  onClick={() => setActiveTab('rules')}
+                                  className="flex-shrink-0 px-1.5 py-0.5 rounded text-xs bg-gray-100 text-gray-500 hover:bg-gray-200 transition-colors"
+                                  title={`View rule: ${trigger.ruleId}`}
+                                >
+                                  {trigger.ruleId.split('.').pop()}
+                                </button>
+                              )}
+                            </div>
+                          ) : (
+                            <span className="text-gray-300 text-xs">—</span>
+                          )}
+                        </td>
+                        <td className="px-4 py-2 text-center">
+                          {q.fired ? <span className="text-green-600 font-bold">●</span> : <span className="text-gray-300">○</span>}
+                        </td>
+                      </tr>
+                    )
+                  })}
                 </tbody>
               </table>
             </div>
