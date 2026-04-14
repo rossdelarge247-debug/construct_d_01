@@ -331,7 +331,7 @@ function SpendingCard({
                 color: isEstimated ? 'var(--color-amber-600)' : 'var(--color-green-600)',
               }}
             >
-              {isEstimated ? 'Estimated' : `${bankName} Bank connection`}
+              {isEstimated ? 'Estimated' : 'Bank confirmed'}
             </span>
             {!isEstimated && (
               <button className="text-[13px] text-blue-600 hover:opacity-80 shrink-0">Edit</button>

@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useCallback } from 'react'
+import { useState, useCallback, useRef, useEffect } from 'react'
 import { X } from 'lucide-react'
 import {
   SPENDING_CATEGORIES,
@@ -62,10 +62,14 @@ export function SpendingCategorise({
     setCurrentItems(items)
   }, [detectedItems])
 
-  // On first render, init the first category
-  useState(() => {
-    if (currentCat) initCategoryItems(currentCat)
-  })
+  // Init the first category on mount
+  const initialised = useRef(false)
+  useEffect(() => {
+    if (!initialised.current && currentCat) {
+      initCategoryItems(currentCat)
+      initialised.current = true
+    }
+  }, [currentCat, initCategoryItems])
 
   const removeItem = (id: string) => {
     setCurrentItems((prev) => prev.filter((item) => item.id !== id))

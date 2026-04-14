@@ -1,5 +1,7 @@
 'use client'
 
+import { useState } from 'react'
+
 // S1a — Spending fork: "Do it now" or "Just provide estimates"
 // Appears as the last section in the confirmation flow.
 // The question acknowledges the user's time and doesn't pressure them.
@@ -10,6 +12,8 @@ interface SpendingForkProps {
 }
 
 export function SpendingFork({ onChoose, onSkip }: SpendingForkProps) {
+  const [selected, setSelected] = useState<'now' | 'estimates' | null>(null)
+
   return (
     <div className="animate-fade-in">
       <p className="text-[12px] font-semibold text-ink-tertiary uppercase tracking-wider mb-2">
@@ -23,17 +27,30 @@ export function SpendingFork({ onChoose, onSkip }: SpendingForkProps) {
       <div className="mt-6 space-y-2">
         <ForkOption
           label="I'd like to get it done now"
-          selected={false}
-          onClick={() => onChoose('now')}
+          selected={selected === 'now'}
+          onClick={() => setSelected('now')}
         />
         <ForkOption
           label="I'll just provide some estimates to begin with"
-          selected={false}
-          onClick={() => onChoose('estimates')}
+          selected={selected === 'estimates'}
+          onClick={() => setSelected('estimates')}
         />
       </div>
 
       <div className="mt-8 flex items-center gap-4">
+        <button
+          onClick={() => selected && onChoose(selected)}
+          disabled={!selected}
+          className="px-8 py-3.5 text-white text-[15px] font-semibold transition-all active:scale-[0.98] disabled:opacity-40 disabled:cursor-not-allowed"
+          style={{
+            backgroundColor: 'var(--color-red-500)',
+            borderRadius: 'var(--radius-card)',
+          }}
+          onMouseEnter={(e) => { if (selected) e.currentTarget.style.backgroundColor = 'var(--color-red-600)' }}
+          onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = 'var(--color-red-500)' }}
+        >
+          Continue
+        </button>
         <button
           onClick={onSkip}
           className="text-[13px] text-ink-tertiary hover:text-ink-secondary transition-colors"

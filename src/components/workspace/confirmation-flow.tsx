@@ -154,7 +154,7 @@ export function ConfirmationFlow({
       ? 'Spending estimates disclosed, ready for starter conversations (complete full disclosure asap)'
       : 'Spending fully disclosed'
     setCompletedSections((prev: SectionSummaryData[]) => [...prev, {
-      sectionKey: 'spending' as SectionSummaryData['sectionKey'],
+      sectionKey: 'spending',
       sectionLabel: 'Spending',
       heading: 'Spending disclosed',
       accordionLabel: spendingLabel,
@@ -181,7 +181,7 @@ export function ConfirmationFlow({
 
   const handleFinish = useCallback(() => {
     const confirmations: SectionConfirmation[] = completedSections
-      .filter((s: SectionSummaryData) => (s.sectionKey as string) !== 'spending')
+      .filter((s: SectionSummaryData) => s.sectionKey !== 'spending')
       .map((s: SectionSummaryData) => ({
         sectionKey: s.sectionKey,
         status: 'confirmed' as const,

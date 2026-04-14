@@ -7,11 +7,9 @@ import { TaskListHome } from '@/components/workspace/task-list-home'
 import { BankConnectionFlow } from '@/components/workspace/bank-connection-flow'
 import { ConfirmationFlow } from '@/components/workspace/confirmation-flow'
 import { FinancialSummaryPage } from '@/components/workspace/financial-summary-page'
-import type { BankConnectionPhase, ConnectedAccount, SectionConfirmation, SpendingFlowResult } from '@/types/hub'
+import type { BankConnectionPhase, ConnectedAccount, SectionConfirmation, SpendingFlowResult, WorkspaceView } from '@/types/hub'
 import type { BankStatementExtraction } from '@/lib/ai/extraction-schemas'
 import { SpendingFlow } from '@/components/workspace/spending-flow'
-
-type WorkspaceView = 'carousel' | 'task_list' | 'bank_connection' | 'confirmation' | 'financial_summary' | 'spending_upgrade'
 
 export default function WorkspacePage() {
   const [view, setView] = useState<WorkspaceView>('carousel')

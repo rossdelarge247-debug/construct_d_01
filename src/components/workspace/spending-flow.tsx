@@ -217,7 +217,7 @@ function FullSpendingSummary({
                   color: 'var(--color-green-600)',
                 }}
               >
-                {bankName} Bank connection
+                Bank confirmed
               </span>
               <button className="text-[13px] text-blue-600 hover:opacity-80 shrink-0">
                 Edit

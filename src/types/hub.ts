@@ -13,6 +13,7 @@ export type WorkspaceView =
   | 'bank_connection'
   | 'confirmation'
   | 'financial_summary'
+  | 'spending_upgrade'
 
 export type BankConnectionPhase =
   | 'idle'

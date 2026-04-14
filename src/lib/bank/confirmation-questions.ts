@@ -38,7 +38,7 @@ export interface SectionSummaryFact {
 }
 
 export interface SectionSummaryData {
-  sectionKey: ConfirmationSectionKey
+  sectionKey: ConfirmationSectionKey | 'spending'
   sectionLabel: string
   heading: string
   facts: SectionSummaryFact[]
