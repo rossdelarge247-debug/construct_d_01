@@ -62,7 +62,10 @@ export function ConfirmationFlow({
 
   const handleSectionQuestionsComplete = useCallback(() => {
     const summary = generateSectionSummary(currentSectionKey, answers, extractions)
-    setCompletedSections((prev: SectionSummaryData[]) => [...prev, summary])
+    setCompletedSections((prev: SectionSummaryData[]) => {
+      const filtered = prev.filter((s) => s.sectionKey !== currentSectionKey)
+      return [...filtered, summary]
+    })
     setAccordionOpen(true)
     setPhase('mini_summary')
   }, [currentSectionKey, answers, extractions])
@@ -153,7 +156,9 @@ export function ConfirmationFlow({
     const spendingLabel = result.mode === 'estimates'
       ? 'Spending estimates disclosed, ready for starter conversations (complete full disclosure asap)'
       : 'Spending fully disclosed'
-    setCompletedSections((prev: SectionSummaryData[]) => [...prev, {
+    setCompletedSections((prev: SectionSummaryData[]) => {
+      const filtered = prev.filter((s) => s.sectionKey !== 'spending')
+      return [...filtered, {
       sectionKey: 'spending',
       sectionLabel: 'Spending',
       heading: 'Spending disclosed',
@@ -163,7 +168,8 @@ export function ConfirmationFlow({
         value: `£${c.totalMonthly}`,
         source: result.mode === 'bank_data' ? 'bank' as const : 'self' as const,
       })),
-    }])
+    }]
+    })
     setPhase('final_summary')
     setAccordionOpen(true)
   }, [])
