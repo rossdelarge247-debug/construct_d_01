@@ -59,7 +59,7 @@ export default function ChildrenPage() {
       <div className="space-y-8">
         <div>
           <h1 className="font-heading text-2xl font-bold text-ink">Your children</h1>
-          <p className="mt-2 text-sm text-ink-light leading-relaxed">
+          <p className="mt-2 text-sm text-ink-secondary leading-relaxed">
             Let&apos;s think about what arrangements might work best for your children.
           </p>
         </div>
@@ -110,9 +110,9 @@ export default function ChildrenPage() {
 
         <div className="flex items-center justify-between pt-4">
           {idx > 0 ? (
-            <button type="button" onClick={() => setStep(STEPS[idx - 1])} className="text-sm text-ink-light transition-colors hover:text-ink">Back</button>
+            <button type="button" onClick={() => setStep(STEPS[idx - 1])} className="text-sm text-ink-secondary transition-colors hover:text-ink">Back</button>
           ) : (
-            <button type="button" onClick={() => router.push('/start/route')} className="text-sm text-ink-light transition-colors hover:text-ink">Back</button>
+            <button type="button" onClick={() => router.push('/start/route')} className="text-sm text-ink-secondary transition-colors hover:text-ink">Back</button>
           )}
           <Button onClick={next} disabled={!canContinue()}>Continue</Button>
         </div>

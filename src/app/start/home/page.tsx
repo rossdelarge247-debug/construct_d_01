@@ -57,7 +57,7 @@ export default function HomePage() {
       <div className="space-y-8">
         <div>
           <h1 className="font-heading text-2xl font-bold text-ink">Your home</h1>
-          <p className="mt-2 text-sm text-ink-light leading-relaxed">
+          <p className="mt-2 text-sm text-ink-secondary leading-relaxed">
             Let&apos;s think about what you&apos;d like to happen with the property.
           </p>
         </div>
@@ -106,9 +106,9 @@ export default function HomePage() {
 
         <div className="flex items-center justify-between pt-4">
           {idx > 0 ? (
-            <button type="button" onClick={() => setStep(STEPS[idx - 1])} className="text-sm text-ink-light transition-colors hover:text-ink">Back</button>
+            <button type="button" onClick={() => setStep(STEPS[idx - 1])} className="text-sm text-ink-secondary transition-colors hover:text-ink">Back</button>
           ) : (
-            <button type="button" onClick={() => router.back()} className="text-sm text-ink-light transition-colors hover:text-ink">Back</button>
+            <button type="button" onClick={() => router.back()} className="text-sm text-ink-secondary transition-colors hover:text-ink">Back</button>
           )}
           <Button onClick={next} disabled={!canContinue()}>Continue</Button>
         </div>

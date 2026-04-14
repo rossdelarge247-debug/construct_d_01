@@ -61,8 +61,8 @@ function MultiSelect({ options, selected, onChange }: {
           className={cn(
             'rounded-[var(--radius-md)] border-2 px-5 py-4 text-left text-sm font-medium transition-all duration-200',
             selected.includes(option.value)
-              ? 'border-warmth bg-warmth-light/50 text-warmth-dark'
-              : 'border-cream-dark bg-cream text-ink hover:border-ink-faint',
+              ? 'border-[#E5484D] bg-[#FEF2F2] text-[#E5484D]'
+              : 'border-[var(--color-grey-100)] bg-white text-ink hover:border-ink-faint',
           )}
         >
           {option.label}
@@ -100,14 +100,14 @@ export default function FinancesPage() {
       <div className="space-y-8">
         <div>
           <h1 className="font-heading text-2xl font-bold text-ink">Your finances</h1>
-          <p className="mt-2 text-sm text-ink-light leading-relaxed">
+          <p className="mt-2 text-sm text-ink-secondary leading-relaxed">
             This isn&apos;t about exact numbers yet. It&apos;s about understanding what matters to you.
           </p>
         </div>
 
         {step === 'priorities' && (
           <div className="space-y-5">
-            <p className="text-ink">What matters most to you financially? <span className="text-ink-faint">(Select all that apply)</span></p>
+            <p className="text-ink">What matters most to you financially? <span className="text-ink-tertiary">(Select all that apply)</span></p>
             <MultiSelect
               options={PRIORITY_OPTIONS}
               selected={session.finances.priorities}
@@ -128,7 +128,7 @@ export default function FinancesPage() {
 
         {step === 'worries' && (
           <div className="space-y-5">
-            <p className="text-ink">What worries you most? <span className="text-ink-faint">(Select all that apply)</span></p>
+            <p className="text-ink">What worries you most? <span className="text-ink-tertiary">(Select all that apply)</span></p>
             <MultiSelect
               options={WORRY_OPTIONS}
               selected={session.finances.worries}
@@ -162,8 +162,8 @@ export default function FinancesPage() {
             <p className="text-ink">Here&apos;s what we&apos;ve heard</p>
             <div className="space-y-3">
               {getFinancialReactions(session).map(reaction => (
-                <div key={reaction.trigger} className="rounded-[var(--radius-md)] border border-cream-dark p-5">
-                  <p className="text-sm text-ink-light leading-relaxed">{reaction.message}</p>
+                <div key={reaction.trigger} className="rounded-[var(--radius-md)] border border-[var(--color-grey-100)] p-5">
+                  <p className="text-sm text-ink-secondary leading-relaxed">{reaction.message}</p>
                 </div>
               ))}
               {getFinancialReactions(session).length === 0 && (
@@ -197,9 +197,9 @@ export default function FinancesPage() {
 
         <div className="flex items-center justify-between pt-4">
           {idx > 0 ? (
-            <button type="button" onClick={() => setStep(STEPS[idx - 1])} className="text-sm text-ink-light transition-colors hover:text-ink">Back</button>
+            <button type="button" onClick={() => setStep(STEPS[idx - 1])} className="text-sm text-ink-secondary transition-colors hover:text-ink">Back</button>
           ) : (
-            <button type="button" onClick={() => router.back()} className="text-sm text-ink-light transition-colors hover:text-ink">Back</button>
+            <button type="button" onClick={() => router.back()} className="text-sm text-ink-secondary transition-colors hover:text-ink">Back</button>
           )}
           <Button onClick={next} disabled={!canContinue()}>Continue</Button>
         </div>

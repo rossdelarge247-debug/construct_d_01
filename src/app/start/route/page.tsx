@@ -240,12 +240,12 @@ export default function PathwayPage() {
         <div>
           <div className="flex items-center gap-2">
             <div className="h-3 w-3 rotate-45 bg-warmth" />
-            <span className="text-xs font-medium uppercase tracking-wide text-warmth-dark">Your pathway</span>
+            <span className="text-xs font-medium uppercase tracking-wide text-[#E5484D]">Your pathway</span>
           </div>
           <h1 className="mt-3 font-heading text-2xl font-bold text-ink">
             Your separation journey, step by step.
           </h1>
-          <p className="mt-2 text-sm text-ink-light leading-relaxed">
+          <p className="mt-2 text-sm text-ink-secondary leading-relaxed">
             Based on what you&apos;ve told us, here&apos;s what your specific journey involves — from where you are now to a settled, formalised agreement.
           </p>
         </div>
@@ -257,13 +257,13 @@ export default function PathwayPage() {
               {/* Timeline */}
               <div className="flex flex-col items-center">
                 <div className={cn(
-                  'flex shrink-0 items-center justify-center rounded-full text-cream font-medium',
-                  stage.isMajor ? 'h-8 w-8 bg-warmth text-sm' : 'h-6 w-6 bg-ink-faint text-xs',
+                  'flex shrink-0 items-center justify-center rounded-full text-white font-medium',
+                  stage.isMajor ? 'h-8 w-8 bg-[#E5484D] text-sm' : 'h-6 w-6 bg-ink-tertiary text-xs',
                 )}>
                   {i + 1}
                 </div>
                 {i < stages.length - 1 && (
-                  <div className="w-px flex-1 bg-cream-dark" style={{ minHeight: '16px' }} />
+                  <div className="w-px flex-1 bg-[var(--color-grey-100)]" style={{ minHeight: '16px' }} />
                 )}
               </div>
 
@@ -271,17 +271,17 @@ export default function PathwayPage() {
               <div className={cn('pb-5 flex-1', i === stages.length - 1 && 'pb-0')}>
                 <p className={cn(
                   'font-medium text-ink',
-                  stage.isMajor ? 'text-sm' : 'text-xs text-ink-light',
+                  stage.isMajor ? 'text-sm' : 'text-xs text-ink-secondary',
                 )}>
                   {stage.title}
                 </p>
-                <p className="mt-0.5 text-xs text-ink-faint">{stage.detail}</p>
+                <p className="mt-0.5 text-xs text-ink-tertiary">{stage.detail}</p>
 
                 {/* Tips */}
                 <ul className="mt-2 space-y-1">
                   {stage.tips.map((tip, j) => (
-                    <li key={j} className="flex items-start gap-2 text-xs text-ink-light leading-relaxed">
-                      <span className="mt-1 h-1 w-1 shrink-0 rounded-full bg-ink-faint" />
+                    <li key={j} className="flex items-start gap-2 text-xs text-ink-secondary leading-relaxed">
+                      <span className="mt-1 h-1 w-1 shrink-0 rounded-full bg-ink-tertiary" />
                       {tip}
                     </li>
                   ))}
@@ -289,8 +289,8 @@ export default function PathwayPage() {
 
                 {/* Service hint */}
                 {stage.serviceHint && (
-                  <div className="mt-2 rounded-[var(--radius-sm)] bg-warmth-light/30 px-3 py-2">
-                    <p className="text-xs text-warmth-dark">
+                  <div className="mt-2 rounded-[var(--radius-sm)] bg-[var(--color-grey-50)] px-3 py-2">
+                    <p className="text-xs text-[#E5484D]">
                       <span className="font-medium">How we help:</span> {stage.serviceHint}
                     </p>
                   </div>
@@ -328,12 +328,12 @@ export default function PathwayPage() {
         )}
 
         {/* Waypoint celebration + bridge */}
-        <div className="border-t border-cream-dark pt-6 space-y-4">
+        <div className="border-t border-[var(--color-grey-100)] pt-6 space-y-4">
           <MicroMoment>
             You now have a clearer picture of the process than most people at this stage.
           </MicroMoment>
 
-          <div className="rounded-[var(--radius-md)] border border-sage-light bg-sage-light/30 p-4">
+          <div className="rounded-[var(--radius-md)] border border-[var(--color-green-50)] bg-[var(--color-green-600)]-light/30 p-4">
             <p className="text-sm text-ink leading-relaxed">
               <span className="font-medium">This pathway is part of your free plan.</span> Keep going to add your financial picture, priorities, and personalised recommendations — then download everything as a PDF.
             </p>
@@ -343,7 +343,7 @@ export default function PathwayPage() {
             <button
               type="button"
               onClick={() => router.push('/start/situation')}
-              className="text-sm text-ink-light transition-colors hover:text-ink"
+              className="text-sm text-ink-secondary transition-colors hover:text-ink"
             >
               Back
             </button>
@@ -351,7 +351,7 @@ export default function PathwayPage() {
               <Button onClick={() => router.push(getNextStep())}>
                 Build my full plan
               </Button>
-              <p className="mt-2 text-xs text-ink-faint">About 7 more minutes</p>
+              <p className="mt-2 text-xs text-ink-tertiary">About 7 more minutes</p>
             </div>
           </div>
         </div>
