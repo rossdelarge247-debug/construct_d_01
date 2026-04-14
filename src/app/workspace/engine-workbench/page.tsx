@@ -10,6 +10,7 @@ import { transformExtractionResult } from '@/lib/ai/result-transformer'
 import { generateSectionSteps, CONFIRMATION_SECTIONS } from '@/lib/bank/confirmation-questions'
 import { getAllTestScenarios, type TestScenario, type ExpectedPayment, type ExpectedIncome } from '@/lib/bank/test-scenarios'
 import { toNtropyInput, type NtropyEnrichedTransaction } from '@/lib/bank/ntropy-client'
+import { runSignalDetection, type SignalDetectionResult } from '@/lib/bank/signal-rules'
 import type { BankStatementExtraction, DetectedPayment, ExtractedIncome } from '@/lib/ai/extraction-schemas'
 
 // ═══ Scenario runner ═══
@@ -171,7 +172,7 @@ interface NtropyComparisonResult {
 
 // ═══ UI ═══
 
-type TabId = 'classifications' | 'incomes' | 'questions' | 'ntropy'
+type TabId = 'classifications' | 'incomes' | 'questions' | 'ntropy' | 'rules'
 
 export default function EngineWorkbenchPage() {
   const scenarios = useMemo(() => getAllTestScenarios(), [])
@@ -185,6 +186,32 @@ export default function EngineWorkbenchPage() {
   const [ntropyLoading, setNtropyLoading] = useState(false)
 
   const activeResult = csvResult || result
+
+  // Run signal detection whenever results change
+  const signalResult = useMemo<SignalDetectionResult | null>(() => {
+    if (!activeResult) return null
+    const allPayments = activeResult.extractions.flatMap(e => e.regular_payments)
+    const allIncomes = activeResult.extractions.flatMap(e => e.income_deposits)
+    const allTransactions = activeResult.classifications.map(c => ({
+      date: '2025-06-01',
+      description: c.payee,
+      amount: c.autoCategory === 'unknown' ? -c.amount : -c.amount,
+    }))
+    // Also add income as positive transactions
+    for (const inc of allIncomes) {
+      allTransactions.push({ date: '2025-06-01', description: inc.source, amount: inc.amount })
+    }
+    return runSignalDetection({
+      incomes: allIncomes,
+      payments: allPayments,
+      transactions: allTransactions,
+      accountMeta: {
+        provider: activeResult.extractions[0]?.provider ?? 'Unknown',
+        isJoint: activeResult.extractions[0]?.is_joint ?? false,
+        type: activeResult.extractions[0]?.account_type ?? 'current',
+      },
+    })
+  }, [activeResult])
 
   const handleRunScenario = useCallback(() => {
     const scenario = scenarios.find((s) => s.id === selectedScenarioId)
@@ -435,6 +462,7 @@ export default function EngineWorkbenchPage() {
               ['incomes', `Income (${activeResult.incomes.length})`],
               ['questions', `Questions (${activeResult.questions.filter((q) => q.fired).length})`],
               ['ntropy', `Ntropy${ntropyResult ? ` (${ntropyResult.comparisons.length})` : ''}`],
+              ['rules', `Rules${signalResult ? ` (${signalResult.stats.fired}/${signalResult.stats.totalRules})` : ''}`],
             ] as [TabId, string][]).map(([id, label]) => (
               <button
                 key={id}
@@ -634,6 +662,130 @@ export default function EngineWorkbenchPage() {
                   <p className="text-xs mt-2">Requires NTROPY_API_KEY env var. Uses 1 credit per payment.</p>
                 </div>
               )}
+            </div>
+          )}
+
+          {/* Rules diagnostic tab */}
+          {activeTab === 'rules' && signalResult && (
+            <div>
+              {/* Stats bar */}
+              <div className="flex gap-3 mb-4">
+                <span className="px-3 py-1 text-xs rounded-full bg-green-100 text-green-800">
+                  {signalResult.stats.highConfidence} high confidence
+                </span>
+                <span className="px-3 py-1 text-xs rounded-full bg-amber-100 text-amber-800">
+                  {signalResult.stats.mediumConfidence} medium
+                </span>
+                {signalResult.stats.flags > 0 && (
+                  <span className="px-3 py-1 text-xs rounded-full bg-red-100 text-red-800">
+                    {signalResult.stats.flags} flag{signalResult.stats.flags > 1 ? 's' : ''}
+                  </span>
+                )}
+                <span className="px-3 py-1 text-xs rounded-full bg-gray-100 text-gray-600">
+                  {signalResult.stats.notFired} not triggered
+                </span>
+              </div>
+
+              {/* Rules table */}
+              <div className="space-y-3">
+                {signalResult.ruleResults.map((rr) => (
+                  <div
+                    key={rr.rule.id}
+                    className={`rounded-xl border p-4 ${
+                      rr.fired
+                        ? rr.signal!.confidence >= 0.85
+                          ? 'border-green-200 bg-green-50/50'
+                          : rr.signal!.section === 'flags'
+                          ? 'border-red-200 bg-red-50/50'
+                          : 'border-amber-200 bg-amber-50/50'
+                        : 'border-gray-200 bg-gray-50/30 opacity-60'
+                    }`}
+                  >
+                    {/* Header */}
+                    <div className="flex items-start justify-between mb-2">
+                      <div>
+                        <div className="flex items-center gap-2">
+                          <span className={`w-2 h-2 rounded-full ${
+                            rr.fired
+                              ? rr.signal!.confidence >= 0.85 ? 'bg-green-500'
+                              : rr.signal!.section === 'flags' ? 'bg-red-500'
+                              : 'bg-amber-500'
+                              : 'bg-gray-300'
+                          }`} />
+                          <span className="font-medium text-sm">
+                            {rr.fired ? rr.signal!.name : rr.rule.name}
+                          </span>
+                          <span className="px-2 py-0.5 rounded-full text-xs bg-gray-100 text-gray-500">{rr.rule.id}</span>
+                          <span className={`px-2 py-0.5 rounded-full text-xs ${
+                            rr.rule.tier === 'must_nail' ? 'bg-blue-100 text-blue-700'
+                            : rr.rule.tier === 'good_enough' ? 'bg-gray-100 text-gray-600'
+                            : 'bg-purple-100 text-purple-700'
+                          }`}>
+                            {rr.rule.tier.replace(/_/g, ' ')}
+                          </span>
+                        </div>
+                        <p className="text-xs text-gray-500 mt-1">{rr.rule.description}</p>
+                      </div>
+                      <div className="text-right">
+                        <span className="text-xs text-gray-400">Form E {rr.rule.formEField}</span>
+                        {rr.fired && (
+                          <div className="text-xs font-medium mt-1">
+                            {Math.round(rr.signal!.confidence * 100)}% confidence
+                          </div>
+                        )}
+                      </div>
+                    </div>
+
+                    {/* Fired: show determination + reasoning */}
+                    {rr.fired && rr.signal && (
+                      <div className="mt-3 border-t border-gray-200/50 pt-3">
+                        <div className="text-sm font-medium mb-2">{rr.signal.determination}</div>
+                        <ul className="text-xs text-gray-600 space-y-1">
+                          {rr.signal.reasoning.map((r, i) => (
+                            <li key={i} className="flex gap-2">
+                              <span className="text-gray-400">•</span>
+                              {r}
+                            </li>
+                          ))}
+                        </ul>
+
+                        {/* Evidence */}
+                        {rr.signal.evidence.length > 0 && (
+                          <div className="mt-2 text-xs text-gray-500">
+                            {rr.signal.evidence.map((e, i) => (
+                              <div key={i} className="flex gap-2 items-center">
+                                <span className="text-gray-300">↳</span>
+                                <span>{e.label}</span>
+                                {e.metrics?.map((m, j) => (
+                                  <span key={j} className="px-1.5 py-0.5 rounded bg-gray-100 text-gray-500">{m.name}: {m.value}</span>
+                                ))}
+                              </div>
+                            ))}
+                          </div>
+                        )}
+
+                        {/* Cross-section impacts */}
+                        {rr.signal.crossSectionImpacts.length > 0 && (
+                          <div className="mt-2 flex flex-wrap gap-1">
+                            {rr.signal.crossSectionImpacts.map((impact, i) => (
+                              <span key={i} className="px-2 py-0.5 rounded-full text-xs bg-blue-50 text-blue-700 border border-blue-100">
+                                {impact}
+                              </span>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                    )}
+
+                    {/* Not fired */}
+                    {!rr.fired && (
+                      <div className="mt-2 text-xs text-gray-400 italic">
+                        Rule did not trigger — no matching pattern found in data
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </div>
             </div>
           )}
         </>
