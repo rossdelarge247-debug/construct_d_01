@@ -188,6 +188,47 @@ This register captures architectural, UX, and technical decisions made during V2
 
 ---
 
+### D16. Transaction enrichment: build on Tink first, Bud as upgrade path
+
+**Decision (14 April 2026):** Build the spending panel using Tink's existing PFM categories. Design the data layer with optional enrichment fields (logo, subcategory, regularity) so Bud or Tink Enrichment can be slotted in later without UI changes.
+
+**Alternatives considered:**
+- Integrate Bud immediately for richer categorisation (210+ categories, merchant logos, regularity detection)
+- Build custom AI-based transaction categorisation using Claude
+
+**Why:**
+- We already get PFM categories + merchant names from Tink's `/data/v2/transactions` endpoint — enough for MVP spending panel
+- Bud pricing is opaque (contact sales) — premature vendor commitment before we have users
+- Adding another API dependency risks slowing session 13 delivery
+- Bud's integration format accepts Tink transactions directly — easy to add later
+
+**What Bud would add (if needed later):**
+- 210+ categories at 3 levels of granularity (vs Tink's ~50)
+- Merchant logos (SVG) and clean display names (76%+ coverage)
+- Recurring payment detection with predicted dates
+- >98% categorisation accuracy
+- <5ms per transaction
+
+**Validation step:** Check Tink Console to see if Data Enrichment and Merchant Information products are already enabled. If so, we may get logos and richer categories from Tink's `/enrichment/v1/transactions-by-ids` endpoint at no extra cost.
+
+**Risk:** If Tink's basic categories prove too coarse for the spending panel UX, we'll need to evaluate Bud or Tink Enrichment mid-build. Mitigation: type the transaction interface with optional fields now.
+
+---
+
+### D17. Tink enrichment API not yet utilised
+
+**Decision (14 April 2026):** Our current Tink integration only calls `/data/v2/transactions` (basic PFM categories). Tink has a dedicated enrichment API (`/enrichment/v1/transactions-by-ids`) and a Merchant Information product that we are not using.
+
+**Action required:**
+1. Check Tink Console → Products → verify which products are enabled
+2. If Data Enrichment is enabled, add a test call to validate what additional fields we get
+3. If Merchant Information is enabled, we may already have access to logos and clean names
+4. Scope is currently `accounts:read,transactions:read` — enrichment may require additional scopes
+
+**Consequence:** We may be leaving free enrichment on the table. This should be checked before building the spending panel.
+
+---
+
 ## Decisions deferred
 
 | Decision | Deferred to | Reason |
