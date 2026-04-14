@@ -45,19 +45,46 @@ interface KeywordEntry {
 }
 
 const KEYWORD_LOOKUP_TABLE: KeywordEntry[] = [
-  { keywords: ['therapy', 'counselling', 'physio', 'osteopath', 'chiropractor', 'psychologist', 'cbt'], category: 'healthcare', categoryLabel: 'Healthcare', formEField: '3.1', confidence: 0.90 },
-  { keywords: ['dentist', 'dental', 'orthodont'], category: 'dental', categoryLabel: 'Healthcare / dental', formEField: '3.1', confidence: 0.92 },
-  { keywords: ['dvla', 'aa', 'rac', 'halfords', 'kwik fit', 'mot'], category: 'vehicle', categoryLabel: 'Vehicle costs', formEField: '3.1', confidence: 0.92 },
-  { keywords: ['nursery', 'childminder', 'after school', 'breakfast club', 'holiday club'], category: 'childcare', categoryLabel: 'Childcare', formEField: '3.1', confidence: 0.93 },
-  { keywords: ['gym', 'fitness', 'david lloyd', 'puregym', 'better', 'nuffield'], category: 'leisure', categoryLabel: 'Personal / leisure', formEField: '3.1', confidence: 0.90 },
-  { keywords: ['school', 'tuition', 'uniform'], category: 'education', categoryLabel: 'Children / education', formEField: '3.1', confidence: 0.88 },
-  { keywords: ['solicitor', 'law', 'mediator', 'mediation', 'legal'], category: 'legal', categoryLabel: 'Legal costs', formEField: '3.1', confidence: 0.95 },
-  { keywords: ['vodafone', 'o2', 'ee', 'three', 'giffgaff', 'sky mobile'], category: 'phone', categoryLabel: 'Phone / communications', formEField: '3.1', confidence: 0.95 },
-  { keywords: ['bt', 'virgin media', 'sky', 'plusnet', 'talktalk'], category: 'broadband', categoryLabel: 'Broadband / TV', formEField: '3.1', confidence: 0.93 },
-  { keywords: ['spotify', 'netflix', 'disney', 'apple', 'amazon prime'], category: 'subscription', categoryLabel: 'Subscriptions', formEField: '3.1', confidence: 0.97 },
-  { keywords: ['pet', 'vet', 'veterinary'], category: 'pets', categoryLabel: 'Pet costs', formEField: '3.1', confidence: 0.90 },
-  { keywords: ['cleaner', 'gardener', 'window clean'], category: 'household', categoryLabel: 'Household maintenance', formEField: '3.1', confidence: 0.88 },
-  { keywords: ['insurance', 'aviva', 'vitality', 'bupa', 'axa', 'legal & general', 'admiral', 'direct line'], category: 'insurance', categoryLabel: 'Insurance', formEField: '3.1', confidence: 0.85 },
+  // Healthcare
+  { keywords: ['therapy', 'counselling', 'counseling', 'physio', 'osteopath', 'chiropractor', 'psychologist', 'cbt', 'nhs', 'hospital', 'clinic', 'doctor', 'gp surgery', 'optician', 'specsavers', 'boots opticians'], category: 'healthcare', categoryLabel: 'Healthcare', formEField: '3.1', confidence: 0.90 },
+  { keywords: ['dentist', 'dental', 'orthodont', 'mydentist'], category: 'dental', categoryLabel: 'Healthcare / dental', formEField: '3.1', confidence: 0.92 },
+  { keywords: ['pharmacy', 'chemist', 'lloyds pharmacy', 'boots pharmacy', 'prescription'], category: 'healthcare', categoryLabel: 'Healthcare', formEField: '3.1', confidence: 0.88 },
+  // Vehicle & transport
+  { keywords: ['dvla', 'halfords', 'kwik fit', 'mot', 'arnold clark', 'eurocar', 'national tyres', 'ats euromaster', 'green flag'], category: 'vehicle', categoryLabel: 'Vehicle costs', formEField: '3.1', confidence: 0.92 },
+  { keywords: ['aa ', 'rac ', 'aa breakdown', 'rac breakdown'], category: 'vehicle', categoryLabel: 'Vehicle costs', formEField: '3.1', confidence: 0.90 },
+  { keywords: ['parking', 'ncp', 'ringo', 'justpark', 'ringgo', 'paybyphone'], category: 'vehicle', categoryLabel: 'Vehicle costs', formEField: '3.1', confidence: 0.88 },
+  { keywords: ['train', 'rail', 'trainline', 'national rail', 'tfl', 'oyster', 'bus'], category: 'transport', categoryLabel: 'Public transport', formEField: '3.1', confidence: 0.90 },
+  // Childcare & education
+  { keywords: ['nursery', 'nurseries', 'childminder', 'childminding', 'after school', 'breakfast club', 'holiday club', 'kids club', 'nanny', 'bright horizons', 'busy bees', 'kidsunlimited'], category: 'childcare', categoryLabel: 'Childcare', formEField: '3.1', confidence: 0.93 },
+  { keywords: ['school', 'tuition', 'uniform', 'academy', 'college', 'university'], category: 'education', categoryLabel: 'Children / education', formEField: '3.1', confidence: 0.88 },
+  // Leisure & fitness
+  { keywords: ['gym', 'fitness', 'david lloyd', 'puregym', 'better leisure', 'nuffield', 'the gym', 'jd gyms', 'anytime fitness', 'bannatyne', 'virgin active'], category: 'leisure', categoryLabel: 'Personal / leisure', formEField: '3.1', confidence: 0.90 },
+  // Legal
+  { keywords: ['solicitor', 'solicitors', 'law firm', 'mediator', 'mediation', 'legal', 'barrister', 'chambers'], category: 'legal', categoryLabel: 'Legal costs', formEField: '3.1', confidence: 0.95 },
+  // Phone & comms
+  { keywords: ['vodafone', 'o2 ', 'ee ', 'three ', 'giffgaff', 'sky mobile', 'id mobile', 'tesco mobile', 'voxi', 'lebara', 'lycamobile', 'smarty'], category: 'phone', categoryLabel: 'Phone / communications', formEField: '3.1', confidence: 0.95 },
+  // Broadband & TV
+  { keywords: ['virgin media', 'plusnet', 'talktalk', 'now tv', 'now broadband', 'bt broadband', 'bt sport', 'zen internet', 'hyperoptic', 'community fibre', 'gigaclear'], category: 'broadband', categoryLabel: 'Broadband / TV', formEField: '3.1', confidence: 0.93 },
+  // Subscriptions & streaming
+  { keywords: ['spotify', 'netflix', 'disney', 'apple music', 'apple tv', 'amazon prime', 'youtube', 'audible', 'tidal', 'deezer', 'paramount', 'crunchyroll', 'adobe', 'microsoft 365', 'icloud'], category: 'subscription', categoryLabel: 'Subscriptions', formEField: '3.1', confidence: 0.97 },
+  // Pets
+  { keywords: ['pet', 'vet', 'veterinary', 'petplan', 'pets at home', 'vets4pets', 'pdsa', 'rspca'], category: 'pets', categoryLabel: 'Pet costs', formEField: '3.1', confidence: 0.90 },
+  // Household
+  { keywords: ['cleaner', 'gardener', 'window clean', 'plumber', 'electrician', 'handyman', 'decorator'], category: 'household', categoryLabel: 'Household maintenance', formEField: '3.1', confidence: 0.88 },
+  // Insurance (lower confidence — could be pension too, handled by disambiguation in csv-parser)
+  { keywords: ['insurance', 'vitality', 'bupa', 'axa', 'lv=', 'zurich', 'direct line', 'hastings', 'esure', 'churchill', 'privilege', 'swiftcover', 'nfu mutual', 'more than'], category: 'insurance', categoryLabel: 'Insurance', formEField: '3.1', confidence: 0.85 },
+  // Groceries (helps catch supermarkets in unknown payments)
+  { keywords: ['tesco', 'sainsbury', 'asda', 'morrisons', 'aldi', 'lidl', 'waitrose', 'co-op', 'coop', 'marks spencer', 'm&s', 'iceland', 'ocado'], category: 'groceries', categoryLabel: 'Groceries', formEField: '3.1', confidence: 0.95 },
+  // Dining
+  { keywords: ['mcdonalds', 'kfc', 'pizza', 'nandos', 'greggs', 'costa', 'starbucks', 'pret', 'wetherspoon', 'deliveroo', 'uber eats', 'just eat'], category: 'dining', categoryLabel: 'Dining & takeaway', formEField: '3.1', confidence: 0.93 },
+  // BNPL (detected but classified as debt)
+  { keywords: ['klarna', 'clearpay', 'afterpay', 'laybuy', 'zilch', 'paypal credit'], category: 'bnpl', categoryLabel: 'Buy now pay later', formEField: '2.14', confidence: 0.95 },
+  // Gambling (red flag — spec 22 §10)
+  { keywords: ['bet365', 'paddy power', 'william hill', 'betfair', 'ladbrokes', 'coral', 'sky bet', 'betfred', 'fanduel', 'unibet', 'tombola', 'lottoland', 'camelot', 'national lottery', 'gala bingo'], category: 'gambling', categoryLabel: 'Gambling', formEField: 'flag', confidence: 0.97 },
+  // Crypto (red flag / other assets — spec 22 §9)
+  { keywords: ['coinbase', 'binance', 'kraken', 'crypto.com', 'gemini', 'bitstamp', 'bitfinex'], category: 'crypto', categoryLabel: 'Cryptocurrency', formEField: '2.4/2.9', confidence: 0.95 },
+  // Investment platforms
+  { keywords: ['hargreaves', 'lansdown', 'vanguard', 'aj bell', 'fidelity', 'interactive investor', 'nutmeg', 'wealthify', 'moneybox', 'freetrade', 'trading 212', 'etoro'], category: 'investment', categoryLabel: 'Investment platform', formEField: '2.4', confidence: 0.93 },
 ]
 
 /**
@@ -590,9 +617,99 @@ function generatePaymentQuestion(payment: { payee: string; amount: number; frequ
         formEField: '3.1',
       }
 
+    case 'utilities':
+      return {
+        questionText: `${amt}/month to ${payment.payee}. Is this a utility bill?`,
+        reasoning: null,
+        options: [
+          { label: 'Yes, gas/electric', value: 'utilities' },
+          { label: 'Yes, water', value: 'utilities' },
+          { label: 'Something else', value: 'other' },
+        ],
+        primaryOption: 'Yes, gas/electric', secondaryLabel: 'Something else',
+        formEField: '3.1',
+      }
+
+    case 'council_tax':
+      return {
+        questionText: `${amt}/month to ${payment.payee}. Is this council tax?`,
+        reasoning: null,
+        options: [
+          { label: 'Yes, council tax', value: 'council_tax' },
+          { label: 'Something else', value: 'other' },
+        ],
+        primaryOption: 'Yes, council tax', secondaryLabel: 'Something else',
+        formEField: '3.1',
+      }
+
+    case 'subscription':
+      return {
+        questionText: `${amt}/month to ${payment.payee}. Is this a subscription or phone contract?`,
+        reasoning: null,
+        options: [
+          { label: 'Yes, subscription', value: 'subscription' },
+          { label: 'Phone contract', value: 'subscription' },
+          { label: 'Something else', value: 'other' },
+        ],
+        primaryOption: 'Yes, subscription', secondaryLabel: 'Something else',
+        formEField: '3.1',
+      }
+
+    case 'childcare':
+      return {
+        questionText: `${amt}/month to ${payment.payee}. Is this childcare?`,
+        reasoning: null,
+        options: [
+          { label: 'Yes, childcare', value: 'childcare' },
+          { label: 'School fees', value: 'school_fees' },
+          { label: 'Something else', value: 'other' },
+        ],
+        primaryOption: 'Yes, childcare', secondaryLabel: 'Something else',
+        formEField: '3.1',
+      }
+
+    case 'loan_repayment':
+      return {
+        questionText: `${amt}/month to ${payment.payee}. What type of debt repayment is this?`,
+        reasoning: null,
+        options: [
+          { label: 'Personal loan', value: 'loan_repayment' },
+          { label: 'Car finance', value: 'car_finance' },
+          { label: 'Credit card', value: 'credit_card' },
+          { label: 'Student loan', value: 'student_loan' },
+          { label: 'Something else', value: 'other' },
+        ],
+        primaryOption: null, secondaryLabel: 'Something else',
+        formEField: '2.14 + 3.1',
+      }
+
+    case 'child_maintenance':
+      return {
+        questionText: `${amt}/month to ${payment.payee}. Is this a child maintenance payment?`,
+        reasoning: null,
+        options: [
+          { label: 'Yes, child maintenance', value: 'child_maintenance' },
+          { label: 'Something else', value: 'other' },
+        ],
+        primaryOption: 'Yes, child maintenance', secondaryLabel: 'Something else',
+        formEField: '3.1',
+      }
+
     default:
-      // Below threshold but category is clear — still auto-confirm
-      return null
+      // Truly unhandled category — should not happen but don't silently drop
+      return {
+        questionText: `${amt}/month to ${payment.payee}. What is this payment for?`,
+        reasoning: null,
+        options: [
+          { label: 'Bill or utility', value: 'utilities' },
+          { label: 'Insurance', value: 'insurance' },
+          { label: 'Subscription', value: 'subscription' },
+          { label: 'Loan or debt repayment', value: 'loan_repayment' },
+          { label: 'Something else', value: 'other' },
+        ],
+        primaryOption: null, secondaryLabel: 'Something else',
+        formEField: '3.1',
+      }
   }
 }
 

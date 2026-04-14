@@ -499,11 +499,16 @@ const INVESTMENT_PLATFORMS = [
   'hargreaves', 'lansdown', 'vanguard', 'aj bell', 'fidelity',
   'interactive investor', 'nutmeg', 'wealthify', 'moneybox',
   'freetrade', 'trading 212', 'etoro', 'hl ',
+  // Additional platforms
+  'bestinvest', 'charles stanley', 'close brothers', 'rathbone',
+  'brewin dolphin', 'quilter', 'st james', 'investec',
+  'scottish friendly', 'fundsmith', 'dodl',
 ]
 
 const CRYPTO_EXCHANGES = [
   'coinbase', 'binance', 'kraken', 'crypto.com', 'gemini',
   'bitstamp', 'bitfinex', 'revolut crypto',
+  'luno', 'cex.io', 'blockchain.com', 'swissborg',
 ]
 
 function matchesPayee(payee: string, patterns: string[]): boolean {
@@ -905,10 +910,15 @@ const CREDIT_CARD_PROVIDERS = [
   'amex', 'american express', 'barclaycard', 'mbna', 'capital one',
   'hsbc card', 'natwest card', 'lloyds card', 'virgin money',
   'aqua', 'marbles', 'vanquis', 'tesco bank', 'sainsbury',
+  // Additional UK credit card providers
+  'newday', 'creation', 'zopa card', 'monzo credit', 'tandem',
+  'ocean', 'chrome', 'fluid', 'luma', 'bank of ireland',
+  'jaja', 'curve', 'cashplus',
 ]
 
 const BNPL_PROVIDERS = [
   'klarna', 'clearpay', 'afterpay', 'laybuy', 'zilch', 'paypal credit',
+  'splitit', 'divido', 'deko',
 ]
 
 function generateDebtsSteps(extractions: BankStatementExtraction[]): ConfirmationStep[] {
@@ -916,12 +926,17 @@ function generateDebtsSteps(extractions: BankStatementExtraction[]): Confirmatio
   const steps: ConfirmationStep[] = []
 
   // ── Detect different debt types ──
-  const loans = allPayments.filter((p) => p.likely_category === 'loan_repayment')
+  // Credit cards and BNPL detected by payee name; loans by category minus those already matched
   const creditCards = allPayments.filter((p) =>
     matchesPayee(p.payee, CREDIT_CARD_PROVIDERS),
   )
   const bnpl = allPayments.filter((p) =>
     matchesPayee(p.payee, BNPL_PROVIDERS),
+  )
+  const loans = allPayments.filter((p) =>
+    p.likely_category === 'loan_repayment' &&
+    !matchesPayee(p.payee, BNPL_PROVIDERS) &&
+    !matchesPayee(p.payee, CREDIT_CARD_PROVIDERS),
   )
   const hasOverdraft = extractions.some((e) => (e.closing_balance ?? 0) < 0)
 
@@ -1632,7 +1647,12 @@ function generateDebtsSummary(answers: Record<string, string>, extractions: Bank
 //
 // Cross-section: income answer 'dividends' or 'self_employed' implies business
 
-const BUSINESS_PAYEES = ['companies house', 'hmrc self assessment', 'hmrc sa', 'accountant']
+const BUSINESS_PAYEES = [
+  'companies house', 'hmrc self assessment', 'hmrc sa', 'hmrc ndds',
+  'hmrc shipley', 'hmrc cumbernauld', 'hmrc self',
+  'accountant', 'bookkeeper', 'xero', 'quickbooks', 'freeagent', 'sage',
+  'corporation tax', 'company tax',
+]
 
 function generateBusinessSteps(extractions: BankStatementExtraction[]): ConfirmationStep[] {
   const allPayments = extractions.flatMap((e) => e.regular_payments)
@@ -1795,8 +1815,8 @@ function generateBusinessSummary(answers: Record<string, string>): SectionSummar
 // Uses checklist step type — multi-select with follow-up value questions.
 // Signals: crypto exchanges, car insurance, investment platforms.
 
-const CRYPTO_PAYEES = ['coinbase', 'binance', 'kraken', 'crypto.com', 'bitstamp']
-const INVESTMENT_PAYEES = ['hargreaves lansdown', 'hl ', 'aj bell', 'vanguard', 'interactive investor', 'trading 212', 'freetrade']
+const CRYPTO_PAYEES = ['coinbase', 'binance', 'kraken', 'crypto.com', 'bitstamp', 'gemini', 'luno', 'cex.io', 'blockchain.com', 'swissborg']
+const INVESTMENT_PAYEES = ['hargreaves lansdown', 'hl ', 'aj bell', 'vanguard', 'interactive investor', 'trading 212', 'freetrade', 'nutmeg', 'moneybox', 'wealthify', 'bestinvest', 'charles stanley', 'etoro', 'dodl']
 
 function generateOtherAssetsSteps(extractions: BankStatementExtraction[]): ConfirmationStep[] {
   const allPayments = extractions.flatMap((e) => e.regular_payments)

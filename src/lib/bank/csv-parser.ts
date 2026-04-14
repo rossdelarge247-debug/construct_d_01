@@ -132,11 +132,37 @@ function parseGeneric(headers: string[], rows: string[][]): ParsedTransaction[] 
 
 // ═══ Transaction → Extraction ═══
 
+function normaliseDescription(desc: string): string {
+  return desc
+    .toLowerCase()
+    // Strip common bank prefixes
+    .replace(/^(card payment to|faster payment to|direct debit|standing order|bank transfer to|visa deb|visa credit|mastercard|contactless)\s+/i, '')
+    // Strip DD/SO/S/O/D/D markers
+    .replace(/\b(dd|so|s\/o|d\/d|spc|bgt|bgc|bac|chq|tfr|cr|dr)\b/gi, '')
+    // Strip reference numbers (REF:xxx, ref xxx, /xxx, #xxx)
+    .replace(/\b(ref:?\s*\S+|reference\s*\S+)\b/gi, '')
+    .replace(/[/#]\S+/g, '')
+    // Strip dates (12MAR26, 12/03/2026, 2026-03-12, 12-MAR, etc.)
+    .replace(/\b\d{1,2}(jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)\d{0,4}\b/gi, '')
+    .replace(/\b\d{1,2}[\/\-]\d{1,2}[\/\-]?\d{0,4}\b/g, '')
+    // Strip GBP amounts (GBP 47.50, £47.50)
+    .replace(/\b(gbp\s*)?\d+\.\d{2}\b/gi, '')
+    .replace(/£\d+(\.\d{2})?/g, '')
+    // Strip trailing card/account numbers
+    .replace(/\b\d{4,}\b/g, '')
+    // Strip common suffixes
+    .replace(/\b(ltd|plc|limited|inc|co|uk|com|services?|group|grp)\b/gi, '')
+    // Clean up
+    .replace(/[^a-z0-9\s]/g, '')
+    .replace(/\s+/g, ' ')
+    .trim()
+}
+
 function groupByPayee(transactions: ParsedTransaction[], isCredit: boolean): Map<string, ParsedTransaction[]> {
   const groups = new Map<string, ParsedTransaction[]>()
   const filtered = transactions.filter((t) => isCredit ? t.amount > 0 : t.amount < 0)
   for (const tx of filtered) {
-    const key = tx.description.toLowerCase().replace(/\b(dd|so|s\/o|d\/d|ref:?\s*\w+)\b/gi, '').trim()
+    const key = normaliseDescription(tx.description)
     if (!key) continue
     const group = groups.get(key) || []
     group.push(tx)
@@ -168,28 +194,111 @@ function identifyIncomeFromCSV(credits: Map<string, ParsedTransaction[]>): Extra
 
 function inferIncomeType(source: string): ExtractedIncome['type'] {
   const s = source.toLowerCase()
-  if (s.includes('hmrc') || s.includes('dwp') || s.includes('universal credit') || s.includes('child benefit')) return 'benefits'
-  if (s.includes('pension') || s.includes('retirement')) return 'pension_income'
-  if (s.includes('rent')) return 'rental'
+  // Benefits — government sources
+  if (s.includes('hmrc') || s.includes('dwp') || s.includes('universal credit') ||
+      s.includes('child benefit') || s.includes('tax credit') || s.includes('pip') ||
+      s.includes('esa') || s.includes('jsa') || s.includes('housing benefit') ||
+      s.includes('carers allowance') || s.includes('attendance allowance')) return 'benefits'
+  // Pension income (receiving, not contributing)
+  if (s.includes('pension') || s.includes('retirement') || s.includes('annuity') ||
+      s.includes('teachers pension') || s.includes('nhs pension') ||
+      s.includes('civil service pension') || s.includes('armed forces pension')) return 'pension_income'
+  // Rental income
+  if (s.includes('rent') || s.includes('tenant') || s.includes('letting')) return 'rental'
+  // Maintenance received
+  if (s.includes('maintenance') || s.includes('cms') || s.includes('child support') || s.includes('csa')) return 'maintenance'
+  // Self-employment indicators
+  if (s.includes('invoice') || s.includes('stripe') || s.includes('paypal') ||
+      s.includes('square') || s.includes('sumup') || s.includes('wise business') ||
+      s.includes('freelance')) return 'self_employment'
+  // Dividend
+  if (s.includes('dividend')) return 'other'
+  // Default: most regular income is employment
   return 'employment'
 }
 
 const CATEGORY_KEYWORDS: Record<DetectedPayment['likely_category'], string[]> = {
-  mortgage: ['mortgage', 'halifax', 'nationwide bs', 'building society'],
-  rent: ['rent', 'letting', 'openrent'],
-  insurance: ['insurance', 'admiral', 'aviva', 'direct line', 'axa'],
-  pension_contribution: ['pension', 'nest', 'aviva pension'],
-  childcare: ['childcare', 'nursery', 'after school'],
-  loan_repayment: ['loan', 'finance', 'klarna', 'afterpay'],
-  child_maintenance: ['cms', 'child maintenance', 'csa'],
-  utilities: ['gas', 'electric', 'water', 'british gas', 'eon', 'edf', 'octopus'],
-  council_tax: ['council tax', 'council'],
-  subscription: ['netflix', 'spotify', 'amazon prime', 'disney', 'sky', 'bt ', 'vodafone', 'ee ', 'o2 ', 'three'],
+  mortgage: [
+    'mortgage',
+    // Major UK mortgage lenders
+    'halifax', 'nationwide', 'santander', 'natwest', 'barclays mortgage',
+    'hsbc mortgage', 'tsb', 'virgin money', 'coventry bs', 'yorkshire bs',
+    'leeds bs', 'skipton bs', 'building society', 'principality',
+    'accord mortgage', 'kensington mortgage', 'metro bank mortgage',
+  ],
+  rent: [
+    'rent', 'letting', 'lettings', 'openrent', 'estate agent',
+    'property management', 'housing assoc', 'l&q', 'peabody',
+    'housing trust', 'notting hill', 'clarion',
+  ],
+  insurance: [
+    'insurance', 'admiral', 'direct line', 'axa', 'lv=', 'lv ',
+    'zurich', 'vitality', 'bupa', 'hastings', 'more than',
+    'esure', 'churchill', 'privilege', 'swiftcover',
+    'rac', 'aa insurance', 'nfu mutual',
+  ],
+  pension_contribution: [
+    'pension', 'nest', 'scottish widows', 'standard life', 'royal london',
+    'aegon', 'legal & general', 'l&g pension', 'aviva pension',
+    'fidelity pension', 'hargreaves pension',
+  ],
+  childcare: [
+    'childcare', 'nursery', 'nurseries', 'after school', 'breakfast club',
+    'holiday club', 'childminder', 'nanny', 'kids club',
+    'bright horizons', 'busy bees',
+  ],
+  loan_repayment: [
+    'loan', 'finance', 'zopa', 'funding circle', 'ratesetter',
+    'hitachi', 'creation', 'ikano', 'novuna', 'shawbrook',
+    'bamboo', 'oakbrook', 'everyday loans',
+    // Car finance
+    'bmw finance', 'volkswagen finance', 'pcp', 'black horse',
+    'moneybarn', 'startline', 'blue motor',
+    // Student loans
+    'student loan', 'slc',
+  ],
+  child_maintenance: ['cms', 'child maintenance', 'csa', 'child support'],
+  utilities: [
+    // Energy
+    'gas', 'electric', 'energy', 'british gas', 'eon', 'e.on',
+    'edf', 'octopus', 'sse', 'ovo', 'bulb', 'shell energy',
+    'scottish power', 'utilita', 'utility warehouse', 'so energy',
+    // Water
+    'water', 'thames water', 'united utilities', 'anglian water',
+    'severn trent', 'yorkshire water', 'southern water',
+    'south west water', 'northumbrian water', 'welsh water',
+    'dwr cymru', 'affinity water',
+  ],
+  council_tax: [
+    'council tax', 'council', 'borough', 'city council',
+    'county council', 'district council', 'lbc', ' cc ',
+    'metropolitan', 'unitary',
+  ],
+  subscription: [
+    'netflix', 'spotify', 'amazon prime', 'disney', 'now tv',
+    'apple', 'google', 'youtube', 'audible', 'tidal',
+    // Broadband / TV / mobile
+    'sky', 'bt broadband', 'virgin media', 'talktalk', 'plusnet',
+    'vodafone', 'ee mobile', 'o2', 'three', 'giffgaff',
+    'sky mobile', 'id mobile', 'tesco mobile', 'voxi',
+  ],
   unknown: [],
 }
 
+// BNPL providers — detected separately from general loan repayments
+const BNPL_KEYWORDS = [
+  'klarna', 'clearpay', 'afterpay', 'laybuy', 'zilch',
+  'paypal credit', 'splitit', 'divido',
+]
+
 function inferCategory(description: string): DetectedPayment['likely_category'] {
   const d = description.toLowerCase()
+  // Check BNPL first — these are loan_repayment for Form E purposes
+  if (BNPL_KEYWORDS.some((kw) => d.includes(kw))) return 'loan_repayment'
+  // Aviva disambiguation: "aviva pension" → pension, otherwise → insurance
+  if (d.includes('aviva')) {
+    return d.includes('pension') ? 'pension_contribution' : 'insurance'
+  }
   for (const [category, keywords] of Object.entries(CATEGORY_KEYWORDS)) {
     if (category === 'unknown') continue
     if (keywords.some((kw) => d.includes(kw))) return category as DetectedPayment['likely_category']
@@ -200,19 +309,29 @@ function inferCategory(description: string): DetectedPayment['likely_category'] 
 function identifyPaymentsFromCSV(debits: Map<string, ParsedTransaction[]>): DetectedPayment[] {
   const result: DetectedPayment[] = []
   for (const [, group] of debits) {
-    if (group.length < 2) continue
+    // High-value payments (£100+) or known-category payments are relevant even with 1 occurrence
+    // (e.g., annual insurance, quarterly HMRC). Low-value unknowns still need ≥2 to filter noise.
+    const payee = group[0].description
+    const category = inferCategory(payee)
+    const maxAmount = Math.max(...group.map((t) => Math.abs(t.amount)))
+    if (group.length < 2 && category === 'unknown' && maxAmount < 100) continue
     const amounts = group.map((t) => Math.abs(t.amount))
     const avg = Math.round(amounts.reduce((a, b) => a + b, 0) / amounts.length)
-    const payee = group[0].description
     const dates = group.map((t) => new Date(t.date).getTime()).sort()
     const gaps = dates.slice(1).map((d, i) => (d - dates[i]) / (24 * 60 * 60 * 1000))
     const avgGap = gaps.length > 0 ? gaps.reduce((a, b) => a + b, 0) / gaps.length : 30
+    // Category-aware confidence: known categories get higher confidence than 'unknown'
+    // More occurrences also increase confidence (3+ months = reliable pattern)
+    const categoryConfidence = category !== 'unknown' ? 0.92 : 0.75
+    const recurrenceBoost = group.length >= 6 ? 0.03 : group.length >= 3 ? 0.01 : 0
+    const confidence = Math.min(0.96, categoryConfidence + recurrenceBoost)
+
     result.push({
       payee,
       amount: avg,
       frequency: avgGap < 10 ? 'weekly' : avgGap < 45 ? 'monthly' : avgGap < 120 ? 'quarterly' : 'annual',
-      confidence: 0.85,
-      likely_category: inferCategory(payee),
+      confidence,
+      likely_category: category,
     })
   }
   return result.sort((a, b) => b.amount - a.amount)
