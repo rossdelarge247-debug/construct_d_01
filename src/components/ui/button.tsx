@@ -10,10 +10,10 @@ interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
 }
 
 const variantStyles: Record<ButtonVariant, string> = {
-  primary: 'bg-warmth text-cream hover:bg-warmth-dark',
-  secondary: 'bg-cream text-ink border-[var(--border-card)] border-cream-dark hover:bg-cream-dark',
-  ghost: 'text-ink-light hover:text-ink hover:bg-cream-dark',
-  danger: 'bg-red-600 text-white hover:bg-red-700',
+  primary: 'bg-[#E5484D] text-white hover:bg-[#CE3E44]',
+  secondary: 'bg-white text-ink border border-[var(--color-grey-100)] hover:bg-[var(--color-grey-50)]',
+  ghost: 'text-ink-secondary hover:text-ink hover:bg-[var(--color-grey-50)]',
+  danger: 'bg-ink text-white hover:opacity-90',
 }
 
 const sizeStyles: Record<ButtonSize, string> = {
@@ -29,7 +29,7 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
         ref={ref}
         className={cn(
           'inline-flex items-center justify-center font-medium transition-all duration-200',
-          'rounded-[var(--radius-sm)]',
+          'rounded-[var(--radius-card)]',
           'disabled:pointer-events-none disabled:opacity-50',
           variantStyles[variant],
           sizeStyles[size],

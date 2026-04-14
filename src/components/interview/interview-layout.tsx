@@ -51,64 +51,42 @@ const STEP_TO_PHASE: Record<InterviewStepId, TrackerPhase> = {
 // Waypoint phases get a diamond marker
 const WAYPOINT_PHASES: TrackerPhase[] = ['pathway', 'plan']
 
-export function InterviewLayout({ children, currentStep, steps, showProgress = true }: InterviewLayoutProps) {
+export function InterviewLayout({ children, currentStep, showProgress = true }: InterviewLayoutProps) {
   const currentPhase = currentStep ? STEP_TO_PHASE[currentStep] : null
   const currentPhaseIndex = currentPhase ? TRACKER_PHASES.indexOf(currentPhase) : -1
 
   return (
-    <div className="flex min-h-screen flex-col bg-cream">
+    <div className="flex min-h-screen flex-col bg-off-white">
       <ExitPageButton />
-      {/* Minimal header */}
-      <header className="px-6 pt-6">
-        <div className="mx-auto flex max-w-xl items-center justify-between">
-          <Link href="/" className="font-heading text-lg font-semibold text-ink-faint transition-colors hover:text-ink">
+      {/* Header — V2 unified */}
+      <header className="sticky top-0 z-30 bg-white" style={{ boxShadow: '0 1px 0 var(--color-grey-100)' }}>
+        <div className="flex items-center justify-center px-6" style={{ height: '64px' }}>
+          <Link href="/" className="text-[18px] font-bold text-ink tracking-tight select-none">
             {APP_NAME}
           </Link>
         </div>
       </header>
 
-      {/* Progress tracker — simplified with waypoints */}
-      {showProgress && currentStep && steps && (
+      {/* Progress bar — V2 red bar + step counter */}
+      {showProgress && currentStep && (
         <div className="px-6 pt-6">
-          <div className="mx-auto max-w-xl">
-            {/* Progress bar */}
-            <div className="h-1 overflow-hidden rounded-full bg-cream-dark">
-              <div
-                className="h-full rounded-full bg-warmth transition-all duration-500 ease-out"
-                style={{ width: `${((currentPhaseIndex + 1) / TRACKER_PHASES.length) * 100}%` }}
-              />
+          <div className="mx-auto max-w-[600px]">
+            <div className="flex items-center justify-between mb-2">
+              <span className="text-[13px] font-semibold text-ink">
+                {PHASE_LABELS[currentPhase!]}
+              </span>
+              <span className="text-[13px] font-medium text-ink-tertiary">
+                {currentPhaseIndex + 1} of {TRACKER_PHASES.length}
+              </span>
             </div>
-
-            {/* Phase labels with waypoint diamonds */}
-            <div className="mt-3 flex items-center justify-between">
-              {TRACKER_PHASES.map((phase, i) => {
-                const isWaypoint = WAYPOINT_PHASES.includes(phase)
-                const isComplete = i < currentPhaseIndex
-                const isCurrent = i === currentPhaseIndex
-                const isFuture = i > currentPhaseIndex
-
-                return (
-                  <div key={phase} className="flex flex-col items-center gap-1">
-                    {/* Diamond or dot marker */}
-                    <div className={cn(
-                      'transition-all duration-300',
-                      isWaypoint ? 'h-2.5 w-2.5 rotate-45' : 'h-1.5 w-1.5 rounded-full',
-                      isComplete && 'bg-sage',
-                      isCurrent && 'bg-warmth',
-                      isFuture && 'bg-cream-dark',
-                    )} />
-                    {/* Label */}
-                    <span className={cn(
-                      'text-[11px] transition-colors duration-300',
-                      isComplete && 'text-sage',
-                      isCurrent && 'font-medium text-warmth-dark',
-                      isFuture && 'text-ink-faint',
-                    )}>
-                      {PHASE_LABELS[phase]}
-                    </span>
-                  </div>
-                )
-              })}
+            <div className="h-1.5 overflow-hidden rounded-full" style={{ backgroundColor: 'var(--color-grey-100)' }}>
+              <div
+                className="h-full rounded-full transition-all duration-300 ease"
+                style={{
+                  width: `${((currentPhaseIndex + 1) / TRACKER_PHASES.length) * 100}%`,
+                  backgroundColor: 'var(--color-red-500)',
+                }}
+              />
             </div>
           </div>
         </div>
@@ -116,7 +94,7 @@ export function InterviewLayout({ children, currentStep, steps, showProgress = t
 
       {/* Content */}
       <main className="flex flex-1 flex-col px-6 pb-12 pt-8">
-        <div className="mx-auto w-full max-w-xl">
+        <div className="mx-auto w-full max-w-[600px]">
           {children}
         </div>
       </main>

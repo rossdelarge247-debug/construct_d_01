@@ -179,7 +179,7 @@ export default function SituationPage() {
               </Explainer>
             )}
             {session.situation.relationship_quality === 'safety_concerns' && (
-              <div className="rounded-[var(--radius-md)] border border-warmth-light bg-warmth-light/30 p-5">
+              <div className="rounded-[var(--radius-md)] border border-[var(--color-amber-50)] bg-[#FFFBEB] p-5">
                 <p className="text-sm font-medium text-ink">You&apos;re not alone.</p>
                 <p className="mt-2 text-sm text-ink-light leading-relaxed">
                   If you or your children are in immediate danger, call 999. For confidential support, you can contact the National Domestic Abuse Helpline on 0808 2000 247 (24 hours, free).
@@ -216,7 +216,7 @@ export default function SituationPage() {
               columns={1}
             />
             {session.situation.financial_control_concerns && (
-              <div className="rounded-[var(--radius-md)] border border-warmth-light bg-warmth-light/30 p-5">
+              <div className="rounded-[var(--radius-md)] border border-[var(--color-amber-50)] bg-[#FFFBEB] p-5">
                 <p className="text-sm font-medium text-ink">This is more common than you might think.</p>
                 <p className="mt-2 text-sm text-ink-light leading-relaxed">
                   Controlling someone&apos;s access to money is a form of economic abuse. You can speak to Surviving Economic Abuse at survivingeconomicabuse.org, or call the National Domestic Abuse Helpline on 0808 2000 247.

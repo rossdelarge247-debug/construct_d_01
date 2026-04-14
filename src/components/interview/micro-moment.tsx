@@ -7,7 +7,7 @@ interface MicroMomentProps {
 
 export function MicroMoment({ children, className }: MicroMomentProps) {
   return (
-    <p className={cn('text-sm italic text-ink-faint leading-relaxed', className)}>
+    <p className={cn('text-[13px] italic text-ink-tertiary leading-relaxed', className)}>
       {children}
     </p>
   )
