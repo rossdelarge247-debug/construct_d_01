@@ -9,6 +9,7 @@ import { parseCSVToExtraction } from '@/lib/bank/csv-parser'
 import { transformExtractionResult } from '@/lib/ai/result-transformer'
 import { generateSectionSteps, CONFIRMATION_SECTIONS } from '@/lib/bank/confirmation-questions'
 import { getAllTestScenarios, type TestScenario, type ExpectedPayment, type ExpectedIncome } from '@/lib/bank/test-scenarios'
+import { toNtropyInput, type NtropyEnrichedTransaction } from '@/lib/bank/ntropy-client'
 import type { BankStatementExtraction, DetectedPayment, ExtractedIncome } from '@/lib/ai/extraction-schemas'
 
 // ═══ Scenario runner ═══
@@ -150,9 +151,27 @@ function runScenario(scenario: TestScenario): RunResult {
   }
 }
 
+// ═══ Ntropy comparison ═══
+
+interface NtropyComparison {
+  payee: string
+  amount: number
+  ourCategory: string
+  ntropyMerchant: string | null
+  ntropyLabels: string[]
+  agree: boolean | null  // null = can't determine
+}
+
+interface NtropyComparisonResult {
+  comparisons: NtropyComparison[]
+  latencyMs: number
+  creditsUsed: number
+  error: string | null
+}
+
 // ═══ UI ═══
 
-type TabId = 'classifications' | 'incomes' | 'questions' | 'transformed'
+type TabId = 'classifications' | 'incomes' | 'questions' | 'ntropy'
 
 export default function EngineWorkbenchPage() {
   const scenarios = useMemo(() => getAllTestScenarios(), [])
@@ -161,6 +180,9 @@ export default function EngineWorkbenchPage() {
   const [csvResult, setCsvResult] = useState<RunResult | null>(null)
   const [activeTab, setActiveTab] = useState<TabId>('classifications')
   const [filterCategory, setFilterCategory] = useState<string>('all')
+
+  const [ntropyResult, setNtropyResult] = useState<NtropyComparisonResult | null>(null)
+  const [ntropyLoading, setNtropyLoading] = useState(false)
 
   const activeResult = csvResult || result
 
@@ -270,6 +292,56 @@ export default function EngineWorkbenchPage() {
     reader.readAsText(file)
   }, [])
 
+  const handleNtropyCompare = useCallback(async () => {
+    if (!activeResult) return
+    setNtropyLoading(true)
+    setNtropyResult(null)
+    try {
+      const payments = activeResult.classifications.map((c) => ({
+        payee: c.payee,
+        amount: c.amount,
+      }))
+      const ntropyInput = toNtropyInput(payments)
+      const res = await fetch('/api/ntropy/enrich', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(ntropyInput),
+      })
+      const data = await res.json()
+      if (data.error) {
+        setNtropyResult({ comparisons: [], latencyMs: 0, creditsUsed: 0, error: data.error })
+        return
+      }
+      const enrichedMap = new Map<string, NtropyEnrichedTransaction>()
+      for (const e of data.enriched) {
+        enrichedMap.set(e.transaction_id, e)
+      }
+      const comparisons: NtropyComparison[] = activeResult.classifications.map((c, i) => {
+        const txId = `tx-${i}-${c.payee.slice(0, 20).replace(/\s/g, '-')}`
+        const enriched = enrichedMap.get(txId)
+        return {
+          payee: c.payee,
+          amount: c.amount,
+          ourCategory: c.autoCategory,
+          ntropyMerchant: enriched?.merchant ?? null,
+          ntropyLabels: enriched?.labels ?? [],
+          agree: null,  // Manual comparison — categories don't map 1:1
+        }
+      })
+      setNtropyResult({
+        comparisons,
+        latencyMs: data.latencyMs,
+        creditsUsed: data.creditsUsed,
+        error: null,
+      })
+      setActiveTab('ntropy')
+    } catch (err) {
+      setNtropyResult({ comparisons: [], latencyMs: 0, creditsUsed: 0, error: (err as Error).message })
+    } finally {
+      setNtropyLoading(false)
+    }
+  }, [activeResult])
+
   // Category filter options
   const categories = useMemo(() => {
     if (!activeResult) return []
@@ -310,6 +382,18 @@ export default function EngineWorkbenchPage() {
           Load CSV
           <input type="file" accept=".csv" onChange={handleCSVUpload} className="hidden" />
         </label>
+        {activeResult && (
+          <>
+            <div className="border-l border-gray-300 h-8 mx-1" />
+            <button
+              onClick={handleNtropyCompare}
+              disabled={ntropyLoading}
+              className="px-4 py-2 bg-purple-600 text-white rounded-lg text-sm font-medium hover:bg-purple-700 transition-colors disabled:opacity-50"
+            >
+              {ntropyLoading ? 'Enriching...' : `Compare with Ntropy (${activeResult.classifications.length} txns)`}
+            </button>
+          </>
+        )}
       </div>
 
       {/* Results */}
@@ -350,6 +434,7 @@ export default function EngineWorkbenchPage() {
               ['classifications', `Classifications (${activeResult.classifications.length})`],
               ['incomes', `Income (${activeResult.incomes.length})`],
               ['questions', `Questions (${activeResult.questions.filter((q) => q.fired).length})`],
+              ['ntropy', `Ntropy${ntropyResult ? ` (${ntropyResult.comparisons.length})` : ''}`],
             ] as [TabId, string][]).map(([id, label]) => (
               <button
                 key={id}
@@ -487,6 +572,68 @@ export default function EngineWorkbenchPage() {
                   ))}
                 </tbody>
               </table>
+            </div>
+          )}
+
+          {/* Ntropy comparison table */}
+          {activeTab === 'ntropy' && (
+            <div>
+              {ntropyResult?.error && (
+                <div className="mb-4 p-4 bg-red-50 border border-red-200 rounded-xl text-red-700 text-sm">
+                  {ntropyResult.error}
+                </div>
+              )}
+              {ntropyResult && !ntropyResult.error && (
+                <>
+                  <div className="flex gap-3 mb-4 text-sm text-gray-500">
+                    <span>Latency: {ntropyResult.latencyMs}ms</span>
+                    <span>Credits used: {ntropyResult.creditsUsed}</span>
+                  </div>
+                  <div className="overflow-x-auto rounded-xl border border-gray-200">
+                    <table className="w-full text-left">
+                      <thead className="bg-gray-50">
+                        <tr>
+                          <th className="px-4 py-3 font-medium text-gray-600">Raw description</th>
+                          <th className="px-4 py-3 font-medium text-gray-600 text-right">Amount</th>
+                          <th className="px-4 py-3 font-medium text-gray-600">Our category</th>
+                          <th className="px-4 py-3 font-medium text-gray-600">Ntropy merchant</th>
+                          <th className="px-4 py-3 font-medium text-gray-600">Ntropy labels</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-gray-100">
+                        {ntropyResult.comparisons.map((c, i) => (
+                          <tr key={i}>
+                            <td className="px-4 py-2 max-w-[250px] truncate text-xs" title={c.payee}>{c.payee}</td>
+                            <td className="px-4 py-2 text-right tabular-nums">£{c.amount.toLocaleString()}</td>
+                            <td className="px-4 py-2">
+                              <span className={`px-2 py-0.5 rounded-full text-xs ${
+                                c.ourCategory === 'unknown' ? 'bg-amber-100 text-amber-800' : 'bg-blue-100 text-blue-800'
+                              }`}>
+                                {c.ourCategory}
+                              </span>
+                            </td>
+                            <td className="px-4 py-2 text-sm">{c.ntropyMerchant ?? <span className="text-gray-300">—</span>}</td>
+                            <td className="px-4 py-2">
+                              {c.ntropyLabels.length > 0
+                                ? c.ntropyLabels.map((l, j) => (
+                                    <span key={j} className="px-2 py-0.5 rounded-full text-xs bg-purple-100 text-purple-800 mr-1">{l}</span>
+                                  ))
+                                : <span className="text-gray-300">—</span>
+                              }
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                </>
+              )}
+              {!ntropyResult && (
+                <div className="text-center py-12 text-gray-400">
+                  <p>Click &quot;Compare with Ntropy&quot; to enrich the current results.</p>
+                  <p className="text-xs mt-2">Requires NTROPY_API_KEY env var. Uses 1 credit per payment.</p>
+                </div>
+              )}
             </div>
           )}
         </>
