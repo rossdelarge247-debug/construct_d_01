@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useCallback } from 'react'
+import { useState, useCallback, useEffect, useRef } from 'react'
 import { TitleBar } from '@/components/hub/title-bar'
 import { WelcomeCarousel } from '@/components/workspace/welcome-carousel'
 import { TaskListHome } from '@/components/workspace/task-list-home'
@@ -11,16 +11,92 @@ import type { BankConnectionPhase, ConnectedAccount, SectionConfirmation, Spendi
 import type { BankStatementExtraction } from '@/lib/ai/extraction-schemas'
 import { SpendingFlow } from '@/components/workspace/spending-flow'
 
+// ═══ Session persistence ═══
+// Bridge until Supabase (#65). Saves workspace progress to sessionStorage
+// so page reloads don't lose the user's work within the same browser session.
+
+const STORAGE_KEY = 'decouple-workspace-state'
+
+interface PersistedState {
+  view: WorkspaceView
+  bankConnected: boolean
+  connectedAccounts: ConnectedAccount[]
+  bankExtractions: BankStatementExtraction[]
+  confirmationComplete: boolean
+  confirmations: SectionConfirmation[]
+  spendingResult: SpendingFlowResult | null
+}
+
+function loadPersistedState(): PersistedState | null {
+  try {
+    const raw = sessionStorage.getItem(STORAGE_KEY)
+    if (!raw) return null
+    return JSON.parse(raw) as PersistedState
+  } catch {
+    return null
+  }
+}
+
+function savePersistedState(state: PersistedState) {
+  try {
+    sessionStorage.setItem(STORAGE_KEY, JSON.stringify(state))
+  } catch { /* storage full or unavailable — degrade silently */ }
+}
+
+function getInitialState(): {
+  view: WorkspaceView
+  bankConnected: boolean
+  connectedAccounts: ConnectedAccount[]
+  bankExtractions: BankStatementExtraction[]
+  confirmationComplete: boolean
+  confirmations: SectionConfirmation[]
+  spendingResult: SpendingFlowResult | null
+} {
+  const saved = loadPersistedState()
+  if (saved) {
+    // On reload, land on a safe resting screen (not mid-flow screens)
+    let view = saved.view
+    if (view === 'bank_connection' || view === 'confirmation' || view === 'spending_upgrade') {
+      view = saved.confirmationComplete ? 'financial_summary' : 'task_list'
+    }
+    return { ...saved, view }
+  }
+  return {
+    view: 'carousel',
+    bankConnected: false,
+    connectedAccounts: [],
+    bankExtractions: [],
+    confirmationComplete: false,
+    confirmations: [],
+    spendingResult: null,
+  }
+}
+
 export default function WorkspacePage() {
-  const [view, setView] = useState<WorkspaceView>('carousel')
+  const initial = useRef(getInitialState()).current
+
+  const [view, setView] = useState<WorkspaceView>(initial.view)
   const [bankPhase, setBankPhase] = useState<BankConnectionPhase>('idle')
-  const [bankConnected, setBankConnected] = useState(false)
-  const [connectedAccounts, setConnectedAccounts] = useState<ConnectedAccount[]>([])
-  const [bankExtractions, setBankExtractions] = useState<BankStatementExtraction[]>([])
-  const [confirmationComplete, setConfirmationComplete] = useState(false)
-  const [confirmations, setConfirmations] = useState<SectionConfirmation[]>([])
-  const [spendingResult, setSpendingResult] = useState<SpendingFlowResult | null>(null)
+  const [bankConnected, setBankConnected] = useState(initial.bankConnected)
+  const [connectedAccounts, setConnectedAccounts] = useState<ConnectedAccount[]>(initial.connectedAccounts)
+  const [bankExtractions, setBankExtractions] = useState<BankStatementExtraction[]>(initial.bankExtractions)
+  const [confirmationComplete, setConfirmationComplete] = useState(initial.confirmationComplete)
+  const [confirmations, setConfirmations] = useState<SectionConfirmation[]>(initial.confirmations)
+  const [spendingResult, setSpendingResult] = useState<SpendingFlowResult | null>(initial.spendingResult)
   const [spendingReturnTo, setSpendingReturnTo] = useState<'task_list' | 'financial_summary'>('financial_summary')
+
+  // Persist state on every meaningful change
+  useEffect(() => {
+    savePersistedState({
+      view,
+      bankConnected,
+      connectedAccounts,
+      bankExtractions,
+      confirmationComplete,
+      confirmations,
+      spendingResult,
+    })
+  }, [view, bankConnected, connectedAccounts, bankExtractions, confirmationComplete, confirmations, spendingResult])
 
   // ═══ Navigation callbacks ═══
 
