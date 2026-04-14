@@ -369,8 +369,8 @@ function createPartTimePersona(): BankStatementExtraction[] {
       { payee: 'Council Tax', amount: 145, frequency: 'monthly', confidence: 0.96, likely_category: 'council_tax' },
       { payee: 'Octopus Energy', amount: 110, frequency: 'monthly', confidence: 0.90, likely_category: 'utilities' },
       { payee: 'EE', amount: 32, frequency: 'monthly', confidence: 0.95, likely_category: 'subscription' },
-      { payee: 'Barclaycard', amount: 85, frequency: 'monthly', confidence: 0.88, likely_category: 'credit_card' },
-      { payee: 'Klarna', amount: 45, frequency: 'monthly', confidence: 0.80, likely_category: 'bnpl' },
+      { payee: 'Barclaycard', amount: 85, frequency: 'monthly', confidence: 0.88, likely_category: 'loan_repayment' },
+      { payee: 'Klarna', amount: 45, frequency: 'monthly', confidence: 0.80, likely_category: 'loan_repayment' },
       { payee: 'Thames Water', amount: 38, frequency: 'monthly', confidence: 0.90, likely_category: 'utilities' },
     ],
     spending_categories: [
