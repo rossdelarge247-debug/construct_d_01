@@ -323,8 +323,8 @@ export default function PlanPage() {
         )}
 
         <div className="flex items-center justify-between pt-2">
-          <button type="button" onClick={() => router.back()} className="text-sm text-ink-light hover:text-ink transition-colors">Back</button>
-          <Button onClick={() => router.push('/start/next-steps')}>Your road ahead</Button>
+          <button type="button" onClick={() => router.back()} className="text-sm text-ink-secondary hover:text-ink transition-colors">Back</button>
+          <Button onClick={() => router.push('/start/choose')}>Choose your path</Button>
         </div>
       </div>
     </InterviewLayout>

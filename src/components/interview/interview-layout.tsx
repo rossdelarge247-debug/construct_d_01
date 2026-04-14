@@ -12,9 +12,10 @@ export type InterviewStepId =
   | 'children'
   | 'home'
   | 'finances'
-  | 'readiness'
+  | 'readiness'  // legacy — kept for type compat
   | 'plan'
-  | 'next'
+  | 'next'       // legacy — kept for type compat
+  | 'choose'
 
 interface InterviewLayoutProps {
   children: ReactNode
@@ -46,6 +47,7 @@ const STEP_TO_PHASE: Record<InterviewStepId, TrackerPhase> = {
   readiness: 'picture',
   plan: 'plan',
   next: 'plan',
+  choose: 'plan',
 }
 
 // Waypoint phases get a diamond marker
