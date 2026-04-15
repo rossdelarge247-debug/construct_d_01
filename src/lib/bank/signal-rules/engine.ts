@@ -4,6 +4,8 @@
 import type { SignalRule, SignalInput, DetectedSignal } from './types'
 import { INCOME_RULES } from './income-rules'
 import { PROPERTY_RULES } from './property-rules'
+import { PENSION_RULES } from './pension-rules'
+import { ACCOUNTS_RULES } from './accounts-rules'
 import { DEBT_RULES } from './debt-rules'
 
 // ═══ Rule registry ═══
@@ -11,6 +13,8 @@ import { DEBT_RULES } from './debt-rules'
 export const ALL_RULES: SignalRule[] = [
   ...INCOME_RULES,
   ...PROPERTY_RULES,
+  ...PENSION_RULES,
+  ...ACCOUNTS_RULES,
   ...DEBT_RULES,
 ]
 
