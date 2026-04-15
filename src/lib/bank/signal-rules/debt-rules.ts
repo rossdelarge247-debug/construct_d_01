@@ -95,8 +95,79 @@ const gamblingFlag: SignalRule = {
   },
 }
 
+const bnplDetected: SignalRule = {
+  id: 'debt.bnpl',
+  name: 'Buy Now Pay Later',
+  section: 'debts',
+  tier: 'must_nail',
+  formEField: '2.14',
+  description: 'Klarna, Clearpay, Laybuy instalment payments. BNPL balances are disclosable debts.',
+  detect: (input) => {
+    // Detect BNPL from payment descriptions (Klarna*, Clearpay*, Laybuy*)
+    const bnplPrefixes = ['klarna', 'clearpay', 'laybuy', 'zilch', 'openpay']
+    const bnplPayments = input.payments.filter(p =>
+      bnplPrefixes.some(prefix => p.payee.toLowerCase().includes(prefix))
+    )
+    // Also check raw transactions for BNPL patterns not caught by classification grouping
+    const bnplTransactions = input.transactions.filter(t =>
+      t.amount < 0 && bnplPrefixes.some(prefix => t.description.toLowerCase().includes(prefix))
+    )
+    if (bnplPayments.length === 0 && bnplTransactions.length === 0) return null
+
+    // Group by merchant (strip BNPL prefix to find actual vendor)
+    const merchants = new Map<string, { count: number; total: number; amounts: number[] }>()
+    for (const t of bnplTransactions) {
+      const desc = t.description.toLowerCase()
+      // Extract merchant: "klarna*halfords" → "halfords"
+      const match = desc.match(/(?:klarna|clearpay|laybuy|zilch|openpay)[*\s]+(.+)/i)
+      const merchant = match?.[1]?.trim() ?? desc
+      const existing = merchants.get(merchant) ?? { count: 0, total: 0, amounts: [] }
+      existing.count++
+      existing.total += Math.abs(t.amount)
+      existing.amounts.push(Math.abs(t.amount))
+      merchants.set(merchant, existing)
+    }
+
+    const totalMonthly = bnplPayments.reduce((sum, p) => sum + p.amount, 0)
+    const totalFromTxns = Array.from(merchants.values()).reduce((sum, m) => sum + m.total, 0)
+
+    const reasoning: string[] = []
+    for (const [merchant, data] of merchants) {
+      const isSameAmount = data.amounts.every(a => a === data.amounts[0])
+      reasoning.push(
+        `${merchant}: ${data.count} payment${data.count > 1 ? 's' : ''}, £${data.total.toLocaleString()} total` +
+        (isSameAmount && data.count > 1 ? ` (${data.count}x £${data.amounts[0]} — instalment plan)` : '')
+      )
+    }
+    reasoning.push('BNPL balances are disclosable debts under Form E 2.14')
+    reasoning.push('User should confirm: any outstanding balance?')
+
+    return {
+      id: 'debt.bnpl',
+      ruleId: 'debt.bnpl',
+      name: `BNPL payment${merchants.size > 1 ? 's' : ''} detected`,
+      section: 'debts',
+      formEField: '2.14',
+      confidence: 0.9,
+      determination: `BNPL: ${merchants.size} merchant${merchants.size > 1 ? 's' : ''}, £${(totalMonthly || totalFromTxns).toLocaleString()} total`,
+      reasoning,
+      evidence: Array.from(merchants.entries()).map(([merchant, data]) => ({
+        label: `${merchant}: £${data.total.toLocaleString()} (${data.count} payments)`,
+        metrics: [
+          { name: 'Payments', value: String(data.count) },
+          { name: 'Total', value: `£${data.total.toLocaleString()}` },
+        ],
+      })),
+      crossSectionImpacts: [
+        'Outstanding BNPL balance is a debt — check provider app for current balance',
+      ],
+    }
+  },
+}
+
 export const DEBT_RULES: SignalRule[] = [
   creditCardDetected,
   loanDetected,
+  bnplDetected,
   gamblingFlag,
 ]

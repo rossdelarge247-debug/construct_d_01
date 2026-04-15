@@ -646,6 +646,48 @@ export default function EngineWorkbenchPage() {
     'transport', 'education', 'healthcare', 'unknown',
   ]
 
+  // Ntropy label → our category mapping (best-effort, not 1:1)
+  const NTROPY_TO_CATEGORY: Record<string, DetectedPayment['likely_category']> = {
+    'vehicle_maintenance': 'transport',
+    'home maintenance': 'utilities',
+    'entertainment': 'subscription',
+    'e-commerce purchase': 'unknown',
+    'self care': 'healthcare',
+    'groceries': 'groceries',
+    'dining': 'dining',
+    'fuel': 'fuel',
+    'education': 'education',
+    'insurance': 'insurance',
+    'loan': 'loan_repayment',
+    'rent': 'rent',
+    'mortgage': 'mortgage',
+    'investment': 'investment',
+    'gambling': 'gambling',
+    'childcare': 'childcare',
+  }
+
+  // Apply a category to all items in a payee group
+  const handleGroupCategoryOverride = useCallback((group: PayeeGroup, newCategory: DetectedPayment['likely_category']) => {
+    if (!activeResult) return
+    for (const c of group.items) {
+      const globalIdx = activeResult.classifications.indexOf(c)
+      if (globalIdx >= 0) {
+        addCorrection({
+          normalisedPayee: normaliseDescription(c.payee),
+          rawDescription: c.payee,
+          autoCategory: c.autoCategory as DetectedPayment['likely_category'],
+          correctedCategory: newCategory,
+          amount: c.amount,
+          timestamp: new Date().toISOString(),
+        })
+        c.autoCategory = newCategory
+        c.confidence = 1.0
+      }
+    }
+    if (csvResult) setCsvResult({ ...csvResult })
+    else if (result) setResult({ ...result })
+  }, [activeResult, csvResult, result])
+
   const handleCategoryOverride = useCallback((index: number, newCategory: DetectedPayment['likely_category']) => {
     if (!activeResult) return
     const classification = activeResult.classifications[index]
@@ -941,8 +983,52 @@ export default function EngineWorkbenchPage() {
                                 </td>
                               </>
                             )}
-                            <td className="px-4 py-2.5 tabular-nums text-gray-500 text-xs">
-                              {group.count > 1 ? `£${Math.round(group.totalAmount / group.count).toLocaleString()} avg` : ''}
+                            <td className="px-4 py-2.5 text-xs">
+                              <div className="flex items-center gap-1.5">
+                                {group.count > 1 && <span className="text-gray-400">£{Math.round(group.totalAmount / group.count).toLocaleString()} avg</span>}
+                                {/* Ntropy reconciliation: apply Ntropy's label to all items */}
+                                {ntropyResult && (() => {
+                                  const labels = new Set<string>()
+                                  for (const c of group.items) {
+                                    const ntr = ntropyLookup.get(`${c.payee}:${c.amount}`)
+                                    ntr?.ntropyLabels.forEach(l => labels.add(l))
+                                  }
+                                  const topLabel = Array.from(labels)[0]
+                                  const mapped = topLabel ? NTROPY_TO_CATEGORY[topLabel.toLowerCase()] : undefined
+                                  const allAlreadyOverridden = group.items.every(c => c.confidence >= 1.0)
+                                  if (!topLabel || allAlreadyOverridden) return null
+                                  return (
+                                    <button
+                                      onClick={(e) => {
+                                        e.stopPropagation()
+                                        if (mapped && mapped !== 'unknown') {
+                                          handleGroupCategoryOverride(group, mapped)
+                                        }
+                                      }}
+                                      disabled={!mapped || mapped === 'unknown'}
+                                      className="px-2 py-0.5 rounded text-[10px] bg-purple-100 text-purple-700 hover:bg-purple-200 transition-colors disabled:opacity-40 disabled:cursor-default"
+                                      title={`Apply Ntropy label "${topLabel}" → ${mapped ?? '?'} to all ${group.count} items`}
+                                    >
+                                      Use: {topLabel}
+                                    </button>
+                                  )
+                                })()}
+                                {/* Group override dropdown */}
+                                <select
+                                  value=""
+                                  onClick={(e) => e.stopPropagation()}
+                                  onChange={(e) => {
+                                    if (e.target.value) handleGroupCategoryOverride(group, e.target.value as DetectedPayment['likely_category'])
+                                    e.target.value = ''
+                                  }}
+                                  className="px-1 py-0.5 rounded text-[10px] bg-gray-100 text-gray-500 border-0 cursor-pointer"
+                                >
+                                  <option value="">Set all...</option>
+                                  {ALL_CATEGORIES.map(cat => (
+                                    <option key={cat} value={cat}>{cat}</option>
+                                  ))}
+                                </select>
+                              </div>
                             </td>
                           </tr>
                           {/* Expanded individual rows */}

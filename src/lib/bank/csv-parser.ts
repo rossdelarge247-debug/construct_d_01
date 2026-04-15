@@ -143,9 +143,11 @@ export function normaliseDescription(desc: string): string {
     // Strip reference numbers (REF:xxx, ref xxx, /xxx, #xxx)
     .replace(/\b(ref:?\s*\S+|reference\s*\S+)\b/gi, '')
     .replace(/[/#]\S+/g, '')
-    // Strip dates (12MAR26, 12/03/2026, 2026-03-12, 12-MAR, etc.)
-    .replace(/\b\d{1,2}(jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)\d{0,4}\b/gi, '')
+    // Strip dates (12MAR26, 12 MAR, 12/03/2026, 2026-03-12, ON 12 MAR, etc.)
+    .replace(/\b\d{1,2}\s*(jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)\s*\d{0,4}\b/gi, '')
+    .replace(/\b(jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)\s*\d{0,4}\b/gi, '')
     .replace(/\b\d{1,2}[\/\-]\d{1,2}[\/\-]?\d{0,4}\b/g, '')
+    .replace(/\b(on|at)\s+\d{1,2}\b/gi, '')  // "ON 21", "AT 14"
     // Strip GBP amounts (GBP 47.50, £47.50)
     .replace(/\b(gbp\s*)?\d+\.\d{2}\b/gi, '')
     .replace(/£\d+(\.\d{2})?/g, '')
