@@ -4,7 +4,7 @@
 // Load scenarios or CSVs, see every classification, mark corrections,
 // run regression against golden test data.
 
-import { useState, useMemo, useCallback } from 'react'
+import React, { useState, useMemo, useCallback } from 'react'
 import { parseCSVToExtraction } from '@/lib/bank/csv-parser'
 import { transformExtractionResult } from '@/lib/ai/result-transformer'
 import { generateSectionSteps, CONFIRMATION_SECTIONS } from '@/lib/bank/confirmation-questions'
@@ -184,6 +184,8 @@ export default function EngineWorkbenchPage() {
   const [activeTab, setActiveTab] = useState<TabId>('classifications')
   const [filterCategory, setFilterCategory] = useState<string>('all')
   const [filterBucket, setFilterBucket] = useState<string>('all')
+  const [groupByPayee, setGroupByPayee] = useState(false)
+  const [expandedGroups, setExpandedGroups] = useState<Set<string>>(new Set())
 
   const [ntropyResult, setNtropyResult] = useState<NtropyComparisonResult | null>(null)
   const [ntropyLoading, setNtropyLoading] = useState(false)
@@ -464,6 +466,60 @@ export default function EngineWorkbenchPage() {
     }
     return items
   }, [activeResult, filterCategory, filterBucket])
+
+  // Payee grouping — more aggressive than normaliseDescription to merge date variants
+  // e.g. "Klarna*Halfords Au ON 21 DEC" + "Klarna*Halfords Au ON 21 NOV" → same group
+  function payeeGroupKey(payee: string): string {
+    return normaliseDescription(payee)
+      .replace(/\b(on|at|in|to|for|the|of|and|ft|bcc|scc)\b/gi, '')
+      .replace(/\b\d+\b/g, '')       // strip isolated numbers (dates, refs)
+      .replace(/\b\w{1,2}\b/g, '')   // strip 1-2 char tokens
+      .replace(/\s+/g, ' ')
+      .trim()
+  }
+
+  interface PayeeGroup {
+    key: string
+    items: ClassificationResult[]
+    totalAmount: number
+    count: number
+    categories: string[]
+    ntropyMerchant: string | null  // from first item with Ntropy data
+  }
+
+  const groupedClassifications = useMemo<PayeeGroup[]>(() => {
+    if (!groupByPayee) return []
+    const groups = new Map<string, ClassificationResult[]>()
+    for (const c of filteredClassifications) {
+      const key = payeeGroupKey(c.payee)
+      if (!key) continue
+      const group = groups.get(key) ?? []
+      group.push(c)
+      groups.set(key, group)
+    }
+    return Array.from(groups.entries())
+      .map(([key, items]: [string, ClassificationResult[]]) => {
+        const totalAmount = items.reduce((sum, c) => sum + c.amount, 0)
+        const cats = [...new Set(items.map(c => c.autoCategory))]
+        // Get Ntropy merchant from lookup if available
+        let ntropyMerchant: string | null = null
+        for (const c of items) {
+          const ntr = ntropyLookup.get(`${c.payee}:${c.amount}`)
+          if (ntr?.ntropyMerchant) { ntropyMerchant = ntr.ntropyMerchant; break }
+        }
+        return { key, items, totalAmount, count: items.length, categories: cats, ntropyMerchant }
+      })
+      .sort((a, b) => b.totalAmount - a.totalAmount) // Highest total first
+  }, [groupByPayee, filteredClassifications, ntropyLookup])
+
+  const toggleGroup = useCallback((key: string) => {
+    setExpandedGroups(prev => {
+      const next = new Set(prev)
+      if (next.has(key)) next.delete(key)
+      else next.add(key)
+      return next
+    })
+  }, [])
 
   // Question → trigger mapping: which classification/signal caused each question to fire
   const questionTriggers = useMemo(() => {
@@ -770,8 +826,8 @@ export default function EngineWorkbenchPage() {
                 </div>
               </div>
 
-              {/* Category + bucket filters */}
-              <div className="flex gap-2 mb-3 flex-wrap">
+              {/* Category + bucket filters + group toggle */}
+              <div className="flex gap-2 mb-3 flex-wrap items-center">
                 {categories.map((cat) => (
                   <button
                     key={cat}
@@ -785,24 +841,132 @@ export default function EngineWorkbenchPage() {
                     {cat}
                   </button>
                 ))}
+                <div className="border-l border-gray-300 h-5 mx-1" />
+                <button
+                  onClick={() => { setGroupByPayee(!groupByPayee); setExpandedGroups(new Set()) }}
+                  className={`px-3 py-1 text-xs rounded-full transition-colors ${
+                    groupByPayee
+                      ? 'bg-indigo-600 text-white'
+                      : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                  }`}
+                >
+                  {groupByPayee ? 'Grouped by payee' : 'Group by payee'}
+                </button>
               </div>
               <div className="overflow-x-auto rounded-xl border border-gray-200">
                 <table className="w-full text-left">
                   <thead className="bg-gray-50">
                     <tr>
-                      <th className="px-4 py-3 font-medium text-gray-600">Payee</th>
-                      <th className="px-4 py-3 font-medium text-gray-600 text-right">Amount</th>
-                      <th className="px-4 py-3 font-medium text-gray-600">Freq</th>
-                      <th className="px-4 py-3 font-medium text-gray-600">Auto category</th>
+                      <th className="px-4 py-3 font-medium text-gray-600">{groupByPayee ? 'Payee group' : 'Payee'}</th>
+                      <th className="px-4 py-3 font-medium text-gray-600 text-right">{groupByPayee ? 'Total' : 'Amount'}</th>
+                      {groupByPayee && <th className="px-4 py-3 font-medium text-gray-600 text-center">Count</th>}
+                      {!groupByPayee && <th className="px-4 py-3 font-medium text-gray-600">Freq</th>}
+                      <th className="px-4 py-3 font-medium text-gray-600">Category</th>
                       {ntropyResult && <th className="px-4 py-3 font-medium text-purple-600">Ntropy merchant</th>}
                       {ntropyResult && <th className="px-4 py-3 font-medium text-purple-600">Ntropy labels</th>}
-                      <th className="px-4 py-3 font-medium text-gray-600">Expected</th>
+                      {!groupByPayee && <th className="px-4 py-3 font-medium text-gray-600">Expected</th>}
                       <th className="px-4 py-3 font-medium text-gray-600">Conf</th>
-                      <th className="px-4 py-3 font-medium text-gray-600 text-center">Match</th>
+                      {!groupByPayee && <th className="px-4 py-3 font-medium text-gray-600 text-center">Match</th>}
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-gray-100">
-                    {filteredClassifications.map((c, i) => {
+                    {/* Grouped view */}
+                    {groupByPayee && groupedClassifications.map((group) => {
+                      const isExpanded = expandedGroups.has(group.key)
+                      const allUnknown = group.categories.length === 1 && group.categories[0] === 'unknown'
+                      return (
+                        <React.Fragment key={group.key}>
+                          {/* Group header row */}
+                          <tr
+                            onClick={() => toggleGroup(group.key)}
+                            className={`cursor-pointer hover:bg-gray-50 ${allUnknown ? 'bg-amber-50/40' : 'bg-gray-50/50'}`}
+                          >
+                            <td className="px-4 py-2.5 font-medium text-sm">
+                              <span className="mr-1.5 text-gray-400 text-xs">{isExpanded ? '▼' : '▶'}</span>
+                              {group.ntropyMerchant ?? group.key}
+                            </td>
+                            <td className="px-4 py-2.5 text-right tabular-nums font-medium">£{group.totalAmount.toLocaleString()}</td>
+                            <td className="px-4 py-2.5 text-center">
+                              <span className="px-2 py-0.5 rounded-full text-xs bg-gray-200 text-gray-700">{group.count}x</span>
+                            </td>
+                            <td className="px-4 py-2.5">
+                              {group.categories.map((cat) => (
+                                <span key={cat} className={`px-2 py-0.5 rounded-full text-xs mr-1 ${
+                                  cat === 'unknown' ? 'bg-amber-100 text-amber-800' : 'bg-blue-100 text-blue-800'
+                                }`}>{cat}</span>
+                              ))}
+                            </td>
+                            {ntropyResult && (
+                              <>
+                                <td className="px-4 py-2.5 text-sm">{group.ntropyMerchant ?? <span className="text-gray-300">—</span>}</td>
+                                <td className="px-4 py-2.5">
+                                  {(() => {
+                                    const labels = new Set<string>()
+                                    for (const c of group.items) {
+                                      const ntr = ntropyLookup.get(`${c.payee}:${c.amount}`)
+                                      ntr?.ntropyLabels.forEach(l => labels.add(l))
+                                    }
+                                    return labels.size > 0
+                                      ? Array.from(labels).map(l => <span key={l} className="px-1.5 py-0.5 rounded-full text-xs bg-purple-100 text-purple-800 mr-1">{l}</span>)
+                                      : <span className="text-gray-300">—</span>
+                                  })()}
+                                </td>
+                              </>
+                            )}
+                            <td className="px-4 py-2.5 tabular-nums text-gray-500 text-xs">
+                              {group.count > 1 ? `£${Math.round(group.totalAmount / group.count).toLocaleString()} avg` : ''}
+                            </td>
+                          </tr>
+                          {/* Expanded individual rows */}
+                          {isExpanded && group.items.map((c, j) => {
+                            const globalIdx = activeResult!.classifications.indexOf(c)
+                            return (
+                              <tr key={`${group.key}-${j}`} className="bg-white border-l-2 border-l-indigo-200">
+                                <td className="pl-10 pr-4 py-1.5 text-xs text-gray-500 max-w-[260px] truncate" title={c.payee}>{c.payee}</td>
+                                <td className="px-4 py-1.5 text-right tabular-nums text-xs">£{c.amount.toLocaleString()}</td>
+                                <td className="px-4 py-1.5 text-center text-xs text-gray-400">{c.frequency}</td>
+                                <td className="px-4 py-1.5">
+                                  <select
+                                    value={c.autoCategory}
+                                    onChange={(e) => handleCategoryOverride(globalIdx, e.target.value as DetectedPayment['likely_category'])}
+                                    className={`px-2 py-0.5 rounded-full text-xs border-0 cursor-pointer ${
+                                      c.confidence >= 1.0 ? 'bg-green-100 text-green-800'
+                                      : c.autoCategory === 'unknown' ? 'bg-amber-100 text-amber-800'
+                                      : 'bg-blue-100 text-blue-800'
+                                    }`}
+                                  >
+                                    {ALL_CATEGORIES.map((cat) => (
+                                      <option key={cat} value={cat}>{cat}</option>
+                                    ))}
+                                  </select>
+                                </td>
+                                {ntropyResult && (() => {
+                                  const ntr = ntropyLookup.get(`${c.payee}:${c.amount}`)
+                                  return (
+                                    <>
+                                      <td className="px-4 py-1.5 text-xs">{ntr?.ntropyMerchant ?? <span className="text-gray-300">—</span>}</td>
+                                      <td className="px-4 py-1.5">
+                                        {ntr && ntr.ntropyLabels.length > 0
+                                          ? ntr.ntropyLabels.map((l, k) => (
+                                              <span key={k} className="px-1.5 py-0.5 rounded-full text-[10px] bg-purple-100 text-purple-800 mr-1">{l}</span>
+                                            ))
+                                          : <span className="text-gray-300">—</span>
+                                        }
+                                      </td>
+                                    </>
+                                  )
+                                })()}
+                                <td className="px-4 py-1.5 tabular-nums text-xs text-gray-400">
+                                  {c.confidence >= 1.0 ? <span className="text-green-600">user</span> : `${(c.confidence * 100).toFixed(0)}%`}
+                                </td>
+                              </tr>
+                            )
+                          })}
+                        </React.Fragment>
+                      )
+                    })}
+                    {/* Flat view (default) */}
+                    {!groupByPayee && filteredClassifications.map((c, i) => {
                       const globalIdx = activeResult!.classifications.indexOf(c)
                       return (
                         <tr key={i} className={c.isCorrect === false ? 'bg-red-50' : c.isCorrect === true ? '' : c.autoCategory === 'unknown' ? 'bg-amber-50/30' : 'bg-gray-50/50'}>
