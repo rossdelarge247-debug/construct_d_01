@@ -1011,7 +1011,7 @@ export default function EngineWorkbenchPage() {
                                       }}
                                       disabled={!mapped || mapped === 'unknown'}
                                       className="px-2 py-0.5 rounded text-[10px] bg-purple-100 text-purple-700 hover:bg-purple-200 transition-colors disabled:opacity-40 disabled:cursor-default"
-                                      title={`Apply Ntropy label "${topLabel}" → ${mapped ?? '?'} to all ${group.count} items`}
+                                      title={`Apply Ntropy label "${topLabel}" → ${mapped ?? '?'} to all ${group.rawTxCount} items`}
                                     >
                                       Use: {topLabel}
                                     </button>
