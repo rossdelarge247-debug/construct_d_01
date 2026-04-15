@@ -183,6 +183,7 @@ export default function EngineWorkbenchPage() {
   const [csvResult, setCsvResult] = useState<RunResult | null>(null)
   const [activeTab, setActiveTab] = useState<TabId>('classifications')
   const [filterCategory, setFilterCategory] = useState<string>('all')
+  const [filterBucket, setFilterBucket] = useState<string>('all')
 
   const [ntropyResult, setNtropyResult] = useState<NtropyComparisonResult | null>(null)
   const [ntropyLoading, setNtropyLoading] = useState(false)
@@ -397,12 +398,6 @@ export default function EngineWorkbenchPage() {
     return ['all', ...Array.from(cats).sort()]
   }, [activeResult])
 
-  const filteredClassifications = useMemo(() => {
-    if (!activeResult) return []
-    if (filterCategory === 'all') return activeResult.classifications
-    return activeResult.classifications.filter((c) => c.autoCategory === filterCategory)
-  }, [activeResult, filterCategory])
-
   // Ntropy lookup: match by payee + amount for inline display on classifications tab
   const ntropyLookup = useMemo(() => {
     if (!ntropyResult?.comparisons) return new Map<string, NtropyComparison>()
@@ -412,6 +407,63 @@ export default function EngineWorkbenchPage() {
     }
     return map
   }, [ntropyResult])
+
+  // Amount distribution analysis — bucketed ranges with category breakdown
+  const AMOUNT_BUCKETS = [
+    { id: '0-500', label: '< £500', min: 0, max: 500 },
+    { id: '500-1000', label: '£500-1k', min: 500, max: 1000 },
+    { id: '1000-2000', label: '£1-2k', min: 1000, max: 2000 },
+    { id: '2000-3000', label: '£2-3k', min: 2000, max: 3000 },
+    { id: '3000-5000', label: '£3-5k', min: 3000, max: 5000 },
+    { id: '5000-10000', label: '£5-10k', min: 5000, max: 10000 },
+    { id: '10000+', label: '£10k+', min: 10000, max: Infinity },
+  ]
+
+  const amountAnalysis = useMemo(() => {
+    if (!activeResult) return []
+    return AMOUNT_BUCKETS.map(bucket => {
+      const items = activeResult.classifications.filter(c =>
+        c.amount >= bucket.min && c.amount < bucket.max
+      )
+      const catCounts = new Map<string, number>()
+      for (const c of items) {
+        catCounts.set(c.autoCategory, (catCounts.get(c.autoCategory) ?? 0) + 1)
+      }
+      const ntLabels = new Map<string, number>()
+      if (ntropyResult) {
+        for (const c of items) {
+          const ntr = ntropyLookup.get(`${c.payee}:${c.amount}`)
+          if (ntr) {
+            for (const l of ntr.ntropyLabels) {
+              ntLabels.set(l, (ntLabels.get(l) ?? 0) + 1)
+            }
+          }
+        }
+      }
+      return {
+        ...bucket,
+        count: items.length,
+        unknownCount: items.filter(c => c.autoCategory === 'unknown').length,
+        categories: Array.from(catCounts.entries()).sort((a, b) => b[1] - a[1]) as [string, number][],
+        ntropyLabels: Array.from(ntLabels.entries()).sort((a, b) => b[1] - a[1]) as [string, number][],
+      }
+    })
+  }, [activeResult, ntropyResult, ntropyLookup])
+
+  const filteredClassifications = useMemo(() => {
+    if (!activeResult) return []
+    let items = activeResult.classifications
+    if (filterCategory !== 'all') {
+      items = items.filter((c) => c.autoCategory === filterCategory)
+    }
+    if (filterBucket !== 'all') {
+      const bucket = AMOUNT_BUCKETS.find(b => b.id === filterBucket)
+      if (bucket) {
+        items = items.filter(c => c.amount >= bucket.min && c.amount < bucket.max)
+      }
+    }
+    return items
+  }, [activeResult, filterCategory, filterBucket])
 
   // Question → trigger mapping: which classification/signal caused each question to fire
   const questionTriggers = useMemo(() => {
@@ -644,7 +696,82 @@ export default function EngineWorkbenchPage() {
           {/* Classification table */}
           {activeTab === 'classifications' && (
             <>
-              <div className="flex gap-2 mb-3">
+              {/* Amount distribution analysis */}
+              <div className="mb-4 rounded-xl border border-gray-200 overflow-hidden">
+                <div className="bg-gray-50 px-4 py-2 border-b border-gray-200 flex items-center justify-between">
+                  <span className="text-xs font-medium text-gray-600">Amount distribution</span>
+                  {filterBucket !== 'all' && (
+                    <button onClick={() => setFilterBucket('all')} className="text-xs text-blue-600 hover:underline">Clear filter</button>
+                  )}
+                </div>
+                <div className="grid grid-cols-7 divide-x divide-gray-100">
+                  {amountAnalysis.map(bucket => {
+                    const maxCount = Math.max(...amountAnalysis.map(b => b.count), 1)
+                    const barHeight = bucket.count > 0 ? Math.max(8, (bucket.count / maxCount) * 60) : 0
+                    const isActive = filterBucket === bucket.id
+                    return (
+                      <button
+                        key={bucket.id}
+                        onClick={() => setFilterBucket(isActive ? 'all' : bucket.id)}
+                        className={`flex flex-col items-center px-2 py-3 transition-colors ${
+                          isActive ? 'bg-blue-50' : 'hover:bg-gray-50'
+                        }`}
+                      >
+                        {/* Bar */}
+                        <div className="w-full flex justify-center mb-1" style={{ height: 60 }}>
+                          <div className="flex flex-col justify-end items-center w-full gap-px">
+                            {bucket.count > 0 && (
+                              <div className="flex w-full justify-center" style={{ height: barHeight }}>
+                                <div className="flex w-10 rounded-t overflow-hidden">
+                                  {bucket.unknownCount > 0 && (
+                                    <div
+                                      className="bg-amber-400"
+                                      style={{ width: `${(bucket.unknownCount / bucket.count) * 100}%` }}
+                                    />
+                                  )}
+                                  <div
+                                    className="bg-blue-400"
+                                    style={{ width: `${((bucket.count - bucket.unknownCount) / bucket.count) * 100}%` }}
+                                  />
+                                </div>
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                        {/* Label */}
+                        <span className="text-xs font-medium text-gray-700">{bucket.label}</span>
+                        <span className="text-xs text-gray-500">{bucket.count} txn{bucket.count !== 1 ? 's' : ''}</span>
+                        {bucket.unknownCount > 0 && (
+                          <span className="text-xs text-amber-600">{bucket.unknownCount} unknown</span>
+                        )}
+                        {/* Top categories */}
+                        <div className="mt-1 flex flex-wrap justify-center gap-0.5">
+                          {bucket.categories.slice(0, 3).map(([cat, n]: [string, number]) => (
+                            <span key={cat} className={`px-1 py-px rounded text-[10px] ${
+                              cat === 'unknown' ? 'bg-amber-100 text-amber-700' : 'bg-gray-100 text-gray-600'
+                            }`}>
+                              {cat.slice(0, 8)}{cat.length > 8 ? '.' : ''} {n}
+                            </span>
+                          ))}
+                        </div>
+                        {/* Ntropy labels if available */}
+                        {bucket.ntropyLabels.length > 0 && (
+                          <div className="mt-0.5 flex flex-wrap justify-center gap-0.5">
+                            {bucket.ntropyLabels.slice(0, 2).map(([label, n]: [string, number]) => (
+                              <span key={label} className="px-1 py-px rounded text-[10px] bg-purple-100 text-purple-700">
+                                {label.slice(0, 10)} {n}
+                              </span>
+                            ))}
+                          </div>
+                        )}
+                      </button>
+                    )
+                  })}
+                </div>
+              </div>
+
+              {/* Category + bucket filters */}
+              <div className="flex gap-2 mb-3 flex-wrap">
                 {categories.map((cat) => (
                   <button
                     key={cat}
