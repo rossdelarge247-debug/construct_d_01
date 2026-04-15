@@ -5,7 +5,7 @@
 // run regression against golden test data.
 
 import React, { useState, useMemo, useCallback } from 'react'
-import { parseCSVToExtraction } from '@/lib/bank/csv-parser'
+import { parseCSVToExtraction, type ParsedTransaction } from '@/lib/bank/csv-parser'
 import { transformExtractionResult } from '@/lib/ai/result-transformer'
 import { generateSectionSteps, CONFIRMATION_SECTIONS } from '@/lib/bank/confirmation-questions'
 import { getAllTestScenarios, type TestScenario, type ExpectedPayment, type ExpectedIncome } from '@/lib/bank/test-scenarios'
@@ -25,6 +25,8 @@ interface ClassificationResult {
   confidence: number
   expectedCategory?: string
   isCorrect: boolean | null  // null = no expectation
+  dates: string[]  // Raw transaction dates for this payee
+  txCount: number  // Number of raw transactions (before grouping into avg)
 }
 
 interface IncomeResult {
@@ -61,6 +63,15 @@ interface RunResult {
   }
 }
 
+// Find raw transaction dates for a classified payee
+function findDatesForPayee(payee: string, rawTxns: ParsedTransaction[]): string[] {
+  const key = normaliseDescription(payee)
+  return rawTxns
+    .filter(t => normaliseDescription(t.description) === key)
+    .map(t => t.date)
+    .sort()
+}
+
 function runScenario(scenario: TestScenario): RunResult {
   // Build CSV text from scenario transactions
   const csvLines = ['Date,Description,Amount']
@@ -71,7 +82,7 @@ function runScenario(scenario: TestScenario): RunResult {
   const csvText = csvLines.join('\n')
 
   // Parse through the CSV parser
-  const { extraction } = parseCSVToExtraction(csvText, `${scenario.provider}.csv`)
+  const { extraction, rawTransactions } = parseCSVToExtraction(csvText, `${scenario.provider}.csv`)
   extraction.provider = scenario.provider
   extraction.account_type = scenario.accountType
   extraction.is_joint = scenario.isJoint
@@ -106,6 +117,7 @@ function runScenario(scenario: TestScenario): RunResult {
     const isCorrect = expected
       ? p.likely_category === expected.expectedCategory
       : null
+    const dates = findDatesForPayee(p.payee, rawTransactions)
     return {
       payee: p.payee,
       amount: p.amount,
@@ -114,6 +126,8 @@ function runScenario(scenario: TestScenario): RunResult {
       confidence: p.confidence,
       expectedCategory: expected?.expectedCategory,
       isCorrect,
+      dates,
+      txCount: dates.length,
     }
   })
 
@@ -264,7 +278,7 @@ export default function EngineWorkbenchPage() {
       const text = ev.target?.result as string
       if (!text) return
       try {
-        const { extraction } = parseCSVToExtraction(text, file.name)
+        const { extraction, rawTransactions } = parseCSVToExtraction(text, file.name)
         const extractions = [extraction]
         transformExtractionResult(
           { document_type: 'bank_statement', confidence: 0.95, provider: extraction.provider, description: 'CSV import' },
@@ -282,14 +296,19 @@ export default function EngineWorkbenchPage() {
             })
           }
         }
-        const classifications: ClassificationResult[] = extraction.regular_payments.map((p: DetectedPayment) => ({
-          payee: p.payee,
-          amount: p.amount,
-          frequency: p.frequency,
-          autoCategory: p.likely_category,
-          confidence: p.confidence,
-          isCorrect: null,
-        }))
+        const classifications: ClassificationResult[] = extraction.regular_payments.map((p: DetectedPayment) => {
+          const dates = findDatesForPayee(p.payee, rawTransactions)
+          return {
+            payee: p.payee,
+            amount: p.amount,
+            frequency: p.frequency,
+            autoCategory: p.likely_category,
+            confidence: p.confidence,
+            isCorrect: null,
+            dates,
+            txCount: dates.length,
+          }
+        })
         const incomes: IncomeResult[] = extraction.income_deposits.map((i: ExtractedIncome) => ({
           source: i.source,
           amount: i.amount,
@@ -861,6 +880,7 @@ export default function EngineWorkbenchPage() {
                       <th className="px-4 py-3 font-medium text-gray-600 text-right">{groupByPayee ? 'Total' : 'Amount'}</th>
                       {groupByPayee && <th className="px-4 py-3 font-medium text-gray-600 text-center">Count</th>}
                       {!groupByPayee && <th className="px-4 py-3 font-medium text-gray-600">Freq</th>}
+                      <th className="px-4 py-3 font-medium text-gray-600">Dates</th>
                       <th className="px-4 py-3 font-medium text-gray-600">Category</th>
                       {ntropyResult && <th className="px-4 py-3 font-medium text-purple-600">Ntropy merchant</th>}
                       {ntropyResult && <th className="px-4 py-3 font-medium text-purple-600">Ntropy labels</th>}
@@ -888,6 +908,14 @@ export default function EngineWorkbenchPage() {
                             <td className="px-4 py-2.5 text-right tabular-nums font-medium">£{group.totalAmount.toLocaleString()}</td>
                             <td className="px-4 py-2.5 text-center">
                               <span className="px-2 py-0.5 rounded-full text-xs bg-gray-200 text-gray-700">{group.count}x</span>
+                            </td>
+                            <td className="px-4 py-2.5 text-xs text-gray-400">
+                              {(() => {
+                                const allDates = group.items.flatMap(c => c.dates).sort()
+                                if (allDates.length === 0) return '—'
+                                if (allDates.length <= 2) return allDates.join(', ')
+                                return `${allDates[0]} — ${allDates[allDates.length - 1]}`
+                              })()}
                             </td>
                             <td className="px-4 py-2.5">
                               {group.categories.map((cat) => (
@@ -924,7 +952,12 @@ export default function EngineWorkbenchPage() {
                               <tr key={`${group.key}-${j}`} className="bg-white border-l-2 border-l-indigo-200">
                                 <td className="pl-10 pr-4 py-1.5 text-xs text-gray-500 max-w-[260px] truncate" title={c.payee}>{c.payee}</td>
                                 <td className="px-4 py-1.5 text-right tabular-nums text-xs">£{c.amount.toLocaleString()}</td>
-                                <td className="px-4 py-1.5 text-center text-xs text-gray-400">{c.frequency}</td>
+                                <td className="px-4 py-1.5 text-center text-xs text-gray-400">
+                                  {c.frequency === 'one_off' ? 'one-off' : c.frequency}
+                                </td>
+                                <td className="px-4 py-1.5 text-[10px] text-gray-400">
+                                  {c.dates.length > 0 ? c.dates.join(', ') : '—'}
+                                </td>
                                 <td className="px-4 py-1.5">
                                   <select
                                     value={c.autoCategory}
@@ -972,7 +1005,20 @@ export default function EngineWorkbenchPage() {
                         <tr key={i} className={c.isCorrect === false ? 'bg-red-50' : c.isCorrect === true ? '' : c.autoCategory === 'unknown' ? 'bg-amber-50/30' : 'bg-gray-50/50'}>
                           <td className="px-4 py-2 max-w-[280px] truncate" title={c.payee}>{c.payee}</td>
                           <td className="px-4 py-2 text-right tabular-nums">£{c.amount.toLocaleString()}</td>
-                          <td className="px-4 py-2 text-gray-500">{c.frequency}</td>
+                          <td className="px-4 py-2 text-gray-500">
+                            <span className={c.frequency === 'one_off' ? 'text-amber-600 font-medium' : ''}>
+                              {c.frequency === 'one_off' ? 'one-off' : c.frequency}
+                            </span>
+                            {c.txCount > 1 && <span className="text-gray-400 text-xs ml-1">({c.txCount}x)</span>}
+                          </td>
+                          <td className="px-4 py-2 text-xs text-gray-400">
+                            {c.dates.length > 0
+                              ? c.dates.length <= 3
+                                ? c.dates.join(', ')
+                                : `${c.dates[0]} ... ${c.dates[c.dates.length - 1]}`
+                              : '—'
+                            }
+                          </td>
                           <td className="px-4 py-2">
                             <select
                               value={c.autoCategory}

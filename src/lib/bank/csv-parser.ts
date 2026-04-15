@@ -14,7 +14,7 @@ import { lookupCorrection } from '@/lib/bank/user-corrections'
 
 type BankFormat = 'monzo' | 'barclays' | 'starling' | 'generic'
 
-interface ParsedTransaction {
+export interface ParsedTransaction {
   date: string
   description: string
   amount: number // positive = credit, negative = debit
@@ -461,7 +461,22 @@ function identifyPaymentsFromCSV(debits: Map<string, ParsedTransaction[]>): Dete
     const avg = Math.round(amounts.reduce((a, b) => a + b, 0) / amounts.length)
     const dates = group.map((t) => new Date(t.date).getTime()).sort()
     const gaps = dates.slice(1).map((d, i) => (d - dates[i]) / (24 * 60 * 60 * 1000))
-    const avgGap = gaps.length > 0 ? gaps.reduce((a, b) => a + b, 0) / gaps.length : 30
+    const avgGap = gaps.length > 0 ? gaps.reduce((a, b) => a + b, 0) / gaps.length : 0
+
+    // Frequency: one_off for single payments, otherwise derive from average gap between dates
+    let frequency: 'weekly' | 'monthly' | 'quarterly' | 'annual' | 'one_off'
+    if (group.length === 1) {
+      frequency = 'one_off'
+    } else if (avgGap < 10) {
+      frequency = 'weekly'
+    } else if (avgGap < 45) {
+      frequency = 'monthly'
+    } else if (avgGap < 120) {
+      frequency = 'quarterly'
+    } else {
+      frequency = 'annual'
+    }
+
     // Confidence scoring: user corrections = 1.0, then category-aware with amount guards
     let confidence: number
     if (userOverride) {
@@ -478,7 +493,7 @@ function identifyPaymentsFromCSV(debits: Map<string, ParsedTransaction[]>): Dete
     result.push({
       payee,
       amount: avg,
-      frequency: avgGap < 10 ? 'weekly' : avgGap < 45 ? 'monthly' : avgGap < 120 ? 'quarterly' : 'annual',
+      frequency,
       confidence,
       likely_category: category,
     })
@@ -519,6 +534,7 @@ export interface CSVParseResult {
   format: BankFormat
   transactionCount: number
   provider: string
+  rawTransactions: ParsedTransaction[]
 }
 
 export function parseCSVToExtraction(csvText: string, fileName?: string): CSVParseResult {
@@ -570,5 +586,6 @@ export function parseCSVToExtraction(csvText: string, fileName?: string): CSVPar
     format,
     transactionCount: transactions.length,
     provider,
+    rawTransactions: transactions,
   }
 }
