@@ -19,14 +19,15 @@ import type { BankStatementExtraction, DetectedPayment, ExtractedIncome } from '
 
 interface ClassificationResult {
   payee: string
-  amount: number
+  amount: number               // Average per occurrence
   frequency: string
   autoCategory: string
   confidence: number
   expectedCategory?: string
-  isCorrect: boolean | null  // null = no expectation
-  dates: string[]  // Raw transaction dates for this payee
-  txCount: number  // Number of raw transactions (before grouping into avg)
+  isCorrect: boolean | null
+  dates: string[]              // Raw transaction dates for this payee
+  txCount: number              // Number of raw transactions
+  rawTotal: number             // Sum of all raw transaction amounts (not the average)
 }
 
 interface IncomeResult {
@@ -63,13 +64,15 @@ interface RunResult {
   }
 }
 
-// Find raw transaction dates for a classified payee
-function findDatesForPayee(payee: string, rawTxns: ParsedTransaction[]): string[] {
+// Find raw transactions for a classified payee — returns dates, count, and total
+function findRawTxnData(payee: string, rawTxns: ParsedTransaction[]): { dates: string[]; txCount: number; rawTotal: number } {
   const key = normaliseDescription(payee)
-  return rawTxns
-    .filter(t => normaliseDescription(t.description) === key)
-    .map(t => t.date)
-    .sort()
+  const matching = rawTxns.filter(t => normaliseDescription(t.description) === key)
+  return {
+    dates: matching.map(t => t.date).sort(),
+    txCount: matching.length,
+    rawTotal: Math.round(matching.reduce((sum, t) => sum + Math.abs(t.amount), 0)),
+  }
 }
 
 function runScenario(scenario: TestScenario): RunResult {
@@ -117,7 +120,7 @@ function runScenario(scenario: TestScenario): RunResult {
     const isCorrect = expected
       ? p.likely_category === expected.expectedCategory
       : null
-    const dates = findDatesForPayee(p.payee, rawTransactions)
+    const txnData = findRawTxnData(p.payee, rawTransactions)
     return {
       payee: p.payee,
       amount: p.amount,
@@ -126,8 +129,7 @@ function runScenario(scenario: TestScenario): RunResult {
       confidence: p.confidence,
       expectedCategory: expected?.expectedCategory,
       isCorrect,
-      dates,
-      txCount: dates.length,
+      ...txnData,
     }
   })
 
@@ -297,7 +299,7 @@ export default function EngineWorkbenchPage() {
           }
         }
         const classifications: ClassificationResult[] = extraction.regular_payments.map((p: DetectedPayment) => {
-          const dates = findDatesForPayee(p.payee, rawTransactions)
+          const txnData = findRawTxnData(p.payee, rawTransactions)
           return {
             payee: p.payee,
             amount: p.amount,
@@ -305,8 +307,7 @@ export default function EngineWorkbenchPage() {
             autoCategory: p.likely_category,
             confidence: p.confidence,
             isCorrect: null,
-            dates,
-            txCount: dates.length,
+            ...txnData,
           }
         })
         const incomes: IncomeResult[] = extraction.income_deposits.map((i: ExtractedIncome) => ({
@@ -500,10 +501,11 @@ export default function EngineWorkbenchPage() {
   interface PayeeGroup {
     key: string
     items: ClassificationResult[]
-    totalAmount: number
-    count: number
+    rawTotal: number              // True total from raw transactions
+    rawTxCount: number            // True count of raw transactions
+    avgAmount: number             // Average per transaction
     categories: string[]
-    ntropyMerchant: string | null  // from first item with Ntropy data
+    ntropyMerchant: string | null
   }
 
   const groupedClassifications = useMemo<PayeeGroup[]>(() => {
@@ -518,17 +520,19 @@ export default function EngineWorkbenchPage() {
     }
     return Array.from(groups.entries())
       .map(([key, items]: [string, ClassificationResult[]]) => {
-        const totalAmount = items.reduce((sum, c) => sum + c.amount, 0)
+        // Use rawTotal from each classification (sum of all raw transaction amounts)
+        const rawTotal = items.reduce((sum, c) => sum + c.rawTotal, 0)
+        const rawTxCount = items.reduce((sum, c) => sum + c.txCount, 0)
+        const avgAmount = rawTxCount > 0 ? Math.round(rawTotal / rawTxCount) : 0
         const cats = [...new Set(items.map(c => c.autoCategory))]
-        // Get Ntropy merchant from lookup if available
         let ntropyMerchant: string | null = null
         for (const c of items) {
           const ntr = ntropyLookup.get(`${c.payee}:${c.amount}`)
           if (ntr?.ntropyMerchant) { ntropyMerchant = ntr.ntropyMerchant; break }
         }
-        return { key, items, totalAmount, count: items.length, categories: cats, ntropyMerchant }
+        return { key, items, rawTotal, rawTxCount, avgAmount, categories: cats, ntropyMerchant }
       })
-      .sort((a, b) => b.totalAmount - a.totalAmount) // Highest total first
+      .sort((a, b) => b.rawTotal - a.rawTotal) // Highest total first
   }, [groupByPayee, filteredClassifications, ntropyLookup])
 
   const toggleGroup = useCallback((key: string) => {
@@ -947,9 +951,9 @@ export default function EngineWorkbenchPage() {
                               <span className="mr-1.5 text-gray-400 text-xs">{isExpanded ? '▼' : '▶'}</span>
                               {group.ntropyMerchant ?? group.key}
                             </td>
-                            <td className="px-4 py-2.5 text-right tabular-nums font-medium">£{group.totalAmount.toLocaleString()}</td>
+                            <td className="px-4 py-2.5 text-right tabular-nums font-medium">£{group.rawTotal.toLocaleString()}</td>
                             <td className="px-4 py-2.5 text-center">
-                              <span className="px-2 py-0.5 rounded-full text-xs bg-gray-200 text-gray-700">{group.count}x</span>
+                              <span className="px-2 py-0.5 rounded-full text-xs bg-gray-200 text-gray-700">{group.rawTxCount}x</span>
                             </td>
                             <td className="px-4 py-2.5 text-xs text-gray-400">
                               {(() => {
@@ -985,7 +989,7 @@ export default function EngineWorkbenchPage() {
                             )}
                             <td className="px-4 py-2.5 text-xs">
                               <div className="flex items-center gap-1.5">
-                                {group.count > 1 && <span className="text-gray-400">£{Math.round(group.totalAmount / group.count).toLocaleString()} avg</span>}
+                                {group.rawTxCount > 1 && <span className="text-gray-400">£{group.avgAmount.toLocaleString()} avg</span>}
                                 {/* Ntropy reconciliation: apply Ntropy's label to all items */}
                                 {ntropyResult && (() => {
                                   const labels = new Set<string>()
@@ -1037,9 +1041,13 @@ export default function EngineWorkbenchPage() {
                             return (
                               <tr key={`${group.key}-${j}`} className="bg-white border-l-2 border-l-indigo-200">
                                 <td className="pl-10 pr-4 py-1.5 text-xs text-gray-500 max-w-[260px] truncate" title={c.payee}>{c.payee}</td>
-                                <td className="px-4 py-1.5 text-right tabular-nums text-xs">£{c.amount.toLocaleString()}</td>
+                                <td className="px-4 py-1.5 text-right tabular-nums text-xs">
+                                  £{c.rawTotal.toLocaleString()}
+                                  {c.txCount > 1 && <span className="text-gray-400 ml-1">(£{c.amount.toLocaleString()} avg)</span>}
+                                </td>
                                 <td className="px-4 py-1.5 text-center text-xs text-gray-400">
                                   {c.frequency === 'one_off' ? 'one-off' : c.frequency}
+                                  {c.txCount > 1 && <span className="ml-1">({c.txCount}x)</span>}
                                 </td>
                                 <td className="px-4 py-1.5 text-[10px] text-gray-400">
                                   {c.dates.length > 0 ? c.dates.join(', ') : '—'}
@@ -1090,7 +1098,12 @@ export default function EngineWorkbenchPage() {
                       return (
                         <tr key={i} className={c.isCorrect === false ? 'bg-red-50' : c.isCorrect === true ? '' : c.autoCategory === 'unknown' ? 'bg-amber-50/30' : 'bg-gray-50/50'}>
                           <td className="px-4 py-2 max-w-[280px] truncate" title={c.payee}>{c.payee}</td>
-                          <td className="px-4 py-2 text-right tabular-nums">£{c.amount.toLocaleString()}</td>
+                          <td className="px-4 py-2 text-right tabular-nums">
+                            {c.txCount > 1
+                              ? <span>£{c.rawTotal.toLocaleString()} <span className="text-gray-400 text-xs">(£{c.amount.toLocaleString()} avg)</span></span>
+                              : <span>£{c.amount.toLocaleString()}</span>
+                            }
+                          </td>
                           <td className="px-4 py-2 text-gray-500">
                             <span className={c.frequency === 'one_off' ? 'text-amber-600 font-medium' : ''}>
                               {c.frequency === 'one_off' ? 'one-off' : c.frequency}
