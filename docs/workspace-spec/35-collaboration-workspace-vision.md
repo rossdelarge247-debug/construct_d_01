@@ -46,6 +46,81 @@ Not four permission layers. Two spaces.
 
 **For V3, ship the two-space model only.** Mediator access to private workspaces (caucus sessions) is a V4 feature.
 
+## The unified household picture (data model)
+
+The single most important architectural realisation: **individual Form Es are inputs, not truth.** The truth is the reconciled household picture.
+
+In a marriage, matrimonial law treats most assets as a shared pool regardless of whose name is on them. So when both parties declare "the Ford Escort, £8k" it's ONE asset in the unified picture — not two side-by-side entries.
+
+### The household item
+
+Every financial entity (property, account, pension, debt, vehicle) is a **household item** — a single record that can be declared by one or both parties, with metadata capturing ownership and provenance.
+
+```
+interface HouseholdItem {
+  id: string
+  type: 'property' | 'account' | 'pension' | 'vehicle' | 'debt' | 'investment' | 'other_asset' | 'income_source'
+  identifier: string              // "Halifax mortgage", "Ford Escort", "HL ISA"
+
+  // The agreed value (if both parties agree)
+  value: number | null
+  valueStatus: 'agreed' | 'contested' | 'unverified'
+  valueBasis: 'bank_evidenced' | 'self_declared' | 'estimated' | 'professionally_valued'
+
+  // Per-party claims (captured at disclosure)
+  declaredByA: ItemClaim | null
+  declaredByB: ItemClaim | null
+
+  // Ownership metadata
+  heldBy: 'joint' | 'sole_a' | 'sole_b'
+  ownershipType: 'matrimonial' | 'pre_marital' | 'inherited' | 'gifted' | 'disputed'
+  acquiredDate?: string           // If known — distinguishes matrimonial from pre-marital
+
+  // Reconciliation state
+  reconciliationStatus: 'matched' | 'unique_a' | 'unique_b' | 'contested_value' | 'contested_ownership' | 'missing_expected'
+}
+
+interface ItemClaim {
+  declaredAt: string              // timestamp
+  value: number
+  valueBasis: string
+  heldBy: string                  // what this party claims about ownership
+  ownershipType: string           // what this party claims about matrimonial status
+  evidence: string[]              // references to bank data, documents
+  note?: string                   // optional explanation
+}
+```
+
+### Ownership tags
+
+Every item carries an ownership tag. This is metadata, not identity:
+
+| Tag | Meaning | Typically in matrimonial pot? |
+|---|---|---|
+| **Joint** | Both names on the account/title (joint bank account, jointly owned house) | Yes |
+| **Sole — A** | In Party A's name only | Usually yes (if acquired during marriage) |
+| **Sole — B** | In Party B's name only | Usually yes |
+| **Pre-marital** | Brought into the marriage by one party | Sometimes excluded |
+| **Inherited / gifted** | Received during marriage from outside the partnership | Often excluded |
+| **Disputed** | Parties can't agree on classification | Needs resolution |
+
+The loan in Mark's name for the car Sarah drives is a **matrimonial debt** even though its tag is "sole — Mark." The tag affects transparency; the matrimonial classification determines whether it's in the pot.
+
+### Three kinds of item emerge from reconciliation
+
+| Type | Example | UI treatment |
+|---|---|---|
+| **Matched** | Both declared Ford Escort at £8k | ✓ Agreed — one item in the picture |
+| **Contested value** | Sarah: house £450k / Mark: house £480k | ⚠️ Same item, agree value |
+| **Contested ownership** | Sarah: inheritance separate / Mark: in the pot | ⚠️ Same item, agree tag |
+| **Unique to one party** | Sarah's Monzo (Mark didn't know) | Info — Mark can confirm or query |
+| **Missing expected** | Engine expects pensions, neither declared | Gap — prompt both |
+| **Contradictory** | Sarah says joint account exists / Mark says closed | Conflict — requires evidence |
+
+### Why this matters
+
+The combined view in V3 is **not** two separate Form Es in side-by-side columns. It's ONE unified list of household items, where each item carries the provenance of who declared it, who holds it, and whether the value is agreed. This is the Juro pattern applied correctly: in contract negotiation there's ONE contract both parties redline — not two separate contracts compared.
+
 ## Five core features
 
 ### 1. The Financial Picture (shared, live, evidenced)
