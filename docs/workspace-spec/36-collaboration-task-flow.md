@@ -82,6 +82,24 @@ System generates: Financial Summary
 - Action: [Start a proposal]
 - Timeline event: "Financial picture confirmed (92% agreed)"
 
+## Act 2.5: Define your positions (private workspace)
+
+Before proposing, the user privately defines their preferred and fallback positions. This happens in "my workspace" — the other party never sees it.
+
+### B4. Position builder (private)
+**Screen: Your positions**
+- For each major item (property, pensions, savings, debts), the user defines:
+  - **Preferred position:** What you'd ideally want
+  - **Fallback position:** What you'd accept as a compromise
+  - **Reasoning:** Why (private notes, not shared)
+- System-generated context alongside each item helps inform positions:
+  - "Net equity: £230k. Equal division = £115k each."
+  - "Your pension CETV: £180k. Their CETV: £12k. Gap: £168k."
+- This data stays private until the user chooses to offer a position
+- When negotiation narrows, the system can prompt: "You're £8,400 apart. Your fallback position would close this gap — would you like to offer it?"
+
+**Why this matters:** Juro's contract negotiation insight — playbooks define preferred, acceptable, and walk-away positions. Divorce settlement has the same structure. Defining positions privately before proposing leads to more considered, less emotional offers.
+
 ## Act 3: Propose and negotiate
 
 ### C1. Build a proposal
@@ -89,6 +107,26 @@ System generates: Financial Summary
 - System shows equal division as starting point (arithmetic, not advice)
 - Interactive: adjust items, see real-time impact on the split %
 - Each adjustment prompts: "Brief reason?" with smart starters ("Primary carer" / "Pre-marriage asset" / "Can afford mortgage alone")
+- **System-generated context per item** (visible to both parties when sent):
+
+```
+┌─────────────────────────────────────────────────┐
+│  Property: You propose to keep the house         │
+│                                                  │
+│  Your reasoning: "I'm primary carer for the      │
+│  children and need stability"                    │
+│                                                  │
+│  Context (auto-generated from disclosed data):   │
+│  • Property value: £450k (3 agent valuations)    │
+│  • Mortgage: £220k outstanding                   │
+│  • Net equity: £230k                             │
+│  • Your pension offset offered: £85k CETV        │
+│  • Overall split with this proposal: 58/42       │
+│  • Equal division baseline: 50/50 = £115k each   │
+└─────────────────────────────────────────────────┘
+```
+
+- If user defined positions in B4, their preferred position pre-fills the proposal
 - Action: [Preview] → see it as they will see it
 
 ### C2. Review before sending
@@ -96,14 +134,17 @@ System generates: Financial Summary
 - "You're about to send Proposal v1 to Mark"
 - Summary of what you're proposing, per item
 - Your reasoning alongside each item
+- System context alongside each item
 - How it compares to equal division
+- **Fairness guardrail:** If proposal gives one party >85% of net assets, flag: "This split is unusual. A court would typically query this. Consider adjusting or adding reasoning."
 - Actions: [← Back to edit] [Send to Mark]
 - Timeline event: "Sarah sent Proposal v1"
 
 ### C3. Review received proposal
 **Screen: Sarah's Proposal**
-- Clear layout: what's proposed, per item, with reasoning
+- Clear layout: what's proposed, per item, with their reasoning + system context
 - Comparison to equal division
+- **Copilot suggestions** (private, only you see): "They've proposed keeping the property. Your fallback position was a sale. Consider: accepting if pension offset is adequate, or countering with a deferred sale."
 - Per-item: [Accept] [Counter this item]
 - Whole proposal: [Accept all] [Counter-propose]
 
@@ -112,6 +153,7 @@ System generates: Financial Summary
 - Pre-filled with their proposal
 - Adjust only items you disagree with — unchanged items stay green
 - Changed items highlighted amber, reasoning required
+- **System highlights impact of changes:** "Changing pension share from 40% to 25% moves the overall split from 55/45 to 62/38"
 - Action: [Send counter-proposal]
 - Timeline event: "Mark counter-proposed (changed 2 of 8 items)"
 - Progress board updates: "6 agreed, 2 remaining, gap: £8,400"
@@ -121,12 +163,15 @@ System generates: Financial Summary
 - Left: your position. Right: their position
 - Green: agreed. Amber: close. Red: far apart
 - "You're £8,400 apart. 2 proposals exchanged in 3 weeks."
+- **Fallback prompt** (private): If you defined fallback positions and the gap is within range, the system gently suggests: "Your fallback position on pensions would close this gap."
+- **Convergence pattern:** Show how the gap has narrowed over time (v1: £24k apart → v2: £8.4k apart)
 - Actions: [Accept their position] [Adjust yours] [Suggest meeting in the middle] [Get help from a mediator]
 
 ### C6. Agreement
 **Screen: Agreement reached**
 - "You've agreed on all items"
-- Full summary with both parties' reasoning
+- Full summary with both parties' reasoning + system context
+- Every item shows: what was proposed, what was countered, what was agreed, and the reasoning trail
 - Actions: [Download PDF] [Share with solicitor] [Start consent order process]
 - Timeline event: "Agreement reached — all items resolved"
 - Progress board: 100%

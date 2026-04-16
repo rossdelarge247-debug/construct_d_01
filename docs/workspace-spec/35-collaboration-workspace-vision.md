@@ -46,7 +46,7 @@ Not four permission layers. Two spaces.
 
 **For V3, ship the two-space model only.** Mediator access to private workspaces (caucus sessions) is a V4 feature.
 
-## Four core features
+## Five core features
 
 ### 1. The Financial Picture (shared, live, evidenced)
 Both parties' financial data in one structured view. Builds progressively — your data first, theirs appears alongside. Auto-matching where both declared the same item. Discrepancies surfaced gently. Every number links to source evidence.
@@ -54,10 +54,27 @@ Both parties' financial data in one structured view. Builds progressively — yo
 ### 2. The Proposal (structured, reasoned, diffable)
 System pre-populates from the financial picture. User adjusts with real-time impact calculation. Reasoning required per item. Counter-proposals show only what changed. Deliberate "review before send" moment.
 
-### 3. The Progress Board (what's agreed, what's not)
+### 3. The Playbook Engine (data-driven reasoning context)
+The disclosed financial data becomes an active playbook that drives proposal logic. Inspired by Juro's insight that playbooks shouldn't be static documents but active decision engines embedded in workflows.
+
+**How it works:** When a user builds or reviews a proposal, the system generates reasoning context alongside each item — not advice, but arithmetic + precedent context derived from the disclosed data:
+
+- "Your combined income disparity is 3:1 — spousal maintenance is typically considered in this scenario"
+- "Your pension CETV is £180k vs their £12k — pension sharing is common where disparity exceeds £50k"
+- "You have primary care of 2 children — courts typically consider this when dividing property"
+- "This proposal gives you 72% of net assets — the typical court range for your circumstances is 55-65%"
+
+The V2 signal rules, decision trees, and Form E mappings ARE the playbook. In V3 they don't just drive disclosure — they drive informed negotiation.
+
+**The reasoning split:**
+- **Human reasoning** (required per item): "I need the house for stability for the children"
+- **System context** (auto-generated, visible to both): property value, mortgage, equity, what the overall split looks like, how it compares to the equal division baseline
+- Both visible together on every proposal item. This makes proposals evidence-based, not positional.
+
+### 4. The Progress Board (what's agreed, what's not)
 Reframes the emotional experience: "78% agreed, gap is £8,400." Items move from disputed to agreed. Monetary gap shrinks visibly. Persistent — always visible as context.
 
-### 4. The Timeline (the story of what happened)
+### 5. The Timeline (the story of what happened)
 Every share, view, query, response, proposal, agreement. Timestamps and read receipts. Makes stalling visible. Useful for mediators, solicitors, and courts. Replaces the email thread.
 
 ## Five UX patterns (from Juro contract negotiation + our design)

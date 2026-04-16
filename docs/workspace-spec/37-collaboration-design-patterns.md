@@ -62,6 +62,44 @@ Always visible at the top. Click any stage to see what it looked like at that po
 **Juro:** "Send back new version" button
 **Decouple:** Review screen showing exactly what you're about to send, what changed from their proposal, your reasoning. Prevents impulse responses. The product equivalent of "sleep on it."
 
+## Juro-inspired negotiation patterns
+
+### Playbook as active engine
+**Juro's insight:** Static playbooks (PDFs, policy docs) should become active decision engines embedded in workflows. Rather than relying on memory or searching through documents, the system applies playbook logic in real time.
+
+**Decouple's application:** The V2 signal rules, Form E decision trees, and disclosed financial data ARE our playbook. In V3, they don't just drive disclosure — they drive informed negotiation. When a user builds a proposal, the system generates reasoning context from the disclosed data. When a counter-proposal arrives, the system highlights implications. The playbook is the data itself.
+
+### Fallback positions
+**Juro's model:** Contracts have preferred terms, acceptable fallbacks, and walk-away positions. These are defined in advance and applied strategically during negotiation.
+
+**Decouple's application:** Users privately define preferred and fallback positions per item (property, pensions, savings). The system stores these and surfaces them strategically: "You're £8,400 apart. Your fallback position would close this gap." Fallback positions never leave the private workspace unless the user explicitly offers them.
+
+### Copilot, not autopilot
+**Juro's framing:** AI surfaces risks, suggests redlines, drafts counter-proposals. Lawyers retain control over high-stakes decisions.
+
+**Decouple's application:** When a counter-proposal arrives, the system:
+- Highlights what changed and the impact on the overall split
+- Surfaces implications from the disclosed data ("Reducing pension share from 40% to 25% changes the split from 55/45 to 62/38")
+- Suggests responses based on the user's stated fallback positions (private, only user sees)
+- The user always reviews, edits, and sends deliberately — the system never acts autonomously
+
+### Information symmetry
+**Academic insight (Eidenmüller, Oxford):** AI negotiation tools increase information possessed by all parties, making bargaining ranges clearer and reducing information asymmetry.
+
+**Decouple's application:** Bank-evidenced data + structured disclosure = both parties see the same facts. The "bargaining range" becomes visible because the numbers are transparent. System-generated context on every proposal item ensures both parties see the same arithmetic. This is the product's core competitive moat — trust through transparency.
+
+### Negotiation reasoning (the dual-layer pattern)
+Every proposal item carries two layers of reasoning, always visible together:
+
+| Layer | Source | Visibility | Example |
+|---|---|---|---|
+| **Human reasoning** | Written by the proposer | Both parties see | "I need the house for stability for the children" |
+| **System context** | Auto-generated from disclosed data | Both parties see | "Net equity: £230k. This proposal = 58/42 split. Equal division = 50/50." |
+
+The human explains WHY. The system shows WHAT in numbers. Both visible, always. This makes proposals evidence-based, not positional. Neither party can make claims that contradict the disclosed data.
+
+---
+
 ## Key design principles
 
 ### 1. Structured interactions, not freeform messaging
