@@ -69,7 +69,7 @@ When the session is ending (user says wrap up, or you hit ~2,000 lines), do thes
 
 ## Branch
 
-Development branch: `claude/decouple-v2-financial-disclosure-azVFf` (session 18 — signal rules expansion, workbench analytics, spec 31)
+Development branch: `claude/decouple-financial-workspace-oXXQ7` (session 20 — post-signup profiling gaps 6-12 resolved/parked, clean-build stock-take). Next session may open a new branch if code changes begin.
 
 ## Deployment
 
@@ -81,8 +81,8 @@ Tink Console must whitelist `https://construct-dev.vercel.app/api/bank/callback`
 
 ```
 docs/SESSION-CONTEXT.md                    — START HERE every session
-docs/HANDOFF-SESSION-18.md                 — Most recent session retro
-docs/HANDOFF-SESSION-17.md                 — Previous session retro
+docs/HANDOFF-SESSION-20.md                 — Most recent session retro (design: gaps 6-12 + stock-take)
+docs/HANDOFF-SESSION-18.md                 — Engine / workbench session
 docs/workspace-spec/28-v1-public-site-overhaul.md — V1 overhaul spec (tier model, visual, interview)
 docs/workspace-spec/29-v2-personalisation-opportunities.md — V2 personalisation backlog
 docs/workspace-spec/27-visual-direction-session11.md — Visual direction (Airbnb/Emma/Habito)
