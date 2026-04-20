@@ -783,7 +783,103 @@ Completeness framed as self-protection, not bureaucracy.
 
 ---
 
-## Gap 11: Safeguarding carry-through — PENDING
+## Gap 11: Safeguarding carry-through — RESOLVED
+
+**V1 approach:** Universal baseline + triggered signposting + basic privacy defaults. Full adaptive safeguarding architecture (coercive control detection, mediator routing, decoy mode, adaptive pacing) deferred to V1.5 backlog.
+
+**Rationale** (grounded in v1-desk-research.md):
+- 30% of DA deaths occur in the first month of separation; 70% within first year
+- 95% of DA cases involve economic abuse
+- 72% of Refuge service users report tech-facilitated abuse
+- Women's Aid oppose tools that claim to serve DA victims without proper infrastructure
+- Victims of coercive control cannot negotiate freely — a financial negotiation tool is not a refuge
+- Survivors DO plan finances in secret as part of exit preparation — universal privacy baseline serves them honestly
+
+**Position:** Decouple is the complete settlement workspace for separating couples — finances, children, housing, legal documents. It is NOT a domestic abuse service. For V1, we signpost honestly and preserve autonomy rather than pretending capability we don't have.
+
+**Universal baseline (all users, no flag required)**
+- GOV.UK "Exit this page" component top-right on every screen → redirects to BBC News
+- Neutral email subjects ("Your account has an update")
+- No financial content in email body
+- No push notifications by default
+- Non-descript browser tab titles ("Dashboard" not "My divorce — Decouple")
+- Pause account — archives state, hides from dashboard, user can return (never delete — evidence preserved)
+- Safety & support resources in nav footer, always accessible
+
+**Triggered response — when `relationship_quality = safety_concerns` OR `device_private = not_sure`**
+
+Dedicated signposting screen before Moment 1 standard acknowledgement:
+
+```
+"Before we go further — something important"
+
+"You told us there are safety concerns. We want to be honest
+ about where we fit.
+
+ Decouple helps separating couples build a complete settlement —
+ finances, children, housing, and the path through to a legal
+ agreement. It's not a domestic abuse service. For what you
+ might be facing right now, these services are built for exactly
+ that:
+
+ Women's Aid — 0808 2000 247 (24/7)
+ National Domestic Abuse Helpline — 0808 2000 247 (24/7)
+ Men's Advice Line — 0808 8010 327
+ Refuge — refuge.org.uk
+ Surviving Economic Abuse — survivingeconomicabuse.org
+ Samaritans — 116 123 (24/7)
+
+ If you're in immediate danger, call 999.
+
+ Decouple can still help once you're safe — building your
+ picture privately, preparing the financial side, planning
+ how to move forward. Come back when the time is right.
+
+ What would you like to do?"
+
+ [Continue — I'm safe to]
+ [Exit to a safe site now]
+ [Show me more support services]
+```
+
+Autonomy preserved — user can proceed. But we don't claim to be what we're not.
+
+**Additional V1 baseline for flagged users**
+- Direct-share to ex is OFF by default; active opt-in required with "double-check this is safe" warning
+- Time-limited share links (7 days default)
+- Account recovery via user-nominated phone number
+- "Revoke access" one tap from any screen
+
+**V1.5 / V2 backlog — nice-to-haves**
+
+Captured here; to be cross-referenced into the v2-backlog.md:
+- Coercive control behavioural detection (spec 47 Levels 1-3 — pressure-test spec 47 as part of V1.5 design)
+- Mediator-routing as share default for flagged users
+- Decoy mode / alternate bookmark labels / favicon swap
+- Adaptive pacing (progress bar without count, check-in prompts, no time-pressure language)
+- Coercive control evidence documentation affordance
+- Fairness guardrails wired into proposal phase (flag extreme splits)
+- IDVA letter integration for legal aid evidence
+- Shared-device-specific features (shorter inactivity timeout, no browser storage, decoy mode)
+- Adaptive safeguarding re-evaluation (gentle offer to update settings after no-sensitive-activity period)
+
+**What this produces for V1:**
+- Honest positioning — Decouple does not overclaim
+- Universal privacy baseline covers exit-prep users without flags
+- Clear signposting for flagged users to appropriate specialist services
+- Autonomy preserved — users can proceed if they choose
+- ~1 week of engineering vs months for full safeguarding architecture
+- Foundation for V1.5 enrichment informed by real usage data and Women's Aid / SafeLives partnerships
+
+**Why V1.5 is the right home for richer features:**
+- Building coercive control detection creates a duty of care V1 infrastructure can't meet
+- Usage data + specialist partnerships will inform richer second iteration
+- Better than building speculatively without real signal
+- V1.5 gives time to form the right partnerships (Women's Aid, SafeLives, Surviving Economic Abuse)
+
+---
+
+## Gap 7: Invited party (Mark) profiling variant — PENDING
 
 Plus design debt items to revisit:
 - Dashboard pressure test (spec 04) against latest thinking
