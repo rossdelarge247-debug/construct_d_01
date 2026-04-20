@@ -498,7 +498,117 @@ Public sector → PN3 help text includes McCloud note: "If your scheme is affect
 
 ---
 
-## Gap 9: Account structure — PENDING
+## Gap 9: Account structure — RESOLVED
+
+**Approach:** Two touches. Light priming pre-bank (P6 heads-up, no data capture). Full capture post-bank in the Accounts section using detected evidence — specific transfer destinations beat cold checklists.
+
+**Moment 2 (pre-bank) — P6 Other accounts heads-up** *(one screen)*
+```
+"Before we connect, a heads-up"
+
+"We'll connect your main bank(s) in the next step and pull in the
+ last 12 months of data. That covers most people. A few things to
+ have in mind:
+
+ • App-only banks like Monzo, Revolut, Starling, Chase — we can
+   connect these too if you have them
+ • Savings accounts with providers like NS&I, Marcus, Chip, Atom —
+   bring their most recent statements
+ • Joint accounts — connect the one you have access to
+ • Closed accounts in the last 12 months — we'll ask about these
+   after we see what you connect"
+
+[Got it — let's connect →]
+```
+
+Deliberately not a checklist. Primes attention; capture happens post-bank where evidence can drive it.
+
+**Moment 3 (post-bank) — Accounts section**
+
+**AC1 — Connected accounts review**
+```
+"Here are the accounts we connected"
+
+HSBC — Current account (sole) — connected 20 Apr
+HSBC — Savings (sole) — connected 20 Apr
+Barclays — Joint current account — connected 20 Apr
+
+  [+ Connect another bank]
+```
+Soft prompt if only one institution connected.
+
+Soft line (not a separate screen): *"Any joint accounts with your spouse/ex you can't log into? Add them when they join."*
+
+**AC2 — App-based / other providers**
+Reduced chip list:
+```
+"Do you have accounts with any of these?" (tap all that apply)
+
+[Monzo]  [Revolut]  [Starling]  [Chase]  [Other savings provider]
+```
+Per tapped:
+- Connect now (if Tink supports), OR
+- Upload statement → to-do item, OR
+- "Linked pot of my main account" (no separate balance)
+
+**AC3 — Transfers to unknown accounts** *(engine-driven)*
+
+**Dependency:** requires the matching layer to detect outbound transfers to destination accounts (by sort code + account number or name) and identify those NOT among connected accounts. This is a requirement for the engine — capture in the post-bank classification enhancement spec.
+
+```
+"We noticed regular transfers to an account that isn't connected"
+
+Account ending 4521 — £500/mo — possibly a savings account?
+
+○ That's my own account — let's connect it
+○ That's my own account — I'll upload statements
+○ That's my spouse/ex's account
+○ That's someone else's account → [who?]
+○ I don't recognise this → flag for review
+```
+
+Powerful anti-hidden-accounts safeguard. Completion = trust signal at share time.
+
+**AC4 — Closed accounts in last 12 months**
+```
+"Any accounts closed in the last 12 months?"
+
+Form E requires statements from accounts open in the last 12 months,
+even if closed now.
+
+○ Yes → loop per account (provider, type, approx closure date,
+        sole/joint, approx final balance, statements?)
+○ No
+○ Not sure → to-do item
+```
+
+**AC5 — Business accounts** *(self-employed only, pointer to Business section)*
+```
+"We'll cover business accounts in the business section."
+```
+
+**Edge cases:**
+- Linked pots (Monzo pots, Starling spaces) — don't duplicate; AC2 has the "linked pot" option.
+- Crypto exchanges — out of scope here; covered in other-assets. AC3 catches untagged Coinbase transfers as cross-check.
+- Dormant savings forgotten — AC4 partially covers; share-readiness gap check surfaces again.
+- Revolut/Wise multi-currency wallets — treat as one account.
+- NS&I Premium Bonds — investments section, not AC.
+- Recently-opened accounts (<30 days) — engine handles without separate capture.
+- Dormant (no 12-month transactions) — captured via AC2 "other provider" with statement upload.
+
+**Engine dependency (to capture in a separate spec):**
+The matching layer must expose outbound transfer destinations and flag those not covered by any connected account. AC3 hinges on this.
+
+**What this produces:**
+- Document accounts section (connected + app-based + closed)
+- Engine enrichment (fewer Tier 3 unknowns once destinations are tagged)
+- To-do items (statement uploads, closed-account statements)
+- Trust signals (AC3 complete → "no unexplained outbound transfers" badge)
+- Reconciliation prep (joint-not-primary flagged for ex's side)
+
+---
+
+## Gap 8: Verification opt-in placement — PENDING
 
 Plus design debt items to revisit:
 - Dashboard pressure test (spec 04) against latest thinking
