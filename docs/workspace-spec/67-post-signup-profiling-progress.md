@@ -879,7 +879,77 @@ Captured here; to be cross-referenced into the v2-backlog.md:
 
 ---
 
-## Gap 7: Invited party (Mark) profiling variant — PENDING
+## Gap 7: Invited party (Mark) profiling variant — SPECCED, DECISIONS PARKED
+
+**Status:** Design direction agreed. Five open decisions parked — to be revisited after user reconciles Claude AI Design prototype work and we do the joint stock-take.
+
+### Core design direction (AGREED)
+
+Mark is a **builder**, not a verifier. He has his own account, his own financial picture, his own AI plan. Shared context (children count, property type, joint accounts) is inherited from Sarah with correction rights — but every correction is captured as a **dispute item**, never silent overwrite. Joint items merge in the household picture; sole items live on each party's side. Safeguarding flags are per-party (Mark's own device privacy, relationship quality, safety concerns).
+
+### Mark's journey outline
+
+1. **Invitation link** → IN1 invited-party landing
+2. **Abbreviated pre-signup** (IS1-IS6):
+   - IS1: "Here's what we know so far" — inherited context (relationship status, cohabiting, children, property) with correction buttons. Corrections → dispute items.
+   - IS2: Stage (Mark's own — may differ from Sarah's)
+   - IS3: Your ex and safety (Mark's own view)
+   - IS4: What you know about Sarah's finances (mirror of O5)
+   - IS5-IS6: Priorities, worries (Mark's own — generates his own AI plan)
+3. **IS-Plan**: Mark's own AI plan output (parallel to O7)
+4. **IS-Next**: continue into workspace
+5. **Moment 1 (Mark variant)**: Welcome acknowledging shared context + Mark's own flagged state
+6. **Moment 2**: Mark's own pre-bank profiling (self-employment if flagged for him, joint mortgage confirmed, vehicles / pensions / accounts all fresh)
+7. **Bank connection**: Mark's own banks — Sarah's data not visible to Mark
+8. **Moment 3**: Section-by-section confirmation on Mark's bank data
+   - Joint account recognition by sort code + account number — merge, not duplicate
+   - Children section: light confirm if Sarah already did depth; Mark's view of care arrangements captured (possible dispute)
+   - Housing transition HT1/HT2: Mark's own view
+9. **Verification, pre-share completeness** (same as Sarah)
+10. **Reconciliation flow** — where the two pictures meet
+11. **Proposal phase** — Mark's own future needs; proposals negotiated together
+
+### Shared context vs personal — reference
+
+**Inherited from Sarah (Mark can correct, corrections = disputes):**
+- Relationship status, cohabiting status, children count/names/ages, property type, joint mortgage provider, children's schools (from Sarah's Gap 3 capture)
+
+**Mark answers fresh:**
+- Stage, relationship quality, device privacy, self-employment, partner awareness (O5 inverted), priorities, worries, all of Moment 2, all of Moment 3 on his bank data, his future needs
+
+### Edge cases covered in design
+
+- Mark before Sarah ready to share
+- Mark refuses to sign up → spec 47 non-engagement paths
+- Mark finds Sarah-picture inaccuracies → reconciliation surfaces
+- Mark self-employed (Sarah's not) → full P2 + Moment 3 business section
+- Mark has children Sarah didn't mention → Mark-side additions
+- Sarah pre-signup inaccuracies → reconciliation prompt
+- Mark in safety_concerns (Sarah wasn't) → Mark gets signposting screen, his flags private
+- Reconciliation asymmetry on trust levels visible to both (Gap 8)
+- Invitation link expiry default 14 days
+- Mark doesn't want to use platform → export Sarah's picture as PDF, go conventional
+
+### FIVE OPEN DECISIONS — PARKED FOR RETURN
+
+1. **IS1 (shared context confirmation) placement** — pre-signup screen vs inline on Moment 1. Current proposal: pre-signup (reduces friction by showing Mark how much work is done before account creation). **Needs decision.**
+
+2. **Priorities/worries in IS5/IS6 vs inheriting from Sarah vs skipping** — current proposal: Mark answers his own, generates his own AI plan. Alternative: inherit Sarah's (assume similar), or skip for invited users. **Needs decision.**
+
+3. **Invitation link expiry** — current proposal: 14 days default. Alternatives: 7 (shorter urgency) or 30 (longer runway). **Needs decision.**
+
+4. **"Mark corrects Sarah" treatment** — current proposal: full dispute-capture on every correction. Alternative: silent merge for trivial items (misspellings, age off by 1), dispute only for material differences. **Needs decision.**
+
+5. **AI plan output for Mark** — current proposal: same O7 structure with Mark's context. Alternative: lighter "you've been invited, here's what's ahead" summary. **Needs decision — weak opinion; suggest deferring until real user feedback.**
+
+### What needs to happen before finalising Gap 7
+
+- User to reconcile Claude AI Design prototype work with this direction (invited party onboarding screens may already have design thinking applied)
+- Joint stock-take on session state (what's built, what's specced, clean-build decision)
+- Decisions 1-5 above to be locked
+- Then spec 68 (definitive post-signup profiling) writes up Gap 7 alongside gaps 1-12
+
+---
 
 Plus design debt items to revisit:
 - Dashboard pressure test (spec 04) against latest thinking

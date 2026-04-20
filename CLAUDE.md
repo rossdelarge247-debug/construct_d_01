@@ -1,8 +1,23 @@
 # Claude Code — Decouple
 
-## North star
+## Product positioning (preserve this across sessions)
 
-The experience should feel like having a brilliant, patient financial analyst sitting beside you. You hand them your bank statements and they come back saying: "Here's what I found. Your salary is £3,218/month from ACME Ltd. You've got a mortgage at £1,150/month to Halifax. I noticed what looks like a pension contribution — is that right?" They do the heavy lifting. You confirm, correct, or fill gaps. In 15 minutes, not 15 hours.
+Decouple is the **complete settlement workspace for separating couples** — finances, children, housing, future needs, through to consent order, court submission, and post-order implementation. It is NOT a financial disclosure tool. Not a better Form E. It is a divorce process disrupter aiming to replace the £14,561-average-cost solicitor-led journey with a £800-1,100 consumer-first, bank-evidenced, collaborative alternative, end-to-end.
+
+**Unique claim:** The only place where both parties build one evidence-backed, shared picture of their complete settlement — finances, children, housing, future needs — negotiate proposals on it, and generate legally binding documents from their agreement.
+
+**Three positioning pillars (spec 42):**
+- Shared, not adversarial
+- Evidenced, not asserted
+- End-to-end, not hand-off
+
+**Tagline:** "Decouple — the complete picture."
+
+When drafting any user-facing copy, engine messaging, or session output: never frame Decouple as "a financial disclosure tool." The complete settlement workspace framing is load-bearing — it shapes scope, tone, and what the product promises to do. Spec 42 is the authoritative source.
+
+## North star (quality bar)
+
+The experience should feel like having a brilliant, patient analyst sitting beside you through the whole separation — finances, children, housing, future needs. They come back saying: "Here's what I found. Your salary is £3,218/month from ACME Ltd. You've got a mortgage at £1,150/month to Halifax. Amelia and Jack are with you during the week. Here's the picture taking shape." They do the heavy lifting. You confirm, correct, or fill gaps. In 15 minutes, not 15 hours.
 
 **Quality bar:** This should feel like it was built in 2026. No shortcuts, no MVPs. The users are stressed, often alone, often late at night. Every interaction must be compassionate, professional, and empowering.
 
