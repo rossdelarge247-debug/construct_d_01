@@ -608,7 +608,103 @@ The matching layer must expose outbound transfer destinations and flag those not
 
 ---
 
-## Gap 8: Verification opt-in placement — PENDING
+## Gap 8: Verification opt-in placement — RESOLVED
+
+**Approach:** Three placements, not one. No pre-bank friction. Inline document uploads during confirmation. Consolidated credit-check + remaining-documents moment pre-share. Always-available verification hub (dashboard widget + dedicated page). Identity verification deferred to consent-order stage (end of journey, when documents need signing).
+
+**(c) Inline during confirmation — document upload affordances**
+
+Every evidenceable assertion gets a light "upload / later" control. Skip auto-adds to to-do list. Each upload lifts trust level from self-declared → document-evidenced.
+
+Slots include:
+- Property → valuation or Zoopla estimate (future: Zoopla integration pre-fills)
+- Mortgage → statement
+- Pension CETV → letter when it arrives
+- Pension DC → latest statement
+- Business → company accounts, SA302s
+- Closed account → final statement
+- Salary → payslips (only if bank data ambiguous)
+
+Never a blocker. Always skippable.
+
+**(d) Pre-share verification moment — dedicated screen**
+
+Triggered when picture is substantially built (post-spending, post-children, post-housing transition), before "share with ex" action.
+
+```
+"Your picture is ready. One last step — let's strengthen it."
+
+"Before your ex sees your picture, we can add verification layers
+ that make it harder to dispute and easier to trust."
+
+┌─ Credit check (recommended) ─────────────────────────────┐
+│  We'll check your credit file with Experian.             │
+│  This catches debts or credit agreements the bank data   │
+│  didn't show. Takes 2 minutes. Soft check — no impact    │
+│  on your score.                                          │
+│                                                          │
+│  [Run credit check]    [Skip — self-declared only]       │
+└──────────────────────────────────────────────────────────┘
+
+┌─ Documents you haven't uploaded yet ─────────────────────┐
+│  • Property valuation                                    │
+│  • CETV letter (requested — arriving approx 3 weeks)     │
+│  • Company accounts (added to to-do list)                │
+│                                                          │
+│  [Upload what you have]    [Continue without]            │
+└──────────────────────────────────────────────────────────┘
+```
+
+Credit check is recommended-by-default (2-min soft check, no downside, measurable trust upside). Identity verification is NOT offered here — it waits until consent-order stage when document signing actually needs it.
+
+**"Partner awareness: hiding" variant:**
+```
+"You mentioned at signup that you're worried your partner might
+ be hiding things. The credit check catches exactly this — debts,
+ credit cards, or agreements that aren't in their bank data.
+
+ When they go through their picture, they'll do this too.
+
+ [Run my credit check]"
+```
+
+**(e) Verification hub — always available**
+
+Both a dashboard widget AND a dedicated page (detailed with dashboard pressure-test later).
+- Each major item with current trust level
+- What would raise it (run credit check, upload X)
+- What's in-flight (CETV requested N weeks ago)
+- Asymmetry surface: at reconciliation, each side sees the *trust level of each item* (not "did X run a check") — framed as evidence strength, not what the person refused.
+
+**Identity verification — deferred to consent-order stage**
+
+Not at pre-share. Not during profiling. Introduced at the end of the journey when the user is about to sign and submit legal documents. Different mental model: "this is for the court, not for your ex."
+
+**Edge cases:**
+- User refuses credit check → not forced. At reconciliation, ex sees each item's trust level (non-credit-checked items show as "self-declared + bank-evidenced" rather than "+ credit-verified"). Ex can request one themselves.
+- Credit check returns new debts → engine surfaces: "we found these — add to your picture?" User confirms or flags as "error on file — I'll dispute" (dispute path logged).
+- Document upload fails / poor quality → hub shows "uploaded but couldn't extract" → re-upload or flag for professional review (spec 42 on-demand).
+- Self-employed pre-share → missing company accounts / SA302s prominently flagged (self-employed disclosures get scrutinised harder).
+- Reconciliation asymmetry → gentle nudge: "Your ex has evidenced their debts with a credit check. Want to add one too?" Non-shaming frame.
+- Safeguarding (safety_concerns flag) → credit check offered without strong framing. Document uploads fine. Identity deferred to absolute last moment (less digital footprint).
+
+**What this produces:**
+- Three discrete placements (inline, pre-share consolidated, always-available hub)
+- Trust level per item (self-declared / bank-evidenced / credit-verified / document-evidenced / both-party-agreed / court-sealed — per spec 42)
+- Gap surfacing at peak motivation (just before share)
+- Never gated. Always opt-in.
+- Asymmetry visibility as accountability mechanism — transparency not policing
+
+**Engine / product dependencies:**
+- Credit check integration (Experian / ClearScore — pick provider)
+- Document upload pipeline with extraction + trust-level update
+- Trust-level taxonomy wired to every item type
+- Dashboard widget + verification page (awaits dashboard pressure-test)
+- Identity verification flow (awaits consent-order stage spec)
+
+---
+
+## Gap 12: Reverse partner awareness — PENDING
 
 Plus design debt items to revisit:
 - Dashboard pressure test (spec 04) against latest thinking
