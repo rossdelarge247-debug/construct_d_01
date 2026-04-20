@@ -243,11 +243,123 @@ Buy/rent plans, rough budget, mortgage needs, retirement concerns.
 
 ---
 
-## Gaps 6-12 — PENDING (next session)
+## Gap 6: Self-employed details — sequencing — RESOLVED
+
+**Approach:** Basics pre-bank (engine needs them for classification). Depth post-bank in a dedicated Business section (user has cognitive momentum after seeing classified business credits).
+
+**Moment 2 (pre-bank) — P2 Self-employed basics** *(only if `self_employment ∈ {me, both}`)*
+
+Three screens, one question per screen.
+
+**P2a — Business identity**
+```
+"Tell us about your business"
+
+Company / trading name: [___________]
+Structure: ○ Sole trader  ○ Limited company  ○ Partnership  ○ Other
+```
+
+**P2b — Pay method**
+```
+"How do you pay yourself?"
+
+○ Salary only (PAYE through the company)
+○ Dividends only
+○ Salary and dividends
+○ Drawings / ad hoc
+○ Not sure / varies
+```
+
+**P2c — Other income channels**
+```
+"Any other income sources from the business?"
+
+□ Client payments direct to me
+□ Rental income through the company
+□ Other
+□ None — it's all through the above
+```
+
+Rationale: platforms like Stripe, GoCardless, or direct client transfers land in the bank account and need Tier 1 classification pre-bank, not Tier 3 "what is this?" post-bank.
+
+**Moment 3 (post-bank) — Business section** *(slotted into section-by-section confirmation after Income review)*
+
+**B1 — Income confirmation (enhanced)**
+Shown alongside detected credits from the company:
+```
+"£2,800/mo on 28th, consistent"  → [Salary] [Dividend] [Other]
+"£5,000 on varying dates"         → [Salary] [Dividend] [Other]
+"£1,200 from Stripe"              → [Client payments] [Other]
+```
+
+**B2 — Business value**
+```
+"What's the approximate value of the business?"
+[________]  + "Skip if unsure — we can come back to this"
+
+In-screen guidance: "Your accountant can give you this. For Ltd
+companies, it's usually net assets on the last balance sheet plus
+goodwill. For sole traders, it's tools, stock, and goodwill."
+```
+If skipped, adds "Get business valuation" to to-do list.
+
+**B3 — Shareholding** *(Ltd only)*
+```
+"Do you hold shares in the company?"
+○ Yes, 100%
+○ Yes, jointly with my spouse/partner
+○ Yes, with other shareholders → "What percentage is yours?" [___%]
+○ No — I'm a director but not a shareholder
+```
+Auto-hidden if structure ≠ Ltd. For partnerships, becomes "What's your partnership share?" [___%].
+
+**B4 — Director's loan account** *(Ltd only)*
+```
+"Do you have a director's loan account?"
+○ Yes → "Roughly, what's the balance?" [______]
+        "Is the company owing you (credit) or are you owing the
+         company (debit)?"  ○ Company owes me  ○ I owe the company
+○ No
+○ Not sure → shown message: "DLAs are the most commonly missed
+             item on Form E. Ask your accountant before sharing."
+```
+
+**B5 — Accountant + documents**
+```
+"Do you have an accountant?"
+○ Yes → Name + firm (optional)
+        "We'll need your last 2 years' tax returns (SA302) and the
+         most recent company accounts. We've added these to your
+         to-do list."
+○ No — I do my own → "OK. SA302 available from HMRC online,
+                      accounts via Companies House."
+```
+
+**To-do items generated:**
+- SA302 last 2 years (auto-added)
+- Most recent company accounts (auto-added)
+- Business valuation (if B2 skipped)
+- Accountant letter (if needed for sharing)
+
+**Edge cases:**
+- `self_employment = ex` → P2 skipped entirely for this user. Business section runs on the invited party's journey (Gap 7).
+- `self_employment = both` → P2 and B1-B5 run for each party separately.
+- "Not sure / varies" on pay method → engine falls back to Tier 3 per-credit classification in B1.
+- Sole trader → B3, B4 auto-hidden. B2 reframed ("tools, stock, goodwill").
+- Dormant / ceased Ltd → B2 guidance adds "enter £0 or book value if dormant." B1 still runs for historic credits.
+
+**What this produces:**
+- Document business subsection (structure, shareholding, DLA, estimated value, accountant)
+- Engine Tier 1 matches for company name across all credit patterns
+- To-do items for SA302 / accounts / valuation — parallel treatment to CETV for timeline pressure
+- Verification flags (business value = self-declared until documents land)
+
+---
+
+## Gaps 7-12 — PENDING
 
 | Gap | Short description |
 |---|---|
-| 6 | Self-employed details — sequencing (what's Moment 2 vs Moment 3) |
 | 7 | Invited party (Mark) profiling variant |
 | 8 | Verification opt-in placement |
 | 9 | Account structure capture |
@@ -269,9 +381,9 @@ Plus design debt items to revisit:
 2. spec 67 (this document — distribution map + gaps 1-5)
 3. spec 66 (original gaps list, now superseded for 1-5, still valid for 6-12)
 
-**Start with:** Gap 6 (self-employed details sequencing)
+**Next:** Gap 10 (pension depth)
 
-**Following order:** 6 → 10 → 9 → 8 → 12 → 11 → 7 (invited party last, as it depends on the other variants being locked)
+**Remaining order:** 10 → 9 → 8 → 12 → 11 → 7 (invited party last, as it depends on the other variants being locked)
 
 **Then:**
 - Update spec 66 to mark all gaps resolved
