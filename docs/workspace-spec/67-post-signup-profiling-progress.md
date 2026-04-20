@@ -704,7 +704,86 @@ Not at pre-share. Not during profiling. Introduced at the end of the journey whe
 
 ---
 
-## Gap 12: Reverse partner awareness — PENDING
+## Gap 12: Reverse partner awareness — RESOLVED (REFRAMED)
+
+**Decision:** The original question — "what does your partner know about your finances?" — is dropped. It has no actionable answer: if the user discloses an item, the ex will know by definition; if they don't disclose, we don't know to ask. The middle-ground "surprise" scenarios are natural territory for reconciliation flow in the proposal phase, not pre-share preparation.
+
+**What replaces it:** A pre-share **commonly-missed-items checklist**. Completeness is what actually matters at this moment — consent orders require full disclosure; an undisclosed asset surfacing later can unwind the whole agreement.
+
+**Placement:** Pre-share, after verification (Gap 8d), before the invite-ex action.
+```
+picture built → verification → COMPLETENESS CHECKLIST → share
+```
+
+**CL1 — One last check**
+```
+"One last check — have we captured everything?"
+
+"Some things are easy to forget. Tap anything that applies —
+ we'll add it before you share."
+
+Household & valuables
+  □ Jewellery, watches, wedding/engagement rings
+  □ TV, audio, gaming consoles
+  □ Art, prints, antiques
+  □ Tools, equipment (work or hobby)
+  □ Collectibles (stamps, coins, wine, memorabilia)
+  □ Musical instruments
+  □ Designer clothes, handbags, shoes over £500
+
+Money matters
+  □ Cash at home over £500
+  □ Money someone owes me
+  □ Money I owe someone (not a bank/credit card)
+  □ Endowment or life insurance with a cash-in value
+  □ Compensation or inheritance due to me
+
+Other
+  □ Crypto not yet declared
+  □ Foreign property or bank accounts
+  □ Timeshare
+  □ Horses, livestock, or pets of significant value
+
+[I've got everything →]
+```
+
+Per-tick → mini-form (description + approx value + optional photo/receipt).
+
+**CL2 — Encouragement (always shown)**
+```
+"Thanks for double-checking."
+
+"Disclosing everything — including small items — is what makes
+ a settlement enforceable. If an undisclosed asset emerges later,
+ the whole agreement can be re-opened. Better to include a £400
+ ring than leave it out."
+
+[Share with my ex →]
+```
+
+Completeness framed as self-protection, not bureaucracy.
+
+**Edge cases:**
+- Many items ticked → mini-forms batched, deferrable ("I'll add later" → to-do item).
+- Item already declared → "this is already in your picture" with link to its section.
+- High-value late addition → "this materially changes your picture — review before sharing?" prompt.
+- Nothing ticked → proceed directly to share.
+- Safeguarding — same checklist, no tonal change. Completeness protects everyone.
+- Late-valued items → photo / receipt upload can be deferred; value self-declared until evidenced.
+
+**What this produces:**
+- Legally-stronger disclosure (spec 41 enforceability research)
+- Completeness trust badge on user's side of picture
+- Fewer late-reconciliation surprises
+- Reconciliation-phase relief (ex sees complete picture)
+
+**What stays:** Pre-signup O5 ("what do you know about your partner's finances") is unchanged. Different question, different job — gates messaging, flags hidden-assets pathway, emphasises credit check.
+
+**Surprise management lives in reconciliation flow** (proposal phase), not here. Per-item "discuss this" affordances, one-at-a-time surfacing, dispute paths — all already specced for agreement phase.
+
+---
+
+## Gap 11: Safeguarding carry-through — PENDING
 
 Plus design debt items to revisit:
 - Dashboard pressure test (spec 04) against latest thinking
