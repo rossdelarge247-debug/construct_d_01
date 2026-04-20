@@ -356,16 +356,149 @@ Auto-hidden if structure ≠ Ltd. For partnerships, becomes "What's your partner
 
 ---
 
-## Gaps 7-12 — PENDING
+## Gap 10: Pension depth — DB vs DC, CETV status — RESOLVED
 
-| Gap | Short description |
-|---|---|
-| 7 | Invited party (Mark) profiling variant |
-| 8 | Verification opt-in placement |
-| 9 | Account structure capture |
-| 10 | Pension depth — DB vs DC, CETV status |
-| 11 | Safeguarding carry-through |
-| 12 | Reverse partner awareness |
+**Approach:** Don't ask DB vs DC at profiling — users can't classify. Ask existence + provider + a quiet DB-proxy (public-sector / legacy-corporate). Fire CETV nudge immediately for DB-likely users to start the 6-12 week clock on day 1. DB/DC vocabulary surfaces only in post-bank confirmation, with examples and pre-selection from profile heuristics.
+
+**Key move:** CETV request lands on the to-do list at pre-bank, before bank connection. This is the single biggest timeline win in the product — 6-12 weeks saved.
+
+**Moment 2 (pre-bank) — P4 Pensions basic** *(always asked)*
+
+**P4a — Existence**
+```
+"Do you have any pensions?"
+
+○ Yes, one
+○ Yes, more than one
+○ I'm already drawing a pension
+○ Not sure — maybe from old jobs
+○ No
+```
+
+Avoids workplace/personal/private distinctions. "Not sure" honoured.
+
+**P4b — Provider + DB proxy** *(shown if P4a ≠ No)*
+```
+"Who's your pension provider?"
+
+Provider 1: [Aviva        ▾]  ← dropdown of UK providers + free text
+[+ Add another pension]
+
+"Which of these best describe you or your employer?"
+□ Current or former public sector worker (NHS, GP or other
+  health service, teacher, civil servant, police, armed
+  forces, firefighter, local authority)
+□ Current or former large corporate (banking, utilities,
+  manufacturer) — you joined before 2012
+□ None of these / not sure
+```
+
+Second question is the quiet DB detector. User never sees "DB" or "DC."
+
+**P4c — CETV nudge** *(shown if DB likely — i.e. either checkbox ticked)*
+```
+"A quick note about timing"
+
+"Some pensions (especially from public sector jobs or older
+ corporate schemes) need a special valuation called a CETV.
+ Your pension provider has to calculate it — it typically takes
+ 6-12 weeks, and we can't avoid that wait.
+
+ We'll add this to your to-do list so you can start early. The
+ valuation will be ready when you need to share your picture."
+
+[OK, add to my to-do list]    [Skip for now]
+```
+
+Dedicated screen. Timeline message deserves its own beat. For DC-only users, P4c is skipped entirely.
+
+**Engine use of P4:**
+- Provider names → Tier 1 match (disambiguates Aviva pension vs Aviva insurance)
+- Public-sector / legacy-corporate flag → `expect_DB_pension: likely`, drives CETV-now nudge
+- "Drawing a pension" → classify pension credits as `pension_income`
+- "Not sure" → don't block; detect in confirmation
+
+**Moment 3 (post-bank) — Pension section**
+
+**PN1 — Review what we found**
+```
+✓ Aviva — £185/mo contribution matched to your workplace pension
+✓ Scottish Widows — no contributions visible (likely workplace,
+   deducted at source)
+? Hargreaves Lansdown — £300/mo — is this a pension (SIPP) or
+   an investment account?
+```
+
+**PN2 — Per-pension DB/DC** *(loops per pension, first use of DB/DC vocabulary)*
+```
+"Aviva — tell us more"
+
+○ You pay in (and your employer pays in) and it builds up a pot
+  → "defined contribution" pension. Modern private-sector norm.
+
+○ You get a guaranteed income for life based on your salary
+  and years worked
+  → "defined benefit" pension. Public sector and older corporate.
+
+○ Not sure
+```
+Pre-selected from P4b signal + provider heuristics (Teachers' Pensions = DB, Nest = DC). User can correct. "Not sure" treated as DB (conservative).
+
+**PN3 — Value + CETV status**
+
+DC path:
+```
+"What's the approximate value?"
+[______]  + "This is on your latest statement or online portal."
+○ I don't know — add to my to-do list
+
+"How recent is this figure?"
+○ Less than 3 months  ○ 3-12 months  ○ Over a year
+```
+
+DB path:
+```
+"Have you requested your CETV yet?"
+○ Yes — it's on the way
+  → "When did you request it?" [date] → countdown shown
+○ Yes — I have it already
+  → CETV value [______]
+  → Date of valuation [______]
+○ No, not yet
+  → CTA: "Request CETV now" + how-to + to-do item with target date
+```
+
+Public sector → PN3 help text includes McCloud note: "If your scheme is affected by the McCloud judgment, your CETV may be estimated or delayed."
+
+**PN4 — If drawing a pension**
+- Monthly amount (bank auto-detected, user confirms)
+- Provider / scheme name
+- Start date of drawdown
+- Annuity or drawdown
+- Any lump sum taken in last 12 months
+
+**Edge cases:**
+- Forgotten old-job pensions → "not sure" keeps door open. Engine detects contributions. Pension Tracing Service nudge deferred to later (share-readiness, not profiling).
+- SIPPs → PN1 Tier 2 disambiguation (SIPP or investment?). If SIPP → DC downstream.
+- Multiple pensions → PN2/PN3 loop, each with its own to-do item.
+- Drawn + still contributing → PN4 for drawn, PN2/PN3 for remaining pots.
+- Complex pension sharing → flag PODE (Pension on Divorce Expert) for on-demand professional review (spec 42).
+
+**To-do items generated:**
+- CETV request (auto-added for DB-likely, target date set)
+- Pension statement upload (for DC, if value unknown or stale)
+- Scheme summary / TVC request (for DB if complex, at share-readiness)
+
+**What this produces:**
+- Document pensions section (per-pension type, provider, value, CETV status)
+- Earliest-possible CETV request (day 1, not day 30)
+- Engine Tier 1 classification of pension providers
+- Trust signals (CETV-with-date = evidenced; pot value = self-declared until statement)
+- Proposal inputs (pension sharing feasibility, PODE flag when complex)
+
+---
+
+## Gap 9: Account structure — PENDING
 
 Plus design debt items to revisit:
 - Dashboard pressure test (spec 04) against latest thinking
