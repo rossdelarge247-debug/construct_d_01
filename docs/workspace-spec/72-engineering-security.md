@@ -92,19 +92,183 @@ Keep this table updated when env vars are added / removed. Commit alongside the 
 
 ## 3. Authentication + session pattern
 
-[FILL]
+Auth flows through the Session abstraction defined in S-F7 (rebuild strategy spec 71) — domain code consumes `getCurrentSession()` and never touches Supabase auth directly. The prod implementation wraps Supabase; the dev implementation returns a synthetic fixture session.
+
+**Session interface (stable contract):**
+```ts
+interface UserSession {
+  id: string;                  // stable internal ID
+  email: string;               // T2
+  role: 'participant' | 'admin' | 'support';
+  twoFactorVerified: boolean;
+  createdAt: Date;
+  lastActiveAt: Date;
+  deviceFingerprint: string;   // for anomaly detection
+}
+```
+
+**Authentication requirements:**
+
+- **2FA mandatory** for every participant account before touching any T3+ data (spec 54 Risk 4b). Enforced at route-guard layer: if `!session.twoFactorVerified && route requires T3 access`, redirect to 2FA enrolment.
+- **Password policy** follows NIST 800-63B: min 12 characters, no arbitrary complexity rules (no forced symbols), passwords checked against Have I Been Pwned API at creation + change, no periodic rotation requirement.
+- **Magic link for second-party invitation** (Mark) — friction-free 30-second entry per spec 54 Risk 4h. 14-day invite expiry per session-22 G7-3 lock. Link single-use; rotates on use.
+- **Session lifetime:** 24h access token; 30-day refresh token; refresh rotation on every use. Idle timeout 4h (re-auth required). Absolute max 30 days without re-auth.
+- **Cookie flags:** `HttpOnly`, `Secure`, `SameSite=Lax`, `__Host-` prefix for session cookies. Never accessible to client JS.
+
+**Anomaly detection (spec 54 Risk 4b):**
+- Login from new device/country → email notification to user + in-app banner
+- 5+ failed auth attempts from one IP → rate-limit block (1 hour)
+- Sensitive changes (password, email, 2FA disable, share to new ex) → 24-hour cooling-off window + email confirmation
+- Failed 2FA attempts → progressive lockout (1min, 5min, 15min, 1hr)
+
+**Account takeover protection:**
+- 2FA cannot be disabled without re-entering current 2FA code + 24h delay
+- Password reset emails come from a reserved address (`security@decouple.co.uk` — never the general noreply) with signed links
+- Recovery codes generated at 2FA setup, downloadable once
+
+**Session state handling in dev mode:** fixture user Sarah (or scenario-selected persona) loaded into `UserSession` at module init; `twoFactorVerified: true` by default (dev bypass). Dev mode NEVER issues real cookies — dev session state lives only in memory + localStorage per S-F7 pattern.
 
 ## 4. Row Level Security + authorisation
 
-[FILL]
+Supabase RLS is the **primary authorisation layer** — never relied on application-level checks alone. Application code adds a second layer, but RLS is the thing pen-testers will probe first and the thing that must be right.
+
+**Hard rules:**
+1. **Every table has RLS enabled** before any data lands. No exceptions. Migration CI check rejects any `CREATE TABLE` without an immediately-following `ALTER TABLE ... ENABLE ROW LEVEL SECURITY` and at least one policy.
+2. **Default deny.** No table gets a broad `USING (true)` policy. Every policy names its actor and its scope.
+3. **Service role key NEVER ships to client.** Server-side use only, specifically bypassing RLS for migrations and admin operations that are individually audited.
+4. **Admin reads are audited.** A separate `admin_access_log` table records: admin user, resource table + ID, timestamp, reason (free-text), legitimate business reason (enum). Policy on that table: only admins write, only admins (or compliance role) read.
+
+**Private-data pattern (Sarah's Picture, private sections, notes):**
+```sql
+CREATE POLICY "own_data_only" ON sarahs_picture_fields
+  FOR SELECT USING (user_id = auth.uid());
+CREATE POLICY "own_data_only_write" ON sarahs_picture_fields
+  FOR INSERT WITH CHECK (user_id = auth.uid());
+CREATE POLICY "own_data_only_update" ON sarahs_picture_fields
+  FOR UPDATE USING (user_id = auth.uid());
+```
+
+**Joint-data pattern (Our Household Picture, reconciled fields):**
+- `joint_documents` table has `sarah_id`, `mark_id` columns
+- Policy: `auth.uid() IN (sarah_id, mark_id)` gates SELECT
+- WRITES restricted to field-level mechanics (see selective-publish below)
+
+**Selective-publish (Sarah publishes one field at a time into joint doc):**
+- `joint_published_fields` table: `joint_doc_id, field_key, source_user_id, published_value, published_at, provenance_json`
+- Write policy: only the source-user can publish their own field (`source_user_id = auth.uid()`)
+- Read policy: members of the joint doc can SELECT
+- This enforces the cross-party rule (§1): Mark cannot read Sarah's raw data, only the published intersection.
+
+**Derived views respect tier composition (§1):** a view joining T2 + T3 tables is T3; RLS policies on the view enforce the more restrictive access.
+
+**Testing RLS (part of DoD for any schema change):**
+- Two-persona test scenarios: Sarah writes → Mark reads → assert nothing returned
+- Sarah publishes field → Mark reads → assert only that field visible
+- Admin reads without logging reason → assert rejected
+- Service key revoked in test environment → app still works for normal operations (means RLS policies are sufficient, not leaning on service key)
+
+**Pen-test red-flag patterns to avoid:**
+- `USING (true)` policies (broad access)
+- Policies referencing columns the requesting user controls directly
+- Server code using service role key for operations that could use user-scoped keys
+- Missing RLS on any table that holds T2+ data (migration gate enforces)
 
 ## 5. Input / output validation at boundaries
 
-[FILL]
+**Principle:** trust is earned at the boundary — not inherited from TypeScript types. Every piece of data that crosses a trust boundary gets runtime validation.
+
+**Trust boundaries (validation required at each):**
+- Client → API route (every POST/PUT/PATCH body; every query param)
+- Third-party webhook → our handler (Tink, Stripe, Supabase webhooks)
+- File upload → storage
+- External API response → our code (treat Tink, Ntropy, Anthropic responses as untrusted input)
+- Database read → application code (types defined in schema, runtime-asserted at ORM layer)
+
+**Implementation pattern:**
+- **Zod schemas** at every API route entry. Reject on invalid with 400 + generic error ("invalid request"); log the specific validation failure server-side.
+- TypeScript types generated from Zod schemas (`z.infer<>`) — single source of truth.
+- No `any` or `unknown` coming out of API handlers.
+
+**Output encoding:**
+- React's JSX escapes by default — this is the primary XSS defence.
+- **Never** use `dangerouslySetInnerHTML` with user-controlled content. If unavoidable for legal-doc rendering (consent order, D81): HTML via DOMPurify with strict allowlist (no `<script>`, no `<iframe>`, no inline event handlers); allowlist audited per release.
+- User-generated HTML is not allowed anywhere in the product at V1 (no rich-text fields for users); if added at V1.5+, requires new security review.
+
+**SQL:** all queries through Supabase client (parameterised). Raw SQL banned except in migrations.
+
+**File uploads:**
+- MIME type verified via magic-byte inspection (don't trust `Content-Type` header)
+- Allowlist only: PDF, PNG, JPG, HEIC, DOCX (and only where the feature needs it)
+- Size limit per upload: 15MB
+- Antivirus scan before storage (Supabase storage has this; verify enabled)
+- Stored under content-addressed filenames (hash-based) — never user-controlled path fragments
+- Served with `Content-Disposition: attachment` where possible; never inline-render uncontrolled PDFs
+
+**URL validation:**
+- Redirects to user-controlled URLs go through an allowlist (only our domain + known partner domains)
+- External-link warning pattern for user-embedded URLs (when that feature exists)
+
+**Email / phone validation:**
+- Permissive regex at form-time (don't reject unusual-but-valid inputs like `+` in email or `.co.uk`)
+- Real validation via verification link (email) or SMS code (phone — later)
+
+**Rate limiting at API boundaries:**
+- Auth endpoints: 5 req/min per IP
+- Bank connect / share endpoints: 3 req/min per session
+- General API: 60 req/min per session
+- Implementation: Supabase Edge Functions + upstash/ratelimit or Vercel Edge Middleware
 
 ## 6. Logging + observability + scrubbing
 
-[FILL]
+**Principle:** logs are useful when they help diagnose problems; dangerous when they leak what they're supposed to protect. Every log line classified per data-tier rules (§1).
+
+**Log destinations:**
+- Operational logs (errors, timing, requests) → standard structured-JSON pipeline (Vercel logs + external aggregator TBD at Phase C)
+- Audit logs (T3+ access events) → separate append-only store (Supabase table with RLS + retention; or dedicated log service)
+- Analytics events → PostHog with strict event-schema allowlist (§8 third-party)
+
+**Hard scrubbing rules:**
+
+| Tier | Log value? | What's loggable | Scrubbing |
+|---|---|---|---|
+| T0 Public | ✅ | Everything | None |
+| T1 Functional | ✅ | Everything | None |
+| T2 Personal | ❌ values | Keys, IDs, presence-flags | Names/emails replaced with hashed token `sha256(value)[:8]` |
+| T3 Financial | ❌ values | Access events (actor, timestamp, resource_id, action) | All values scrubbed; aggregates (e.g. `amount_bucket: "£100-500"`) OK if genuinely useful |
+| T4 Safeguarding | ❌ values | Access events with explicit review_reason | All values scrubbed; even presence-flags require review reason to log |
+| T5 Legal | ✅ full audit | Full audit trail by regulation | Document hash, never content, in logs — full content in legal-binding immutable storage |
+
+**What is NEVER logged:**
+- Auth tokens, session keys, 2FA codes, recovery codes
+- Passwords (even hashed) — never in logs regardless of form
+- Full bank transaction descriptions, amounts, dates (T3)
+- Safeguarding answers, safety flags, exit-page invocations (T4)
+- AI prompt content sent to Anthropic containing T2+ data — log only prompt ID + metadata
+
+**Error messages to client:**
+- Always generic + unique reference ID: `"Something went wrong. Reference: 7F3A-9B2C"`
+- Detailed error context server-side only (reference ID correlates)
+- Never leak stack traces, SQL, internal paths, third-party error bodies
+- HTTP status codes are honest (401/403/404/500) but response bodies are minimal
+
+**Audit log requirements (T3+ access):**
+- Structure: `{ actor_id, action, resource_type, resource_id, timestamp, request_id, reason? }`
+- Immutable: append-only, no DELETE, no UPDATE
+- Retention: indefinite for T5; T3/T4 per §1 retention table
+- Reviewable: compliance role can query with RLS access; exported on DSAR
+
+**Alerts:**
+- Failed auth > 20/min from one IP → immediate notify
+- T3 read volume > 10x baseline from single actor → review queue
+- RLS policy violation attempt → immediate alert (shouldn't happen; if does, investigate)
+- Dev-mode attempted in prod (`DECOUPLE_AUTH_MODE != 'prod'` at prod module load) → pager-level alert + block
+- Service role key used from non-allowlisted path → alert + block
+
+**What we DO want logged (useful for defending + operating):**
+- Every auth event (login, logout, 2FA, password change) — T2 scrubbed
+- Every T3+ read event (for audit trail + anomaly detection)
+- Every share action, publish action, proposal signature — full event log per party
+- Every external integration call (Tink, Stripe, Anthropic) — metadata only, never payload
 
 ## 7. Dev / prod boundary enforcement
 
