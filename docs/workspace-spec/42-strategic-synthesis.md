@@ -1,7 +1,9 @@
 # Spec 42 — Strategic Synthesis: The Complete Settlement Workspace
 
-**Date:** 17 April 2026
+**Date:** 17 April 2026 · **Amended:** 22 April 2026 (session 22)
 **Purpose:** Synthesise session 19's strategic work into one document. Value proposition, positioning, and end-to-end journey redesign. Captures the shift from "financial disclosure tool" to "complete settlement workspace."
+
+**Session 22 amendment:** The original six-phase journey below is superseded by the five-phase model locked in spec 68 (synthesis hub) + 68a-e (phase-specific locked decisions). Share collapses from a phase into an action; Move-on folds into Finalise tracking. Document-as-spine articulated as four documents: Sarah's Picture (Build) → Our Household Picture (Reconcile) → Settlement Proposal (Settle) → Generated legal docs (Finalise). Operational framing lives in spec 68. This file retains the strategic rationale that still holds; the phase-journey section is rewritten below to reflect the five-phase model.
 
 ## The reframe
 
@@ -72,61 +74,65 @@ Remove any one and the decision doesn't make sense.
 
 ---
 
-## The six-phase journey
+## The five-phase journey
 
-One product. One document. Six phases from first question to moving forward.
+One workspace. Four documents. Five phases from first question to post-order implementation.
+
+**Share is an action, not a phase.** The share action from Build triggers entry to Reconcile — see spec 68 and 68b B-S for mechanics. **Move-on is absorbed into Finalise tracking** for V1 (richer post-order implementation treatment may surface as V1.5+).
 
 ### Phase 1: Start — "I'm getting divorced"
-- Orientation and emotional check-in
-- Safety screening (coercive control indicators)
-- MIAM-equivalent (if considering court)
-- Profiling (housing, employment, vehicles, children, pensions, assets)
-- The document begins to form from profiling answers
+Pre-signup orientation + account creation.
+- Public site explains the product
+- AI plan surfaces the user's likely journey from a few orienting questions
+- Safety screening (coercive control indicators) → signposting for flagged users
+- Signup + tier selection
+- Welcome tour (four post-signup content steps: Build / Reconcile / Settle / Finalise)
+- Moment 1 acknowledgement + Moment 2 pre-bank profiling (spec 67)
 
-### Phase 2: Build — "Your picture"
+### Phase 2: Build — "Sarah's Picture" (private)
 Working on your part of the complete settlement document.
-- Bank connection → financial picture auto-populates
-- Phase A (assets/income/debts) with tier-based matching
-- Phase B (spending)
-- Children section (count, ages, current arrangements, primary care)
-- Housing section (current home, future intentions)
-- Future needs section (budget projections, income needs)
+- Bank connection → financial picture auto-populates (247 transactions across 12 months)
+- Per-section confirmation: Children as §1, Home, Pensions, Assets, Debts, Income, Outgoings
+- Children (count, ages, primary care, contact, schools, childcare)
+- Housing (current home, future intentions)
+- Future needs (budget projections, income needs — deferred to Settle per spec 67 Gap 5)
 - Evidence gathering (documents, valuations, credit check)
-- **Live document preview throughout — you see your picture emerging**
+- Dashboard above the document — task-focused, gets user to next action fast
+- **Sarah's Picture renders as a document throughout — §-numbered sections, trust chips inline, snapshot right-rail**
 
-### Phase 3: Share — "Our picture"
-- Invite your ex (can happen from 70% complete onward)
-- They go through their version of Phase 1-2
-- Reconciliation: match items, agree values, surface unique/missing items
-- Unified household settlement picture emerges — finances, children, housing, future
+### Phase 3: Reconcile — "Our Household Picture" (shared)
+Triggered by Share action from Build.
+- Mark receives invite → respondent signup flow (G7-1..G7-5 locked session 22)
+- Mark builds his own picture; joint document mirrors both
+- Status quad header: Agreed / Differ / New to you / Gap to address
+- Conflict cards: side-by-side values with provenance + delta, non-judgemental framing
+- AI-ordered deliberation queue (biggest-impact-first)
+- Mark status machine: not-invited / invited-not-opened / opened / building / shared
+- Joint-doc versioning: V1.0 → V2.0 → Vx.y → AGREED on reconciliation complete
 
-### Phase 4: Agree — "The settlement"
-Proposals cover all four areas, not just money:
+### Phase 4: Settle — "The Settlement Proposal"
+Proposals cover all four areas, not just money.
 - **Financial:** Property, pensions, savings, debts, maintenance
 - **Children:** Living arrangements, contact pattern, holidays, school costs
 - **Housing:** Transition plan, interim arrangements
 - **Future:** Spousal maintenance, pension sharing, career restart support
-- Per-item proposals with reasoning + system context
-- Counter-proposals as redlines
-- Progress board tracks convergence across all four areas
-- Agreement locked when all items agreed
+- Option cards per section (Sell / Sarah keeps / Mark keeps / Defer-until-18)
+- Running-split banner tracks Sarah-vs-Mark percentage + £ figures
+- AI coach right rail: Court reasonableness / Fairness check / Coaching / On-this-comment
+- Counter-proposal three-button response: Discuss / Counter / Accept
+- Progress board with convergence chart + version history timeline
+- Explicit sign by both parties to lock agreement
 
-### Phase 5: Finalise — "The order"
+### Phase 5: Finalise — "Court-ready package" + post-submit tracking
 - Consent order generated from agreed settlement (includes child clauses)
 - D81 auto-populated (Section 10 from reasoning trails)
-- Pension sharing annex if applicable
-- Parenting Plan / Schedule of Arrangements for Children if applicable
-- Pre-flight quality check
-- Submit to court (with guidance)
-- Track through 6-10 week judicial review
-
-### Phase 6: Move on — "Forward"
-Implementation guidance for everything agreed:
-- **Financial:** Transfer property, share pension, close joint accounts, update mortgage
-- **Children:** Set up the contact schedule, update school emergency contacts, notify HMRC about Child Benefit recipient
-- **Housing:** Move logistics, deposit release, utility transfers
-- **Records:** Update DVLA, HMRC, employer, bank, pension provider
-- Step-by-step, with template letters and checklists
+- Pension sharing annex (Form P) if applicable
+- Statement of Arrangements for Children if applicable
+- Eight-check pre-flight quality gate
+- Three-tier solicitor fork: £0 direct / £250 pensions-only / £450 full
+- Four-confirmation submit page (MyHMCTS or guided-manual per 68f F-4)
+- Post-submit tracker: 6-10 week judicial review + Court-sealed state updates the agreement artefact
+- **Move-on implementation guidance folded in for V1** (transfer property, share pension, close joint accounts, update records, set up contact schedule). Richer treatment deferred to V1.5+.
 
 ---
 
@@ -209,7 +215,7 @@ Pensions are the biggest timeline bottleneck (6-12 week wait). Explicit tracking
 | From | To |
 |---|---|
 | Financial disclosure tool | Complete settlement workspace |
-| V1 / V2 / V3 (three products) | Six phases, one product, one document |
+| V1 / V2 / V3 (three products) | Five phases, four documents, one workspace |
 | Dashboard output | Document as the spine |
 | Disclosure-only | End-to-end (disclosure → agreement → court → implementation) |
 | Direct-to-consumer only | Consumer + mediator partnerships + solicitor infrastructure |

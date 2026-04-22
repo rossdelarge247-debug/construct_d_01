@@ -1,22 +1,32 @@
 # Spec 44 — The Document: Structure, ES2 Alignment, Versioning
 
-**Date:** 17 April 2026
+**Date:** 17 April 2026 · **Amended:** 22 April 2026 (session 22)
 **Purpose:** Define what the document actually IS. Its structure, its sections, how it aligns with ES2 and Form E, and how versioning works. This is the spine of the product — every screen is an interface onto this.
 
-## What is "the document"?
+**Session 22 amendment:** The original "one document with ten sections" framing is superseded by the four-document lifecycle locked in spec 68 (hub) + 68a-e. See the "Four-document lifecycle" section below (rewritten). Versioning, read/edit toggle, and collaboration mechanics are now governed by the 68 suite — this spec retains the section structure (ES2 mapping) and trust-system framing that still hold. Operational framing: spec 68.
 
-A live, collaborative, evidence-linked settlement document that contains everything needed to produce a consent order. It starts as one party's disclosure draft and grows into the unified household picture, then the agreed settlement, then the court-ready order.
+## Four-document lifecycle (session 22)
 
-**It is the ES2, Form E, Statement of Arrangements, MoU, and draft consent order — unified.**
+The "spine" is not one document — it's a lineage of four documents, one per phase, each a live artefact with evidence trails, trust badges, and §-numbered sections. Together they produce everything needed for a consent order.
+
+| Document | Phase | Owned by | Versioning | Created when |
+|---|---|---|---|---|
+| **Sarah's Picture** | Build | Sarah (private) | Last-updated timestamp + per-section history log. **No version chip** (68b B-V1). | Signup + first profiling |
+| **Our Household Picture** | Reconcile | Both | **V1.0 → V2.0 → Vx.y → AGREED** on reconciliation complete (68c) | First Share action from Build |
+| **Settlement Proposal** | Settle | Drafted by one, countered by the other | **V1 → V2 counter → V3 response → Vn → SIGNED** (68d) | All reconcile items resolved |
+| **Generated legal docs** | Finalise | Auto-produced | **V5 AGREED basis → court-ready artefacts** (68e) | Settlement signed by both |
+
+**It is the ES2, Form E, Statement of Arrangements, and draft consent order — unified across four document artefacts that share a common §-structure, evidence model, and trust taxonomy.**
+
+Each document renders in the same three-column shape: left-rail chapter TOC with completion iconography, middle prose body with inline structured data, right-rail contextual panel (Snapshot / Data sources / Needs your attention in Build; Status quad / Deliberation queue in Reconcile; AI coach in Settle; Pre-flight / Activity log in Finalise). See 68b-e for per-phase detail.
 
 ## The document structure
 
-The document has 10 sections. Sections activate based on profiling (skip what's not relevant).
+The document has 10 sections, shared across all four documents in the lifecycle above. Sections activate based on profiling (skip what's not relevant).
 
-### Section 1 — Parties & context
-Names, ages, marriage dates, separation date, children count/ages, current living arrangements, date of document.
+**Section ordering amended session 22:** Children is now §1 per 68b B-D6 ("most settlements pivot around children; the document should lead with them"). Parties & context is absorbed into the document header metadata rather than a separate §.
 
-### Section 2 — The children
+### Section 1 — The children
 Living arrangements, primary care, contact pattern, school, health, special needs, Child Benefit recipient, agreements on future.
 
 Maps to: Statement of Arrangements for Children + child-related clauses in consent order.
@@ -80,70 +90,21 @@ Section ──► Item ──► Claim(s)
 
 This is the HouseholdItem type from spec 35, enriched to cover non-financial items too (children, housing arrangements).
 
-## The version pipeline (Juro-inspired)
+## Versioning (session 22 amendment)
 
-```
-┌────────┬────────┬────────┬────────┬────────┬────────┬────────┐
-│ v0.x   │ v1.0   │ v2.0   │ v3.0   │ v4.x   │ v5.0   │ v7.0   │
-│ DRAFT  │ SHARED │UNIFIED │ FACTS  │PROPOSAL│SETTLED │ SEALED │
-│        │        │        │ AGREED │(counter│        │(court) │
-│        │        │        │        │ rounds)│        │        │
-└────────┴────────┴────────┴────────┴────────┴────────┴────────┘
-  Party A     Ex         Reconcil-   Both       Back &     All       Court
-  building    invited    iation      parties    forth     items     approved
-  alone                  complete    confirmed  proposals  agreed
-                                     facts
-```
+The original v0.x → v7.0 single-pipeline model is superseded. Each of the four documents in the lifecycle has its own versioning per its phase spec:
 
-### Version rules
+- **Sarah's Picture (Build):** No version chip (68b B-V1). Last-updated timestamp with clickable history log. Per-section change log preserved for legal auditability.
+- **Our Household Picture (Reconcile):** V1.0 on first Share, V2.0 on Mark's first share back, Vx.y on each re-share, **AGREED** suffix appended when reconciliation completes (68c).
+- **Settlement Proposal (Settle):** V1 (Sarah's opening) → V2 (Mark's counter) → V3 (Sarah's response) → Vn until both accept. Both parties **explicitly sign** to lock agreement — not per-edit (68d S-G2).
+- **Generated legal docs (Finalise):** V5 AGREED basis → court-ready artefacts (Consent Order, D81 + Section 10, Form P pension annex, Settlement Summary PDF, optional Statement of Arrangements). Court-sealed state updates the agreement artefact post-approval (68e).
 
-- **Every generation creates an immutable snapshot.** Past versions can always be viewed.
-- **Diffs between versions** show exactly what changed, who changed it, when.
-- **One live version** is the "current" — what both parties see by default.
-- **Versions have states:** Draft / Shared / Signed-off / Sealed.
-- **Signing off** is a deliberate action per party (not per edit) — you sign off on a version, locking your agreement to it.
+### Common rules across all four documents
 
-### Typical version trail
-
-```
-v0.1   Sarah starts building (profiling complete)
-v0.4   Sarah connects bank, picture grows
-v0.8   Sarah adds children, housing, future sections
-v0.9   Sarah adds spending review
-v1.0   Sarah finalises — "ready to share" (generated)
-
-  [Sarah invites Mark]
-
-v1.1   Mark views, starts his side
-v1.3   Mark connects bank
-v1.6   Mark reviews Sarah's items, accepts most
-v1.8   Mark adds his unique items
-v2.0   Mark finalises his pass — unified draft (generated)
-
-  [Reconciliation period — discussions on contested items]
-
-v2.1   Joint savings value agreed (evidence resolved)
-v2.2   Pension CETV received for Mark
-v2.3   Property value agreed after valuations
-v3.0   Both sign off on the facts — household picture complete
-
-  [Proposal phase]
-
-v4.1   Sarah's proposal v1 (sent)
-v4.2   Mark's counter on 3 items (sent)
-v4.3   Sarah's counter on 1 item (sent)
-v5.0   Both accept all items — settlement agreed
-
-  [Legal generation]
-
-v6.0   Consent order + D81 generated
-v6.1   Submitted to court
-v7.0   Court sealed — immutable
-
-  [Implementation]
-
-v8.x   Each implementation step tracked (transfer property, share pension, etc.)
-```
+- Every version is an immutable snapshot; past versions always viewable.
+- Diffs between versions show who changed what, when.
+- One live version per document is "current" — what both parties see by default.
+- Signing off is a deliberate per-party action, not per-edit (specifically applies to Our Household Picture AGREED and Settlement Proposal SIGNED states).
 
 ## The trust system (per-item)
 
@@ -160,30 +121,20 @@ Every item carries a trust level. Multiple badges possible.
 
 Higher trust → higher auto-generation capability. A document where all items are 🤝 both-party-agreed + most items are 📎 bank-evidenced can auto-generate a Tier 1 submittable consent order.
 
-## Edit mode vs document mode
+## Document interaction model (session 22 amendment)
 
-### Edit mode
-App-like. This is where the user DOES things:
-- Profiling questions
-- Bank connection
-- Phase A confirmation (tier-based matching)
-- Phase B spending review
-- Uploading evidence
-- Responding to discussions
-- Building proposals
+The original **edit mode vs document mode toggle is DROPPED** per 68b B-E1. There is no top-bar Read/Edit toggle.
 
-Progressive, one-thing-at-a-time, animated transitions. The existing V2 patterns.
+The document always renders as a document — §-numbered sections, legal-doc styling, prose body with inline structured data, trust chips on every evidenceable line. Editing happens **per-section, inline**, via section-level controls (68b B-E2):
 
-### Document mode
-Document-like. This is where the user SEES what they've built:
-- Structured report layout
-- Tabular sections where appropriate
-- Printable / exportable / shareable
-- Evidence badges visible per item
-- Agreement status visible per item
-- Version selector
+- **Edit** — opens a section editor
+- **Upload evidence** — attaches documents, bumps trust level
+- **Delete** — with confirmation (removes inferred items too)
+- **Plus per-section extensions:** Re-categorise for spending, Add transaction for manual additions, Add valuation for property, etc.
 
-The toggle is always available. Users can flip to document mode at any point during the journey.
+Every edit, upload, deletion, and auto-classification override is timestamped into a section-level change log (68b B-E3). This supports the legal requirement to show how the picture evolved without needing a mode toggle.
+
+Export / print / share affordances are always available via document-level menus (see 68a C-E3 escape-hatch export + 68a C-S share modal). The document IS printable / exportable / shareable at any point — no mode flip required.
 
 ## How collaboration works on the document
 
