@@ -142,9 +142,15 @@ The backlog lives at `docs/v2/v2-backlog.md` (98 items, prioritised). Don't read
 
 ## Visual direction
 
-- **Colour palette & minimalism:** Airbnb — clean, white-forward, generous spacing, restrained colour use
-- **Forms & IxD approach:** Emma app — the interaction patterns, radio groups, progressive disclosure, card layouts. NOT Emma's colour palette.
-- **Spec 18 is partially superseded** — tokens (spacing, typography, shadows) still valid. The colour palette and component designs will be updated in a visual design pass. Do not apply spec 18 colours to new components.
+**Canonical source:** the Claude AI Design tool outputs from session 22 wire batches. Exact visual treatment — colour system, typography, component design, screen layouts — to preserve and rebuild. Copy in the outputs is NOT final; visual treatment IS.
+
+**Not reference points:** Airbnb, Emma, Habito. Legacy in-house visual language (spec 18 colour palette, spec 27 visual direction) is superseded.
+
+**Anchor components:** catalogued in `docs/workspace-spec/68g-visual-anchors.md` (C-V1 through C-V14) — the Phase C extraction shortlist. Includes phase colour system, welcome-carousel shell, stepper, keyboard affordance, demo cards per phase, dashboard components (5-phase stepper, task taxonomy chips, task rows, connected-data-source card, bank picker, trust band, locked-section treatment, accent-tint washes, time-estimate affordance).
+
+**Extraction sequence:** Phase B (Build Map) tags each component per phase with Anchor / Derived / Variant / Re-use / Preserve-with-reskin / Known-unknown. Phase C Step 1 extracts from the Claude AI Design outputs, builds the design system foundation, ships the first deployable slice.
+
+**Token inheritance:** Spec 18 tokens (spacing, typography, shadows) remain valid only where the Claude AI Design outputs have not superseded them. Colour palette + component designs come from Claude AI Design outputs exclusively.
 
 ## Product rules
 

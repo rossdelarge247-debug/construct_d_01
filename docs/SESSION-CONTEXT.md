@@ -108,7 +108,7 @@ See `docs/workspace-spec/68f-open-decisions-register.md` for full context, optio
 4. **Do NOT** re-read pre-pivot specs (03-06, 11, 12). Active reconciled framing lives in 42 / 44 / 68 / 68a-f.
 5. **Do NOT** let a "quick code extraction" jump ahead of reconciliation + Build Map. Phase A must complete before Phase C.
 6. V1 legacy palette is gone — no warmth/cream/sage colours.
-7. Red #E5484D is primary CTAs only.
+7. **Visual direction canonical source is Claude AI Design tool outputs** (session 22 wire batches). Legacy reference points (Airbnb, Emma, Habito) and legacy in-house specs (spec 18 colour palette, spec 27 visual direction) are superseded. No new work references them. Anchor shortlist in `68g-visual-anchors.md` (C-V1..C-V14); extraction happens at Phase C Step 1.
 8. Shadow-based card separation — no borders on cards.
 9. Safeguarding for V1 is signposting + baseline. Detection / decoy / adaptive pacing = V1.5.
 10. Identity verification waits until consent-order stage.
