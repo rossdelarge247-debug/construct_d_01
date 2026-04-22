@@ -54,11 +54,12 @@
 **Lean:** minimal for V1 (name + email), additional party-specific fields V1.5 when routed to specialists.
 **Target:** When solicitor + mediator anchor variants designed.
 
-### 🟠 C-E1 · Escape-hatch export trigger thresholds
-**Context:** Export CTA triggers on stuck states (68a C-E2). Thresholds open.
-**Options:** Mark-not-engaged: 2 / 4 / 6 weeks. Stuck reconciliation: 3 / 5 / 7 rounds.
-**Lean:** Mark 4 weeks, reconciliation 5 rounds. Validate against realistic timelines.
-**Target:** Before first deployable slice.
+### 🟢 C-E1 · Escape-hatch export trigger thresholds — LOCKED (session 22)
+**Resolution:**
+- Mark non-engagement (no account created or no activity after invite) → export-as-Form-E CTA surfaces at **4 weeks**
+- Stuck reconciliation (rounds without forward progress) → export-as-ES2 CTA surfaces at **5 rounds**
+Validate both thresholds against real usage telemetry post-V1 launch; treat as V1 defaults, subject to tuning.
+**Target specs impacted:** 68a C-E2 behaviour spec (thresholds now filled in).
 
 ### 🟠 C-X1 · Exit-this-page behaviour detail
 **Context:** Footer exit present, redirects to BBC per GOV.UK pattern (68a C-X1).
@@ -198,35 +199,30 @@
 
 Five decisions parked pending this session's wire reconciliation. Revisit now that we have clearer shared context.
 
-### 🟠 G7-1 · IS1 (shared context confirmation) placement
-**Context:** Mark's IS1 — "here's what we know so far" with correction rights. Placement open.
-**Options:** Pre-signup screen vs inline on Moment 1
-**Lean:** pre-signup — reduces friction by showing value before account creation.
-**Target:** Lock this session or next.
+### 🟢 G7-1 · IS1 (shared context confirmation) placement — LOCKED (session 22)
+**Resolution:** Pre-signup. Mark's IS1 sits before account creation, as part of a tailored signup flow for the respondent that leverages data already captured from Sarah. Shows value before commitment; respondent-specific signup path (not the same as Sarah's).
+**Target specs impacted:** spec 67 Gap 7 section (move from parked to resolved).
 
-### 🟠 G7-2 · Mark's priorities/worries (IS5/IS6)
-**Context:** Whether Mark answers priorities fresh or inherits from Sarah.
-**Options:** Fresh · inherit · skip
-**Lean:** fresh. Generates his own AI plan. Preserves autonomy.
-**Target:** Lock this session or next.
+### 🟢 G7-2 · Mark's priorities/worries (IS5/IS6) — LOCKED (session 22)
+**Resolution:** Mark answers his own priorities/worries fresh. He is a builder, not a verifier. **Opt-in / opt-out** — he can choose to build his own full AI plan *or* skip straight into responding to Sarah's picture without generating his own. Default path = opt-in (full parallel); opt-out is available for respondents who only want to engage with Sarah's work.
+**Target specs impacted:** spec 67 Gap 7, and the AI plan output spec for the respondent variant (see G7-5).
 
-### 🟠 G7-3 · Invitation link expiry
-**Context:** Default expiry for Mark's invitation link.
-**Options:** 7 days · 14 days · 30 days · configurable by Sarah
-**Lean:** 14 days default, configurable on resend.
-**Target:** Lock this session or next.
+### 🟢 G7-3 · Invitation link expiry — LOCKED (session 22)
+**Resolution:** 14 days default. Configurable by Sarah on resend.
 
-### 🟠 G7-4 · "Mark corrects Sarah" treatment
-**Context:** When Mark corrects inherited shared context, how it's captured.
-**Options:** Full dispute on every correction · silent merge for trivial (misspelling, age off by 1) · dispute only material
-**Lean:** dispute only material, with a threshold. Trivial corrections apply silently with an audit-log entry.
-**Target:** Lock this session or next.
+### 🟢 G7-4 · "Mark corrects Sarah" treatment — LOCKED (session 22)
+**Resolution:** No silent merges. **There is no such thing as trivial when details need to be accurate.** Mark's IS1 is a series of confirm-or-correct questions, one per inherited fact — not a data-preview with correction buttons. Pattern:
+- Per non-financial attribute (kids' ages, postcodes, addresses, length of occupation, relationship length, employer names, etc.) we ask Mark: *"Sarah said {value} — is that correct?"*
+- **Confirm** → item marked cross-confirmed (trust level increments per 68a C-T2 taxonomy)
+- **Correct** → Mark enters the new value → **conflict raised** into Reconcile with both values side-by-side
+- Financial figures (account balances, mortgage amount, pension CETV, etc.) are not part of this flow — they come from each party's own bank connection and reconcile naturally via the joint document's conflict-card pattern (68c R-C).
 
-### 🟠 G7-5 · AI plan output for Mark
-**Context:** Same O7 structure or lighter summary.
-**Options:** Full parallel to Sarah's · lighter "you've been invited, here's what's ahead" · skip entirely
-**Lean:** full parallel. Mark is a builder, not a verifier — he needs the same orientation.
-**Target:** Lock this session or next.
+Mirrors Sarah's own post-bank confirmation flow (ask-don't-assume).
+**Target specs impacted:** spec 67 Gap 7; downstream IS1 anchor design; 68c Reconcile phase detail.
+
+### 🟢 G7-5 · AI plan output for Mark — LOCKED (session 22)
+**Resolution:** Full parallel to Sarah's O7, with nuance for the respondent role. Structure and depth mirror Sarah's plan — Mark is a builder too. Tone and framing acknowledge he came in as the invited party (e.g. "You've been invited to respond — here's the picture taking shape, and here's your parallel journey"). Not a shrunk or watered-down version; same substance, context-adapted framing. Ties to G7-2 opt-in default.
+**Target specs impacted:** spec 67 Gap 7; AI plan generation spec (respondent variant).
 
 ---
 

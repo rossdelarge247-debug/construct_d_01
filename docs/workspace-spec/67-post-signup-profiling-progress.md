@@ -879,9 +879,9 @@ Captured here; to be cross-referenced into the v2-backlog.md:
 
 ---
 
-## Gap 7: Invited party (Mark) profiling variant — SPECCED, DECISIONS PARKED
+## Gap 7: Invited party (Mark) profiling variant — RESOLVED (session 22)
 
-**Status:** Design direction agreed. Five open decisions parked — to be revisited after user reconciles Claude AI Design prototype work and we do the joint stock-take.
+**Status:** Design direction agreed and all five parked decisions now locked (see 68f G7-1..G7-5 for full resolution text). Detailed wireframes for the respondent journey are deferred until Phase C build work — the locks below are sufficient input for the Build Map.
 
 ### Core design direction (AGREED)
 
@@ -930,24 +930,26 @@ Mark is a **builder**, not a verifier. He has his own account, his own financial
 - Invitation link expiry default 14 days
 - Mark doesn't want to use platform → export Sarah's picture as PDF, go conventional
 
-### FIVE OPEN DECISIONS — PARKED FOR RETURN
+### FIVE DECISIONS — LOCKED (session 22)
 
-1. **IS1 (shared context confirmation) placement** — pre-signup screen vs inline on Moment 1. Current proposal: pre-signup (reduces friction by showing Mark how much work is done before account creation). **Needs decision.**
+Full resolution text in 68f. Summary:
 
-2. **Priorities/worries in IS5/IS6 vs inheriting from Sarah vs skipping** — current proposal: Mark answers his own, generates his own AI plan. Alternative: inherit Sarah's (assume similar), or skip for invited users. **Needs decision.**
+1. **IS1 placement (G7-1)** — **pre-signup**, as part of a tailored respondent signup flow that leverages data already captured from Sarah.
 
-3. **Invitation link expiry** — current proposal: 14 days default. Alternatives: 7 (shorter urgency) or 30 (longer runway). **Needs decision.**
+2. **Priorities/worries IS5-IS6 (G7-2)** — **fresh, with opt-in/opt-out**. Mark can build his own full AI plan (default) or skip straight into responding to Sarah's picture.
 
-4. **"Mark corrects Sarah" treatment** — current proposal: full dispute-capture on every correction. Alternative: silent merge for trivial items (misspellings, age off by 1), dispute only for material differences. **Needs decision.**
+3. **Invitation link expiry (G7-3)** — **14 days default**, configurable on resend.
 
-5. **AI plan output for Mark** — current proposal: same O7 structure with Mark's context. Alternative: lighter "you've been invited, here's what's ahead" summary. **Needs decision — weak opinion; suggest deferring until real user feedback.**
+4. **"Mark corrects Sarah" treatment (G7-4)** — **no silent merges, no trivial threshold**. IS1 is a series of confirm-or-correct questions per non-financial inherited fact; confirms bump trust level, corrections raise conflicts into Reconcile. Financial figures reconcile naturally via each party's own bank connection.
 
-### What needs to happen before finalising Gap 7
+5. **AI plan output for Mark (G7-5)** — **full parallel to Sarah's O7**, with tone and framing adapted for the respondent role. Not a shrunk version; same substance, context-adapted.
 
-- User to reconcile Claude AI Design prototype work with this direction (invited party onboarding screens may already have design thinking applied)
-- Joint stock-take on session state (what's built, what's specced, clean-build decision)
-- Decisions 1-5 above to be locked
-- Then spec 68 (definitive post-signup profiling) writes up Gap 7 alongside gaps 1-12
+**Note on journey-outline step 2:** the IS1 description above ("inherited context with correction buttons; corrections → dispute items") is superseded by G7-4's ask-and-confirm pattern. Update when the detailed Mark-journey wireframes are produced in Phase C.
+
+### Downstream work
+
+- Detailed wireframes for the respondent journey (IS1-IS6 + IS-Plan + Moment-1-Mark variant) — deferred to Phase C build work.
+- Spec 68 already absorbs the profiling framing; Gap 7 is now resolved and fed into the Build Map.
 
 ---
 
