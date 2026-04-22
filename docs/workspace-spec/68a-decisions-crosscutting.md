@@ -8,17 +8,23 @@
 
 ## C-N Navigation
 
-**C-N1 Nav is contextual — LOCKED.**
-When the user is inside a document, the left rail is that document's chapter TOC (not the app nav). App-level phase nav surfaces via breadcrumb + a dedicated nav wireframe to be designed next.
+**C-N1 Nav is a contextual journey map — LOCKED (amended session 22).**
+The left rail (in-document) and the horizontal dashboard stepper both render the same five-phase journey map, differently per context. In both surfaces:
+- All five phases (Start / Build / Reconcile / Settle / Finalise) render as top-level items, always.
+- The *currently-active* phase expands to show its document's chapter TOC (left rail) or its task-grouped cards (dashboard) with per-item completion indicators.
+- Locked future phases remain visible but dimmed, with their sub-structure previewed one level down to set expectations, and an "Unlocks when…" hint inline.
+- The breadcrumb top-bar is complementary, showing location within the current phase.
+
+Supersedes the prior "doc TOC only" framing of C-N1. Wire evidence from session 22 confirmed the hybrid journey-map is a richer pattern than a pure doc TOC or a split app-nav-plus-doc-TOC.
 
 **C-N2 Locked phases are dimmed + tooltipped — LOCKED.**
-Phases the user has not yet unlocked render in nav with reduced opacity and a "Unlocks when…" tooltip on hover. Signals the path ahead without enabling premature clicks.
+Phases the user has not yet unlocked render with reduced opacity and a "Unlocks when…" hint. Signals the path ahead without enabling premature clicks. Sits inside C-N1 rather than alongside it.
 
 **C-N3 Phase labels — LOCKED.**
-Start · Build · Reconcile · Settle · Finalise. "Share" is an action button, not a nav destination. Reconcile's destination copy is "Our Household Picture" or equivalent — not "Agreeing the facts" (the Claude AI Design wires used that phrase, but the phase label stays "Reconcile").
+Start · Build · Reconcile · Settle · Finalise. "Share" is an action button, not a nav destination. Reconcile's destination copy is "Our Household Picture" or equivalent. Dashboard stepper labels must match phase labels (copy pass: unify "Preparation / Disclose / Reconcile / Settle / Finalise" in wires with "Start / Build / Reconcile / Settle / Finalise").
 
-**C-N4 Dedicated nav wireframe — OPEN (see 68f N-1).**
-Needs a separate design pass before Build Map: icon-rail-plus-doc-TOC vs breadcrumb-as-nav vs collapsible three-layer.
+**C-N4 Dedicated nav wireframe — RESOLVED (session 22).**
+The journey-map pattern in C-N1 above is the dedicated nav wireframe. Session 22 Dashboard + Sarah's Picture wires together provided the two-surface realisation. Open implementation details tracked in 68f C-N1b (label pass), C-N1c (unlock copy), C-N1d (sub-item preview depth), and C-N5 (two-surface pattern spec).
 
 ---
 

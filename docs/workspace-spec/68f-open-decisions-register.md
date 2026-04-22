@@ -10,23 +10,49 @@
 
 ## Cross-cutting
 
-### 🟠 C-N1 · App-level nav wireframe
-**Context:** When inside a document, left rail is the doc TOC (68a C-N1 locked). But app-level phase nav needs its own home.
-**Options:** (a) icon rail further-left (4-col effective) · (b) breadcrumb-as-nav with dropdowns · (c) collapsible three-layer (app → doc → section) · (d) top-tab bar
-**Lean:** (a) or (c). Needs a dedicated nav wireframe design pass.
-**Target:** Phase A step 1 — next session candidate.
+### 🟢 C-N1a · Contextual journey-map structure — LOCKED (session 22)
+**Context:** In-doc left rail and dashboard horizontal stepper both render the same 5-phase journey map, context-adapted. Amended 68a C-N1.
+**Resolution:** See amended 68a C-N1. Both surfaces show all five phases always; current phase expands to doc TOC (rail) or task groups (dashboard); locked phases dimmed with one-level sub-item preview + "Unlocks when…" hint.
+**Evidence:** Session 22 Sarah's Picture wires + Dashboard wires.
 
-### 🟠 C-T1 · Trust badge visual treatment
-**Context:** Six-level trust taxonomy locked (68a C-T2). Visual not yet.
-**Options:** Icon chip · dot + label · colour-banded pill · text-only inline
-**Lean:** icon + tooltip, subdued. Decide when Sarah's Picture anchor extracted.
-**Target:** Phase C step 1 (code extraction).
+### 🟠 C-N1b · Phase + document label pass
+**Context:** Wire labels drift from phase model ("Prepare your disclosure" / "Your position" / "Shared position" / "Preparation" / "Disclose"). Must unify per 68a C-N3 + C-U1.
+**Options:** Straight relabel (wires → phase-model labels) vs tour-stepper keeps verb labels (Prepare/Share/Build/Finalise) while nav uses phase labels.
+**Lean:** unify everywhere — nav, stepper, breadcrumb, section H2s all use Start / Build / Reconcile / Settle / Finalise.
+**Target:** Copy pass before Phase C anchor extraction.
 
-### 🟠 C-S1 · Share modal field sets per party type
-**Context:** Three party types locked (ex / solicitor / mediator). Fields per type not yet.
-**Options:** Ex = name + email. Solicitor = firm + ref + email + case number? Mediator = firm + case ref + email?
-**Lean:** minimal for V1 — name + email for all; additional fields V1.5.
-**Target:** When share modal anchor designed.
+### 🟢 C-N1c · Unlock-when copy — LOCKED (session 22)
+**Resolution:** Inline hint + tooltip copy locked:
+- Build → unlocks on signup completion (implicit, no hint needed)
+- Reconcile → "Unlocks when you share your picture with Mark"
+- Settle → "Unlocks when you and Mark agree on your shared picture"
+- Finalise → "Unlocks when your settlement is signed by both of you"
+- Dashboard-section variants (confirmed by wire): "Unlocks when preparation is complete" / "Unlocks when reconciliation is complete" — acceptable alternates for phase-group sections.
+
+### 🟢 C-N1d · Locked-phase preview depth — LOCKED (session 22)
+**Resolution:** Locked phases show one level of sub-items, dimmed. Reinforces "here's the whole journey" framing per user intent and session 22 wire evidence.
+
+### 🟠 C-N5 · Two-nav-surfaces pattern specification
+**Context:** Dashboard uses horizontal 5-phase stepper; in-doc uses vertical left-rail journey map. Same phase-set, different contexts.
+**Options:** Pattern-spec the two surfaces as one component family with context props vs spec each independently.
+**Lean:** one component family (phase-map) with two render modes (horizontal-stepper / vertical-rail).
+**Target:** Before Phase C anchor extraction.
+
+### 🟢 C-T1 · Trust badge visual treatment — LOCKED (session 22 wire evidence)
+**Resolution:** Chip pattern — **colour = taxonomy level, label = specific source**. Confirmed by wires:
+- Amber "Estimated" chip = self-declared (user-added / estimated values)
+- Green "Barclays Bank" / "Verified from Barclays xxxx2323" chip = bank-evidenced (source named)
+- Remaining four levels (credit-verified / document-evidenced / both-party-agreed / court-sealed) render with their own accent colour + source label, visual treatment to be finalised during Phase C anchor extraction but pattern is locked.
+**Evidence:** Session 22 spending-estimates → bank-evidenced upgrade wires.
+
+### 🟢 C-S1a · Ex-modal field set — LOCKED (session 22)
+**Resolution:** First name + Last name + Email address. Minimal per lean. Confirmed by session 22 strawperson share-modal wires.
+
+### 🟠 C-S1b · Solicitor + mediator modal field sets
+**Context:** Ex locked (C-S1a). Solicitor + mediator party-type modals not yet wired.
+**Options:** Solicitor = firm + ref + email + case number? Mediator = firm + case ref + email?
+**Lean:** minimal for V1 (name + email), additional party-specific fields V1.5 when routed to specialists.
+**Target:** When solicitor + mediator anchor variants designed.
 
 ### 🟠 C-E1 · Escape-hatch export trigger thresholds
 **Context:** Export CTA triggers on stuck states (68a C-E2). Thresholds open.
@@ -61,11 +87,10 @@
 **Status:** V1.5 backlog.
 **Target:** v2-backlog.md reference.
 
-### 🟠 B-3 · Dashboard detailed spec
-**Context:** Dashboard sits above Sarah's Picture, to-do focused (68b B-T1). Actual design not produced.
-**Options:** Work from wires (no dashboard wire in this batch) vs from first principles vs combine with first-time welcome tour concept.
-**Lean:** design fresh with spec 04 pressure-test as input.
-**Target:** Phase A step 3 (next immediate work).
+### 🟢 B-3 · Dashboard detailed spec — LOCKED for shape (session 22)
+**Resolution:** Dashboard shape locked across three states (first-time zero / first-time return post-connection / refined post-connection with taxonomy chips). Visual anchors catalogued in 68g (session 22 additions) under C-V6–V14. Copy remains subject to the C-U4 disclosure-language audit and C-N1b label pass.
+**Evidence:** Session 22 dashboard wires (3 states).
+**Remaining opens split out:** B-11 (task taxonomy completeness), B-12 (phase grouping 5→3), B-13 (state machine transitions), B-14 (user-added tasks scope).
 
 ### 🟠 B-4 · Section list mapped to ES2 structure
 **Context:** Section order in wire is indicative (68b B-C1). Definitive ES2 mapping open.
