@@ -21,6 +21,8 @@ The experience should feel like having a brilliant, patient analyst sitting besi
 
 **Quality bar:** This should feel like it was built in 2026. No shortcuts, no MVPs. The users are stressed, often alone, often late at night. Every interaction must be compassionate, professional, and empowering.
 
+**MLP, not MVP.** When engineering phases open and scope conversations happen per slice, the frame is "what the *loveable* version requires vs what can iterate post-launch" — not "what's the minimum viable." Minimum Loveable Product. This matters because users are in crisis; a barely-functional product would do more harm than no product. Loveable is the floor.
+
 ## Session startup (do this FIRST)
 
 1. **Fetch and checkout the development branch:**
@@ -59,17 +61,19 @@ When the session is ending (user says wrap up, or you hit ~2,000 lines), do thes
    - Prioritised deliverables for next session
    - Any new negative constraints discovered
    - Updated key files list
+   - Current branch name
 3. **Write `docs/HANDOFF-SESSION-{N}.md`** — detailed retro:
    - What happened (with specifics)
    - What went well / what could improve
    - Key decisions made
    - Bugs found and how they were fixed
-4. **Update this file (`CLAUDE.md`)** if the branch name, key files, or rules changed
+4. **Update this file (`CLAUDE.md`)** if branch conventions, key files, or rules changed
 5. **Commit and push** the handoff docs
+6. **Open PR to `main`** from the session branch (optional per session — currently recommended at session wrap to keep main as canonical source of latest locked specs and avoid long-running branch drift). Use `gh pr create` or the GitHub MCP tools.
 
 ## Branch
 
-Development branch: `claude/decouple-financial-workspace-oXXQ7` (session 20 — post-signup profiling gaps 6-12 resolved/parked, clean-build stock-take). Next session may open a new branch if code changes begin.
+Current branch is always specified in `docs/SESSION-CONTEXT.md`. Each design session runs on its own branch (e.g. `claude/session-{N}-{scope}-{hash}`). Check SESSION-CONTEXT at session start. Engineering sessions (Phase C onward) may open dedicated slice-named branches per `docs/workspace-spec/70-build-map-slices.md`.
 
 ## Deployment
 
@@ -80,43 +84,54 @@ Tink Console must whitelist `https://construct-dev.vercel.app/api/bank/callback`
 ## Key files
 
 ```
-docs/SESSION-CONTEXT.md                    — START HERE every session
-docs/HANDOFF-SESSION-20.md                 — Most recent session retro (design: gaps 6-12 + stock-take)
-docs/HANDOFF-SESSION-18.md                 — Engine / workbench session
-docs/workspace-spec/28-v1-public-site-overhaul.md — V1 overhaul spec (tier model, visual, interview)
-docs/workspace-spec/29-v2-personalisation-opportunities.md — V2 personalisation backlog
-docs/workspace-spec/27-visual-direction-session11.md — Visual direction (Airbnb/Emma/Habito)
-docs/workspace-spec/24-wireframe-spec-part1.md — Wireframes: carousel, task list, bank connection, reveal
-docs/workspace-spec/25-wireframe-spec-part2.md — Wireframes: confirmation flow, summaries, financial hub
-docs/workspace-spec/26-transitions-animations.md — Every transition, animation, and micro-interaction
-docs/workspace-spec/22-confirmation-flow-tree.md — Complete decision tree for all Form E sections
-docs/workspace-spec/23-post-confirm-gap-summary.md — What's proved vs gaps after bank connect
-src/components/workspace/welcome-carousel.tsx  — Carousel (screens 1a-1c)
-src/components/workspace/task-list-home.tsx     — Task list home (screen 2a)
-src/components/workspace/bank-connection-flow.tsx — Bank connection + TinkModal + reveal (screens 3-3e)
-src/components/workspace/confirmation-flow.tsx  — Confirmation Q&A (screens 2b-2i)
-src/components/workspace/section-mini-summary.tsx — Per-section summaries (screens 2d-a/b/c)
-src/components/workspace/progress-stepper.tsx   — Progress bar
-src/components/workspace/spending-fork.tsx      — S1a: now vs estimates fork
-src/components/workspace/spending-estimates.tsx — S1b/S1c-1: estimates form + summary
-src/components/workspace/spending-search.tsx    — S2d: transaction search with typeahead
-src/components/workspace/spending-categorise.tsx — S2a-S2f: per-category confirmation loop
-src/components/workspace/spending-flow.tsx      — Thin orchestrator + S1c-2 full summary
-src/components/workspace/financial-summary-page.tsx — Financial summary with spending card (screen 3a)
-src/lib/bank/bank-data-utils.ts               — Extraction → UI types + demo factory + transaction search
-src/lib/bank/confirmation-questions.ts         — Spec 22 question + summary generation
-src/lib/bank/test-scenarios.ts                — 5 synthetic test scenarios (session 16)
-src/app/workspace/engine-workbench/page.tsx   — Engine workbench dev page (session 16)
-src/app/workspace/page.tsx                     — Flow state machine orchestrator
-src/app/api/bank/connect/route.ts              — Tink Link auth + URL generation
-src/app/api/bank/callback/route.ts             — Tink callback (iframe postMessage + redirect)
-src/lib/bank/tink-client.ts                    — Tink API client
-src/lib/bank/tink-transformer.ts               — Tink → BankStatementExtraction
-src/lib/ai/result-transformer.ts               — Spec 13 decision trees + spec 19 keyword lookup
-src/lib/ai/extraction-schemas.ts               — Structured output schemas (facts only)
-src/types/hub.ts                               — All types (workspace types at top, legacy below)
-src/app/globals.css                            — Animations + prefers-reduced-motion
-docs/workspace-spec/13-extraction-decision-tree-documents.md — Decision trees per document type
+Session orientation
+docs/SESSION-CONTEXT.md                             — START HERE every session
+docs/HANDOFF-SESSION-{N}.md                         — Most recent session retro
+
+Reconciled framing (spec 68 suite — read when relevant)
+docs/workspace-spec/68-synthesis-hub.md             — Wire reconciliation hub
+docs/workspace-spec/68a-decisions-crosscutting.md   — Cross-cutting locked (nav, trust, share, exit, AI coach)
+docs/workspace-spec/68b-decisions-build.md          — Build phase locked (Sarah's Picture mechanics)
+docs/workspace-spec/68c-decisions-reconcile.md      — Reconcile phase locked (joint doc, conflict card, queue)
+docs/workspace-spec/68d-decisions-settle.md         — Settle phase locked (proposal, AI coach, counter)
+docs/workspace-spec/68e-decisions-finalise.md       — Finalise phase locked (generation, pre-flight, fork, submit)
+docs/workspace-spec/68f-open-decisions-register.md  — Session-21 register (LIVE, session-22 locks applied)
+docs/workspace-spec/68g-visual-anchors.md           — C-V1..C-V14 extraction shortlist (Phase C)
+docs/workspace-spec/68g-build-opens.md              — B-5..B-14 build-phase opens
+docs/workspace-spec/68g-copy-share-opens.md         — C-U4-6 + C-S5-6 opens
+
+Positioning + architecture
+docs/workspace-spec/42-strategic-synthesis.md       — Authoritative positioning (5-phase amended session 22)
+docs/workspace-spec/44-the-document-structure.md    — Document-as-spine (four-document lifecycle, amended)
+docs/workspace-spec/65-pre-signup-interview-reconciled.md  — Pre-signup locked
+docs/workspace-spec/67-post-signup-profiling-progress.md   — 12 gaps resolved + Gap 7 resolved session 22
+
+Build Map (spec 70 suite — the Phase B deliverable)
+docs/workspace-spec/70-build-map.md                 — Hub: tagging, preserved-legacy, how-to-read
+docs/workspace-spec/70-build-map-start.md           — Phase 1
+docs/workspace-spec/70-build-map-build.md           — Phase 2
+docs/workspace-spec/70-build-map-reconcile.md       — Phase 3
+docs/workspace-spec/70-build-map-settle.md          — Phase 4
+docs/workspace-spec/70-build-map-finalise.md        — Phase 5
+docs/workspace-spec/70-build-map-slices.md          — 31-slice catalogue (engineering work units)
+
+Stable libraries (preserve across rebuild — Re-use per Build Map)
+src/lib/bank/tink-client.ts                         — Tink API client
+src/lib/bank/tink-transformer.ts                    — Tink → BankStatementExtraction
+src/lib/bank/bank-data-utils.ts                     — Extraction → UI types + transaction search
+src/lib/bank/signal-rules/                          — 17 rules (session 18)
+src/lib/bank/confirmation-questions.ts              — Spec 22 decision trees (Preserve-with-reskin)
+src/lib/bank/test-scenarios.ts                      — 5 synthetic scenarios
+src/lib/ai/extraction-schemas.ts                    — Anthropic structured-output schemas
+src/lib/ai/result-transformer.ts                    — Spec 13 trees + spec 19 keyword lookup
+src/types/hub.ts                                    — Types (prune legacy during rebuild)
+src/app/api/bank/connect/route.ts                   — Tink Link URL generation
+src/app/api/bank/callback/route.ts                  — Tink callback (iframe postMessage + redirect)
+src/app/workspace/engine-workbench/page.tsx         — Engine workbench dev tool
+
+Discarded — do NOT port (superseded by 68 + 70)
+src/components/workspace/*                          — V2 components (spec 18 palette / pre-pivot flow)
+src/app/workspace/page.tsx                          — V2 flow orchestrator (replaced by new architecture)
 ```
 
 ## Information tiers — what to read and when
