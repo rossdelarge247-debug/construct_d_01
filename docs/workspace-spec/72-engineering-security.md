@@ -327,19 +327,213 @@ Reskinned `src/components/layout/env-banner.tsx` (Re-use after audit confirms). 
 
 ## 8. Third-party data flow
 
-[FILL]
+Every third-party integration is an expansion of our attack surface + a data-processor relationship under GDPR. Rules scale with what they see.
+
+**Per-provider register (maintained alongside env-var inventory §2):**
+
+| Provider | What they see | Tier | DPA | Access pattern | Credential |
+|---|---|---|---|---|---|
+| Supabase | All our stored data | T2–T5 | Required (§56 L1.5) | Auth + DB + storage | Service role (server) + anon (client, RLS-gated) |
+| Vercel | Traffic, env vars, build artefacts | T2 (via request logs) | Required | Hosting | Via deploy integration |
+| Tink | Bank credentials (at consent), transaction history | T3 | Required | OAuth-like consent; 90-day access window | `TINK_CLIENT_SECRET` |
+| Anthropic | Prompts we choose to send (may contain T2+) | T2+ (if we send it) | Required | Per-request API | `ANTHROPIC_API_KEY` |
+| Ntropy | Transaction descriptions + amounts | T3 | Required | Server-to-server enrichment | `NTROPY_API_KEY` |
+| Stripe | Payment amount + user ID | T2 | Required | Stripe Elements (client) + server webhooks | `STRIPE_SECRET_KEY` + webhook signing secret |
+| PostHog | Events we choose to emit (T1-only) | T1 | Required | Client + server SDK | `NEXT_PUBLIC_POSTHOG_KEY` (write-only) |
+
+**Minimisation rules (applied per-provider):**
+
+- **Anthropic:** AI prompts carrying user data use internal IDs not names; bank transaction descriptions sent, but payee names that look personal (e.g. "Transfer to John Smith") are flagged + user-confirmed before send; never send safeguarding flags, email addresses, passwords, account numbers. Anthropic-side retention: confirm no training-on-customer-data per their Data Usage Policy (verified annually).
+- **Ntropy:** send only transaction description + amount + date; never names, IDs, context beyond what's needed for classification.
+- **Stripe:** Stripe Elements renders the card form; card number / CVV / expiry never hit our servers. We store Stripe customer ID + subscription status only.
+- **PostHog:** event payloads allowlisted at schema level — no free-text fields, no user-provided strings. Track only: button IDs, phase transitions, feature flags, performance metrics. Never: what the user typed, bank values, safeguarding flags.
+- **Tink:** consent scoped to read-only account data; refresh tokens stored server-side only; access window tracked so we can alert users before expiry (spec 54 Risk 4g — 90-day consent expiry).
+- **Supabase:** the primary store; minimisation via schema design (don't collect what you don't need) + retention policy §1.
+
+**Webhook verification (mandatory):**
+- Every webhook handler verifies signature before acting
+- Stripe: `stripe-signature` header verified against `STRIPE_WEBHOOK_SECRET`
+- Supabase database webhooks: HMAC via configured secret
+- Tink webhooks (if adopted): per Tink's verification spec
+- Unsigned / invalid-signature webhooks → 401 + log + alert
+
+**Subprocessor changes:**
+- Monitor each provider's subprocessor list quarterly
+- Material changes (new region, new subprocessor) trigger DPIA review
+- Breach notifications from a provider treated as our own (72-hour ICO clock starts)
+
+**Egress allowlist:**
+- Outbound HTTP from our servers goes only to a narrow allowlist (Supabase, Tink, Anthropic, Stripe, Ntropy, PostHog)
+- Enforced at Vercel edge / deploy-platform level where possible
+- Any new outbound destination = explicit security review + env var + DPA review
 
 ## 9. Safeguarding engineering
 
-[FILL]
+Spec 54 Risk 4b names safeguarding failure as existential. Spec 67 Gap 11 commits V1 to **signposting + baseline** (detection + decoy + adaptive pacing = V1.5). This section defines the engineering specifics that make even the baseline actually protective.
+
+**Exit-this-page (spec 68a C-X1 locked):**
+- Universal footer component on every page
+- On click: `localStorage.clear()` + `sessionStorage.clear()` + `history.replaceState({}, '', '/')` + `window.location.replace('https://bbc.co.uk/news')`
+- Note the sequence: clear first, replace history second, redirect third. A slow redirect leaves evidence if done out of order.
+- No confirmation dialog on V1 (spec 68a lock: lean = instant redirect + clear local state)
+- Server-side: same click should also invalidate the session (POST to `/api/auth/panic-exit` before redirect) — best-effort, not blocking
+- Cookies: clear all Decouple cookies via same endpoint
+
+**Device-privacy answer actual effect (spec 65 O3):**
+When user answers "device is not private to me":
+- Email linkback features disabled (no "resume where you left off" emails)
+- Require 2FA + fresh login each session (no "remember this device")
+- In-app suggestion: "Create your account when you're on a private device" — soft gate before any T3 data write
+- Dashboard shows private-device prompt banner persistently until dismissed or until user re-answers
+
+**Discreet-use mode (V1.5 — planned):**
+- Tab title toggles between product name and a benign alternative ("Personal finance tracker" / "Household planning")
+- Favicon swap
+- Muted colour palette variant (no branded magenta / signature purples)
+- Keyboard shortcut to flip modes instantly
+- Note for V1: this is planned, not shipping V1 per spec 67 Gap 11 lock
+
+**Safeguarding flags = T4 (§1) — no leaks:**
+- Never included in email content, push notifications, SMS
+- Never included in analytics events (PostHog allowlist excludes them)
+- Never rendered client-side unless user is actively viewing their own safeguarding dashboard
+- Admin access requires explicit review_reason logged in audit trail
+
+**Account takeover by abusive ex (spec 54 Risk 4b):**
+- Login anomaly detection (new IP/country/device) → notification to pre-registered alternate channel (backup email or SMS) BEFORE access granted
+- Password reset requires 2FA code OR a 24-hour cooling-off + email confirmation from the current registered email
+- Sensitive changes (email change, 2FA disable, share-to-new-ex) always have 24-hour cooling-off period
+- "Freeze account" user-initiated action (V1.5) — lockout self-service + human-review unlock
+
+**Coercion detection (V1.5 scoped):**
+- Proposal acceptance has 24-hour cooling-off window (spec 54 Risk 4b)
+- Unusual patterns (rapid acceptance of unfavourable terms, forced sign-off) flag for review
+- Engineering baseline V1: rate-limit proposal state transitions to prevent forced rapid-acceptance
+
+**What V1 engineering does NOT do (per spec 67 Gap 11 lock):**
+- Active detection (sentiment analysis, coercive language detection) — V1.5
+- Decoy mode / "fake dashboard" — V1.5+
+- Panic button SOS → specialist services — signposting only V1
+- Separate safeguarding specialist role with audit access to flagged accounts — V1.5
+
+**V1 engineering does always do:**
+- Everything above in this section
+- Signposting to Women's Aid / NDAH / Men's Advice Line / Refuge / SEA / Samaritans (spec 70 S-O3)
+- Exit-this-page footer universal
+- Device-privacy answer with real effects
+- T4 tier enforcement
 
 ## 10. Pen-test readiness checklist
 
-[FILL]
+Spec 56 L5.1 budgets £2,000–5,000 + 2–3 weeks for pen test (including remediation). Preparedness reduces findings, which reduces remediation time, which derisks launch date. This section is the pre-pen-test self-audit.
+
+**Standard security headers** (Vercel `next.config.ts` or middleware — verify in production):
+
+```
+Strict-Transport-Security: max-age=63072000; includeSubDomains; preload
+Content-Security-Policy: [tight — no unsafe-inline, no unsafe-eval; allowlist for Tink Link + Stripe Elements + PostHog]
+X-Frame-Options: DENY
+X-Content-Type-Options: nosniff
+Referrer-Policy: strict-origin-when-cross-origin
+Permissions-Policy: camera=(), microphone=(), geolocation=(), payment=(self)
+Cross-Origin-Opener-Policy: same-origin
+Cross-Origin-Embedder-Policy: require-corp
+```
+
+**CSP allowlist for known third-party scripts** (update per integration):
+- `script-src 'self' js.stripe.com *.tink.com <posthog-host>`
+- `frame-src 'self' js.stripe.com *.tink.com` (for Stripe Elements + Tink Link iframe flows)
+- `connect-src 'self' *.supabase.co api.anthropic.com api.ntropy.com api.stripe.com <posthog-host>`
+- Inline scripts banned — if needed, use nonces via Next.js middleware
+
+**OWASP ASVS Level 1 + 2 mapping** (target: L2 compliance pre-pen-test):
+
+| ASVS area | How we satisfy |
+|---|---|
+| V1 Architecture + Threat Modeling | This spec + 54 + 71 |
+| V2 Authentication | §3 |
+| V3 Session Management | §3 (cookie flags, rotation, lifetime) |
+| V4 Access Control | §4 (RLS primary, app check secondary) |
+| V5 Validation, Sanitization, Encoding | §5 |
+| V6 Cryptography at Rest | Supabase defaults + 2FA seed storage via secure KMS |
+| V7 Error Handling and Logging | §6 |
+| V8 Data Protection | §1 classification + retention |
+| V9 Communication | TLS 1.3 (Vercel) |
+| V10 Malicious Code | §5 file upload scanning |
+| V11 Business Logic | RLS §4 + per-slice security DoD §11 |
+| V12 Files and Resources | §5 upload handling + CSP |
+| V13 API and Web Service | §5 rate limiting + schema validation |
+| V14 Configuration | §2 env vars + §7 dev/prod boundary |
+
+**Common pen-test findings — pre-addressed patterns:**
+
+- **CSRF:** SameSite=Lax cookies (§3) + CSRF token for state-changing GETs (if any); Supabase auth session is cookie-based, pairs fine
+- **IDOR (insecure direct object reference):** every resource access goes through RLS (§4); opaque UUIDs not autoincrementing ints
+- **SSRF (server-side request forgery):** egress allowlist §8; never use user-supplied URLs for server-side fetches
+- **Open redirects:** URL allowlist for any redirect destination §5
+- **Clickjacking:** X-Frame-Options: DENY (above)
+- **Session fixation:** session rotated on login
+- **Timing attacks:** constant-time comparison for auth token + 2FA code checks
+- **Auth timing leakage:** login endpoint returns same response + timing for "user not found" vs "wrong password" (both fail in constant time, generic error)
+- **XSS:** JSX escaping §5; no `dangerouslySetInnerHTML` without DOMPurify; strict CSP
+- **Stored XSS via user inputs:** no rich-text fields V1; if added later, HTML sanitisation required
+- **Auth bypass via type juggling:** Zod schemas §5 reject wrong types at boundary
+
+**Pre-pen-test internal audit (run 1 week before external test):**
+- [ ] `npm audit` — address high + critical
+- [ ] Snyk / GitHub Dependabot — zero critical open
+- [ ] `gitleaks` full-history scan
+- [ ] ZAP or Burp automated scan against preview deploy
+- [ ] Browser console: zero CSP violations across smoke-test surfaces
+- [ ] Every slice's DoD security checklist (§11) ticked
+- [ ] RLS test scenarios pass for every table
+- [ ] `DECOUPLE_AUTH_MODE=prod` enforced in production build (§7 CI gate)
+- [ ] Production build smoke test: no `console.log` leaks, no dev-route access
+- [ ] Third-party webhook signatures verified (§8)
+- [ ] Security headers present + correct (`securityheaders.com` scan — target A+ grade)
+- [ ] SSL Labs scan — target A+
+- [ ] Mozilla Observatory — target A+
+
+**Post-pen-test workflow:**
+- Every finding triaged same-day
+- Critical + high: remediate before launch (block-launch)
+- Medium: remediate before launch if time; defer to V1.1 with risk-accept sign-off if not
+- Low + informational: V1.1 backlog
+- Re-test after remediation — budget for this in the £2-5k
+
+**Ongoing post-launch:**
+- Annual pen-test (ISO 27001 path per spec 54)
+- Quarterly internal audit (this checklist)
+- Bug bounty / vulnerability disclosure policy (spec 56 L5.8) — published at launch
 
 ## 11. Per-slice security checklist (DoD addition)
 
-[FILL]
+Extends the Definition of Done pattern drafted in `docs/engineering-phase-candidates.md` §B. Every slice that ships carries documented evidence for every box below, or explicit deferral with written reasoning in the slice wrap.
+
+**Security checklist — applied per slice:**
+
+- [ ] **Data classification per AC.** For each AC's data surface, the tier is named (T0–T5) and implementation matches tier requirements (encryption, logging, retention).
+- [ ] **New tables / columns.** RLS policies written; policies tested with two-persona scenarios (cross-party leak check if applicable); service-role-key-free path exercised.
+- [ ] **API routes.** Zod schema at entry for every route; 400 on invalid; rate limits applied per §5.
+- [ ] **File upload surfaces.** Magic-byte MIME check, allowlist, size limit, AV scan verified.
+- [ ] **New env vars.** Added to spec 72 inventory (§2); Vercel prod scope verified if secret; NEXT_PUBLIC_*_KEY|_SECRET|_TOKEN|_PASSWORD|_PRIVATE regex check clean.
+- [ ] **Third-party data flows.** Any new integration: DPA in place (§8), minimisation check (what's necessary vs what's sent), webhook signature verified, egress allowlist updated.
+- [ ] **Audit log entries.** T3+ read/write events recorded with actor, timestamp, resource, action; immutable storage confirmed.
+- [ ] **Error handling.** Generic user-facing errors with reference ID; no stack traces / SQL / internals leaked; server-side detail logged with matching reference.
+- [ ] **Dev/prod boundary.** Any new dev-only route / tool / fixture gates via `MODE === 'prod'` notFound or equivalent (§7). CI gate passes.
+- [ ] **Safeguarding impact.** Does this slice touch T4? If yes: review against §9 rules (no leaks to email/push/analytics; access gated; device-privacy-aware). V1 = signposting baseline not broken.
+- [ ] **Security headers + CSP.** If adding external scripts or new resource origins: CSP allowlist updated; SCP test passes on preview deploy.
+- [ ] **Adversarial review.** `/security-review` skill run on slice diff. Output reviewed — concerns addressed or deferred with reasoning.
+- [ ] **Dependency audit.** `npm audit` clean on the slice branch (high + critical); new dependencies justified; licenses checked.
+- [ ] **Secrets hygiene.** No secrets introduced into client bundle; no secrets in commit history (`gitleaks` clean on slice branch).
+
+**Exemption pattern.** A box may be skipped only with written reasoning in the slice wrap, e.g. *"Box 3 skipped — slice has no new API routes (UI-only)"*. Systematic skips (e.g. repeatedly marking "no T3 data" without justification) flag the DoD for review.
+
+**Evidence location.** Each slice's DoD evidence lives in `docs/slices/S-XX-{name}/security.md` alongside the AC and test plan docs (per `docs/engineering-phase-candidates.md` §C–D).
+
+**Who signs off.** The slice author for routine items; any T3+ data work or new third-party integration requires a second pair of eyes (for V1: the user reviews before PR merge; V1.5+: dedicated security reviewer role if team grows).
+
+**Why this gate matters.** Pen-testers will sample slices and probe them systematically. A slice that skipped the checklist is a slice where the pen-tester will find a finding. Better to catch it here.
 
 ---
 
