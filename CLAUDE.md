@@ -25,11 +25,7 @@ The experience should feel like having a brilliant, patient analyst sitting besi
 
 ## Session startup (do this FIRST)
 
-1. **Fetch and checkout the development branch:**
-   ```
-   git fetch origin claude/new-session-GUZLb
-   git checkout claude/new-session-GUZLb
-   ```
+1. **Verify your working branch.** The canonical branch name is in `docs/SESSION-CONTEXT.md` (or your task description). If the harness landed you on a different base, resync before doing anything else — `git fetch origin <branch>` then `git checkout -B <branch> origin/<branch>`. Session 22→23 hit this exact snag; don't build on a stale base.
 
 2. **Read `docs/SESSION-CONTEXT.md`** — this is the rolling context block. It contains: product vision, principles, what the last session accomplished, current state of the codebase, prioritised deliverables for this session, negative constraints (things NOT to do), and key file paths. Always read this before doing anything else.
 
