@@ -37,11 +37,11 @@ function ConfidenceBar({ session }: { session: InterviewSession }) {
   return (
     <div className="space-y-2">
       <div className="flex h-2.5 overflow-hidden rounded-full">
-        {known > 0 && <div className="bg-sage" style={{ width: `${(known / total) * 100}%` }} />}
+        {known > 0 && <div className="bg-[var(--color-green-600)]" style={{ width: `${(known / total) * 100}%` }} />}
         {estimated > 0 && <div className="bg-amber" style={{ width: `${(estimated / total) * 100}%` }} />}
-        {unknown > 0 && <div className="bg-cream-dark" style={{ width: `${(unknown / total) * 100}%` }} />}
+        {unknown > 0 && <div className="bg-[var(--color-grey-100)]" style={{ width: `${(unknown / total) * 100}%` }} />}
       </div>
-      <div className="flex gap-4 text-xs text-ink-light">
+      <div className="flex gap-4 text-xs text-ink-secondary">
         {known > 0 && <span>{known} known</span>}
         {estimated > 0 && <span>{estimated} estimated</span>}
         {unknown > 0 && <span>{unknown} unknown</span>}
@@ -65,7 +65,7 @@ function PlanPanel({ title, label, labelClass, loading, aiSection, fallbackSumma
   const points = aiSection?.key_points || fallbackPoints
 
   return (
-    <div className="rounded-[var(--radius-md)] border border-cream-dark p-5 space-y-3">
+    <div className="rounded-[var(--radius-md)] border border-[var(--color-grey-100)] p-5 space-y-3">
       {/* Header */}
       <div className="flex items-center justify-between">
         <h3 className="font-heading text-base font-semibold text-ink">{title}</h3>
@@ -74,8 +74,8 @@ function PlanPanel({ title, label, labelClass, loading, aiSection, fallbackSumma
 
       {loading ? (
         <div className="space-y-2 animate-pulse">
-          <div className="h-3.5 w-4/5 rounded bg-cream-dark" />
-          <div className="h-3 w-3/5 rounded bg-cream-dark" />
+          <div className="h-3.5 w-4/5 rounded bg-[var(--color-grey-100)]" />
+          <div className="h-3 w-3/5 rounded bg-[var(--color-grey-100)]" />
         </div>
       ) : (
         <>
@@ -86,8 +86,8 @@ function PlanPanel({ title, label, labelClass, loading, aiSection, fallbackSumma
           {points.length > 0 && (
             <ul className="space-y-1.5">
               {points.map((point, i) => (
-                <li key={i} className="flex items-start gap-2 text-sm text-ink-light">
-                  <span className="mt-1 h-1.5 w-1.5 shrink-0 rounded-full bg-ink-faint" />
+                <li key={i} className="flex items-start gap-2 text-sm text-ink-secondary">
+                  <span className="mt-1 h-1.5 w-1.5 shrink-0 rounded-full bg-ink-tertiary" />
                   {point}
                 </li>
               ))}
@@ -96,11 +96,11 @@ function PlanPanel({ title, label, labelClass, loading, aiSection, fallbackSumma
 
           {/* Next steps — what they do */}
           {nextSteps && nextSteps.length > 0 && (
-            <div className="border-t border-cream-dark pt-3 space-y-1.5">
-              <p className="text-xs font-medium text-ink-faint uppercase tracking-wide">Your next steps</p>
+            <div className="border-t border-[var(--color-grey-100)] pt-3 space-y-1.5">
+              <p className="text-xs font-medium text-ink-tertiary uppercase tracking-wide">Your next steps</p>
               {nextSteps.map((step, i) => (
-                <p key={i} className="flex items-start gap-2 text-sm text-ink-light">
-                  <span className="mt-0.5 text-warmth">→</span>
+                <p key={i} className="flex items-start gap-2 text-sm text-ink-secondary">
+                  <span className="mt-0.5 text-[#E5484D]">→</span>
                   {step}
                 </p>
               ))}
@@ -109,8 +109,8 @@ function PlanPanel({ title, label, labelClass, loading, aiSection, fallbackSumma
 
           {/* Service value — how we help */}
           {serviceHelp && (
-            <div className="rounded-[var(--radius-sm)] bg-warmth-light/30 p-3">
-              <p className="text-sm text-warmth-dark">
+            <div className="rounded-[var(--radius-sm)] bg-[var(--color-grey-50)] p-3">
+              <p className="text-sm text-[#E5484D]-dark">
                 <span className="font-medium">How we make this easier:</span> {serviceHelp}
               </p>
             </div>
@@ -134,9 +134,9 @@ export default function PlanPage() {
   const v = session.values
 
   const confLabel = (state: string | null) =>
-    state === 'known' ? { text: 'Strong', cls: 'text-sage-dark bg-sage-light' }
-    : state === 'estimated' ? { text: 'Some gaps', cls: 'text-amber bg-amber-light' }
-    : { text: 'Needs detail', cls: 'text-ink-faint bg-cream-dark' }
+    state === 'known' ? { text: 'Strong', cls: 'text-[var(--color-green-600)] bg-[var(--color-green-600)]-light' }
+    : state === 'estimated' ? { text: 'Some gaps', cls: 'text-[#D97706] bg-[#FFFBEB]' }
+    : { text: 'Needs detail', cls: 'text-ink-tertiary bg-[var(--color-grey-100)]' }
 
   const childLabel = confLabel(session.children.confidence)
   const homeLabel = confLabel(session.home.value_confidence)
@@ -236,9 +236,9 @@ export default function PlanPage() {
         </div>
 
         {loading && (
-          <div className="flex items-center gap-3 rounded-[var(--radius-md)] border border-warmth-light bg-warmth-light/20 p-4">
-            <div className="h-4 w-4 animate-spin rounded-full border-2 border-warmth-light border-t-warmth" />
-            <p className="text-sm text-ink-light">Building your personalised assessment...</p>
+          <div className="flex items-center gap-3 rounded-[var(--radius-md)] border border-[var(--color-grey-200)] bg-[var(--color-grey-50)] p-4">
+            <div className="h-4 w-4 animate-spin rounded-full border-2 border-[var(--color-grey-200)] border-t-[#E5484D]" />
+            <p className="text-sm text-ink-secondary">Building your personalised assessment...</p>
           </div>
         )}
 
@@ -301,11 +301,11 @@ export default function PlanPage() {
         )}
 
         {tier !== 'not_ready' && (
-          <div className="rounded-[var(--radius-md)] border border-cream-dark p-5 space-y-3">
+          <div className="rounded-[var(--radius-md)] border border-[var(--color-grey-100)] p-5 space-y-3">
             <h3 className="font-heading text-base font-semibold text-ink">Confidence map</h3>
             <ConfidenceBar session={session} />
             {!loading && (
-              <p className="text-sm text-ink-light">
+              <p className="text-sm text-ink-secondary">
                 {aiUsed && narrative?.confidence_insight ? narrative.confidence_insight : 'This shows what you know and where the gaps are.'}
               </p>
             )}
@@ -317,14 +317,14 @@ export default function PlanPage() {
         )}
 
         {tier !== 'not_ready' && (
-          <button type="button" className="w-full rounded-[var(--radius-sm)] border border-cream-dark px-4 py-3 text-center text-sm text-ink-light hover:bg-cream-dark transition-colors">
+          <button type="button" className="w-full rounded-[var(--radius-sm)] border border-[var(--color-grey-100)] px-4 py-3 text-center text-sm text-ink-secondary hover:bg-[var(--color-grey-100)] transition-colors">
             Download your plan as PDF
           </button>
         )}
 
         <div className="flex items-center justify-between pt-2">
-          <button type="button" onClick={() => router.back()} className="text-sm text-ink-light hover:text-ink transition-colors">Back</button>
-          <Button onClick={() => router.push('/start/next-steps')}>Your road ahead</Button>
+          <button type="button" onClick={() => router.back()} className="text-sm text-ink-secondary hover:text-ink transition-colors">Back</button>
+          <Button onClick={() => router.push('/start/choose')}>Choose your path</Button>
         </div>
       </div>
     </InterviewLayout>

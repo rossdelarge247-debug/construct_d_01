@@ -1,4 +1,6 @@
-# V2 Session Handoff — Build Your Picture
+# [SUPERSEDED] V2 Session Handoff — Build Your Picture
+
+> **This document is superseded by [`docs/HANDOFF.md`](../HANDOFF.md) (10 April 2026), which is the canonical handoff document.** This earlier version is retained for historical context only. Where the two documents contradict, the root HANDOFF.md is authoritative.
 
 **Date:** 9 April 2026
 **Branch:** `claude/project-planning-sprint-zero-odNO5`

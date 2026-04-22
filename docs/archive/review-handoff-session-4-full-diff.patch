@@ -1,0 +1,604 @@
+diff --git a/docs/HANDOFF-SESSION-4-REVIEW.md b/docs/HANDOFF-SESSION-4-REVIEW.md
+new file mode 100644
+index 0000000..9c5b4fd
+--- /dev/null
++++ b/docs/HANDOFF-SESSION-4-REVIEW.md
+@@ -0,0 +1,359 @@
++# Session 4 Review: Handoff Assessment & Recommendations
++
++**Date:** 11 April 2026
++**Reviewer:** Chat 4 (independent review session)
++**Branch:** `claude/review-handoff-session-4-8Isd9`
++**Source:** `docs/HANDOFF.md` (Session 3), `docs/v2/V2-HANDOFF.md` (Session 2)
++
++---
++
++## 1. Retro Verdict: The Session 3 Self-Assessment Is Accurate
++
++The handoff's retro is honest and correct. Here's each point validated against the code:
++
++### 1.1 "Jumped to fixes before diagnosing"
++
++**Confirmed.** The git log tells the story:
++
++```
++888494c  Model fallback chain: sonnet-4-6 -> sonnet-4-5 -> 3-5-sonnet -> haiku
++edf1788  Switch back to Haiku — Sonnet model ID was timing out
++e466ddf  Correct Sonnet model ID + bump maxDuration to 120s
++50af9a7  Use Haiku 4.5 (confirmed working with PDF document type)
++```
++
++Four commits trying model IDs in sequence. The console.log instrumentation was *already in the code* — `document-analysis.ts` has 11 log statements that would have shown exactly which model worked and which didn't. But nobody checked the Vercel function logs before changing code. The fix should have been: read logs, identify the exact failure line, make one change.
++
++### 1.2 "Round-tripped through 5 deploy cycles on the model ID issue"
++
++**Confirmed.** The commits above plus `ef8427d` (Sonnet model + sparkle animation in one commit) and `653ca08` (Haiku for Hobby timeout) show at least 6 deploy-test cycles on what was fundamentally one question: *which model ID works with PDF document type?*
++
++The health check idea was right. A `/api/health` endpoint that calls `messages.create` with a tiny prompt and logs the model ID would have answered this in one deploy.
++
++### 1.3 "Rebuilt the animation three times"
++
++**Confirmed.** The sparkle/processing animation appears across multiple commits (`ef8427d`, `6e76b15`, visual polish commits). The handoff notes user feedback: "no magical sparkling that I could see." The animation is still flagged as too subtle in the known issues (HANDOFF.md, item 8).
++
++This is a visual direction problem, not a code problem. The fix is a 2-minute conversation about what "premium AI thinking" looks like before writing CSS.
++
++### 1.4 "Built features while the pipeline was broken"
++
++**Confirmed.** The commit history shows feature work (first-time wizard, category tabs, CETV tracker, manual entry modal, document review modal, summary tab) interleaved with pipeline debugging. The most generous reading: the feature work was parallelizable. The honest reading: energy went into building rooms in a house with no foundation.
++
++### 1.5 "Didn't check the handoff's known issues first"
++
++**Confirmed.** The V2-HANDOFF.md (Session 2) explicitly lists:
++- Model availability as known issue #1
++- `AI_DRY_RUN` behaviour as known issue #2
++- `maxDuration` as known issue #3
++
++All three became time sinks in Session 3.
++
++---
++
++## 2. Full Documentation Audit
++
++I've read every document in the `docs/` directory. Here are the findings that change or deepen the picture.
++
++### 2.1 Spec Evolution: The Page Model Has Been Revised Three Times
++
++The workspace page model evolved through three specs, and the older ones were never formally deprecated:
++
++| Spec | Model | Status |
++|------|-------|--------|
++| **05** (Build Your Picture) | Card grid of categories, click to navigate to `/workspace/build/{category}` | **Superseded by 05b** |
++| **05b** (Revised) | Tabbed interface, all work happens inline within tabs, no page navigation | **Current design** |
++| **12** (Two-Tier Tabs) | Adds page-level tabs (Preparation/Summary) above the category tabs | **Latest refinement** |
++
++**Spec 06 (Category Detail)** describes a `/workspace/build/{category}` detail page that is now unnecessary under the tabbed model. It should be considered obsolete.
++
++**The implementation follows 05b + 12** — this is correct. But anyone reading the docs linearly will be confused by the superseded specs.
++
++### 2.2 Spec 10 vs 10b: Two Competing Analysis Models
++
++These specs directly contradict each other:
++
++- **Spec 10** describes domain-by-domain analysis with staggered domain cards, branching questions, and ~30 signal-question pairs per document type. This is ambitious and complex.
++- **Spec 10b** describes tiered confidence (auto/confirm/question/gap) with only 3-5 user taps per document. This is pragmatic and buildable.
++
++**10b explicitly calls out 10's problems**: the domain approach risks "overwhelming, feels like a form." The implementation correctly follows 10b. Spec 10 should be archived.
++
++However, **spec 11 (AI Question Mapping) feeds into both**. The 8-domain intelligence and ~30 signal-question pairs from spec 11 should drive the AI prompt that generates the tiered results for 10b. The domain reasoning happens server-side in the prompt; the user sees the simplified 10b UI. This is the right architecture — it just hasn't been built yet.
++
++### 2.3 Design System Drift: Serif Headings Were Dropped
++
++The V1 visual design spec (`v1-visual-design.md`) specifies **Lora serif** for headings and Inter for body text. The handoff says the implementation uses **Inter only (no serif)**. This appears to be a deliberate decision during the V2 build ("bold 2026 aesthetic"), but it contradicts the original design direction. Worth confirming with the user whether the serif/sans split was intentionally abandoned.
++
++### 2.4 The Confidence Model Is More Nuanced Than the Code Implements
++
++The V1 specs define a four-state confidence model: **Known / Estimated / Unsure / Unknown**. Each state has distinct visual treatment and follow-up behaviour:
++
++- **Known**: Sage green, no follow-up needed
++- **Estimated**: Warm amber, confirm later
++- **Unsure**: Soft lavender, priority to confirm
++- **Unknown**: Muted grey, must be resolved before disclosure
++
++The V2 workspace type system (`types/workspace.ts`) simplifies this to `'known' | 'estimated'` — losing the Unsure/Unknown distinction. This matters because the readiness scoring and Form E completeness checking should differentiate between "I gave a rough number" (Estimated) and "I have no idea" (Unknown).
++
++### 2.5 Safeguarding Carries Through — But Isn't Wired
++
++The desk research (`v1-desk-research.md`) found:
++- 95% of domestic abuse cases involve economic abuse
++- 72% of Refuge users report tech-facilitated abuse
++- Post-separation financial abuse is common
++
++V1 captures safeguarding flags (coercive control indicators, financial abuse indicators, device safety). The V2 specs say these should inform workspace behaviour — e.g. suppressing collaboration language, adjusting mediation recommendations, surfacing safety resources. **None of this wiring exists in V2 yet.** The flags are captured in V1 but not consumed in V2.
++
++### 2.6 V1-to-V2 Data Flow Is Underspecified
++
++Multiple documents reference the V1→V2 handoff:
++- Vertical assessment: "V1 data import — pre-populate from interview session values and confidence map"
++- v2-concept: "From your plan" card shows V1 estimates, user confirms or corrects
++- 05b: First-time wizard includes "V1 playback" step
++
++But **no spec details the actual field mapping** between V1 session data and V2 workspace items. How does a V1 "property value: Estimated" become a V2 financial item? Which V1 confidence states map to which V2 categories? This needs an implementation spec before the wiring can be built.
++
++### 2.7 The Service Problem Space Document Is Critical Context
++
++`docs/v2/service-problem-space.md` maps the entire as-is journey (7 stages) against pain points. Its key insight: **V2's data model is the foundation for everything downstream.** V3 (Disclose) consumes V2 data for Form E structure. V4 (Negotiate) consumes V2+V3 for proposals. V5 (Formalise) consumes all of it for consent orders.
++
++If V2's data model is wrong — wrong categories, wrong confidence granularity, wrong item structure — every downstream vertical breaks. This elevates the importance of getting the `types/workspace.ts` data model right before building persistence.
++
++### 2.8 Tensions and Open Questions in the Specs
++
++| Tension | Between | Impact |
++|---------|---------|--------|
++| Upload location | Spec 09 (inline) vs implementation (page-level) | Low — page-level with smart routing is arguably better |
++| Financial picture visibility | Spec 05b (always visible below) vs Spec 12 (Summary tab, separate mode) | Medium — should users see live updates while working? |
++| Liability framing | "We organise, not verify" vs "brilliant assistant" language | Medium — user expectations vs legal exposure |
++| Self-employment flow | Flagged in multiple specs, never detailed | High for affected users, low frequency |
++| Mobile experience | Mentioned everywhere, specified nowhere in detail | Medium — needs a mobile spec pass |
++| Async processing | "Upload in bulk, leave, come back" vs in-app-only notifications | Medium — how does user know extraction is done? |
++
++### 2.9 Superseded Specs That Should Be Marked
++
++| Spec | Superseded By | Action Needed |
++|------|--------------|---------------|
++| 05 (Build Your Picture) | 05b (Revised) | Add "SUPERSEDED" header |
++| 06 (Category Detail) | 05b + 12 (tabbed inline model) | Add "SUPERSEDED" header |
++| 10 (AI Analysis Flow) | 10b (Tiered Questions) | Add "SUPERSEDED" header |
++
++---
++
++## 3. Current State of the Critical Path
++
++The critical path is: **Upload PDF -> AI extracts -> Tiered questions -> User confirms -> Items in workspace**
++
++### 2.1 What Works
++
++| Stage | Status | Evidence |
++|-------|--------|----------|
++| File upload (drag/drop, file select) | Working | `document-upload.tsx` handles PDF/image/text |
++| Base64 encoding & API submission | Working | `route.ts` lines 38-67, 10MB limit enforced |
++| Haiku 4.5 PDF analysis | Working (quality issues) | Model `claude-haiku-4-5-20251001` confirmed |
++| JSON parsing with repair fallback | Working | 3-tier repair in `document-analysis.ts` |
++| Tiered question UI | Working | Step-through dialogue in `ai-analysis.tsx` |
++| Auto-advance past auto items | Working | Fixed in `47c18ac` |
++| Items added to workspace | Working | `handleAnalysisComplete` in `build/page.tsx` |
++
++### 2.2 What Doesn't Work or Is Missing
++
++| Issue | Severity | Location |
++|-------|----------|----------|
++| **504 on Vercel not diagnosed** | P0 | Need Vercel function logs for `/api/documents/extract` |
++| Extraction quality is shallow | P1 | Haiku misses items, hallucinated a 13k asset |
++| Questions are generic, not domain-aware | P1 | AI prompt doesn't use spec 11's 8-domain mapping |
++| "Something wrong?" button does nothing | P2 | `ai-analysis.tsx` — button exists, no handler |
++| No PDF side-by-side review | P2 | Spec 09 — not started |
++| No celebration on completion | P3 | Spec 09 — no green flash, no count-up |
++| No document storage | P2 | PDFs sent to AI but not persisted |
++| No cross-document intelligence | P3 | Each upload analysed in isolation |
++
++### 2.3 The 504 Question
++
++The handoff's top recommendation is correct: **check Vercel function logs before touching code.**
++
++The console.log statements in the pipeline will reveal exactly where the function dies:
++
++```
++[Upload] File: ${fileName}, type: ${fileType}, size: ${size}KB     <- route.ts:29
++[Upload] PDF base64: ${base64Size}KB                                <- route.ts:43
++[AI Direct Analysis] Using claude-haiku-4-5-20251001                <- document-analysis.ts:134
++[AI Direct Analysis] Tokens: ${in} in, ${out} out                  <- document-analysis.ts:149
++[Analysis] PDF direct: ${items.length} items                        <- route.ts:47
++```
++
++If the logs show the function reaching `[AI Direct Analysis] Using...` but never reaching `Tokens:`, the Anthropic API call is timing out. If it never reaches `[Upload] PDF base64:`, the file encoding is the problem. If it reaches `Tokens:` but not `PDF direct:`, JSON parsing is failing.
++
++**Do not guess. Read the logs.**
++
++---
++
++## 3. Architecture Assessment
++
++### 3.1 Strengths
++
++1. **Single-call PDF analysis** — sending base64 directly to Claude avoids multi-call timeout risk. This was the right call.
++2. **Provider abstraction** — `provider.ts` cleanly separates model routing from business logic. Supports future two-step (Haiku reads, Sonnet analyses).
++3. **Smart dry-run** — only activates when `AI_DRY_RUN=true` AND no API key. Won't accidentally mock on production.
++4. **JSON repair strategy** — 3-tier fallback for truncated responses is defensive and practical.
++5. **Controlled component state** — `analysisResultRef` prevents state loss on tab switches. Good React pattern.
++6. **Comprehensive logging** — 11 log statements in the AI pipeline. The debugging infrastructure exists; it just wasn't used.
++
++### 3.2 Risks
++
++1. **No SDK-level timeout** — Anthropic SDK defaults to ~5 minutes, but Vercel kills at 120s. Adding `timeout: 90000` to the SDK client would give a clean error instead of a 504.
++2. **4096 max_tokens cap** — sufficient for 20-30 items but will truncate complex documents. The repair logic handles this, but raising to 8192 (with the repair as safety net) would be safer.
++3. **No streaming** — full response must complete before anything shows. For a 3-8s Haiku call this is fine, but a two-step Haiku+Sonnet approach (15-30s) would benefit from streaming to show progressive results.
++4. **localStorage only** — fine for now, but data loss on browser clear. The Supabase schema is ready; wiring it in is medium effort.
++5. **Zero tests** — Vitest installed, zero test files. The pipeline's JSON parsing and repair logic are prime candidates for unit tests.
++
++### 3.3 Spec Coverage
++
++| Spec | Implementation | Gap |
++|------|---------------|-----|
++| 05b (Build Your Picture) | 90% | Upload at page level vs per-tab (deliberate, arguably better) |
++| 09 (Upload & Review) | 30% | Review panel, per-item confirm, celebration, PDF modal all missing |
++| 10 (AI-Led Analysis) | 20% | Domain-first architecture absent; flat tiered items instead |
++| 10b (Tiered Questions) | 85% | Core flow works; correction button is a stub |
++| 11 (AI Question Mapping) | 5% | 8-domain intelligence exists on paper, not in the AI prompt |
++| 12 (Two-Tier Tabs) | 95% | Working well |
++
++**The biggest gap is between specs 10/11 and the implementation.** The specs describe a domain-aware AI that reasons like a financial analyst. The implementation sends a generic prompt and gets generic results. This is the root cause of the "shallow extraction" and "basic questions" quality issues.
++
++---
++
++## 4. Recommendations for Session 5
++
++### Phase 1: Diagnose Before Fixing (30 minutes)
++
++1. **Check Vercel function logs** for the `/api/documents/extract` endpoint. Look for the console.log breadcrumbs. Identify exactly which line the 504 dies at.
++2. **Check the Anthropic API key** is set in Vercel environment variables. The code logs `[API] ANTHROPIC_API_KEY is not set` if it's missing — look for this.
++3. **Upload a small test PDF** (1-2 pages) to the deployed site and watch the logs in real time.
++
++### Phase 2: One Targeted Fix (1-2 hours)
++
++Based on what the logs show:
++
++- **If the API key is missing/wrong**: Set it in Vercel, redeploy, done.
++- **If the Anthropic call times out**: Add `timeout: 90000` to the SDK client in `provider.ts`. This gives a clean error at 90s instead of a Vercel 504 at 120s.
++- **If JSON parsing fails**: The repair logic should handle this — check if it's being reached. May need to bump `max_tokens` from 4096.
++- **If the function never starts**: Check Vercel function size limits, cold start times.
++
++### Phase 3: Quality Upgrade — Two-Step Analysis (2-3 hours)
++
++Once the pipeline reliably returns results:
++
++1. **Step 1**: Haiku reads the PDF and extracts raw text + structure (what it's good at)
++2. **Step 2**: Sonnet analyses the extracted text using the domain-aware prompt from spec 11
++
++This is the single highest-impact change for extraction quality. Haiku is fast but shallow. Sonnet can't read PDFs directly but can reason deeply about text. Together they solve both problems.
++
++Implementation sketch:
++```
++route.ts:
++  1. Send PDF to Haiku with "extract all text and structure" prompt
++  2. Take Haiku's text output
++  3. Send text to Sonnet with the full domain-aware analysis prompt
++  4. Return Sonnet's structured JSON
++```
++
++The 120s Vercel timeout gives room for both calls (Haiku: 3-8s, Sonnet: 15-30s).
++
++### Phase 4: Domain-Aware Prompt (2-3 hours)
++
++Rewrite the analysis prompt in `document-analysis.ts` to incorporate spec 11's 8-domain mapping:
++
++- Income signals -> income questions
++- Account structure -> account questions
++- Spending patterns -> spending questions
++- Commitments -> commitment questions
++- Property indicators -> property questions
++- Pension references -> pension questions
++- Debt signals -> debt questions
++- Anomalies -> targeted follow-ups
++
++This transforms the AI from "extract some numbers" to "reason like a financial analyst about what this document reveals."
++
++### Phase 5: Write Tests for the Pipeline (1 hour)
++
++Priority test targets:
++- `parseAnalysisResponse()` — test with valid JSON, truncated JSON, markdown-wrapped JSON
++- `repairTruncatedJson()` — test with various truncation points
++- `DOC_TYPE_TO_CATEGORY` mapping — test all document types route correctly
++- Mock API responses to test the full upload->parse->display flow
++
++### Phase 6: Data Model Review (before Supabase persistence)
++
++The documentation audit reveals the data model needs attention before persisting to Supabase:
++
++1. **Restore the full confidence model**: `types/workspace.ts` only has `'known' | 'estimated'`. The specs define four states: Known / Estimated / Unsure / Unknown. The readiness scoring, Form E completeness, and V3+ disclosure all depend on distinguishing "rough estimate" from "no idea."
++
++2. **Verify category alignment with Form E**: The `DOC_TYPE_TO_CATEGORY` mapping in `build/page.tsx` is basic. Cross-reference against the Form E section mapping in `v2-vertical-assessment.md` to ensure items will route correctly for disclosure output.
++
++3. **Add source document linking**: Items need to reference which document they came from. This is prerequisite for the side-by-side review modal (spec 09) and for cross-document intelligence later.
++
++### Do NOT Do Yet
++
++- **PDF side-by-side modal** (spec 09) — requires document storage, PDF viewer component, significant effort. Park it.
++- **Supabase persistence** — localStorage is fine for now, and the data model needs the fixes above first. Don't persist a wrong schema.
++- **V1 data wiring** — V2 needs to work standalone first, and the V1→V2 field mapping needs an implementation spec.
++- **Cross-document intelligence** — single-document quality must improve first.
++- **More animation work** — agree on visual direction before building.
++- **Mobile experience** — the specs don't detail mobile interactions enough. Needs a design pass before building.
++- **Self-employment flow** — flagged in specs but never detailed. Needs a spec before building.
++- **Safeguarding wiring** (V1 flags → V2 behaviour) — important but not blocking the critical path. Add after the pipeline is solid.
++
++---
++
++## 6. File Quick Reference
++
++### Must-read files for the next session
++
++```
++src/app/api/documents/extract/route.ts        <- API entry point (120s timeout, 11 console.logs)
++src/lib/ai/document-analysis.ts                <- AI prompt + JSON repair (the code to upgrade)
++src/lib/ai/provider.ts                         <- Model routing (add SDK timeout here)
++src/app/workspace/build/page.tsx               <- Page orchestrator (category mapping)
++src/types/workspace.ts                         <- Data model (confidence states need expanding)
++docs/workspace-spec/11-ai-question-mapping.md  <- 8-domain intelligence spec (not yet in code)
++docs/workspace-spec/10b-ai-tiered-questions.md <- Tiered UI spec (mostly implemented)
++```
++
++### Context files (read if you need the "why")
++
++```
++docs/v2/service-problem-space.md               <- Why V2's data model is foundation for V3-V5
++docs/v2/v2-concept.md                          <- UX thesis, entry paths, spending presentation
++docs/v1/v1-desk-research.md                    <- Safeguarding findings, pension blindness, user voice
++docs/v1/v1-flow-spec.md                        <- V1 interview structure (needed for V1→V2 wiring)
++docs/v2/workspace-visual-redesign.md           <- Visual direction ("bold 2026")
++```
++
++### Don't-need-to-read files
++
++V1 interview components, sidebar implementation, future phase pages, and most workspace UI components are stable and working. The following specs are superseded and should not guide new work:
++- `docs/workspace-spec/05-build-your-picture.md` (superseded by 05b)
++- `docs/workspace-spec/06-category-detail.md` (superseded by tabbed model)
++- `docs/workspace-spec/10-ai-analysis-flow.md` (superseded by 10b)
++
++---
++
++## 7. Summary
++
++The Session 3 retro is accurate and self-aware. The project has a solid architecture, good logging infrastructure, and an exceptionally thorough documentation set. The problems are process problems, not code problems:
++
++1. **The pipeline wasn't diagnosed before being "fixed"** — resulting in 5+ wasted deploy cycles
++2. **Features were built on an unverified foundation** — the AI pipeline should have been proven working end-to-end before building the wizard, CETV tracker, etc.
++3. **The AI prompt is generic** — the detailed 8-domain intelligence spec (11) exists but isn't driving the code
++4. **The specs evolved but weren't curated** — three specs are superseded without being marked, creating confusion for new sessions
++5. **The data model simplified too much** — losing the Unsure/Unknown confidence states will cause problems downstream
++
++The path forward is clear:
++1. Diagnose the 504 from Vercel logs (not guessing)
++2. Make one informed fix
++3. Upgrade to two-step Haiku+Sonnet with the domain-aware prompt from spec 11
++4. Fix the confidence model before persisting to Supabase
++5. Mark superseded specs to prevent future confusion
++
++Everything else is polish on top of a working, quality pipeline.
+diff --git a/docs/HANDOFF.md b/docs/HANDOFF.md
+index e7512c9..6cb4060 100644
+--- a/docs/HANDOFF.md
++++ b/docs/HANDOFF.md
+@@ -1,6 +1,6 @@
+-# V2 Session Handoff Document
++# Decouple — Master Handoff Document
+ 
+-**Date:** 10 April 2026
++**Last updated:** 11 April 2026 (Session 4 review)
+ **Product:** Calm Separation Workspace (working title: Decouple)
+ **Repository:** rossdelarge247-debug/construct_d_01
+ **Branch:** claude/project-planning-sprint-zero-odNO5
+@@ -269,20 +269,24 @@ All specs are in `docs/` and should be treated as the source of truth for UX dec
+ - `docs/v2/workspace-visual-redesign.md` — Bold visual direction critique and principles
+ 
+ ### Workspace UI/UX Specs (the detailed build specs)
+-- `docs/workspace-spec/01-design-system.md` — Typography scale, spacing, rhythm
+-- `docs/workspace-spec/02-page-map.md` — Workspace URL hierarchy
+-- `docs/workspace-spec/03-sidebar-navigation.md` — Sidebar structure and status indicators
+-- `docs/workspace-spec/04-workspace-home.md` — Mission control page
+-- `docs/workspace-spec/05-build-your-picture.md` — Original Build page spec
+-- `docs/workspace-spec/05b-build-your-picture-revised.md` — Revised with tabs (supersedes 05)
+-- `docs/workspace-spec/06-category-detail.md` — Category deep-dive pages
+-- `docs/workspace-spec/07-future-phases.md` — Placeholder pages for V3–V5
+-- `docs/workspace-spec/08-interaction-patterns.md` — When to use modals vs inline vs navigation
+-- **`docs/workspace-spec/09-upload-review-flow.md`** — Upload zone design, review panel, side-by-side PDF modal, celebration pattern. **Key unbuilt spec.**
+-- **`docs/workspace-spec/10-ai-analysis-flow.md`** — AI-led analysis replacing generic extraction. **Core to V2.**
+-- **`docs/workspace-spec/10b-ai-tiered-questions.md`** — Four-tier question UX with interaction counts. **Now implemented as step-through dialogue.**
+-- `docs/workspace-spec/11-ai-question-mapping.md` — Signal→question mapping across 8 domains
+-- `docs/workspace-spec/12-two-tier-tabs.md` — Page tabs + category tabs architecture
++
++**Active specs (use for implementation):**
++- `01-design-system.md` — Typography scale, spacing, rhythm, borders, shadows
++- `02-page-map.md` — Workspace URL hierarchy
++- `03-sidebar-navigation.md` — Sidebar structure and status indicators
++- `04-workspace-home.md` — Mission control page
++- **`05b-build-your-picture-revised.md`** — Current page layout: one page, three stacked zones, tabbed categories
++- `07-future-phases.md` — Educational zero-data states for V3–V5
++- `08-interaction-patterns.md` — When to use modals vs inline vs navigation
++- **`09-upload-review-flow.md`** — Upload zone, review panel, side-by-side PDF modal, celebration. **Key unbuilt spec.**
++- **`10b-ai-tiered-questions.md`** — Four-tier question UX (auto/confirm/question/gap). **Core implemented spec.**
++- **`11-ai-question-mapping.md`** — Signal→question mapping across 8 domains. **Not yet in AI prompt.**
++- **`12-two-tier-tabs.md`** — Page tabs (Preparation/Summary) + category tabs
++
++**Archived specs (superseded, retained for design history):**
++- ~~`05-build-your-picture.md`~~ — Superseded by 05b (card grid → tabbed model)
++- ~~`06-category-detail.md`~~ — Superseded by 05b+12 (separate page → inline tab)
++- ~~`10-ai-analysis-flow.md`~~ — Superseded by 10b (domain-by-domain → tiered confidence). Note: the domain intelligence from 10 + spec 11 should still drive the server-side AI prompt; only the user-facing UI follows 10b.
+ 
+ ---
+ 
+@@ -345,46 +349,53 @@ The build progressed through clear phases:
+ 
+ ---
+ 
+-## 12. Immediate Next Session Priorities
+-
+-### P0 — Design work needed before more code
+-
+-**The analysis flow needs more design thinking before further implementation.** The current approach jumped to code too quickly. The structure, presentation, flow, and interaction patterns need deeper specification through wireframes and detailed design before building more. Specifically:
+-
+-- **Data field combination logic**: How should the AI combine and simplify extracted data for presentation? E.g. multiple salary credits should become one "Employment income" line, not 4 separate transactions. Regular standing orders should be grouped by purpose. The rules for how raw transaction data becomes clean financial items need explicit specification.
+-
+-- **Assumptions and simplification heuristics**: What assumptions should the AI make to reduce the number of questions? E.g. if there's a regular £1,150 payment to a building society, assume mortgage without asking. If HMRC credits appear monthly, assume salary without confirming. The more the AI can confidently resolve, the fewer questions the user faces. These heuristics need documenting per document type.
+-
+-- **Dialogue interaction design**: The step-through dialogue needs wireframes showing exactly what each step looks like, how answers affect subsequent steps, what happens when a user changes their mind, and how the flow adapts based on what the document contains. The current implementation is mechanical (show card, get answer, next card) rather than conversational.
+-
+-- **Data presentation hierarchy**: How should extracted items be grouped and displayed? Currently it's a flat list of values. Should it be organised by: account → income vs outgoings → individual items? Or by confidence tier? The visual hierarchy and information architecture needs designing before building.
+-
+-- **Cross-field intelligence**: Some fields inform others. If the AI detects joint account, that affects ownership of all items. If rent is detected, property questions change. If self-employment income appears, business category activates. These relationships need mapping out.
+-
+-- **Document type-specific flows**: A bank statement produces a very different analysis from a pension letter or a payslip. Each document type should have its own tailored presentation and question flow, not a one-size-fits-all template. Wireframes needed per type.
+-
+-**Recommendation**: Before writing more code, produce detailed wireframes and interaction specs (similar to the level of detail in specs 09, 10b, and 11) covering the above. The specs that exist are good but were written before we saw real AI output — they need updating based on what we've learned.
++## 12. Session History
+ 
+-### P1 — Technical fixes (can run in parallel with design)
++| Session | Date | Focus | Key Outcomes |
++|---------|------|-------|--------------|
++| 1 | Apr 2026 | V0 + V1 foundation | Platform, auth, design tokens, 10-step interview, AI plan generation |
++| 2 | Apr 2026 | V2 workspace build | Upload pipeline, extraction, review, categories, visual redesign |
++| 3 | 10 Apr | V2 AI pipeline debug | Model fallback chain, timeout fixes, sparkle animation, step-through dialogue. Retro: jumped to fixes before diagnosing, 5+ deploy cycles wasted on model IDs |
++| 4 | 11 Apr | Documentation review | Full doc audit, archived superseded specs (05, 06, 10), identified data model gaps, created session backlog |
+ 
+-1. **Two-step Sonnet upgrade** — Haiku extraction quality is insufficient (shallow, hallucinated values, missed items like rent). Implement: Haiku reads PDF text → Sonnet (`claude-3-5-sonnet-20241022`) analyses extracted text (no PDF document type needed). Vercel Pro 300s timeout gives plenty of room for two sequential calls.
+-
+-2. **Processing animation** — Current sparkle dots are too subtle to notice. Replace with a more visible but still elegant animation (shimmer gradient, animated SVG constellation, or larger/brighter twinkle pattern). Reference emergent 2026 AI design patterns.
+-
+-3. **Verify step-through dialogue works end-to-end** — The auto-advance bug was fixed (`47c18ac`) but the full flow (auto items → confirms → questions → gaps → "Add items" button → items appear in category tabs) needs testing with a real document.
+-
+-### P2 — Core V2 features (after design work)
+-
+-4. **"Something wrong?" correction flow** (spec 10b) — Make the auto-confirmed items list editable when the user clicks "Correct an item". Currently the button exists but does nothing.
+-
+-5. **PDF side-by-side review modal** (spec 09) — Store uploaded PDFs in Supabase Storage. Build split-view modal with PDF viewer left, editable extracted data right. The Dext pattern. This is the biggest unbuilt feature.
+-
+-6. **Celebration pattern** (spec 09) — Green flash, count-up animations on category cards, toast on confirmation completion.
+-
+-### P3 — Completeness
+-
+-7. **V1 → V2 data wiring** — Pipe interview session data into workspace to pre-populate categories and readiness state.
+-
+-8. **Supabase persistence** — Replace localStorage with Supabase. Requires auth upgrade path.
++---
+ 
+-9. **PDF/email export from Summary tab** — Form E equivalent structured output.
++## 13. Session Backlog
++
++Each session should be focused and output a context block for the next. Priorities flow top-down.
++
++### Session 5 — Diagnose & Fix Pipeline (NEXT)
++- **Read Vercel function logs** for `/api/documents/extract` — 11 console.log breadcrumbs will pinpoint the 504
++- **One targeted fix** based on log evidence (API key? SDK timeout? JSON parse?)
++- **Add SDK-level timeout** (`timeout: 90000` in provider.ts) — gives clean error before Vercel's 120s kills
++- **Verify end-to-end** with a real document on Vercel: upload → tiered UI → items in category tabs
++- Deliverable: pipeline works reliably on production
++
++### Session 6 — Two-Step Analysis + Domain Prompt
++- **Implement Haiku→Sonnet two-step**: Haiku extracts text from PDF, Sonnet analyses text with domain-aware prompt
++- **Rewrite AI prompt** using spec 11's 8-domain signal→question mapping
++- **Add combination heuristics**: multiple salary credits → one "Employment income" line, standing orders grouped by purpose
++- Deliverable: extraction quality matches spec 10b expectations (3-5 taps, intelligent questions)
++
++### Session 7 — Data Model + Correction Flow
++- **Expand confidence model**: `'known' | 'estimated'` → `'known' | 'estimated' | 'unsure' | 'unknown'` per V1 spec
++- **Add source document linking** to items (prerequisite for side-by-side review)
++- **Build "Something wrong?" correction flow** (spec 10b) — inline editing of auto-confirmed items
++- **Write pipeline tests**: `parseAnalysisResponse`, `repairTruncatedJson`, category mapping
++- Deliverable: data model ready for Supabase persistence
++
++### Session 8 — Celebration + Processing Animation
++- **Confirmation celebration** (spec 09): green flash, count-up on category cards, toast
++- **Processing animation redesign**: agree visual direction first, then build (shimmer/constellation/other)
++- **Conversational processing messages**: reference detected content ("Found a Barclays statement...")
++- Deliverable: upload→confirm flow feels polished and intentional
++
++### Future Sessions (unscheduled, order TBD)
++- PDF side-by-side review modal (spec 09) — needs document storage first
++- Supabase persistence — replace localStorage, requires auth upgrade
++- V1 → V2 data wiring — needs implementation spec for field mapping
++- Safeguarding wiring — V1 flags → V2 workspace behaviour
++- PDF/email export from Summary tab
++- Self-employment flow (needs spec first)
++- Mobile experience pass (needs spec first)
++- Cross-document intelligence
+diff --git a/docs/SESSION-CONTEXT.md b/docs/SESSION-CONTEXT.md
+new file mode 100644
+index 0000000..c7cbad6
+--- /dev/null
++++ b/docs/SESSION-CONTEXT.md
+@@ -0,0 +1,51 @@
++# Session 5 Context Block
++
++Product: **Decouple** — financial disclosure workspace for UK divorce (Form E replacement).
++Stack: Next.js 16.2, React 19, TypeScript, Tailwind 4, Supabase, Claude AI, Vercel Pro.
++Branch: `claude/project-planning-sprint-zero-odNO5`
++
++## Core Principles
++- "A warm hand on a cold day" — compassionate, never clinical
++- Upload-first, review-by-exception — AI does 90%, user confirms 10% (3-5 taps)
++- Confidence states matter: Known/Estimated/Unsure/Unknown (code only has 2 — needs expanding)
++- V2's data model is the foundation for V3-V5. If it's wrong, everything downstream breaks
++- No features on a broken pipeline. Diagnose before fixing. Read logs before changing code
++- Specs 05, 06, 10 are ARCHIVED. Active specs: 05b, 10b, 11, 12, 09
++
++## Current Vertical: V2 (Build Your Picture)
++- Critical path: Upload PDF → Haiku 4.5 extracts → tiered questions (10b) → items in workspace
++- Pipeline works mechanically but has a **504 on Vercel** — undiagnosed
++- Extraction quality is shallow (Haiku alone). Fix: two-step Haiku reads PDF → Sonnet analyses text
++- AI prompt is generic. Spec 11 defines 8-domain signal→question mapping — not yet in code
++- UI follows spec 10b (tiered confidence). Step-through dialogue works. Auto-advance bug fixed (`47c18ac`)
++- State: localStorage only. Supabase schema ready (11 tables, RLS) but not wired
++
++## Latest Spec Delta / Gotchas
++- `route.ts` has 11 console.log breadcrumbs — read Vercel logs to find the 504 failure point
++- Only `claude-haiku-4-5-20251001` works with PDF `type: 'document'`. Do not try other models for PDFs
++- `maxDuration=120` in route.ts. Vercel Pro allows 300s. No SDK-level timeout set
++- `AI_DRY_RUN` only activates when flag=true AND no API key. Won't mock on production
++- "Something wrong?" button in `ai-analysis.tsx` exists but does nothing (stub)
++- `max_tokens=4096` — truncation risk on complex docs. JSON repair logic exists as fallback
++
++## Negative Constraints
++1. **Do not change model IDs without reading Vercel function logs first** — Session 3 wasted 5 deploys guessing
++2. **Do not build new features until the pipeline returns reliable results on Vercel** — fix the foundation first
++3. **Do not persist to Supabase yet** — the confidence model in `types/workspace.ts` is incomplete (2 states, needs 4)
++
++## Session 5 Deliverables
++1. Read Vercel function logs for `/api/documents/extract` — identify exact failure line
++2. Apply one targeted fix based on evidence
++3. Add `timeout: 90000` to Anthropic SDK client in `provider.ts`
++4. Verify end-to-end: upload a real PDF on Vercel → tiered UI → items appear in category tabs
++
++## Key Files
++```
++src/app/api/documents/extract/route.ts     — API entry, 120s timeout, logging
++src/lib/ai/document-analysis.ts            — AI prompt, JSON repair
++src/lib/ai/provider.ts                     — Model routing, SDK client
++src/app/workspace/build/page.tsx           — Page orchestrator, category mapping
++src/types/workspace.ts                     — Data model (needs confidence expansion)
++docs/workspace-spec/11-ai-question-mapping.md — 8-domain spec (not in code yet)
++docs/HANDOFF.md                            — Master reference + session backlog
++```
+diff --git a/docs/workspace-spec/05-build-your-picture.md b/docs/workspace-spec/05-build-your-picture.md
+index 416346c..64a2f92 100644
+--- a/docs/workspace-spec/05-build-your-picture.md
++++ b/docs/workspace-spec/05-build-your-picture.md
+@@ -1,4 +1,6 @@
+-# Workspace Design Spec — 05: Build Your Picture
++> **SUPERSEDED** — This spec is replaced by `05b-build-your-picture-revised.md` (tabbed inline model) and `12-two-tier-tabs.md` (Preparation/Summary page tabs). Retained for design history only. Do not use for new implementation work.
++
++# Workspace Design Spec — 05: Build Your Picture (ARCHIVED)
+ 
+ ## URL: /workspace/build
+ 
+diff --git a/docs/workspace-spec/06-category-detail.md b/docs/workspace-spec/06-category-detail.md
+index 15a0089..9f7d621 100644
+--- a/docs/workspace-spec/06-category-detail.md
++++ b/docs/workspace-spec/06-category-detail.md
+@@ -1,4 +1,6 @@
+-# Workspace Design Spec — 06: Category Detail
++> **SUPERSEDED** — The `/workspace/build/{category}` detail page is no longer needed. Under the tabbed model (`05b` + `12`), all category work happens inline within component-level tabs. Retained for design history only.
++
++# Workspace Design Spec — 06: Category Detail (ARCHIVED)
+ 
+ ## URL: /workspace/build/{category}
+ 
+diff --git a/docs/workspace-spec/10-ai-analysis-flow.md b/docs/workspace-spec/10-ai-analysis-flow.md
+index 07bcd29..e0ea156 100644
+--- a/docs/workspace-spec/10-ai-analysis-flow.md
++++ b/docs/workspace-spec/10-ai-analysis-flow.md
+@@ -1,4 +1,6 @@
+-# Workspace Design Spec — 10: AI-Led Analysis Flow
++> **SUPERSEDED** — This domain-by-domain analysis approach was refined into the tiered confidence model in `10b-ai-tiered-questions.md`. The domain intelligence from this spec and `11-ai-question-mapping.md` should drive the server-side AI prompt, but the user-facing UI follows 10b's simpler tiered pattern. Retained for design context.
++
++# Workspace Design Spec — 10: AI-Led Analysis Flow (ARCHIVED)
+ 
+ ## What this replaces
+ 

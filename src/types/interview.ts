@@ -41,11 +41,12 @@ export interface InterviewSession {
     confidence: 'known' | 'estimated' | 'unsure' | null
   }
 
-  // Step 6: Finances
+  // Step 6: Finances (streamlined — priorities + worries on one screen, partner awareness on next)
   finances: {
     priorities: string[]
     worries: string[]
     combined_awareness: 'pretty_clear' | 'know_my_side' | 'rough_idea' | 'really_dont_know' | null
+    partner_awareness: 'good_idea' | 'some_things' | 'very_little' | 'hiding' | null
     additional_notes: string | null
   }
 
@@ -115,6 +116,7 @@ export const INITIAL_SESSION: InterviewSession = {
     priorities: [],
     worries: [],
     combined_awareness: null,
+    partner_awareness: null,
     additional_notes: null,
   },
   confidence: {

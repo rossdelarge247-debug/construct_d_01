@@ -59,7 +59,7 @@ export default function PathwayPage() {
           '£500 government voucher available towards mediation costs',
           isAmicable ? 'Since your relationship is amicable, mediation often works well' : 'Mediation can work even when communication is difficult',
         ],
-        serviceHint: 'We help you prepare — organised disclosure and clear proposals make mediation more productive',
+        serviceHint: 'Part of Share & Negotiate — organised disclosure and clear proposals make mediation more productive',
         isMajor: false,
       })
     }
@@ -73,7 +73,7 @@ export default function PathwayPage() {
         'Pensions are often the largest asset — sometimes worth more than the home',
         'Request pension valuations (CETVs) early — they take up to 3 months',
       ],
-      serviceHint: 'Upload documents and we extract, structure, and organise everything automatically. Track proposals, counter-proposals, and what\'s agreed.',
+      serviceHint: 'Part of Prepare — connect your bank and we extract everything automatically. Part of Share & Negotiate — track proposals and agreements.',
       isMajor: true,
     })
 
@@ -87,7 +87,7 @@ export default function PathwayPage() {
           'A parenting plan helps formalise what you\'ve agreed',
           'Child maintenance (financial support) is a separate process via CMS',
         ],
-        serviceHint: 'Build detailed arrangements ready to share with a mediator or formalise in a parenting plan',
+        serviceHint: 'Part of Share & Negotiate — build detailed arrangements ready for mediation',
         isMajor: true,
       })
     }
@@ -101,7 +101,7 @@ export default function PathwayPage() {
         'Requires a professionally drafted document — not just the D81 form',
         'Court fee: £60 · Usually no hearing required',
       ],
-      serviceHint: 'We structure your agreement into the information needed for a consent order, reducing solicitor costs',
+      serviceHint: 'Part of Finalise — court-ready documentation at the press of a button',
       isMajor: true,
     })
 
@@ -156,7 +156,7 @@ export default function PathwayPage() {
           '£500 government voucher available if children are involved',
           'Written agreements are strongly recommended even if informal',
         ],
-        serviceHint: 'We help you prepare a clear financial picture and structured proposals for discussion',
+        serviceHint: 'Part of Prepare — bank connection builds your financial picture automatically',
         isMajor: false,
       })
     }
@@ -171,7 +171,7 @@ export default function PathwayPage() {
           'Get a property valuation — estate agents offer free appraisals',
           'Consider a Declaration of Trust if one person is staying in the property',
         ],
-        serviceHint: 'Upload documents and we build a structured financial picture automatically. Track what\'s agreed and what\'s outstanding.',
+        serviceHint: 'Part of Prepare — connect your bank and we build everything. Part of Share — track agreements.',
         isMajor: true,
       })
     } else {
@@ -183,7 +183,7 @@ export default function PathwayPage() {
           'Agree who is responsible for shared debts',
           'Update any shared financial commitments (utilities, subscriptions)',
         ],
-        serviceHint: 'We help you build a clear financial picture and track what\'s been agreed',
+        serviceHint: 'Part of Prepare — clear financial picture from your bank data.',
         isMajor: true,
       })
     }
@@ -198,7 +198,7 @@ export default function PathwayPage() {
           'Child maintenance calculated through CMS (separate process)',
           'A parenting plan helps prevent future misunderstandings',
         ],
-        serviceHint: 'Build detailed arrangements ready for mediation or a parenting plan',
+        serviceHint: 'Part of Share & Negotiate — structured arrangements for mediation',
         isMajor: true,
       })
     }
@@ -212,7 +212,7 @@ export default function PathwayPage() {
         'For property, you may need a formal legal document (deed of trust)',
         'Legal advice is recommended to protect both parties',
       ],
-      serviceHint: 'We help structure your agreement clearly, ready for legal review',
+      serviceHint: 'Part of Finalise — structured agreement ready for legal review',
       isMajor: true,
     })
   }
@@ -239,13 +239,13 @@ export default function PathwayPage() {
         {/* Waypoint header */}
         <div>
           <div className="flex items-center gap-2">
-            <div className="h-3 w-3 rotate-45 bg-warmth" />
-            <span className="text-xs font-medium uppercase tracking-wide text-warmth-dark">Your pathway</span>
+            <div className="h-3 w-3 rotate-45 bg-[#E5484D]" />
+            <span className="text-xs font-medium uppercase tracking-wide text-[#E5484D]">Your pathway</span>
           </div>
           <h1 className="mt-3 font-heading text-2xl font-bold text-ink">
             Your separation journey, step by step.
           </h1>
-          <p className="mt-2 text-sm text-ink-light leading-relaxed">
+          <p className="mt-2 text-sm text-ink-secondary leading-relaxed">
             Based on what you&apos;ve told us, here&apos;s what your specific journey involves — from where you are now to a settled, formalised agreement.
           </p>
         </div>
@@ -257,13 +257,13 @@ export default function PathwayPage() {
               {/* Timeline */}
               <div className="flex flex-col items-center">
                 <div className={cn(
-                  'flex shrink-0 items-center justify-center rounded-full text-cream font-medium',
-                  stage.isMajor ? 'h-8 w-8 bg-warmth text-sm' : 'h-6 w-6 bg-ink-faint text-xs',
+                  'flex shrink-0 items-center justify-center rounded-full text-white font-medium',
+                  stage.isMajor ? 'h-8 w-8 bg-[#E5484D] text-sm' : 'h-6 w-6 bg-ink-tertiary text-xs',
                 )}>
                   {i + 1}
                 </div>
                 {i < stages.length - 1 && (
-                  <div className="w-px flex-1 bg-cream-dark" style={{ minHeight: '16px' }} />
+                  <div className="w-px flex-1 bg-[var(--color-grey-100)]" style={{ minHeight: '16px' }} />
                 )}
               </div>
 
@@ -271,17 +271,17 @@ export default function PathwayPage() {
               <div className={cn('pb-5 flex-1', i === stages.length - 1 && 'pb-0')}>
                 <p className={cn(
                   'font-medium text-ink',
-                  stage.isMajor ? 'text-sm' : 'text-xs text-ink-light',
+                  stage.isMajor ? 'text-sm' : 'text-xs text-ink-secondary',
                 )}>
                   {stage.title}
                 </p>
-                <p className="mt-0.5 text-xs text-ink-faint">{stage.detail}</p>
+                <p className="mt-0.5 text-xs text-ink-tertiary">{stage.detail}</p>
 
                 {/* Tips */}
                 <ul className="mt-2 space-y-1">
                   {stage.tips.map((tip, j) => (
-                    <li key={j} className="flex items-start gap-2 text-xs text-ink-light leading-relaxed">
-                      <span className="mt-1 h-1 w-1 shrink-0 rounded-full bg-ink-faint" />
+                    <li key={j} className="flex items-start gap-2 text-xs text-ink-secondary leading-relaxed">
+                      <span className="mt-1 h-1 w-1 shrink-0 rounded-full bg-ink-tertiary" />
                       {tip}
                     </li>
                   ))}
@@ -289,8 +289,8 @@ export default function PathwayPage() {
 
                 {/* Service hint */}
                 {stage.serviceHint && (
-                  <div className="mt-2 rounded-[var(--radius-sm)] bg-warmth-light/30 px-3 py-2">
-                    <p className="text-xs text-warmth-dark">
+                  <div className="mt-2 rounded-[var(--radius-sm)] bg-[var(--color-grey-50)] px-3 py-2">
+                    <p className="text-xs text-[#E5484D]">
                       <span className="font-medium">How we help:</span> {stage.serviceHint}
                     </p>
                   </div>
@@ -328,12 +328,12 @@ export default function PathwayPage() {
         )}
 
         {/* Waypoint celebration + bridge */}
-        <div className="border-t border-cream-dark pt-6 space-y-4">
+        <div className="border-t border-[var(--color-grey-100)] pt-6 space-y-4">
           <MicroMoment>
             You now have a clearer picture of the process than most people at this stage.
           </MicroMoment>
 
-          <div className="rounded-[var(--radius-md)] border border-sage-light bg-sage-light/30 p-4">
+          <div className="rounded-[var(--radius-md)] border border-[var(--color-green-50)] bg-[var(--color-green-600)]-light/30 p-4">
             <p className="text-sm text-ink leading-relaxed">
               <span className="font-medium">This pathway is part of your free plan.</span> Keep going to add your financial picture, priorities, and personalised recommendations — then download everything as a PDF.
             </p>
@@ -343,7 +343,7 @@ export default function PathwayPage() {
             <button
               type="button"
               onClick={() => router.push('/start/situation')}
-              className="text-sm text-ink-light transition-colors hover:text-ink"
+              className="text-sm text-ink-secondary transition-colors hover:text-ink"
             >
               Back
             </button>
@@ -351,7 +351,7 @@ export default function PathwayPage() {
               <Button onClick={() => router.push(getNextStep())}>
                 Build my full plan
               </Button>
-              <p className="mt-2 text-xs text-ink-faint">About 7 more minutes</p>
+              <p className="mt-2 text-xs text-ink-tertiary">About 7 more minutes</p>
             </div>
           </div>
         </div>

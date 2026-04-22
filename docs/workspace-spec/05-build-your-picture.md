@@ -1,4 +1,6 @@
-# Workspace Design Spec — 05: Build Your Picture
+# [SUPERSEDED] Workspace Design Spec — 05: Build Your Picture
+
+> **This spec is superseded by [`05b-build-your-picture-revised.md`](./05b-build-your-picture-revised.md), which is the current build spec.** This earlier version is retained for historical context. The revised spec introduces the two-tier tab structure and single-page architecture that replaced the original layout.
 
 ## URL: /workspace/build
 

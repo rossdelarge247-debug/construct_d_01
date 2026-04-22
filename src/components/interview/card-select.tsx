@@ -18,7 +18,7 @@ interface CardSelectProps {
 export function CardSelect({ options, value, onChange, columns = 2 }: CardSelectProps) {
   return (
     <div className={cn(
-      'grid gap-3',
+      'grid gap-2',
       columns === 2 ? 'grid-cols-1 sm:grid-cols-2' : 'grid-cols-1',
     )}>
       {options.map(option => (
@@ -27,20 +27,31 @@ export function CardSelect({ options, value, onChange, columns = 2 }: CardSelect
           type="button"
           onClick={() => onChange(option.value)}
           className={cn(
-            'rounded-[var(--radius-md)] border-2 px-5 py-4 text-left transition-all duration-200',
+            'rounded-[var(--radius-card)] px-5 py-4 text-left transition-all duration-200',
             value === option.value
-              ? 'border-warmth bg-warmth-light/50'
-              : 'border-cream-dark bg-cream hover:border-ink-faint',
+              ? 'bg-ink text-white'
+              : 'bg-white text-ink hover:bg-[var(--color-grey-50)]',
           )}
+          style={{
+            boxShadow: value === option.value
+              ? 'none'
+              : 'var(--shadow-card)',
+            border: value === option.value
+              ? '1px solid var(--color-ink)'
+              : '1px solid var(--color-grey-100)',
+          }}
         >
           <span className={cn(
-            'block text-sm font-medium',
-            value === option.value ? 'text-warmth-dark' : 'text-ink',
+            'block text-[15px] font-medium',
+            value === option.value ? 'text-white' : 'text-ink',
           )}>
             {option.label}
           </span>
           {option.description && (
-            <span className="mt-1 block text-xs text-ink-light leading-relaxed">
+            <span className={cn(
+              'mt-1 block text-[13px] leading-relaxed',
+              value === option.value ? 'text-white/70' : 'text-ink-secondary',
+            )}>
               {option.description}
             </span>
           )}

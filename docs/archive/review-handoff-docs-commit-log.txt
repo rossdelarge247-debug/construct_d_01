@@ -1,0 +1,26 @@
+8ccc20a 2026-04-11 16:05:04 +0000 Enrich session context: full vision, north star, design philosophy, UX aspirations
+7134b3b 2026-04-11 15:56:57 +0000 Add session discipline rules: track LOC, flag at 1500, stop at 2000
+c070095 2026-04-11 15:53:56 +0000 Add Session 4 review and Session 5 context block (corrected for post-pivot state)
+900b2e0 2026-04-11 15:19:07 +0000 Add Session 3 handoff with retro and process improvements
+a7aa497 2026-04-11 15:01:37 +0000 Fix Sonnet model ID: use 'claude-sonnet-4-6' (verified working via /api/health)
+3f6fc30 2026-04-11 14:51:01 +0000 Expand health check to test all possible Sonnet model ID formats
+77e3656 2026-04-11 14:46:54 +0000 Add per-call API timeouts and /api/health model diagnostic endpoint
+a380567 2026-04-11 08:34:23 +0000 Fix Sonnet model selection: try multiple candidates with diagnostic fallback chain
+7054dd7 2026-04-11 07:31:30 +0000 Sparkle diamond animation, progressive processing messages, resilient error handling
+9f5d5c6 2026-04-11 07:21:55 +0000 Add V1 data replay step and AI pipeline debug panel
+40aed6e 2026-04-11 07:09:51 +0000 Visual polish pass: cross-fade transitions, processing animation, value count-up
+8033f13 2026-04-11 06:59:41 +0000 Add savings, credit card, and P60/tax return document type support
+872c420 2026-04-11 06:51:34 +0000 Fix hero panel interactions: working checkboxes, radio selection, dynamic summary
+82b6a60 2026-04-11 00:56:00 +0000 Wire real AI pipeline to hub and implement spec-compliant fidelity calculation
+73db449 2026-04-11 00:25:21 +0000 Add Session 2 handoff briefing
+d85a57f 2026-04-11 00:17:14 +0000 Add result transformer: bridge between AI pipeline and hero panel Q&A
+0ee0789 2026-04-11 00:11:12 +0000 Rebuild AI pipeline: two-step extraction with structured outputs
+425c230 2026-04-11 00:03:00 +0000 Update package-lock.json from npm install
+f37e62b 2026-04-11 00:01:56 +0000 Rebuild workspace as hub + hero panel architecture (foundation)
+e4ac0c0 2026-04-10 23:49:24 +0000 Add complete V2 feature backlog (98 items across 6 categories)
+9476d4c 2026-04-10 23:43:07 +0000 Update config flow from wireframes + add visual design system
+07e05bd 2026-04-10 23:18:00 +0000 Add post-pivot visual design system spec
+de50103 2026-04-10 22:58:26 +0000 Add V2 design pivot and new build specs (hub + hero panel architecture)
+ac75c38 2026-04-10 21:54:27 +0000 Add comprehensive extraction and clarification decision trees
+4919fd9 2026-04-10 10:51:06 +0000 Add V2 desk research and research implications
+fba51ee 2026-04-10 08:03:19 +0000 Shore up documentation: index, decisions register, deprecation markers, smoke test

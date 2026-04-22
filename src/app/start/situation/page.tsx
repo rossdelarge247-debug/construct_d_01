@@ -88,7 +88,7 @@ export default function SituationPage() {
           <h1 className="font-heading text-2xl font-bold text-ink">
             Your situation
           </h1>
-          <p className="mt-2 text-sm text-ink-light leading-relaxed">
+          <p className="mt-2 text-sm text-ink-secondary leading-relaxed">
             A few questions to help us understand where you are. Nothing is shared.
           </p>
         </div>
@@ -179,9 +179,9 @@ export default function SituationPage() {
               </Explainer>
             )}
             {session.situation.relationship_quality === 'safety_concerns' && (
-              <div className="rounded-[var(--radius-md)] border border-warmth-light bg-warmth-light/30 p-5">
+              <div className="rounded-[var(--radius-md)] border border-[var(--color-amber-50)] bg-[#FFFBEB] p-5">
                 <p className="text-sm font-medium text-ink">You&apos;re not alone.</p>
-                <p className="mt-2 text-sm text-ink-light leading-relaxed">
+                <p className="mt-2 text-sm text-ink-secondary leading-relaxed">
                   If you or your children are in immediate danger, call 999. For confidential support, you can contact the National Domestic Abuse Helpline on 0808 2000 247 (24 hours, free).
                 </p>
                 <Explainer label="More support options">
@@ -216,9 +216,9 @@ export default function SituationPage() {
               columns={1}
             />
             {session.situation.financial_control_concerns && (
-              <div className="rounded-[var(--radius-md)] border border-warmth-light bg-warmth-light/30 p-5">
+              <div className="rounded-[var(--radius-md)] border border-[var(--color-amber-50)] bg-[#FFFBEB] p-5">
                 <p className="text-sm font-medium text-ink">This is more common than you might think.</p>
-                <p className="mt-2 text-sm text-ink-light leading-relaxed">
+                <p className="mt-2 text-sm text-ink-secondary leading-relaxed">
                   Controlling someone&apos;s access to money is a form of economic abuse. You can speak to Surviving Economic Abuse at survivingeconomicabuse.org, or call the National Domestic Abuse Helpline on 0808 2000 247.
                 </p>
               </div>
@@ -235,7 +235,7 @@ export default function SituationPage() {
             <button
               type="button"
               onClick={() => setCurrentStep(STEP_ORDER[currentIndex - 1])}
-              className="text-sm text-ink-light transition-colors hover:text-ink"
+              className="text-sm text-ink-secondary transition-colors hover:text-ink"
             >
               Back
             </button>

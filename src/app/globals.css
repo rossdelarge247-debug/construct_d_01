@@ -1,95 +1,135 @@
 @import "tailwindcss";
 
 @theme {
-  /* ═══ Core palette ═══ */
+  /* ═══ Surfaces ═══ */
+  --color-white: #FFFFFF;
+  --color-off-white: #F7F8FA;
+  --color-grey-50: #F0F1F4;
+  --color-grey-100: #E2E4E9;
+  --color-grey-200: #C8CCD4;
+
+  /* ═══ Text ═══ */
+  --color-ink: #1A1D23;
+  --color-ink-secondary: #4A4F5C;
+  --color-ink-tertiary: #7C8291;
+  --color-ink-disabled: #B0B5BF;
+
+  /* ═══ Accent ═══ */
+  --color-red-500: #E5484D;
+  --color-red-600: #CE3E44;
+  --color-red-50: #FEF2F2;
+
+  /* ═══ Functional — action ═══ */
+  --color-blue-600: #2563EB;
+  --color-blue-50: #EFF6FF;
+
+  /* ═══ Functional — status ═══ */
+  --color-green-600: #16A34A;
+  --color-green-50: #F0FDF4;
+  --color-amber-600: #D97706;
+  --color-amber-50: #FFFBEB;
+
+  /* ═══ Structural ═══ */
+  --color-slate-700: #334155;
+  --color-slate-50: #F8FAFC;
+
+  /* ═══ Typography ═══ */
+  --font-sans: 'Inter', system-ui, -apple-system, sans-serif;
+
+  /* ═══ Shadows ═══ */
+  --shadow-card: 0 1px 3px rgba(0, 0, 0, 0.08);
+  --shadow-card-hover: 0 2px 8px rgba(0, 0, 0, 0.12);
+  --shadow-hero: 0 2px 8px rgba(0, 0, 0, 0.08);
+  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.06);
+
+  /* ═══ Radius ═══ */
+  --radius-sm: 4px;
+  --radius-md: 8px;
+  --radius-card: 12px;
+  --radius-lg: 16px;
+  --radius-pill: 20px;
+  --radius-full: 9999px;
+
+  /* ═══ Spacing ═══ */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 20px;
+  --space-6: 24px;
+  --space-8: 32px;
+  --space-10: 40px;
+  --space-12: 48px;
+
+  /* ═══ Layout ═══ */
+  --content-max-width: 1080px;
+  --content-narrow: 600px;
+  --title-bar-height: 64px;
+
+  /* ═══ Animation ═══ */
+  --transition-fade: 400ms ease-out;
+  --transition-content: 200ms ease;
+  --transition-progress: 300ms ease;
+  --transition-value: 600ms ease-out;
+
+  /* ═══ Legacy — kept for V1 interview pages ═══ */
   --color-cream: #FAF6F1;
   --color-cream-dark: #F0EBE3;
-  --color-surface: #FEFDFB;
-  --color-ink: #2D2926;
-  --color-ink-light: #6B6560;
-  --color-ink-faint: #A39E99;
-
-  /* ═══ Primary accent — terracotta warmth ═══ */
   --color-warmth: #C67D5A;
   --color-warmth-light: #F0DDD2;
   --color-warmth-dark: #A8623F;
-
-  /* ═══ Secondary accent — soft teal ═══ */
   --color-teal: #5B8A8A;
   --color-teal-light: #E0EDED;
-  --color-teal-dark: #4A7272;
-
-  /* ═══ Success — sage green ═══ */
   --color-sage: #7A9E7E;
   --color-sage-light: #E4EDE5;
-  --color-sage-dark: #5C7E60;
-
-  /* ═══ Warning — amber ═══ */
   --color-amber: #D4A84B;
   --color-amber-light: #F5ECD4;
-
-  /* ═══ Depth — warm navy ═══ */
   --color-depth: #3D4F5F;
-  --color-depth-light: #E8ECF0;
-
-  /* ═══ Soft — lavender (minimal) ═══ */
-  --color-soft: #C2B5C7;
-  --color-soft-light: #EDE8EF;
-
-  /* ═══ Typography — all Inter ═══ */
+  --color-ink-light: #6B6560;
+  --color-ink-faint: #A39E99;
+  --color-surface: #FEFDFB;
   --font-heading: 'Inter', system-ui, -apple-system, sans-serif;
   --font-body: 'Inter', system-ui, -apple-system, sans-serif;
-
-  /* ═══ Shadows — warm ═══ */
-  --shadow-sm: 0 1px 3px rgba(45, 41, 38, 0.06);
   --shadow-md: 0 3px 12px rgba(45, 41, 38, 0.08);
   --shadow-lg: 0 8px 24px rgba(45, 41, 38, 0.12);
-
-  /* ═══ Radius ═══ */
-  --radius-sm: 8px;
-  --radius-md: 12px;
-  --radius-lg: 16px;
-  --radius-full: 9999px;
-
-  /* ═══ Layout ═══ */
+  --radius-sm-legacy: 8px;
+  --radius-md-legacy: 12px;
+  --radius-lg-legacy: 16px;
   --sidebar-width: 240px;
   --sidebar-collapsed: 64px;
-
-  /* ═══ Borders ═══ */
   --border-card: 2px;
   --border-accent: 5px;
 }
 
 /* ═══ Base ═══ */
 body {
-  font-family: var(--font-body);
+  font-family: var(--font-sans);
   font-size: 15px;
   color: var(--color-ink);
-  background-color: var(--color-cream);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
 
 h1, h2, h3, h4 {
-  font-family: var(--font-heading);
+  font-family: var(--font-sans);
   font-weight: 700;
   letter-spacing: -0.02em;
 }
 
 /* ═══ Focus ═══ */
 *:focus-visible {
-  outline: 2px solid var(--color-warmth);
+  outline: 2px solid var(--color-blue-600);
   outline-offset: 2px;
-  border-radius: 4px;
+  border-radius: var(--radius-sm);
 }
 
 /* ═══ Selection ═══ */
 ::selection {
-  background-color: var(--color-warmth-light);
+  background-color: var(--color-blue-50);
   color: var(--color-ink);
 }
 
-/* ═══ Scrollbar (subtle) ═══ */
+/* ═══ Scrollbar ═══ */
 ::-webkit-scrollbar {
   width: 6px;
   height: 6px;
@@ -98,14 +138,147 @@ h1, h2, h3, h4 {
   background: transparent;
 }
 ::-webkit-scrollbar-thumb {
-  background: var(--color-cream-dark);
+  background: var(--color-grey-200);
   border-radius: 3px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: var(--color-ink-faint);
+  background: var(--color-ink-tertiary);
 }
 
 /* ═══ Tabular numbers for financial data ═══ */
 .tabular-nums {
   font-variant-numeric: tabular-nums;
+}
+
+/* ═══ Processing animations (spec 18) ═══ */
+
+/* Sparkle diamond animation — appear, twinkle, fade */
+@keyframes sparkle {
+  0%, 100% { opacity: 0; transform: scale(0.3) rotate(0deg); }
+  15% { opacity: 0.9; transform: scale(1) rotate(10deg); }
+  30% { opacity: 0.6; transform: scale(0.85) rotate(-5deg); }
+  45% { opacity: 1; transform: scale(1.1) rotate(5deg); }
+  60% { opacity: 0.4; transform: scale(0.7) rotate(-10deg); }
+  80% { opacity: 0; transform: scale(0.2) rotate(0deg); }
+}
+
+/* Indeterminate progress sweep — competent, measured (spec 18) */
+@keyframes shimmer {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(333%); }
+}
+
+/* Lozenge spinner to tick transition */
+@keyframes fadeInScale {
+  from { opacity: 0; transform: scale(0.5); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+/* Value count-up entrance (section cards) */
+@keyframes valueEnter {
+  from { opacity: 0; transform: translateY(4px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.animate-value-enter {
+  animation: valueEnter var(--transition-value) forwards;
+}
+
+.animate-fade-in-scale {
+  animation: fadeInScale 150ms ease-out forwards;
+}
+
+/* ═══ Workspace animations (spec 26) ═══ */
+
+/* Fade in — general content appearance */
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.animate-fade-in {
+  animation: fadeIn 300ms ease-out forwards;
+}
+
+/* Slide in from left — reveal account labels */
+@keyframes slideInLeft {
+  from { opacity: 0; transform: translateX(-20px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+
+.animate-slide-in-left {
+  animation: slideInLeft 300ms ease-out forwards;
+}
+
+/* Modal appear — Tink modal (spring-like: fast start, gentle settle) */
+@keyframes modalAppear {
+  from { opacity: 0; transform: scale(0.95) translateY(8px); }
+  to { opacity: 1; transform: scale(1) translateY(0); }
+}
+
+.animate-modal-appear {
+  animation: modalAppear 300ms cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+/* Shimmer — indeterminate progress bar */
+.animate-shimmer {
+  animation: shimmer 1.5s ease-in-out infinite;
+}
+
+/* ═══ Celebration patterns (backlog #84) ═══ */
+
+/* Green flash — card pulse on section confirm */
+@keyframes celebrateFlash {
+  0% { background-color: white; }
+  20% { background-color: var(--color-green-50); }
+  100% { background-color: white; }
+}
+
+.animate-celebrate {
+  animation: celebrateFlash 800ms ease-out forwards;
+}
+
+/* Tick bounce — the checkmark that appears on confirm */
+@keyframes tickBounce {
+  0% { transform: scale(0); opacity: 0; }
+  60% { transform: scale(1.2); opacity: 1; }
+  100% { transform: scale(1); opacity: 1; }
+}
+
+.animate-tick-bounce {
+  animation: tickBounce 400ms cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+}
+
+/* Progress bar completion pulse */
+@keyframes progressPulse {
+  0% { opacity: 1; }
+  50% { opacity: 0.6; }
+  100% { opacity: 1; }
+}
+
+.animate-progress-complete {
+  animation: progressPulse 600ms ease-out 1;
+}
+
+/* ═══ prefers-reduced-motion: spec 26 — instant transitions, no stagger ═══ */
+@media (prefers-reduced-motion: reduce) {
+  .animate-fade-in,
+  .animate-slide-in-left,
+  .animate-modal-appear,
+  .animate-shimmer,
+  .animate-fade-in-scale,
+  .animate-value-enter,
+  .animate-celebrate,
+  .animate-tick-bounce,
+  .animate-progress-complete {
+    animation: none !important;
+    opacity: 1 !important;
+    transform: none !important;
+  }
+
+  /* Disable all transition durations */
+  *, *::before, *::after {
+    transition-duration: 0.01ms !important;
+    animation-duration: 0.01ms !important;
+  }
 }

@@ -119,16 +119,15 @@ export function useInterview() {
   const hasProperty = session.situation.property_status === 'own_jointly' || session.situation.property_status === 'own_one_name'
   const hasSafeguardingConcerns = session.situation.relationship_quality === 'safety_concerns' || session.situation.financial_control_concerns === true
 
-  // Dynamic step list based on situation
+  // Dynamic step list — streamlined (readiness matrix cut, next-steps replaced with choose)
   const interviewSteps = [
     'situation' as const,
     'route' as const,
     ...(hasChildren ? ['children' as const] : []),
     ...(hasProperty ? ['home' as const] : []),
     'finances' as const,
-    'readiness' as const,
     'plan' as const,
-    'next' as const,
+    'choose' as const,
   ]
 
   return {

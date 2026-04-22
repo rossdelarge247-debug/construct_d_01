@@ -34,7 +34,7 @@ export default function StartPage() {
         <h1 className="font-heading text-3xl font-bold leading-snug tracking-tight text-ink sm:text-4xl">
           Let&apos;s build your free separation plan.
         </h1>
-        <p className="mt-4 text-ink-light leading-relaxed">
+        <p className="mt-4 text-ink-secondary leading-relaxed">
           A clear picture of where you are, what comes next, and what to do.
         </p>
 
@@ -43,13 +43,13 @@ export default function StartPage() {
             <p
               key={i}
               className={cn(
-                'flex items-start gap-4 text-ink-light transition-all duration-500 ease-out',
+                'flex items-start gap-4 text-ink-secondary transition-all duration-500 ease-out',
                 i < visibleCount
                   ? 'translate-y-0 opacity-100'
                   : 'translate-y-3 opacity-0',
               )}
             >
-              <span className="mt-0.5 text-sage">&#10003;</span>
+              <span className="mt-0.5 text-[var(--color-green-600)]">&#10003;</span>
               {bullet}
             </p>
           ))}
@@ -59,7 +59,7 @@ export default function StartPage() {
           'mt-12 transition-all duration-500 ease-out',
           showFooter ? 'translate-y-0 opacity-100' : 'translate-y-3 opacity-0',
         )}>
-          <p className="text-sm text-ink-faint">
+          <p className="text-sm text-ink-tertiary">
             You don&apos;t need to know everything. You just need to start.
           </p>
           <div className="mt-6">
@@ -67,7 +67,7 @@ export default function StartPage() {
               <Button size="lg">Build my free plan</Button>
             </Link>
           </div>
-          <p className="mt-3 text-xs text-ink-faint">
+          <p className="mt-3 text-xs text-ink-tertiary">
             Takes about 10 minutes. No sign-up needed.
           </p>
         </div>

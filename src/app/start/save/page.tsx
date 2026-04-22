@@ -10,7 +10,7 @@ export default function SaveWorkspacePage() {
         <h1 className="font-heading text-2xl font-bold text-ink">
           Save your workspace
         </h1>
-        <p className="mt-4 max-w-sm text-sm text-ink-light leading-relaxed">
+        <p className="mt-4 max-w-sm text-sm text-ink-secondary leading-relaxed">
           You&apos;ve built something worth keeping. Save your workspace to keep your plan, return anytime, and continue when you&apos;re ready.
         </p>
 
@@ -23,7 +23,7 @@ export default function SaveWorkspacePage() {
           </Button>
         </div>
 
-        <p className="mt-8 text-xs text-ink-faint leading-relaxed">
+        <p className="mt-8 text-xs text-ink-tertiary leading-relaxed">
           Your information stays private. Nothing is shared unless you choose to share it.
         </p>
       </div>
