@@ -109,7 +109,7 @@ docs/workspace-spec/70-build-map-build.md           — Phase 2
 docs/workspace-spec/70-build-map-reconcile.md       — Phase 3
 docs/workspace-spec/70-build-map-settle.md          — Phase 4
 docs/workspace-spec/70-build-map-finalise.md        — Phase 5
-docs/workspace-spec/70-build-map-slices.md          — 31-slice catalogue (engineering work units)
+docs/workspace-spec/70-build-map-slices.md          — 32-slice catalogue (engineering work units)
 
 Stable libraries (preserve across rebuild — Re-use per Build Map)
 src/lib/bank/tink-client.ts                         — Tink API client

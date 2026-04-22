@@ -66,6 +66,26 @@ This is a **catalogue**, not a scope doc. Every slice in the product is listed s
 - **Depends on:** S-F1, S-F3.
 - **Opens:** 68g B-11 (category completeness audit), 68g B-14 (user-added tasks V1/V1.5), 68f B-2 (snooze V1.5).
 
+### S-F7 · Persistence + auth abstraction (dev/prod modes)
+- **Phases:** All
+- **Value:** Domain code reads/writes sessions + workspace state via interfaces (Session, WorkspaceStore, AuthGate). Dev mode runs end-to-end against `localStorage` fixtures — no signup, no Supabase. Prod mode flips to Supabase via `NEXT_PUBLIC_DECOUPLE_AUTH_MODE=prod` env var. Same domain code paths, different implementation. Engineering can build + test slices without auth shipping; real auth swaps in cleanly later. Full design in spec 71 §4.
+- **Key components:**
+  - `lib/auth/` — Session interface + dev-session (fixture user) + supabase-session + AuthGate
+  - `lib/store/` — WorkspaceStore interface + dev-store (localStorage) + supabase-store (wraps existing `lib/supabase/workspace-store.ts`)
+  - `/app/dev/` route group — dashboard, scenario picker, state inspector, reset, moved engine-workbench
+  - `components/dev/` — scenario-picker, state-inspector, (moved hub debug panels)
+  - Env banner reskin (Preserve-with-reskin) — mode chip + scenario dropdown + reset
+  - Build-time + runtime assertions enforcing `MODE === 'prod'` in production build (spec 72 §7)
+  - CI gate testing production build for dev-mode leaks (routes / imports / email domains / localStorage keys)
+  - Fixture scenario library — 8 initial scenarios (cold-sarah through sarah-finalise)
+- **Depends on:** S-F1 (design system for dev-banner reskin + dev-UI primitives)
+- **Opens:**
+  - Storage schema versioning convention (`decouple:dev:store:v1` → v2 migration pattern)
+  - Real-Supabase migration playbook (separate spec when we ship first real-auth deploy)
+  - Scenario JSON format + loader pattern
+  - Dev-only API route convention (`/app/dev/api/*`)
+- **Security:** spec 72 §3 (Session pattern) + §7 (Dev/prod boundary enforcement, multi-layer). Fixture users on reserved `@dev.decouple.local` domain; prod signup allowlist rejects.
+
 ---
 
 ## Onboarding slices
