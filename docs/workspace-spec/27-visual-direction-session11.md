@@ -1,7 +1,13 @@
 # Visual Direction — Session 11 Design Pass
 
-**References:** Airbnb (surfaces, spacing, accent colour), Emma (financial value display, card treatment, content brevity), Habito (Q&A interaction, radio cards, progress bar)
-**Supersedes:** Spec 18 colour palette and component designs. Spec 18 spacing tokens, typography scale, and animation timings remain valid.
+> **⚠ SUPERSEDED (session 22).** Canonical visual direction is now the Claude AI Design tool outputs from session 22 wire batches. Anchor shortlist in `68g-visual-anchors.md` (C-V1..C-V14). See CLAUDE.md "Visual direction" section for the current framing. The Airbnb / Emma / Habito references below are **no longer reference points** and must not be cited as visual direction for new work.
+>
+> Parts of this spec that may remain useful as *historical context only*: the principles around "colour is a signal," "shadow over borders," "data speaks," "brevity," and "generous space" happen to align with the Claude AI Design outputs and are already encoded there. Token values (spacing, typography) remain valid only where the Claude AI Design outputs have not superseded them.
+
+---
+
+**Original references (SUPERSEDED):** Airbnb (surfaces, spacing, accent colour), Emma (financial value display, card treatment, content brevity), Habito (Q&A interaction, radio cards, progress bar)
+**Originally supersedes:** Spec 18 colour palette and component designs. Spec 18 spacing tokens, typography scale, and animation timings remain valid.
 
 ---
 

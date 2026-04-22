@@ -46,7 +46,82 @@ Not four permission layers. Two spaces.
 
 **For V3, ship the two-space model only.** Mediator access to private workspaces (caucus sessions) is a V4 feature.
 
-## Four core features
+## The unified household picture (data model)
+
+The single most important architectural realisation: **individual Form Es are inputs, not truth.** The truth is the reconciled household picture.
+
+In a marriage, matrimonial law treats most assets as a shared pool regardless of whose name is on them. So when both parties declare "the Ford Escort, £8k" it's ONE asset in the unified picture — not two side-by-side entries.
+
+### The household item
+
+Every financial entity (property, account, pension, debt, vehicle) is a **household item** — a single record that can be declared by one or both parties, with metadata capturing ownership and provenance.
+
+```
+interface HouseholdItem {
+  id: string
+  type: 'property' | 'account' | 'pension' | 'vehicle' | 'debt' | 'investment' | 'other_asset' | 'income_source'
+  identifier: string              // "Halifax mortgage", "Ford Escort", "HL ISA"
+
+  // The agreed value (if both parties agree)
+  value: number | null
+  valueStatus: 'agreed' | 'contested' | 'unverified'
+  valueBasis: 'bank_evidenced' | 'self_declared' | 'estimated' | 'professionally_valued'
+
+  // Per-party claims (captured at disclosure)
+  declaredByA: ItemClaim | null
+  declaredByB: ItemClaim | null
+
+  // Ownership metadata
+  heldBy: 'joint' | 'sole_a' | 'sole_b'
+  ownershipType: 'matrimonial' | 'pre_marital' | 'inherited' | 'gifted' | 'disputed'
+  acquiredDate?: string           // If known — distinguishes matrimonial from pre-marital
+
+  // Reconciliation state
+  reconciliationStatus: 'matched' | 'unique_a' | 'unique_b' | 'contested_value' | 'contested_ownership' | 'missing_expected'
+}
+
+interface ItemClaim {
+  declaredAt: string              // timestamp
+  value: number
+  valueBasis: string
+  heldBy: string                  // what this party claims about ownership
+  ownershipType: string           // what this party claims about matrimonial status
+  evidence: string[]              // references to bank data, documents
+  note?: string                   // optional explanation
+}
+```
+
+### Ownership tags
+
+Every item carries an ownership tag. This is metadata, not identity:
+
+| Tag | Meaning | Typically in matrimonial pot? |
+|---|---|---|
+| **Joint** | Both names on the account/title (joint bank account, jointly owned house) | Yes |
+| **Sole — A** | In Party A's name only | Usually yes (if acquired during marriage) |
+| **Sole — B** | In Party B's name only | Usually yes |
+| **Pre-marital** | Brought into the marriage by one party | Sometimes excluded |
+| **Inherited / gifted** | Received during marriage from outside the partnership | Often excluded |
+| **Disputed** | Parties can't agree on classification | Needs resolution |
+
+The loan in Mark's name for the car Sarah drives is a **matrimonial debt** even though its tag is "sole — Mark." The tag affects transparency; the matrimonial classification determines whether it's in the pot.
+
+### Three kinds of item emerge from reconciliation
+
+| Type | Example | UI treatment |
+|---|---|---|
+| **Matched** | Both declared Ford Escort at £8k | ✓ Agreed — one item in the picture |
+| **Contested value** | Sarah: house £450k / Mark: house £480k | ⚠️ Same item, agree value |
+| **Contested ownership** | Sarah: inheritance separate / Mark: in the pot | ⚠️ Same item, agree tag |
+| **Unique to one party** | Sarah's Monzo (Mark didn't know) | Info — Mark can confirm or query |
+| **Missing expected** | Engine expects pensions, neither declared | Gap — prompt both |
+| **Contradictory** | Sarah says joint account exists / Mark says closed | Conflict — requires evidence |
+
+### Why this matters
+
+The combined view in V3 is **not** two separate Form Es in side-by-side columns. It's ONE unified list of household items, where each item carries the provenance of who declared it, who holds it, and whether the value is agreed. This is the Juro pattern applied correctly: in contract negotiation there's ONE contract both parties redline — not two separate contracts compared.
+
+## Five core features
 
 ### 1. The Financial Picture (shared, live, evidenced)
 Both parties' financial data in one structured view. Builds progressively — your data first, theirs appears alongside. Auto-matching where both declared the same item. Discrepancies surfaced gently. Every number links to source evidence.
@@ -54,10 +129,27 @@ Both parties' financial data in one structured view. Builds progressively — yo
 ### 2. The Proposal (structured, reasoned, diffable)
 System pre-populates from the financial picture. User adjusts with real-time impact calculation. Reasoning required per item. Counter-proposals show only what changed. Deliberate "review before send" moment.
 
-### 3. The Progress Board (what's agreed, what's not)
+### 3. The Playbook Engine (data-driven reasoning context)
+The disclosed financial data becomes an active playbook that drives proposal logic. Inspired by Juro's insight that playbooks shouldn't be static documents but active decision engines embedded in workflows.
+
+**How it works:** When a user builds or reviews a proposal, the system generates reasoning context alongside each item — not advice, but arithmetic + precedent context derived from the disclosed data:
+
+- "Your combined income disparity is 3:1 — spousal maintenance is typically considered in this scenario"
+- "Your pension CETV is £180k vs their £12k — pension sharing is common where disparity exceeds £50k"
+- "You have primary care of 2 children — courts typically consider this when dividing property"
+- "This proposal gives you 72% of net assets — the typical court range for your circumstances is 55-65%"
+
+The V2 signal rules, decision trees, and Form E mappings ARE the playbook. In V3 they don't just drive disclosure — they drive informed negotiation.
+
+**The reasoning split:**
+- **Human reasoning** (required per item): "I need the house for stability for the children"
+- **System context** (auto-generated, visible to both): property value, mortgage, equity, what the overall split looks like, how it compares to the equal division baseline
+- Both visible together on every proposal item. This makes proposals evidence-based, not positional.
+
+### 4. The Progress Board (what's agreed, what's not)
 Reframes the emotional experience: "78% agreed, gap is £8,400." Items move from disputed to agreed. Monetary gap shrinks visibly. Persistent — always visible as context.
 
-### 4. The Timeline (the story of what happened)
+### 5. The Timeline (the story of what happened)
 Every share, view, query, response, proposal, agreement. Timestamps and read receipts. Makes stalling visible. Useful for mediators, solicitors, and courts. Replaces the email thread.
 
 ## Five UX patterns (from Juro contract negotiation + our design)
