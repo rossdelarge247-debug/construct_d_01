@@ -382,25 +382,32 @@ S-F5 (AI coach pattern) deferred — not on critical path to first user-facing s
 
 **Exit criterion for C.1:** Foundation primitives + abstractions exist; `/dev/*` dashboard loads a scenario; a placeholder page rendering a document shell with phase stepper + trust chip + task row works end-to-end. No Discarded tree removed yet (removals come with the slices that replace).
 
-### Phase C.2 — First user-facing slice
+### Phase C.2 — Public surfaces + onboarding (locked session 23 P0-2)
 
-Pick one at session 23 P0-2. Candidates + rationale live there. Whichever is picked, this slice:
-- Is the first slice to touch real user-flow code
-- Removes a specific section of the Discarded tree (per §5 removal table)
-- Ships to Preview at slice-complete; to Production at slice-merged + smoke-test-green
-- Sets the cadence + pattern for all subsequent slice-delivery work
+First user-visible work after foundation. Two slices delivered together so the end-to-end public journey is coherent. Neither ships alone to Preview in a usable state.
 
-### Phase C.3 — Build phase remainder
+| Order | Slice | Scope |
+|---|---|---|
+| 1 | **S-M1** marketing rewrite | `/`, `/features`, `/pricing` rebuilt against Claude AI Design outputs + spec 42 positioning. Legal placeholders (`/privacy`, `/terms`, `/cookies`) stay Preserve-with-reskin shells pending legal review (spec 56 L2). |
+| 2 | **S-O1** primary onboarding | Welcome carousel (C-V2) + stepper (C-V3) + phase demo cards (C-V5) + trust band (C-V11) + spec 65 O1-O8 interview (8 screens, tone-branching, safeguarding-woven) + plan output (O7-O8 via `plan-narrative.ts` Re-use) + Moment 2 pre-bank profiling (spec 67 handoff) + signup gate at completion. |
 
-S-B1 through S-B7, in roughly this order (dependencies drive exact order):
+**S-O1 MLP scope (loveable floor, not minimum viable):** all 8 O1-O8 screens ship (they're the coherent flow; not cuttable). Simpler plan narrative first (skip deep branching), iterate v1.1. Phase demo cards static first, interactive v1.1. Moment 2 covers only the profiling questions strictly needed to enter Build — extended Moment 2 questions defer to v1.1.
 
-1. S-B1 bank connection (independent, high reuse)
-2. S-B2 Sarah's Picture (the load-bearing slice; most downstream depends on it)
-3. S-B3 dashboard (renders post-connection + post-build progress)
-4. S-B4 per-section confirmation loop
-5. S-B5 spending journey
-6. S-B6 evidence upload
-7. S-B7 share action (triggers reconcile — last in Build, first touch of Reconcile)
+**Exit criterion for C.2:** A fresh browser can land on `/`, navigate features/pricing, click through to `/start`, complete O1-O8 interview, see plan output, hit signup gate. Dev mode allows the signup gate to handoff to `/dashboard` via fixture user. Full-path smoke test green in integration Preview.
+
+### Phase C.3 — First post-auth slice + Build phase
+
+First slice once users can land + sign up + be authed. **S-B1 + thin S-B4 taster** locked at session 23 P0-2 as the Phase C.3 entry.
+
+| Order | Slice | Scope note |
+|---|---|---|
+| 1 | **S-B1 + S-B4-thin** | Bank picker grid (C-V10) + Tink Link → callback → extraction render → one (1) section confirmation loop (e.g. Income: "We found £3,218/month from ACME, confirm or correct?") with spec 22 decision tree logic (Preserve-with-reskin) + spec 67 Moment 3 profiling for that section + trust chip upgrade on confirm. **Deferred:** remaining sections, multi-section handling, evidence upload, correction history. |
+| 2 | **S-B2** Sarah's Picture | Load-bearing. Downstream depends on it. |
+| 3 | **S-B3** dashboard | Post-connection + post-build state rendering. |
+| 4 | **S-B4** full — remaining sections | Children, Housing, Pensions, Spending, Debts, Other-assets — each section's spec 22 tree + spec 67 Moment 3 profiling. May split into per-section sub-slices. |
+| 5 | **S-B5** spending journey (estimates → bank-evidenced) | Outgoings section, detailed flow. |
+| 6 | **S-B6** evidence upload | Per-section inline upload + trust-level bump to document-evidenced. |
+| 7 | **S-B7** share action | Triggers reconcile; last in Build phase; removes `/workspace/*` discarded tree per §5. |
 
 **After S-B7:** the `/app/workspace/*` discarded tree is fully removed. At this point the codebase has no V2-era route surface left.
 
@@ -413,12 +420,53 @@ Cross-cutting slices (S-X1 escape-hatch export, S-X2 exit-this-page) land alongs
 ### Critical path to first real-user ship
 
 ```
-C.0 setup  →  C.1 foundation (6 slices)  →  C.2 first user-facing slice  →  PR to main  →  Preview-smoke test  →  first deployable state
+C.0 setup
+  → C.1 foundation (6 slices: S-F1 → S-F7 → S-F3 → S-F2 → S-F4 → S-F6)
+  → C.2 public + onboarding (S-M1 + S-O1)
+  → C.3 first post-auth slice (S-B1 + S-B4-thin)
+  → C.3 Build remainder (S-B2 → S-B3 → S-B4-full → S-B5 → S-B6 → S-B7)
+  → C.4 Reconcile / Settle / Finalise
+  → cutover: fast-forward main ← phase-c, single production deploy
 ```
 
-This is the minimum path from "design-only repo" to "something a beta user could touch in a controlled way." Everything after (remaining Build slices, Reconcile, Settle, Finalise, legal templates, pre-test audit, pen-test, launch-readiness) cascades from there.
+Each arrow = "ready for next step" once prior slice ships to integration Preview with green smoke test + DoD met.
 
-**Launch-readiness dependencies** (spec 56) do NOT block Phase C slice work — they run in parallel (legal template commissions, SRA consultation, insurance quotes, DPIA, pen-test scheduling). Engineering is one workstream of several on the critical path to real-user launch.
+**Launch-readiness dependencies** (spec 56) run in parallel (legal template commissions, SRA consultation, insurance quotes, DPIA, pen-test scheduling) — not blocking slice work. Engineering is one workstream of several on the critical path to real-user launch.
+
+## §7a · Deployment model — Phase-C-freeze topology (locked session 23 P0-2)
+
+Production (`construct-dev.vercel.app`) stays on current V1 state throughout Phase C. No prod redeploys during rebuild. Final cutover = deliberate single atomic switch.
+
+**Three testable surfaces during Phase C:**
+
+| URL | What it shows | Source branch | Environment |
+|---|---|---|---|
+| `construct-dev.vercel.app` (prod) | V1 as it is today — **frozen** | `main` (pinned / unchanged) | `DECOUPLE_AUTH_MODE=prod`, real Supabase (once provisioned) |
+| `construct-dev-git-phase-c-*.vercel.app` | Rolling rebuild state (integration Preview) | `phase-c` (long-lived integration branch) | `DECOUPLE_AUTH_MODE=dev`, dev-store, scenario picker |
+| `construct-dev-git-<slice-branch>-*.vercel.app` | Single slice under test, isolated | `claude/phase-c-s-{xx}-*` per slice | `DECOUPLE_AUTH_MODE=dev` |
+
+**Branch flow:**
+1. `phase-c` branch created from `main` at freeze-start
+2. Slice branches branch from `phase-c` → work → Preview URL updates on push
+3. Slice DoD met (spec 72 §11 checklist) → merge slice → `phase-c` → integration Preview updates
+4. `main` stays frozen during entire Phase C
+5. Cutover: fast-forward `main` ← `phase-c`, single prod deploy, atomic switch
+
+**Hotfix protocol:** if a security patch or urgent bug fix must land on `main` during Phase C (dependabot critical, user-breaking prod bug), cherry-pick same-day into `phase-c` so branches don't diverge. Low risk given V1 is stable, but document the protocol.
+
+**Env scoping (reuses spec 72 §2):**
+- Vercel Production env → `DECOUPLE_AUTH_MODE=prod` fixed, CI gate enforces
+- Vercel Preview env → `DECOUPLE_AUTH_MODE=dev` default, all new rebuild work exercises dev abstractions
+- Vercel Development (local CLI) → `DECOUPLE_AUTH_MODE=dev`
+
+**Why freeze vs rolling-prod:**
+- Real users on current prod are uninterrupted during the rebuild period
+- No patchwork user experience (V1 marketing + new workspace) mid-rebuild
+- Clean atomic cutover with single rollback path if cutover goes wrong
+- Integration Preview always reflects "what prod will be at cutover"
+- Per-slice Previews enable targeted testing without affecting prod
+
+**Cutover checklist** (produced later — not this session): DPIA in place · pen-test passed · legal review of generated docs · real Supabase provisioned with RLS · beta users onboarded through integration Preview · go/no-go decision documented.
 
 ## 8. S-F7 slice card (for spec 70 slice index)
 

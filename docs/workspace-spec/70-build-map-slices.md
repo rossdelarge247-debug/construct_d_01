@@ -88,6 +88,24 @@ This is a **catalogue**, not a scope doc. Every slice in the product is listed s
 
 ---
 
+## Marketing slices
+
+*Public unauthed surfaces — landing, features, pricing. Rebuilt against Claude AI Design outputs per session 23 P0-2 decision.*
+
+### S-M1 · Marketing site rewrite
+- **Phases:** Pre-Phase-1 (unauthed public surface)
+- **Value:** Every arrival lands on spec-42-aligned positioning — "complete settlement workspace" framing, not "financial disclosure tool." Public site is the first impression; current V1 pages violate positioning (app/page.tsx, app/features, app/pricing Discarded per spec 70 hub audit).
+- **Key components:** New landing (`/`) · new features page (`/features`) · new pricing page (`/pricing`) · reskin of legal placeholders (`/privacy`, `/terms`, `/cookies` — Preserve-with-reskin shells pending legal review per spec 56 L2) · marketing-surface primitives from S-F1 design system · Claude AI Design outputs as canonical visual source · positioning copy from spec 42 (tagline, pillars, value proposition) · handoff to `/start` pre-signup interview.
+- **Depends on:** S-F1 (design system tokens + primitives).
+- **Opens:**
+  - Marketing copy sourcing (direct from spec 42 + new positioning writing)
+  - Responsive behaviour for marketing pages (mobile/tablet/desktop design variants)
+  - SEO metadata + structured data per spec 56 L9.2
+  - Analytics event allowlist for marketing surfaces (spec 72 §8 PostHog schema)
+- **Security:** spec 72 §8 (PostHog event allowlist — no PII in marketing events) + §10 (CSP allowlist includes marketing third-party scripts if any).
+
+---
+
 ## Onboarding slices
 
 *Phase 1 Start, plus the respondent variant.*
