@@ -173,7 +173,131 @@ Only these files move during rebuild. Every move is tracked here + in spec 70 hu
 
 ## 4. Dev-mode pattern — S-F7 slice
 
-[FILL]
+Dev mode is a **first-class implementation behind a real interface**, not a special case sprinkled through the code. Same domain code paths run in dev and prod; only the implementation behind the interface swaps. Hexagonal-architecture style. Boundary enforcement is multi-layered per spec 72 §7.
+
+### Three abstractions
+
+**Session** — who the user is.
+```ts
+interface UserSession {
+  id: string;
+  email: string;
+  role: 'participant' | 'admin' | 'support';
+  twoFactorVerified: boolean;
+  createdAt: Date;
+  lastActiveAt: Date;
+  deviceFingerprint: string;
+}
+```
+
+**WorkspaceStore** — where user-scoped state lives.
+```ts
+interface WorkspaceStore {
+  read<T>(userId: string, scope: string): Promise<T | null>;
+  write<T>(userId: string, scope: string, data: T): Promise<void>;
+  subscribe<T>(userId: string, scope: string, callback: (data: T) => void): () => void;
+  // reset() is dev-only — real account deletion is a separate DSAR-compliant flow (slice TBD)
+}
+```
+
+**AuthGate** — route guards.
+```ts
+interface AuthGate {
+  requireUser(): Promise<UserSession>;       // throws → redirect to /start if no session
+  redirectIfAuthed(to: string): Promise<void>; // for unauthed-only routes (landing, signup)
+  currentSession(): Promise<UserSession | null>; // non-throwing check
+}
+```
+
+### Switch mechanism
+
+Single env var: `NEXT_PUBLIC_DECOUPLE_AUTH_MODE=dev|prod`. Read once at module init in `src/lib/auth/index.ts`:
+
+```ts
+// src/lib/auth/index.ts
+export const MODE: 'dev' | 'prod' =
+  process.env.NEXT_PUBLIC_DECOUPLE_AUTH_MODE === 'prod' ? 'prod' : 'dev';
+
+// Runtime assertion — spec 72 §7
+if (process.env.NODE_ENV === 'production' && MODE !== 'prod') {
+  throw new Error('DECOUPLE_AUTH_MODE must be "prod" in production build');
+}
+
+export const getSession = MODE === 'prod' ? supabaseSession : devSession;
+export const getAuthGate = MODE === 'prod' ? supabaseAuthGate : devAuthGate;
+```
+
+And symmetric in `src/lib/store/index.ts`:
+```ts
+import { MODE } from '@/lib/auth';
+export const getStore = MODE === 'prod' ? supabaseStore : devStore;
+```
+
+All slice code consumes `import { getSession, getAuthGate, getStore } from '@/lib/auth'` (or `'@/lib/store'`). Never touches Supabase directly, never touches the env var directly. ESLint rule enforces (spec 72 §7).
+
+### Dev implementation details
+
+**`dev-session.ts`** — returns a fixture user based on current scenario. Fixture users have synthetic emails on `@dev.decouple.local` domain (spec 72 §7 fixture isolation). `twoFactorVerified: true` by default (dev bypass). State lives in `localStorage` under `decouple:dev:session:v1`.
+
+**`dev-store.ts`** — reads/writes to `localStorage` under versioned key pattern `decouple:dev:store:v1:{userId}:{scope}`. Subscribe uses `storage` event (cross-tab) + custom event dispatch (same-tab). Graceful degradation if localStorage unavailable (log warning, continue in-memory; dev-only behaviour).
+
+**`dev-auth-gate.ts`** — always returns the current fixture session; `redirectIfAuthed` is a no-op in dev (we want to see pages regardless).
+
+### Dev surface routes (under `/app/dev/`)
+
+All gated by `MODE === 'prod'` notFound at layout level (spec 72 §7):
+
+| Route | Purpose |
+|---|---|
+| `/dev` | Dashboard — links to tools below + current-mode + current-scenario |
+| `/dev/scenarios` | Scenario picker — select fixture state; reload reloads with chosen scenario applied |
+| `/dev/state-inspector` | Current dev store contents as JSON + edit affordance + save-back |
+| `/dev/reset` | Confirm + wipe `decouple:dev:*` localStorage keys + redirect to `/dev` |
+| `/dev/engine-workbench` | Moved from `/workspace/engine-workbench` — signal-rule testing |
+
+### Dev banner (env-banner reskin)
+
+`src/components/layout/env-banner.tsx` (Preserve-with-reskin) becomes the persistent dev-mode surface:
+- Current mode chip (DEV / PROD)
+- Current scenario name + switcher dropdown
+- Reset button (wipes + reloads)
+- `MODE === 'prod'` → returns `null` unconditionally
+
+Rendered inside `(authed)` layout (banner hidden on marketing routes regardless of mode). In dev preview deploys, every page shows the banner.
+
+### Fixture scenario library (initial 8)
+
+JSON fixtures under `src/lib/store/scenarios/*.json` + a loader in `scenario-loader.ts`:
+
+1. **`cold-sarah`** — blank workspace, no bank, no data
+2. **`sarah-connected`** — bank connected, extractions loaded, confirmations not started
+3. **`sarah-mid-build`** — confirmations ~50% complete, some estimates, some evidence
+4. **`sarah-complete`** — build complete, Sarah's Picture ready to share
+5. **`sarah-shared-mark-invited`** — shared, Mark invited but not signed in
+6. **`sarah-reconcile-in-progress`** — both built, joint doc, conflicts pending
+7. **`sarah-settle`** — settlement proposal in progress
+8. **`sarah-finalise`** — ready for consent order generation
+
+Each scenario = deterministic state snapshot. Picking a scenario = `reset + load scenario JSON into dev store + reload`. Scenarios cover the states a slice needs to be testable end-to-end.
+
+Existing `src/lib/bank/test-scenarios.ts` (Re-use) feeds the bank portions of the scenarios — no duplication.
+
+### Public → authed handoff in dev mode
+
+Pre-signup interview (`/start`, spec 65 O1-O8) runs in both modes. In prod: interview output → signup → Supabase workspace store. In dev: interview output → dev store under fixture user → skip-signup link → dashboard loads that user.
+
+Same code path, same state model, different backend. When real auth ships: flip env var, real signup writes to Supabase, dashboard reads from Supabase. No route logic changes. No form logic changes.
+
+### Real-Supabase migration playbook (parked open)
+
+When we flip to `DECOUPLE_AUTH_MODE=prod` for the first real launch environment:
+1. Supabase project provisioned with RLS policies (spec 72 §4) — all tables, all policies
+2. Schema migration applied (tables matching WorkspaceStore scopes)
+3. Env vars set in Vercel Production scope (spec 72 §2)
+4. CI gate enabled to block merges that re-introduce dev-mode leaks (spec 72 §7)
+5. Migration spec produced (not this session) covering: schema versioning, data backfill if any, rollback plan, smoke tests, first-user onboarding to prod
+
+That migration is a slice of its own (likely S-F8 or similar, sequenced after first-real-launch readiness). Not in scope for session 23.
 
 ## 5. Staged discard-tree removal
 
@@ -189,7 +313,37 @@ Only these files move during rebuild. Every move is tracked here + in spec 70 hu
 
 ## 8. S-F7 slice card (for spec 70 slice index)
 
-[FILL]
+Copy this card into `docs/workspace-spec/70-build-map-slices.md` under the Foundation slices section (after S-F6). Slice count increases from 31 → 32.
+
+```markdown
+### S-F7 · Persistence + auth abstraction (dev/prod modes)
+
+- **Phases:** All
+- **Value:** Domain code reads/writes sessions + workspace state via interfaces (Session, WorkspaceStore, AuthGate). Dev mode runs end-to-end against `localStorage` fixtures — no signup, no Supabase. Prod mode flips to Supabase via `NEXT_PUBLIC_DECOUPLE_AUTH_MODE=prod` env var. Same domain code paths, different implementation. Engineering can build + test slices without auth shipping; real auth swaps in cleanly later.
+- **Key components:**
+  - `lib/auth/` — Session interface + dev-session (fixture user) + supabase-session + AuthGate
+  - `lib/store/` — WorkspaceStore interface + dev-store (localStorage) + supabase-store (wraps existing `lib/supabase/workspace-store.ts`)
+  - `/app/dev/` route group — dashboard, scenario picker, state inspector, reset, moved engine-workbench
+  - `components/dev/` — scenario-picker, state-inspector, (moved hub debug panels)
+  - Env banner reskin (Preserve-with-reskin) — mode chip + scenario dropdown + reset
+  - Build-time + runtime assertions enforcing `MODE === 'prod'` in production build (spec 72 §7)
+  - CI gate testing production build for dev-mode leaks (routes / imports / email domains / localStorage keys)
+  - Fixture scenario library — 8 initial scenarios covering cold through finalise states
+- **Depends on:** S-F1 (design system for dev-banner reskin + dev-UI primitives)
+- **Opens:**
+  - Storage schema versioning convention (`decouple:dev:store:v1` → v2 migration pattern)
+  - Real-Supabase migration playbook (separate spec when we ship first real-auth deploy)
+  - Scenario JSON format + loader pattern
+  - Dev-only API route convention (`/app/dev/api/*`)
+- **Security:** spec 72 §3 (Session pattern) + §7 (Dev/prod boundary enforcement, multi-layer). Fixture user emails on `@dev.decouple.local` reserved domain; production signup allowlist rejects this domain.
+```
+
+**Placement in slice dependency graph:** S-F7 sits in the Foundation block. S-F1 (design system) comes before S-F7 (dev banner + UI uses primitives). S-F7 is a hard prerequisite for any slice that reads/writes user state — which is S-O1 (primary onboarding), S-B1 (bank connection), S-B2 (Sarah's Picture), and all downstream. S-F7 is therefore in the Phase C Step 1 set alongside S-F1.
+
+**Recommended Phase C Step 1 set (foundation + first enabler):**
+`S-F1 (design system) → S-F7 (dev/prod abstraction) → S-F3 (phase nav) → S-F2 (document shell) → S-F4 (trust chip) → S-F6 (task row + task taxonomy)` → ready for first user-facing slice.
+
+S-F5 (AI coach pattern) can come later — it's not on the critical path to the first user-visible deliverable.
 
 ---
 
