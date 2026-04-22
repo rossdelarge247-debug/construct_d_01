@@ -19,7 +19,7 @@ Capture engineering-phase additions to `CLAUDE.md` and supporting patterns so th
 
 The Karpathy file is orthogonal (coding conduct); the Medium workflow is largely either redundant with what we have, or ritual without mechanical value, or actively harmful to our session-continuity model. Filtering below.
 
-## A. New CLAUDE.md section — Coding conduct
+## A. New CLAUDE.md section — Coding conduct ✅ applied (session 24)
 
 Lift the Karpathy principles near-verbatim. These are guardrails against Claude over-engineering, silent-deciding, or scope-creeping inside `src/`. Complementary to our existing Product rules and Technical rules — doesn't replace either.
 
@@ -41,7 +41,7 @@ These rules govern how Claude behaves when editing `src/`. Guardrails against ov
 
 ~20 lines added to CLAUDE.md. No conflict with existing sections.
 
-## B. New CLAUDE.md section — Engineering conventions
+## B. New CLAUDE.md section — Engineering conventions ✅ applied (session 24)
 
 Operational rules that turn conventions into mechanical gates. Insert after the new Coding conduct section.
 
