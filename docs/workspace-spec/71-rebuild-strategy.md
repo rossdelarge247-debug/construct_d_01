@@ -301,15 +301,124 @@ That migration is a slice of its own (likely S-F8 or similar, sequenced after fi
 
 ## 5. Staged discard-tree removal
 
-[FILL]
+Each slice that replaces a surface deletes the old tree as part of its DoD. No big-bang removal. Deletions are audited — a slice's wrap doc lists the paths it removed, and spec 70 hub inventory flips the removed rows from Discarded to removed (retained for audit trail).
+
+**Removal sequence table:**
+
+| Slice | Surfaces replaced | Paths deleted as part of slice DoD |
+|---|---|---|
+| S-F7 | engine-workbench moved; debug panels moved | (no deletions — only moves; see §3 move table) |
+| S-O1 | pre-signup interview (V1 Gentle Interview) | `src/app/start/*` (14 pages) · `src/components/interview/*` (5 files) |
+| Marketing rewrite (part of S-F1 or a dedicated slice) | landing + features + pricing pages | `src/app/page.tsx` · `src/app/features/page.tsx` · `src/app/pricing/page.tsx` (replaced in place) |
+| S-B1 | bank connection flow | `src/components/workspace/bank-connection-flow.tsx` |
+| S-B2 | Sarah's Picture — financial summary + first-time wizard + hub title-bar + build route | `src/components/workspace/{financial-summary-page, financial-summary, first-time-wizard, manual-entry-modal, document-review-modal, category-tabs, category-content, page-tabs, summary-tab, section-mini-summary, readiness-bar, progress-stepper}.tsx` · `src/components/hub/title-bar.tsx` · `src/app/workspace/build/page.tsx` |
+| S-B3 | dashboard — task list home + welcome carousel | `src/components/workspace/{welcome-carousel, task-list-home}.tsx` |
+| S-B4 | confirmation loop | `src/components/workspace/confirmation-flow.tsx` |
+| S-B5 | spending journey (5 files) | `src/components/workspace/{spending-flow, spending-estimates, spending-categorise, spending-fork, spending-search}.tsx` |
+| S-B6 | evidence upload | `src/components/workspace/{document-upload, extraction-review}.tsx` |
+| S-B7 | share action + orchestrator no-longer-needed | `src/app/workspace/page.tsx` · `src/app/workspace/{agree, build, disclose, finalise, negotiate, layout}.tsx` · `src/components/workspace/workspace-layout.tsx` |
+| End of Phase C.3 cleanup | any remaining Discarded components | `src/components/workspace/*` remaining (ai-analysis, cetv-tracker, document-checklist, future-phase-page, mega-footer, modal, toast, page-tabs remnants, extraction-review remnants) — delete in a dedicated cleanup PR after confirming no imports remain |
+| S-F3 constants update | 4-phase WORKSPACE_PHASES | (not a deletion — update `src/constants/index.ts` to spec 42 five-phase in place) |
+| S-F7 types cleanup | V1 interview types | `src/types/interview.ts` delete · `src/types/hub.ts` prune legacy interview types |
+
+**Staged removal verification (part of slice DoD):**
+- Before deleting: `grep -r "from '@/components/workspace/<file>'" src/` across repo → zero hits
+- Preview deploy green on slice branch pre-merge
+- Preview deploy green on main post-merge
+- Spec 70 hub inventory updated in same PR
+
+**What if a slice finds it needs something from a Discarded file?** Evidence that the Discarded classification was wrong. Pause, re-classify in spec 70 hub with new evidence, then proceed. Don't copy-paste out of Discarded files — that leaks V1 palette or obsolete patterns. Better to extract the pattern as a design doc and rebuild.
 
 ## 6. Known-unknowns from spec 70 — resolved
 
-[FILL]
+Four Known-unknowns were flagged in spec 70 hub. Each resolved in session 23 via targeted file inspection. Recording the resolution here so the hub can be updated on the next edit + future sessions don't re-litigate.
+
+| Path | Resolution | Evidence |
+|---|---|---|
+| `src/app/workspace/page.tsx` | **Discarded.** CLAUDE.md was correct; audit was over-generous. | File imports 7 items from Discarded `components/workspace/*` tree (welcome-carousel, task-list-home, bank-connection-flow, confirmation-flow, financial-summary-page, spending-flow, mega-footer) plus `components/hub/title-bar` (also Discarded). The state-machine pattern (PersistedState + loadPersistedState + savePersistedState + safe-resting-screen logic on reload) is genuinely valuable — captured at **design level** in S-F7 WorkspaceStore (§4 above). Logic survives; code does not port. Deletion happens in S-B7 per §5. |
+| `src/app/workspace/layout.tsx` | **Discarded.** | 5-line file — `<ToastProvider>{children}</ToastProvider>` wrapping Discarded toast component. Toast pattern rebuilds naturally as a design-system primitive during S-F1. Not worth porting. |
+| `src/app/workspace/{agree, build, disclose, finalise, negotiate}/page.tsx` | **All Discarded.** | `agree` uses FuturePhasePage (Discarded) with disclosure-framing content. `build` imports ~10 Discarded components + V1 palette (`bg-cream-dark`, `bg-warmth`, `bg-sage`) in READINESS_MILESTONES. `disclose` uses "Form E equivalent" + "disclosure-ready format" (positioning violation). `finalise` lists "£60 consent order" (stale fee — current is £53/593) and references "Form A" + "disclosure pack". `negotiate` has decent copy but imports Discarded FuturePhasePage. All replaced by new phase routes under `/app/(authed)/{build, reconcile, settle, finalise}` per §2. |
+| `src/app/workspace/agree/page.tsx` path-change note | Rename resolved — Phase 4 is **Settle** per spec 42 (not "Agree"). | The route + content are both Discarded anyway, so rename is moot. New Phase 4 code lives at `/app/(authed)/settle/` fresh. Audit's "rename" recommendation superseded. |
+
+**Pattern preserved, not code:**
+The `workspace/page.tsx` state machine taught us that:
+- Session-level workspace state must survive page reload (sessionStorage fallback when no backend)
+- Mid-flow screens should not be "restorable on reload" — reload should land on a safe resting screen
+- Persistence is versioned (`STORAGE_KEY` pattern)
+- Degradation is silent (storage full or unavailable → in-memory only)
+
+All four points carry into S-F7 WorkspaceStore behaviour by design, not by code port. Dev-store and Supabase-store both implement this shape; slice-level code consuming the store inherits it.
+
+**Spec 70 hub update required:** the Known-unknowns section will flip to this resolution when the hub is next edited (likely during S-F7 or session 24).
 
 ## 7. Migration sequencing
 
-[FILL]
+Four-phase sequence from current state to end state. Each "Phase" here = a Phase-C sub-period (not a product phase per spec 42 — those are Start/Build/Reconcile/Settle/Finalise). Naming: **C.0 / C.1 / C.2 / C.3 / C.4**.
+
+### Phase C.0 — Ops setup (not slice work)
+
+Pre-slice infrastructure. Done once, then enables all slice work.
+
+- Vercel env vars configured per spec 72 §2 (secrets scoped per environment; `DECOUPLE_AUTH_MODE` fixed `=prod` in Production; `=dev` allowed in Preview + Development)
+- Main-branch CI gates wired: lint, typecheck, build, `npm audit`, `gitleaks`, security-headers smoke test, dev-mode-leak production-build scan (spec 72 §7)
+- Supabase project provisioned with RLS enabled on all tables from day one (spec 72 §4)
+- Preview deploy URL convention + smoke-test checklist per slice (part of DoD)
+- `docs/slices/` directory created with template (acceptance.md + test-plan.md + security.md + verification.md per spec 72 §11)
+
+### Phase C.1 — Foundation slices
+
+No user-facing impact yet. These unlock everything else. Run as a single work-arc; merge to main incrementally but not separately promoted to users.
+
+| Order | Slice | Why this order |
+|---|---|---|
+| 1 | **S-F1** design system (tokens + primitives) | Everything else renders through these. First real deliverable of Phase C per spec 70 hub. |
+| 2 | **S-F7** dev/prod abstraction + `/app/dev/*` | Unlocks slice-building without auth shipping. Depends on S-F1 for env-banner + dev-UI primitives. |
+| 3 | **S-F3** phase nav (stepper + journey map) | First cross-phase anchor. Used by dashboard + every phase page. |
+| 4 | **S-F2** document shell | The shape every document renders into (Sarah's Picture, Our Household Picture, Settlement Proposal). |
+| 5 | **S-F4** trust chip | Every evidence-carrying item needs this. |
+| 6 | **S-F6** task row + task taxonomy | Dashboard + in-doc needs-your-attention all render through it. |
+
+S-F5 (AI coach pattern) deferred — not on critical path to first user-facing slice. Added when Settle/Reconcile slices need it.
+
+**Exit criterion for C.1:** Foundation primitives + abstractions exist; `/dev/*` dashboard loads a scenario; a placeholder page rendering a document shell with phase stepper + trust chip + task row works end-to-end. No Discarded tree removed yet (removals come with the slices that replace).
+
+### Phase C.2 — First user-facing slice
+
+Pick one at session 23 P0-2. Candidates + rationale live there. Whichever is picked, this slice:
+- Is the first slice to touch real user-flow code
+- Removes a specific section of the Discarded tree (per §5 removal table)
+- Ships to Preview at slice-complete; to Production at slice-merged + smoke-test-green
+- Sets the cadence + pattern for all subsequent slice-delivery work
+
+### Phase C.3 — Build phase remainder
+
+S-B1 through S-B7, in roughly this order (dependencies drive exact order):
+
+1. S-B1 bank connection (independent, high reuse)
+2. S-B2 Sarah's Picture (the load-bearing slice; most downstream depends on it)
+3. S-B3 dashboard (renders post-connection + post-build progress)
+4. S-B4 per-section confirmation loop
+5. S-B5 spending journey
+6. S-B6 evidence upload
+7. S-B7 share action (triggers reconcile — last in Build, first touch of Reconcile)
+
+**After S-B7:** the `/app/workspace/*` discarded tree is fully removed. At this point the codebase has no V2-era route surface left.
+
+### Phase C.4 — Reconcile / Settle / Finalise phases
+
+Each phase = its own build period. Reconcile first (unblocked by S-B7 share), then Settle (unblocked by R-1 joint-doc versioning + some of Reconcile complete), then Finalise.
+
+Cross-cutting slices (S-X1 escape-hatch export, S-X2 exit-this-page) land alongside the phase slices that first need them — not upfront.
+
+### Critical path to first real-user ship
+
+```
+C.0 setup  →  C.1 foundation (6 slices)  →  C.2 first user-facing slice  →  PR to main  →  Preview-smoke test  →  first deployable state
+```
+
+This is the minimum path from "design-only repo" to "something a beta user could touch in a controlled way." Everything after (remaining Build slices, Reconcile, Settle, Finalise, legal templates, pre-test audit, pen-test, launch-readiness) cascades from there.
+
+**Launch-readiness dependencies** (spec 56) do NOT block Phase C slice work — they run in parallel (legal template commissions, SRA consultation, insurance quotes, DPIA, pen-test scheduling). Engineering is one workstream of several on the critical path to real-user launch.
 
 ## 8. S-F7 slice card (for spec 70 slice index)
 
