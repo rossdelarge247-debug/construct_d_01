@@ -103,13 +103,18 @@ docs/workspace-spec/65-pre-signup-interview-reconciled.md  — Pre-signup locked
 docs/workspace-spec/67-post-signup-profiling-progress.md   — 12 gaps resolved + Gap 7 resolved session 22
 
 Build Map (spec 70 suite — the Phase B deliverable)
-docs/workspace-spec/70-build-map.md                 — Hub: tagging, preserved-legacy, how-to-read
+docs/workspace-spec/70-build-map.md                 — Hub: tagging, preserved-legacy, how-to-read (audit-integrated inventory, session 23)
 docs/workspace-spec/70-build-map-start.md           — Phase 1
 docs/workspace-spec/70-build-map-build.md           — Phase 2
 docs/workspace-spec/70-build-map-reconcile.md       — Phase 3
 docs/workspace-spec/70-build-map-settle.md          — Phase 4
 docs/workspace-spec/70-build-map-finalise.md        — Phase 5
 docs/workspace-spec/70-build-map-slices.md          — 33-slice catalogue (engineering work units)
+
+Rebuild + engineering (Phase C preparation — session 23)
+docs/workspace-spec/71-rebuild-strategy.md          — Folder structure, stable-lib paths, S-F7 dev-mode, staged removal, Phase C sequencing, Phase-C-freeze topology
+docs/workspace-spec/72-engineering-security.md      — Engineering security principles (data classification, env vars, auth/session, RLS, validation, logging, dev/prod boundary, third-party, safeguarding, pen-test readiness, per-slice security DoD)
+docs/engineering-phase-candidates.md                — Parked CLAUDE.md additions for Phase C kickoff (Karpathy coding conduct, engineering conventions, per-slice AC + test plan templates)
 
 Stable libraries (preserve across rebuild — Re-use per Build Map)
 src/lib/bank/tink-client.ts                         — Tink API client
