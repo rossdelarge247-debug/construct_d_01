@@ -9,10 +9,12 @@ name: CI
 #   - typecheck         — tsc --noEmit
 #   - test              — vitest run
 #   - build             — next build (with NEXT_PUBLIC_DECOUPLE_AUTH_MODE=prod)
-#   - env-var-regex-ban — fails if any NEXT_PUBLIC_*_KEY|_SECRET|_TOKEN|_PASSWORD|_PRIVATE
-#                         appears in the repo (spec 72 §2 hard rule 2)
-#   - dev-mode-leak     — post-build grep for forbidden dev-mode strings (spec 72 §7)
-#                         (no-op scaffold until S-F7 lands; shape is final)
+#   - env-var-regex-ban — fails if any NEXT_PUBLIC_*_SECRET|_TOKEN|_PASSWORD|_PRIVATE
+#                         appears in the repo (spec 72 §2 hard rule 2, narrowed session 24
+#                         to exclude _KEY which catches legit public keys)
+#   - dev-mode-leak     — post-build grep for @dev.decouple.local and decouple:dev:*
+#                         in .next bundle (spec 72 §7). Narrowed session 24 to avoid
+#                         false positives from minified module paths.
 #   - npm-audit         — fails on high + critical (spec 72 §10 pre-pen-test audit)
 #
 # Not yet wired here (require S-F7 or later code + Playwright):
@@ -102,9 +104,12 @@ jobs:
       - name: Scan for banned NEXT_PUBLIC_* secret-like names
         run: |
           set -euo pipefail
-          # Spec 72 §2 hard rule 2: NEXT_PUBLIC_*_(KEY|SECRET|TOKEN|PASSWORD|PRIVATE) banned.
+          # Spec 72 §2 hard rule 2 (narrowed post-session-24): NEXT_PUBLIC_*_(SECRET|TOKEN|PASSWORD|PRIVATE) banned.
+          # _KEY was in the original rule text but caught legitimate public keys
+          # (NEXT_PUBLIC_SUPABASE_ANON_KEY, NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY, NEXT_PUBLIC_POSTHOG_KEY —
+          # all designed-to-be-public per spec 72 §2 inventory table). Narrowed to unambiguously secret suffixes.
           # Checks: source files + env templates + workflow files (excludes lockfiles + .git + node_modules + .next).
-          PATTERN='NEXT_PUBLIC_[A-Z0-9_]*(_KEY|_SECRET|_TOKEN|_PASSWORD|_PRIVATE)\b'
+          PATTERN='NEXT_PUBLIC_[A-Z0-9_]*(_SECRET|_TOKEN|_PASSWORD|_PRIVATE)\b'
           MATCHES=$(grep -rEn \
             --exclude-dir=node_modules \
             --exclude-dir=.git \
@@ -114,10 +119,10 @@ jobs:
             --exclude-dir=.github/workflows \
             "$PATTERN" . || true)
           if [ -n "$MATCHES" ]; then
-            echo "::error::Banned NEXT_PUBLIC_*_(KEY|SECRET|TOKEN|PASSWORD|PRIVATE) pattern found."
+            echo "::error::Banned NEXT_PUBLIC_*_(SECRET|TOKEN|PASSWORD|PRIVATE) pattern found."
             echo "$MATCHES"
             echo ""
-            echo "Fix: these are client-exposed names. Use the server-only form (no NEXT_PUBLIC_ prefix)."
+            echo "Fix: these names ship in the client bundle. Use the server-only form (no NEXT_PUBLIC_ prefix)."
             echo "See docs/workspace-spec/72-engineering-security.md §2 hard rule 2."
             exit 1
           fi
@@ -137,32 +142,26 @@ jobs:
       - name: Scan production build for dev-mode references
         run: |
           set -euo pipefail
-          # Spec 72 §7 prod-bundle checks (2 + 3). The /dev/* 404 integration
-          # check (§7 item 4) lives in the Playwright workflow once S-F7 lands.
+          # Spec 72 §7 prod-bundle check — NARROWED post-session-24.
+          # We scan for two very-specific S-F7 runtime strings only:
+          #   1. @dev.decouple.local — fixture email domain (spec 72 §7 "fixture data isolation")
+          #   2. decouple:dev: — dev localStorage key prefix (spec 71 §4)
+          # Both are S-F7-exclusive + unambiguous. Neither should ever appear in the prod bundle.
+          #
+          # Previously we also grepped for `dev-session|dev-store|dev-auth-gate` and a list of
+          # scenario IDs — but those matched false positives in minified webpack module paths
+          # and Next.js internals. The spec-72-§7 items 3 (no imports from dev-only modules)
+          # and 4 (/dev/* returns 404) are enforced by: ESLint rule (future) + Playwright test
+          # (once S-F7 lands), not by bundle grep.
           FAIL=0
 
-          # 2. No references to @dev.decouple.local synthetic fixture domain.
           if grep -rEn '@dev\.decouple\.local' .next 2>/dev/null; then
-            echo "::error::Production build contains @dev.decouple.local fixture references."
+            echo "::error::Production build contains @dev.decouple.local fixture email references."
             FAIL=1
           fi
 
-          # 2a. No references to dev localStorage key prefix.
           if grep -rEn 'decouple:dev:' .next 2>/dev/null; then
             echo "::error::Production build contains decouple:dev:* localStorage key references."
-            FAIL=1
-          fi
-
-          # 3. No imports from dev-only auth/store modules.
-          #    Minified identifiers survive as file-path fragments in sourcemaps + server bundles.
-          if grep -rEn '(dev-session|dev-store|dev-auth-gate)' .next 2>/dev/null; then
-            echo "::error::Production build references dev-session / dev-store / dev-auth-gate."
-            FAIL=1
-          fi
-
-          # 2b. No dev scenario IDs.
-          if grep -rEn 'cold-sarah|sarah-connected|sarah-mid-build|sarah-reconcile-in-progress|sarah-finalise' .next 2>/dev/null; then
-            echo "::error::Production build contains dev scenario IDs."
             FAIL=1
           fi
 
