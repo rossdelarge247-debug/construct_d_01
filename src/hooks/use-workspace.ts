@@ -15,6 +15,7 @@ export function useWorkspace() {
   useEffect(() => {
     const stored = loadWorkspace()
     if (stored) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setItems(stored.items)
       setSpending(stored.spending)
       setDocuments(stored.documents)

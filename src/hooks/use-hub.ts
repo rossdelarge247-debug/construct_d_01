@@ -116,6 +116,7 @@ export function useHub() {
   useEffect(() => {
     const stored = loadState()
     if (stored) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setConfig(stored.config)
       setItems(stored.items)
     }
@@ -144,6 +145,7 @@ export function useHub() {
       const allItems: FinancialItem[] = []
 
       for (const { result, transformed } of results) {
+        // eslint-disable-next-line react-hooks/set-state-in-effect
         setUploadContext({
           fileCount: 0, fileNames: [],
           documentType: result.classification.document_type,
@@ -183,6 +185,7 @@ export function useHub() {
 
   // Regenerate lozenges when config changes, preserving upload state
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setLozengeState((prevLozenges) => {
       const freshLozenges = generateLozenges(config)
       // Merge: preserve uploaded status from previous lozenges

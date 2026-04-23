@@ -2,6 +2,8 @@
 // Grounded in spec 13 (extraction decision tree) and Form E field mapping
 // Each prompt tells the AI exactly what to look for in that document type
 
+import * as schemas from './extraction-schemas'
+
 export const CLASSIFICATION_PROMPT = `You are classifying a UK financial document for someone going through separation/divorce.
 
 Determine the document type from its content. Common types:
@@ -195,7 +197,6 @@ export function getExtractionPrompt(documentType: string): string {
 }
 
 export function getExtractionSchema(documentType: string) {
-  const schemas = require('./extraction-schemas')
   switch (documentType) {
     case 'bank_statement': return schemas.BANK_STATEMENT_SCHEMA
     case 'payslip': return schemas.PAYSLIP_SCHEMA
