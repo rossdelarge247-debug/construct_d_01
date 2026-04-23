@@ -34,7 +34,6 @@ export const WORKSPACE_PHASES: { key: WorkspacePhase; label: string; description
 export const CONFIDENCE_STATES = [
   { key: 'known' as const, label: 'Known', description: 'I have this information' },
   { key: 'estimated' as const, label: 'Estimated', description: 'I have a rough idea' },
-  { key: 'unsure' as const, label: 'Unsure', description: 'I think I know, but not confident' },
   { key: 'unknown' as const, label: 'Unknown', description: 'I don\'t have this information' },
 ]
 

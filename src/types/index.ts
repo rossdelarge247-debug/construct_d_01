@@ -10,7 +10,7 @@ export type InviteStatus = 'pending' | 'accepted' | 'declined'
 export type ProposalStatus = 'draft' | 'shared' | 'accepted' | 'disputed' | 'superseded' | 'withdrawn'
 
 export type FinancialCategory = 'asset' | 'liability' | 'income' | 'pension' | 'property' | 'obligation' | 'other'
-export type ConfidenceState = 'known' | 'estimated' | 'unsure' | 'unknown'
+export type ConfidenceState = 'known' | 'estimated' | 'unknown'
 export type FollowUpState = 'fine_for_now' | 'confirm_later' | 'priority_to_confirm' | 'resolved'
 export type VisibilityState = 'private' | 'shared' | 'requested' | 'disputed' | 'accepted' | 'archived'
 
