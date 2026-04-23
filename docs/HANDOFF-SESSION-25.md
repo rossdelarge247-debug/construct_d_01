@@ -183,9 +183,9 @@ Don't try to ship a slice in session 26 if hooks take longer than expected. Hook
 
 Branch: `claude/decouple-settlement-workspace-3DjCI`
 
-Commits ahead of main (expected: 7 after the wrap commit lands):
+Commits ahead of main (7):
 ```
-[wrap commit TBD]  docs: HANDOFF-25 + SESSION-CONTEXT update + SessionStart hook
+ac995d6  docs: session 25 wrap + SessionStart hook (partial reboot)
 403d39d  fix(lint): clear 7 CI-blocking errors in preserved code
 70e2672  chore(deps): bump next 16.2.2 -> ^16.2.4 for DoS advisory
 8a5aecd  docs(68a): lock confidence taxonomy in new C-CF section
