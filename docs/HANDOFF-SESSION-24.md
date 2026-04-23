@@ -248,6 +248,11 @@ b6596bc  Phase C foundation (Option 4): wipe V1, apply rebuild scaffolding, reti
 
 - **#4** (closed, not merged) — Session 23 re-targeted at main. Superseded by #6.
 - **#5** (closed, not merged) — Session 24 ops → main. Superseded by #6.
-- **#6** (✅ merged) — Phase C foundation (Option 4). Squash commit `321fce8` on main.
-- **{wrap}** — Session 24 wrap (`chore/session-24-wrap` → main), pending at handoff time.
+- **#6** (✅ merged, `321fce8`) — Phase C foundation (Option 4). V1 wipe + scaffolding + spec 71 §5/§7a amendments.
+- **#7** (✅ merged, `797c378`) — Session 24 wrap (this doc, SESSION-CONTEXT rewrite, CLAUDE.md read-discipline rules, HANDOFFs archive).
+- **#8** (✅ merged, `979a254`) — **Post-wrap CI hotfix.** First CI run against PR #7 surfaced two false-positives in the CI drafts I shipped: (a) env-var regex flagged legit public keys — narrowed to drop `_KEY`; (b) dev-mode leak scan matched minified webpack paths — narrowed to `@dev.decouple.local` + `decouple:dev:` only. Spec 72 §2 hard rule 2 + §7 CI-gate text amended. Remaining CI failures (lint 13, unit test, npm audit 2, gitleaks) are pre-existing and tagged for session 25 P0 triage.
+
+## Post-wrap note (added session 24 cleanup pass)
+
+The PR #8 hotfix happened *after* this handoff was first written. The "Bugs / issues encountered" and "What could improve" sections above do not mention it because it surfaced post-wrap. Root-cause summary: I wrote CI greps without first running them against the existing repo, so didn't catch the `_KEY` collision with legit `NEXT_PUBLIC_*_KEY` names (regex contradicted the inventory table it preceded) or the `dev-session|dev-store|dev-auth-gate` collision with minified bundle paths. Both are "write rule → don't self-check rule → ship" failures. The "Verify before planning" Planning conduct rule I codified earlier in the same session should have fired here and didn't. Noted for session 25 Planning conduct honour check.
 
