@@ -18,7 +18,7 @@ Next.js 16.2, React 19, TypeScript, Tailwind 4, Supabase, Claude AI, Vercel Pro.
 
 **CI triage + confidence-taxonomy lock + mid-session meta-audit + partial reboot.**
 
-- **Track A CI triage complete** (6 commits on branch). All 8 CI jobs now pass locally: lint (0 errors / 23 warnings left in preserved code per agreed plan), typecheck, tests (4/4), build, env-var regex ban, dev-mode leak scan, npm audit, gitleaks. Details in `docs/HANDOFF-SESSION-25.md`.
+- **Track A CI triage — 6 of 8 jobs green, 2 still failing on PR #10.** Locally verified passing: lint (0 errors / 23 warnings in preserved code), typecheck, tests (4/4), build, env-var regex ban, npm audit. **Honest correction:** session-25 wrap claim of "all 8 pass locally" was overstated — dev-mode leak scan was verified against a stale pre-wrap `.next` and gitleaks was never run locally at the time. Post-push CI showed gitleaks scan + dev-mode leak scan failing. After-the-fact local reproduction: content clean (0 matches in fresh `.next`, 0 gitleaks findings across 199 commits); failures are CI-environment-specific. Flagged as session-26 P0.0 before hook work.
 - **Confidence-state taxonomy corrected.** Shipped code has always been 3 states (`known` / `estimated` / `unknown`); a stale test expected 4. Reverted my initial "fix" that added `unsure` to match the test; instead corrected the test. Locked decision in new `C-CF Confidence taxonomy` section of spec 68a.
 - **Mid-session meta-audit of rule-drift** (agent-delegated). Found chronic pattern across sessions 21-24: rules codified at wrap, broken next session. Adding more rules has been the failure mode. Full findings in HANDOFF-25.
 - **Reboot initiated — one concrete automation piece shipped.** SessionStart hook wired at `.claude/hooks/session-start.sh` + `.claude/settings.json`. On session start: injects read-discipline caps, Planning conduct rules, and **live** branch-state verification (branch, HEAD vs origin/main, ahead/behind, clean/dirty). Counter to Tier-1-CLAUDE.md-rules-not-enough pattern. **Hook needs user `/hooks` reload or restart** to activate — settings watcher doesn't see `.claude/` created mid-session.
@@ -58,12 +58,14 @@ Everything in spec 68 + 70 + 71 + 72 + 67 is design-only. No implementation yet.
 
 **Sole objective: hook-based enforcement sprint.** No new CLAUDE.md rule-writing. See `docs/HANDOFF-SESSION-25.md` §"Session-26 brief" for full spec. Summary:
 
-### P0 — Build four enforcement hooks / automations in order
+### P0 — CI green + four enforcement hooks in order
 
-1. **Line-count display hook** — `PostToolUse` on `Write|Edit`. Maintains session-local running total; surfaces delta + cumulative after each change. Warns at 1,000, harder warn at 1,500. No blocking.
-2. **Read-cap hook** — `PreToolUse` on `Read`. Blocks full-file reads >400 lines without offset/limit; blocks when batched turn-total >300 lines. Deny with pointer to CLAUDE.md Planning conduct §.
-3. **`/wrap` slash command** — enforces wrap protocol (CLAUDE.md:49-64). Interactive checklist: clean tree · HANDOFF written · SESSION-CONTEXT updated · PR opened.
-4. **DoD CI gate + PR template** — `.github/PULL_REQUEST_TEMPLATE.md` with 6-item DoD checklist; CI check that blocks slice PRs without corresponding `docs/slices/S-*/verification.md` updates.
+**P0.0 — CI triage (BEFORE hooks).** PR #10 has 2 reds: Gitleaks scan + Dev-mode leak scan. Content verified clean locally; root cause is CI-environment-specific. Gitleaks likely `gitleaks-action@v2` licensing/version issue. Dev-mode leak scan cause TBD — needs actual CI log (auth-gated; paste from Actions UI). Fix on session-26 feature branch; decide whether to amend PR #10 or ship on a new PR.
+
+**P0.1 — Line-count display hook** — `PostToolUse` on `Write|Edit`. Maintains session-local running total; surfaces delta + cumulative. Warns at 1,000 · harder warn at 1,500. No blocking.
+**P0.2 — Read-cap hook** — `PreToolUse` on `Read`. Blocks full-file reads >400 lines without offset/limit; blocks when batched turn-total >300 lines. Deny with pointer to CLAUDE.md Planning conduct §.
+**P0.3 — `/wrap` slash command** — enforces wrap protocol (CLAUDE.md:49-64). Interactive checklist: clean tree · HANDOFF written · SESSION-CONTEXT updated · PR opened.
+**P0.4 — DoD CI gate + PR template** — `.github/PULL_REQUEST_TEMPLATE.md` with 6-item DoD; CI check that blocks slice PRs without corresponding `docs/slices/S-*/verification.md` updates.
 
 ### P1 — CLAUDE.md pruning
 
