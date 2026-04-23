@@ -66,6 +66,44 @@ This is a **catalogue**, not a scope doc. Every slice in the product is listed s
 - **Depends on:** S-F1, S-F3.
 - **Opens:** 68g B-11 (category completeness audit), 68g B-14 (user-added tasks V1/V1.5), 68f B-2 (snooze V1.5).
 
+### S-F7 · Persistence + auth abstraction (dev/prod modes)
+- **Phases:** All
+- **Value:** Domain code reads/writes sessions + workspace state via interfaces (Session, WorkspaceStore, AuthGate). Dev mode runs end-to-end against `localStorage` fixtures — no signup, no Supabase. Prod mode flips to Supabase via `NEXT_PUBLIC_DECOUPLE_AUTH_MODE=prod` env var. Same domain code paths, different implementation. Engineering can build + test slices without auth shipping; real auth swaps in cleanly later. Full design in spec 71 §4.
+- **Key components:**
+  - `lib/auth/` — Session interface + dev-session (fixture user) + supabase-session + AuthGate
+  - `lib/store/` — WorkspaceStore interface + dev-store (localStorage) + supabase-store (wraps existing `lib/supabase/workspace-store.ts`)
+  - `/app/dev/` route group — dashboard, scenario picker, state inspector, reset, moved engine-workbench
+  - `components/dev/` — scenario-picker, state-inspector, (moved hub debug panels)
+  - Env banner reskin (Preserve-with-reskin) — mode chip + scenario dropdown + reset
+  - Build-time + runtime assertions enforcing `MODE === 'prod'` in production build (spec 72 §7)
+  - CI gate testing production build for dev-mode leaks (routes / imports / email domains / localStorage keys)
+  - Fixture scenario library — 8 initial scenarios (cold-sarah through sarah-finalise)
+- **Depends on:** S-F1 (design system for dev-banner reskin + dev-UI primitives)
+- **Opens:**
+  - Storage schema versioning convention (`decouple:dev:store:v1` → v2 migration pattern)
+  - Real-Supabase migration playbook (separate spec when we ship first real-auth deploy)
+  - Scenario JSON format + loader pattern
+  - Dev-only API route convention (`/app/dev/api/*`)
+- **Security:** spec 72 §3 (Session pattern) + §7 (Dev/prod boundary enforcement, multi-layer). Fixture users on reserved `@dev.decouple.local` domain; prod signup allowlist rejects.
+
+---
+
+## Marketing slices
+
+*Public unauthed surfaces — landing, features, pricing. Rebuilt against Claude AI Design outputs per session 23 P0-2 decision.*
+
+### S-M1 · Marketing site rewrite
+- **Phases:** Pre-Phase-1 (unauthed public surface)
+- **Value:** Every arrival lands on spec-42-aligned positioning — "complete settlement workspace" framing, not "financial disclosure tool." Public site is the first impression; current V1 pages violate positioning (app/page.tsx, app/features, app/pricing Discarded per spec 70 hub audit).
+- **Key components:** New landing (`/`) · new features page (`/features`) · new pricing page (`/pricing`) · reskin of legal placeholders (`/privacy`, `/terms`, `/cookies` — Preserve-with-reskin shells pending legal review per spec 56 L2) · marketing-surface primitives from S-F1 design system · Claude AI Design outputs as canonical visual source · positioning copy from spec 42 (tagline, pillars, value proposition) · handoff to `/start` pre-signup interview.
+- **Depends on:** S-F1 (design system tokens + primitives).
+- **Opens:**
+  - Marketing copy sourcing (direct from spec 42 + new positioning writing)
+  - Responsive behaviour for marketing pages (mobile/tablet/desktop design variants)
+  - SEO metadata + structured data per spec 56 L9.2
+  - Analytics event allowlist for marketing surfaces (spec 72 §8 PostHog schema)
+- **Security:** spec 72 §8 (PostHog event allowlist — no PII in marketing events) + §10 (CSP allowlist includes marketing third-party scripts if any).
+
 ---
 
 ## Onboarding slices
