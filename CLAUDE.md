@@ -170,6 +170,13 @@ These rules govern how Claude makes decisions and builds plans. Guardrails again
 
 **Distrust your own summaries.** A summary compressed earlier in the session is navigation, not source. When a decision is load-bearing, go back to the spec itself — even if the summary "feels" right. Heavy context makes skim-recall tempting; resist it.
 
+**Read discipline — cadence matters more than file size.** Sessions 22, 23, and 24 all hit stream timeouts from parallel large reads. Operational rules:
+- **Max 300 lines of combined tool-result content per turn.** If a batch would exceed this, split across sequential turns.
+- **Max 3 Read calls per turn.** One turn, focused scope; subsequent Reads go in subsequent turns.
+- **Read sections, not files, for specs >400 lines.** Use `Read` with `offset` + `limit` for the specific section. Full-file Read for a "get the flavour" purpose is banned for large specs.
+- **Use `grep` / `ls` before committing to a read.** Cheap existence or structure check first; Read only when you know what you're looking for.
+- **Announce before a parallel batch.** Before multiple tool calls in one turn, state the expected combined line count. If >300, split.
+
 ## Coding conduct
 
 These rules govern how Claude behaves when editing `src/`. Guardrails against over-engineering, silent decisions, and scope creep. Complementary to Product rules and Technical rules — doesn't replace either.
