@@ -156,6 +156,20 @@ The backlog lives at `docs/v2/v2-backlog.md` (98 items, prioritised). Don't read
 - **Wireframes are definitive** — implement screens 1a–3a and 2a–2j exactly as wireframed in specs 24-25. Do not reinterpret or simplify. When in doubt, re-read the spec or ask the user to reshare the wireframe.
 - **Transitions and animations are specced** — see spec 26. Every state change must have the specified animation. Provide `prefers-reduced-motion` fallbacks.
 
+## Planning conduct
+
+These rules govern how Claude makes decisions and builds plans. Guardrails against confident-but-wrong recommendations when the source material is available but not re-read. Derived from a session-24 failure where Path A was endorsed as "matching spec 71 §7a exactly" while actually contradicting it.
+
+**Verify before planning.** When a task description, handoff, or prior summary states a fact about repo state (branch tips, PR status, merged/open, env vars set, file contents), verify against the actual source (git, GitHub API, Vercel, the file) before building a plan on it. Briefs are plans written at a past moment; they rot. Don't treat them as ground truth.
+
+**Quote, don't paraphrase, when invoking a spec.** Any claim of the form "per spec X" or "matches X exactly" must include the literal sentence from the spec in the same breath. Forces the re-read. If you can't quote it, you don't know it.
+
+**Plan-vs-spec cross-check before executing.** When the user approves a multi-step plan, re-read the most relevant spec section before the first actionable step. Explicitly confirm the plan still holds against the source. 30 seconds; catches drift between summary-recall and the actual text.
+
+**Path options carry spec refs.** When offering A / B / C alternatives, each option must name which spec justifies it or conflicts with it. Prevents abstract-tradeoff reasoning from sneaking in.
+
+**Distrust your own summaries.** A summary compressed earlier in the session is navigation, not source. When a decision is load-bearing, go back to the spec itself — even if the summary "feels" right. Heavy context makes skim-recall tempting; resist it.
+
 ## Coding conduct
 
 These rules govern how Claude behaves when editing `src/`. Guardrails against over-engineering, silent decisions, and scope creep. Complementary to Product rules and Technical rules — doesn't replace either.
