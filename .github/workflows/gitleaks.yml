@@ -1,0 +1,28 @@
+name: Gitleaks
+
+# Secrets scan — spec 72 §2 hard rule 5: pre-commit hook + CI gate catch
+# high-entropy strings + known secret patterns.
+#
+# Runs on PRs (scans the diff) + on pushes to main (scans full history).
+# No license required for solo-author / small-team usage.
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+
+jobs:
+  gitleaks:
+    name: Gitleaks scan
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          # Full history so push-event scans cover everything, not just the tip.
+          fetch-depth: 0
+      - uses: gitleaks/gitleaks-action@v2
+        env:
+          # GITLEAKS_LICENSE only required for GitHub organisations >1 user.
+          # For solo-author usage the default behaviour is fine.
+          GITLEAKS_LICENSE: ${{ secrets.GITLEAKS_LICENSE }}

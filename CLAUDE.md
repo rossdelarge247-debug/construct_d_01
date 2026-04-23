@@ -25,11 +25,7 @@ The experience should feel like having a brilliant, patient analyst sitting besi
 
 ## Session startup (do this FIRST)
 
-1. **Fetch and checkout the development branch:**
-   ```
-   git fetch origin claude/new-session-GUZLb
-   git checkout claude/new-session-GUZLb
-   ```
+1. **Verify your working branch.** The canonical branch name is in `docs/SESSION-CONTEXT.md` (or your task description). If the harness landed you on a different base, resync before doing anything else — `git fetch origin <branch>` then `git checkout -B <branch> origin/<branch>`. Session 22→23 hit this exact snag; don't build on a stale base.
 
 2. **Read `docs/SESSION-CONTEXT.md`** — this is the rolling context block. It contains: product vision, principles, what the last session accomplished, current state of the codebase, prioritised deliverables for this session, negative constraints (things NOT to do), and key file paths. Always read this before doing anything else.
 
@@ -107,13 +103,18 @@ docs/workspace-spec/65-pre-signup-interview-reconciled.md  — Pre-signup locked
 docs/workspace-spec/67-post-signup-profiling-progress.md   — 12 gaps resolved + Gap 7 resolved session 22
 
 Build Map (spec 70 suite — the Phase B deliverable)
-docs/workspace-spec/70-build-map.md                 — Hub: tagging, preserved-legacy, how-to-read
+docs/workspace-spec/70-build-map.md                 — Hub: tagging, preserved-legacy, how-to-read (audit-integrated inventory, session 23)
 docs/workspace-spec/70-build-map-start.md           — Phase 1
 docs/workspace-spec/70-build-map-build.md           — Phase 2
 docs/workspace-spec/70-build-map-reconcile.md       — Phase 3
 docs/workspace-spec/70-build-map-settle.md          — Phase 4
 docs/workspace-spec/70-build-map-finalise.md        — Phase 5
-docs/workspace-spec/70-build-map-slices.md          — 31-slice catalogue (engineering work units)
+docs/workspace-spec/70-build-map-slices.md          — 33-slice catalogue (engineering work units)
+
+Rebuild + engineering (Phase C preparation — session 23)
+docs/workspace-spec/71-rebuild-strategy.md          — Folder structure, stable-lib paths, S-F7 dev-mode, Phase C sequencing. §5 + §7a amended session 24 (Option 4): bulk V1 removal, single-branch-main workflow, no integration branch, no cutover event
+docs/workspace-spec/72-engineering-security.md      — Engineering security principles (data classification, env vars, auth/session, RLS, validation, logging, dev/prod boundary, third-party, safeguarding, pen-test readiness, per-slice security DoD)
+docs/engineering-phase-candidates.md                — Parked CLAUDE.md additions for Phase C kickoff (Karpathy coding conduct, engineering conventions, per-slice AC + test plan templates)
 
 Stable libraries (preserve across rebuild — Re-use per Build Map)
 src/lib/bank/tink-client.ts                         — Tink API client
@@ -154,6 +155,52 @@ The backlog lives at `docs/v2/v2-backlog.md` (98 items, prioritised). Don't read
 - **Do not reference pre-pivot specs (03-06, 11, 12)** — the architecture changed. Active specs are 13-26.
 - **Wireframes are definitive** — implement screens 1a–3a and 2a–2j exactly as wireframed in specs 24-25. Do not reinterpret or simplify. When in doubt, re-read the spec or ask the user to reshare the wireframe.
 - **Transitions and animations are specced** — see spec 26. Every state change must have the specified animation. Provide `prefers-reduced-motion` fallbacks.
+
+## Planning conduct
+
+These rules govern how Claude makes decisions and builds plans. Guardrails against confident-but-wrong recommendations when the source material is available but not re-read. Derived from a session-24 failure where Path A was endorsed as "matching spec 71 §7a exactly" while actually contradicting it.
+
+**Verify before planning.** When a task description, handoff, or prior summary states a fact about repo state (branch tips, PR status, merged/open, env vars set, file contents), verify against the actual source (git, GitHub API, Vercel, the file) before building a plan on it. Briefs are plans written at a past moment; they rot. Don't treat them as ground truth.
+
+**Quote, don't paraphrase, when invoking a spec.** Any claim of the form "per spec X" or "matches X exactly" must include the literal sentence from the spec in the same breath. Forces the re-read. If you can't quote it, you don't know it.
+
+**Plan-vs-spec cross-check before executing.** When the user approves a multi-step plan, re-read the most relevant spec section before the first actionable step. Explicitly confirm the plan still holds against the source. 30 seconds; catches drift between summary-recall and the actual text.
+
+**Path options carry spec refs.** When offering A / B / C alternatives, each option must name which spec justifies it or conflicts with it. Prevents abstract-tradeoff reasoning from sneaking in.
+
+**Distrust your own summaries.** A summary compressed earlier in the session is navigation, not source. When a decision is load-bearing, go back to the spec itself — even if the summary "feels" right. Heavy context makes skim-recall tempting; resist it.
+
+## Coding conduct
+
+These rules govern how Claude behaves when editing `src/`. Guardrails against over-engineering, silent decisions, and scope creep. Complementary to Product rules and Technical rules — doesn't replace either.
+
+**Think before coding.** Surface confusion; name uncertainty. When more than one interpretation is possible, present both rather than silent-deciding. Mention simpler approaches and push back when appropriate. Stop and ask if a request is ambiguous — don't proceed on assumptions.
+
+**Simplicity first.** Minimum code that solves the problem. No unrequested features, no speculative abstractions, no "configurability" unless asked, no error handling for scenarios that can't happen. If 200 lines could be 50, rewrite. Senior-engineer test: would they say this is overcomplicated?
+
+**Surgical changes.** Touch only what the task requires. Don't improve adjacent code, don't refactor functioning code, don't reformat. Match existing style. If you notice unrelated dead code, mention it — don't delete it. Every changed line should trace directly to the requested task.
+
+**Goal-driven execution.** Convert each task into verifiable success criteria before writing code. Test-first where tractable. Strong criteria enable independent looping; weak criteria require re-clarification and slow velocity.
+
+## Engineering conventions
+
+**TDD where tractable.** Write the test first, then the code to pass it. Applies to logic, rules, data transforms, API routes, signal/engine work. Not mandatory for pure-visual UI (visual regression covers that), but preferred wherever state or branching logic exists.
+
+**Adversarial review gate (per slice).** Before committing any slice or significant change, run one adversarial review pass. Two options: (1) explicit prompt — "poke holes in this; find edge cases, security issues, regression risks"; (2) `/review` or `/security-review` skill. Output is a list of concerns. Either address or explicitly defer with reasoning. No slice ships without this gate.
+
+**Snapshot before refactor.** Any refactor over ~50 lines or touching more than 2 files: commit a checkpoint on the branch first. Cheap rollback insurance, explicit before/after diff when reviewing.
+
+**Deterministic over generative.** For repetitive scaffolding (new slice folder, codegen, boilerplate, branch setup), prefer bash/CLI over prompting Claude. Reserve Claude for reasoning tasks. Extends the "prefer dedicated tools over Bash when one fits" rule — the inverse is also true when deterministic is cheaper.
+
+**Definition of Done (per slice).** A slice ships only when all six are true:
+1. All acceptance criteria met, with evidence per AC
+2. Tests written and passing (unit + integration + visual as applicable)
+3. Adversarial review done; concerns addressed or explicitly deferred
+4. Preview deploy verified in-browser if UI (golden path + edge cases + prefers-reduced-motion)
+5. No regression in adjacent slices (smoke check + automated tests across the slice's affected surfaces)
+6. Slice's open 68f/g entries resolved or explicitly deferred with reasoning in slice wrap
+
+Plus the 13-item security checklist in spec 72 §11. No exceptions. A partially-done slice is not shipped; it's re-scoped and re-planned.
 
 ## Visual direction
 

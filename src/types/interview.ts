@@ -1,4 +1,15 @@
 // V1 Gentle Interview — session state types
+//
+// @deprecated — DEPRECATION NOTE (session 24, Option 4):
+// Originally classified Discarded in spec 70 hub. Restored because four Re-use /
+// Preserve-with-reskin files still depend on `InterviewSession` + `INITIAL_SESSION`:
+//   - src/lib/recommendations.ts
+//   - src/lib/ai/plan-narrative.ts
+//   - src/hooks/use-interview.ts
+//   - src/app/api/plan/generate/route.ts
+// Full deletion blocked on spec-65 type refactor landing with S-O1 slice.
+// Do not extend. When S-O1 replaces the interview flow with spec 65 O1-O8, migrate
+// the four consumers to new types and delete this file as part of that slice's DoD.
 
 export interface InterviewSession {
   // Step 2: Situation

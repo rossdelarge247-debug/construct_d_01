@@ -1,0 +1,189 @@
+name: CI
+
+# Runs on every PR + push to main.
+# Source of truth for the CI gates listed in docs/workspace-spec/71-rebuild-strategy.md §7 Phase C.0
+# and docs/workspace-spec/72-engineering-security.md §2 + §7.
+#
+# Jobs:
+#   - lint              — eslint
+#   - typecheck         — tsc --noEmit
+#   - test              — vitest run
+#   - build             — next build (with NEXT_PUBLIC_DECOUPLE_AUTH_MODE=prod)
+#   - env-var-regex-ban — fails if any NEXT_PUBLIC_*_KEY|_SECRET|_TOKEN|_PASSWORD|_PRIVATE
+#                         appears in the repo (spec 72 §2 hard rule 2)
+#   - dev-mode-leak     — post-build grep for forbidden dev-mode strings (spec 72 §7)
+#                         (no-op scaffold until S-F7 lands; shape is final)
+#   - npm-audit         — fails on high + critical (spec 72 §10 pre-pen-test audit)
+#
+# Not yet wired here (require S-F7 or later code + Playwright):
+#   - /dev/* returns 404 in prod build integration test (spec 72 §7)
+#   - Security-headers scan against preview deploy (spec 72 §10)
+#   - CSP-violation console check (spec 72 §10)
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  NODE_VERSION: '20'
+
+jobs:
+  lint:
+    name: Lint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+      - run: npm ci
+      - run: npm run lint
+
+  typecheck:
+    name: Type-check
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+      - run: npm ci
+      - run: npm run typecheck
+
+  test:
+    name: Unit + logic tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+      - run: npm ci
+      - run: npm test
+
+  build:
+    name: Production build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+      - run: npm ci
+      - name: Next.js production build
+        env:
+          # Spec 71 §4 + spec 72 §7: production build requires prod mode.
+          # Once S-F7 ships, lib/auth/index.ts throws at module-load if this
+          # env var is not 'prod' under NODE_ENV=production.
+          NEXT_PUBLIC_DECOUPLE_AUTH_MODE: prod
+        run: npm run build
+      - name: Upload build artefact for dev-mode-leak scan
+        uses: actions/upload-artifact@v4
+        with:
+          name: next-build
+          path: .next
+          retention-days: 1
+
+  env-var-regex-ban:
+    name: Env-var regex ban (spec 72 §2)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Scan for banned NEXT_PUBLIC_* secret-like names
+        run: |
+          set -euo pipefail
+          # Spec 72 §2 hard rule 2: NEXT_PUBLIC_*_(KEY|SECRET|TOKEN|PASSWORD|PRIVATE) banned.
+          # Checks: source files + env templates + workflow files (excludes lockfiles + .git + node_modules + .next).
+          PATTERN='NEXT_PUBLIC_[A-Z0-9_]*(_KEY|_SECRET|_TOKEN|_PASSWORD|_PRIVATE)\b'
+          MATCHES=$(grep -rEn \
+            --exclude-dir=node_modules \
+            --exclude-dir=.git \
+            --exclude-dir=.next \
+            --exclude=package-lock.json \
+            --exclude=.gitleaks.toml \
+            --exclude-dir=.github/workflows \
+            "$PATTERN" . || true)
+          if [ -n "$MATCHES" ]; then
+            echo "::error::Banned NEXT_PUBLIC_*_(KEY|SECRET|TOKEN|PASSWORD|PRIVATE) pattern found."
+            echo "$MATCHES"
+            echo ""
+            echo "Fix: these are client-exposed names. Use the server-only form (no NEXT_PUBLIC_ prefix)."
+            echo "See docs/workspace-spec/72-engineering-security.md §2 hard rule 2."
+            exit 1
+          fi
+          echo "No banned env-var patterns found."
+
+  dev-mode-leak:
+    name: Dev-mode leak scan (spec 72 §7)
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Download build artefact
+        uses: actions/download-artifact@v4
+        with:
+          name: next-build
+          path: .next
+      - name: Scan production build for dev-mode references
+        run: |
+          set -euo pipefail
+          # Spec 72 §7 prod-bundle checks (2 + 3). The /dev/* 404 integration
+          # check (§7 item 4) lives in the Playwright workflow once S-F7 lands.
+          FAIL=0
+
+          # 2. No references to @dev.decouple.local synthetic fixture domain.
+          if grep -rEn '@dev\.decouple\.local' .next 2>/dev/null; then
+            echo "::error::Production build contains @dev.decouple.local fixture references."
+            FAIL=1
+          fi
+
+          # 2a. No references to dev localStorage key prefix.
+          if grep -rEn 'decouple:dev:' .next 2>/dev/null; then
+            echo "::error::Production build contains decouple:dev:* localStorage key references."
+            FAIL=1
+          fi
+
+          # 3. No imports from dev-only auth/store modules.
+          #    Minified identifiers survive as file-path fragments in sourcemaps + server bundles.
+          if grep -rEn '(dev-session|dev-store|dev-auth-gate)' .next 2>/dev/null; then
+            echo "::error::Production build references dev-session / dev-store / dev-auth-gate."
+            FAIL=1
+          fi
+
+          # 2b. No dev scenario IDs.
+          if grep -rEn 'cold-sarah|sarah-connected|sarah-mid-build|sarah-reconcile-in-progress|sarah-finalise' .next 2>/dev/null; then
+            echo "::error::Production build contains dev scenario IDs."
+            FAIL=1
+          fi
+
+          if [ "$FAIL" -eq 1 ]; then
+            echo ""
+            echo "See docs/workspace-spec/72-engineering-security.md §7 for dev/prod boundary rules."
+            exit 1
+          fi
+          echo "No dev-mode leaks in production build."
+
+  npm-audit:
+    name: npm audit (high + critical)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+      - name: Audit production dependencies
+        run: |
+          set -euo pipefail
+          # Spec 72 §10: fail on high + critical. Medium is advisory.
+          npm audit --omit=dev --audit-level=high

@@ -975,3 +975,28 @@ Plus design debt items to revisit:
 - Update spec 66 to mark all gaps resolved
 - Write definitive post-signup profiling spec (spec 68 or update 34)
 - Move on to Action 2 (Claude Design work capture)
+
+---
+
+## Slice ownership map (added session 23 P0-2)
+
+Profiling work in this spec distributes across multiple question-asking layers, each owned by a specific slice per spec 70 Build Map. Single source of truth for "where do these questions live in the code."
+
+| Layer | Question type | Source | Owning slice | Status |
+|---|---|---|---|---|
+| 1 | Pre-signup interview (tone + situation + safeguarding + partner + what matters) | Spec 65 O1-O8 | **S-O1** primary onboarding | Fully scoped in slice index |
+| 2 | Moment 2 pre-bank profiling (questions before bank connect, Gap 1-6 resolutions) | This spec, Gaps 1-6 | **S-O1** (handoff after O8, before `/dashboard`) | In S-O1 scope — explicit in slice AC |
+| 3 | Moment 3 post-bank profiling (per-section questions after bank signals resolve) | This spec, Gaps 7-12 post-bank resolutions | **S-B1 + S-B4** (first in thin-S-B4 taster for Income section; remaining sections in full-fat S-B4) | Scoped |
+| 4 | Per-section bank-signal-driven confirm-or-correct | Spec 22 decision trees | **S-B4** (`confirmation-questions.ts` Preserve-with-reskin + new UI) | Scoped |
+| 5 | Respondent (Mark) journey questions | Gap 7 resolution | **S-O2** respondent onboarding | Wireframes deferred to Phase C per Gap 7; logic scoped |
+| 6 | Ongoing progressive disclosure (post-build, pre-share) | Gap 11-12 resolutions | **S-B3** dashboard + **S-B7** share action | Scoped |
+
+**What changes when a new profiling question is added:**
+- Content edit → this spec (67)
+- Implementation scope → the owning slice's `docs/slices/S-XX/acceptance.md`
+- Engineering → the slice's code + tests per DoD (spec 72 §11)
+
+**What this map protects against:**
+- Question content drifting between spec and code (single source of truth)
+- Duplicate implementations across slices (each layer has one owner)
+- Scope creep into slices that don't own the layer — PR review gate references this map
