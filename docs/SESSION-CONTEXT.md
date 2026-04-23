@@ -29,6 +29,7 @@ Next.js 16.2, React 19, TypeScript, Tailwind 4, Supabase, Claude AI, Vercel Pro.
 - **V1 wiped** — `src/components/workspace/*` (32 files), `src/components/interview/*`, `src/components/hub/title-bar.tsx`, `src/app/{features,pricing,start}/`, most of `src/app/workspace/`. Exceptions: `engine-workbench` (Re-use, moves at S-F7); `src/types/interview.ts` restored with deprecation note (4 Re-use/PWR consumers).
 - **Planning conduct rules codified in real time** — derived from mid-session failure (endorsed Path A as "matching spec 71 §7a exactly" while actually contradicting it). Rule set is load-bearing meta-discipline for all future sessions.
 - **Housekeeping:** HANDOFFs 2-17 archived to `docs/handoffs-archive/`; latest 5 remain top-level.
+- **Post-wrap CI hotfix (PR #8, `979a254`)** — first CI run against PR #7 surfaced two false-positives in CI drafts I shipped. Env-var regex narrowed to drop `_KEY` (was catching legit public keys — `NEXT_PUBLIC_SUPABASE_ANON_KEY` RLS-gated, `NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY` publishable, `NEXT_PUBLIC_POSTHOG_KEY` write-only — per spec 72 §2 inventory). Dev-mode leak scan narrowed to `@dev.decouple.local` + `decouple:dev:` only (dropped `dev-session|dev-store|dev-auth-gate` + scenario IDs — matched false positives in minified webpack paths). Spec 72 §2 hard rule 2 + §7 CI-gate text amended. Remaining CI failures (lint 13, unit test, npm audit 2, gitleaks) are pre-existing and land on session 25's P0.
 
 See `docs/HANDOFF-SESSION-24.md` for detailed retro.
 
@@ -62,13 +63,18 @@ Everything in spec 68 + 70 + 71 + 72 + 67 is design-only. No implementation yet.
 
 ### P0 — Unblock + begin first slice
 
-1. **Manual user actions** (do before first slice code work):
+1. **Manual user actions** (confirm before first slice code work):
    - Vercel env-vars per spec 72 §2 (`NEXT_PUBLIC_DECOUPLE_AUTH_MODE=prod` pinned in Production; audit Supabase naming — service role must NOT be `NEXT_PUBLIC_*`)
    - Supabase project with RLS default-deny
    - Branch protection on `main` (require CI checks pass)
-   - Delete stale remote branches: `phase-c`, `claude/update-session-context-ZrUCG`, `claude/project-planning-sprint-zero-odNO5`
 
-2. **S-F1 design system tokens** — first engineering slice. **Blocked pending Claude AI Design tool source files** from session 22 wire batches. User to share / confirm location. Once unblocked: new feature branch `claude/S-F1-design-system` off main; slice kickoff copies `docs/slices/_template/` → `docs/slices/S-F1-design-system/` and fills in.
+2. **CI triage** (pre-existing failures exposed on first run of PR #7; PR #8 fixed the two I shipped):
+   - `tests/unit/types.test.ts` expects 5-phase `WORKSPACE_PHASES` per spec 42; `src/constants/index.ts` still has 4-phase V1 keys. Update constants to five-phase (Start / Build / Reconcile / Settle / Finalise) — natural fix, unblocks the test.
+   - `npm audit` — 2 high/critical; `npm audit fix` + review the criticals.
+   - `lint` — 13 annotations across preserved code; triage (probably one rule hitting multiple files).
+   - `gitleaks` — likely needs `GITLEAKS_LICENSE` secret or `.gitleaksignore`; diagnose first.
+
+3. **S-F1 design system tokens** — first engineering slice. **Blocked pending Claude AI Design tool source files** from session 22 wire batches. User to share / confirm location. Once unblocked: feature branch `claude/S-F1-design-system` off main; slice kickoff copies `docs/slices/_template/` → `docs/slices/S-F1-design-system/` and fills in.
 
 ### P1 — Parallel doc work (not blocked)
 
