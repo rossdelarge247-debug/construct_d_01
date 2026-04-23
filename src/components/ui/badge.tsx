@@ -23,12 +23,14 @@ export function Badge({ className, variant = 'default', ...props }: BadgeProps) 
 const confidenceStyles: Record<ConfidenceState, string> = {
   known: 'bg-sage-light text-sage-dark border-sage',
   estimated: 'bg-amber-light text-amber border-amber',
+  unsure: 'bg-slate-100 text-slate-600 border-slate-300',
   unknown: 'bg-cream-dark text-ink-faint border-cream-dark',
 }
 
 const confidenceLabels: Record<ConfidenceState, string> = {
   known: 'Known',
   estimated: 'Estimated',
+  unsure: 'Unsure',
   unknown: 'Unknown',
 }
 
