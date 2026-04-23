@@ -59,7 +59,7 @@ Six tiers, low to high sensitivity. Every field, table, log line, and analytics 
 
 **Hard rules:**
 1. `NEXT_PUBLIC_*` names ship in the client bundle. **Never** use for secrets. Assume every such var is public knowledge the moment it's set.
-2. Names matching `*_KEY|*_SECRET|*_TOKEN|*_PASSWORD|*_PRIVATE` prefixed with `NEXT_PUBLIC_` are **banned**. CI gate enforces via regex.
+2. Names matching `*_SECRET|*_TOKEN|*_PASSWORD|*_PRIVATE` prefixed with `NEXT_PUBLIC_` are **banned**. CI gate enforces via regex. _Narrowed session 24:_ `*_KEY` alone is **not** banned — some `NEXT_PUBLIC_*_KEY` names are legitimately public (see inventory below: `NEXT_PUBLIC_SUPABASE_ANON_KEY` RLS-gated, `NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY` publishable, `NEXT_PUBLIC_POSTHOG_KEY` write-only). When introducing a new key-like env var, ask: "if this value ships in the client bundle, is that acceptable?" If no, drop `NEXT_PUBLIC_` and/or use `_SECRET` / `_TOKEN` / `_PRIVATE` suffix.
 3. Real `.env*` files gitignored (already configured); `.env.example` committed with placeholder values + 1-line docstring per var.
 4. Production secrets only in Vercel env — encrypted at rest, scoped per environment (Development / Preview / Production).
 5. Pre-commit hook runs `gitleaks` (or equivalent) scanning staged diff for high-entropy strings + known secret patterns. Blocks commit on detection.
@@ -316,9 +316,10 @@ Route-level gate, not middleware-only (defence in depth). Applies to engine-work
 **CI gate — production build smoke test.**
 A CI job runs `NODE_ENV=production next build`, then greps the built output to assert:
 1. No `console.log` in production-sensitive code paths (allowlist: nothing with PII logged)
-2. No references to `@dev.decouple.local`
-3. No imports from `src/lib/auth/dev-session.ts` or `src/lib/store/dev-store.ts` in non-dev routes
-4. `/dev/*` routes return 404 (integration test via Playwright or similar)
+2. No references to `@dev.decouple.local` (fixture email domain) — **enforced by bundle grep**
+3. No references to `decouple:dev:` (dev localStorage key prefix) — **enforced by bundle grep**
+4. No imports from `src/lib/auth/dev-session.ts` or `src/lib/store/dev-store.ts` in non-dev routes — **enforced by ESLint rule** (not bundle grep — minified module paths produce false positives; see session-24 hotfix that removed `dev-session|dev-store|dev-auth-gate` from bundle scan)
+5. `/dev/*` routes return 404 (integration test via Playwright, once S-F7 lands)
 
 **Dev banner (always-on in dev/preview).**
 Reskinned `src/components/layout/env-banner.tsx` (Re-use after audit confirms). Shows: current mode + active scenario + reset button. Persistent across all dev/preview surfaces. In prod build: returns null unconditionally.
