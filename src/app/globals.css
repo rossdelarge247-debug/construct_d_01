@@ -101,6 +101,111 @@
   --border-accent: 5px;
 }
 
+/* ═══════════════════════════════════════════════════════════════════════════
+   Decouple design system tokens (S-F1)
+
+   Extracted from session-22 Claude AI Design prototypes:
+   · docs/design-source/welcome-tour/Welcome Tour - Standalone.html
+   · docs/design-source/post-connect-dashboard/Post-connect Dashboard - Standalone.html
+
+   `--ds-*` prefix avoids collision with V1/V2 tokens in the @theme block
+   above, which non-reskinned Preserve-with-reskin components still consume.
+   V1/V2 tokens are deletable at end-of-Phase-C when no consumer remains.
+
+   Locks 68g C-V1 (phase colour system) + C-V13 (phase accent-tint washes).
+   See docs/slices/S-F1-design-tokens/acceptance.md.
+   ═══════════════════════════════════════════════════════════════════════════ */
+:root {
+  /* ─── Colours · Neutrals (7) — from prototype TOKENS block lines 638-644 ─── */
+  --ds-color-ink: #1A1A1A;
+  --ds-color-text-sub: #57534E;
+  --ds-color-text-muted: #78716C;
+  --ds-color-border: #E5E3DC;
+  --ds-color-surface-page: #F5F5F4;
+  --ds-color-surface-panel: #FFFFFF;
+  --ds-color-surface-canvas: #FAFAF7;
+
+  /* ─── Colours · Phase accents (8) — spec 68g C-V1 ─── */
+  --ds-color-phase-build: #4338CA;
+  --ds-color-phase-build-soft: #EEF2FF;
+  --ds-color-phase-reconcile: #9D174D;
+  --ds-color-phase-reconcile-soft: #FCE7F3;
+  --ds-color-phase-settle: #0369A1;
+  --ds-color-phase-settle-soft: #E0F2FE;
+  --ds-color-phase-finalise: #166534;
+  --ds-color-phase-finalise-soft: #DCFCE7;
+
+  /* ─── Colours · State (1) ─── */
+  --ds-color-danger: #FF3B30;
+
+  /* ─── Typography · Families (3) ─── */
+  --ds-font-sans: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  --ds-font-serif: 'Source Serif Pro', Georgia, serif;
+  --ds-font-mono: 'JetBrains Mono', ui-monospace, Menlo, monospace;
+
+  /* ─── Typography · Scale (12) — literal pixel preserved per user direction ─── */
+  --ds-type-11: 11px;
+  --ds-type-14-5: 14.5px;
+  --ds-type-15-5: 15.5px;
+  --ds-type-16: 16px;
+  --ds-type-17: 17px;
+  --ds-type-20: 20px;
+  --ds-type-21: 21px;
+  --ds-type-26: 26px;
+  --ds-type-28: 28px;
+  --ds-type-40: 40px;
+  --ds-type-62: 62px;
+  --ds-type-72: 72px;
+
+  /* ─── Typography · Weights (4) ─── */
+  --ds-weight-regular: 400;
+  --ds-weight-medium: 500;
+  --ds-weight-semibold: 600;
+  --ds-weight-bold: 700;
+
+  /* ─── Typography · Letter-spacing (1) ─── */
+  --ds-letter-spacing-wide: 0.12em;
+
+  /* ─── Radii (3) ─── */
+  --ds-radius-sm: 4px;
+  --ds-radius-md: 6px;
+  --ds-radius-lg: 8px;
+
+  /* ─── Shadows · Neutral (3) ─── */
+  --ds-shadow-sm: 0 2px 6px rgba(0, 0, 0, 0.1);
+  --ds-shadow-md: 0 2px 20px rgba(0, 0, 0, 0.04);
+  --ds-shadow-lg: 0 10px 40px rgba(0, 0, 0, 0.12);
+
+  /* ─── Shadows · Phase-tinted (4) — spec 68g C-V13 ─── */
+  --ds-shadow-phase-build: 0 4px 30px rgba(67, 56, 202, 0.06);
+  --ds-shadow-phase-reconcile: 0 4px 30px rgba(157, 23, 77, 0.06);
+  --ds-shadow-phase-settle: 0 4px 30px rgba(3, 105, 161, 0.06);
+  --ds-shadow-phase-finalise: 0 6px 32px rgba(22, 101, 52, 0.08);
+
+  /* ─── Spacing (17) — pixel-literal preserved per user direction ─── */
+  --ds-space-1: 1px;
+  --ds-space-2: 2px;
+  --ds-space-3: 3px;
+  --ds-space-4: 4px;
+  --ds-space-5: 5px;
+  --ds-space-6: 6px;
+  --ds-space-7: 7px;
+  --ds-space-8: 8px;
+  --ds-space-10: 10px;
+  --ds-space-12: 12px;
+  --ds-space-14: 14px;
+  --ds-space-20: 20px;
+  --ds-space-30: 30px;
+  --ds-space-32: 32px;
+  --ds-space-40: 40px;
+  --ds-space-56: 56px;
+  --ds-space-60: 60px;
+
+  /* ─── Layout containers (2) ─── */
+  --ds-layout-max-narrow: 760px;
+  --ds-layout-max-wide: 960px;
+}
+
 /* ═══ Base ═══ */
 body {
   font-family: var(--font-sans);
