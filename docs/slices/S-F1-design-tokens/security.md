@@ -63,15 +63,20 @@ Verified that the slice introduces zero references to `@dev.decouple.local` or a
 
 ## 12. Adversarial review
 
-- [ ] `/security-review` skill run on slice diff — *pending*
-- [ ] Output reviewed; each concern either addressed or explicitly deferred with reasoning — *pending*
-- [ ] Deferrals recorded below with reason + planned follow-up — *pending*
+- [x] Manual adversarial pass on slice diff (per CLAUDE.md "Engineering conventions" — `/review` or manual "poke holes" both acceptable; for a docs-heavy + tokens-only slice, manual is fitter). Six concerns surfaced; dispositions below.
+- [x] `/review` skill at PR time — to be run after PR opens (covers code-quality + edge cases on the diff)
+- [ ] `/security-review` skill — optional for this slice given T0-Public-only data classification + manual security-pass findings below; will run if PR comments raise security flags
 
 **Review findings + disposition:**
 
-| Concern | Severity | Disposition | Owner / follow-up |
-|---|---|---|---|
-| *to be filled post-review* | | | |
+| # | Concern | Severity | Disposition | Owner / follow-up |
+|---|---|---|---|---|
+| 1 | Visual smoke for AC-3 (Button reskin) is limited — placeholder landing page renders no Button, so verification is dev-tools `getComputedStyle` only, not a real rendered button. | Info | **Accepted.** Token slice's primary deliverable is the token vocabulary; component visual-fidelity is downstream slices' job. Will be exercised properly when welcome carousel + dashboard slices render real buttons. | First component slice that uses Button (welcome carousel slice) |
+| 2 | `--ds-space-N` literal-pixel naming vs V1 `--space-N` 4px-rhythm scale — different mental models on the same prefix root. A developer reading both sets could reasonably misread `--ds-space-3` as 12px (V1's interpretation) instead of 3px (S-F1's literal). | Low | **Accepted.** The `--ds-` prefix is the disambiguation. Documentation in `globals.css` comment block explicitly notes the literal-pixel preservation. Concern flagged for the first downstream developer to encounter the V1↔S-F1 transition; mitigation = comment is read. | None — design intent locked per user direction |
+| 3 | Tailwind utility classes are NOT auto-generated for `--ds-*` tokens (they sit outside the `@theme` block). Components must use `bg-[var(--ds-color-ink)]` arbitrary-value syntax. | Low | **Accepted.** Coexistence with V1/V2 in `@theme` was the priority (per AC-1 amendment). If a downstream slice finds the arbitrary-value syntax cumbersome, a separate slice can lift `--ds-*` keys into `@theme` (or into a Tailwind-config-via-CSS pattern) — that's an additive change and doesn't compromise S-F1. | First slice that finds the syntax painful |
+| 4 | Self-hosted webfont binaries are NOT shipped in S-F1; `--ds-font-sans` Inter reference falls back to system fonts (`-apple-system, BlinkMacSystemFont, sans-serif`) until a font-shipping slice runs. | Info | **Accepted.** Documented in security.md §6. Visual fidelity to design source partially compromised until fonts ship; system-font fallback is acceptable interim. | Welcome-tour slice OR a dedicated font-shipping slice |
+| 5 | Many tokens shipped but not yet used by any component (e.g. `--ds-space-1` through `--ds-space-7`, several `--ds-type-*` rungs). Risk: dead-code accumulation if downstream slices never adopt them. | Info | **Accepted.** Tokens trace to design-source values and exist for downstream consumption. AC-1 + verification.md "Token coverage gaps" already document the deliberate trade-off ("preserve all 17 spacing values" per user direction). Pruning happens at end-of-Phase-C if values still have zero consumers. | Phase-C wrap retro |
+| 6 | No phase-name mismatch resolution between the design source's labels (Disclose / Reconcile / Settle / Finalise per kicker; `prepare/share/build/finalise` per object key) and spec 68g + spec 42's canonical names (Build / Reconcile / Settle / Finalise). S-F1 tokens use spec 68g names. | Info | **Accepted + flagged for downstream.** Token names follow spec authority (Build = `--ds-color-phase-build` = `#4338CA`); UI copy reconciliation is downstream copy-flip slice work (S-C-U4 + spec 73 already cataloguing this). Tokens are unambiguous; UI text is the variable. | Downstream copy-flip slices owning the welcome tour |
 
 ## 13. Dependency + secrets hygiene
 
