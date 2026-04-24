@@ -36,18 +36,18 @@ The loveable floor is **a principled, semantically-named token vocabulary that e
 
 ## AC-1 · CSS token layer in `src/app/globals.css`
 
-- **Outcome:** The full token vocabulary (64 tokens) is declared as CSS custom properties under `:root` in `src/app/globals.css`, available globally without imports. Values match the design source verbatim.
-- **Verification:** `grep -E '^\s*--color-|^\s*--font-|^\s*--type-|^\s*--weight-|^\s*--letter-|^\s*--radius-|^\s*--shadow-|^\s*--space-|^\s*--layout-' src/app/globals.css | wc -l` returns ≥64. Each phase token (`--color-phase-{build,reconcile,settle,finalise}` + `-soft` variants) matches the value in `docs/design-source/welcome-tour/Welcome Tour - Standalone.html` lines 654-691.
+- **Outcome:** The full token vocabulary (64 tokens) is declared as CSS custom properties under a new `:root` block in `src/app/globals.css`, sitting alongside the existing Tailwind 4 `@theme {}` block (which retains V1/V2 legacy tokens for non-reskinned Preserve-with-reskin components). All S-F1 tokens use the `--ds-*` prefix (e.g. `--ds-color-phase-build`) to avoid collision with V1/V2 names — particularly important for spacing, where V1 `--space-N` is a 4px-rhythm scale and S-F1 `--ds-space-N` is literal-pixel. Values match the design source verbatim.
+- **Verification:** `grep -E '^\s*--ds-' src/app/globals.css | wc -l` returns ≥64. Each phase token (`--ds-color-phase-{build,reconcile,settle,finalise}` + `-soft` variants) matches the value in `docs/design-source/welcome-tour/Welcome Tour - Standalone.html` lines 654-691.
 - **In scope:**
-  - 15 colour tokens (7 neutral + 8 phase + 1 state).
-  - 12 type-scale tokens (`--type-11` through `--type-72`, decimals as `-N`-suffix: `--type-14-5`, `--type-15-5`).
-  - 3 font-family tokens (`--font-sans`, `--font-serif`, `--font-mono`).
-  - 4 weight tokens (`--weight-regular/-medium/-semibold/-bold`).
-  - 1 letter-spacing token (`--letter-spacing-wide`).
-  - 3 radius tokens (`--radius-sm/-md/-lg`).
-  - 7 shadow tokens (3 neutral + 4 phase-tinted).
-  - 17 spacing tokens (`--space-1` through `--space-60`, preserved verbatim per user direction).
-  - 2 layout-container tokens (`--layout-max-narrow: 760px`, `--layout-max-wide: 960px`).
+  - 15 colour tokens (7 neutral + 8 phase + 1 state) — all prefixed `--ds-color-*`.
+  - 12 type-scale tokens (`--ds-type-11` through `--ds-type-72`, decimals as `-N`-suffix: `--ds-type-14-5`, `--ds-type-15-5`).
+  - 3 font-family tokens (`--ds-font-sans`, `--ds-font-serif`, `--ds-font-mono`).
+  - 4 weight tokens (`--ds-weight-regular/-medium/-semibold/-bold`).
+  - 1 letter-spacing token (`--ds-letter-spacing-wide`).
+  - 3 radius tokens (`--ds-radius-sm/-md/-lg`).
+  - 7 shadow tokens (3 neutral + 4 phase-tinted) — `--ds-shadow-*`.
+  - 17 spacing tokens (`--ds-space-1` through `--ds-space-60`, preserved verbatim per user direction).
+  - 2 layout-container tokens (`--ds-layout-max-narrow: 760px`, `--ds-layout-max-wide: 960px`).
 - **Out of scope:** dark-mode variants; reduced-motion variants; print-specific tokens; Tailwind theme integration; bank brand tokens; un-evidenced state tokens (success / warning / info beyond `--color-danger`); spacing extensions beyond observed values.
 - **Opens blocked:** none — all 68g C-V1/C-V13 inputs are present in design source.
 - **Loveable check:** A downstream slice author opens `globals.css`, finds every primitive named by *role*, can ship a phase-coloured chip in two lines without inventing values. Yes — delight, not merely served.
@@ -119,5 +119,6 @@ The loveable floor is **a principled, semantically-named token vocabulary that e
 |---|---|---|---|
 | 2026-04-24 | User (informal) | Pre-AC scope locked | Reading 1 / option B; phase-colour treatment (b); Start implicit; role-based neutral names; preserve-12 type scale; literal-pixel naming; danger = `#FF3B30`; explicit phase shadows; spacing fully preserved (17 values). |
 | 2026-04-24 | User | **AC frozen** | Implementation may begin. Change requests roll into re-drafted AC + re-slicing, not mid-slice scope shifts. |
+| 2026-04-24 | User | AC-1 amendment | Token names prefixed `--ds-*` to coexist with V1/V2 tokens already in `globals.css` (`@theme` block, lines 3-102). Rationale: zero blast radius for non-reskinned Preserve-with-reskin components (Card, Badge, header, footer, env-banner, hub primitives) which still depend on V1/V2 `--color-*`, `--space-N`, `--shadow-*`, `--radius-*` names. V1/V2 tokens deletable at end-of-Phase-C when no consumer remains. Affects AC-1 only; AC-2 TS mirror structure (`tokens.color.phase.build`) unaffected because TS namespacing already handles disambiguation. |
 
 **AC is the contract.** Change requests after freeze roll into re-drafting AC + re-slicing, not mid-slice scope shifts.
