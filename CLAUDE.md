@@ -114,6 +114,16 @@ docs/workspace-spec/71-rebuild-strategy.md          — Folder structure, stable
 docs/workspace-spec/72-engineering-security.md      — Engineering security principles (data classification, env vars, auth/session, RLS, validation, logging, dev/prod boundary, third-party, safeguarding, pen-test readiness, per-slice security DoD)
 docs/engineering-phase-candidates.md                — Parked CLAUDE.md additions for Phase C kickoff (Karpathy coding conduct, engineering conventions, per-slice AC + test plan templates)
 
+Hook + CI enforcement (sessions 25 + 27)
+.claude/settings.json                               — Hook registrations (SessionStart · PostToolUse · PreToolUse)
+.claude/hooks/session-start.sh                      — Turn-0 branch state + read-discipline reminder (session 25)
+.claude/hooks/line-count.sh                         — PostToolUse Write/Edit: session-churn delta + wrap thresholds (session 27 P0.1)
+.claude/hooks/read-cap.sh                           — PreToolUse Read: block >400-line full reads + >300-line turn batch (session 27 P0.2)
+.claude/hooks/wrap-check.sh                         — /wrap helper: wrap-protocol checklist (session 27 P0.3)
+.claude/commands/wrap.md                            — /wrap slash command (invokes wrap-check.sh)
+.github/workflows/pr-dod.yml                        — CI: src/ PRs must reference docs/slices/S-*/verification.md (session 27 P0.4)
+.github/PULL_REQUEST_TEMPLATE.md                    — 6-item DoD + 13-item security checklist on every PR (session 27 P0.4)
+
 Stable libraries (preserve across rebuild — Re-use per Build Map)
 src/lib/bank/tink-client.ts                         — Tink API client
 src/lib/bank/tink-transformer.ts                    — Tink → BankStatementExtraction
