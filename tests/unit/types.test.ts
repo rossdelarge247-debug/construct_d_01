@@ -13,12 +13,11 @@ describe('Constants', () => {
     ])
   })
 
-  it('defines 4 confidence states', () => {
-    expect(CONFIDENCE_STATES).toHaveLength(4)
+  it('defines 3 confidence states', () => {
+    expect(CONFIDENCE_STATES).toHaveLength(3)
     expect(CONFIDENCE_STATES.map(c => c.key)).toEqual([
       'known',
       'estimated',
-      'unsure',
       'unknown',
     ])
   })

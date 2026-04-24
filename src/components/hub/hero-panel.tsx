@@ -66,6 +66,7 @@ export function HeroPanel({
   // Cross-fade transition: fade out → swap content → fade in (spec 18 line 249)
   useEffect(() => {
     if (state !== prevStateRef.current) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setVisible(false)
       const timer = setTimeout(() => {
         setRenderState(state)
@@ -496,6 +497,7 @@ function ClarificationState({
 
   // Reset selection when question changes
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setSelectedValue(null)
     setShowMoreOptions(false)
     setShowCategorySelector(false)

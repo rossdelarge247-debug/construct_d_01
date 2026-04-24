@@ -41,6 +41,19 @@ Icon? colour-dot? text-chip? Shadow-only-on-card per visual direction. Design pa
 
 ---
 
+## C-CF Confidence taxonomy
+
+**C-CF1 Three states — LOCKED.**
+User self-assessed certainty on supplied information. Three values: `known` (I have this information) / `estimated` (I have a rough idea) / `unknown` (I don't have this information).
+
+**C-CF2 Why three, not four — RATIONALE.**
+Earlier iteration had four states including `unsure`. Reviewed and collapsed (session ~22/23): `unsure` and `unknown` are outcome-equivalent — downstream logic resolves to "user knows / is estimating / doesn't know," with no distinct treatment needed for 'unsure'. `unsure` also read as ambiguous against `estimated`.
+
+**C-CF3 Surface scope — OPEN.**
+Currently attached to pre-signup interview answers. A substantial rebuild of the pre-login interview / guided journey is specced (flow: interview → plan → subscription recommendation → signup). Whether confidence states persist into post-signup field UI, and how they are rendered (chip, inline text, hidden on joint views?), is OPEN — to be decided when the relevant UI is anchored in Phase C.
+
+---
+
 ## C-S Share modal + share CTA
 
 **C-S1 Share CTA is adaptive — LOCKED.**

@@ -95,6 +95,11 @@ jobs:
           name: next-build
           path: .next
           retention-days: 1
+          # upload-artifact@v4 excludes dotfiles by default; .next is a
+          # dot-prefixed dir so every file under it is treated as hidden
+          # and skipped. Without this flag the artifact is empty and
+          # dev-mode-leak fails with "Artifact not found".
+          include-hidden-files: true
 
   env-var-regex-ban:
     name: Env-var regex ban (spec 72 §2)
