@@ -46,7 +46,7 @@ The experience should feel like having a brilliant, patient analyst sitting besi
 
 ### Wrapping up a session
 
-When the session is ending (user says wrap up, or you hit ~2,000 lines), do these in order:
+Run `/wrap` for an auto-generated checklist (tree clean · HANDOFF-SESSION-N · SESSION-CONTEXT refreshed · PR status). Then, when the session is ending (user says wrap up, or you hit ~2,000 lines), do these in order:
 
 1. **Commit and push** all uncommitted work
 2. **Update `docs/SESSION-CONTEXT.md`** — rewrite it for the NEXT session:
