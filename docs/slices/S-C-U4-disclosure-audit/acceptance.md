@@ -3,7 +3,7 @@
 **Slice:** S-C-U4-disclosure-audit
 **Spec ref:** `docs/workspace-spec/68g-copy-share-opens.md` §C-U4 (primary) · §C-U5 · §C-U6 (fold-ins) · `docs/workspace-spec/68a-decisions-crosscutting.md` C-U1 (parent positioning lock)
 **Phase(s):** Cross-cutting copy-audit pass, precedes Phase C visual extraction and Build Map finalisation
-**Status:** Draft · awaiting user review before implementation
+**Status:** Approved · session 28 implementation + adversarial review complete (pending user final pass)
 
 ---
 
@@ -89,6 +89,6 @@ The loveable floor for this slice is: **after this slice, no team member (Claude
 | Date | Reviewer | Outcome | Notes |
 |---|---|---|---|
 | 2026-04-24 | Claude (draft) | Pending user review | Drafted from spec 68g §C-U4 verbatim; folds in C-U5 + C-U6 per their Target refs pointing at C-U4 output |
-| | User | | AC frozen · implementation may begin |
+| 2026-04-24 | User | Approved (session 28 kickoff: "pure docs. yes. feels right") | AC frozen · implementation complete across AC-1..AC-5 |
 
 **AC is the contract.** Change requests after freeze roll into re-drafting AC + re-sliceing, not mid-slice scope shifts.

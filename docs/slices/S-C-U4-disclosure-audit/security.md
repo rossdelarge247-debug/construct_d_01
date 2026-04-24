@@ -1,145 +1,80 @@
-# {S-XX · slice name} — Security DoD
+# S-C-U4 · Disclosure-language audit — Security DoD
 
-**Slice:** S-XX-{slug}
-**Source:** `docs/workspace-spec/72-engineering-security.md` §11 (per-slice security checklist)
-**Data-tier reference:** spec 72 §1 (T0 Public · T1 Functional · T2 Personal · T3 Financial · T4 Safeguarding · T5 Legal)
+**Slice:** S-C-U4-disclosure-audit
+**Checklist source:** `docs/workspace-spec/72-engineering-security.md` §11 (13 items)
 
-Every slice ships with this checklist filled. A box may be skipped only with written reasoning (e.g. *"no new API routes — UI-only"*). Systematic skips flag the DoD for review.
+## Scope note
+
+Docs-only slice. No runtime behaviour, no data surfaces, no new API routes, no new dependencies, no new env vars, no new third-party integrations, no client-bundle additions, no CSP changes. Every box below that gates on code / data / runtime is marked **N/A** with one-line reasoning per spec 72 §11 exemption pattern. The spirit of the checklist is still honoured: we name each risk category and confirm it doesn't apply rather than skipping silently.
+
+---
+
+## 13-item checklist
+
+### 1. Data classification per AC
+
+- [x] **N/A — no data surfaces touched.** AC-1 through AC-5 produce documentation only. No T0–T5 data read, written, or transformed. The audit catalogue names file paths + line numbers but contains no extracted user data. Reasoning: spec 72 §1 data-classification model applies to runtime data flows; this slice has none.
+
+### 2. New tables / columns (RLS)
+
+- [x] **N/A — no schema changes.** No Supabase migrations, no new tables, no new columns, no new RLS policies. Reasoning: docs-only.
+
+### 3. API routes (Zod + rate limit)
+
+- [x] **N/A — no API routes added or modified.** No `src/app/api/**` touches. Reasoning: docs-only.
+
+### 4. File upload surfaces
+
+- [x] **N/A — no upload surfaces.** No MIME validation, AV scan, or size-limit changes. Reasoning: docs-only.
+
+### 5. New env vars
+
+- [x] **N/A — no env vars added.** `NEXT_PUBLIC_*_KEY|_SECRET|_TOKEN|_PASSWORD|_PRIVATE` regex check run on the branch diff: clean (zero matches because zero env-var additions). Reasoning: docs-only. Command run: `git diff origin/main | grep -E 'NEXT_PUBLIC_.*_(KEY|SECRET|TOKEN|PASSWORD|PRIVATE)'` → empty.
+
+### 6. Third-party data flows
+
+- [x] **N/A — no third-party integration added or modified.** No DPA / minimisation / webhook / egress-allowlist change. Reasoning: docs-only.
+
+### 7. Audit log entries
+
+- [x] **N/A — no T3+ read/write events introduced.** No new actor/timestamp/resource/action log points. Reasoning: docs-only.
+
+### 8. Error handling
+
+- [x] **N/A — no runtime error paths added or modified.** The pattern doc §4.4 *specifies* error copy for future slices (reference IDs, no stack traces, generic user-facing) but this slice does not implement any. Reasoning: docs-only; spec 73 §4.4 itself codifies spec 72 §6 (error logging / reference ID pattern) for consistency across future slices.
+
+### 9. Dev/prod boundary
+
+- [x] **N/A — no new dev-only routes / tools / fixtures.** No `MODE === 'prod'` gates touched. No new dev-mode workbench surfaces. CI gate passes trivially (nothing to gate). Reasoning: docs-only.
+
+### 10. Safeguarding impact (T4)
+
+- [x] **N/A — no T4 data touched.** No new surfaces that render T4 (safeguarding-flag) content. The pattern doc §4 tone templates include an attention-tone example (missing pension statement) that never references a user's actual data — it's a shape illustration. Reasoning: docs-only; spec 72 §9 safeguarding rules apply to runtime data flows, none present here.
+
+### 11. Security headers + CSP
+
+- [x] **N/A — no external scripts / new origins.** No CSP allowlist change. Reasoning: docs-only.
+
+### 12. Adversarial review
+
+- [ ] **Run at wrap.** `/security-review` skill run on slice diff + explicit "poke holes" review pass. Findings logged in `verification.md` §"Adversarial review" with disposition per finding. Not skippable even for docs-only — copy-doc framing choices can still be load-bearing (a banned-word rule that's too loose ships brand drift; a narrow-exception clause that's too wide leaks legal-register back into UI).
+
+### 13. Dependency audit + secrets hygiene
+
+- [x] **`npm audit`:** no new dependencies added or updated in this slice (docs-only). `npm audit` state on branch = state on origin/main (not re-run for this slice). Evidence: `git diff origin/main -- package.json package-lock.json` → empty.
+- [x] **Secrets hygiene:** no secrets introduced. `gitleaks` state unchanged vs main. Evidence: `git diff origin/main | grep -iE 'api[-_]?key|password|token|secret' | grep -v 'docs/\\|\\.md:'` → zero hits in code diff (markdown token/password references in tone-template docs are prose examples, not real secrets).
 
 ---
 
-## 1. Data classification per AC
+## Exemption pattern compliance
 
-For each AC's data surface, name the tier (T0-T5) and confirm implementation matches tier requirements (encryption, logging, retention).
-
-| AC | Data touched | Tier | Tier requirements met |
-|---|---|---|---|
-| AC-1 | | | |
-| AC-2 | | | |
-
-## 2. New tables / columns
-
-RLS policies written; policies tested with two-persona scenarios (cross-party leak check if applicable); service-role-key-free path exercised.
-
-- [ ] RLS enabled on every new table (migration gate enforces)
-- [ ] Default-deny; no `USING (true)` policies
-- [ ] Two-persona test: {Sarah writes → Mark reads → assert nothing returned}
-- [ ] Selective-publish tested if joint-data pattern applies (Mark sees only published fields)
-- [ ] Service-role-key revoked in test env; app still works for normal user ops
-- [ ] N/A · reason: {if no schema changes}
-
-## 3. API routes
-
-- [ ] Zod schema at entry for every new route
-- [ ] 400 on invalid; server-side log of specific validation failure with reference ID
-- [ ] Rate limits applied per spec 72 §5 (auth 5/min IP · bank-connect/share 3/min session · general 60/min session)
-- [ ] N/A · reason: {if no new API routes}
-
-## 4. File upload surfaces
-
-- [ ] Magic-byte MIME check (don't trust `Content-Type` header)
-- [ ] Allowlist only: PDF, PNG, JPG, HEIC, DOCX
-- [ ] Size limit 15MB per upload
-- [ ] AV scan verified (Supabase storage)
-- [ ] Content-addressed filenames; no user-controlled path fragments
-- [ ] N/A · reason: {if no upload surfaces}
-
-## 5. New env vars
-
-- [ ] Added to spec 72 §2 inventory table
-- [ ] Vercel Production scope verified if secret (server-only, not `NEXT_PUBLIC_*`)
-- [ ] Regex check clean: no `NEXT_PUBLIC_*_KEY|_SECRET|_TOKEN|_PASSWORD|_PRIVATE`
-- [ ] `.env.example` updated with placeholder + one-line docstring
-- [ ] CI gate passes (regex scan)
-- [ ] N/A · reason: {if no new env vars}
-
-## 6. Third-party data flows
-
-Any new integration or expanded use of an existing provider.
-
-- [ ] DPA in place (spec 72 §8 per-provider register updated)
-- [ ] Minimisation check: what's necessary vs what's sent — documented
-- [ ] Webhook signature verified if applicable
-- [ ] Egress allowlist updated (spec 72 §8)
-- [ ] Data-tier of sent payload confirmed acceptable for the provider
-- [ ] N/A · reason: {if no third-party changes}
-
-## 7. Audit log entries
-
-T3+ read/write events must be recorded with actor, timestamp, resource_type, resource_id, action; immutable append-only storage.
-
-- [ ] Event schema matches spec 72 §6 structure
-- [ ] Storage append-only (no DELETE, no UPDATE)
-- [ ] Retention per spec 72 §1 table
-- [ ] RLS: compliance role can read; actors cannot edit
-- [ ] N/A · reason: {if no T3+ operations}
-
-## 8. Error handling
-
-- [ ] Generic user-facing errors with reference ID: `"Something went wrong. Reference: 7F3A-9B2C"`
-- [ ] No stack traces / SQL / internal paths / third-party error bodies leaked to client
-- [ ] Server-side detail logged with matching reference ID
-- [ ] HTTP status codes honest (401 / 403 / 404 / 500); response bodies minimal
-
-## 9. Dev/prod boundary
-
-Any new dev-only route, tool, or fixture must gate via `MODE === 'prod'` notFound (spec 72 §7).
-
-- [ ] Dev-only code lives under `/app/dev/` or `lib/auth/dev-*` / `lib/store/dev-*`
-- [ ] Dev routes return 404 in prod build (Playwright integration test)
-- [ ] No references to `@dev.decouple.local` or dev scenario IDs in prod bundle
-- [ ] No imports from `dev-session.ts` / `dev-store.ts` in non-dev routes (ESLint rule)
-- [ ] Dev-mode-leak CI scan passes
-- [ ] N/A · reason: {if slice is prod-only with no dev surface}
-
-## 10. Safeguarding impact
-
-Does this slice touch T4 data (safety flags, coercion indicators, device-privacy, exit-page, free-text notes)?
-
-- [ ] No T4 data touched — skip remaining boxes
-- [ ] If yes: never included in email / push / SMS content
-- [ ] If yes: never included in analytics events (PostHog allowlist enforced)
-- [ ] If yes: never rendered client-side outside user's own safeguarding dashboard
-- [ ] If yes: admin access requires explicit review_reason logged in audit trail
-- [ ] V1 signposting baseline not broken (exit-this-page, device-privacy answer effects, Women's Aid / NDAH / Samaritans signposting intact)
-
-## 11. Security headers + CSP
-
-If adding external scripts or new resource origins.
-
-- [ ] CSP allowlist updated in `next.config.ts` / middleware
-- [ ] No `'unsafe-inline'` / `'unsafe-eval'` added
-- [ ] CSP test passes on preview deploy (browser console: zero violations)
-- [ ] `securityheaders.com` scan: A+ grade maintained
-- [ ] N/A · reason: {if no external script/origin changes}
-
-## 12. Adversarial review
-
-- [ ] `/security-review` skill run on slice diff
-- [ ] Output reviewed; each concern either addressed or explicitly deferred with reasoning
-- [ ] Deferrals recorded below with reason + planned follow-up
-
-**Review findings + disposition:**
-
-| Concern | Severity | Disposition | Owner / follow-up |
-|---|---|---|---|
-| | | Addressed · Deferred to V1.5 · Risk-accepted · Wont-fix | |
-
-## 13. Dependency + secrets hygiene
-
-- [ ] `npm audit` clean on slice branch (high + critical addressed)
-- [ ] GitHub Dependabot: no new criticals introduced
-- [ ] New dependencies justified; licences compatible with closed-source commercial use
-- [ ] `gitleaks` clean on slice branch (no high-entropy strings / known patterns in diff)
-- [ ] No secrets introduced into client bundle (all in Vercel Production env)
-- [ ] No secrets in commit history (if introduced in-session, rotate before merge)
-
----
+All 12 N/A marks above carry written one-line reasoning per spec 72 §11 exemption pattern (*"Box N skipped — slice has no new API routes (UI-only)"*). Systematic-skip check (spec 72 §11): this slice is docs-only; the skips cluster because the slice is categorically outside the checklist's primary scope, not because individual risks were waved through. A future docs-only slice repeating these skips is expected; a code slice that checks "N/A — docs only" on a runtime-affecting box is the failure mode the exemption-pattern rule guards against.
 
 ## Sign-off
 
-- **Slice author:** {name / session ID}
-- **Date:** {date}
-- **Reviewer (if T3+ data or new third-party):** {user / dedicated reviewer}
-- **All boxes ticked or justifiably N/A:** yes / no
-- **Pen-test readiness note:** {any items that would likely surface in pen test — address before merge or document why deferred}
+- **Slice author (Claude):** All N/A reasoning above reviewed; adversarial-review gate (item 12) pending at wrap.
+- **User review at wrap:** Required per spec 72 §11 "Who signs off" (V1 rule — user reviews before PR merge).
+
+## Evidence location
+
+This doc is the evidence record per spec 72 §11 "Evidence location" rule. Travels with the slice in the PR.

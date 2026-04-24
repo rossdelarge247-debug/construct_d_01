@@ -140,3 +140,38 @@ Run on branch `claude/S-C-U4-disclosure-audit` at commit `ae7f94b`. Results clas
 - Grep scoped to `src/`. Any future additions during Phase C extraction must re-run the grep on merge.
 - "Progressive disclosure" (Category C) could still appear as user-visible text if a tooltip or help doc renders the internal comment. Downstream slice should verify no Category-C strings leak to rendered copy.
 - Category-B/A boundary (e.g. A17 in `recommendations.ts`) is judgement-dependent. The replacement in §2 banned-words (narrow exception for legal-process references) is the arbiter; borderline rows should be reviewed against §2 during downstream slice review.
+
+---
+
+## Amendment 1 — Adversarial-review gap closure (session 28)
+
+Surfaced during the slice's own adversarial review (spec 72 §11 item 12 + CLAUDE.md Engineering conventions "poke holes" pass). Two narrow grep expansions and one scope clarification:
+
+### A1-1 · `src/types/hub.ts:8` — missed from original catalogue
+
+- Line: `export type EvidenceSource = 'bank_connection' | 'self_disclosed' | 'document'`
+- Category: **D** — internal type enum value. Not rendered. No user-visible leak.
+- Disposition: retained; downstream rename (e.g. to `'user_input'`) optional, non-urgent.
+
+### A1-2 · `position` word-boundary expansion
+
+Original catalogue anchored on `\byour position\b` (tight match to spec 68g C-U4 surface #4). Widened grep `[Pp]osition` surfaced three additional hits:
+
+| File : line | Excerpt | Category | Disposition |
+|---|---|---|---|
+| `src/lib/bank/confirmation-questions.ts` : 1328 | `'Jointly owned — the starting position in marriage is 50/50'` | **B** | Retain. "Starting position" is the MCA 1973 legal term for the presumption. Legal-process reference — passes §2.4 solicitor/judge test |
+| `src/lib/bank/confirmation-questions.ts` : 1422 | `'Joint account held with your partner — 50/50 starting position'` | **B** | Same as above |
+| `src/constants/index.ts` : 25 | `'Resolving remaining disputes and capturing the final agreed position.'` | **A (boundary)** | Replace: `'Resolving remaining disputes and capturing the final agreement.'` Replacement loses legal register at no cost — "agreed position" here is product copy describing the settle phase, not a legal citation. §1 (settle) + §2.2 (position banned) |
+
+**Revised Category-A count:** 20 + 1 = **21**.
+**Revised Category-B count:** 14 + 2 = **16**.
+**Revised Category-D count:** 3 + 1 = **4**.
+**Revised Total:** 55 + 4 = **59** (14 wire + 45 src/).
+
+### A1-3 · `docs/workspace-spec/` scope clarification
+
+The workspace spec directory contains `disclos*` / `position` hits across multiple specs (e.g. `52-product-canvas.md` J2 user-story "gathering, disclosing"; `67-post-signup-profiling-progress.md`; `47-adaptive-non-engagement-safety.md`; `13-extraction-decision-tree-documents.md`; `21-evidence-model.md`). These are **meta-references** (specs describing the product's problem space and the UK legal process), not rendered UI copy. Per AC-1 Out-of-scope ("Replacing historical references in archived docs — do not retrofit"), the spec directory is **not** a primary audit surface.
+
+**Disposition:** out of scope. If a future slice repurposes any of these passages as rendered UI copy, that slice runs §1/§2 check at extraction time. Standing rule: when a spec evolves into a wire or user-facing doc, the copy-pattern doc (spec 73) is the gate.
+
+**Exception:** `52-product-canvas.md` J2 user-story "gathering, disclosing" is an *internal* product-canvas phrasing. Not blocking — canvas lives for product-team orientation, not UI extraction. Flagged for session wrap handoff (editorial only, not this slice).
