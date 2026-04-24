@@ -168,12 +168,7 @@ These rules govern how Claude makes decisions and builds plans. Guardrails again
 
 **Distrust your own summaries.** A summary compressed earlier in the session is navigation, not source. When a decision is load-bearing, go back to the spec itself — even if the summary "feels" right. Heavy context makes skim-recall tempting; resist it.
 
-**Read discipline — cadence matters more than file size.** Sessions 22, 23, and 24 all hit stream timeouts from parallel large reads. Operational rules:
-- **Max 300 lines of combined tool-result content per turn.** If a batch would exceed this, split across sequential turns.
-- **Max 3 Read calls per turn.** One turn, focused scope; subsequent Reads go in subsequent turns.
-- **Read sections, not files, for specs >400 lines.** Use `Read` with `offset` + `limit` for the specific section. Full-file Read for a "get the flavour" purpose is banned for large specs.
-- **Use `grep` / `ls` before committing to a read.** Cheap existence or structure check first; Read only when you know what you're looking for.
-- **Announce before a parallel batch.** Before multiple tool calls in one turn, state the expected combined line count. If >300, split.
+**Read discipline.** Enforced by `.claude/hooks/read-cap.sh` (PreToolUse on Read): blocks full-file Reads of >400-line files without offset+limit, and blocks Reads that would push this turn's total past 300 lines. Deny messages quote the rule and suggest offset/limit or grep-first alternatives. Habits the hook doesn't catch — `grep` / `ls` / `wc -l` before committing to a Read, announcing expected combined size before a parallel batch — remain in you.
 
 ## Coding conduct
 
