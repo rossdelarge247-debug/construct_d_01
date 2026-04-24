@@ -10,7 +10,7 @@
 
 ## Copy audit + language patterns
 
-### 🟠 C-U4 · Disclosure-language audit across surfaces
+### 🟢 C-U4 · Disclosure-language audit across surfaces
 **Context:** 68a C-U1 locks "never 'financial disclosure tool' framing" as load-bearing positioning. Session 22 wires leaked disclosure-tool language back across ~12 surfaces:
 - Primary CTA: "Disclose your position"
 - Dropdown item: "Disclose your position"
@@ -28,19 +28,22 @@
 - Private-doc version chip: "V1 Last updated 21/04/2026" (also conflicts with 68b B-V1 which drops version chips)
 **Decision:** Run a surface-by-surface copy audit before Phase C extraction. Produce a single copy pattern doc covering: (a) replacement vocabulary (picture / shared / build / reconcile / settle / finalise), (b) banned words (disclose / disclosure / position), (c) empty-state verb family (see C-U5), (d) confirmation / attention / success / error tone templates.
 **Target:** Dedicated copy-audit pass before Build Map finalises.
+**Locked:** see `docs/workspace-spec/73-copy-patterns.md` + `docs/slices/S-C-U4-disclosure-audit/audit-catalogue.md`. Session 28.
 
-### 🟠 C-U5 · Empty-state CTA copy pattern
+### 🟢 C-U5 · Empty-state CTA copy pattern
 **Context:** Session 22 wires use inconsistent empty-state CTA verbs: "Add your children information now" / "Complete your spending disclosure" / "Nothing disclosed yet" + "Add your children information now" (same card). No unified pattern.
 **Options:** (a) "Tell us about X" — warm, declarative · (b) "Add X" — direct, action-oriented · (c) "Get started with X" — procedural · (d) mixed per context (tell-us for narrative sections, add for list sections).
 **Lean:** (d) — narrative sections (Children / Home) use "Tell us about your {topic}"; list sections (Debts / Other assets / Pensions) use "Add {item}". Empty-state body stays light: "Nothing here yet" (per C-U4 audit, not "Nothing disclosed yet").
 **Target:** Part of C-U4 audit output.
+**Locked:** see `docs/workspace-spec/73-copy-patterns.md` §3. Session 28.
 
-### 🟠 C-U6 · Stepper / section label unification across surfaces
+### 🟢 C-U6 · Stepper / section label unification across surfaces
 **Context:** Session 22 uses three different labels for the same territory within one screen — "Prepare" (tour stepper), "Preparation" (dashboard section H2), "Disclose" (dashboard stepper step 2). And across screens: "Your position" (sidebar) vs "Sarah's Picture" (doc title) vs "private disclosure" (task label).
 **Decision:** All nav surfaces + section H2s use the 5-phase labels from 68a C-N3 (Start / Build / Reconcile / Settle / Finalise). Tour stepper may use verb-action labels (Prepare / Share / Build / Finalise) only if separated clearly from nav — lean is to unify.
 **Options:** (a) unify all — stepper + section + nav all use phase labels · (b) allow tour stepper to keep verb labels, unify everywhere else.
 **Lean:** (a) — simplest, removes cognitive load. Tour stepper can render phase labels compactly; verbs can live in the tour body copy.
 **Target:** Copy audit output (C-U4) and Build Map input.
+**Locked:** see `docs/workspace-spec/73-copy-patterns.md` §1 (5-phase labels per Lean (a)). Session 28.
 
 ---
 
