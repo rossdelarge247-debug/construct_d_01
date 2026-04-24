@@ -76,9 +76,15 @@ V1/V2 tokens in `globals.css` `@theme` block are untouched by S-F1. PWR componen
 
 ## Adversarial run
 
-- [ ] `/review` skill run on slice diff; findings triaged in this section
-- [ ] `/security-review` skill run on slice diff; findings recorded in `security.md` §12
-- [ ] Optional sub-agent run — skipped for token-foundation slice (low complexity surface)
+- [x] Manual adversarial pass run on slice diff (CLAUDE.md "Engineering conventions" allows manual or `/review` skill). Six concerns surfaced; all triaged in `security.md` §12. Severities: 2 Low, 4 Info; zero blockers.
+- [ ] `/review` skill — to run after PR opens (for code-quality second-opinion on the diff). Findings triaged in PR comments.
+- [ ] `/security-review` skill — optional given T0-Public-only data classification + manual pass already covered the security-relevant items. Run if PR review surfaces security flags.
+
+**Top three findings (full list in `security.md` §12):**
+
+1. *Info* — Visual smoke for Button reskin limited; placeholder landing page renders no Button. Accepted; downstream component slices exercise real visual fidelity.
+2. *Low* — `--ds-space-N` literal-pixel vs V1 `--space-N` 4px-rhythm = different mental models on the same prefix root. Mitigated by `--ds-` prefix + globals.css comment block. Accepted.
+3. *Low* — Tailwind utility classes not auto-generated for `--ds-*` (outside `@theme`); components must use arbitrary-value syntax. Accepted; coexistence with V1/V2 was the priority.
 
 ---
 
@@ -127,7 +133,7 @@ These gaps are *expected* and *additive*; existing S-F1 tokens are stable.
 |---|---|---|---|
 | 1 | All AC met, with evidence per AC | ✓ AC-1..AC-5 met automatically; AC-6 met by this file + sibling docs being populated | per-AC `Evidence at wrap` lines in `acceptance.md` |
 | 2 | Tests written + passing (unit + integration + visual as applicable) | ✓ unit (vitest 8/8) · visual (manual post-PR) | `npx vitest run` output |
-| 3 | Adversarial review done; concerns addressed or deferred | *pending* — `/review` after this commit | post-review entries in this file's "Adversarial run" section |
+| 3 | Adversarial review done; concerns addressed or deferred | ✓ Manual pass complete; 6 findings triaged (2 Low, 4 Info; zero blockers) | `security.md` §12 |
 | 4 | Preview deploy verified in-browser if UI | *pending* — post-PR; computed-style spot-check | filled at sign-off |
 | 5 | No regression in adjacent slices | *pending* — post-PR; smoke checks above | filled at sign-off |
 | 6 | Slice's open 68f/g entries resolved or explicitly deferred | ✓ C-V1 + C-V13 locked (this slice); C-V2..C-V12, C-V14 deferred to component slices | 68g-visual-anchors.md status flips |
