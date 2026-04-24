@@ -35,10 +35,8 @@ The experience should feel like having a brilliant, patient analyst sitting besi
 
 ### Track your progress actively
 
-- After every file edit, maintain a **running count of net lines added/modified**.
+- Line-count tracking is automated: `.claude/hooks/line-count.sh` fires on every Write/Edit and surfaces delta + cumulative session churn. Soft-note at 1,000; warn at 1,500 ("approaching session scope limit — recommend wrapping up"); stop at 2,000 ("stop writing code and wrap"). When the hook surfaces a warn, relay it to the user.
 - Use the TodoWrite tool to track tasks. Mark each done as you complete it.
-- At **~1,500 lines changed**, proactively tell the user: "Approaching session scope limit (~1,500 lines). Recommend wrapping up soon."
-- At **~2,000 lines changed**, **stop writing code**. Tell the user you need to wrap up.
 
 ### Context window freshness
 
