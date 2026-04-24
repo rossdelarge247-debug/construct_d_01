@@ -1,4 +1,4 @@
-# Session 26 Context Block
+# Session 27 Context Block
 
 ## Product positioning (preserve across sessions)
 
@@ -14,18 +14,18 @@ Next.js 16.2, React 19, TypeScript, Tailwind 4, Supabase, Claude AI, Vercel Pro.
 
 **Single-branch-main workflow** (spec 71 §7a amended session 24, Option 4): no `phase-c` integration branch, no cutover event. Slice work on short-lived feature branches (`claude/S-XX-{slug}`) → PR → main. Vercel prod rebuilds on every main merge; may show placeholder / partially-built state during rebuild — acceptable given no users. Tink credentials in Vercel env.
 
-## What session 25 accomplished
+## What sessions 25–26 accomplished
 
-**CI triage + confidence-taxonomy lock + mid-session meta-audit + partial reboot.**
+**CI triage + confidence-taxonomy lock + SessionStart hook + CI-gate fixes. PR #10 merged to main as squash `1df3678`.**
 
-- **Track A CI triage — 6 of 8 jobs green, 2 still failing on PR #10.** Locally verified passing: lint (0 errors / 23 warnings in preserved code), typecheck, tests (4/4), build, env-var regex ban, npm audit. **Honest correction:** session-25 wrap claim of "all 8 pass locally" was overstated — dev-mode leak scan was verified against a stale pre-wrap `.next` and gitleaks was never run locally at the time. Post-push CI showed gitleaks scan + dev-mode leak scan failing. After-the-fact local reproduction: content clean (0 matches in fresh `.next`, 0 gitleaks findings across 199 commits); failures are CI-environment-specific. Flagged as session-26 P0.0 before hook work.
-- **Confidence-state taxonomy corrected.** Shipped code has always been 3 states (`known` / `estimated` / `unknown`); a stale test expected 4. Reverted my initial "fix" that added `unsure` to match the test; instead corrected the test. Locked decision in new `C-CF Confidence taxonomy` section of spec 68a.
-- **Mid-session meta-audit of rule-drift** (agent-delegated). Found chronic pattern across sessions 21-24: rules codified at wrap, broken next session. Adding more rules has been the failure mode. Full findings in HANDOFF-25.
-- **Reboot initiated — one concrete automation piece shipped.** SessionStart hook wired at `.claude/hooks/session-start.sh` + `.claude/settings.json`. On session start: injects read-discipline caps, Planning conduct rules, and **live** branch-state verification (branch, HEAD vs origin/main, ahead/behind, clean/dirty). Counter to Tier-1-CLAUDE.md-rules-not-enough pattern. **Hook needs user `/hooks` reload or restart** to activate — settings watcher doesn't see `.claude/` created mid-session.
-- **Brief-rot caught 3 times** in the session-25 kickoff (WORKSPACE_PHASES, CONFIDENCE_STATES count, gitleaks flag — all wrong). Reinforces the SessionStart-hook live-branch-state value.
-- **Reboot completion deferred to session 26** by explicit decision. Full audit + session-26 implementation brief in HANDOFF-25. No new CLAUDE.md rules this session.
+- **Track A CI triage (session 25)** — lint 0 errors (23 warnings left in preserved code per agreed plan), typecheck clean, tests 4/4, build clean, npm audit 0 vulns (Next.js 16.2.2 → ^16.2.4 DoS fix + dompurify + protobufjs).
+- **Confidence-state taxonomy locked** in spec 68a as new C-CF section — 3 states (`known` / `estimated` / `unknown`). Stale 4-state test corrected.
+- **SessionStart hook wired** at `.claude/hooks/session-start.sh` + `.claude/settings.json`. Injects read-discipline caps + Planning conduct rules + live branch state at every session start. Response to session-25 audit finding that Tier-1 CLAUDE.md rules weren't persisting.
+- **Mid-session rule-drift audit (session 25)** — chronic codify-at-wrap / break-next-session pattern across sessions 21-24. Diagnosis: rule density is the problem; adding more rules has been the failure mode. Response: shift to hook-based automation (session 27 objective).
+- **Session 26 CI triage (P0.0 closed)** — diagnosed two CI-environment failures that slipped through session-25 wrap. Fix 1: `actions/upload-artifact@v4` was excluding `.next` (dot-prefixed dir) as hidden files — added `include-hidden-files: true`. Fix 2: `gitleaks-action@v2` added a GITHUB_TOKEN requirement on pull_request events — added to env block. All 9 checks green on PR #10 at merge.
+- **PR #10 merged to main** at `1df3678` — session 25 wrap + session 26 CI fixes collapsed into one squash commit.
 
-See `docs/HANDOFF-SESSION-25.md` for detailed retro + session-26 brief.
+See `docs/HANDOFF-SESSION-25.md` for the retro (includes the session-26-onwards brief that session 27 picks up from P0.1).
 
 ## Current state
 
@@ -34,7 +34,8 @@ See `docs/HANDOFF-SESSION-25.md` for detailed retro + session-26 brief.
 - **Sessions 19-22 foundational:** 5-phase model · four-document lifecycle · spec 68a-e phase locks · spec 68f session-21 register with session-22 locks applied · spec 68g trio (visual anchors, build opens, copy/share opens).
 - **Session 23:** spec 71 rebuild strategy · spec 72 engineering security · spec 70 hub audit · spec 70 slices catalogue (S-F7 + S-M1 = 33 slices) · spec 67 slice-ownership map · engineering-phase-candidates (§A/§B applied, §C/§D embodied in slice templates, §E/§F/§G parked).
 - **Session 24:** Phase C foundation merged to main · Phase-C-freeze retired (Option 4) · V1 wiped · CLAUDE.md has Coding conduct + Engineering conventions + Planning conduct + read-discipline rules · slice template scaffolding ready · CI drafts ready · HANDOFFs archived.
-- **Session 25:** CI triage complete (all 8 jobs pass) · confidence-taxonomy locked in spec 68a as new C-CF section (3 states: `known`/`estimated`/`unknown`) · SessionStart hook wired at `.claude/hooks/session-start.sh` · mid-session audit captured rule-drift pattern · reboot-completion deferred to session 26.
+- **Session 25:** CI triage started · confidence-taxonomy locked in spec 68a as new C-CF section (3 states: `known`/`estimated`/`unknown`) · SessionStart hook wired at `.claude/hooks/session-start.sh` · mid-session audit captured rule-drift pattern · reboot-completion deferred.
+- **Session 26:** CI triage completed (P0.0) — `include-hidden-files: true` fix for upload-artifact@v4 + `GITHUB_TOKEN` fix for gitleaks-action@v2. PR #10 merged to main as `1df3678` with all 9 checks green.
 
 ### Open (see spec 68f + 68g trio registers for full list)
 
@@ -54,13 +55,11 @@ Everything in spec 68 + 70 + 71 + 72 + 67 is design-only. No implementation yet.
 - **Deprecated exception:** `src/types/interview.ts` — restored with deprecation header; full delete blocked on spec-65 refactor at S-O1.
 - **Placeholder:** `src/app/page.tsx` — minimal "rebuilding" landing.
 
-## Session 26 priorities
+## Session 27 priorities
 
-**Sole objective: hook-based enforcement sprint.** No new CLAUDE.md rule-writing. See `docs/HANDOFF-SESSION-25.md` §"Session-26 brief" for full spec. Summary:
+**Sole objective: hook-based enforcement sprint.** No new CLAUDE.md rule-writing. See `docs/HANDOFF-SESSION-25.md` §"Session-26 brief" for full spec (brief is still named "session 26" but session 27 is the active execution; P0.0 was closed in session 26). Summary:
 
-### P0 — CI green + four enforcement hooks in order
-
-**P0.0 — CI triage (BEFORE hooks).** PR #10 has 2 reds: Gitleaks scan + Dev-mode leak scan. Content verified clean locally; root cause is CI-environment-specific. Gitleaks likely `gitleaks-action@v2` licensing/version issue. Dev-mode leak scan cause TBD — needs actual CI log (auth-gated; paste from Actions UI). Fix on session-26 feature branch; decide whether to amend PR #10 or ship on a new PR.
+### P0 — Four enforcement hooks in order
 
 **P0.1 — Line-count display hook** — `PostToolUse` on `Write|Edit`. Maintains session-local running total; surfaces delta + cumulative. Warns at 1,000 · harder warn at 1,500. No blocking.
 **P0.2 — Read-cap hook** — `PreToolUse` on `Read`. Blocks full-file reads >400 lines without offset/limit; blocks when batched turn-total >300 lines. Deny with pointer to CLAUDE.md Planning conduct §.
@@ -108,7 +107,7 @@ Target ≤1,500 lines this session (hook infrastructure is denser than slice cod
 
 ## Branch
 
-Main is canonical (session 24 merged via PR #6 as squash `321fce8`; session 24 wrap PR merging this rewrite pending).
+Main is canonical. Latest: PR #10 merged as squash `1df3678` (session 25 wrap + session 26 CI triage). All 9 CI checks green on merge.
 
 **Feature branch pattern (spec 71 §7a single-branch-main):**
 - Off main: `git checkout main && git pull --ff-only && git checkout -b claude/S-XX-{slug}`
@@ -116,7 +115,7 @@ Main is canonical (session 24 merged via PR #6 as squash `321fce8`; session 24 w
 - Preview URL per branch: `construct-dev-git-{branch}-*.vercel.app`
 - Never push direct to main (branch protection should enforce once configured).
 
-**Pre-flight verify before starting slice work:** `git fetch origin main && git log origin/main -1`. Confirm tip is session 24 wrap merge (or later).
+**Pre-flight verify before starting slice work:** `git fetch origin main && git log origin/main -1`. Confirm tip is `1df3678` or later.
 
 ## Key files
 
@@ -193,26 +192,26 @@ docs/HANDOFF-SESSION-{18,20,21,22,23}.md           — Prior retros (top-level)
 docs/v2/v2-backlog.md                              — 98-item backlog
 ```
 
-## Session 26 pre-flight
+## Session 27 pre-flight
 
-1. **SessionStart hook should surface at turn 0** with read-discipline caps + live branch state. If it doesn't, user needs to open `/hooks` or restart Claude Code once to activate `.claude/settings.json` (created session 25). Verify hook output first.
+1. **SessionStart hook should surface at turn 0** with read-discipline caps + live branch state. `.claude/settings.json` is now on main, so a fresh session should pick it up automatically. If not, restart Claude Code once.
 2. **Claude loads `CLAUDE.md` + this file.** Do NOT batch-read Tier 3 specs — honour read discipline caps.
 3. **Verify branch base** (redundant with hook, do anyway):
    ```
    git fetch origin main
    git log origin/main -1
    ```
-   Confirm session-25 PR merge is present.
+   Confirm tip is `1df3678` or later.
 4. **Confirm with user:**
-   - Did manual actions from session-25 HANDOFF get done? (Branch protection status checks 3.14; `/hooks` reload for settings watcher)
    - Any new rules added to CLAUDE.md since session 25? (Expected: no — moratorium applies.)
    - Still prioritising hook-based enforcement sprint, or reshuffle?
-5. Open feature branch off main: `claude/session-26-hook-enforcement` (or split per-hook slices).
+   - Claude AI Design source files available? (Affects P2 fallback choice.)
+5. Open feature branch off main: `claude/session-27-hook-enforcement` (or split per-hook slices).
 6. **Start P0.1 line-count hook.** Build → pipe-test → validate JSON → proof-it-fires via Edit. One hook at a time, fully verified.
 
 **Session discipline reminders (automatically surfaced by hook; restated for belt-and-braces):**
-- Honour Planning conduct rules from turn 1. Brief-rot in this file or in kickoff is possible — verify any factual claim against live source before building on it.
-- Target ~1,500 lines. Earlier wrap trigger than session 24's ~2,700, slightly higher than session 25's ~120 because hook infrastructure is denser.
+- Honour Planning conduct rules from turn 1. Verify any factual claim against live source before building on it.
+- Target ~1,500 lines. Hook infrastructure is denser than slice code.
 - **No new CLAUDE.md rules.** If a rule feels needed, capture as a handoff note; don't add to Tier 1.
-- **No slice work before hooks land.** The reboot's test is shipping S-F1 (or C-U4 as fallback) under the new enforcement. Anything else muddies the signal.
+- **No slice work before hooks land.** The reboot's test is shipping S-F1 (or C-U4 as fallback) under the new enforcement.
 - If hooks take longer than expected: ship what works, defer what doesn't, document the remainder. Hook quality > quantity.
