@@ -1,4 +1,4 @@
-# Session 26 Context Block
+# Session 28 Context Block
 
 ## Product positioning (preserve across sessions)
 
@@ -6,117 +6,113 @@ Decouple is the **complete settlement workspace for separating couples** — fin
 
 **Pillars (spec 42):** Shared, not adversarial · Evidenced, not asserted · End-to-end, not hand-off. **Tagline:** "Decouple — the complete picture."
 
-Spec 42 is authoritative for positioning. Spec 68 suite (hub + 68a-e locked + 68f/g opens) carries reconciled wire-level framing. Spec 70 Build Map is the Phase C input. Spec 71 (rebuild strategy, §7a amended Option 4) + spec 72 (engineering security) are the execution layer.
+Spec 42 authoritative for positioning. Spec 68 suite (hub + 68a-e locked + 68f/g opens) carries reconciled wire-level framing. Spec 70 Build Map is the Phase C input. Spec 71 (rebuild strategy, §7a amended Option 4) + spec 72 (engineering security) are the execution layer.
 
 ## Stack
 
-Next.js 16.2, React 19, TypeScript, Tailwind 4, Supabase, Claude AI, Vercel Pro.
+Next.js 16.2, React 19, TypeScript, Tailwind 4, Supabase, Claude AI, Vercel Pro. Single-branch-main workflow (spec 71 §7a Option 4): no `phase-c` integration, no cutover event. Slice work on short-lived feature branches (`claude/S-XX-{slug}` or `claude/session-{N}-{scope}`) → PR → main. Tink credentials in Vercel env.
 
-**Single-branch-main workflow** (spec 71 §7a amended session 24, Option 4): no `phase-c` integration branch, no cutover event. Slice work on short-lived feature branches (`claude/S-XX-{slug}`) → PR → main. Vercel prod rebuilds on every main merge; may show placeholder / partially-built state during rebuild — acceptable given no users. Tink credentials in Vercel env.
+## What sessions 25–27 accomplished (rolling window)
 
-## What session 25 accomplished
+**Session 25 — CI triage + confidence-taxonomy lock + SessionStart hook + reboot decision.** CI workflow fixes applied but 2 reds deferred. `.claude/hooks/session-start.sh` shipped — turn-0 branch state + read-discipline reminder. Mid-session audit found chronic rule-drift ("adding more rules has been the failure mode") and pivoted the plan from more rules to automation.
 
-**CI triage + confidence-taxonomy lock + mid-session meta-audit + partial reboot.**
+**Session 26 — CI triage mini-session (no handoff at the time; retro backfilled session 27).** Fixed the two remaining red jobs (Gitleaks, Dev-mode leak scan) directly on PR #10's branch via rebase; PR #10 merged `2026-04-24T08:15:28Z` with all 9 checks green (main tip `1df3678`). No separate PR number. No retro or SESSION-CONTEXT refresh done at the time.
 
-- **Track A CI triage — 6 of 8 jobs green, 2 still failing on PR #10.** Locally verified passing: lint (0 errors / 23 warnings in preserved code), typecheck, tests (4/4), build, env-var regex ban, npm audit. **Honest correction:** session-25 wrap claim of "all 8 pass locally" was overstated — dev-mode leak scan was verified against a stale pre-wrap `.next` and gitleaks was never run locally at the time. Post-push CI showed gitleaks scan + dev-mode leak scan failing. After-the-fact local reproduction: content clean (0 matches in fresh `.next`, 0 gitleaks findings across 199 commits); failures are CI-environment-specific. Flagged as session-26 P0.0 before hook work.
-- **Confidence-state taxonomy corrected.** Shipped code has always been 3 states (`known` / `estimated` / `unknown`); a stale test expected 4. Reverted my initial "fix" that added `unsure` to match the test; instead corrected the test. Locked decision in new `C-CF Confidence taxonomy` section of spec 68a.
-- **Mid-session meta-audit of rule-drift** (agent-delegated). Found chronic pattern across sessions 21-24: rules codified at wrap, broken next session. Adding more rules has been the failure mode. Full findings in HANDOFF-25.
-- **Reboot initiated — one concrete automation piece shipped.** SessionStart hook wired at `.claude/hooks/session-start.sh` + `.claude/settings.json`. On session start: injects read-discipline caps, Planning conduct rules, and **live** branch-state verification (branch, HEAD vs origin/main, ahead/behind, clean/dirty). Counter to Tier-1-CLAUDE.md-rules-not-enough pattern. **Hook needs user `/hooks` reload or restart** to activate — settings watcher doesn't see `.claude/` created mid-session.
-- **Brief-rot caught 3 times** in the session-25 kickoff (WORKSPACE_PHASES, CONFIDENCE_STATES count, gitleaks flag — all wrong). Reinforces the SessionStart-hook live-branch-state value.
-- **Reboot completion deferred to session 26** by explicit decision. Full audit + session-26 implementation brief in HANDOFF-25. No new CLAUDE.md rules this session.
+**Session 27 — hook-based enforcement sprint.** Four enforcement hooks + PR template + CI gate shipped:
+- **P0.1** `.claude/hooks/line-count.sh` (PostToolUse Write/Edit) — cumulative session churn via `git diff --numstat origin/main` + untracked `wc -l`. Warns at 1,000 / 1,500 / 2,000. Commit `5409a71`.
+- **P0.2** `.claude/hooks/read-cap.sh` (PreToolUse Read) — blocks full-file Reads of >400-line files without offset+limit; blocks Reads that would push turn-total past 300. 45s gap heuristic for turn boundaries. Commit `524b2d9`.
+- **P0.3** `/wrap` slash command + `.claude/hooks/wrap-check.sh` — interactive wrap-protocol checklist. Commit `73709db`.
+- **P0.4** `.github/PULL_REQUEST_TEMPLATE.md` + `.github/workflows/pr-dod.yml` — 6-item DoD + 13-item security checklist on every PR; CI fails `src/`-touching PRs without `docs/slices/S-*/verification.md` reference. Commit `a7ce9e4`.
+- **P1 CLAUDE.md pruning** — 5 section commits (`a70a276` → `b9dcf73`): line-count + read-discipline sub-rules collapsed to hook pointers; wrap + DoD sections gained enforcement pointers; session-startup tightened. Net -5 lines on pruned sections. Plus Key files extension (`daa3bed`) +10 lines for hook/CI discoverability → CLAUDE.md net **231 → 236** (+5).
 
-See `docs/HANDOFF-SESSION-25.md` for detailed retro + session-26 brief.
+See `docs/HANDOFF-SESSION-27.md` for full retro. Session 27 did NOT ship a slice — deferred per kickoff's "hooks before slices" constraint.
 
 ## Current state
 
-### Locked (through session 24)
+### Locked (through session 27)
 
-- **Sessions 19-22 foundational:** 5-phase model · four-document lifecycle · spec 68a-e phase locks · spec 68f session-21 register with session-22 locks applied · spec 68g trio (visual anchors, build opens, copy/share opens).
-- **Session 23:** spec 71 rebuild strategy · spec 72 engineering security · spec 70 hub audit · spec 70 slices catalogue (S-F7 + S-M1 = 33 slices) · spec 67 slice-ownership map · engineering-phase-candidates (§A/§B applied, §C/§D embodied in slice templates, §E/§F/§G parked).
-- **Session 24:** Phase C foundation merged to main · Phase-C-freeze retired (Option 4) · V1 wiped · CLAUDE.md has Coding conduct + Engineering conventions + Planning conduct + read-discipline rules · slice template scaffolding ready · CI drafts ready · HANDOFFs archived.
-- **Session 25:** CI triage complete (all 8 jobs pass) · confidence-taxonomy locked in spec 68a as new C-CF section (3 states: `known`/`estimated`/`unknown`) · SessionStart hook wired at `.claude/hooks/session-start.sh` · mid-session audit captured rule-drift pattern · reboot-completion deferred to session 26.
+- **Sessions 19-22 foundational:** 5-phase model · four-document lifecycle · spec 68a-e phase locks · spec 68f register with session-22 locks applied · spec 68g trio.
+- **Sessions 23-24:** spec 71 rebuild strategy · spec 72 engineering security · spec 70 hub + 33-slice catalogue · spec 67 slice-ownership · Option 4 single-branch-main · V1 wiped · CLAUDE.md Coding/Engineering/Planning conduct.
+- **Session 25:** CI triage Track A · confidence-taxonomy C-CF (3 states `known`/`estimated`/`unknown`) · SessionStart hook.
+- **Session 26:** CI green on main (PR #10 merged with 9/9 checks).
+- **Session 27:** Four enforcement hooks + PR template + DoD CI gate live on branch. CLAUDE.md pruned + Key-files-extended.
 
-### Open (see spec 68f + 68g trio registers for full list)
+### Open (see spec 68f + 68g registers for full list)
 
-- **68f:** 10 🟢 locked, 17 🟠 open (mostly downstream — R-1..6, S-1..3, F-1..5, C-X1, C-N1b, C-S1b).
+- **68f:** 10 🟢 locked, 17 🟠 open (downstream — R-1..6, S-1..3, F-1..5, C-X1, C-N1b, C-S1b).
 - **68g-visual-anchors:** 14 open (C-V1..C-V14) — resolved as slices encounter each anchor.
 - **68g-build-opens:** 10 open (B-5..B-14).
-- **68g-copy-share-opens:** 5 open. **C-U4 disclosure-language audit = session 25 P1** (blocks anchor extraction copy).
+- **68g-copy-share-opens:** 5 open. **C-U4 disclosure-language audit is session 28 P0** (blocks anchor extraction copy).
 
 ### Specced but NOT built
 
-Everything in spec 68 + 70 + 71 + 72 + 67 is design-only. No implementation yet. S-F1 design tokens is the first engineering slice; blocked pending Claude AI Design tool source files from session 22 wire batches.
+Everything in spec 68 + 70 + 71 + 72 + 67 is design-only. No slices shipped. S-F1 design tokens is the first engineering slice once Claude AI Design source files are released; C-U4 copy audit is the first session-28 target (no asset dependency).
 
-### Built (on main post-Option-4)
+### Built (on main + on session-27 branch pending merge)
 
-- **Re-use (unchanged):** `src/lib/{bank,ai,supabase,stripe,analytics,documents,recommendations}/*` · `src/app/api/{bank,documents,ntropy,plan,health,test-pipeline}/` · `src/app/workspace/engine-workbench/` (moves to `/app/dev/` at S-F7) · most hooks · `src/utils/cn.ts` · `src/types/{hub,index}.ts`.
-- **Preserve-with-reskin:** `src/components/ui/{button,card,badge}.tsx` · `src/components/layout/{header,footer,env-banner}.tsx` · `src/components/hub/fidelity-label.tsx` · `src/lib/bank/confirmation-questions.ts` · `src/lib/supabase/workspace-store.ts` · `src/types/workspace.ts` · `src/hooks/{use-interview,use-workspace}.ts` · `src/constants/index.ts` · legal placeholders (`/privacy`, `/terms`, `/cookies`).
-- **Deprecated exception:** `src/types/interview.ts` — restored with deprecation header; full delete blocked on spec-65 refactor at S-O1.
-- **Placeholder:** `src/app/page.tsx` — minimal "rebuilding" landing.
+- **Main (pre-session-27):** Stable libs (`src/lib/*`) · API routes · Preserve-with-reskin UI (`src/components/ui/*`, `src/components/hub/*` except title-bar) · legal placeholders · landing placeholder · CI workflows (`ci.yml`, `gitleaks.yml`) · `src/types/interview.ts` with deprecation header.
+- **Session 27 branch (pending merge):** four enforcement hooks + `/wrap` command + PR template + DoD CI gate + CLAUDE.md prune/extend + HANDOFF-26 stub + HANDOFF-27 retro.
 
-## Session 26 priorities
+## Session 28 priorities
 
-**Sole objective: hook-based enforcement sprint.** No new CLAUDE.md rule-writing. See `docs/HANDOFF-SESSION-25.md` §"Session-26 brief" for full spec. Summary:
+### P0 — C-U4 disclosure-language audit
 
-### P0 — CI green + four enforcement hooks in order
+No asset dependency; first slice exercised under new enforcement. First real test of: PR template · pr-dod.yml gate · `/wrap` live invocation · 6-item DoD · adversarial review output in PR body · 13-item security checklist. See `docs/workspace-spec/68g-copy-share-opens.md` for C-U4 scope.
 
-**P0.0 — CI triage (BEFORE hooks).** PR #10 has 2 reds: Gitleaks scan + Dev-mode leak scan. Content verified clean locally; root cause is CI-environment-specific. Gitleaks likely `gitleaks-action@v2` licensing/version issue. Dev-mode leak scan cause TBD — needs actual CI log (auth-gated; paste from Actions UI). Fix on session-26 feature branch; decide whether to amend PR #10 or ship on a new PR.
+### P1 — S-F1 design system tokens (unblock-dependent)
 
-**P0.1 — Line-count display hook** — `PostToolUse` on `Write|Edit`. Maintains session-local running total; surfaces delta + cumulative. Warns at 1,000 · harder warn at 1,500. No blocking.
-**P0.2 — Read-cap hook** — `PreToolUse` on `Read`. Blocks full-file reads >400 lines without offset/limit; blocks when batched turn-total >300 lines. Deny with pointer to CLAUDE.md Planning conduct §.
-**P0.3 — `/wrap` slash command** — enforces wrap protocol (CLAUDE.md:49-64). Interactive checklist: clean tree · HANDOFF written · SESSION-CONTEXT updated · PR opened.
-**P0.4 — DoD CI gate + PR template** — `.github/PULL_REQUEST_TEMPLATE.md` with 6-item DoD; CI check that blocks slice PRs without corresponding `docs/slices/S-*/verification.md` updates.
+Gated on user releasing Claude AI Design tool source files from session 22. Per session-27 kickoff user statement: "I'm not going anywhere near that until I feel it is safe to do so." No action on S-F1 until user signals unblock.
 
-### P1 — CLAUDE.md pruning
+### P2 — Hook calibration pass
 
-Rule-by-rule review: what's enforced by hook/CI (keep), what's genuinely held (keep), what's been broken more than held (remove or demote). **Moratorium on new rules** until S-F1 ships under new enforcement.
+Observe live behaviour of session 27 P0.1-P0.4 during real slice work (C-U4). If `read-cap.sh` 45s gap heuristic misfires, if `line-count.sh` misses an edge case, if `pr-dod.yml` false-flags — tune. Not expected to need changes; flagged for attention.
 
-### P2 — First slice (if time + assets)
+### Stretch
 
-S-F1 design system tokens becomes the test slice once hooks are in. Must ship with full 6-item DoD + 13-item spec 72 §11 security DoD visibly checked + adversarial review output in PR description. **If Claude AI Design tool source files still blocked**, use C-U4 copy audit as hook-enforcement test target instead.
+Adversarial review (`/security-review` skill) on the four enforcement hooks themselves in their first real-use context. Not required; nice-to-have.
 
-### Scope ceiling
+## Scope ceiling
 
-Target ≤1,500 lines this session (hook infrastructure is denser than slice code). Don't over-pack: hook quality > feature velocity for this session. Read discipline: hooks surface the caps at turn 0; honour them.
+Target ≤1,500 lines session churn (hook-surfaced). C-U4 is a copy-audit slice; the churn will be heavier in docs than code, but honour the cap. Hook warns at 1,000 / 1,500 / 2,000; relay warns to user.
 
 ## Negative constraints
 
 1. **Do NOT** frame Decouple as a "financial disclosure tool." Spec 42 complete-settlement-workspace framing is load-bearing.
-2. **Phase-C-freeze model RETIRED** (session 24, Option 4). No `phase-c` integration branch, no frozen main, no cutover event. Slice work on short-lived feature branches → PR → main. If user traffic arrives before Phase C completes, re-introduce freeze via new spec 71 §7a amendment; do not retrofit from pre-Option-4 strikethrough text.
-3. **Do NOT** re-introduce any file from the wiped V1 tree (`src/components/workspace/*`, `src/components/interview/*`, etc.). If a slice believes it needs a V1 pattern, extract the pattern as a design doc and rebuild — don't copy-paste.
+2. **Phase-C-freeze model RETIRED** (session 24 Option 4). Single-branch-main; no integration branch; no cutover event. If user traffic arrives before Phase C completes, re-introduce freeze via new spec 71 §7a amendment — don't retrofit from pre-Option-4 strikethrough text.
+3. **Do NOT** re-introduce any file from the wiped V1 tree (`src/components/workspace/*`, `src/components/interview/*`, etc.). If a slice needs a V1 pattern, extract as a design doc and rebuild — don't copy-paste.
 4. **Do NOT** re-open 68a-e locked decisions unless new evidence surfaces.
 5. **Do NOT** read pre-pivot specs (03-06, 11, 12). Active framing: 42, 44, 65, 67, 68, 68a-g, 70, 71, 72.
 6. **`NEXT_PUBLIC_DECOUPLE_AUTH_MODE=prod` mandatory in Production** (spec 72 §2 + §7). CI gate enforces; runtime assertion throws on mismatch; `/app/dev/*` returns 404 in prod.
-7. **Read discipline (honour on turn 1):** 300-line cap per turn · 3-Read cap per turn · offset/limit for specs >400 lines · grep/ls before Read · announce size before parallel batch.
-8. **V1 legacy palette is gone.** Visual canonical = Claude AI Design tool outputs (session 22 wire batches). Airbnb / Emma / Habito + spec 18 palette + spec 27 all superseded.
+7. **Read discipline enforced by `.claude/hooks/read-cap.sh`** (session 27 P0.2): full-file Reads of >400-line files blocked without offset+limit; per-turn total >300 blocked. Deny messages quote the rule + suggest alternatives. Grep/ls/wc-l before Read remains habit-level; the hook catches the forgotten case.
+8. **V1 legacy palette gone.** Visual canonical = Claude AI Design tool outputs (session 22 wire batches). Airbnb / Emma / Habito + spec 18 palette + spec 27 all superseded.
 9. **Safeguarding V1 = signposting + baseline** (spec 67 Gap 11, spec 72 §9). Detection / decoy / adaptive pacing = V1.5.
 10. **Identity verification waits until consent-order stage** — not signup, not Settle signature (V1 = explicit attestation per 68f S-3).
 11. **MLP not MVP** — scope decisions per slice framed as "what the *loveable* version requires vs what can iterate post-launch." Users are in crisis; loveable is the floor.
 12. **AI extracts facts, app generates questions** — never put reasoning / clarification / gap analysis in AI extraction schemas. result-transformer.ts generates these via spec 13 trees.
 13. **Anthropic SDK uses `output_config.format`** (not `response_format`). All JSON schemas need `additionalProperties: false`. SDK timeout 90s; route maxDuration 300s.
-14. **No new CLAUDE.md rules in session 26** (per session-25 audit + reboot decision). The reboot is automation, not more rules. If a rule feels needed, capture as a handoff note or a hook spec — do not add to CLAUDE.md until S-F1 ships under new enforcement.
+14. **No new CLAUDE.md rules** — moratorium holds until S-F1 ships under new enforcement (per session-25 reboot decision + session-27 hook sprint). Capture needed rules as HANDOFF notes or hook specs. The reboot is automation, not more rules.
 15. **Don't treat failing tests as spec.** A test that disagrees with shipped code is a signal, not a mandate. Verify which represents the current design decision (spec + user confirmation); the stale side is the artefact.
-16. **Don't trust kickoff-prompt factual claims without live verification.** SessionStart hook surfaces live branch state; use it. Session 25 caught 3 brief-rot errors via verification.
-17. **No slice work in session 26 until hooks land.** Shipping a slice under old enforcement would not be a clean test of the reboot.
+16. **Don't trust kickoff-prompt factual claims without live verification.** SessionStart hook surfaces live branch state; use it. Session 25 caught 3 brief-rot errors via verification; session 27 caught 2 more (kickoff's "P0.0 closed" + "session 27" framing needed user confirmation because SESSION-CONTEXT was still session-26-framed at the time).
+17. **DoD CI gate enforces slice-verification on src/ PRs** (session 27 P0.4). Any PR touching `src/` without a `docs/slices/S-*/verification.md` reference fails. Escape hatch: `no-slice-required` label, for truly trivial src/ touches only (use sparingly).
 
 ## Information tiers
 
 - **Tier 1 (always loaded):** `CLAUDE.md` — positioning, rules, Coding/Engineering/Planning conduct.
 - **Tier 2 (read at session start):** this file.
-- **Tier 3 (read section — not full file — when building in that area):** spec 42 (positioning) · spec 44 (document-as-spine) · spec 68 hub + 68a-e phase locks · spec 70 Build Map suite · spec 71 rebuild strategy (§5/§7a amended) · spec 72 engineering security · `docs/engineering-phase-candidates.md` (§E/§F/§G still relevant).
-- **Tier 4 (reference only, don't read proactively):** 68f / 68g open registers · spec 67 · spec 65 · `docs/HANDOFF-SESSION-{18,20-24}.md` · `docs/handoffs-archive/` · `docs/v2/v2-backlog.md`. Consult before proposing new work to verify it's not already planned / deprioritised.
+- **Tier 3 (read section, not full file, when building in that area):** spec 42 · spec 44 · spec 68 hub + 68a-e · spec 70 Build Map suite · spec 71 · spec 72 · `docs/engineering-phase-candidates.md` (§E/§F/§G still relevant).
+- **Tier 4 (reference only, don't read proactively):** 68f/g open registers · spec 67 · spec 65 · `docs/HANDOFF-SESSION-*.md` · `docs/handoffs-archive/` · `docs/v2/v2-backlog.md`. Consult before proposing new work.
 
 ## Branch
 
-Main is canonical (session 24 merged via PR #6 as squash `321fce8`; session 24 wrap PR merging this rewrite pending).
+Main is canonical. Session 27 PR merging into main will bring four enforcement hooks + DoD CI gate + PR template to main — once merged, they apply to every subsequent PR repo-wide.
 
 **Feature branch pattern (spec 71 §7a single-branch-main):**
-- Off main: `git checkout main && git pull --ff-only && git checkout -b claude/S-XX-{slug}`
-- Work → commit → push → PR → review → merge to main → delete feature branch
-- Preview URL per branch: `construct-dev-git-{branch}-*.vercel.app`
-- Never push direct to main (branch protection should enforce once configured).
+- Off main: `git checkout main && git pull --ff-only && git checkout -b claude/S-XX-{slug}` (slice) or `claude/session-{N}-{scope}` (session-scoped).
+- Work → commit → push → PR → review → merge to main → delete branch.
+- Preview URL per branch: `construct-dev-git-{branch}-*.vercel.app`.
+- Never direct-push to main (branch protection should enforce once configured).
 
-**Pre-flight verify before starting slice work:** `git fetch origin main && git log origin/main -1`. Confirm tip is session 24 wrap merge (or later).
+**Session 28 pre-flight verify:** `git fetch origin main && git log origin/main -1`. Confirm session-27 wrap PR is merged (tip should be ahead of `1df3678`).
 
 ## Key files
 
@@ -124,8 +120,9 @@ Main is canonical (session 24 merged via PR #6 as squash `321fce8`; session 24 w
 Session orientation
 CLAUDE.md                                          — Positioning + rules (Tier 1)
 docs/SESSION-CONTEXT.md                            — THIS FILE (Tier 2)
-docs/HANDOFF-SESSION-25.md                         — Latest retro (includes session-26 brief)
-docs/HANDOFF-SESSION-24.md                         — Prior retro
+docs/HANDOFF-SESSION-27.md                         — Latest retro (session 27 hook sprint)
+docs/HANDOFF-SESSION-26.md                         — CI-triage mini-session backfill stub
+docs/HANDOFF-SESSION-25.md                         — Reboot-decision retro
 
 Reconciled framing (Tier 3)
 docs/workspace-spec/42-strategic-synthesis.md      — Authoritative positioning
@@ -139,7 +136,7 @@ docs/workspace-spec/68e-decisions-finalise.md      — Finalise locks
 docs/workspace-spec/68f-open-decisions-register.md — Session-21 register + session-22 locks
 docs/workspace-spec/68g-visual-anchors.md          — C-V1..C-V14
 docs/workspace-spec/68g-build-opens.md             — B-5..B-14
-docs/workspace-spec/68g-copy-share-opens.md        — C-U4..U6 + C-S5..S6 (C-U4 = session 25 P1)
+docs/workspace-spec/68g-copy-share-opens.md        — C-U4..U6 + C-S5..S6 (C-U4 = session 28 P0)
 
 Build Map (Tier 3)
 docs/workspace-spec/70-build-map.md                — Hub + audit-integrated inventory
@@ -147,7 +144,7 @@ docs/workspace-spec/70-build-map-{start,build,reconcile,settle,finalise}.md
 docs/workspace-spec/70-build-map-slices.md         — 33-slice catalogue
 
 Phase C execution (Tier 3)
-docs/workspace-spec/71-rebuild-strategy.md         — §5+§7a amended (Option 4: single-branch-main, V1 wiped)
+docs/workspace-spec/71-rebuild-strategy.md         — §5+§7a amended (Option 4)
 docs/workspace-spec/72-engineering-security.md     — Engineering security principles
 docs/engineering-phase-candidates.md               — §A/§B applied; §C/§D embodied in docs/slices/_template/
 
@@ -159,9 +156,11 @@ Flow model (Tier 4 reference)
 docs/workspace-spec/65-pre-signup-interview-reconciled.md  — → S-O1
 docs/workspace-spec/67-post-signup-profiling-progress.md   — Slice-ownership map at end
 
-CI + ops
-.github/workflows/{ci,gitleaks}.yml                — 7-job CI + secrets scan (drafted; active on next PR)
-.github/workflows/README.md                        — Spec refs + not-yet-wired + troubleshooting
+Hook + CI enforcement (sessions 25 + 27) — full paths in CLAUDE.md Key files
+.claude/settings.json · .claude/hooks/{session-start,line-count,read-cap,wrap-check}.sh
+.claude/commands/wrap.md
+.github/workflows/{ci,gitleaks,pr-dod}.yml
+.github/PULL_REQUEST_TEMPLATE.md
 
 Stable libs (Re-use per spec 70 hub — on main now)
 src/lib/{bank,ai,supabase,stripe,analytics,documents,recommendations}/*
@@ -189,30 +188,29 @@ src/app/page.tsx                                   — "Rebuilding" landing unti
 
 Archive (Tier 4)
 docs/handoffs-archive/                             — HANDOFFs 2-17
-docs/HANDOFF-SESSION-{18,20,21,22,23}.md           — Prior retros (top-level)
+docs/HANDOFF-SESSION-{18,20,21,22,23,24,25,26,27}.md  — Prior retros (top-level)
 docs/v2/v2-backlog.md                              — 98-item backlog
 ```
 
-## Session 26 pre-flight
+## Session 28 pre-flight
 
-1. **SessionStart hook should surface at turn 0** with read-discipline caps + live branch state. If it doesn't, user needs to open `/hooks` or restart Claude Code once to activate `.claude/settings.json` (created session 25). Verify hook output first.
-2. **Claude loads `CLAUDE.md` + this file.** Do NOT batch-read Tier 3 specs — honour read discipline caps.
-3. **Verify branch base** (redundant with hook, do anyway):
+1. **SessionStart hook fires at turn 0** surfacing read-discipline + Planning conduct + live branch state. Verify it appears.
+2. **Claude loads `CLAUDE.md` + this file.** Don't batch-read Tier 3 specs — read-cap hook enforces.
+3. **Verify branch base:**
    ```
    git fetch origin main
    git log origin/main -1
    ```
-   Confirm session-25 PR merge is present.
+   Confirm session-27 wrap PR is merged.
 4. **Confirm with user:**
-   - Did manual actions from session-25 HANDOFF get done? (Branch protection status checks 3.14; `/hooks` reload for settings watcher)
-   - Any new rules added to CLAUDE.md since session 25? (Expected: no — moratorium applies.)
-   - Still prioritising hook-based enforcement sprint, or reshuffle?
-5. Open feature branch off main: `claude/session-26-hook-enforcement` (or split per-hook slices).
-6. **Start P0.1 line-count hook.** Build → pipe-test → validate JSON → proof-it-fires via Edit. One hook at a time, fully verified.
+   - Manual actions from HANDOFF-27 status? (Branch protection status checks; `/hooks` reload if needed.)
+   - C-U4 copy audit still P0, or reshuffle?
+   - Claude AI Design source files now available? (Unblocks S-F1.)
+5. **Open feature branch off main:** `claude/S-C-U4-disclosure-audit` (or similar) per spec 71 §7a.
+6. **First action on C-U4:** read `docs/workspace-spec/68g-copy-share-opens.md` §C-U4 with offset+limit for scope; don't read the whole file if it's >400 lines (hook will block).
 
-**Session discipline reminders (automatically surfaced by hook; restated for belt-and-braces):**
-- Honour Planning conduct rules from turn 1. Brief-rot in this file or in kickoff is possible — verify any factual claim against live source before building on it.
-- Target ~1,500 lines. Earlier wrap trigger than session 24's ~2,700, slightly higher than session 25's ~120 because hook infrastructure is denser.
-- **No new CLAUDE.md rules.** If a rule feels needed, capture as a handoff note; don't add to Tier 1.
-- **No slice work before hooks land.** The reboot's test is shipping S-F1 (or C-U4 as fallback) under the new enforcement. Anything else muddies the signal.
-- If hooks take longer than expected: ship what works, defer what doesn't, document the remainder. Hook quality > quantity.
+**Session discipline (hook-surfaced; restated):**
+- Honour Planning conduct from turn 1. Brief-rot in this file is possible — live-verify factual claims.
+- Target ~1,500 lines. Hook warns at 1,000 / 1,500 / 2,000.
+- **No new CLAUDE.md rules** — moratorium holds until S-F1 ships under new enforcement (per session-25 reboot). Capture needed rules as HANDOFF notes or hook specs.
+- **Honour the 6-item DoD + 13-item security checklist.** PR template is mandatory; CI gate fails PRs that touch `src/` without slice-verification reference.

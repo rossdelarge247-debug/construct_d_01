@@ -25,20 +25,18 @@ The experience should feel like having a brilliant, patient analyst sitting besi
 
 ## Session startup (do this FIRST)
 
-1. **Verify your working branch.** The canonical branch name is in `docs/SESSION-CONTEXT.md` (or your task description). If the harness landed you on a different base, resync before doing anything else — `git fetch origin <branch>` then `git checkout -B <branch> origin/<branch>`. Session 22→23 hit this exact snag; don't build on a stale base.
+1. **Verify your working branch.** `.claude/hooks/session-start.sh` surfaces live branch state at turn 0 (current branch, HEAD vs origin/main, ahead/behind, tree state). Canonical branch name is in `docs/SESSION-CONTEXT.md` or the task description. If the harness landed you on a different base, resync: `git fetch origin <branch>` → `git checkout -B <branch> origin/<branch>`.
 
-2. **Read `docs/SESSION-CONTEXT.md`** — this is the rolling context block. It contains: product vision, principles, what the last session accomplished, current state of the codebase, prioritised deliverables for this session, negative constraints (things NOT to do), and key file paths. Always read this before doing anything else.
+2. **Read `docs/SESSION-CONTEXT.md`** — rolling context block. Vision, principles, last session's accomplishments, current state, prioritised deliverables, negative constraints, key file paths. Always before anything else.
 
-3. **Confirm with the user** what they'd like to focus on. The SESSION-CONTEXT.md has suggested deliverables but the user may have different priorities.
+3. **Confirm with the user** what they want to focus on. SESSION-CONTEXT has suggested deliverables; user may have different priorities.
 
 ## Session discipline
 
 ### Track your progress actively
 
-- After every file edit, maintain a **running count of net lines added/modified**.
+- Line-count tracking is automated: `.claude/hooks/line-count.sh` fires on every Write/Edit and surfaces delta + cumulative session churn. Soft-note at 1,000; warn at 1,500 ("approaching session scope limit — recommend wrapping up"); stop at 2,000 ("stop writing code and wrap"). When the hook surfaces a warn, relay it to the user.
 - Use the TodoWrite tool to track tasks. Mark each done as you complete it.
-- At **~1,500 lines changed**, proactively tell the user: "Approaching session scope limit (~1,500 lines). Recommend wrapping up soon."
-- At **~2,000 lines changed**, **stop writing code**. Tell the user you need to wrap up.
 
 ### Context window freshness
 
@@ -48,7 +46,7 @@ The experience should feel like having a brilliant, patient analyst sitting besi
 
 ### Wrapping up a session
 
-When the session is ending (user says wrap up, or you hit ~2,000 lines), do these in order:
+Run `/wrap` for an auto-generated checklist (tree clean · HANDOFF-SESSION-N · SESSION-CONTEXT refreshed · PR status). Then, when the session is ending (user says wrap up, or you hit ~2,000 lines), do these in order:
 
 1. **Commit and push** all uncommitted work
 2. **Update `docs/SESSION-CONTEXT.md`** — rewrite it for the NEXT session:
@@ -116,6 +114,16 @@ docs/workspace-spec/71-rebuild-strategy.md          — Folder structure, stable
 docs/workspace-spec/72-engineering-security.md      — Engineering security principles (data classification, env vars, auth/session, RLS, validation, logging, dev/prod boundary, third-party, safeguarding, pen-test readiness, per-slice security DoD)
 docs/engineering-phase-candidates.md                — Parked CLAUDE.md additions for Phase C kickoff (Karpathy coding conduct, engineering conventions, per-slice AC + test plan templates)
 
+Hook + CI enforcement (sessions 25 + 27)
+.claude/settings.json                               — Hook registrations (SessionStart · PostToolUse · PreToolUse)
+.claude/hooks/session-start.sh                      — Turn-0 branch state + read-discipline reminder (session 25)
+.claude/hooks/line-count.sh                         — PostToolUse Write/Edit: session-churn delta + wrap thresholds (session 27 P0.1)
+.claude/hooks/read-cap.sh                           — PreToolUse Read: block >400-line full reads + >300-line turn batch (session 27 P0.2)
+.claude/hooks/wrap-check.sh                         — /wrap helper: wrap-protocol checklist (session 27 P0.3)
+.claude/commands/wrap.md                            — /wrap slash command (invokes wrap-check.sh)
+.github/workflows/pr-dod.yml                        — CI: src/ PRs must reference docs/slices/S-*/verification.md (session 27 P0.4)
+.github/PULL_REQUEST_TEMPLATE.md                    — 6-item DoD + 13-item security checklist on every PR (session 27 P0.4)
+
 Stable libraries (preserve across rebuild — Re-use per Build Map)
 src/lib/bank/tink-client.ts                         — Tink API client
 src/lib/bank/tink-transformer.ts                    — Tink → BankStatementExtraction
@@ -170,12 +178,7 @@ These rules govern how Claude makes decisions and builds plans. Guardrails again
 
 **Distrust your own summaries.** A summary compressed earlier in the session is navigation, not source. When a decision is load-bearing, go back to the spec itself — even if the summary "feels" right. Heavy context makes skim-recall tempting; resist it.
 
-**Read discipline — cadence matters more than file size.** Sessions 22, 23, and 24 all hit stream timeouts from parallel large reads. Operational rules:
-- **Max 300 lines of combined tool-result content per turn.** If a batch would exceed this, split across sequential turns.
-- **Max 3 Read calls per turn.** One turn, focused scope; subsequent Reads go in subsequent turns.
-- **Read sections, not files, for specs >400 lines.** Use `Read` with `offset` + `limit` for the specific section. Full-file Read for a "get the flavour" purpose is banned for large specs.
-- **Use `grep` / `ls` before committing to a read.** Cheap existence or structure check first; Read only when you know what you're looking for.
-- **Announce before a parallel batch.** Before multiple tool calls in one turn, state the expected combined line count. If >300, split.
+**Read discipline.** Enforced by `.claude/hooks/read-cap.sh` (PreToolUse on Read): blocks full-file Reads of >400-line files without offset+limit, and blocks Reads that would push this turn's total past 300 lines. Deny messages quote the rule and suggest offset/limit or grep-first alternatives. Habits the hook doesn't catch — `grep` / `ls` / `wc -l` before committing to a Read, announcing expected combined size before a parallel batch — remain in you.
 
 ## Coding conduct
 
@@ -208,6 +211,8 @@ These rules govern how Claude behaves when editing `src/`. Guardrails against ov
 6. Slice's open 68f/g entries resolved or explicitly deferred with reasoning in slice wrap
 
 Plus the 13-item security checklist in spec 72 §11. No exceptions. A partially-done slice is not shipped; it's re-scoped and re-planned.
+
+Enforcement: `.github/PULL_REQUEST_TEMPLATE.md` reproduces this checklist; `.github/workflows/pr-dod.yml` fails any PR that touches `src/` without a `docs/slices/S-*/verification.md` reference in the body (escape hatch: `no-slice-required` label for truly trivial src/ touches).
 
 ## Visual direction
 
