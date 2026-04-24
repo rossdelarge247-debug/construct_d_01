@@ -39,7 +39,7 @@ The loveable floor is **a principled, semantically-named token vocabulary that e
 - **Outcome:** The full token vocabulary (64 tokens) is declared as CSS custom properties under a new `:root` block in `src/app/globals.css`, sitting alongside the existing Tailwind 4 `@theme {}` block (which retains V1/V2 legacy tokens for non-reskinned Preserve-with-reskin components). All S-F1 tokens use the `--ds-*` prefix (e.g. `--ds-color-phase-build`) to avoid collision with V1/V2 names — particularly important for spacing, where V1 `--space-N` is a 4px-rhythm scale and S-F1 `--ds-space-N` is literal-pixel. Values match the design source verbatim.
 - **Verification:** `grep -E '^\s*--ds-' src/app/globals.css | wc -l` returns ≥64. Each phase token (`--ds-color-phase-{build,reconcile,settle,finalise}` + `-soft` variants) matches the value in `docs/design-source/welcome-tour/Welcome Tour - Standalone.html` lines 654-691.
 - **In scope:**
-  - 15 colour tokens (7 neutral + 8 phase + 1 state) — all prefixed `--ds-color-*`.
+  - 16 colour tokens (7 neutral + 8 phase + 1 state) — all prefixed `--ds-color-*`. *(Note: prose initially read "15 (7+8+1)"; arithmetic was off by one — actual shipped count is 16. Corrected here at AC-6 wrap.)*
   - 12 type-scale tokens (`--ds-type-11` through `--ds-type-72`, decimals as `-N`-suffix: `--ds-type-14-5`, `--ds-type-15-5`).
   - 3 font-family tokens (`--ds-font-sans`, `--ds-font-serif`, `--ds-font-mono`).
   - 4 weight tokens (`--ds-weight-regular/-medium/-semibold/-bold`).

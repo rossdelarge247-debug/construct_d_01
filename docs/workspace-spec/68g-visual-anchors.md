@@ -12,7 +12,7 @@
 
 ## Welcome tour anchors (first-time journey)
 
-### 🟠 C-V1 · Phase colour system
+### 🟢 C-V1 · Phase colour system
 **Pattern:** Each phase carries a signature accent + full-canvas gradient wash.
 - Build → indigo
 - Reconcile → pink / magenta
@@ -21,6 +21,7 @@
 Used on phase chip ("PHASE N · X"), step numeral, demo-card details, page background gradient. Sets emotional arc across the journey (calm → work-it-out → settle → done).
 **Evidence:** Session 22 welcome tour (5 screens) + dashboard (phase-accent card washes).
 **Target:** Token spec before Phase C. Define hex values, gradient stops, application rules per surface.
+**Locked:** Session 29 / S-F1 — `docs/slices/S-F1-design-tokens/`. CSS tokens shipped at `--ds-color-phase-{build,reconcile,settle,finalise}` + `-soft` variants in `src/app/globals.css`. Hex values: Build `#4338CA` / Reconcile `#9D174D` / Settle `#0369A1` / Finalise `#166534` (each with a `-soft` backdrop tint). Start phase implicit (no token) per spec 42 5-phase model. Gradient stops + per-surface application rules deferred to consuming component slices (welcome carousel, dashboard, etc.).
 
 ### 🟠 C-V2 · Welcome carousel shell
 **Pattern:** Full-bleed page. Serif display headline with italic accent word. Italic subhead. Body paragraph. Hero demo card offset right. Persistent bottom stepper (C-V3). Back/Next bottom corners. Skip-tour upper-right. Identity chip upper-right with status sub-label.
@@ -97,10 +98,11 @@ Bottom of list: `+ Add a task` link (scope open — see 68f B-14).
 **Evidence:** Session 22 dashboard refined wire ("Disclosure & reconcile" and "Settle & finalise" sections).
 **Target:** Anchor pattern. Ties to 68a C-N2 (dimmed+tooltipped locked phases) and 68f C-N1c (unlock copy locked).
 
-### 🟠 C-V13 · Phase accent-tint card washes
+### 🟢 C-V13 · Phase accent-tint card washes
 **Pattern:** Cards within each phase section carry a subtle background wash tinted toward the phase's accent (C-V1). Peach/rose for Preparation active cards, deeper pink for private-area cards, light blue for Settle cards, etc. Extends the phase colour system into UI surfaces beyond tour backgrounds.
 **Evidence:** Session 22 dashboard refined wire (3rd state).
 **Target:** Token spec with C-V1. Define tint opacity and application rules.
+**Locked:** Session 29 / S-F1 — `docs/slices/S-F1-design-tokens/`. Phase-tinted shadow tokens shipped at `--ds-shadow-phase-{build,reconcile,settle,finalise}` (rgba opacity 0.06 for Build/Reconcile/Settle, 0.08 for Finalise — sourced verbatim from prototype) + the four `--ds-color-phase-*-soft` tokens (also from C-V1) provide the canonical tint backgrounds. Per-surface application rules (which card types take which phase wash) deferred to consuming component slices.
 
 ### 🟠 C-V14 · Time-estimate affordance
 **Pattern:** Large display typography, right-aligned on a step card, format `Est. time ~Ns` or `~{N}s` / `~{N} min`. Sets expectation before the user commits to a task.
