@@ -1,0 +1,74 @@
+name: PR DoD gate
+
+# Enforces CLAUDE.md §"Engineering conventions" Definition of Done:
+# any PR that touches src/ must reference a docs/slices/S-*/verification.md
+# in the PR body so reviewers can trace acceptance criteria to evidence.
+# Docs / infra-only PRs skip the check.
+#
+# P0.4 of session 27's hook-enforcement sprint. Complements the other
+# CI jobs in ci.yml and gitleaks.yml.
+
+on:
+  pull_request:
+    types: [opened, synchronize, edited, reopened]
+
+jobs:
+  slice-verification:
+    name: src/ changes reference slice verification
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Detect src/ changes in this PR
+        id: diff
+        run: |
+          BASE="${{ github.event.pull_request.base.sha }}"
+          HEAD="${{ github.event.pull_request.head.sha }}"
+          # Narrow: only fail when src/ files are added / modified / deleted.
+          SRC_COUNT=$(git diff --name-only "$BASE" "$HEAD" -- 'src/' | wc -l | tr -d ' ')
+          echo "src_count=$SRC_COUNT" >> "$GITHUB_OUTPUT"
+          echo "PR touches $SRC_COUNT src/ file(s) relative to base."
+
+      - name: Require slice verification reference when src/ touched
+        if: steps.diff.outputs.src_count != '0'
+        env:
+          PR_BODY: ${{ github.event.pull_request.body }}
+        run: |
+          # Match: docs/slices/S-<id>/verification.md anywhere in body.
+          # S-id can be alphanumeric with hyphens (S-F1, S-B4, S-M1, ...).
+          if printf '%s' "$PR_BODY" | grep -qE 'docs/slices/S-[A-Za-z0-9-]+/verification\.md'; then
+            echo "PASS — PR body references a slice verification file."
+            exit 0
+          fi
+
+          # Escape hatch: `no-slice-required` label on the PR (applied via UI),
+          # for genuinely trivial src/ touches like the landing-page placeholder.
+          LABELS='${{ toJson(github.event.pull_request.labels.*.name) }}'
+          if printf '%s' "$LABELS" | grep -q 'no-slice-required'; then
+            echo "PASS — PR has 'no-slice-required' label; slice verification not required."
+            exit 0
+          fi
+
+          cat <<'MSG' >&2
+          PR DoD gate FAILED.
+
+          This PR modifies files under src/ but the PR body does not
+          reference any docs/slices/S-*/verification.md.
+
+          Per CLAUDE.md §"Engineering conventions" Definition of Done
+          item 1: "All acceptance criteria met, with evidence per AC."
+          Reviewers need to trace acceptance criteria to evidence.
+
+          Fix (one of):
+            - Add a reference to the slice's verification file in the
+              PR body, e.g. "Evidence: docs/slices/S-F1/verification.md".
+            - If the src/ touch is trivial (placeholder / infra-only),
+              apply the 'no-slice-required' label to this PR.
+          MSG
+          exit 1
+
+      - name: Skip reason (no src/ changes)
+        if: steps.diff.outputs.src_count == '0'
+        run: echo "PR does not touch src/; slice-verification reference not required."
