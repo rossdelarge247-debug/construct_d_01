@@ -3,7 +3,7 @@
 **Slice:** S-F1-design-tokens
 **Spec ref:** `docs/workspace-spec/70-build-map-slices.md` (S-F1 slice card) · `docs/workspace-spec/68g-visual-anchors.md` (C-V1 phase colour system, C-V13 phase accent-tint washes) · `docs/workspace-spec/70-build-map.md` line 117 (Button as first Preserve-with-reskin target)
 **Phase(s):** Foundation (Phase C, Step 1) — pre-phase token layer used by every phase surface downstream
-**Status:** Draft — pending user freeze
+**Status:** Approved · In implementation
 
 ---
 
@@ -118,6 +118,6 @@ The loveable floor is **a principled, semantically-named token vocabulary that e
 | Date | Reviewer | Outcome | Notes |
 |---|---|---|---|
 | 2026-04-24 | User (informal) | Pre-AC scope locked | Reading 1 / option B; phase-colour treatment (b); Start implicit; role-based neutral names; preserve-12 type scale; literal-pixel naming; danger = `#FF3B30`; explicit phase shadows; spacing fully preserved (17 values). |
-| | User | | AC frozen · implementation may begin |
+| 2026-04-24 | User | **AC frozen** | Implementation may begin. Change requests roll into re-drafted AC + re-slicing, not mid-slice scope shifts. |
 
 **AC is the contract.** Change requests after freeze roll into re-drafting AC + re-slicing, not mid-slice scope shifts.
