@@ -25,11 +25,11 @@ The experience should feel like having a brilliant, patient analyst sitting besi
 
 ## Session startup (do this FIRST)
 
-1. **Verify your working branch.** The canonical branch name is in `docs/SESSION-CONTEXT.md` (or your task description). If the harness landed you on a different base, resync before doing anything else — `git fetch origin <branch>` then `git checkout -B <branch> origin/<branch>`. Session 22→23 hit this exact snag; don't build on a stale base.
+1. **Verify your working branch.** `.claude/hooks/session-start.sh` surfaces live branch state at turn 0 (current branch, HEAD vs origin/main, ahead/behind, tree state). Canonical branch name is in `docs/SESSION-CONTEXT.md` or the task description. If the harness landed you on a different base, resync: `git fetch origin <branch>` → `git checkout -B <branch> origin/<branch>`.
 
-2. **Read `docs/SESSION-CONTEXT.md`** — this is the rolling context block. It contains: product vision, principles, what the last session accomplished, current state of the codebase, prioritised deliverables for this session, negative constraints (things NOT to do), and key file paths. Always read this before doing anything else.
+2. **Read `docs/SESSION-CONTEXT.md`** — rolling context block. Vision, principles, last session's accomplishments, current state, prioritised deliverables, negative constraints, key file paths. Always before anything else.
 
-3. **Confirm with the user** what they'd like to focus on. The SESSION-CONTEXT.md has suggested deliverables but the user may have different priorities.
+3. **Confirm with the user** what they want to focus on. SESSION-CONTEXT has suggested deliverables; user may have different priorities.
 
 ## Session discipline
 
