@@ -43,7 +43,7 @@ export interface SectionSummaryData {
   heading: string
   facts: SectionSummaryFact[]
   calculatedValues?: { label: string; value: string }[]
-  accordionLabel: string // e.g. "Income disclosed, ready for sharing & collaboration"
+  accordionLabel: string // e.g. "Income captured, ready to share"
 }
 
 export const CONFIRMATION_SECTIONS: ConfirmationSectionKey[] = [
@@ -1247,7 +1247,7 @@ function generateIncomeSummary(
     sectionLabel: 'Income',
     heading: "That's it for income",
     facts: facts.length > 0 ? facts : [{ label: 'No income sources identified', source: 'self' }],
-    accordionLabel: 'Income disclosed, ready for sharing & collaboration',
+    accordionLabel: 'Income captured, ready to share',
   }
 }
 
@@ -1279,13 +1279,13 @@ function generatePropertySummary(
   const status = answers['property-status']
 
   if (isRenting) {
-    facts.push({ label: 'You rent your home — no property to disclose', source: 'self' })
+    facts.push({ label: 'You rent your home — no property to add', source: 'self' })
     return {
       sectionKey: 'property',
       sectionLabel: 'Property',
       heading: "That's it for property",
       facts,
-      accordionLabel: 'No property to disclose',
+      accordionLabel: 'No property to add',
     }
   }
 
@@ -1300,8 +1300,8 @@ function generatePropertySummary(
       sectionKey: 'property',
       sectionLabel: 'Property',
       heading: "That's it for property",
-      facts: facts.length > 0 ? facts : [{ label: 'No property to disclose', source: 'self' }],
-      accordionLabel: 'No property to disclose',
+      facts: facts.length > 0 ? facts : [{ label: 'No property to add', source: 'self' }],
+      accordionLabel: 'No property to add',
     }
   }
 
@@ -1398,7 +1398,7 @@ function generatePropertySummary(
     heading: "That's it for property",
     facts,
     calculatedValues: calculated.length > 0 ? calculated : undefined,
-    accordionLabel: ownsProperty ? 'Property disclosed, ready for sharing & collaboration' : 'No property to disclose',
+    accordionLabel: ownsProperty ? 'Property captured, ready to share' : 'No property to add',
   }
 }
 
@@ -1430,9 +1430,9 @@ function generateAccountsSummary(
     const value = answers[`accounts-transfer-${i}-value`] || answers[`accounts-investment-${i}-value`] || answers[`accounts-crypto-${i}-value`]
     const valueLabel = value ? ` — estimated £${parseInt(value.replace(/,/g, ''), 10).toLocaleString()}` : ''
 
-    if (transferType === 'savings') facts.push({ label: `Savings account disclosed${valueLabel}`, source: 'self', gapMessage: 'For finalisation, we\'ll need a statement for this account.' })
-    else if (transferType === 'isa') facts.push({ label: `ISA disclosed${valueLabel}`, source: 'self', gapMessage: 'For finalisation, we\'ll need a latest ISA statement.' })
-    else if (transferType === 'investment') facts.push({ label: `Investment account disclosed${valueLabel}`, source: 'self', gapMessage: 'For finalisation, we\'ll need a latest valuation statement.' })
+    if (transferType === 'savings') facts.push({ label: `Savings account captured${valueLabel}`, source: 'self', gapMessage: 'For finalisation, we\'ll need a statement for this account.' })
+    else if (transferType === 'isa') facts.push({ label: `ISA captured${valueLabel}`, source: 'self', gapMessage: 'For finalisation, we\'ll need a latest ISA statement.' })
+    else if (transferType === 'investment') facts.push({ label: `Investment account captured${valueLabel}`, source: 'self', gapMessage: 'For finalisation, we\'ll need a latest valuation statement.' })
     else if (transferType === 'pension') facts.push({ label: 'Pension contribution identified — added to pensions section', source: 'self' })
 
     if (investmentType === 'isa') facts.push({ label: `Stocks & shares ISA${valueLabel}`, source: 'self', gapMessage: 'For finalisation, we\'ll need a latest valuation.' })
@@ -1446,7 +1446,7 @@ function generateAccountsSummary(
   if (answers['accounts-app-banks'] === 'yes') {
     const appValue = answers['accounts-app-banks-detail']
     const appLabel = appValue ? ` — estimated £${parseInt(appValue.replace(/,/g, ''), 10).toLocaleString()}` : ''
-    facts.push({ label: `App-based bank account(s) disclosed${appLabel}`, source: 'self', gapMessage: 'For finalisation, connect these accounts or provide screenshots.' })
+    facts.push({ label: `App-based bank account(s) captured${appLabel}`, source: 'self', gapMessage: 'For finalisation, connect these accounts or provide screenshots.' })
   }
 
   // Closed accounts
@@ -1471,7 +1471,7 @@ function generateAccountsSummary(
     sectionLabel: 'Accounts',
     heading: "That's it for accounts",
     facts,
-    accordionLabel: 'Accounts disclosed, ready for sharing & collaboration',
+    accordionLabel: 'Accounts captured, ready to share',
   }
 }
 
@@ -1489,14 +1489,14 @@ function generatePensionsSummary(answers: Record<string, string>): SectionSummar
     if (noSignalAnswer === 'unsure') {
       facts.push({ label: 'Pension situation uncertain — check your payslip or ask your employer', source: 'self' })
     } else {
-      facts.push({ label: 'No pensions to disclose', source: 'self' })
+      facts.push({ label: 'No pensions to add', source: 'self' })
     }
     return {
       sectionKey: 'pensions',
       sectionLabel: 'Pensions',
       heading: "That's it for pensions",
       facts,
-      accordionLabel: 'No pensions to disclose',
+      accordionLabel: 'No pensions to add',
     }
   }
 
@@ -1511,7 +1511,7 @@ function generatePensionsSummary(answers: Record<string, string>): SectionSummar
     const count = answers['pensions-count'] || answers['pensions-multiple-count']
     if (count === '1') facts.push({ label: 'One pension', source: 'self' })
     else if (count) facts.push({ label: `${count} pensions`, source: 'self' })
-    else facts.push({ label: 'Pension(s) to disclose', source: 'self' })
+    else facts.push({ label: 'Pension(s) to add', source: 'self' })
 
     // DB vs DC
     const pensionType = answers['pensions-type']
@@ -1544,7 +1544,7 @@ function generatePensionsSummary(answers: Record<string, string>): SectionSummar
     sectionLabel: 'Pensions',
     heading: "That's it for pensions",
     facts,
-    accordionLabel: `${sourceLabel} disclosed, ready for sharing & collaboration`,
+    accordionLabel: `${sourceLabel} captured, ready to share`,
   }
 }
 
@@ -1626,7 +1626,7 @@ function generateDebtsSummary(answers: Record<string, string>, extractions: Bank
   const hasAnyDebts = facts.length > 0
 
   if (!hasAnyDebts) {
-    facts.push({ label: 'No debts to disclose', source: 'self' })
+    facts.push({ label: 'No debts to add', source: 'self' })
   }
 
   return {
@@ -1634,7 +1634,7 @@ function generateDebtsSummary(answers: Record<string, string>, extractions: Bank
     sectionLabel: 'Debts',
     heading: "That's it for debts",
     facts,
-    accordionLabel: hasAnyDebts ? 'Debts disclosed, ready for sharing & collaboration' : 'No debts to disclose',
+    accordionLabel: hasAnyDebts ? 'Debts captured, ready to share' : 'No debts to add',
   }
 }
 
@@ -1798,7 +1798,7 @@ function generateBusinessSummary(answers: Record<string, string>): SectionSummar
       facts.push({ label: `Director's loan: you owe the company${loanLabel}`, source: 'self' })
     }
   } else {
-    facts.push({ label: 'No business interests to disclose', source: 'self' })
+    facts.push({ label: 'No business interests to add', source: 'self' })
   }
 
   return {
@@ -1806,7 +1806,7 @@ function generateBusinessSummary(answers: Record<string, string>): SectionSummar
     sectionLabel: 'Business',
     heading: "That's it for business",
     facts,
-    accordionLabel: hasBusiness ? 'Business interests disclosed, ready for sharing & collaboration' : 'No business interests to disclose',
+    accordionLabel: hasBusiness ? 'Business interests captured, ready to share' : 'No business interests to add',
   }
 }
 
@@ -1951,7 +1951,7 @@ function generateOtherAssetsSummary(answers: Record<string, string>): SectionSum
   const facts: SectionSummaryFact[] = []
 
   if (hasNone) {
-    facts.push({ label: 'No other assets to disclose', source: 'self' })
+    facts.push({ label: 'No other assets to add', source: 'self' })
   } else {
     const formatValue = (key: string) => {
       const raw = answers[key]
@@ -1993,6 +1993,6 @@ function generateOtherAssetsSummary(answers: Record<string, string>): SectionSum
     sectionLabel: 'Other assets',
     heading: "That's it for other assets",
     facts,
-    accordionLabel: hasNone ? 'No other assets to disclose' : 'Other assets disclosed, ready for sharing & collaboration',
+    accordionLabel: hasNone ? 'No other assets to add' : 'Other assets captured, ready to share',
   }
 }

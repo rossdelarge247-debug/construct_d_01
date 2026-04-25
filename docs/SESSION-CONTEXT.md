@@ -42,7 +42,7 @@ Next.js 16.2, React 19, TypeScript, Tailwind 4, Supabase, Claude AI, Vercel Pro.
 
 ### Specced but NOT built
 
-Two slices shipped: S-C-U4 (docs-only) + **S-F1 (first `src/`-touching, merged session 29)**. The remainder of spec 68 + 70 + 71 + 72 + 67 + 73 is still design-only. **31 of 33 catalogued slices remain unshipped.** Session 30 P0 candidate: `S-B-1-confirmation-questions-copy-flip` — first slice ships spec 73 vocabulary into live `src/lib/ai/recommendations.ts`.
+Two slices shipped: S-C-U4 (docs-only) + **S-F1 (first `src/`-touching, merged session 29)**. The remainder of spec 68 + 70 + 71 + 72 + 67 + 73 is still design-only. **31 of 33 catalogued slices remain unshipped.** Session 30 P0 candidate: `S-B-1-confirmation-questions-copy-flip` — first slice ships spec 73 vocabulary into live `src/lib/bank/confirmation-questions.ts`.
 
 ### Built (on main as of `cc6fc76`)
 
@@ -61,7 +61,7 @@ Two slices shipped: S-C-U4 (docs-only) + **S-F1 (first `src/`-touching, merged s
 
 ### P0 — S-B-1 confirmation-questions copy-flip
 
-12 clustered Cat-A rows in `src/lib/ai/recommendations.ts` per `docs/slices/S-C-U4-disclosure-audit/audit-catalogue.md`. Ships spec 73 vocabulary into live code (first time spec 73 transitions from doc to live UI strings). **Second-ever `src/`-touching slice** + first non-foundation slice; runs the full DoD again with another data point on hook calibration. Surface is small (logic file, no UI), so visual smoke is N/A; spec 73 §1 vocabulary substitutions + §2 banned-word checks + §4 tone-template alignment are the AC core.
+12 clustered Cat-A rows in `src/lib/bank/confirmation-questions.ts` per `docs/slices/S-C-U4-disclosure-audit/audit-catalogue.md`. Ships spec 73 vocabulary into live code (first time spec 73 transitions from doc to live UI strings). **Second-ever `src/`-touching slice** + first non-foundation slice; runs the full DoD again with another data point on hook calibration. Surface is small (logic file, no UI), so visual smoke is N/A; spec 73 §1 vocabulary substitutions + §2 banned-word checks + §4 tone-template alignment are the AC core.
 
 ### P1 — Welcome carousel slice (parallel candidate)
 
@@ -229,10 +229,10 @@ docs/v2/v2-backlog.md                              — 98-item backlog
    - Run `/review` skill on PR #14 retroactively (Stretch)?
 5. **Open feature branch off main:** `claude/S-B-1-confirmation-questions-copy-flip` (or whatever slice the user picks) per spec 71 §7a.
 6. **First actions on S-B-1:**
-   - Read `docs/slices/S-C-U4-disclosure-audit/audit-catalogue.md` with offset+limit — target the 12 Cat-A rows in `src/lib/ai/recommendations.ts`.
+   - Read `docs/slices/S-C-U4-disclosure-audit/audit-catalogue.md` with offset+limit — target the 12 Cat-A rows in `src/lib/bank/confirmation-questions.ts`.
    - Read `docs/workspace-spec/73-copy-patterns.md` §1 vocabulary + §2 banned words (with §2.4 solicitor/judge-test exception) + §4 tone templates.
    - Scaffold `docs/slices/S-B-1-confirmation-questions-copy-flip/` from `docs/slices/_template/` + draft AC before any `src/` edit.
-   - Read targeted lines of `src/lib/ai/recommendations.ts` (use `grep` to find each Cat-A string before reading; never full-file).
+   - Read targeted lines of `src/lib/bank/confirmation-questions.ts` (use `grep` to find each Cat-A string before reading; never full-file).
 
 **Session discipline (hook-surfaced; restated):**
 - Honour Planning conduct from turn 1. Brief-rot in this file is possible — live-verify factual claims.

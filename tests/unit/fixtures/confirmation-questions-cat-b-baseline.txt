@@ -1,0 +1,7 @@
+      subtext: 'These are easy to forget but must be disclosed.',
+    subtext: 'Form E requires disclosure of recently closed accounts.',
+    text: 'A CETV is the cash value your pension provider puts on your pension if you were to transfer it. It\'s required for financial disclosure. Contact your provider to request one — it\'s free but takes 6-8 weeks.',
+    facts.push({ label: 'Jointly owned — the starting position in marriage is 50/50', source: 'self' })
+    facts.push({ label: 'Joint account held with your partner — 50/50 starting position', source: 'self' })
+        gapMessage: 'Request a CETV from your pension provider(s) now — it takes 6-8 weeks and is required for disclosure.',
+    subtext: "This is money you've lent to or borrowed from your company — it must be disclosed.",

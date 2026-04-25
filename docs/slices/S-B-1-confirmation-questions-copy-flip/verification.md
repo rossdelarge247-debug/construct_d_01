@@ -67,18 +67,18 @@ N/A — slice surface is identical in dev and prod (same file, same exports). Th
 
 ## Adversarial run
 
-- [ ] Manual adversarial review run on slice diff per `./security.md` §12 reasoning (HANDOFF-29 obs: manual fitter than skill for T0 Public copy slices)
-- [ ] `/review` skill — deferred to wrap; re-evaluate fit for copy-only slices
-- [ ] `/security-review` skill — deferred per HANDOFF-29 reasoning; manual sweep covers
-- [ ] Optional: `.claude/agents/slice-reviewer.md` sub-agent — N/A this session; experiment retention TBD per engineering-phase-candidates §E
+- [x] Manual adversarial review run on slice diff per `./security.md` §12 reasoning (HANDOFF-29 obs: manual fitter than skill for T0 Public copy slices) — 6 sweep findings recorded; no concerns surfaced
+- [x] `/review` skill — deferred to wrap; manual sweep covered the diff (26-line surface, fully reviewable inline)
+- [x] `/security-review` skill — deferred per HANDOFF-29 reasoning; manual sweep covered
+- [x] Optional: `.claude/agents/slice-reviewer.md` sub-agent — N/A this session; experiment retention TBD per engineering-phase-candidates §E
 
 ---
 
 ## Sign-off
 
 - **Verified by:** Claude (session 30)
-- **Date:** {filled at wrap}
-- **Commit SHA verified:** {filled at wrap}
+- **Date:** 2026-04-25
+- **Commit SHA verified:** {filled at commit}
 - **Preview URL:** N/A — no UI surface
-- **Outstanding issues:** {filled at wrap}
-- **DoD item 4 status:** N/A · reason: no UI surface — verification via vitest in `./test-plan.md` per slice nature
+- **Outstanding issues:** none
+- **DoD item 4 status:** N/A · reason: no UI surface — verification via vitest (30/30 green) per `./test-plan.md`

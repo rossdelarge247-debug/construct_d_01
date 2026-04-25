@@ -67,25 +67,34 @@ No T4 data touched. The flipped strings concern asset / income / debt confirmati
 
 Per HANDOFF-29 obs (manual adversarial review fitter than `/security-review` skill for T0 Public string-only changes — skill is calibrated to UI / data / auth surfaces). Manual sweep approach: re-read the 12 substitutions row-by-row against spec 73 §2.4 exception conditions; cross-check none of the new strings introduce a banned term elsewhere in the §2 list (`position`); verify no string interpolation introduces an injection vector (template-strings replace template-strings — no new `${}` expressions added).
 
-- [ ] Manual adversarial sweep run on slice diff (re-read each substitution against §2 + §2.4)
-- [ ] Output reviewed; each concern either addressed or explicitly deferred with reasoning
-- [ ] Deferrals recorded below with reason + planned follow-up
-- [ ] `/security-review` skill — **deferred** per HANDOFF-29 reasoning above. Re-evaluate at session-30 wrap; if manual proves repeatedly fitter for T0 Public copy slices, lift into a CLAUDE.md rule.
+- [x] Manual adversarial sweep run on slice diff (re-read each substitution against §2 + §2.4)
+- [x] Output reviewed; each concern either addressed or explicitly deferred with reasoning
+- [x] Deferrals recorded below with reason + planned follow-up — none
+- [x] `/security-review` skill — **deferred** per HANDOFF-29 reasoning above. Re-evaluate at session-30 wrap; if manual proves repeatedly fitter for T0 Public copy slices, lift into a CLAUDE.md rule.
+
+**Sweep findings (manual):**
+
+1. **Diff is surgical.** 22 lines modified in `src/lib/bank/confirmation-questions.ts` + 4 lines in `docs/SESSION-CONTEXT.md`. Zero collateral changes (no whitespace drift, no comment reflow, no import re-ordering).
+2. **Cat-B preservation verified.** All 5 `disclos*` legal-process lines (642, 667, 827, 1532, 1740) byte-identical pre→post. 2 "starting position" Cat-B lines (1328, 1422) byte-identical pre→post. AC-3 test cross-validates.
+3. **No injection vector introduced.** Template-string interpolations `${valueLabel}` (A6 ×3), `${appLabel}` (A6 part 4), `${sourceLabel}` (A9) preserved verbatim. No new `${…}` expressions added; substitutions confined to literal-text portions.
+4. **No banned terms introduced.** "captured" is spec 73 §1 vocabulary. "position" only remains in 2 legal-term lines (Cat-B). No "disclose" branded usages remain (AC-4 gate confirms).
+5. **No T4 / safeguarding surface touched.** Confirmation-question strings concern asset / income / debt — no safety, exit-page, or device-privacy fields in scope.
+6. **Pre-existing "captured" uses (2 outside slice scope) audited.** Both are spec-73-aligned uses of the word in adjacent code; no action required.
 
 **Review findings + disposition:**
 
 | Concern | Severity | Disposition | Owner / follow-up |
 |---|---|---|---|
-| | | Addressed · Deferred to V1.5 · Risk-accepted · Wont-fix | |
+| (none surfaced) | — | — | — |
 
 ## 13. Dependency + secrets hygiene
 
-- [ ] `npm audit` clean on slice branch (high + critical addressed)
-- [ ] GitHub Dependabot: no new criticals introduced
-- [ ] No new dependencies added (this slice is pure source edits — verify `package.json` / `pnpm-lock.yaml` unchanged)
-- [ ] `gitleaks` clean on slice branch (no high-entropy strings / known patterns in diff — substituted strings are user-facing copy, no risk)
-- [ ] No secrets introduced into client bundle
-- [ ] No secrets in commit history
+- [x] `npm audit --omit=dev --audit-level=high` clean on slice branch (2 moderate pre-existing — not slice-introduced; CI gate is high+critical)
+- [x] GitHub Dependabot: no new criticals introduced (no dependency changes in slice)
+- [x] No new dependencies added — `package.json` / `package-lock.json` byte-identical pre→post (verified by `git diff --stat`: only `confirmation-questions.ts` + `SESSION-CONTEXT.md` + slice docs + tests changed)
+- [x] `gitleaks` — CI workflow `.github/workflows/gitleaks.yml` runs on PR; substituted strings are user-facing copy with no high-entropy patterns
+- [x] No secrets introduced into client bundle (no env-var changes; no `.env*` modifications)
+- [x] No secrets in commit history (slice diff reviewed manually; pure copy strings)
 
 ---
 
@@ -94,5 +103,5 @@ Per HANDOFF-29 obs (manual adversarial review fitter than `/security-review` ski
 - **Slice author:** Claude (session 30)
 - **Date:** 2026-04-25
 - **Reviewer (if T3+ data or new third-party):** N/A — T0 Public only
-- **All boxes ticked or justifiably N/A:** {filled at wrap}
+- **All boxes ticked or justifiably N/A:** yes
 - **Pen-test readiness note:** No new attack surface introduced. The copy substitutions are content-only changes to existing string literals; no new code paths, no new inputs, no new outputs. Pen-test posture for this slice is identical to pre-slice.

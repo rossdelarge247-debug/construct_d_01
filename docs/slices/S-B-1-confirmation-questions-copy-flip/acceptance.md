@@ -32,7 +32,7 @@ The loveable floor for this slice is: every accordion label and list-section emp
 - **Out of scope:** the §3 empty-state portions of those mixed rows (covered by AC-2); any string outside the audit-catalogue Cat-A list.
 - **Opens blocked:** none.
 - **Loveable check:** *"Income captured, ready to share"* reads as something a partner would say to a partner — a co-built artefact, not a one-way legal act. Spec 42 pillar 1 (*"shared, not adversarial"*) is audible in the string. Pass.
-- **Evidence at wrap:** filled at implementation — vitest output + diff link.
+- **Evidence at wrap:** vitest 30/30 green (`tests/unit/confirmation-questions-copy.test.ts` AC-1 block). 11 substitution sites at lines 46 (type comment), 1250, 1401 §1-portion, 1433–1435, 1449, 1474, 1547, 1637 §1-portion, 1809 §1-portion, 1996 §1-portion. `grep -c "captured" src/lib/bank/confirmation-questions.ts` = 14 (12 from substitutions + 2 pre-existing spec-73-aligned uses outside slice scope).
 
 **Implementation note for A6 (catalogue↔file mismatch).** Audit-catalogue calls 1433–1435/1449 *"accordion labels"*; the live file has these as `facts.push({ label: ... })` template-string entries with a trailing `${valueLabel}` token. Verbatim *"captured, ready to share"* breaks the template: *"Savings account captured, ready to share£5,000"* reads wrong. Resolution: apply the §1.2 *pattern* (drop "disclosed", use "captured"; keep template structure; do not append "ready to share" where the original lacked it). Worked replacement: *"Savings account disclosed${valueLabel}"* → *"Savings account captured${valueLabel}"*. Pattern source: spec 73 §1.2 (*"Income disclosed, ready for sharing & collaboration → Income captured, ready to share"*) interpreted as substitution rule, not literal formula.
 
@@ -44,7 +44,7 @@ The loveable floor for this slice is: every accordion label and list-section emp
 - **Out of scope:** §1 captured/share portions of those mixed rows (covered by AC-1).
 - **Opens blocked:** none.
 - **Loveable check:** *"No property to add"* invites the user forward; *"No property to disclose"* sounds like absence-of-evidence in a legal proceeding. The flip is the entire point of spec 73 §3. Pass.
-- **Evidence at wrap:** filled at implementation.
+- **Evidence at wrap:** vitest 30/30 green (AC-2 block). 11 substitution sites at lines 1282, 1288, 1303, 1304, 1401 §3-portion, 1492, 1499, 1514, 1629, 1801, 1954. Banned-pattern regex `(?:no )?[a-z()]+ to disclose` returns zero matches.
 
 ## AC-3 · Cat-B legal-process references preserved verbatim
 
@@ -54,7 +54,7 @@ The loveable floor for this slice is: every accordion label and list-section emp
 - **Out of scope:** any line not on the audit-catalogue Cat-A list. If implementation surfaces new flips, capture as audit-catalogue amendment per kickoff scope ceiling — do not silently expand.
 - **Opens blocked:** none.
 - **Loveable check:** the user reading *"A CETV is required for financial disclosure"* is being told what the legal system literally requires. Replacing "disclosure" here with brand vocabulary would mislead the user about the legal mechanism. §2.4 exception: passes the solicitor / judge test ("could a solicitor say this exact sentence?" — yes). Pass.
-- **Evidence at wrap:** filled at implementation — diff hunks at the 7 preserved line numbers.
+- **Evidence at wrap:** vitest AC-3 test green pre+post substitution batch. `git diff main -- src/lib/bank/confirmation-questions.ts` shows zero hunks at lines 642, 667, 827, 1328, 1422, 1532, 1740. Cat-B baseline fixture md5: `6ae2b0f218c663dfefab0b3912013ed2`.
 
 ## AC-4 · §2 banned-word audit clean
 
@@ -64,7 +64,7 @@ The loveable floor for this slice is: every accordion label and list-section emp
 - **Out of scope:** banned-word checks on other files (those belong to the per-file slices that follow this one).
 - **Opens blocked:** none.
 - **Loveable check:** the audit gate is what makes the slice trustworthy — every shipped string has been weighed against §2.4. Pass.
-- **Evidence at wrap:** filled at implementation — bash gate output stored in the test fixture.
+- **Evidence at wrap:** vitest AC-4 test green. `grep -c "disclos" src/lib/bank/confirmation-questions.ts` = 5. Cross-validated against Cat-B fixture in test T-4: every remaining `disclos*` line matches a Cat-B baseline line.
 
 ## AC-5 · `docs/SESSION-CONTEXT.md` typo correction (4 occurrences)
 
@@ -74,7 +74,7 @@ The loveable floor for this slice is: every accordion label and list-section emp
 - **Out of scope:** any other path-correction; any rewrite of surrounding prose; any edit to `docs/HANDOFF-SESSION-29.md` (historical-audit-trail per spec 73 §2.4 condition 3 — retain the typo as session-29 evidence; it'll be flagged in HANDOFF-30).
 - **Opens blocked:** none.
 - **Loveable check:** N/A user-facing — internal-doc consistency item. Discipline check: passes — typo fixed in the same commit it was discovered in, no carryover.
-- **Evidence at wrap:** filled at implementation — pre-edit + post-edit grep counts.
+- **Evidence at wrap:** vitest AC-5 tests (2/2) green. Pre-edit `grep -c "src/lib/ai/recommendations.ts" docs/SESSION-CONTEXT.md` = 4. Post-edit: 0 wrong-path occurrences; 4 corrected-path occurrences. Shipped same commit as AC-1/AC-2 src edits per AC-5 In-scope rule.
 
 ---
 
