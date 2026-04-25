@@ -190,6 +190,12 @@ These rules govern how Claude behaves when editing `src/`. Guardrails against ov
 
 **Surgical changes.** Touch only what the task requires. Don't improve adjacent code, don't refactor functioning code, don't reformat. Match existing style. If you notice unrelated dead code, mention it — don't delete it. Every changed line should trace directly to the requested task.
 
+**Names carry the design.** A reader should infer purpose from the name alone. If a name needs a comment to clarify, rename it. Functions are verbs; types and modules are nouns; booleans answer questions.
+
+**Small, single-purpose functions.** Functions do one thing. If you reach for "and" in the function name, split it. No fixed line ceiling — readability is the test, not line count — but a function that needs scrolling is a smell.
+
+**Effects behind interfaces.** Pure logic doesn't import side-effecty modules; effects (storage, network, time, randomness) live behind interfaces consumers can swap. If a unit can't be tested without mocking the world, the seam is wrong. Hexagonal-architecture style — see spec 71 §4 for the reference shape applied to S-F7.
+
 **Goal-driven execution.** Convert each task into verifiable success criteria before writing code. Test-first where tractable. Strong criteria enable independent looping; weak criteria require re-clarification and slow velocity.
 
 ## Engineering conventions
