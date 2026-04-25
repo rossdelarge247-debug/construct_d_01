@@ -1,0 +1,39 @@
+{
+  "session": {
+    "id": "sarah",
+    "email": "sarah@dev.decouple.local",
+    "role": "participant",
+    "twoFactorVerified": true,
+    "createdAt": "2026-01-01T00:00:00.000Z",
+    "lastActiveAt": "2026-04-15T10:00:00.000Z",
+    "deviceFingerprint": "dev-fixture-device"
+  },
+  "store": [
+    {
+      "userId": "sarah",
+      "scope": "bank",
+      "data": {
+        "connected": true,
+        "provider": "halifax",
+        "lastSync": "2026-04-15T10:00:00.000Z"
+      }
+    },
+    {
+      "userId": "sarah",
+      "scope": "confirmations",
+      "data": {
+        "completed": ["INC-1", "INC-2", "EXP-1"],
+        "estimated": ["EXP-3"],
+        "pending": ["EXP-4", "EXP-5", "EXP-6"]
+      }
+    },
+    {
+      "userId": "sarah",
+      "scope": "evidence",
+      "data": {
+        "uploaded": ["payslip-march.pdf"],
+        "outstanding": ["mortgage-statement", "pension-statement"]
+      }
+    }
+  ]
+}
