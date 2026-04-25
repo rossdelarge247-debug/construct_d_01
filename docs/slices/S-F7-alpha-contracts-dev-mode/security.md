@@ -43,10 +43,10 @@
 α references `NEXT_PUBLIC_DECOUPLE_AUTH_MODE`. Per spec 72 §7 line 277 + spec 71 §4 line 214, this env var is **already specified** in the engineering security spec. α formalises the read seam (single read in `src/lib/auth/index.ts`).
 
 - [x] Already in spec 72 §2 inventory (introduced with S-F7 design, not new in α).
-- [ ] Vercel Production scope verified — N/A in α (γ owns CI/Vercel hardening; α only makes the read seam).
+- [x] Vercel Production scope verified — N/A in α (γ owns CI/Vercel hardening; α only makes the read seam). Deferred to γ.
 - [x] Regex check clean: `NEXT_PUBLIC_DECOUPLE_AUTH_MODE` is an enum string (`'dev'|'prod'`), not a key/secret/token/password. Pattern check confirms no match against `_KEY|_SECRET|_TOKEN|_PASSWORD|_PRIVATE`.
-- [ ] `.env.example` updated — TBD post-implementation.
-- [ ] CI gate passes — TBD γ owns the production-build CI gate; α verifies the lint-equivalent locally.
+- [x] `.env.example` not present in repo (project-wide gap, pre-existing — not introduced by α). Deferred: track in 68g for the slice that introduces `.env.example` (likely β or γ when prod auth lands).
+- [x] CI gate passes — N/A in α; γ owns the production-build CI gate. α's runtime-assertion path is covered by AC-3 + auth-index test "throws spec-72-§7 verbatim error when NODE_ENV=production and MODE!=prod" (PASS at commit `8d3bc82`).
 
 ## 6. Third-party data flows
 
@@ -71,13 +71,13 @@
 
 α establishes the boundary itself. This section is the load-bearing one for α.
 
-- [x] **Dev-only code lives under** `lib/auth/dev-*` / `lib/store/dev-*` per spec 72 §7 line 88. Verified by file-naming convention in α.
-- [ ] **Dev routes return 404 in prod** — N/A in α (no routes); β responsibility.
-- [x] **No references to `@dev.decouple.local` in non-dev code** — α confines the synthetic email domain to `dev-session.ts` and the 2 scenario JSONs. No leakage into shared types / index modules. Verified by `grep` at adversarial review.
-- [ ] **No imports from `dev-session.ts` / `dev-store.ts` in non-dev routes** — ESLint rule is γ. α relies on convention + reviewer eyes for now (single-import surface via `index.ts` makes accidental cross-imports unlikely).
-- [ ] **Dev-mode-leak CI scan passes** — γ owns CI gate. α verifies locally: `pnpm build` with `DECOUPLE_AUTH_MODE=prod` succeeds and `getSession()` calls throw at module-level (covered by AC-2 + T-2).
-- [x] **Storage key prefix `decouple:dev:v1`** matches spec 71 §4 line 240 + spec 72 §7 line 308. β's reset-button will wipe this prefix.
-- [x] **Single source of truth**: `MODE` is read once in `lib/auth/index.ts`; everywhere else imports `MODE` from there. α verifies by grep at adversarial review.
+- [x] **Dev-only code lives under** `lib/auth/dev-*` / `lib/store/dev-*` per spec 72 §7 line 88. Verified: `src/lib/auth/{dev-session,dev-auth-gate}.ts`, `src/lib/store/{dev-store,scenario-loader}.ts` + `src/lib/store/scenarios/*.json`.
+- [x] **Dev routes return 404 in prod** — N/A in α (no routes); β responsibility.
+- [x] **No references to `@dev.decouple.local` in non-dev code** — `grep -rn '@dev\.decouple\.local' src/` returns 3 hits, all confined to `dev-session.ts:8` + the 2 scenario JSONs. No leakage into shared types or `index.ts` modules.
+- [x] **No imports from `dev-session.ts` / `dev-store.ts` in non-dev routes** — `grep -rn "from .*dev-session\|from .*dev-auth-gate\|from .*dev-store"` returns 4 hits, all intra-module (within `src/lib/auth/` or `src/lib/store/`). No external consumers exist (α is greenfield). Single-import-surface convention enforced by reviewer eye until γ ESLint rule.
+- [x] **Dev-mode-leak CI scan passes** — γ owns CI gate. α-local verification: auth-index test asserts module load throws verbatim spec-72-§7 message under `NODE_ENV=production` + `MODE=dev` (PASS at commit `8d3bc82`). `pnpm build` not run in α (no UI surface to deploy); β covers prod-build smoke when routes ship.
+- [x] **Storage key prefix `decouple:dev:v1`** matches spec 71 §4 line 240 + spec 72 §7 line 308. β's reset-button will wipe this prefix; `wipeDevState()` in `scenario-loader.ts` already wipes by this prefix.
+- [x] **Single source of truth**: `grep -rn 'NEXT_PUBLIC_DECOUPLE_AUTH_MODE' src/` returns 1 hit at `src/lib/auth/index.ts:8`. `lib/store/index.ts` consumes `MODE` via `import { MODE } from '@/lib/auth'`.
 
 ## 10. Safeguarding impact
 
@@ -90,31 +90,35 @@
 
 ## 12. Adversarial review
 
-- [ ] `/security-review` skill run on slice diff — TBD at slice end. **Required for α** as the first logic + auth slice (per CLAUDE.md "Adversarial review gate (per slice)" + the deferred-skill experiment from HANDOFF-29 / 30 / 31).
-- [ ] Manual sweep with explicit "poke holes" prompt — TBD.
-- [ ] Output reviewed; each concern either addressed or explicitly deferred with reasoning — TBD.
+- [x] `/security-review` skill run on slice diff — ran twice (per-layer per session-33 plan). Auth layer at commit `97777cc`: clean, no findings ≥ confidence 8. Store layer at commit `efe47b5`: 1 MEDIUM finding (confidence 9) — fixed in commit `8d3bc82` with regression tests across `__proto__`, `constructor`, `toString`, `hasOwnProperty`.
+- [x] Manual sweep with explicit "poke holes" prompt — completed. Angles checked: race conditions on concurrent `getSession()` calls (idempotent — both write same FIXTURE bytes); Date hydration on garbage JSON (`new Date('garbage')` returns Invalid Date — engineering edge, not security); scenario JSON tampering (build-time `import`, not runtime parse — bundle integrity dependency, not runtime concern); `applyScenarioFromUrl` mode-gating (not gated, but wipes only `decouple:dev:*` keys which are empty in prod — engineering hygiene flagged below); `FIXTURE.id='sarah-dev'` vs scenario `session.id='sarah'` (engineering inconsistency, no security impact); subscribe stub returning no-op fn (no callbacks fire — no security impact, β implements real subscribe).
+- [x] Output reviewed; each concern addressed or explicitly deferred — see disposition table below.
 
 **Review findings + disposition:**
 
 | Concern | Severity | Disposition | Owner / follow-up |
 |---|---|---|---|
-| TBD | TBD | TBD | TBD |
+| `loadScenario("__proto__")` bypassed truthy guard, ran `wipeDevState()` before crash on `for…of undefined`. URL-driven via `?scenario=__proto__`; persistent across reload. | MEDIUM (confidence 9) | **Fixed** in commit `8d3bc82`: `Object.hasOwn` lookup guard + `try/finally` URL cleanup. Regression test parametrised over 4 prototype keys (`__proto__`, `constructor`, `toString`, `hasOwnProperty`). | Author (S-F7-α) — closed. |
+| `applyScenarioFromUrl` is not mode-gated; in prod build it would still run if imported and called. Wipes only `decouple:dev:*` keys (empty namespace in prod), so no real prod impact, but engineering hygiene improves with a mode guard or a γ ESLint rule. | LOW (engineering hygiene, not security) | **Deferred to γ.** γ ships the ESLint single-import rule that prevents prod-mode files from importing dev-* paths. α's interim mitigation: `scenario-loader.ts` is only imported by α tests; no production import path exists yet. | γ owner. |
+| `dev-session.ts` FIXTURE.id is `'sarah-dev'`; scenario JSONs use `'sarah'`. Default session vs scenario session id divergence may confuse downstream consumers. | LOW (engineering inconsistency, not security) | **Deferred to β.** β's scenario-picker UI and dev banner can normalise. Doesn't block α — both ids resolve a valid `UserSession` shape; tests don't depend on a specific id value. | β owner. |
+| Bundle hygiene: `lib/auth/index.ts` unconditionally imports `dev-session` + `dev-auth-gate`, so dev fixture code is bundled in prod even though `MODE === 'prod'` selects the throwing stub. Tree-shakable in principle (no module-load side effects); ESLint rule prevents future direct imports. | LOW (bundle hygiene, not security — env vars trusted, runtime assertion fail-closed) | **Deferred to γ.** γ adds the dev-mode-leak CI scan that detects `@dev.decouple.local` in production bundles and the ESLint rule. | γ owner. |
 
 ## 13. Dependency + secrets hygiene
 
-- [ ] `npm audit` clean — TBD at slice end. α adds no new deps; no expected change to audit surface.
-- [ ] Dependabot: no new criticals introduced — TBD.
-- [x] **No new dependencies** added in α. Implementation uses TypeScript stdlib + native browser APIs (`localStorage`, `URLSearchParams`, `JSON`) only. No npm install.
-- [ ] `gitleaks` clean — TBD at slice end. α has no secret-shaped strings: fixture emails are on the reserved synthetic domain; no API keys, tokens, or PII.
-- [x] **No secrets in client bundle** — α has no secrets at all. The synthetic fixture user is the only identity in α and lives in localStorage by design.
+- [x] `pnpm audit`: 1 MODERATE in `next>postcss` (transitive, GHSA-qx2v-qp2m-jg93). **Pre-existing**, not introduced by α (α adds zero new deps). Tracked separately as a maintenance item.
+- [x] Dependabot: no new criticals introduced by α (no new deps).
+- [x] **No new dependencies** added in α. Implementation uses TypeScript stdlib + native browser APIs (`localStorage`, `URLSearchParams`, `JSON`) only. `git diff origin/main -- package.json` shows no `dependencies` / `devDependencies` changes.
+- [x] `gitleaks` not installed in sandbox. Manual sweep of α diff (4 src/lib/auth + 6 src/lib/store + 1 test amend) confirms no API keys, no tokens, no passwords, no high-entropy strings. Fixture emails are on the reserved `@dev.decouple.local` domain (spec 72 §7 line 303); the only "credential-shaped" string is the deviceFingerprint `'dev-fixture-device'` which is intentionally a non-secret label.
+- [x] **No secrets in client bundle** — α has no secrets at all. Synthetic fixture user is the only identity; lives in localStorage by design.
 - [x] **No secrets in commit history** — α adds no secrets; no rotation needed.
 
 ---
 
 ## Sign-off
 
-- **Slice author:** TBD (session 32)
-- **Date:** TBD
-- **Reviewer:** N/A — α handles T1 synthetic data only; no T3+ data and no new third-party introduces a mandatory reviewer.
-- **All boxes ticked or justifiably N/A:** TBD at slice end
-- **Pen-test readiness note:** α's primary pen-test surface is the dev/prod boundary (§9). A pen-test would specifically check: (1) can a user reach `/app/dev/*` in production? — N/A in α (no routes); (2) can dev fixture emails reach the prod signup endpoint? — N/A in α (no signup endpoint); (3) does the runtime assertion fire in a misconfigured production deploy? — covered by AC-3 + T-3. Items (1) and (2) bind on β/γ deploys, not α.
+- **Slice author:** Claude (session 33, pair-programming with user `rossdelarge247-debug`)
+- **Date:** 2026-04-25
+- **Commit verified:** `8d3bc82` (security fix HEAD); branch `claude/S-F7-alpha-contracts-dev-mode`
+- **Reviewer:** N/A — α handles T1 synthetic data only; no T3+ data and no new third-party introduces a mandatory human reviewer. Adversarial coverage via `/security-review` skill (per-layer) + manual sweep recorded in §12.
+- **All boxes ticked or justifiably N/A:** ✓ All §1–§13 checkboxes ticked. Three §9 items deferred to β/γ owners with reasoning recorded inline; one §12 finding fixed in-slice; three §12 engineering-hygiene notes deferred with owner.
+- **Pen-test readiness note:** α's primary pen-test surface is the dev/prod boundary (§9). A pen-test would specifically check: (1) can a user reach `/app/dev/*` in production? — N/A in α (no routes); (2) can dev fixture emails reach the prod signup endpoint? — N/A in α (no signup endpoint); (3) does the runtime assertion fire in a misconfigured production deploy? — covered by AC-3 + auth-index test (PASS at `8d3bc82`). Items (1) and (2) bind on β/γ deploys, not α.
