@@ -1,145 +1,108 @@
-# {S-XX · slice name} — Security DoD
+# S-B-2 · Recommendations copy-flip — Security DoD
 
-**Slice:** S-XX-{slug}
+**Slice:** S-B-2-recommendations-copy-flip
 **Source:** `docs/workspace-spec/72-engineering-security.md` §11 (per-slice security checklist)
 **Data-tier reference:** spec 72 §1 (T0 Public · T1 Functional · T2 Personal · T3 Financial · T4 Safeguarding · T5 Legal)
 
-Every slice ships with this checklist filled. A box may be skipped only with written reasoning (e.g. *"no new API routes — UI-only"*). Systematic skips flag the DoD for review.
+S-B-2 is a string-only logic-library edit, structurally identical to S-B-1. Four Cat-A copy-flips replace UI copy strings inside `src/lib/recommendations.ts`; nothing in the data path, schema, network, or auth surface is touched. Every checklist item below is therefore N/A bar §12 (adversarial review) and §13 (dependency hygiene), which are always-on per CLAUDE.md DoD.
 
 ---
 
 ## 1. Data classification per AC
 
-For each AC's data surface, name the tier (T0-T5) and confirm implementation matches tier requirements (encryption, logging, retention).
+Every AC operates on T0 Public — UI copy strings inside a logic library. No personal, financial, safeguarding, or legal data crosses any AC's surface.
 
 | AC | Data touched | Tier | Tier requirements met |
 |---|---|---|---|
-| AC-1 | | | |
-| AC-2 | | | |
+| AC-1 | UI copy (recommendation `explanation` strings) | T0 | N/A — public copy, no encryption / retention requirements |
+| AC-2 | UI copy (recommendation `explanation` + `serviceDescription` strings) | T0 | N/A — same |
+| AC-3 | UI copy (legal-process `FinancialReaction.message` retained verbatim) | T0 | N/A — same |
+| AC-4 | File-level regex audit gate (no data touched) | T0 | N/A |
 
 ## 2. New tables / columns
 
-RLS policies written; policies tested with two-persona scenarios (cross-party leak check if applicable); service-role-key-free path exercised.
-
-- [ ] RLS enabled on every new table (migration gate enforces)
-- [ ] Default-deny; no `USING (true)` policies
-- [ ] Two-persona test: {Sarah writes → Mark reads → assert nothing returned}
-- [ ] Selective-publish tested if joint-data pattern applies (Mark sees only published fields)
-- [ ] Service-role-key revoked in test env; app still works for normal user ops
-- [ ] N/A · reason: {if no schema changes}
+- [x] N/A · reason: no schema changes; logic-library edit only.
 
 ## 3. API routes
 
-- [ ] Zod schema at entry for every new route
-- [ ] 400 on invalid; server-side log of specific validation failure with reference ID
-- [ ] Rate limits applied per spec 72 §5 (auth 5/min IP · bank-connect/share 3/min session · general 60/min session)
-- [ ] N/A · reason: {if no new API routes}
+- [x] N/A · reason: no new or modified API routes; no route handlers touched.
 
 ## 4. File upload surfaces
 
-- [ ] Magic-byte MIME check (don't trust `Content-Type` header)
-- [ ] Allowlist only: PDF, PNG, JPG, HEIC, DOCX
-- [ ] Size limit 15MB per upload
-- [ ] AV scan verified (Supabase storage)
-- [ ] Content-addressed filenames; no user-controlled path fragments
-- [ ] N/A · reason: {if no upload surfaces}
+- [x] N/A · reason: no upload surfaces touched.
 
 ## 5. New env vars
 
-- [ ] Added to spec 72 §2 inventory table
-- [ ] Vercel Production scope verified if secret (server-only, not `NEXT_PUBLIC_*`)
-- [ ] Regex check clean: no `NEXT_PUBLIC_*_KEY|_SECRET|_TOKEN|_PASSWORD|_PRIVATE`
-- [ ] `.env.example` updated with placeholder + one-line docstring
-- [ ] CI gate passes (regex scan)
-- [ ] N/A · reason: {if no new env vars}
+- [x] N/A · reason: no env vars introduced or modified.
 
 ## 6. Third-party data flows
 
-Any new integration or expanded use of an existing provider.
-
-- [ ] DPA in place (spec 72 §8 per-provider register updated)
-- [ ] Minimisation check: what's necessary vs what's sent — documented
-- [ ] Webhook signature verified if applicable
-- [ ] Egress allowlist updated (spec 72 §8)
-- [ ] Data-tier of sent payload confirmed acceptable for the provider
-- [ ] N/A · reason: {if no third-party changes}
+- [x] N/A · reason: no third-party integration changes; nothing sent off-system.
 
 ## 7. Audit log entries
 
-T3+ read/write events must be recorded with actor, timestamp, resource_type, resource_id, action; immutable append-only storage.
-
-- [ ] Event schema matches spec 72 §6 structure
-- [ ] Storage append-only (no DELETE, no UPDATE)
-- [ ] Retention per spec 72 §1 table
-- [ ] RLS: compliance role can read; actors cannot edit
-- [ ] N/A · reason: {if no T3+ operations}
+- [x] N/A · reason: no T3+ operations introduced; no audit-eligible events.
 
 ## 8. Error handling
 
-- [ ] Generic user-facing errors with reference ID: `"Something went wrong. Reference: 7F3A-9B2C"`
-- [ ] No stack traces / SQL / internal paths / third-party error bodies leaked to client
-- [ ] Server-side detail logged with matching reference ID
-- [ ] HTTP status codes honest (401 / 403 / 404 / 500); response bodies minimal
+- [x] N/A · reason: no new error paths; pure substring substitution within existing string literals. The `generateRecommendations` and `getFinancialReactions` exports continue to return the same shapes; only the text payload of certain `explanation` / `serviceDescription` fields changes.
 
 ## 9. Dev/prod boundary
 
-Any new dev-only route, tool, or fixture must gate via `MODE === 'prod'` notFound (spec 72 §7).
-
-- [ ] Dev-only code lives under `/app/dev/` or `lib/auth/dev-*` / `lib/store/dev-*`
-- [ ] Dev routes return 404 in prod build (Playwright integration test)
-- [ ] No references to `@dev.decouple.local` or dev scenario IDs in prod bundle
-- [ ] No imports from `dev-session.ts` / `dev-store.ts` in non-dev routes (ESLint rule)
-- [ ] Dev-mode-leak CI scan passes
-- [ ] N/A · reason: {if slice is prod-only with no dev surface}
+- [x] N/A · reason: target file `src/lib/recommendations.ts` ships in production; same surface either side of the slice. No new dev-only code introduced.
 
 ## 10. Safeguarding impact
 
-Does this slice touch T4 data (safety flags, coercion indicators, device-privacy, exit-page, free-text notes)?
+No T4 data touched. The flipped strings concern financial-picture building, children's arrangements detail, and mediation prep — generic process recommendations, no safety flags, coercion indicators, exit-page, device-privacy, or free-text safeguarding fields are in the substitution surface. Note the slice file does observe `hasSafeguardingConcerns` as a function parameter (used at `:206` to gate the mediation recommendation), but this slice does not modify that gating logic.
 
-- [ ] No T4 data touched — skip remaining boxes
-- [ ] If yes: never included in email / push / SMS content
-- [ ] If yes: never included in analytics events (PostHog allowlist enforced)
-- [ ] If yes: never rendered client-side outside user's own safeguarding dashboard
-- [ ] If yes: admin access requires explicit review_reason logged in audit trail
-- [ ] V1 signposting baseline not broken (exit-this-page, device-privacy answer effects, Women's Aid / NDAH / Samaritans signposting intact)
+- [x] No T4 data touched — skip remaining boxes
+- [x] V1 signposting baseline not broken — exit-this-page, device-privacy answer effects, Women's Aid / NDAH / Samaritans signposting are in separate components and routes, untouched by this slice. The mediation-recommendation gate `if (!hasSafeguardingConcerns)` is preserved verbatim.
 
 ## 11. Security headers + CSP
 
-If adding external scripts or new resource origins.
-
-- [ ] CSP allowlist updated in `next.config.ts` / middleware
-- [ ] No `'unsafe-inline'` / `'unsafe-eval'` added
-- [ ] CSP test passes on preview deploy (browser console: zero violations)
-- [ ] `securityheaders.com` scan: A+ grade maintained
-- [ ] N/A · reason: {if no external script/origin changes}
+- [x] N/A · reason: no external scripts or new resource origins introduced; no `next.config.ts` / middleware changes.
 
 ## 12. Adversarial review
 
-- [ ] `/security-review` skill run on slice diff
-- [ ] Output reviewed; each concern either addressed or explicitly deferred with reasoning
-- [ ] Deferrals recorded below with reason + planned follow-up
+Per HANDOFF-29 + HANDOFF-30 obs (manual adversarial review fitter than `/security-review` skill for T0 Public string-only changes — skill is calibrated to UI / data / auth surfaces). Manual sweep approach: re-read each substitution row-by-row against spec 73 §2 + §2.4 exception conditions; cross-check none of the new strings introduce a banned term elsewhere; verify no string interpolation introduces an injection vector (no template-strings touched in the slice diff).
+
+- [x] Manual adversarial sweep run on slice diff (re-read each substitution against §2 + §2.4)
+- [x] Output reviewed; each concern either addressed or explicitly deferred with reasoning
+- [x] Deferrals recorded below with reason + planned follow-up — none
+- [x] `/security-review` skill — **deferred** per HANDOFF-29 + HANDOFF-30 reasoning. Twice-deferred for T0 Public copy slices; the manual sweep continues to surface signal at zero false-positive cost. If a third copy-flip slice (S-B-3 onward) repeats the pattern unchanged, lift "manual sweep is canonical for T0 copy-only slices" to a CLAUDE.md rule.
+
+**Sweep findings (manual):**
+
+1. **Diff is surgical.** 4 lines modified in `src/lib/recommendations.ts` + 1 doc line amended (audit-catalogue A19). Zero collateral changes (no whitespace drift, no comment reflow, no import re-ordering, no shape changes to exported types).
+2. **Cat-B preservation verified.** Line 60 `'The formal disclosure process requires both parties to declare everything under a legal oath...'` byte-identical pre→post. Cross-validated by AC-3 baseline-fixture test (`tests/unit/fixtures/recommendations-cat-b-baseline.txt`).
+3. **No injection vector introduced.** No template-string interpolations were touched. `serviceDescription` and `explanation` are static string literals before and after the slice; no new `${…}` expressions added.
+4. **No banned terms introduced.** "foundation" / "submission" / "picture" / "Form E submission" are spec 73 §1 vocabulary or §2 legal-process exceptions. AC-4 audit-clean test confirms `\bposition\b = 0` and `disclos[a-z]* = 3` (Cat-B + boundary + Cat-D code key).
+5. **A17 §2.4 boundary case judged.** The chosen reframe — single-word `'formal'` insertion producing `'thorough, formal disclosure'` — passes the §2.4 solicitor/judge test ("could a solicitor or judge say this exact sentence?"). The phrase `'thorough, formal disclosure'` echoes Cat-B line 60's `'formal disclosure process'`, anchoring the legal-process register without losing the original "thorough" emphasis. Heavier alternatives (full rewrite, `'full and frank disclosure'`) were considered and rejected as over-touching the disposition's "retain" instruction.
+6. **A19 amendment audit-trail clean.** The post-freeze amendment ('stronger' adjective → 'strengthens' verb form) is captured in: (a) audit-catalogue row A19 amendment column; (b) acceptance.md review log; (c) standalone commit `05e87f1`. Tests written against the amended string. No silent expansion of scope.
+7. **No T4 / safeguarding surface touched.** Recommendation strings concern picture-building, children's-arrangements detail, mediation prep — no safety, exit-page, or device-privacy fields in scope. The `hasSafeguardingConcerns` parameter is observed (mediation gate) but its logic is unchanged.
+8. **Cat-D code key untouched.** `serviceLink: 'share_and_disclose'` at `:214` deliberately retained per §2.4 condition 4 (internal non-rendered routing key). Renaming would be a cross-cutting refactor — out of scope for a copy-flip.
 
 **Review findings + disposition:**
 
 | Concern | Severity | Disposition | Owner / follow-up |
 |---|---|---|---|
-| | | Addressed · Deferred to V1.5 · Risk-accepted · Wont-fix | |
+| (none surfaced) | — | — | — |
 
 ## 13. Dependency + secrets hygiene
 
-- [ ] `npm audit` clean on slice branch (high + critical addressed)
-- [ ] GitHub Dependabot: no new criticals introduced
-- [ ] New dependencies justified; licences compatible with closed-source commercial use
-- [ ] `gitleaks` clean on slice branch (no high-entropy strings / known patterns in diff)
-- [ ] No secrets introduced into client bundle (all in Vercel Production env)
-- [ ] No secrets in commit history (if introduced in-session, rotate before merge)
+- [x] `npm audit --omit=dev --audit-level=high` clean on slice branch (2 moderate pre-existing — same as S-B-1, not slice-introduced; CI gate is high+critical)
+- [x] GitHub Dependabot: no new criticals introduced (no dependency changes in slice)
+- [x] No new dependencies added — `package.json` / `package-lock.json` byte-identical pre→post. Only `src/lib/recommendations.ts`, slice docs, audit-catalogue (A19 amendment), tests, and helper module changed.
+- [x] `gitleaks` — CI workflow `.github/workflows/gitleaks.yml` runs on PR; substituted strings are user-facing copy with no high-entropy patterns
+- [x] No secrets introduced into client bundle (no env-var changes; no `.env*` modifications)
+- [x] No secrets in commit history (slice diff reviewed manually; pure copy strings)
 
 ---
 
 ## Sign-off
 
-- **Slice author:** {name / session ID}
-- **Date:** {date}
-- **Reviewer (if T3+ data or new third-party):** {user / dedicated reviewer}
-- **All boxes ticked or justifiably N/A:** yes / no
-- **Pen-test readiness note:** {any items that would likely surface in pen test — address before merge or document why deferred}
+- **Slice author:** Claude (session 31)
+- **Date:** 2026-04-25
+- **Reviewer (if T3+ data or new third-party):** N/A — T0 Public only
+- **All boxes ticked or justifiably N/A:** yes
+- **Pen-test readiness note:** No new attack surface introduced. The copy substitutions are content-only changes to existing string literals; no new code paths, no new inputs, no new outputs. Pen-test posture for this slice is identical to pre-slice.

@@ -1,95 +1,85 @@
-# {S-XX · slice name} — In-browser verification
+# S-B-2 · Recommendations copy-flip — In-browser verification
 
-**Slice:** S-XX-{slug}
+**Slice:** S-B-2-recommendations-copy-flip
 **Source:** CLAUDE.md DoD item 4 + engineering-phase-candidates.md §G.5
-**Preview deploy URL:** `construct-dev-git-{slice-branch}-*.vercel.app`
-**Integration URL (for regression check):** `construct-dev-git-phase-c-*.vercel.app`
+**Preview deploy URL:** N/A — no UI surface in this slice (logic-library copy-flip only)
+**Integration URL (for regression check):** N/A — same reason
 
-Run this before marking DoD item 4 complete. Record evidence against each row — commit SHA, screenshot, or short screen recording.
+S-B-2 has no rendered surface — the file under edit (`src/lib/recommendations.ts`) is a logic library whose `Recommendation` and `FinancialReaction` output objects are consumed by future hub UI components. No browser flow exercises the changed strings until a downstream slice wires the consumers. CLAUDE.md DoD item 4 (preview-deploy in-browser) is therefore N/A; verification is via vitest unit + regex audit gates per `./test-plan.md`. Adjacent-slice smoke checks (regression surfaces section below) are the substitute discipline. Pattern matches S-B-1 verbatim — both slices ship into Re-use stable libraries ahead of UI consumer slices.
 
 ---
 
 ## Golden path
 
-The main end-to-end flow this slice delivers.
+N/A — no UI flow in this slice.
 
 | Step | Action | Expected outcome | Evidence |
 |---|---|---|---|
-| 1 | | | |
-| 2 | | | |
-| 3 | | | |
-| 4 | | | |
+| 1 | N/A | UI consumer slice (future) will exercise these strings | — |
 
-**Pass / fail:** {pass · fail — if fail, note blocking issue + ticket}
+**Pass / fail:** N/A — see vitest output in `./test-plan.md` evidence.
 
 ## Edge cases
 
-Known edge cases per AC. Each row = one scenario that should behave gracefully.
+N/A — string substitutions are deterministic. The §2.4 boundary case (A17) is the substantive judgment call; it's covered by AC-2 (frozen text assertion) and the Cat-B preservation invariant by AC-3 + the baseline-fixture test.
 
 | Scenario | Trigger | Expected outcome | Evidence |
 |---|---|---|---|
-| Empty state | {first visit, no data} | | |
-| Error state | {API failure, offline} | | |
-| Back-navigation | {browser back from mid-flow} | | |
-| Reload mid-flow | {F5 on a mid-flow screen} | Lands on safe resting screen per spec 71 §6 state-machine pattern | |
-| Rapid double-click | {CTA pressed twice fast} | Idempotent; no duplicate submit | |
+| N/A | — | — | — |
 
 ## Accessibility
 
-- [ ] **Keyboard-only navigation** — every interactive element reachable via Tab; focus ring visible; no keyboard traps; keyboard affordance pattern (C-V4) used for shortcuts
-- [ ] **Screen reader sanity** — VoiceOver or NVDA pass on golden path; headings hierarchical; landmarks present; form inputs labelled; error messages associated
-- [ ] **`prefers-reduced-motion`** — spec 26 animations gracefully degrade; no vestibular triggers; essential transitions remain visible without movement
-- [ ] **Colour contrast** — tokens from S-F1 design system are WCAG AA minimum; no meaning conveyed by colour alone (trust-chip has label + colour per C-T1 lock)
-- [ ] **Focus management** — modal traps focus; focus returns to trigger on close; skip links work
+N/A — no rendered surface. Accessibility verification will be done by the UI consumer slices that render these strings (hub recommendation card, hero panel, discovery flow). Spec 73 §1 vocabulary is screen-reader-clean (plain English, no symbols, no ambiguous abbreviations).
+
+- [x] N/A · reason: no rendered surface in this slice
 
 ## Responsive viewport
 
-Test at three viewports minimum.
+N/A — same reason.
 
 | Viewport | Width | Expected behaviour | Evidence |
 |---|---|---|---|
-| Mobile | 375 px (iPhone SE) | Single-column; primary CTAs thumb-reachable | |
-| Tablet | 768 px | Adapts cleanly; no awkward mid-points | |
-| Desktop | 1440 px | Three-column document shell visible where applicable | |
+| N/A | — | — | — |
 
 ## Cross-browser
 
-At least Chrome + Safari for V1.
+N/A — same reason.
 
-- [ ] **Chrome latest** — golden path + edge cases
-- [ ] **Safari latest** — golden path + edge cases (iframe / cookie / storage quirks)
-- [ ] **Firefox latest** — optional for V1; target V1.5
-- [ ] **Mobile Safari** (iOS 16+) — golden path on real device or emulator
+- [x] N/A · reason: no rendered surface in this slice
 
 ## Regression surfaces
 
-Adjacent slices that share a component, library, or route with this slice. Smoke-check each.
+The `generateRecommendations` and `getFinancialReactions` exports in `src/lib/recommendations.ts` are consumed by surfaces that render the recommendation cards and financial-reaction messages. Adjacent slices / surfaces that may break if the substitutions are applied incorrectly:
 
 | Adjacent slice / surface | Smoke check | Pass / fail | Evidence |
 |---|---|---|---|
-| | {one-sentence golden-path spot check} | | |
+| Future hub recommendation-card slice | Confirm `Recommendation.explanation` strings render without truncation in card layout (some new strings are slightly longer than originals — A19 +37 chars, A18 -2 chars, A20 +13 chars, A17 +9 chars) | N/A — slice not yet built | — |
+| `src/components/hub/discovery-flow.tsx` (V2-discarded per CLAUDE.md Key files — do not port) | Confirm file is not imported into any active route; behaviour unchanged | not-imported by active routes (verified `grep -rn "from .*discovery-flow" src/app`) | — |
+| `src/lib/recommendations.ts` consumer enumeration | `grep -rn "from .*lib/recommendations" src/` returns only test files + future hub callers | verified — no current rendering callers in `src/app/` | — |
+| Test suite | `npm test` full run | pass — 41/41 across 5 files | commit `c0114a2` |
 
-Use the spec 70 hub + slice dependency graph to identify adjacent slices. Lean: any slice that consumes a component / library this slice touches is in scope.
+Use `grep -rn "from .*lib/recommendations" src/` to enumerate consumers at implementation time and update this table when downstream slices wire UI.
 
 ## Dev-mode sanity (if slice surface varies by MODE)
 
-- [ ] Dev preview: env banner visible with correct mode + scenario chip
-- [ ] Dev preview: scenario switcher works; reset wipes `decouple:dev:*` keys
-- [ ] Production build (local `next build && next start` with `DECOUPLE_AUTH_MODE=prod`): `/app/dev/*` returns 404; no dev-fixture email references in bundle
+N/A — slice surface is identical in dev and prod (same file, same exports). No `MODE`-conditional code paths added.
+
+- [x] N/A · reason: no MODE-conditional surface
 
 ## Adversarial run
 
-- [ ] `/review` skill run on slice diff; findings triaged
-- [ ] `/security-review` skill run on slice diff; findings recorded in `security.md` §12
-- [ ] Optional: `.claude/agents/slice-reviewer.md` sub-agent run (if experiment retained per engineering-phase-candidates §E)
+- [x] Manual adversarial review run on slice diff per `./security.md` §12 reasoning (HANDOFF-29 + HANDOFF-30 obs: manual fitter than skill for T0 Public copy slices) — 8 sweep findings recorded; no concerns surfaced
+- [x] `/review` skill — deferred to wrap; manual sweep covered the diff (4 src lines + 2 test lines, fully reviewable inline)
+- [x] `/security-review` skill — deferred per HANDOFF-29 + HANDOFF-30 reasoning; twice-deferred for T0 Public copy slices
+- [x] Optional: `.claude/agents/slice-reviewer.md` sub-agent — N/A this session
 
 ---
 
 ## Sign-off
 
-- **Verified by:** {author / session ID}
-- **Date:** {date}
-- **Commit SHA verified:** {sha}
-- **Preview URL:** {URL with timestamp}
-- **Outstanding issues:** {list or "none"}
-- **DoD item 4 status:** complete · blocked · partial (reason)
+- **Verified by:** Claude (session 31)
+- **Date:** 2026-04-25
+- **Commit SHA verified:** `c0114a2` (GREEN implementation) on top of `d47dfc7` (RED) on top of `05e87f1` (A19 amendment) on top of `7aed00c` (scaffold + AC freeze)
+- **Preview URL:** N/A — no UI surface
+- **Outstanding issues:** none
+- **DoD item 4 status:** N/A · reason: no UI surface — verification via vitest (12/12 S-B-2 + 41/41 full suite green) per `./test-plan.md`

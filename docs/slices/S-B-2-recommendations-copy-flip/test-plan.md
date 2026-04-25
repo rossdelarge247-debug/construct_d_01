@@ -1,66 +1,70 @@
-# {S-XX · slice name} — Test plan
+# S-B-2 · Recommendations copy-flip — Test plan
 
-**Slice:** S-XX-{slug}
+**Slice:** S-B-2-recommendations-copy-flip
 **AC doc:** `./acceptance.md`
-**Framework:** `vitest` (unit + logic) · Playwright (integration / E2E — confirmed at Phase C kickoff) · manual + preview-deploy in-browser for visual
+**Framework:** `vitest` (file-content boolean-wrapper assertions via `tests/helpers/source-assertions.ts`) · no Playwright (no UI surface) · no manual visual (no UI surface)
 
 ---
 
 ## Test inventory
 
-One test per AC minimum. Manual tests allowed but flagged; the slice author executes them against the preview deploy before declaring DoD item 4 complete.
+One T-N per AC. All automated. No manual tests in this slice — string substitutions in a logic file have deterministic, file-level evidence.
 
-## T-1 · references AC-1
+Test file: `tests/unit/recommendations-copy.test.ts` (12 `it()` cases across 4 `describe` blocks). Helper: `tests/helpers/source-assertions.ts` (lifted this slice from S-B-1's inline pattern per HANDOFF-30 candidate #4 — second use).
 
-- **Given:** {initial state — user role, data seeded, feature flags, scenario from `src/lib/bank/test-scenarios.ts` if bank-flow}
-- **When:** {action — user interaction, API call, event}
-- **Then:** {observable outcome exactly matching AC-1 verification}
-- **Type:** unit · integration · E2E · visual regression · manual
-- **Automated:** yes / no
-- **If manual:** reason (e.g. visual-only, accessibility sweep, Tink-sandbox round-trip)
-- **Fixture:** {test scenario ID or synthetic data source}
-- **Evidence at wrap:** {test output / screenshot / URL — filled during implementation}
+## T-1 · references AC-1 (§1 vocabulary substitutions A18 + A19)
 
-## T-2 · references AC-2
+- **Given:** spec 73 §1 / §1.1 + audit-catalogue rows A18 (`position` → `foundation`, `disclosure` → `submission`) and A19 (amended this slice — `position` → `picture going into`, `stronger` adjective → `strengthens` verb form).
+- **When:** the test reads `src/lib/recommendations.ts` and runs `has`/`lacks` boolean-wrapper assertions for the catalogued before/after substrings.
+- **Then:** A18 line 166 contains `'stronger foundation for any negotiation or submission'` and lacks `'stronger position for any negotiation or disclosure'`. A19 line 196 contains `'the more it strengthens your picture going into any discussion or mediation'` and lacks `'the stronger your position in any discussion or mediation'`.
+- **Type:** unit (file-content assertion).
+- **Automated:** yes (4 `it()` cases under `describe('S-B-2 · AC-1 §1 vocabulary substitutions (A18 + A19)')`).
+- **Fixture:** none — source-content read.
+- **Evidence:** vitest 4/4 green at commit `c0114a2`.
 
-- **Given:**
-- **When:**
-- **Then:**
-- **Type:**
-- **Automated:**
-- **Fixture:**
-- **Evidence at wrap:**
+## T-2 · references AC-2 (§2 exception substitutions A17 boundary + A20)
 
-## T-3 · references AC-3
+- **Given:** spec 73 §2.1 ban + §2.4 exception policy + audit-catalogue rows A17 (boundary case — retain `'thorough disclosure'` literal; reframe surrounding narrative) and A20 (Form E submission swap).
+- **When:** file-content assertion against the frozen AC text (`'thorough, formal disclosure'` for A17 — chosen reframe; `'organising your Form E submission'` for A20).
+- **Then:** A17 line 163 contains `'thorough, formal disclosure'` and lacks the pre-amendment `'is thorough disclosure —'`. A20 line 215 contains `'organising your Form E submission'` and lacks `'organising your disclosure'`.
+- **Type:** unit (file-content assertion).
+- **Automated:** yes (3 `it()` cases under `describe('S-B-2 · AC-2 §2 exception substitutions (A17 boundary + A20)')`).
+- **Fixture:** none.
+- **Evidence:** vitest 3/3 green at commit `c0114a2`.
 
-- **Given:**
-- **When:**
-- **Then:**
-- **Type:**
-- **Automated:**
-- **Fixture:**
-- **Evidence at wrap:**
+## T-3 · references AC-3 (Cat-B legal-process preserved verbatim)
 
-{add T-N as AC set grows}
+- **Given:** the single Cat-B baseline at `src/lib/recommendations.ts:60` — the `getFinancialReactions` `'hidden_assets'` trigger message — captured pre-edit as fixture content.
+- **When:** post-edit, the test reads `tests/unit/fixtures/recommendations-cat-b-baseline.txt`, calls `has(catBBaseline)` against the source.
+- **Then:** the byte-for-byte string is present in source. Failure means the Cat-B line drifted.
+- **Type:** unit (file-content assertion against frozen fixture).
+- **Automated:** yes (1 `it()` case under `describe('S-B-2 · AC-3 Cat-B legal-process reference preserved verbatim')`).
+- **Fixture:** `tests/unit/fixtures/recommendations-cat-b-baseline.txt` — captured pre-edit, single-line frozen reference.
+- **Evidence:** vitest 1/1 green at commit `c0114a2` (test passed in RED state too — line 60 untouched throughout the slice).
+
+## T-4 · references AC-4 (§2 banned-word audit clean)
+
+- **Given:** spec 73 §2.1 ban + §2.2 ban + §2.4 exception policy.
+- **When:** the test runs (a) `\bposition\b` regex match (case-insensitive) across the full source, and (b) `disclos[a-z]*` regex match across the full source.
+- **Then:** (a) zero `position` matches anywhere in the file (full §2.2 ban — no exceptions). (b) exactly 3 `disclos[a-z]*` matches: line 60 (Cat-B `'formal disclosure process'`), line 163 (boundary `'thorough, formal disclosure'`), line 214 (Cat-D code key `'share_and_disclose'`). All three substrings asserted present individually as a defence-in-depth check.
+- **Type:** unit (regex gate over full file + content assertion).
+- **Automated:** yes (3 `it()` cases under `describe('S-B-2 · AC-4 §2 banned-word audit clean')`).
+- **Fixture:** none.
+- **Evidence:** vitest 3/3 green at commit `c0114a2`. Note: AC-4's hard-coded count of 3 is intentional — a future addition of legitimate Cat-B legal-process language would fail this test by design, forcing explicit catalogue update before merge.
 
 ---
 
 ## Fixture + scenario references
 
-- **Bank scenarios:** `src/lib/bank/test-scenarios.ts` (5 synthetic profiles). Extend only when a new AC strictly requires a new shape — don't duplicate existing scenarios.
-- **WorkspaceStore scenarios (S-F7 onwards):** `src/lib/store/scenarios/*.json` (cold-sarah, sarah-connected, sarah-mid-build, sarah-complete, sarah-shared-mark-invited, sarah-reconcile-in-progress, sarah-settle, sarah-finalise).
-- **Dev fixture user:** `@dev.decouple.local` synthetic email, per spec 72 §7 fixture isolation.
-- **No real user data in fixtures ever.** T3+ tier data (bank, financial) must be synthetic.
+- **Cat-B baseline fixture:** `tests/unit/fixtures/recommendations-cat-b-baseline.txt` — net-new, captured at pre-edit time as the AC-3 frozen reference.
+- **Bank scenarios:** N/A — no `bank/test-scenarios.ts` interaction in this slice.
+- **WorkspaceStore scenarios:** N/A — no store interaction.
+- **Dev fixture user:** N/A — no auth path.
 
 ## Visual regression placeholder
 
-Until a tool is picked (Playwright screenshots / Chromatic / Storybook), visual verification = manual in-browser check against Claude AI Design source. Tool decision tracked at `docs/engineering-phase-candidates.md` §G.2.
+N/A — no UI surface. The slice changes string literals in a logic library; nothing renders differently to the user until a downstream slice consumes these outputs in a UI component (out of scope here).
 
 ## Manual test discipline
 
-If a test is manual, the slice author must:
-1. Run it against the preview deploy before declaring DoD item 4 complete
-2. Record evidence (screenshot / short screen recording / reference-ID) in the test's `Evidence at wrap` line
-3. Capture the build/commit SHA verified against
-
-Untested surfaces are not shipped.
+No manual tests in this slice. All AC verifiable via file-content assertions or regex gates that vitest can run headlessly. The §2.4 boundary judgment for A17 is a one-time human call captured in acceptance.md AC-2 + the review log; the test verifies the frozen text, not the reasoning.

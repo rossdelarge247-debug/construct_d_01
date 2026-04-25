@@ -3,7 +3,7 @@
 **Slice:** S-B-2-recommendations-copy-flip
 **Spec ref:** `docs/workspace-spec/73-copy-patterns.md` §1 (vocabulary), §2.1 + §2.2 (banned words), §2.4 (exception policy) · `docs/slices/S-C-U4-disclosure-audit/audit-catalogue.md` rows A17–A20 (lines 82–85)
 **Phase:** Phase 2 (Build) — recommendation surfaces consumed by hub / discovery flows
-**Status:** Approved (frozen 2026-04-25)
+**Status:** Shipped (DoD walked 2026-04-25)
 
 ---
 
@@ -85,9 +85,9 @@ The loveable floor: every user-facing recommendation string in `src/lib/recommen
 ## Review log
 
 - **2026-04-25 · AC freeze:** Frozen as drafted. A17 reframe shape: one-word `'formal'` insertion (lightest viable reframe; echoes Cat-B line 60 phrasing).
-- **2026-04-25 · A19 amendment (post-freeze):** `'stronger'` adjective replaced with `'strengthens'` verb form to preserve the "the more X, the more Y" parallel. New A19 target: `'the more it strengthens your picture going into any discussion or mediation'`. Audit-catalogue row A19 amended in same commit; acceptance.md AC-1 verification updated. Tests are written against the amended string.
-- **{date} · Tests RED:** {filled when failing-tests commit lands}
-- **{date} · Tests GREEN:** {filled when implementation commit lands}
-- **{date} · Adversarial pass:** {filled at adversarial review}
-- **{date} · Security checklist:** {filled at §13 sweep}
-- **{date} · DoD walked:** {filled at PR-open}
+- **2026-04-25 · A19 amendment (post-freeze):** `'stronger'` adjective replaced with `'strengthens'` verb form to preserve the "the more X, the more Y" parallel. New A19 target: `'the more it strengthens your picture going into any discussion or mediation'`. Audit-catalogue row A19 amended in same commit; acceptance.md AC-1 verification updated. Tests are written against the amended string. Commit: `05e87f1`.
+- **2026-04-25 · Tests RED:** 11 fail / 1 pass (12 tests) confirming pre-implementation source is not yet compliant. The 1 pass is AC-3 (Cat-B baseline at line 60 untouched). Commit: `d47dfc7`.
+- **2026-04-25 · Tests GREEN:** 12/12 pass (S-B-2) + 41/41 (full suite). Test-side fix: dropped redundant `has('thorough disclosure')` assertion that contradicted the comma-bearing frozen AC text. Typecheck clean; 23 pre-existing lint warnings (none in touched files). Commit: `c0114a2`.
+- **2026-04-25 · Adversarial pass:** Manual sweep run on slice diff per security.md §12 (HANDOFF-29 + HANDOFF-30 reasoning — manual fitter than skill for T0 Public copy slices, twice-deferred). 8 sweep findings recorded in security.md §12; zero concerns surfaced. `/review` skill deferred (4-line src diff fully reviewable inline).
+- **2026-04-25 · Security checklist:** 13-item checklist walked in security.md. Items 1-11 + 13 all N/A or clean (T0 Public · pure-text logic-library edit · no new dependencies). Item 12 covered by adversarial pass above. Sign-off complete.
+- **2026-04-25 · DoD walked:** All 6 DoD items met: (1) AC-1..AC-4 evidence in test output; (2) tests written + passing (RED→GREEN cycle in commits `d47dfc7`→`c0114a2`); (3) adversarial review done, zero concerns; (4) preview-deploy N/A — no UI surface (verification.md sign-off); (5) no regression — 41/41 full suite + adjacent-slice smoke per verification.md regression-surfaces table; (6) no 68f/g entries to resolve (closed by upstream S-C-U4). Plus 13-item security checklist complete.
