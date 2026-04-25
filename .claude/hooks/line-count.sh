@@ -24,13 +24,27 @@ fi
 
 SESSION_ID=$(printf '%s' "$INPUT" | jq -r '.session_id // "unknown"')
 STATE="/tmp/claude-lines-${SESSION_ID}.txt"
+SESSION_BASE_FILE="/tmp/claude-base-${SESSION_ID}.txt"
 
-# Cumulative branch churn vs session base (origin/main).
+# Diff base resolution: prefer the SHA captured by session-start.sh at turn 0
+# so cumulative churn measures session-authored work only, not commits
+# inherited from prior sessions on the same branch. Fall back to origin/main
+# if the base file is absent or holds an unreachable SHA — preserves the
+# original contract on first-run / unknown-session edge cases.
+DIFF_BASE="origin/main"
+if [ -f "$SESSION_BASE_FILE" ]; then
+  CANDIDATE=$(cat "$SESSION_BASE_FILE" 2>/dev/null || echo "")
+  if [ -n "$CANDIDATE" ] && git cat-file -e "${CANDIDATE}^{commit}" 2>/dev/null; then
+    DIFF_BASE="$CANDIDATE"
+  fi
+fi
+
+# Cumulative branch churn vs DIFF_BASE.
 # additions + deletions captures "lines touched" semantic; untracked
 # files count as additions (wc -l of each file).
-additions=$(git diff --numstat origin/main 2>/dev/null \
+additions=$(git diff --numstat "$DIFF_BASE" 2>/dev/null \
   | awk '{a+=$1} END{print a+0}')
-deletions=$(git diff --numstat origin/main 2>/dev/null \
+deletions=$(git diff --numstat "$DIFF_BASE" 2>/dev/null \
   | awk '{d+=$2} END{print d+0}')
 untracked=$(git ls-files --others --exclude-standard 2>/dev/null \
   | xargs -r -I{} wc -l "{}" 2>/dev/null \

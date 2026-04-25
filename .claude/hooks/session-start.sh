@@ -12,9 +12,21 @@
 
 set -euo pipefail
 
+INPUT=$(cat 2>/dev/null || echo '{}')
+SESSION_ID=$(printf '%s' "$INPUT" | jq -r '.session_id // "unknown"' 2>/dev/null || echo "unknown")
+
 # --- Branch state ---
 BRANCH=$(git branch --show-current 2>/dev/null || echo "unknown")
 HEAD_SHA=$(git rev-parse --short HEAD 2>/dev/null || echo "unknown")
+
+# Capture the full HEAD SHA as this session's measurement base. Idempotent
+# across resume / clear re-invocations so the base anchors at the FIRST
+# session-start of a given session_id, not later ones. Read by
+# line-count.sh to compute session-authored churn (vs branch-inherited).
+SESSION_BASE_FILE="/tmp/claude-base-${SESSION_ID}.txt"
+if [ ! -f "$SESSION_BASE_FILE" ] && [ "$HEAD_SHA" != "unknown" ]; then
+  git rev-parse HEAD > "$SESSION_BASE_FILE" 2>/dev/null || true
+fi
 
 # Fetch origin/main quietly; tolerate offline
 git fetch origin main --quiet 2>/dev/null || true
@@ -28,6 +40,36 @@ if [ -z "$(git status --porcelain 2>/dev/null)" ]; then
 else
   DIRTY_COUNT=$(git status --porcelain 2>/dev/null | wc -l | tr -d ' ')
   TREE_STATE="dirty (${DIRTY_COUNT} file(s) uncommitted)"
+fi
+
+# --- Branch-resume check (harness-suffix detection) ---
+# Harness occasionally lands sessions on an auto-generated suffixed branch
+# `claude/<slug>-<5alphanumeric>$` when a canonical non-suffixed branch
+# already exists on origin. Detect + surface the resync recipe at turn 0
+# instead of forcing manual `mcp__github__list_branches` diagnosis.
+SUFFIX_WARNING=""
+if [[ "$BRANCH" =~ ^claude/.+-[A-Za-z0-9]{5}$ ]]; then
+  CANDIDATE_BASE="${BRANCH%-*}"
+  if git ls-remote --exit-code --heads origin "$CANDIDATE_BASE" >/dev/null 2>&1; then
+    SUFFIX_WARNING=$(cat <<EOF
+
+
+### Branch-resume check (harness-suffix detected)
+
+Current branch \`${BRANCH}\` matches the harness suffix pattern \`claude/<slug>-<5alphanumeric>\`. Canonical branch \`${CANDIDATE_BASE}\` exists on origin — the harness may have landed you on an orphan suffixed branch.
+
+To resume the canonical branch:
+
+\`\`\`
+git fetch origin ${CANDIDATE_BASE}
+git checkout -B ${CANDIDATE_BASE} origin/${CANDIDATE_BASE}
+git branch -D ${BRANCH}
+\`\`\`
+
+Verify intent (\`mcp__github__list_branches\` for canonical-branch tip + state) before resync if the suffixed branch was deliberate.
+EOF
+)
+  fi
 fi
 
 # --- Compose the reminder injected into model context ---
@@ -58,7 +100,7 @@ CONTEXT=$(cat <<EOF
 
 If BEHIND > 0 or the working tree contains unexpected files, diagnose before any code changes. Per CLAUDE.md startup rule: "If the harness landed you on a different base, resync before doing anything else — \`git fetch origin <branch>\` then \`git checkout -B <branch> origin/<branch>\`."
 
-Before accepting any factual claim in the kickoff prompt (branch tips, test states, file contents, CI status), verify against the live source. Kickoffs are plans written at a past moment; they rot.
+Before accepting any factual claim in the kickoff prompt (branch tips, test states, file contents, CI status), verify against the live source. Kickoffs are plans written at a past moment; they rot.${SUFFIX_WARNING}
 EOF
 )
 
