@@ -1,7 +1,11 @@
-// S-B-1 — AC-5: docs/SESSION-CONTEXT.md path-typo correction.
-// Pre-edit, the wrong path src/lib/ai/recommendations.ts appears 4×
-// (lines 45, 64, 232, 235 — kickoff identification).
-// Post-edit, those occurrences are replaced with src/lib/bank/confirmation-questions.ts.
+// S-B-1 — AC-5: docs/SESSION-CONTEXT.md path-typo correction (durable invariant).
+//
+// The count-of-corrected-path assertion was AC-5-specific verification at PR #16
+// commit time; SESSION-CONTEXT evolves session-by-session (e.g. session-30 wrap
+// flipped P0 / pre-flight sections forward to S-B-2 → src/lib/recommendations.ts,
+// dropping the per-PR-#16 count from 4 → 1). The "no wrong path" assertion
+// remains as the durable gate: the legacy typo src/lib/ai/recommendations.ts
+// must never reappear in branding usage.
 
 import { describe, it, expect } from 'vitest'
 import { readFileSync } from 'node:fs'
@@ -12,15 +16,8 @@ const SESSION_CONTEXT = readFileSync(
   'utf-8'
 )
 
-describe('S-B-1 · AC-5 SESSION-CONTEXT.md typo correction', () => {
+describe('S-B-1 · AC-5 SESSION-CONTEXT.md typo invariant', () => {
   it('no occurrences of the wrong path src/lib/ai/recommendations.ts remain', () => {
     expect(SESSION_CONTEXT.includes('src/lib/ai/recommendations.ts')).toBe(false)
-  })
-
-  it('at least 4 occurrences of the corrected path src/lib/bank/confirmation-questions.ts present', () => {
-    const matches = SESSION_CONTEXT.match(
-      /src\/lib\/bank\/confirmation-questions\.ts/g
-    ) ?? []
-    expect(matches.length).toBeGreaterThanOrEqual(4)
   })
 })
