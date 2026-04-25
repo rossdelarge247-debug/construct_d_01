@@ -81,7 +81,7 @@ Run on branch `claude/S-C-U4-disclosure-audit` at commit `ae7f94b`. Results clas
 | A16 | `src/hooks/use-workspace.ts` : 132 | `label: 'Ready for formal disclosure', description: 'Your picture is comprehensive enough for formal financial exchange'` | `label: 'Ready for Form E submission', description: 'Your picture is comprehensive enough to submit as formal financial disclosure'` | §2 exception (legal-process context) |
 | A17 | `src/lib/recommendations.ts` : 163 | `"You're concerned about hidden assets... thorough disclosure..."` | Retain "thorough disclosure" as legal-process reference (Category B boundary case); reframe narrative so "disclosure" reads as process not brand | §2 exception |
 | A18 | `src/lib/recommendations.ts` : 166 | `"...a much stronger position for any negotiation or disclosure."` | `"...a much stronger foundation for any negotiation or submission."` | §1 (position → foundation) |
-| A19 | `src/lib/recommendations.ts` : 196 | `"...the stronger your position in any discussion or mediation."` | `"...the stronger your picture going into any discussion or mediation."` | §1 |
+| A19 | `src/lib/recommendations.ts` : 196 | `"...the stronger your position in any discussion or mediation."` | `"...the more it strengthens your picture going into any discussion or mediation."` | §1 (amended S-B-2 implementation: `stronger` adjective → `strengthens` verb form to keep "the more X, the more Y" parallel) |
 | A20 | `src/lib/recommendations.ts` : 215 | `"We help you prepare for mediation — organising your disclosure..."` | `"We help you prepare for mediation — organising your Form E submission..."` | §2 exception |
 
 **Category A count:** 20 rows across 5 files.

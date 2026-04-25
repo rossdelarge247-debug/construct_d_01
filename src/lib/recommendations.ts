@@ -160,10 +160,10 @@ export function generateRecommendations(session: InterviewSession, hasSafeguardi
       id: 'financial-picture',
       title: 'Build your complete financial picture',
       explanation: hiddenAssetsConcern
-        ? 'You\'re concerned about hidden assets. The best protection is thorough disclosure — knowing exactly what exists. Upload your documents and we\'ll extract and structure everything automatically, making it much harder for anything to be missed.'
+        ? 'You\'re concerned about hidden assets. The best protection is thorough, formal disclosure — knowing exactly what exists. Upload your documents and we\'ll extract and structure everything automatically, making it much harder for anything to be missed.'
         : finances.combined_awareness === 'really_dont_know'
           ? 'You don\'t yet have a clear picture of the combined finances. This is very common — and it\'s exactly what the next stage helps with. Upload documents and we\'ll do the heavy lifting.'
-          : 'You know your side but not the full picture. Building out the detail — with evidence linked to every item — creates a much stronger position for any negotiation or disclosure.',
+          : 'You know your side but not the full picture. Building out the detail — with evidence linked to every item — creates a much stronger foundation for any negotiation or submission.',
       priority: 'medium',
       category: 'financial',
       serviceLink: 'build_your_picture',
@@ -193,7 +193,7 @@ export function generateRecommendations(session: InterviewSession, hasSafeguardi
     recs.push({
       id: 'children-detail',
       title: 'Strengthen your children\'s arrangements',
-      explanation: 'The more detail you can think through — school terms, holidays, handovers, special needs — the stronger your position in any discussion or mediation. This also helps the children feel more settled.',
+      explanation: 'The more detail you can think through — school terms, holidays, handovers, special needs — the more it strengthens your picture going into any discussion or mediation. This also helps the children feel more settled.',
       priority: 'medium',
       category: 'children',
       serviceLink: 'build_your_picture',
@@ -212,7 +212,7 @@ export function generateRecommendations(session: InterviewSession, hasSafeguardi
       priority: 'medium',
       category: 'process',
       serviceLink: 'share_and_disclose',
-      serviceDescription: 'We help you prepare for mediation — organising your disclosure, structuring your proposals, and tracking what\'s agreed across sessions.',
+      serviceDescription: 'We help you prepare for mediation — organising your Form E submission, structuring your proposals, and tracking what\'s agreed across sessions.',
     })
   }
 
