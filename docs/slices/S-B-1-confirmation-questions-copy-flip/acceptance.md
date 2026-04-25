@@ -3,7 +3,7 @@
 **Slice:** S-B-1-confirmation-questions-copy-flip
 **Spec ref:** `docs/workspace-spec/73-copy-patterns.md` §1 (vocabulary) · §2 (banned words inc. §2.4 exception) · §3 (empty-state verb family) · §4.1 (confirmation tone) · `docs/slices/S-C-U4-disclosure-audit/audit-catalogue.md` rows A1–A12
 **Phase(s):** Phase 2 (Build) — confirmation-question runtime strings
-**Status:** Draft · awaiting freeze
+**Status:** Approved · in implementation
 
 ---
 
@@ -83,6 +83,6 @@ The loveable floor for this slice is: every accordion label and list-section emp
 | Date | Reviewer | Outcome | Notes |
 |---|---|---|---|
 | 2026-04-25 | User | Pending | AC-1..AC-5 drafted; awaiting explicit freeze before src/ edit |
-| | User | | AC frozen · implementation may begin |
+| 2026-04-25 | User | **Frozen** | AC frozen ("ok") — implementation may begin · Cat-B baseline fixture capture is the next step |
 
 **AC is the contract.** Change requests after freeze roll into re-drafting AC + re-slicing, not mid-slice scope shifts.
