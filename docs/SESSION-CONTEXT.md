@@ -84,7 +84,9 @@ Pre-flight Q1 binds the rest. Five main paths:
 
 **Path E — CLAUDE.md candidate lift session.** #14 (origin/HEAD set in session-start.sh) is at occurrence 2 — lift trigger ready. Bundle with #3 re-evaluation (line-count refined model — now potentially redundant after S-TOOL-1) + #13 re-evaluation (PR-by-session-end — now potentially redundant after #12 lift). Tooling/discipline slice.
 
-**Recommended:** Path A (S-F7-β) — natural follow-up, builds on α + tooling foundation. Path D (S-INFRA-1) if the Vercel-preview noise is bothering you.
+**Path F — S-TOOL-2 (long-prose Write protection + SESSION-CONTEXT refresh slash command).** Bundles three things, all surfaced session 34 on the streaming-idle-timeout diagnosis: (1) **PreToolUse hook on Write** (`.claude/hooks/long-prose-write-cap.sh`) — denies Write calls where `tool_input.content` exceeds ~200 lines for `.md` / `.txt` files (lower threshold than for code; the failure mode is prose-specific); deny message points to the skeleton + Edit-append pattern. ~40 lines bash + 4-6 vitest hook tests via the same `child_process.execSync` pattern used in S-TOOL-1. (2) **`/refresh-session-context` slash command** (`.claude/commands/refresh-session-context.md`) — encapsulates the section-by-section Edit flow used at session-34 wrap; deterministic protocol for the most-frequent long-prose-Write case. (3) **Lift the existing CLAUDE.md note** at SESSION-CONTEXT line 267 ("Long-prose Writes: use skeleton + Edit-append. Default for docs >~150 lines.") into CLAUDE.md §"Engineering conventions" with the threshold tightened to 200 (matching the hook); keep the rule visible at Tier 1, not buried in session-specific text. ~80 lines bash + ~30 lines md + 4-6 tests + slice docs.
+
+**Recommended:** Path A (S-F7-β) — natural follow-up, builds on α + tooling foundation. Path D (S-INFRA-1) if the Vercel-preview noise is bothering you. Path F (S-TOOL-2) if you want to keep the tooling-track momentum and prevent the stream-timeout failure mode from recurring; sits naturally next to S-TOOL-1 and reuses the same test pattern.
 
 ### Pre-flight binding decision: PR #21
 
@@ -262,7 +264,7 @@ docs/v2/v2-backlog.md                              — 98-item backlog
    If `### Branch-resume check` warning appears in the SessionStart context, follow its literal recipe.
 4. **Confirm with user (4 pre-flight Qs):**
    - Merge PR #21 first or develop on top?
-   - Which session-35 P0: S-F7-β (Path A), S-F2 (Path B), S-CF-tail (Path C), S-INFRA-1 Stripe pin (Path D), or candidate-lift session (Path E)?
+   - Which session-35 P0: S-F7-β (Path A), S-F2 (Path B), S-CF-tail (Path C), S-INFRA-1 Stripe pin (Path D), candidate-lift session (Path E), or S-TOOL-2 long-prose-write hook + `/refresh-session-context` slash command (Path F)?
    - Slice-prefix decision: codify `S-TOOL-N` as non-catalogue prefix family, or keep tooling work as `claude/session-N-tooling` going forward?
    - CLAUDE.md candidate #14 (origin/HEAD set) — second occurrence this session = lift trigger. Bundle the lift + 5-line `session-start.sh` patch into the next slice, or defer?
 5. **First actions** depend on chosen path. For Path A: scaffold S-F7-β slice docs per template; spec 71 §4 + 68b for dev surface routes; existing S-F7-α impl on main as reference contract. For Path B: identify which F-slice; read its slice card in spec 70-build-map-slices.md. For Path C: read `docs/slices/S-C-U4-disclosure-audit/audit-catalogue.md` Part 2 rows A13-A16. For Path D: read `src/lib/stripe/client.ts` + check Stripe SDK API version compatibility. For Path E: 30-minute scoping pass on which candidates lift cleanly.
@@ -272,6 +274,6 @@ docs/v2/v2-backlog.md                              — 98-item backlog
 - Target ~1,500 lines. **Hook bug carries forward (session 33):** `line-count.sh` measures vs `origin/main`, so cumulative inheritance from prior session's branch commits inflates the count. Until the bug is fixed (Path A target), use `git diff <session-start-sha> --stat` to track session-authored churn manually.
 - **CLAUDE.md moratorium partially lifted sessions 31 + 32; held in 33.** 6 lifted across all sessions; 8 candidates currently parked (#3 line-count refined model · #7 tdd-guard hook spec · #9 vitest version-quirks · #10 lockfile policy · #11 compile-time RED · #12 Branch-resume check · #13 PR-by-session-end · #14 origin/HEAD set · AUX-3 PWR drift check). Continue capturing new candidates as HANDOFF notes; don't lift ad hoc within a slice session.
 - **Honour the 6-item DoD + 13-item security checklist.** S-F7-α will be `pr-dod.yml`'s fourth positive-path activation if PR #20 merges.
-- **Long-prose Writes: use skeleton + Edit-append.** Default for docs >~150 lines.
+- **Long-prose Writes: use skeleton + Edit-append.** Default for docs >~200 lines (raised from 150 after session-34 evidence; HANDOFF-34 at 106 lines + hooks-session-start.test.ts at 183 lines wrote cleanly; SESSION-CONTEXT at 270 lines failed twice with stream idle timeout). Path F (S-TOOL-2) lands the hook-enforced version of this rule.
 - **Behavioural-test discipline:** still binding per session-31 lift.
 - **`/security-review` skill needs `origin/HEAD` set.** Session 33 hit `fatal: ambiguous argument 'origin/HEAD...'`. Quick fix: `git remote set-head origin main`. Worth checking at session start (CLAUDE.md candidate #14).
