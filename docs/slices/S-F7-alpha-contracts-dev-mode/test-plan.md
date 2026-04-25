@@ -10,18 +10,18 @@
 
 One test per AC. All α tests are unit-level + behavioural — exercise the interface with synthetic inputs, assert observable outputs. No file-content assertions per CLAUDE.md "Don't write file-content assertions for logic slices."
 
-Test files map to source files 1:1:
+Test files map to source files 1:1, located at `tests/unit/` per project convention (verified against existing tests `recommendations-copy.test.ts`, `confirmation-questions-copy.test.ts`, etc.). Vitest env: `jsdom` with globals enabled (no need to import `describe`/`it`/`expect`); `@` alias maps to `./src`.
 
 | Test file | Source under test | AC coverage |
 |---|---|---|
-| `src/lib/auth/__tests__/types.test.ts` | `src/lib/auth/types.ts` | AC-1 (compile-time only — types-test pattern) |
-| `src/lib/store/__tests__/types.test.ts` | `src/lib/store/types.ts` | AC-1 (compile-time only) |
-| `src/lib/auth/__tests__/index.test.ts` | `src/lib/auth/index.ts` | AC-2, AC-3 |
-| `src/lib/store/__tests__/index.test.ts` | `src/lib/store/index.ts` | AC-2 |
-| `src/lib/auth/__tests__/dev-session.test.ts` | `src/lib/auth/dev-session.ts` | AC-4, AC-10, AC-11 |
-| `src/lib/store/__tests__/dev-store.test.ts` | `src/lib/store/dev-store.ts` | AC-5, AC-11 |
-| `src/lib/auth/__tests__/dev-auth-gate.test.ts` | `src/lib/auth/dev-auth-gate.ts` | AC-6 |
-| `src/lib/store/__tests__/scenario-loader.test.ts` | `src/lib/store/scenario-loader.ts` | AC-7, AC-8 |
+| `tests/unit/auth-index.test.ts` | `src/lib/auth/index.ts` | AC-1 (auth types via inline `@ts-expect-error`), AC-2, AC-3 |
+| `tests/unit/auth-dev-session.test.ts` | `src/lib/auth/dev-session.ts` | AC-4, AC-10, AC-11 |
+| `tests/unit/auth-dev-auth-gate.test.ts` | `src/lib/auth/dev-auth-gate.ts` | AC-6 |
+| `tests/unit/store-index.test.ts` | `src/lib/store/index.ts` | AC-1 (store types via inline `@ts-expect-error`), AC-2 |
+| `tests/unit/store-dev-store.test.ts` | `src/lib/store/dev-store.ts` | AC-5, AC-11 |
+| `tests/unit/store-scenario-loader.test.ts` | `src/lib/store/scenario-loader.ts` | AC-7, AC-8 |
+
+Type-shape verification (AC-1) folded into the index test files via inline `// @ts-expect-error` assertions on deliberate mismatches. Avoids redundant runtime "type smoke" files; `pnpm tsc --noEmit` is the canonical type gate.
 
 ---
 
