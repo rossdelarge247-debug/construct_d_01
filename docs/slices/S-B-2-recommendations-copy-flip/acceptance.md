@@ -31,7 +31,7 @@ The loveable floor: every user-facing recommendation string in `src/lib/recommen
 - **Outcome:** Two §1 / §1.1 substitutions land verbatim per audit-catalogue rows A18 and A19. After-state strings present in source; before-state strings absent.
 - **Verification:**
   - A18 (`:166`): source contains `'stronger foundation for any negotiation or submission'`; source does **not** contain `'stronger position for any negotiation or disclosure'`.
-  - A19 (`:196`): source contains `'stronger your picture going into any discussion or mediation'`; source does **not** contain `'stronger your position in any discussion or mediation'`.
+  - A19 (`:196`): source contains `'the more it strengthens your picture going into any discussion or mediation'`; source does **not** contain `'the stronger your position in any discussion or mediation'`.
   - Boolean-wrapper tests via `tests/helpers/source-assertions.ts`.
 - **In scope:** The two complete catalogued substring replacements in `src/lib/recommendations.ts`.
 - **Out of scope:** Other `position` / `disclosure` lines in adjacent files (their own slices); `serviceLink: 'share_and_disclose'` at `:214` (Cat-D code key per §2.4 condition 4 — leave alone).
@@ -85,6 +85,7 @@ The loveable floor: every user-facing recommendation string in `src/lib/recommen
 ## Review log
 
 - **2026-04-25 · AC freeze:** Frozen as drafted. A17 reframe shape: one-word `'formal'` insertion (lightest viable reframe; echoes Cat-B line 60 phrasing).
+- **2026-04-25 · A19 amendment (post-freeze):** `'stronger'` adjective replaced with `'strengthens'` verb form to preserve the "the more X, the more Y" parallel. New A19 target: `'the more it strengthens your picture going into any discussion or mediation'`. Audit-catalogue row A19 amended in same commit; acceptance.md AC-1 verification updated. Tests are written against the amended string.
 - **{date} · Tests RED:** {filled when failing-tests commit lands}
 - **{date} · Tests GREEN:** {filled when implementation commit lands}
 - **{date} · Adversarial pass:** {filled at adversarial review}
