@@ -42,11 +42,13 @@ Next.js 16.2, React 19, TypeScript, Tailwind 4, Supabase, Claude AI, Vercel Pro.
 - **68g-visual-anchors:** 12 open (C-V2..C-V12, C-V14); **C-V1 + C-V13 locked session 29 via S-F1**. Resolved as slices encounter each remaining anchor.
 - **68g-build-opens:** 10 open (B-5..B-14).
 - **68g-copy-share-opens:** 2 open (C-S5, C-S6). C-U4/U5/U6 locked session 28.
-- **Spec 73 downstream:** 35 Cat-A strings in `docs/slices/S-C-U4-disclosure-audit/audit-catalogue.md` queued for per-surface copy-flip slices.
+- **Spec 73 downstream:** 20 Cat-A strings in `docs/slices/S-C-U4-disclosure-audit/audit-catalogue.md` Part 2 (src/-level). 16 closed across S-B-1 (A1-A12) and S-B-2 (A17-A20); **4 remaining: A13-A16** in `discovery-flow.tsx`, `constants/index.ts` (×2), `use-workspace.ts`. Plus 14 wire-level Cat-A rows in Part 1 (session-22 wireframes; close as each surface is built — Welcome carousel, dashboard, etc.).
 
 ### Specced but NOT built
 
-Four slices shipped: S-C-U4 (docs-only, session 28) + **S-F1** (first `src/`-touching, session 29) + **S-B-1** (first non-foundation `src/`, session 30) + **S-B-2** (session 31). The remainder of spec 68 + 70 + 71 + 72 + 67 + 73 is still design-only. **29 of 33 catalogued slices remain unshipped.** Spec 73 audit-catalogue Cat-A queue: 35 rows total; S-B-1 closed 12, S-B-2 closed 4, **19 Cat-A rows remaining** distributed across `discovery-flow.tsx` (A13), `constants/index.ts` (A14, A15), `use-workspace.ts` (A16), and `result-transformer.ts` (multiple). Session 32 P0 candidate: `S-B-3-result-transformer-copy-flip` — largest remaining cluster; first slice to test the new "Don't write file-content assertions for logic slices" rule (result-transformer is computational, so behavioural tests required).
+Four slices shipped: S-C-U4 (docs-only, session 28) + **S-F1** (first `src/`-touching, session 29) + **S-B-1** (first non-foundation `src/`, session 30) + **S-B-2** (session 31). The remainder of spec 68 + 70 + 71 + 72 + 67 + 73 is still design-only. **29 of 33 catalogued slices remain unshipped.** Spec 73 audit-catalogue src/-level Cat-A queue (Part 2): 20 rows total; S-B-1 closed A1-A12 (12) and S-B-2 closed A17-A20 (4); **4 remaining (A13-A16)** spread across `src/components/hub/discovery-flow.tsx` (A13), `src/constants/index.ts` (A14, A15), `src/hooks/use-workspace.ts` (A16). Could ship as one cleanup slice (S-CF-tail) or interleave per-surface as those surfaces get reskinned.
+
+**Naming clash to watch.** Spec 70 catalogue uses `S-B1, S-B2, S-B3...` (no hyphen) for Build-phase slices (Bank connection, Sarah's Picture, Dashboard, etc.). Our shipped copy-flip slices used `S-B-1, S-B-2` (hyphen) for Build-phase library copy-flips. Different things. Future copy-flip slices should use a non-conflicting prefix (e.g. `S-CF-N` for "copy-flip N") to avoid confusion. S-B-1 + S-B-2 names are now historical; not worth retroactively renaming.
 
 ### Built (on main as of `1e1c558`)
 
@@ -63,9 +65,17 @@ Four slices shipped: S-C-U4 (docs-only, session 28) + **S-F1** (first `src/`-tou
 
 ## Session 32 priorities
 
-### P0 — S-B-3 result-transformer copy-flip (suggested)
+### P0 candidates — three real options
 
-`src/lib/ai/result-transformer.ts` carries the largest remaining Cat-A cluster (audit-catalogue Cat-B section explicitly lists 5+ legal-process retentions in this file at lines 31, 337, 1362, 430, 921, 1021 — Cat-A rows are interspersed). Ships spec 73 vocabulary into a third logic file. **First slice that tests the new "Don't write file-content assertions for logic slices" CLAUDE.md rule** — `result-transformer.ts` is computational (spec 13 decision trees + spec 19 keyword lookup), so the slice should mix **behavioural tests** (invoke transformer with synthetic inputs, assert on returned objects) with **file-content tests** for the pure-string Cat-A rows. Pre-flight: enumerate Cat-A rows in this file from audit-catalogue Part 2 before AC freeze. Confirm priority at session-32 kickoff.
+The Cat-A copy-flip queue is nearly drained (4 rows). Real options for session-32 P0:
+
+**Option α — `S-CF-tail`: close the Cat-A queue (4 rows across 3 files).** Single small cleanup slice. Drains the audit-catalogue Part 2 of all 20 src/-level Cat-A rows. Mostly mechanical; pattern proven in S-B-1 + S-B-2; uses `tests/helpers/source-assertions.ts`. **Does NOT exercise the new "Don't write file-content assertions for logic slices" rule** because the 4 rows are pure-string substitutions in display copy.
+
+**Option β — `S-F2` Document-as-spine shell.** Spec 70 catalogue's next foundation slice. UI buildout that gives every later slice a place to live. Larger surface; consumes S-F1 tokens; first behavioural-test territory.
+
+**Option γ — Welcome carousel.** Unblocked since S-F1; ships actual prototype copy + imagery. User explicitly wanted this preserved (session 29 design-source conversation). Slot per spec 70 catalogue: net-new slice, not yet enumerated.
+
+Default suggestion: **Option α first** (drains a known queue cleanly, ~1 short session) **then β** (S-F2 is the natural next foundation step). Confirm at session-32 kickoff.
 
 ### P1 — Welcome carousel slice (parallel candidate, unchanged from session 31)
 
@@ -234,13 +244,11 @@ docs/v2/v2-backlog.md                              — 98-item backlog
    - `tdd-guard` hook implementation (parked candidate #7): this session, or hold for next dedicated infra slot?
    - `line-count.sh` calibration: if data still inconsistent after this session, close candidate #3 as "intentional" or hold?
    - Run `/review` skill on PR #14 (S-F1) retroactively — still parked since session 29; still skip, or run now?
-5. **Open feature branch off main:** `claude/S-B-3-result-transformer-copy-flip` (or whatever slice the user picks) per spec 71 §7a.
-6. **First actions on S-B-3 (if confirmed P0):**
-   - Enumerate Cat-A rows in `src/lib/ai/result-transformer.ts` from audit-catalogue Part 2 before AC freeze — count was not pre-catalogued in audit-catalogue summary (Cat-B side has 5+ rows in this file; Cat-A side needs a fresh grep).
-   - Re-read `docs/workspace-spec/73-copy-patterns.md` §1 + §2.4 exception policy.
-   - Scaffold `docs/slices/S-B-3-result-transformer-copy-flip/` from `docs/slices/_template/` + draft AC before any `src/` edit.
-   - **First slice testing the new "Don't write file-content assertions for logic slices" rule.** Result-transformer is computational (spec 13 trees + spec 19 keyword lookup), so the slice should mix behavioural tests (invoke transformer with synthetic inputs, assert on returned objects) with file-content tests for the pure-string Cat-A rows. Use `tests/helpers/source-assertions.ts` for the file-content portion; design synthetic-input fixtures for the behavioural portion.
-   - `wc -l src/lib/ai/result-transformer.ts` first; use targeted Reads with offset+limit per audit-catalogue line numbers.
+5. **Open feature branch off main:** `claude/S-CF-tail-{slug}` or `claude/S-F2-{slug}` (per user pick) per spec 71 §7a.
+6. **First actions on whichever P0 the user picks:**
+   - **Option α `S-CF-tail`:** enumerate the 4 Cat-A rows (A13-A16) from audit-catalogue lines 78-81; scaffold `docs/slices/S-CF-tail-copy-flip/` from `docs/slices/_template/`; reuse `tests/helpers/source-assertions.ts`; mirror S-B-2's TDD shape. Cat-B baseline fixture: capture pre-edit state of any `disclos*` references in the 3 target files for byte-for-byte preservation.
+   - **Option β `S-F2`:** read `docs/workspace-spec/70-build-map-slices.md` §"S-F2 · Document-as-spine shell" + dependency check; first behavioural-test slice — design synthetic-input fixtures alongside AC.
+   - **Option γ Welcome carousel:** read `docs/design-source/welcome-tour/Welcome Tour - Standalone.html` for image extraction; AC must commit to image filenames + alt text per slide before extraction.
 
 **Session discipline (hook-surfaced; restated):**
 - Honour Planning conduct from turn 1. Brief-rot in this file is possible — live-verify factual claims.
