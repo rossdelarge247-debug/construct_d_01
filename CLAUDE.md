@@ -196,9 +196,13 @@ These rules govern how Claude behaves when editing `src/`. Guardrails against ov
 
 **TDD where tractable.** Write the test first, then the code to pass it. Applies to logic, rules, data transforms, API routes, signal/engine work. Not mandatory for pure-visual UI (visual regression covers that), but preferred wherever state or branching logic exists.
 
+**Don't write file-content assertions for logic slices.** If the unit under test is a function with branching/computation, exercise it with inputs and assert outputs. File-content / regex assertions are reserved for pure-string slices (copy-flips) and structural-parity invariants (e.g. CSS↔TS token alignment per S-F1). Refactor-fragility is the smell.
+
 **Adversarial review gate (per slice).** Before committing any slice or significant change, run one adversarial review pass. Two options: (1) explicit prompt — "poke holes in this; find edge cases, security issues, regression risks"; (2) `/review` or `/security-review` skill. Output is a list of concerns. Either address or explicitly defer with reasoning. No slice ships without this gate.
 
 **Snapshot before refactor.** Any refactor over ~50 lines or touching more than 2 files: commit a checkpoint on the branch first. Cheap rollback insurance, explicit before/after diff when reviewing.
+
+**AC arithmetic check.** When slicing AC against an audit-catalogue or numbered list, verify `Σ in-scope rows = total rows` before freezing. Catches scope omissions and off-by-one errors that hide behind narrative AC text.
 
 **Deterministic over generative.** For repetitive scaffolding (new slice folder, codegen, boilerplate, branch setup), prefer bash/CLI over prompting Claude. Reserve Claude for reasoning tasks. Extends the "prefer dedicated tools over Bash when one fits" rule — the inverse is also true when deterministic is cheaper.
 
@@ -217,6 +221,8 @@ Enforcement: `.github/PULL_REQUEST_TEMPLATE.md` reproduces this checklist; `.git
 ## Visual direction
 
 **Canonical source:** the Claude AI Design tool outputs from session 22 wire batches. Exact visual treatment — colour system, typography, component design, screen layouts — to preserve and rebuild. Copy in the outputs is NOT final; visual treatment IS.
+
+**Source files repo-committed, not URL-fetched.** Claude AI Design outputs must live at `docs/design-source/{slug}/`. The Anthropic-hosted URLs are auth-gated and unreachable from the agent sandbox; WebFetch on them returns nothing useful.
 
 **Not reference points:** Airbnb, Emma, Habito. Legacy in-house visual language (spec 18 colour palette, spec 27 visual direction) is superseded.
 
