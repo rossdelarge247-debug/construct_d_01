@@ -1,4 +1,4 @@
-# Session 30 Context Block
+# Session 31 Context Block
 
 ## Product positioning (preserve across sessions)
 
@@ -19,6 +19,8 @@ Next.js 16.2, React 19, TypeScript, Tailwind 4, Supabase, Claude AI, Vercel Pro.
 **Session 28 — S-C-U4 disclosure-language audit slice.** First slice under the new enforcement stack. Docs-only by design per 68g C-U4 line 29. Shipped: `docs/workspace-spec/73-copy-patterns.md` (344 lines — §1 vocabulary, §2 banned words + exception policy, §3 empty-state verb family, §4 tone templates), `docs/slices/S-C-U4-disclosure-audit/` (5 populated docs, 593 lines), 68g-copy-share-opens.md C-U4/U5/U6 flipped 🟠→🟢. Full 6-item DoD walked; 13-item security checklist exercised; 6 adversarial findings (Minor → Amendment 1, Informational deferred with reasoning). Six hook-calibration observations logged — see `docs/HANDOFF-SESSION-28.md`. Merged as PR #13 (main tip `30beb16`).
 
 **Session 29 — S-F1 design-system token foundation.** **First `src/`-touching slice of Phase C.** Shipped: 65 `--ds-*` CSS tokens in `src/app/globals.css` (16 colour + 3 family + 12 type-scale + 4 weight + 1 letter-spacing + 3 radius + 7 shadow + 17 spacing + 2 layout) coexisting with V1/V2 `@theme` block via `--ds-*` prefix; typed TS mirror at `src/styles/tokens.ts` with `tokens` const + `TokenName` discriminated union; Button reskinned to consume `--ds-*` (variant logic preserved); imagery convention at `public/images/` + README; parity test in `tests/unit/tokens.test.ts` enforces CSS↔TS alignment. **68g register flipped 🟠→🟢** for **C-V1** (phase colour system: Build `#4338CA` / Reconcile `#9D174D` / Settle `#0369A1` / Finalise `#166534` + soft variants; Start implicit) and **C-V13** (phase accent-tint card washes via phase-tinted shadows). Full 6-item DoD walked; 13-item security checklist exercised (mostly N/A T0 Public + Item 13 with concrete evidence). Manual adversarial pass: 6 findings (2 Low, 4 Info; zero blockers). **`pr-dod.yml` positive-path canary passed in 4 seconds on first activation.** Merged as PR #14 (main tip `cc6fc76`). See `docs/HANDOFF-SESSION-29.md`.
+
+**Session 30 — S-B-1 confirmation-questions copy-flip.** **Second `src/`-touching slice + first non-foundation slice.** Shipped: 12 catalogued Cat-A copy-flips in `src/lib/bank/confirmation-questions.ts` (22 modified lines) per spec 73 §1 vocabulary (`captured` / `ready to share`) + §3 empty-state pattern (`add`); 4-occurrence path-typo correction in `docs/SESSION-CONTEXT.md` shipped same commit (AC-5). Cat-B preserved verbatim (5 disclos\* legal-process refs + 2 'starting position' MCA 1973 refs) per §2.4 exception. 22 new vitest tests + 1 baseline fixture; boolean-wrapper assertion idiom introduced; full 6-item DoD walked; 13-item security checklist (mostly N/A T0 Public + §12 manual sweep with 6 findings, no concerns + §13 audit clean). **`pr-dod.yml` twice-clean — stable signal achieved.** TDD loop crisp: 21 RED → 21 GREEN in one substitution batch. Pre-flight kickoff caught a load-bearing path-typo before any `src/` touch. Merged as PR #16 (main tip `5fa81a2`). See `docs/HANDOFF-SESSION-30.md`.
 
 ## Current state
 
@@ -42,9 +44,9 @@ Next.js 16.2, React 19, TypeScript, Tailwind 4, Supabase, Claude AI, Vercel Pro.
 
 ### Specced but NOT built
 
-Two slices shipped: S-C-U4 (docs-only) + **S-F1 (first `src/`-touching, merged session 29)**. The remainder of spec 68 + 70 + 71 + 72 + 67 + 73 is still design-only. **31 of 33 catalogued slices remain unshipped.** Session 30 P0 candidate: `S-B-1-confirmation-questions-copy-flip` — first slice ships spec 73 vocabulary into live `src/lib/bank/confirmation-questions.ts`.
+Three slices shipped: S-C-U4 (docs-only) + **S-F1 (first `src/`-touching, merged session 29)** + **S-B-1 (first non-foundation `src/` slice, merged session 30)**. The remainder of spec 68 + 70 + 71 + 72 + 67 + 73 is still design-only. **30 of 33 catalogued slices remain unshipped.** Session 31 P0 candidate: `S-B-2-recommendations-copy-flip` — second copy-flip slice; ships spec 73 vocabulary into `src/lib/recommendations.ts` (4-row Cat-A cluster A17–A20 + §2.4 boundary case at A17 — retain "thorough disclosure" as legal-process while reframing surrounding narrative).
 
-### Built (on main as of `cc6fc76`)
+### Built (on main as of `5fa81a2`)
 
 - **Stable libs:** `src/lib/{bank,ai,supabase,stripe,analytics,documents,recommendations}/*` · API routes · `src/types/{hub,index,workspace}.ts` · `src/hooks/*` · `src/constants/index.ts` · `src/utils/cn.ts`.
 - **Preserve-with-reskin UI:** `src/components/ui/{button,card,badge}.tsx` · `src/components/layout/{header,footer,env-banner}.tsx` · `src/components/hub/{category-selector,discovery-flow,evidence-lozenge,hero-panel,section-cards,fidelity-label}.tsx`. **Button now consumes `--ds-*` (S-F1); other PWR components still on V1/V2 `@theme` palette pending their own reskin slices.**
@@ -57,11 +59,11 @@ Two slices shipped: S-C-U4 (docs-only) + **S-F1 (first `src/`-touching, merged s
 - **Exception:** `src/types/interview.ts` (deprecated; full delete blocked on S-O1).
 - **CI + enforcement:** `ci.yml`, `gitleaks.yml`, `pr-dod.yml` · PR template · four enforcement hooks (line-count · read-cap · session-start · wrap-check).
 
-## Session 30 priorities
+## Session 31 priorities
 
-### P0 — S-B-1 confirmation-questions copy-flip
+### P0 — S-B-2 recommendations copy-flip
 
-12 clustered Cat-A rows in `src/lib/bank/confirmation-questions.ts` per `docs/slices/S-C-U4-disclosure-audit/audit-catalogue.md`. Ships spec 73 vocabulary into live code (first time spec 73 transitions from doc to live UI strings). **Second-ever `src/`-touching slice** + first non-foundation slice; runs the full DoD again with another data point on hook calibration. Surface is small (logic file, no UI), so visual smoke is N/A; spec 73 §1 vocabulary substitutions + §2 banned-word checks + §4 tone-template alignment are the AC core.
+4 clustered Cat-A rows (A17–A20) in `src/lib/recommendations.ts` per `docs/slices/S-C-U4-disclosure-audit/audit-catalogue.md` lines 82–85. Ships spec 73 vocabulary into the second logic file. **Third `src/`-touching slice.** Includes the §2.4 boundary case at A17 (retain "thorough disclosure" as legal-process reference; reframe surrounding narrative so "disclosure" reads as process, not brand). A18 swaps `position` → `foundation` (§1); A19 + A20 are §1 vocabulary swaps. Apply the boolean-wrapper assertion pattern + Cat-B baseline fixture pattern from S-B-1 (test-helper module candidate — see HANDOFF-30 forward-pointer).
 
 ### P1 — Welcome carousel slice (parallel candidate)
 
@@ -69,7 +71,7 @@ Now unblocked by S-F1 tokens. Consumes `--ds-color-phase-*`, `--ds-shadow-phase-
 
 ### P2 — Continued hook-calibration observation
 
-Three observations from HANDOFF-29 §"Hook calibration" worth watching on session-30 src/ work: (1) **line-count.sh** behaviour on a smaller src/ slice — confirms HANDOFF-29's "accurate" reading vs HANDOFF-28's "over-reports" reading; (2) **pr-dod.yml** second positive-path activation — once-clean is good signal, twice-clean is stable; (3) **stream-idle-timeout** threshold characterisation — proactive skeleton+Edit-append pattern worked on HANDOFF-29; collect another data point. Plus **/wrap stdout-capture quirk** still un-exercised — try `/wrap` at session-30 wrap. No pre-emptive tuning per moratorium; collect a third clean session before deciding.
+From HANDOFF-30 §"Calibration data" — session 31 should watch: (1) **`pr-dod.yml`** thrice-clean activation — twice-clean signal already achieved at S-B-1 (PR #16); thrice = continued stability; (2) **`line-count.sh`** refined-model confirmation — confirm the modified-line / `+0` on in-place same-length / `+N×2` on `replace_all` pattern, and isolate the first-Edit-on-newly-tracked-file `+350` anomaly with one more session's data; (3) **vitest boolean-wrapper helper** lift decision — if S-B-2 hits the same `.toContain` dump-on-failure trap, lift to `tests/helpers/source-assertions.ts`; (4) **stream-idle-timeout** triggered once on a ~250-line single-Write attempt mid-wrap — skeleton + Edit-append recovery worked; threshold at ~150 lines confirmed. **`/wrap` stdout-capture quirk now exercised** (cleanly fired session-30 wrap; checklist surfaced via PostToolUse). No pre-emptive tuning per moratorium.
 
 ### Stretch
 
@@ -109,9 +111,9 @@ Target ≤1,500 lines session churn (hook-surfaced). S-F1 is design-system found
 
 ## Branch
 
-Main is canonical. Session 29 work lives on `claude/design-system-tokens-Gin9E` (slice; merged via PR #14 → squash-commit `cc6fc76`); session-29 wrap on `claude/session-29-wrap` (this branch — adds HANDOFF-29 + this refresh).
+Main is canonical. Session 30 slice work lived on `claude/S-B-1-confirmation-questions-copy-flip` (3 commits: scaffold · AC freeze · slice ship; merged via PR #16 → squash-commit `5fa81a2`); session-30 wrap on `claude/session-30-wrap` (this branch — adds HANDOFF-30 + this refresh). Session 29 history: `claude/design-system-tokens-Gin9E` slice → PR #14 → `cc6fc76`; wrap on `claude/session-29-wrap` → PR #15.
 
-**Pre-session-30 prerequisite:** merge this wrap branch to main. Open PR. Once merged, session 30 branches off the updated main per spec 71 §7a single-branch-main.
+**Pre-session-31 prerequisite:** merge this wrap branch to main. Open PR. Once merged, session 31 branches off the updated main per spec 71 §7a single-branch-main.
 
 **Feature branch pattern (spec 71 §7a single-branch-main):**
 - Off main: `git checkout main && git pull --ff-only && git checkout -b claude/S-XX-{slug}` (slice) or `claude/session-{N}-{scope}` (session-scoped).
@@ -119,7 +121,7 @@ Main is canonical. Session 29 work lives on `claude/design-system-tokens-Gin9E` 
 - Preview URL per branch: `construct-dev-git-{branch}-*.vercel.app`.
 - Never direct-push to main (branch protection should enforce once configured).
 
-**Session 30 pre-flight verify:** `git fetch origin main && git log origin/main -1`. Confirm session-29 wrap PR is merged (tip should be ahead of `cc6fc76`).
+**Session 31 pre-flight verify:** `git fetch origin main && git log origin/main -1`. Confirm session-30 wrap PR is merged (tip should be ahead of `5fa81a2`).
 
 ## Key files
 
@@ -212,32 +214,34 @@ docs/HANDOFF-SESSION-{18,20,21,22,23,24,25,26,27,28,29}.md  — Prior retros (to
 docs/v2/v2-backlog.md                              — 98-item backlog
 ```
 
-## Session 30 pre-flight
+## Session 31 pre-flight
 
 1. **SessionStart hook fires at turn 0** surfacing read-discipline + Planning conduct + live branch state. Verify it appears.
 2. **Claude loads `CLAUDE.md` + this file.** Don't batch-read Tier 3 specs — read-cap hook enforces.
-3. **Verify main is ahead of `cc6fc76`** — session-29 wrap PR should be merged:
+3. **Verify main is ahead of `5fa81a2`** — session-30 wrap PR should be merged:
    ```
    git fetch origin main
    git log origin/main -1
    ```
-   If main is still at `cc6fc76`, the wrap PR is unmerged — merge first, or note the miss.
+   If main is still at `5fa81a2`, the wrap PR is unmerged — merge first, or note the miss.
 4. **Confirm with user:**
-   - Any decisions to revisit from HANDOFF-29 candidate-CLAUDE.md additions (Claude Design URLs not WebFetch-able · AC arithmetic check · `line-count.sh` Edit-vs-net interpretation)?
-   - S-B-1 still P0, or reshuffle?
-   - Welcome carousel slice (P1) — open in parallel with S-B-1, sequence after, or defer?
-   - Run `/review` skill on PR #14 retroactively (Stretch)?
-5. **Open feature branch off main:** `claude/S-B-1-confirmation-questions-copy-flip` (or whatever slice the user picks) per spec 71 §7a.
-6. **First actions on S-B-1:**
-   - Read `docs/slices/S-C-U4-disclosure-audit/audit-catalogue.md` with offset+limit — target the 12 Cat-A rows in `src/lib/bank/confirmation-questions.ts`.
-   - Read `docs/workspace-spec/73-copy-patterns.md` §1 vocabulary + §2 banned words (with §2.4 solicitor/judge-test exception) + §4 tone templates.
-   - Scaffold `docs/slices/S-B-1-confirmation-questions-copy-flip/` from `docs/slices/_template/` + draft AC before any `src/` edit.
-   - Read targeted lines of `src/lib/bank/confirmation-questions.ts` (use `grep` to find each Cat-A string before reading; never full-file).
+   - Any decisions to revisit from the 5 parked CLAUDE.md candidate additions (Claude Design URLs not WebFetch-able · AC arithmetic check · `line-count.sh` Edit-vs-net interpretation refined model · vitest boolean-wrapper helper · "kickoff prompts rot like everything else")?
+   - S-B-2 still P0, or reshuffle to welcome carousel (P1)?
+   - Add `tests/helpers/source-assertions.ts` module net-new (lift candidate #4 now), or wait for second use?
+   - Delete merged slice branches (`claude/S-B-1-confirmation-questions-copy-flip` exists locally + on origin) — yes / no / let GitHub auto-delete?
+   - Run `/review` skill on PR #14 (S-F1) retroactively — still parked from session 29; still skip, or run now?
+5. **Open feature branch off main:** `claude/S-B-2-recommendations-copy-flip` (or whatever slice the user picks) per spec 71 §7a.
+6. **First actions on S-B-2:**
+   - Read `docs/slices/S-C-U4-disclosure-audit/audit-catalogue.md` with offset+limit — target rows A17–A20 (lines 82–85) in `src/lib/recommendations.ts`.
+   - Re-read `docs/workspace-spec/73-copy-patterns.md` §1 + §2.4 exception policy (A17 boundary case is the §2.4 application).
+   - Scaffold `docs/slices/S-B-2-recommendations-copy-flip/` from `docs/slices/_template/` + draft AC before any `src/` edit.
+   - Mirror S-B-1's TDD shape: Cat-B baseline fixture + boolean-wrapper assertions; lift to `tests/helpers/source-assertions.ts` if reuse becomes obvious.
+   - `wc -l src/lib/recommendations.ts` first (size unknown to me); use targeted Reads with offset+limit per audit-catalogue line numbers.
 
 **Session discipline (hook-surfaced; restated):**
 - Honour Planning conduct from turn 1. Brief-rot in this file is possible — live-verify factual claims.
 - Target ~1,500 lines. Hook warns at 1,000 / 1,500 / 2,000. (Session 29 ran at ~924 cumulative for the slice + ~225 for the wrap; both well under.)
-- **No new CLAUDE.md rules** — moratorium holds. Three candidate additions parked from HANDOFF-29 §"Forward-pointer" — revisit after S-B-1 ships if they still feel right.
-- **Honour the 6-item DoD + 13-item security checklist.** PR template mandatory; CI gate fails `src/`-touching PRs without slice-verification reference. S-B-1 will be the second real positive-path activation of `pr-dod.yml`.
+- **No new CLAUDE.md rules** — moratorium holds. **Five** candidate additions parked (3 from HANDOFF-29 + 2 new from HANDOFF-30) — revisit after S-B-2 ships if they still feel right.
+- **Honour the 6-item DoD + 13-item security checklist.** PR template mandatory; CI gate fails `src/`-touching PRs without slice-verification reference. S-B-2 will be the **third** real positive-path activation of `pr-dod.yml` (twice-clean signal already achieved at S-B-1; thrice-clean = continued stability).
 - **Long-prose Writes: use skeleton + Edit-append.** Pattern proven on HANDOFF-29 (~270 lines, no timeout via 42-line skeleton + 6 Edit-appends). Default to skeleton for docs >~150 lines of structured prose.
-- **Hooks are accurate this session for `line-count.sh`** — interpret as **modified-line count for Edits** (not net delta). For net delta use `git diff --numstat`. Captured in HANDOFF-29 obs #1 corrected reading.
+- **`line-count.sh` refined model (HANDOFF-30 calibration data §):** modified-line count for Edits (HANDOFF-29 obs confirmed); `+0` on in-place same-length edits; `+N×2` on `replace_all` hitting N occurrences; one anomaly remains on first Edit-on-newly-tracked-file post-commit (likely baseline-init artefact). For net delta still use `git diff --numstat`.
