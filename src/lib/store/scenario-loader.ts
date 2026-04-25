@@ -38,12 +38,14 @@ function installScenario(scenario: Scenario): void {
 }
 
 export async function loadScenario(name: string): Promise<void> {
-  const scenario = SCENARIOS[name];
-  if (!scenario) {
+  // Object.hasOwn rejects prototype keys (`__proto__`, `constructor`, `toString`, …)
+  // — without it, `SCENARIOS["__proto__"]` returns `Object.prototype` (truthy)
+  // and bypasses the guard, allowing a wipe-then-crash via attacker-controlled URL.
+  if (!Object.hasOwn(SCENARIOS, name)) {
     throw new Error(`Unknown scenario: "${name}". Available: ${Object.keys(SCENARIOS).join(', ')}`);
   }
   wipeDevState();
-  installScenario(scenario);
+  installScenario(SCENARIOS[name]);
 }
 
 export async function applyScenarioFromUrl(): Promise<void> {
@@ -52,12 +54,15 @@ export async function applyScenarioFromUrl(): Promise<void> {
   const name = params.get('scenario');
   if (!name) return;
 
-  await loadScenario(name);
-
-  // Consume the param so a reload doesn't re-trigger the scenario load.
-  params.delete('scenario');
-  const remaining = params.toString();
-  const newUrl =
-    window.location.pathname + (remaining ? `?${remaining}` : '') + window.location.hash;
-  window.history.replaceState({}, '', newUrl);
+  // try/finally: even if loadScenario throws (unknown scenario, bad fixture),
+  // the URL param must be consumed so a reload doesn't replay the failure.
+  try {
+    await loadScenario(name);
+  } finally {
+    params.delete('scenario');
+    const remaining = params.toString();
+    const newUrl =
+      window.location.pathname + (remaining ? `?${remaining}` : '') + window.location.hash;
+    window.history.replaceState({}, '', newUrl);
+  }
 }

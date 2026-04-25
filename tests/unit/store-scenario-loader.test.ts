@@ -63,6 +63,27 @@ describe('lib/store/scenario-loader — load + wipe + URL trigger', () => {
     );
   });
 
+  it.each(['__proto__', 'constructor', 'toString', 'hasOwnProperty'])(
+    'loadScenario rejects prototype-chain key %s WITHOUT wiping state (regression: prototype-key bypass)',
+    async (badName) => {
+      const { loadScenario } = await import('@/lib/store/scenario-loader');
+      // Seed some state first so we can detect any wipe.
+      await loadScenario('sarah-mid-build');
+      const beforeKeys = Object.keys(localStorage)
+        .filter((k) => k.startsWith('decouple:dev:'))
+        .sort();
+      expect(beforeKeys.length).toBeGreaterThanOrEqual(1);
+
+      await expect(loadScenario(badName)).rejects.toThrow(/unknown|not found|scenario/i);
+
+      // State must be untouched — the wipe should NOT have run.
+      const afterKeys = Object.keys(localStorage)
+        .filter((k) => k.startsWith('decouple:dev:'))
+        .sort();
+      expect(afterKeys).toEqual(beforeKeys);
+    },
+  );
+
   it('AC-8: applyScenarioFromUrl detects ?scenario= query param and triggers load', async () => {
     // Stub URL to include scenario param.
     const originalLocation = window.location;
