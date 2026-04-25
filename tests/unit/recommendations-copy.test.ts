@@ -45,9 +45,8 @@ describe('S-B-2 · AC-1 §1 vocabulary substitutions (A18 + A19)', () => {
 })
 
 describe('S-B-2 · AC-2 §2 exception substitutions (A17 boundary + A20)', () => {
-  it('A17 line 163 (boundary): retains literal "thorough disclosure" with "formal" anchor', () => {
+  it('A17 line 163 (boundary): "thorough, formal disclosure" lands (frozen AC text)', () => {
     expect(has('thorough, formal disclosure')).toBe(true)
-    expect(has('thorough disclosure')).toBe(true)
   })
 
   it('A17 line 163: pre-amendment "is thorough disclosure —" (without formal) is gone', () => {
