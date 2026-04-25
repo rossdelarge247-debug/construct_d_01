@@ -27,10 +27,13 @@ describe('lib/auth/dev-auth-gate — never blocks in dev', () => {
   });
 
   it('redirectIfAuthed() is a no-op (does not navigate)', async () => {
-    const reloadSpy = vi.spyOn(window.location, 'assign').mockImplementation(() => {});
+    // Amended in session 33: original used `vi.spyOn(window.location, 'assign')`,
+    // which fails in jsdom 26+ because `assign` is non-configurable. The contract
+    // is "no navigation"; verify via observable outcome (href unchanged) instead.
     const { devAuthGate } = await import('@/lib/auth/dev-auth-gate');
-    await devAuthGate.redirectIfAuthed('/somewhere');
-    expect(reloadSpy).not.toHaveBeenCalled();
+    const hrefBefore = window.location.href;
+    await expect(devAuthGate.redirectIfAuthed('/somewhere')).resolves.toBeUndefined();
+    expect(window.location.href).toBe(hrefBefore);
   });
 
   it('currentSession() returns the fixture session matching getSession()', async () => {
