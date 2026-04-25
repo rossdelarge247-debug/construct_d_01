@@ -1,4 +1,4 @@
-# Session 34 Context Block
+# Session 35 Context Block
 
 ## Product positioning (preserve across sessions)
 
@@ -12,19 +12,19 @@ Spec 42 authoritative for positioning. Spec 68 suite (hub + 68a-e locked + 68f/g
 
 Next.js 16.2, React 19, TypeScript, Tailwind 4, Supabase, Claude AI, Vercel Pro. Single-branch-main workflow (spec 71 §7a Option 4): no `phase-c` integration, no cutover event. Slice work on short-lived feature branches (`claude/S-XX-{slug}` or `claude/session-{N}-{scope}`) → PR → main. Tink credentials in Vercel env.
 
-## What sessions 30–33 accomplished (rolling window)
+## What sessions 31–34 accomplished (rolling window)
 
-**Session 30 — S-B-1 confirmation-questions copy-flip.** **Second `src/`-touching slice + first non-foundation slice.** Shipped: 12 catalogued Cat-A copy-flips in `src/lib/bank/confirmation-questions.ts` per spec 73 §1 + §3. Cat-B preserved verbatim per §2.4 exception. 22 vitest tests + Cat-B baseline fixture; boolean-wrapper assertion idiom introduced. **`pr-dod.yml` twice-clean.** Merged as PR #16 (main tip `5fa81a2`). See `docs/HANDOFF-SESSION-30.md`.
+**Session 31 — S-B-2 recommendations copy-flip.** Third `src/`-touching slice; 4 Cat-A copy-flips (A17–A20) in `src/lib/recommendations.ts` per spec 73 §1 + §2.4. Test-helper lifted to `tests/helpers/source-assertions.ts` (HANDOFF-30 candidate #4, second-use). 3 CLAUDE.md lifts (Behavioural over content · AC arithmetic check · Source files repo-committed). Merged PR #18 (`1e1c558`). See `docs/HANDOFF-SESSION-31.md`.
 
-**Session 31 — S-B-2 recommendations copy-flip.** **Third `src/`-touching slice.** Shipped: 4 catalogued Cat-A copy-flips (A17–A20) in `src/lib/recommendations.ts` per spec 73 §1 + §2.4 exception (A17 boundary case retained with one-word `'formal'` anchor; A19 amended post-freeze from `'stronger'` adjective to `'strengthens'` verb form). 12 vitest tests + Cat-B baseline fixture. **Test-helper lifted** to `tests/helpers/source-assertions.ts` (HANDOFF-30 candidate #4, second-use lift). **`pr-dod.yml` thrice-clean.** TDD discussion mid-session surfaced 3 CLAUDE.md candidate lifts (Behavioural over content · AC arithmetic check · Visual-direction Source files repo-committed). Slice merged as PR #18 (main tip `1e1c558`). See `docs/HANDOFF-SESSION-31.md`.
+**Session 32 — S-F7-α scaffolded + RED.** Foundation slice — first non-copy-flip src/ slice + first sub-sliced (α/β/γ/δ). Sub-sliced S-F7 with arithmetic check; α scope = 3 interfaces + dev-mode adapters + 2 fixture scenarios + scenario URL switch + spec-72-§7-verbatim runtime assertion. 3 CLAUDE.md lifts (Names carry the design · Small single-purpose functions · Effects behind interfaces). 6 RED test files; impl deferred to 33. See `docs/HANDOFF-SESSION-32.md`.
 
-**Session 32 — S-F7-α scaffolded + RED.** **Foundation slice — first non-copy-flip src/ slice + first sub-sliced (α/β/γ/δ).** Strategic re-orientation from copy-flip backlog to foundation work via spec 71 §510 + §8 line 507 re-read. Sub-sliced S-F7 four ways with arithmetic check; α scope = 3 interfaces + dev-mode adapters + 2 fixture scenarios + scenario URL switch + spec-72-§7-verbatim runtime assertion. **3 CLAUDE.md rules lifted pre-scaffolding** (8d4e9bd): Names carry the design · Small single-purpose functions · Effects behind interfaces. Slice docs scaffolded; 6 RED test files committed (compile-time RED via import-resolution-fail). `pnpm-lock.yaml` tracked. Slice NOT yet GREEN; impl + DoD + PR was session 33 work. See `docs/HANDOFF-SESSION-32.md`.
+**Session 33 — S-F7-α shipped GREEN + PR opened.** Recovery from harness branch-create bug (orphan suffixed branch). Implemented 4 src/lib/auth/*.ts + 6 src/lib/store/* files. Per-layer `/security-review` caught 1 MEDIUM (`loadScenario("__proto__")` prototype-chain bypass) fixed in-slice with `Object.hasOwn` + `try/finally` + parametrised regressions. 81/81 GREEN. PR #20 opened with full DoD ticked. See `docs/HANDOFF-SESSION-33.md`.
 
-**Session 33 — S-F7-α shipped GREEN through DoD + PR open.** **Fifth slice through Phase C, first foundation src/ slice landed.** Recovery from harness branch-create bug (auto-generated `claude/s-f7-alpha-contracts-dev-mode-jT4MK` empty; real work on `claude/S-F7-alpha-contracts-dev-mode`); resync via `mcp__github__list_branches`. Implemented 4 src/lib/auth/*.ts + 6 src/lib/store/* files (4 .ts + 2 fixture .json) per session-32 RED contract. Per-layer `/security-review` (override of recommended end-of-slice): auth clean; store caught 1 MEDIUM (confidence 9) — `loadScenario("__proto__")` bypassed truthy guard, ran `wipeDevState()` before crash, leaving dev localStorage cleared and malicious URL persisted across reload. Fixed in-slice (`8d3bc82`): `Object.hasOwn` lookup guard + `try/finally` URL cleanup + parametrised regression across 4 prototype keys. 1 jsdom test bug amended (`vi.spyOn(window.location, 'assign')` non-configurable in jsdom 26+) per "flag + freeze + amend openly + document" discipline. 81/81 tests GREEN. Pre-existing typecheck failure in `src/lib/stripe/client.ts:25` documented as out-of-scope. PR #20 opened with full DoD + 13-item security checklist ticked at `ccc6e4f`. See `docs/HANDOFF-SESSION-33.md`.
+**Session 34 — PR #20 merged + S-TOOL-1 shipped GREEN through PR.** Harness suffix-orphan recurred (occurrence 2). Resynced. Merged PR #20 → main tip `5d38f6d`. Branched off new main as `claude/S-TOOL-1-line-count-branch-resume`. **Tooling slice:** fixed `line-count.sh` measure-vs-main inflation (now reads session-base SHA written by `session-start.sh` at turn 0; falls back to `origin/main` gracefully); added harness branch-resume detection in `session-start.sh` (suffixed branch + canonical-on-origin → resync recipe surfaced at turn 0). 11 new vitest tests via `child_process.execSync` against synthetic git fixtures. **CLAUDE.md candidate #12 (Branch-resume check) lifted** into Planning conduct § after second clean use. 92/92 tests GREEN. PR #21 opened with full DoD ticked, 10/10 CI green. See `docs/HANDOFF-SESSION-34.md`.
 
 ## Current state
 
-### Locked (through session 33)
+### Locked (through session 34)
 
 - **Sessions 19-22 foundational:** 5-phase model · four-document lifecycle · spec 68a-e phase locks · spec 68f register with session-22 locks applied · spec 68g trio.
 - **Sessions 23-24:** spec 71 rebuild strategy · spec 72 engineering security · spec 70 hub + 33-slice catalogue · spec 67 slice-ownership · Option 4 single-branch-main · V1 wiped · CLAUDE.md Coding/Engineering/Planning conduct.
@@ -36,7 +36,8 @@ Next.js 16.2, React 19, TypeScript, Tailwind 4, Supabase, Claude AI, Vercel Pro.
 - **Session 30:** S-B-1 shipped — first non-foundation src/ slice; 12 Cat-A copy-flips in `src/lib/bank/confirmation-questions.ts`; boolean-wrapper assertion idiom introduced; `pr-dod.yml` twice-clean.
 - **Session 31:** **S-B-2 shipped** — third src/ slice; 4 Cat-A copy-flips (A17–A20) in `src/lib/recommendations.ts`; A19 amended post-freeze (verb form); test-helper lifted to `tests/helpers/source-assertions.ts`; `pr-dod.yml` thrice-clean. **3 CLAUDE.md additions** lifted in wrap PR: §"Engineering conventions" — Don't write file-content assertions for logic slices · AC arithmetic check; §"Visual direction" — Source files repo-committed, not URL-fetched.
 - **Session 32:** **S-F7-α scaffolded + RED'd** (NOT yet shipped) — first foundation src/ slice; first sub-sliced (α/β/γ/δ); 6 RED test files; 11 AC frozen. **3 CLAUDE.md additions** lifted pre-scaffolding (8d4e9bd): Names carry the design · Small single-purpose functions · Effects behind interfaces.
-- **Session 33:** **S-F7-α shipped GREEN through DoD; PR #20 open** — 81/81 tests GREEN (auth 20 + store 20 incl. 4 prototype-key regressions + 41 pre-existing); per-layer `/security-review` caught 1 MEDIUM (`loadScenario("__proto__")` bypass) fixed in-slice with parametrised regressions; 13-item security checklist + verification.md filled at `ccc6e4f`. Branch `claude/S-F7-alpha-contracts-dev-mode` 10 commits ahead of main; PR #20 awaiting reviewer sign-off + merge. No CLAUDE.md lifts this session — 3 new candidates flagged for second-use verification (#12 Branch-resume check · #13 PR-by-session-end-or-resume-doc · #14 origin/HEAD set as session-start prereq).
+- **Session 33:** **S-F7-α shipped GREEN through DoD; PR #20 open** — 81/81 tests GREEN; per-layer `/security-review` caught 1 MEDIUM (`loadScenario("__proto__")` bypass) fixed in-slice; 13-item security checklist + verification.md filled at `ccc6e4f`. 3 new candidates flagged for second-use verification (#12 Branch-resume check · #13 PR-by-session-end-or-resume-doc · #14 origin/HEAD set as session-start prereq).
+- **Session 34:** **PR #20 merged (main `5d38f6d`); S-TOOL-1 shipped + PR #21 open.** Harness suffix-orphan recurred (occurrence 2 of #12). Tooling slice fixed `line-count.sh` measure-vs-main inflation (session-base SHA captured at turn 0 by `session-start.sh`, line-count diffs against that with `origin/main` fallback) and added harness branch-resume detection (suffixed branch + canonical-on-origin → resync recipe surfaced at turn 0). 11 new vitest hook tests; full suite **92/92 GREEN**. **CLAUDE.md #12 (Branch-resume check) lifted** into Planning conduct § (second clean use). PR #21 OPEN at `413c547` with 10/10 CI green, 0 reviews/comments. **Vercel preview "Error" pre-existing** across PR #20 + #21 (Stripe SDK API mismatch in `src/lib/stripe/client.ts:25` per HANDOFF-33 — not blocking).
 
 ### Open (see spec 68f + 68g registers for full list)
 
@@ -48,51 +49,57 @@ Next.js 16.2, React 19, TypeScript, Tailwind 4, Supabase, Claude AI, Vercel Pro.
 
 ### Specced but NOT built
 
-Four slices shipped to main: S-C-U4 (docs-only, session 28) + **S-F1** (session 29) + **S-B-1** (session 30) + **S-B-2** (session 31). **S-F7-α GREEN + DoD-complete in PR #20** at end of session 33 (10 commits ahead of main on `claude/S-F7-alpha-contracts-dev-mode`; awaiting reviewer sign-off + merge) — fifth slice once merged. The remainder of spec 68 + 70 + 71 + 72 + 67 + 73 is still design-only. **28 of 33 catalogued slices remain unshipped + unstarted; 1 in PR-review (S-F7-α).** Spec 73 audit-catalogue src/-level Cat-A queue (Part 2): 20 rows total; S-B-1 closed A1-A12 (12) and S-B-2 closed A17-A20 (4); **4 remaining (A13-A16)** parked (S-CF-tail deferred to end-of-Phase-C cleanup sweep). Plus 14 wire-level Cat-A rows in Part 1.
+Five slices shipped to main: S-C-U4 (docs-only, session 28) + **S-F1** (session 29) + **S-B-1** (session 30) + **S-B-2** (session 31) + **S-F7-α** (session 34, PR #20 squashed at `5d38f6d`). **S-TOOL-1 GREEN + DoD-complete in PR #21** at session-34 wrap (3 commits ahead of main on `claude/S-TOOL-1-line-count-branch-resume` after handoff commit; awaiting reviewer sign-off + merge) — sixth slice once merged. The remainder of spec 68 + 70 + 71 + 72 + 67 + 73 is still design-only. **28 of 33 catalogued slices remain unshipped + unstarted; 1 tooling slice in PR-review (S-TOOL-1, non-catalogue prefix).** Spec 73 audit-catalogue src/-level Cat-A queue (Part 2): 20 rows total; S-B-1 closed A1-A12 (12) and S-B-2 closed A17-A20 (4); **4 remaining (A13-A16)** parked (S-CF-tail deferred to end-of-Phase-C cleanup sweep). Plus 14 wire-level Cat-A rows in Part 1.
 
 **Naming clash to watch.** Spec 70 catalogue uses `S-B1, S-B2, S-B3...` (no hyphen) for Build-phase slices (Bank connection, Sarah's Picture, Dashboard, etc.). Our shipped copy-flip slices used `S-B-1, S-B-2` (hyphen) for Build-phase library copy-flips. Different things. Future copy-flip slices should use a non-conflicting prefix (e.g. `S-CF-N` for "copy-flip N") to avoid confusion. S-B-1 + S-B-2 names are now historical; not worth retroactively renaming.
 
-### Built (on main as of `f454f9a`; **S-F7-α additions are on branch `claude/S-F7-alpha-contracts-dev-mode` HEAD `ccc6e4f`, not yet on main pending PR #20 merge**)
+### Built (on main as of `5d38f6d`; **S-TOOL-1 additions are on branch `claude/S-TOOL-1-line-count-branch-resume` HEAD `413c547`, not yet on main pending PR #21 merge**)
 
 - **Stable libs:** `src/lib/{bank,ai,supabase,stripe,analytics,documents,recommendations}/*` · API routes · `src/types/{hub,index,workspace}.ts` · `src/hooks/*` · `src/constants/index.ts` · `src/utils/cn.ts`.
 - **Preserve-with-reskin UI:** `src/components/ui/{button,card,badge}.tsx` · `src/components/layout/{header,footer,env-banner}.tsx` · `src/components/hub/{category-selector,discovery-flow,evidence-lozenge,hero-panel,section-cards,fidelity-label}.tsx`. **Button now consumes `--ds-*` (S-F1); other PWR components still on V1/V2 `@theme` palette pending their own reskin slices.**
 - **Design system foundation (NEW session 29):** 65 `--ds-*` CSS tokens in `src/app/globals.css` `:root` block + typed TS mirror at `src/styles/tokens.ts` (exports `tokens`, `Tokens`, `TokenName`, `TOKEN_NAMES`).
 - **Imagery convention (NEW session 29):** `public/images/{component-slug}/` per-component pattern + `public/images/README.md`.
-- **Test infra:** `tests/unit/{types,tokens,confirmation-questions-copy,session-context-typo,recommendations-copy}.test.ts` (session 31: recommendations-copy) · `tests/unit/fixtures/{confirmation-questions,recommendations}-cat-b-baseline.txt` · **`tests/helpers/source-assertions.ts`** (session 31) · `vitest.config.ts` · `tests/setup.ts`. **NEW on branch (PR #20 pending merge):** `tests/unit/{auth-dev-auth-gate,auth-dev-session,auth-index,store-dev-store,store-index,store-scenario-loader}.test.ts` (40 tests).
-- **Auth + persistence abstraction (NEW on branch, PR #20 pending merge):** `src/lib/auth/{types,dev-session,dev-auth-gate,index}.ts` · `src/lib/store/{types,dev-store,index,scenario-loader}.ts` · `src/lib/store/scenarios/{cold-sarah,sarah-mid-build}.json`. Hexagonal architecture per spec 71 §4. β/γ/δ deferred per AC sub-slice table.
+- **Test infra:** `tests/unit/{types,tokens,confirmation-questions-copy,session-context-typo,recommendations-copy}.test.ts` · `tests/unit/fixtures/{confirmation-questions,recommendations}-cat-b-baseline.txt` · **`tests/helpers/source-assertions.ts`** (session 31) · `vitest.config.ts` · `tests/setup.ts`. **Auth + store tests (now on main via S-F7-α):** `tests/unit/{auth-dev-auth-gate,auth-dev-session,auth-index,store-dev-store,store-index,store-scenario-loader}.test.ts` (40 tests). **NEW on branch (PR #21 pending merge):** `tests/unit/{hooks-line-count,hooks-session-start}.test.ts` (11 tests, child_process.execSync against synthetic git fixtures).
+- **Auth + persistence abstraction (NEW on main via S-F7-α):** `src/lib/auth/{types,dev-session,dev-auth-gate,index}.ts` · `src/lib/store/{types,dev-store,index,scenario-loader}.ts` · `src/lib/store/scenarios/{cold-sarah,sarah-mid-build}.json`. Hexagonal architecture per spec 71 §4. β/γ/δ deferred per AC sub-slice table.
+- **Hook self-correction (NEW on branch, PR #21 pending merge):** `.claude/hooks/line-count.sh` reads session-base SHA from `/tmp/claude-base-${SESSION_ID}.txt` (graceful fallback to `origin/main`); `.claude/hooks/session-start.sh` writes that file at turn 0 idempotently AND surfaces a `### Branch-resume check` warning when the current branch matches `^claude/.+-[A-Za-z0-9]{5}$` and the canonical non-suffixed branch exists on origin.
 - **Legal placeholders:** `/privacy /terms /cookies` (still V1, pending legal review).
 - **Landing placeholder:** `src/app/page.tsx` (rebuilding message; updated when S-M1 lands).
 - **Dev tools:** `src/app/workspace/engine-workbench/page.tsx` (moves to `/app/dev/` at S-F7).
 - **Exception:** `src/types/interview.ts` (deprecated; full delete blocked on S-O1).
 - **CI + enforcement:** `ci.yml`, `gitleaks.yml`, `pr-dod.yml` · PR template · four enforcement hooks (line-count · read-cap · session-start · wrap-check).
 
-## Session 34 priorities
+## Session 35 priorities
 
 ### P0 candidates — user picks at kickoff
 
-Pre-flight Q1 binds the rest. Two main paths:
+Pre-flight Q1 binds the rest. Five main paths:
 
-**Path A — Tooling slice first.** Fix the `line-count.sh` measure-vs-main bug + harness branch-resume bug surfaced session 33. Lift CLAUDE.md candidate #12 (Branch-resume check) on second use. Small, surgical (~50-100 lines), unblocks every future multi-session slice. Recommended if the user values reducing future-session friction over forward progress.
+**Path A — S-F7-β (dev surface routes + env banner reskin).** Builds directly on α (now merged). `/app/dev/*` route group, dev banner reskin, scenario picker UI, 6 more fixture scenarios. β unblocks visual verification of dev mode and lets future slices browser-test against fixtures. Recommended.
 
-**Path B — S-F7-β (dev surface routes + env banner reskin).** Builds directly on α. Adds `/app/dev/*` route group, dev banner, scenario picker UI, 6 more fixture scenarios. β unblocks visual verification of dev mode and lets future slices browser-test against fixtures. Requires PR #20 merged first (or developed on top, which risks PR growth).
+**Path B — S-F2 (or another F-series foundation slice).** Now α + tooling stable, F-series can build cleanly. User picks which F-slice next per spec 71 §8.
 
-**Path C — S-F2 (next foundation slice).** Per spec 71 §8 line 507. Now α has shipped a stable contract, F-series can build against it. User picks which F-slice next.
+**Path C — S-CF-tail (4-row drain).** A13-A16 in `discovery-flow.tsx` / `constants/index.ts` ×2 / `use-workspace.ts`. Fast (1 short session). Drains spec 73 Cat-A queue.
 
-**Path D — S-CF-tail (4-row drain).** A13-A16 in `discovery-flow.tsx` / `constants/index.ts` ×2 / `use-workspace.ts`. Fast (1 short session). Drains spec 73 Cat-A queue. No new foundation; cleanup work.
+**Path D — S-INFRA-1 (Stripe SDK pin or upgrade).** Fixes the Vercel preview-error pattern across PRs #20 + #21 (and now likely #21's successor PRs). Small slice (~50-100 lines), foundational stability. Surface area: `src/lib/stripe/client.ts:25`.
 
-**Recommended:** Path A first (small, unblocks future), then Path B (S-F7-β builds on α and visual-verifies the foundation).
+**Path E — CLAUDE.md candidate lift session.** #14 (origin/HEAD set in session-start.sh) is at occurrence 2 — lift trigger ready. Bundle with #3 re-evaluation (line-count refined model — now potentially redundant after S-TOOL-1) + #13 re-evaluation (PR-by-session-end — now potentially redundant after #12 lift). Tooling/discipline slice.
 
-### Pre-flight binding decision: PR #20
+**Recommended:** Path A (S-F7-β) — natural follow-up, builds on α + tooling foundation. Path D (S-INFRA-1) if the Vercel-preview noise is bothering you.
 
-Merge PR #20 first or develop on top? Recommended: **merge first** — α is DoD-clean; review window can be pre-merge; session-34 branches off the new main tip.
+### Pre-flight binding decision: PR #21
+
+Merge PR #21 first or develop on top? Recommended: **merge first** — S-TOOL-1 is DoD-clean (10/10 CI green); review window can be pre-merge; session-35 then branches off the new main tip with the new hooks active.
 
 ### P1 — none. Single-P0 session per choice above.
 
 ### P2 — surface-level housekeeping
 
-Three new CLAUDE.md candidates surfaced session 33 (#12 Branch-resume check · #13 PR-by-session-end-or-resume-doc · #14 origin/HEAD set as session-start prereq). All flagged for second-use verification; #12 was occurrence 1 this session.
+CLAUDE.md candidates after session-34 lift of #12:
+- **#13 PR-by-session-end-or-resume-doc** — practised already; arguably redundant now that #12 hook auto-mitigates the underlying problem. Re-evaluate or close.
+- **#14 origin/HEAD set as session-start prereq** — manual fix needed in sessions 33 + 34 (occurrence 2). Lift trigger ready; ~5-line patch to `session-start.sh` (`git remote set-head origin main 2>/dev/null || true`).
+- **#3 line-count.sh refined model** — the deeper baseline bug that blocked it (measure-vs-main) is now fixed. Re-evaluate whether refined-model upgrade is still wanted; may be redundant.
 
-Carry-forward parked candidates (still pending): AUX-3 PWR drift check (HANDOFF-31) · #3 line-count.sh refined model (now ALSO blocked by deeper baseline bug — bundle into one tooling slice) · #7 tdd-guard hook spec · #9 vitest version-quirks · #10 lockfile policy · #11 compile-time RED pattern.
+Carry-forward parked candidates: AUX-3 PWR drift check · #7 tdd-guard hook spec · #9 vitest version-quirks · #10 lockfile policy · #11 compile-time RED pattern.
 
 ### Stretch
 
@@ -134,9 +141,9 @@ Target ≤1,500 lines session churn (hook-surfaced). S-F1 is design-system found
 
 Main is canonical. Session 31 slice work lived on `claude/S-B-2-recommendations-copy-flip` (5 commits: scaffold + AC freeze · A19 amendment · RED · GREEN · slice docs; merged via PR #18 → squash-commit `1e1c558`); session-31 wrap on `claude/session-31-wrap` (this branch — adds HANDOFF-31 + 3 CLAUDE.md lifts + this refresh). Session 30 history: `claude/S-B-1-confirmation-questions-copy-flip` slice → PR #16 → `5fa81a2`; wrap on `claude/session-30-wrap` → PR #17.
 
-**Pre-session-34 prerequisite:** decide on PR #20 disposition (merge first, or develop on top). If merge first: session 34 branches off the new main tip. If develop on top: continue on `claude/S-F7-alpha-contracts-dev-mode` — but watch PR-growth risk.
+**Pre-session-35 prerequisite:** decide on PR #21 disposition (merge first, or develop on top). If merge first: session 35 branches off the new main tip with the new hooks active. If develop on top: continue on `claude/S-TOOL-1-line-count-branch-resume` — but watch PR-growth risk.
 
-**Session 33 outcome:** S-F7-α DoD-complete on `claude/S-F7-alpha-contracts-dev-mode` HEAD `ccc6e4f` (10 commits + wrap commits ahead of main); PR #20 open and awaiting reviewer sign-off. All 6 src/ DoD items + all 13 security items ticked.
+**Session 34 outcome:** S-TOOL-1 DoD-complete on `claude/S-TOOL-1-line-count-branch-resume` HEAD `413c547` (3 commits ahead of main after handoff commit); PR #21 OPEN with 10/10 CI green, 0 reviews/comments. All in-scope DoD items met or N/A-justified inline (security checklist N/A by tooling-scope rule). Plus PR #20 (S-F7-α) merged at `5d38f6d`.
 
 **Feature branch pattern (spec 71 §7a single-branch-main):**
 - Off main: `git checkout main && git pull --ff-only && git checkout -b claude/S-XX-{slug}` (slice) or `claude/session-{N}-{scope}` (session-scoped).
@@ -144,9 +151,9 @@ Main is canonical. Session 31 slice work lived on `claude/S-B-2-recommendations-
 - Preview URL per branch: `construct-dev-git-{branch}-*.vercel.app`.
 - Never direct-push to main (branch protection should enforce once configured).
 
-**Session 34 pre-flight verify:** `git fetch origin && git log origin/main -1` (expect `f454f9a` if PR #20 not yet merged; ahead if merged); `gh pr view 20` for PR status; `mcp__github__list_branches` to confirm slice branch state (the harness may auto-generate a fresh suffixed branch — watch for this and resync per session-33 recipe).
+**Session 35 pre-flight verify:** `git fetch origin && git log origin/main -1` (expect `5d38f6d` if PR #21 not yet merged; ahead if merged); `mcp__github__pull_request_read --pullNumber=21` for PR status; `mcp__github__list_branches` to confirm slice branch state.
 
-**If harness lands you on a suffixed branch (`claude/<slug>-<4-char-suffix>` lowercase):** check origin for the matching non-suffixed branch via `mcp__github__list_branches`. If it exists with commits, resync via `git fetch origin <real-branch>` → `git checkout -B <real-branch> origin/<real-branch>` → `git branch -D <suffixed-branch>`. Session 33 hit this exact case; documented in HANDOFF-33 + CLAUDE.md candidate #12 (lift on second use).
+**If harness lands you on a suffixed branch (`claude/<slug>-<5-char-alphanumeric>$`):** the new `session-start.sh` (PR #21 once merged) auto-detects this AND surfaces the resync recipe at turn 0. If the warning appears, follow the literal three-command recipe (`git fetch origin <real-branch>` → `git checkout -B <real-branch> origin/<real-branch>` → `git branch -D <suffixed-branch>`). The hook only warns when the canonical non-suffixed branch exists on origin — false-positive risk is near-zero. Sessions 33 + 34 each hit this; documented in HANDOFF-33 + HANDOFF-34 + CLAUDE.md §Planning conduct (lifted session 34).
 
 ## Key files
 
@@ -154,11 +161,12 @@ Main is canonical. Session 31 slice work lived on `claude/S-B-2-recommendations-
 Session orientation
 CLAUDE.md                                          — Positioning + rules (Tier 1)
 docs/SESSION-CONTEXT.md                            — THIS FILE (Tier 2)
-docs/HANDOFF-SESSION-31.md                         — Latest retro (S-B-2 · TDD discussion · 3 CLAUDE.md lifts)
+docs/HANDOFF-SESSION-34.md                         — Latest retro (S-TOOL-1 · #12 lift · PR #20 merged · PR #21 open)
+docs/HANDOFF-SESSION-33.md                         — S-F7-α DoD + PR open retro
+docs/HANDOFF-SESSION-32.md                         — S-F7-α scaffold + RED retro
+docs/HANDOFF-SESSION-31.md                         — S-B-2 · TDD discussion · 3 CLAUDE.md lifts
 docs/HANDOFF-SESSION-30.md                         — S-B-1 confirmation-questions copy-flip retro
 docs/HANDOFF-SESSION-29.md                         — S-F1 design tokens retro (first src/ slice)
-docs/HANDOFF-SESSION-28.md                         — S-C-U4 disclosure-audit retro
-docs/HANDOFF-SESSION-27.md                         — Hook-sprint retro
 
 Reconciled framing (Tier 3)
 docs/workspace-spec/42-strategic-synthesis.md      — Authoritative positioning
@@ -239,25 +247,25 @@ docs/HANDOFF-SESSION-{18,20,21,22,23,24,25,26,27,28,29}.md  — Prior retros (to
 docs/v2/v2-backlog.md                              — 98-item backlog
 ```
 
-## Session 34 pre-flight
+## Session 35 pre-flight
 
-1. **SessionStart hook fires at turn 0** surfacing read-discipline + Planning conduct + live branch state. Verify it appears.
-2. **Claude loads `CLAUDE.md` + this file.** CLAUDE.md unchanged across session 33 (no lifts; 3 candidates flagged for second-use only). Session-32 lifts (Names · Small functions · Effects behind interfaces) are still the most recent additions.
+1. **SessionStart hook fires at turn 0** surfacing read-discipline + Planning conduct + live branch state — and (post PR #21 merge) the new `### Branch-resume check` section if a suffix-orphan is detected. Verify it appears.
+2. **Claude loads `CLAUDE.md` + this file.** CLAUDE.md updated session 34 with the #12 lift (Branch-resume check) under §Planning conduct. Session-32 lifts (Names · Small functions · Effects behind interfaces) remain prior anchors.
 3. **Verify branch state:**
    ```
    git fetch origin
-   git log origin/main -1                                  # f454f9a unless PR #20 merged
-   gh pr view 20                                           # PR status (open / merged / closed)
-   git log -5 --oneline                                    # confirm session-33's commits visible
-   mcp__github__list_branches                              # confirm branch state (harness may suffix)
+   git log origin/main -1                                  # 5d38f6d unless PR #21 merged
+   mcp__github__pull_request_read --pullNumber=21          # PR status (open / merged / closed)
+   git log -5 --oneline                                    # confirm session-34's commits visible
+   mcp__github__list_branches                              # confirm branch state
    ```
-   If harness lands on a suffixed branch, follow the resync recipe in the Branch section above.
+   If `### Branch-resume check` warning appears in the SessionStart context, follow its literal recipe.
 4. **Confirm with user (4 pre-flight Qs):**
-   - Merge PR #20 first or develop on top?
-   - Which session-34 P0: tooling slice (Path A), S-F7-β (Path B), S-F2 (Path C), or S-CF-tail (Path D)?
-   - CLAUDE.md candidate #12 (Branch-resume check) — second use this session = lift trigger. Approve lift?
-   - Hook bug (`line-count.sh` measure-vs-main) — fix this session as part of tooling slice, or defer?
-5. **First actions** depend on chosen path. For Path A: read `.claude/hooks/{line-count,session-start}.sh` and design a session-start-SHA capture mechanism. For Path B: scaffold S-F7-β slice docs per template; AC frozen at kickoff. For Path C: identify which F-slice; read its slice card in spec 70-build-map-slices.md. For Path D: read `docs/slices/S-C-U4-disclosure-audit/audit-catalogue.md` Part 2 rows A13-A16.
+   - Merge PR #21 first or develop on top?
+   - Which session-35 P0: S-F7-β (Path A), S-F2 (Path B), S-CF-tail (Path C), S-INFRA-1 Stripe pin (Path D), or candidate-lift session (Path E)?
+   - Slice-prefix decision: codify `S-TOOL-N` as non-catalogue prefix family, or keep tooling work as `claude/session-N-tooling` going forward?
+   - CLAUDE.md candidate #14 (origin/HEAD set) — second occurrence this session = lift trigger. Bundle the lift + 5-line `session-start.sh` patch into the next slice, or defer?
+5. **First actions** depend on chosen path. For Path A: scaffold S-F7-β slice docs per template; spec 71 §4 + 68b for dev surface routes; existing S-F7-α impl on main as reference contract. For Path B: identify which F-slice; read its slice card in spec 70-build-map-slices.md. For Path C: read `docs/slices/S-C-U4-disclosure-audit/audit-catalogue.md` Part 2 rows A13-A16. For Path D: read `src/lib/stripe/client.ts` + check Stripe SDK API version compatibility. For Path E: 30-minute scoping pass on which candidates lift cleanly.
 
 **Session discipline (hook-surfaced; restated):**
 - Honour Planning conduct from turn 1. Brief-rot in this file is possible — live-verify factual claims.
