@@ -180,6 +180,8 @@ These rules govern how Claude makes decisions and builds plans. Guardrails again
 
 **Read discipline.** Enforced by `.claude/hooks/read-cap.sh` (PreToolUse on Read): blocks full-file Reads of >400-line files without offset+limit, and blocks Reads that would push this turn's total past 300 lines. Deny messages quote the rule and suggest offset/limit or grep-first alternatives. Habits the hook doesn't catch — `grep` / `ls` / `wc -l` before committing to a Read, announcing expected combined size before a parallel batch — remain in you.
 
+**Branch-resume check.** Enforced by `.claude/hooks/session-start.sh` (SessionStart): at turn 0, when the current branch matches the harness suffix pattern `^claude/.+-[A-Za-z0-9]{5}$` AND the non-suffixed canonical branch exists on origin, the context block surfaces a `### Branch-resume check` section with the literal `git fetch / git checkout -B / git branch -D` resync recipe. The hook auto-detects; the discipline is to act on the warning rather than dismiss it. Sessions 33 + 34 each landed on a suffixed orphan when canonical work was on the non-suffixed branch — both lost ~5 minutes to manual `mcp__github__list_branches` diagnosis before the hook existed.
+
 ## Coding conduct
 
 These rules govern how Claude behaves when editing `src/`. Guardrails against over-engineering, silent decisions, and scope creep. Complementary to Product rules and Technical rules — doesn't replace either.
