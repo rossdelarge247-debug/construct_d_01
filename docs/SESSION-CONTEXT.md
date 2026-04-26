@@ -124,11 +124,25 @@ Single-P0 session. S-F7-β is foundational and substantial (~1100 lines impl + t
 - **Tier 4 (reference only, don't read proactively):** 68f/g open registers · spec 67 · spec 65 · `docs/HANDOFF-SESSION-*.md` · `docs/handoffs-archive/` · `docs/v2/v2-backlog.md` · `docs/slices/S-*/` as slice-pattern reference. Consult before proposing new work.
 ## Branch
 
-- **Current:** `claude/S-F7-beta-dev-surface`
-- **HEAD at session 35 wrap (pre-wrap-commits):** `0d4094f` (will move forward by 2 wrap commits + possibly 1 PR description push commit)
-- **Base:** `main` at `c43ca2f` (post-PR-#21-merge tip)
-- **Ahead of main:** 1 commit pre-wrap (will be 2-3 post-wrap)
-- **PR for branch:** to be opened at session 35 wrap per pre-flight binding decision (recommended)
+> **SESSION 36 OUTCOME (2026-04-26):** Two branches in flight. ALL feature work paused until S-INFRA-rigour-v3 (or its v3a split per reviewer recommendation) merges to main.
+>
+> 1. **`claude/S-F7-beta-impl`** at HEAD `a3f67ec` — all 7 S-F7-β ACs shipped (28cc585 AC-7 · d8e2246 AC-1 · fcb5028 AC-5 · 2a2232f AC-6 · 857b958 AC-2/pageExtensions · c2abe62 AC-3 · 8166f89 AC-4 · a3f67ec verification.md). Branch is pushed; PR NOT opened. β cleanup (security-review skill run, unit tests for handlers, component decomposition, 13-item §72 §11 checklist) parked pending rigour infra.
+> 2. **`claude/S-INFRA-rigour-v3`** at HEAD `92f77d7` (= origin/main) + uncommitted draft. Slice acceptance.md drafted; adversarial subagent reviewed it and returned `request-changes` with 2 block-severity findings (F3 unfalsifiable DoD-9 on branch-protection; F5 self-modification of hooks-checksums.txt is bypassable in single commit) and a single-concern verdict of FAIL. **Reviewer recommends splitting into 3 sub-slices: v3a (foundation) unblocks β; v3b (subagent-suite); v3c (multi-provider + ratchet + CLAUDE.md rewrite).** Decision pending from user.
+>
+> **Next session (37) FIRST ACTIONS:**
+> 1. Read `docs/slices/S-INFRA-rigour-v3/acceptance.md.review.json` — full reviewer findings.
+> 2. Get user decision on split (v3 single-slice vs v3a/v3b/v3c per reviewer).
+> 3. Address all block + request-changes findings before any src/ work — particularly: real self-modification protection for hooks-checksums (signed key OR origin/main-anchored ratchet OR append-only audit log); spec 72 §11 13-item security checklist threaded into AC schema; settings.json hook-registration checksum; verify-before-planning enforcement on SHA claims; per-language coverage spec (bats for .sh, vitest for .ts).
+> 4. Re-spawn adversarial subagent on revised acceptance.md until verdict is `approve` or only `nit` findings remain.
+> 5. ONLY THEN begin foundational impl. First commit must be failing meta-tests (test-first), separate SHA from impl commit (per F2 / F2b).
+>
+> The expanded subagent-suite (5 gates per session 36 discussion: commit-msg, spec-quote, AskUserQuestion-framing, periodic-on-track, doc-honesty) + multi-provider 3rd-agent reviewer + 6 top-tier additions remain in scope per session-36 user confirmation. Slice structure is what's pending decision, not scope.
+
+### Branch state at session 36 wrap (verified)
+
+- Active branch: `claude/S-INFRA-rigour-v3` (HEAD `92f77d7`, 0 ahead, 0 behind origin/main; uncommitted: acceptance.md draft + review JSON + this SESSION-CONTEXT edit)
+- Parked branch: `claude/S-F7-beta-impl` (HEAD `a3f67ec`, 8 ahead origin/main)
+- Both pushed (β branch); v3 branch pushed at session-36 commit below.
 
 **If session 36 lands on a suffixed orphan** (e.g. `claude/resume-S-F7-beta-dev-surface-XXXXX`): the now-merged `session-start.sh` from PR #21 should auto-surface a `### Branch-resume check` section in the turn-0 context block with the literal `git fetch / git checkout -B / git branch -D` resync recipe. **First natural test of automated detection** — if it doesn't fire, escalate (hook bug or harness behaviour change). Manual recovery still works if needed:
 
