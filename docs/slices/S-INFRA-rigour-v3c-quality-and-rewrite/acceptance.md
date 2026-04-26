@@ -17,7 +17,8 @@
 - `scripts/audit-controls.sh` + cron GitHub Action — monthly state-of-rigour issue catching silent control atrophy
 - CLAUDE.md "Hard controls" §rewrite — promotes every memory-dependent rule to enforced-by-hook-X reference; catalogues every gate with file path + bypass procedure (concretely defined: user GPG-signed commit + multi-provider-reviewer green, NOT theatrical "multi-key sign-off" per F5b finding); lands LAST so it documents the actual system rather than aspirations
 - DoD-evidence-parser AC — programmatically verifies every spec 72 §11 + 6-item DoD item has either evidence link or explicit deferral string in verification.md (per F1 finding from v3a-v1 review)
-- AC-arithmetic verifier (per F4c finding) — automated check that Σ in-scope rows = total rows in any acceptance.md
+
+*(AC-arithmetic verifier (F4c) consolidated to **v3b** only per v3a-v3 revision — was previously listed in both v3b and v3c stubs.)*
 
 **Estimated budget:** to be drafted bottom-up at slice start. Reviewer's session-36 estimate suggested ~1500-2000 lines for the full quality + multi-provider + rewrite stack.
 
