@@ -1,7 +1,8 @@
 # S-INFRA-rigour-v3a-foundation · Commit-time + plan-time safety net
 
-> **STATUS: REVISED — addresses v1 reviewer findings; pending v2 adversarial review.**
-> v1 review at `acceptance.md.review-v1.json`. Slice split per v1 reviewer recommendation; this slice is now foundation-only. v2 review of this revised acceptance is the next gate before any src/ work.
+> **STATUS: v2 review returned `request-changes` — 2 BLOCK-severity findings (G3 + G10 same issue: `control-change-label.yml` unprotected), single-concern STILL fails, ordering breaks AC-2 vs AC-4 protection (G7), verify-slice.sh excluded from protected scope (G12), DoD-2 may be unsatisfiable against α (G22), unverified SHAs in this very document (G14). Full findings in `acceptance.md.review-v2.json`.**
+> Session 36 wrapping at warn (1502 churn). v3 revision DEFERRED to session 37 first action — rushing iteration at warn threshold contradicts the rigour-over-speed mandate.
+> v1 review at `acceptance.md.review-v1.json` (historical); v2 at `acceptance.md.review-v2.json` (active).
 
 **Slice ID:** `S-INFRA-rigour-v3a-foundation`
 **Branch:** `claude/S-INFRA-rigour-v3` (will rename to `claude/S-INFRA-rigour-v3a-foundation` at first impl commit; deferred to keep current PR-URL stable across the planning iteration)

@@ -1,0 +1,78 @@
+{
+  "reviewer_context": "fresh subagent v2 invocation, no authoring session memory, no v1 review context (skimmed v1 only to understand revision intent)",
+  "review_date": "2026-04-26",
+  "review_session": "session 36 (post-revision, async)",
+  "files_consulted": [
+    "/home/user/construct_d_01/docs/slices/S-INFRA-rigour-v3a-foundation/acceptance.md",
+    "/home/user/construct_d_01/docs/slices/S-INFRA-rigour-v3a-foundation/acceptance.md.review-v1.json",
+    "/home/user/construct_d_01/docs/workspace-spec/72-engineering-security.md",
+    "/home/user/construct_d_01/CLAUDE.md"
+  ],
+  "verdict": "request-changes",
+  "single_concern_assessment": {
+    "passes": false,
+    "rationale": "Author admits 'two words bound by AND' and rationalises with 'same shape (BEFORE-work gates)' — but pre-commit-verify (AC-4) and exit-plan-review (AC-7) fire on different harness events, against different artefacts, with different blockers, in different sessions. AC-3 (ESLint) + AC-6 (coverage) are not BEFORE-work gates at all. The slice's stated single-concern doesn't even cover its own ACs. Reviewer's split suggestion: v3a-i commit-time bundle vs v3a-ii harness-integrity bundle — but author should evaluate whether that creates worse circular deps."
+  },
+  "v1_finding_addressing_check": [
+    {"v1_finding_id": "F1", "addressed": false, "verification": "Deferred to v3c. v3a's DoD-completeness becomes honour-system until v3c.", "remaining_gap": "Acceptable iff v3c sequenced immediately after v3a; not committed in plan."},
+    {"v1_finding_id": "F1c", "addressed": "partial", "verification": "AC-1 verifies 13-box presence; trivially satisfiable by copying empty template.", "remaining_gap": "Recommend AC-1 also assert each box followed by either link or 'deferred:' string. Cheap, much harder to game."},
+    {"v1_finding_id": "F2", "addressed": "partial", "verification": "Honour-system mitigated by commit-log review.", "remaining_gap": "Reviewer cannot determine from SHAs whether test was authored before impl. Strengthen: failing-test commit pushed + CI observes failure BEFORE impl pushed."},
+    {"v1_finding_id": "F2b", "addressed": true, "remaining_gap": "None substantive. NB author asserts SHAs ff1254c+405badd without showing they exist on branch (F4e miss)."},
+    {"v1_finding_id": "F3", "addressed": true, "remaining_gap": "Risk: slice 'done' indefinitely with merge blocked. No SLA. Add 14-day window."},
+    {"v1_finding_id": "F3b", "addressed": true},
+    {"v1_finding_id": "F3c", "addressed": true},
+    {"v1_finding_id": "F4", "addressed": false, "verification": "Deferred to v3b. Acceptable."},
+    {"v1_finding_id": "F4b", "addressed": true, "remaining_gap": "'hook-registration block' underspec'd — which JSON path is hashed?"},
+    {"v1_finding_id": "F4c", "addressed": false, "verification": "Deferred to v3b."},
+    {"v1_finding_id": "F4e", "addressed": "partial", "verification": "AC-7 ships session 38; this acceptance.md cites SHAs without verification. Bootstrapping miss — control catches the failure only AFTER unverified-SHA artefacts committed."},
+    {"v1_finding_id": "F5", "addressed": "partial", "verification": "Label workflow is real protection; full multi-provider gate v3c.", "remaining_gap": "See G3/G10."},
+    {"v1_finding_id": "F5b", "addressed": true},
+    {"v1_finding_id": "F5c", "addressed": false, "verification": "Deferred to v3c. .eslintrc + vitest.config + verify-slice.sh thresholds remain modifiable in single commit until v3c."},
+    {"v1_finding_id": "F6", "addressed": true, "remaining_gap": "shellspec dev-dep + CI wiring not explicitly owned."},
+    {"v1_finding_id": "F6b", "addressed": false, "verification": "Deferred to v3c."},
+    {"v1_finding_id": "F6c", "addressed": true, "remaining_gap": "S-F7-α may not have verify-slice schema. DoD-2 may be unsatisfiable against α — see G22."},
+    {"v1_finding_id": "F6e", "addressed": true, "remaining_gap": "Honour-system at v3a layer."}
+  ],
+  "new_issues_in_revision": [
+    {"id": "G1", "severity": "request-changes", "description": "Branch-rename deferred. Conflicts with branch-name-encodes-scope convention. Reviewer reading branch tip sees 'rigour-v3' (un-narrowed); acceptance describes foundation-only.", "recommendation": "Rename now OR add PreToolUse check erroring if branch name doesn't match slice ID."},
+    {"id": "G2", "severity": "nit", "description": "Branch rename at first impl commit creates temporal coupling not covered by dogfooding rule.", "recommendation": "Document in HANDOFF."},
+    {"id": "G3", "severity": "block", "description": "control-change-label.yml ENFORCING the label is itself unprotected. Author can edit the workflow in a regular PR, weaken/remove label requirement, then in follow-up PR modify hooks freely. Recursion-stopping condition missing.", "recommendation": "Add .github/workflows/control-change-label.yml AND .github/workflows/pr-dod.yml to AC-2 protected scope, OR document the gap honestly and rely on branch-protection rule on main as real backstop."},
+    {"id": "G4", "severity": "request-changes", "description": "AC-7 plan-gate has prompt-injection risk (plan content as instructions to fresh subagent) and template is in-repo and modifiable.", "recommendation": "Subagent prompt template checksummed alongside hooks. Plan content passed as quoted/escaped argument with explicit framing. Document threat model in security.md."},
+    {"id": "G5", "severity": "request-changes", "description": "Σ check is itself honour-system without verifier.", "recommendation": "When v3b lands AC-arithmetic verifier, retroactively run against this acceptance.md."},
+    {"id": "G6", "severity": "nit", "description": "docs budget 200 lines underestimates: acceptance.md alone 135+ pre-impl, plus security.md, verification.md.", "recommendation": "Re-budget docs to 400."}
+  ],
+  "budget_assessment": {
+    "estimate_realistic": false,
+    "actual_estimate_range_lines": "1300-1800",
+    "rationale": "AC-1 250→300-400 (lcov-parse + grep + tsc + vitest non-trivial). AC-2 110→150-200 (jq parsing of settings.json hook-registration block non-trivial). AC-7 100→180-250 (prompt-injection guards + git-state verifier + hook orchestration). AC-3 80→100-130 (CI denial parser). AC-6 50→100-150 (lcov + staged-diff filtering). Plus G6's 400-line docs adjustment. Author's 940 is ~50-70% of realistic. Historical pattern: every infrastructure slice in this repo has overrun bottom-up estimates."
+  },
+  "cross_session_ordering_findings": [
+    {"id": "G7", "severity": "request-changes", "description": "Session 37 ships AC-4 (pre-commit-verify hook) but NOT AC-2 (hooks-checksums). Pre-commit hook lives in .claude/hooks/ between end-37 and end-38 with no integrity protection. Author can edit pre-commit-verify.sh during session-38 dev; AC-2's checksum baseline is then GENERATED against the corrupted hook.", "recommendation": "Reorder: AC-2 baseline + integrity check ships session 37 alongside AC-4. AC-2 is ~110 lines, fits 470-line session-37 budget. Label workflow can land session 38."},
+    {"id": "G8", "severity": "nit", "description": "Session 37 dogfood claim circular: 'first impl commit must pass verify-slice.sh against itself' — but verify-slice.sh doesn't exist before that commit.", "recommendation": "Expand session 37 sub-sequence in cross-session plan: failing meta-tests commit → verify-slice.sh skeleton commit → AC-3/4/8 commits each gated by skeleton."},
+    {"id": "G9", "severity": "request-changes", "description": "AC-7 plan-gate ships session 38 but session 38's own planning happens after session 37 wraps — so AC-7 doesn't exist at session-38 start. Control governing session-38 plan is the deliverable of session 38 itself.", "recommendation": "Either accept session 38 plan-review is honour-system + manual user-review; document explicitly. OR ship AC-7 in session 37 (rebalance: AC-7 ~100 + AC-1 ~250 + AC-3 ~80 + AC-4 ~40 + AC-8 ~50 = 520; tight but possible)."}
+  ],
+  "self_modification_v2_findings": [
+    {"id": "G10", "severity": "block", "description": "Recursion stopping condition for control-change-label.yml undefined. Determined author needs only 2 PRs to bypass: PR1 modifies the workflow (path-filter doesn't include the workflow file itself); PR2 modifies hooks freely. Pen-tester finds this in 5 minutes per spec 72 §10.", "recommendation": "(a) include .github/workflows/control-change-label.yml in path-filter list of workflow itself; or (b) delegate via GitHub branch-protection rule on main requiring control-change label for PRs touching the workflow — added to External preconditions."},
+    {"id": "G11", "severity": "request-changes", "description": "On one-user one-Claude system, 'user-applies-label' is the same actor that would (in threat model) bypass controls. F5b 'theatrical' problem reborn at label layer.", "recommendation": "Document threat model in security.md: control prevents Claude from silently weakening hooks, NOT a malicious user. State this honestly; don't pretend label is more than it is."},
+    {"id": "G12", "severity": "request-changes", "description": "verify-slice.sh + .eslintrc + vitest.config excluded from AC-2 protected scope until v3c. verify-slice.sh is the workhorse the entire pre-commit-verify hook depends on; can lower threshold inside it in regular PR with no special label.", "recommendation": "(a) include verify-slice.sh in AC-2 protected scope NOW (cheap path-filter addition); or (b) acknowledge in Notes that until v3c lands, verify-slice.sh is honour-system soft + commit to v3c shipping within N sessions of v3a."}
+  ],
+  "bootstrapping_v2_findings": [
+    {"id": "G13", "severity": "request-changes", "description": "Commit-log review for failing-meta-tests-first cannot detect 'wrote both at once, split into two commits.' Reviewer cannot distinguish from genuine TDD.", "recommendation": "Failing-meta-tests commit must be PUSHED to remote and CI must observe it failing (CI run ID in verification.md) BEFORE impl pushed. External-system-verifiable. Otherwise downgrade claim from 'TDD' to 'two-commit theatre'."},
+    {"id": "G14", "severity": "request-changes", "description": "Session-36 exemption SHAs (ff1254c + 405badd) author-asserted; per F4e and AC-7 intent, branch/SHA assertions in plan should be verified. Acceptance.md asserts SHAs the slice cannot, by its own ordering, verify yet.", "recommendation": "Run `git log --oneline | grep -E 'ff1254c|405badd'` against actual branch and add verification result inline before merge. Closes F4e bootstrapping miss."}
+  ],
+  "missing_concerns_v2": [
+    {"id": "G15", "severity": "request-changes", "concern": "No AC owns test-isolation for verify-slice.sh meta-tests. shellspec runs in subshells but if meta-test invokes `git commit` it touches real repo.", "rationale": "Concrete engineering risk for session 37. Specify in AC-1: meta-tests run in tmp git repo per shellspec test."},
+    {"id": "G16", "severity": "request-changes", "concern": "No AC/DoD covers performance of pre-commit-verify hook. Full tsc+vitest+lcov-parse on every commit pushes commit time <1s → >30s.", "rationale": "Add DoD: verify-slice.sh in pre-commit mode (incremental, staged-diff scope) completes in <5s on median commit. Full mode (CI) can be slower."},
+    {"id": "G17", "severity": "nit", "concern": "No AC for 'verify-slice.sh exits non-zero with useful message'. Match read-cap.sh pattern — quote the rule + suggest alternatives.", "rationale": "Spec it now, before impl. Cheap."},
+    {"id": "G18", "severity": "request-changes", "concern": "hooks-checksums.txt created in session 38 against whatever hooks contain at that moment. If hooks modified between session 37 (creation) and session 38 (checksumming), modification is checksummed-in as baseline and goes undetected.", "rationale": "Spec: hooks-checksums.txt generated immediately upon any new hook landing in session 37; AC-2 in session 38 is then the GitHub-Actions integrity check + label workflow, but checksum file ships with each hook in session 37."},
+    {"id": "G19", "severity": "nit", "concern": "Missing rollback procedure for the slice. Per CLAUDE.md 'snapshot before refactor' the slice itself should snapshot.", "rationale": "Add Notes: 'Rollback: revert merge commit on main; .claude/hooks/* reset; PR carries control-change label.'"},
+    {"id": "G20", "severity": "request-changes", "concern": "Spec 72 §11 item 11 requires '/security-review skill run on slice diff'. v3a has 940+ lines of new infrastructure including bash hooks running PreToolUse and a workflow accepting arbitrary plan content. /security-review should be called out by reference.", "rationale": "DoD-7 enumerates which §11 boxes require positive evidence (esp. items 5 env vars, 9 dev/prod boundary, 11 adversarial review, 13 secrets hygiene) for an infrastructure slice."}
+  ],
+  "dod_quality_v2_findings": [
+    {"id": "G21", "severity": "request-changes", "description": "DoD-1 evidence schema unspecified for ACs landing across multiple commits (e.g. AC-1 verify-slice.sh + meta-tests).", "recommendation": "(a) require evidence cite FINAL SHA where AC complete, or (b) require commit-range. Make explicit."},
+    {"id": "G22", "severity": "request-changes", "description": "DoD-2 'verify-slice.sh passes against S-F7-α reference slice without modification' assumes α has the verification.md/security.md/coverage thresholds verify-slice.sh expects. If α predates this convention (likely, since this slice establishes it), DoD-2 is unsatisfiable without modifying α — which the rule prohibits.", "recommendation": "Verify pre-condition: does S-F7-α have verification.md + security.md + ts files reaching 90% coverage? If not, DoD-2 needs different reference slice or exemption."},
+    {"id": "G23", "severity": "nit", "description": "DoD-6 verdict schema (request-changes/block/approve/nit-only) not documented in acceptance.", "recommendation": "Document diff-review verdict vocabulary in v3a Notes/security.md; v3c formalises with JSON Schema."},
+    {"id": "G24", "severity": "request-changes", "description": "DoD-8 PR-open requires External preconditions confirmed but table flags 3 items 'not yet'. PR can't open until done. No escalation path.", "recommendation": "Add SLA/owner-handoff to External preconditions; alternatively allow PR to open as draft pending preconditions, with merge gate (not PR-open gate) requiring confirmation."}
+  ],
+  "summary": "Revision is substantial improvement on v1 — F2b dogfooding, F3 external-preconditions separation, F6 per-language coverage, F6c α-reference dogfood, F4b settings.json scope all genuinely addressed. Three v1 findings remain papered-over: F1 (DoD-evidence-parser deferred); F4e (verify-SHAs-in-plans deferred but acceptance cites unverified SHAs); F5/F5c (recursion gaps in label workflow scope; verify-slice.sh + .eslintrc + vitest.config excluded). New issues: cross-session ordering puts AC-2 baseline session 38 while protected hook lands session 37 (G7); AC-7 cannot govern its own session-38 plan (G9); control-change-label.yml unprotected (G3/G10 BLOCK); shellspec test-isolation unspecified (G15); pre-commit performance unbudgeted (G16); DoD-2 may be unsatisfiable against α (G22). Single-concern still fails: pre-commit-verify and exit-plan-review are different harness events with different artefacts in different sessions. Verdict: request-changes — bring AC-2 baseline forward to session 37; protect control-change-label.yml + verify-slice.sh in AC-2 scope; verify asserted SHAs inline; tighten budget to 1300-1800; either split further or rename single-concern honestly."
+}
