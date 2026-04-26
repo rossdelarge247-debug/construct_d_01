@@ -1,0 +1,61 @@
+{
+  "session": {
+    "id": "sarah",
+    "email": "sarah@dev.decouple.local",
+    "role": "participant",
+    "twoFactorVerified": true,
+    "createdAt": "2026-01-01T00:00:00.000Z",
+    "lastActiveAt": "2026-04-28T16:00:00.000Z",
+    "deviceFingerprint": "dev-fixture-device"
+  },
+  "store": [
+    {
+      "userId": "sarah",
+      "scope": "picture",
+      "data": {
+        "generated": true,
+        "readyToShare": true
+      }
+    },
+    {
+      "userId": "sarah",
+      "scope": "share",
+      "data": {
+        "recipientEmail": "mark@dev.decouple.local",
+        "invitedAt": "2026-04-25T11:00:00.000Z",
+        "recipientSignedIn": true,
+        "recipientPictureBuilt": true,
+        "shareToken": "dev-fixture-share-token"
+      }
+    },
+    {
+      "userId": "sarah",
+      "scope": "jointDocument",
+      "data": {
+        "created": true,
+        "createdAt": "2026-04-26T10:00:00.000Z",
+        "fieldsPublished": 12,
+        "fieldsTotal": 18
+      }
+    },
+    {
+      "userId": "sarah",
+      "scope": "conflicts",
+      "data": {
+        "pending": [
+          {
+            "field": "monthlyIncome",
+            "sarahValue": 3218,
+            "markValue": 3500
+          },
+          {
+            "field": "mortgageOutstanding",
+            "sarahValue": 187000,
+            "markValue": 192000
+          }
+        ],
+        "resolved": []
+      }
+    }
+  ]
+}

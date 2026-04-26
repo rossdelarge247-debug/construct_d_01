@@ -1,0 +1,42 @@
+{
+  "session": {
+    "id": "sarah",
+    "email": "sarah@dev.decouple.local",
+    "role": "participant",
+    "twoFactorVerified": true,
+    "createdAt": "2026-01-01T00:00:00.000Z",
+    "lastActiveAt": "2026-05-15T10:00:00.000Z",
+    "deviceFingerprint": "dev-fixture-device"
+  },
+  "store": [
+    {
+      "userId": "sarah",
+      "scope": "jointDocument",
+      "data": {
+        "created": true,
+        "fieldsPublished": 18,
+        "fieldsTotal": 18
+      }
+    },
+    {
+      "userId": "sarah",
+      "scope": "settlement",
+      "data": {
+        "proposal": {
+          "status": "agreed",
+          "agreedAt": "2026-05-12T15:00:00.000Z"
+        }
+      }
+    },
+    {
+      "userId": "sarah",
+      "scope": "finalise",
+      "data": {
+        "consentOrderReady": true,
+        "preFlightPassed": true,
+        "preFlightCheckedAt": "2026-05-15T10:00:00.000Z",
+        "documentsGenerated": ["consent-order.pdf", "d81.pdf", "form-p.pdf"]
+      }
+    }
+  ]
+}
