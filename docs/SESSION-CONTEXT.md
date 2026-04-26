@@ -50,7 +50,7 @@ CLAUDE.md §Planning conduct                                        — #12 Bran
 
 **On `claude/S-F7-beta-impl` (8 ahead, parked):** S-F7-β impl (session 36); PR not opened; cleanup parked pending v3a merge.
 
-**On `claude/S-INFRA-rigour-v3` (13 ahead, in flight):** v3a-foundation slice docs (acceptance.md v5.1 adversarial-approved + v1-v5 review JSONs preserved). NO src/ or .claude/hooks/ changes yet. AC-1 impl begins session 38.
+**On `claude/S-INFRA-rigour-v3` (14 ahead, in flight):** v3a-foundation slice docs (acceptance.md v5.1 adversarial-approved + v1-v5 review JSONs) PLUS S-37-0 (shellspec install + minimal CI workflow) landed at `a898393` from a session-38 attempt that subsequently crashed before S-37-1. AC-1 impl resumes at S-37-1.
 
 ## Session 38 priorities
 
@@ -66,8 +66,8 @@ If only (1) is in place, session 38 can proceed through S-37-5 (pre-commit-verif
 
 **H6 ordered sub-sequence (session 38):**
 
-1. **S-37-0 (anticipatory commit, not in original H6):** install `shellspec` dev-dependency + minimal CI workflow that runs `shellspec` on `tests/shellspec/`. Required because S-37-1 needs shellspec to write tests in. ~30 lines. Could fold into S-37-1 if preferred.
-2. **S-37-1:** `tests/shellspec/verify-slice.spec.sh` with deliberate failures (RED). Push. Wait for CI run. Capture `CI-observed-failing` run-ID into a working note (will be embedded in `verification.md` when AC-1 lands). ~50 lines.
+1. **S-37-0 — LANDED at `a898393`** (session-38 attempt, before crash). Adds `.github/workflows/shellspec.yml` (curl-install + run on every push/PR), `tests/shellspec/.shellspec` config, and a trivial `install_smoke.spec.sh` (passes by `When call true`). Documentation-and-CI-only; falls under pre-AC-1 exempt-commits rule. Decision recorded: **separate S-37-0 commit** (not folded into S-37-1) per session-38 pre-flight Q3.
+2. **S-37-1 (NEXT — first action of fresh session):** `tests/shellspec/verify-slice.spec.sh` with deliberate failures (RED). Push. Wait for CI run on the new shellspec workflow. Capture `CI-observed-failing` run-ID into a working note (will be embedded in `verification.md` when AC-1 lands). ~50 lines.
 3. **S-37-2:** `scripts/verify-slice.sh` skeleton (file-presence checks: verifies slice dir has `acceptance.md` + `security.md` + `verification.md`; useful-message exit per G17 matching `read-cap.sh` pattern; tmp-repo isolation helper per G15). Skeleton passes against itself AND against `docs/slices/S-F7-alpha-contracts-dev-mode/` reference slice. Failing meta-tests from S-37-1 turn GREEN. ~100 lines.
 4. **S-37-3:** `.claude/hooks-checksums.txt` baseline + `scripts/generate-hooks-checksums.sh` + `session-start.sh` integrity-check addition. ~120 lines.
 5. **S-37-4:** ESLint config addition + `docs/eslint-baseline-allowlist.txt` (empty seed) + CI denial-check workflow. ~100 lines.
@@ -128,9 +128,11 @@ Single-P0 session. v3a foundation is the unblocking slice. Don't add adjacent sl
 
 ## Branch
 
+> **SESSION 38a OUTCOME (CRASH RECOVERY, 2026-04-26):** A session-38 attempt was started after the wrap of session 37. It made decisions on the 3 pre-flight Qs (Q3: separate S-37-0 install commit), authored S-37-0 (`a898393`: shellspec install + minimal CI workflow + smoke test), pushed it to `origin/claude/S-INFRA-rigour-v3`, then crashed before authoring S-37-1. No uncommitted state; no S-37-1 attempt visible in reflog or remote. Crash diagnosed in a recovery session: local was 1 commit behind remote post-crash; fast-forwarded local to `a898393`. Pre-flight Q1 (GitHub external preconditions) and Q2 (branch rename) status: unknown — re-confirm with user at next session. CI status of S-37-0 push: not directly retrievable via available tools; smoke test is `When call true; The status should be success` so very low risk.
+>
 > **SESSION 37 OUTCOME (2026-04-26):** Three branches in flight; v3a-foundation slice planning phase COMPLETE.
 >
-> 1. **`claude/S-INFRA-rigour-v3` at HEAD `d836a04` (13 ahead of `origin/main` `92f77d7`)** — slice planning artefacts only; NO src/ or .claude/hooks/ changes. v5.1 polish committed; planning phase converged at v5 verdict `nit-only`. Branch may be renamed to `claude/S-INFRA-rigour-v3a-foundation` at first impl commit per G1.
+> 1. **`claude/S-INFRA-rigour-v3` at HEAD `a898393` (14 ahead of `origin/main` `92f77d7`; was `d836a04`/13 at session 37 wrap)** — slice planning artefacts (acceptance.md v5.1 + 5 review JSONs + handoff docs) PLUS S-37-0 (shellspec install + minimal CI workflow + smoke test) landed at `a898393` from a session-38 attempt. v5.1 polish committed at `d836a04`; planning phase converged at v5 verdict `nit-only`. Branch may still be renamed to `claude/S-INFRA-rigour-v3a-foundation` per G1 (deferred decision still open).
 > 2. **`claude/S-F7-beta-impl` at HEAD `a3f67ec` (8 ahead, parked)** — S-F7-β impl from session 36; PR not opened; cleanup pending v3a-foundation merge to main.
 > 3. **`main` at `92f77d7`** — last merged: PR #21 (S-TOOL-1, session 35).
 >
@@ -143,14 +145,15 @@ Single-P0 session. v3a foundation is the unblocking slice. Don't add adjacent sl
 > - v5.1 polish: J1+J2 closed (no re-review needed per v5 reviewer's "PR-comment follow-up acceptable" framing).
 >
 > **Next session (38) FIRST ACTIONS:**
-> 1. Verify branch state per session-start hook. Confirm 13 ahead at `d836a04`.
+> 1. Verify branch state per session-start hook. Confirm **14 ahead at `a898393`** (post-crash recovery: local was 1 commit behind remote after the crashed session-38 attempt; resync via `git pull --ff-only origin claude/S-INFRA-rigour-v3` if hook reports 13/d836a04 instead of 14/a898393).
 > 2. Confirm with user whether the GitHub external preconditions (label `control-change` + branch protection on main) are in place. If yes: full H6 sub-sequence proceeds. If no: S-37-1 + S-37-2 can still proceed (they don't touch protected paths until S-37-3 lands `hooks-checksums.txt`).
 > 3. Decide whether to rename branch to `claude/S-INFRA-rigour-v3a-foundation` now (cleaner audit trail) or keep `claude/S-INFRA-rigour-v3` until PR opens.
 > 4. Begin S-37-0 (shellspec install, if not folded into S-37-1) → S-37-1 (failing meta-tests RED, push, observe CI red, capture run-ID) → continue H6 sub-sequence.
 
-### Branch state at session 37 wrap (verified)
+### Branch state at recovery-session wrap (verified)
 
-- Active: `claude/S-INFRA-rigour-v3` at HEAD `d836a04` (13 ahead, pushed)
+- Active: `claude/S-INFRA-rigour-v3` at HEAD `a898393` (14 ahead, pushed)
+  - Session 37 wrap was at `d836a04` (13 ahead); session-38 attempt added `a898393` then crashed.
 - Parked: `claude/S-F7-beta-impl` at HEAD `a3f67ec` (8 ahead, pushed; resumes post-v3a-merge)
 - `main` at `92f77d7` (no new merges since session 35)
 
@@ -196,9 +199,11 @@ git remote set-head origin main                                  # required for 
 
 **Pre-flight Qs (ask user before any code):**
 
-1. **External preconditions status** — has the user added the `control-change` label + branch protection on main per the External preconditions table? Affects which H6 commits can land (S-37-1 + S-37-2 are blocker-free; S-37-3 onward depends).
-2. **Branch rename** — rename `claude/S-INFRA-rigour-v3` → `claude/S-INFRA-rigour-v3a-foundation` at first impl commit (cleaner audit) OR keep stable until PR opens?
-3. **Shellspec install positioning** — fold into S-37-1 (cleaner: one commit) OR separate S-37-0 (cleaner: independent install commit)?
+1. **External preconditions status** — has the user added the `control-change` label + branch protection on main per the External preconditions table? Affects which H6 commits can land (S-37-1 + S-37-2 are blocker-free; S-37-3 onward depends). *Status as of recovery-session wrap: not confirmed by user.*
+2. **Branch rename** — rename `claude/S-INFRA-rigour-v3` → `claude/S-INFRA-rigour-v3a-foundation` at first impl commit (cleaner audit) OR keep stable until PR opens? *Status: not actioned in crashed session-38 attempt; still open.*
+3. ~~Shellspec install positioning~~ — **ANSWERED** in crashed session-38 attempt: separate S-37-0 commit (landed at `a898393`). Not re-litigate.
+
+**S-37-0 CI verification (session-38 attempt did not capture):** check that the shellspec workflow run on the `a898393` push went GREEN. If RED, S-37-0 needs a follow-up fix commit before S-37-1 (otherwise S-37-1's RED won't be distinguishable from S-37-0's RED). Use `mcp__github__list_commits` or visit `https://github.com/rossdelarge247-debug/construct_d_01/actions` to confirm.
 
 **Session discipline (hook-surfaced; restated):**
 
