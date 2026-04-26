@@ -1,5 +1,11 @@
 import coldSarah from './scenarios/cold-sarah.json';
 import sarahMidBuild from './scenarios/sarah-mid-build.json';
+import sarahConnected from './scenarios/sarah-connected.json';
+import sarahComplete from './scenarios/sarah-complete.json';
+import sarahSharedMarkInvited from './scenarios/sarah-shared-mark-invited.json';
+import sarahReconcileInProgress from './scenarios/sarah-reconcile-in-progress.json';
+import sarahSettle from './scenarios/sarah-settle.json';
+import sarahFinalise from './scenarios/sarah-finalise.json';
 
 interface ScenarioStoreEntry {
   userId: string;
@@ -14,8 +20,16 @@ interface Scenario {
 
 const SCENARIOS: Record<string, Scenario> = {
   'cold-sarah': coldSarah as Scenario,
+  'sarah-connected': sarahConnected as Scenario,
   'sarah-mid-build': sarahMidBuild as Scenario,
+  'sarah-complete': sarahComplete as Scenario,
+  'sarah-shared-mark-invited': sarahSharedMarkInvited as Scenario,
+  'sarah-reconcile-in-progress': sarahReconcileInProgress as Scenario,
+  'sarah-settle': sarahSettle as Scenario,
+  'sarah-finalise': sarahFinalise as Scenario,
 };
+
+export const SCENARIO_NAMES = Object.keys(SCENARIOS);
 
 const SESSION_KEY = 'decouple:dev:session:v1';
 const DEV_KEY_PREFIX = 'decouple:dev:';

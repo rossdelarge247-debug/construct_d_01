@@ -1,0 +1,46 @@
+{
+  "session": {
+    "id": "sarah",
+    "email": "sarah@dev.decouple.local",
+    "role": "participant",
+    "twoFactorVerified": true,
+    "createdAt": "2026-01-01T00:00:00.000Z",
+    "lastActiveAt": "2026-05-05T13:00:00.000Z",
+    "deviceFingerprint": "dev-fixture-device"
+  },
+  "store": [
+    {
+      "userId": "sarah",
+      "scope": "jointDocument",
+      "data": {
+        "created": true,
+        "fieldsPublished": 18,
+        "fieldsTotal": 18
+      }
+    },
+    {
+      "userId": "sarah",
+      "scope": "conflicts",
+      "data": {
+        "pending": [],
+        "resolved": [
+          { "field": "monthlyIncome", "agreedValue": 3359 },
+          { "field": "mortgageOutstanding", "agreedValue": 189500 }
+        ]
+      }
+    },
+    {
+      "userId": "sarah",
+      "scope": "settlement",
+      "data": {
+        "proposal": {
+          "status": "drafting",
+          "draftedAt": "2026-05-05T13:00:00.000Z",
+          "fieldsDraft": 7,
+          "fieldsTotal": 12
+        },
+        "counterProposals": []
+      }
+    }
+  ]
+}

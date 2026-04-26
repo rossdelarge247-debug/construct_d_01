@@ -3,7 +3,16 @@
 import { useEffect, useState } from 'react'
 import { MODE } from '@/lib/auth'
 
-const SCENARIO_OPTIONS = ['cold-sarah', 'sarah-mid-build'] as const
+const SCENARIO_OPTIONS = [
+  'cold-sarah',
+  'sarah-connected',
+  'sarah-mid-build',
+  'sarah-complete',
+  'sarah-shared-mark-invited',
+  'sarah-reconcile-in-progress',
+  'sarah-settle',
+  'sarah-finalise',
+] as const
 
 const wrapStyle: React.CSSProperties = {
   display: 'flex',

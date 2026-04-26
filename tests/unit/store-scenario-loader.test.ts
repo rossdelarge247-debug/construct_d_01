@@ -56,6 +56,25 @@ describe('lib/store/scenario-loader — load + wipe + URL trigger', () => {
     expect(afterSwitch.length).toBe(0);
   });
 
+  it.each([
+    'cold-sarah',
+    'sarah-connected',
+    'sarah-mid-build',
+    'sarah-complete',
+    'sarah-shared-mark-invited',
+    'sarah-reconcile-in-progress',
+    'sarah-settle',
+    'sarah-finalise',
+  ])('S-F7-β AC-6: loadScenario("%s") loads cleanly + seeds session', async (name) => {
+    const { loadScenario, SCENARIO_NAMES } = await import('@/lib/store/scenario-loader');
+    expect(SCENARIO_NAMES).toContain(name);
+    await loadScenario(name);
+    const session = localStorage.getItem('decouple:dev:session:v1');
+    expect(session).toBeTruthy();
+    const parsed = JSON.parse(session!);
+    expect(parsed.id).toBe('sarah');
+  });
+
   it('loadScenario rejects an unknown scenario name with a clear error', async () => {
     const { loadScenario } = await import('@/lib/store/scenario-loader');
     await expect(loadScenario('not-a-real-scenario')).rejects.toThrow(
