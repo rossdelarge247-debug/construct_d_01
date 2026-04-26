@@ -1,4 +1,4 @@
-# Session 36 Context Block
+# Session 37 Wrap Context Block (heading into session 38)
 
 ## Product positioning (preserve across sessions)
 
@@ -6,218 +6,205 @@ Decouple is the **complete settlement workspace for separating couples** — fin
 
 **Pillars (spec 42):** Shared, not adversarial · Evidenced, not asserted · End-to-end, not hand-off. **Tagline:** "Decouple — the complete picture."
 
-Spec 42 authoritative for positioning. Spec 68 suite (hub + 68a-e locked + 68f/g opens) carries reconciled wire-level framing. Spec 70 Build Map is the Phase C input. Spec 71 (rebuild strategy, §7a amended Option 4) + spec 72 (engineering security) are the execution layer.
+Spec 42 authoritative for positioning. Spec 68 suite (hub + 68a-e locked + 68f/g opens) carries reconciled wire-level framing. Spec 70 Build Map is the Phase C input. Spec 71 (rebuild strategy, §7a Option 4) + spec 72 (engineering security) are the execution layer.
+
 ## Stack
 
-Next.js 16.2, React 19, TypeScript, Tailwind 4, Supabase, Claude AI, Vercel Pro. Single-branch-main workflow (spec 71 §7a Option 4): no `phase-c` integration, no cutover event. Slice work on short-lived feature branches (`claude/S-XX-{slug}` or `claude/session-{N}-{scope}`) → PR → main. Tink credentials in Vercel env. Stripe SDK pinned at `^22.1.0` per S-INFRA-1 (session 35); package.json + both lockfiles aligned.
-## What sessions 32-35 accomplished (rolling window)
+Next.js 16.2, React 19, TypeScript, Tailwind 4, Supabase, Claude AI, Vercel Pro. Single-branch-main workflow (spec 71 §7a Option 4): no `phase-c` integration, no cutover event. Slice work on short-lived feature branches → PR → main. Tink credentials in Vercel env. Stripe SDK pinned at `^22.1.0`.
 
-- **Session 32:** S-F1 design tokens (PR #14 merged) — first src/-touching slice; CI gate `pr-dod.yml` first positive activation.
-- **Session 33:** S-F7-α slice scaffold + Phase C kickoff prep. Persistence + auth abstraction contracts drafted; AC frozen. Branch-resume occurrence #1 (manual recovery).
-- **Session 34:** **S-TOOL-1 shipped + S-F7-α PR #20 merged** (main `5d38f6d`). Tooling slice fixed `line-count.sh` measure-vs-main inflation (session-base SHA captured at turn 0 by `session-start.sh`) and added harness branch-resume detection (suffixed branch + canonical-on-origin → resync recipe surfaced at turn 0). 11 new vitest hook tests; full suite **92/92 GREEN**. **CLAUDE.md #12 (Branch-resume check) lifted** into Planning conduct § (second clean use). PR #21 OPEN at `0d98393` with 10/10 GHA green, 0 reviews, **1 Vercel-preview-error pending**.
-- **Session 35:** **PR #22 (S-INFRA-1) shipped + merged + PR #21 (S-TOOL-1) merged + S-F7-β AC frozen + scaffold pushed.** Diagnosed PR #21's Vercel red as dual-lockfile divergence (`package-lock.json` pinned `stripe@22.0.0`; `pnpm-lock.yaml` pinned `stripe@22.1.0`; CI used npm so Type-check passed; Vercel auto-detected pnpm-lock so `next build`'s post-compile typecheck failed). S-INFRA-1 synced both lockfiles to `stripe@22.1.0` + bumped package.json range to `^22.1.0` + updated apiVersion literal `'2025-03-31.basil'` → `'2026-04-22.dahlia'`. Squash-merged PR #22 (main → `ba8db5e`); `update_pull_request_branch` on PR #21 to merge new main into branch (head `0d98393` → `598e859`); 10/10 GHA + Vercel green; squash-merged PR #21 (main → `c43ca2f`). Branched `claude/S-F7-beta-dev-surface` off `c43ca2f`; drafted full S-F7-β slice (acceptance.md 7 ACs frozen + verification.md UI-template + security.md spec-72-§11-binding skeleton); committed at `0d4094f`. Branch-resume occurrence #3 (manual recovery again — hook from PR #21 not yet on main at session start).
+## What sessions 33-37 accomplished (rolling window)
+
+- **Session 33:** S-F7-α slice scaffold + Phase C kickoff prep. Persistence + auth abstraction contracts drafted.
+- **Session 34:** S-TOOL-1 shipped + S-F7-α PR #20 merged (main `5d38f6d`). Tooling slice fixed `line-count.sh` measure-vs-main inflation + added harness branch-resume detection.
+- **Session 35:** PR #22 (S-INFRA-1 Stripe pin) shipped + merged + PR #21 (S-TOOL-1) merged + S-F7-β AC frozen + scaffold pushed.
+- **Session 36:** S-F7-β implementation (8 commits on `claude/S-F7-beta-impl` HEAD `a3f67ec`; PR not opened — β cleanup parked pending v3a-foundation merge). Self-audit revealed systemic discipline lapses (TDD skipped on 5/7 ACs; no `/security-review` per slice; monolithic page components against function-size rule). User explicitly chose **rigour > speed** and opened S-INFRA-rigour-v3 programme. v1 adversarial review of bundled 9-AC slice returned `request-changes` with single-concern FAIL; reviewer recommended split. v3 → v3a-foundation + v3b-subagent-suite + v3c-quality-and-rewrite. v2 review of revised v3a returned `request-changes` with 2 BLOCK + 16 RC + 6 nits.
+- **Session 37 (this wrap):** **Slice planning phase for v3a-foundation COMPLETE.** Five adversarial review iterations converged at v5 verdict `nit-only`. Trajectory v1 (block + 6) → v2 (2 BLOCK + 24) → v3 (1 BLOCK + 8) → v4 (0 BLOCK + 4) → **v5 (0+0+2 nit-only)** → v5.1 polish (J1+J2 closed). 13 commits on `claude/S-INFRA-rigour-v3` (8 from session 36, 5 new this session: v3-revision · v3-review-capture · v4-revision · v4-review-capture · v5-revision · v5-review-capture · v5.1-polish). All pushed. **Slice unblocked for AC-1 impl in session 38.**
+
 ## Current state
 
-### Locked (through session 35)
+### Locked (through session 37)
 
 - 5-phase journey (Start · Build · Reconcile · Settle · Finalise) per spec 42.
 - Document-as-spine (4-doc lifecycle) per spec 44.
 - Hub + 68a-e: navigation, trust, share, exit, AI coach (cross-cutting); Sarah's Picture mechanics (Build); joint doc + conflict card + queue (Reconcile); proposal + AI coach + counter (Settle); generation + pre-flight + fork + submit (Finalise).
-- Spec 70 Build Map: 33-slice catalogue (Start/Build/Reconcile/Settle/Finalise + Foundation F1-F7 + Marketing + CF copy-flips). S-TOOL-N codified session 35 as non-catalogue prefix family for tooling slices (S-TOOL-1 done; S-TOOL-2 long-prose hook still parked as Path F).
+- Spec 70 Build Map: 33-slice catalogue + S-TOOL-N tooling-slice family + S-INFRA-N infrastructure-slice family.
 - Spec 71 §7a Option 4: single-branch-main; no integration branch; no cutover event.
-- Spec 72: 13-item per-slice security checklist; CI gates (gitleaks, env-var regex, dev-mode leak scan, npm audit, Type-check, Lint, unit tests, production build, slice-verification reference). 10 GHA check_runs total.
-- Hook + CI enforcement: SessionStart (branch-resume detection + read-discipline reminder + session-base SHA capture) · PostToolUse Write/Edit (line-count tracking, accurate post-S-TOOL-1) · PreToolUse Read (read-cap blocks >400L full-file reads + >300L per-turn). `/wrap` + `/review` + `/security-review` + `/init` + `/simplify` skills available.
-- CLAUDE.md candidates lifted: 6 across all sessions. Most recent (session 34): **#12 Branch-resume check** into Planning conduct §.
-- **Stripe SDK pinned `^22.1.0` (S-INFRA-1, session 35).** Both lockfiles aligned. apiVersion literal `'2026-04-22.dahlia'` matches Stripe SDK 22.1.0's typed `LatestApiVersion`.
+- Spec 72: 13-item per-slice security checklist; CI gates.
+- Hook + CI enforcement: SessionStart (branch-resume detection + read-discipline reminder + session-base SHA capture) · PostToolUse Write/Edit (line-count tracking) · PreToolUse Read (read-cap blocks).
+- Stripe SDK pinned `^22.1.0`. Both lockfiles aligned.
+- **NEW (session 37): S-INFRA-rigour-v3a-foundation acceptance.md adversarial-review-approved at nit-only verdict.** 8 ACs frozen + budget 1560 lines across 3 sessions + cross-session H6 sub-sequence locked + external preconditions table + threat model documented. Bundle is multi-concern by-design with concrete per-AC dependency table; rationale audit-trailed across 5 iterations.
 
-### Open (see spec 68f + 68g registers for full list)
-
-- 68f session-21 register: live; updated through session 22 locks.
-- 68g visual anchors C-V1..C-V14 (Phase C extraction shortlist).
-- 68g build opens B-5..B-14.
-- 68g copy-share opens C-U4-6 + C-S5-6.
-- Spec 71 §4 "opens" within S-F7 lock: storage schema versioning, real-Supabase migration playbook, scenario JSON format, dev-only API route convention. Non-blocking S-F7-β; lock pragmatically as first concrete need surfaces during impl.
-
-### Specced but NOT built
-
-- Most slices in spec 70 catalogue. Phase C Step 1 set: S-F1 (built, session 32) → **S-F7 (α built session 34, β scaffolded session 35, β impl session 36)** → S-F3 → S-F2 → S-F4 → S-F6 → first user-facing slice.
-
-### Built (on main as of `c43ca2f`)
+### Built (on main as of `92f77d7`)
 
 ```
 src/lib/auth/{dev-auth-gate,dev-session,index,types}.ts          — S-F7-α (PR #20, session 34)
 src/lib/store/{dev-store,index,scenario-loader,types}.ts          — S-F7-α (PR #20, session 34)
 src/lib/store/scenarios/{cold-sarah,sarah-mid-build}.json         — S-F7-α (PR #20, session 34)
 src/lib/stripe/client.ts                                          — apiVersion aligned (S-INFRA-1, PR #22, session 35)
-package.json + lockfiles                                          — stripe@22.1.0 pinned (S-INFRA-1, session 35)
+package.json + lockfiles                                          — stripe@22.1.0 pinned
 .claude/hooks/{line-count,session-start}.sh                       — S-TOOL-1 (PR #21, session 35)
-tests/unit/hooks-{line-count,session-start}.test.ts               — S-TOOL-1 (PR #21, session 35)
+tests/unit/hooks-{line-count,session-start}.test.ts               — S-TOOL-1 hook tests
 docs/slices/{S-F1,S-B-1,S-B-2,S-C-U4,S-F7-alpha,S-INFRA-1,S-TOOL-1,S-F7-beta}/  — slice docs
-CLAUDE.md §Planning conduct                                        — #12 Branch-resume check lifted (session 34)
+CLAUDE.md §Planning conduct                                        — #12 Branch-resume check (session 34)
 ```
 
-**Branch `claude/S-F7-beta-dev-surface` (1 ahead, 0 behind)** holds the S-F7-β scaffold at `0d4094f`: acceptance.md (7 ACs frozen) + verification.md (UI-template skeleton) + security.md (13-item checklist skeleton). No `src/` changes yet.
-## Session 36 priorities
+**On `claude/S-F7-beta-impl` (8 ahead, parked):** S-F7-β impl (session 36); PR not opened; cleanup parked pending v3a merge.
 
-### P0 — implement S-F7-β per frozen AC
+**On `claude/S-INFRA-rigour-v3` (13 ahead, in flight):** v3a-foundation slice docs (acceptance.md v5.1 adversarial-approved + v1-v5 review JSONs preserved). NO src/ or .claude/hooks/ changes yet. AC-1 impl begins session 38.
 
-AC contract is frozen at `docs/slices/S-F7-beta-dev-surface/acceptance.md` (session 35, all 7 ACs). No re-scoping at session start; AC is the contract. Implementation order, dependency-respecting:
+## Session 38 priorities
 
-1. **AC-7 (#14 lift, smallest, ~30 lines)** — patch `.claude/hooks/session-start.sh` near top with `git remote set-head origin main 2>/dev/null || true`; add CLAUDE.md bullet under §Planning conduct; extend `tests/unit/hooks-session-start.test.ts` with idempotency assertion. Standalone first commit; verifies S-TOOL-1's hook-test pattern still works post-merge.
-2. **AC-1 (route group + dashboard, ~150 lines)** — `src/app/dev/layout.tsx` (notFound on prod) + `src/app/dev/page.tsx` (dashboard linking the tools below).
-3. **AC-5 (env banner reskin, ~80 lines)** — `src/components/layout/env-banner.tsx` reskinned (Preserve-with-reskin per spec 71 §4 line 260) + integration into `(authed)` layout.
-4. **AC-6 (6 fixture scenarios, ~200 lines)** — `src/lib/store/scenarios/{sarah-connected,sarah-complete,sarah-shared-mark-invited,sarah-reconcile-in-progress,sarah-settle,sarah-finalise}.json` + scenarioLoader extension if α used closed enum.
-5. **AC-2 (scenario picker + reset, ~150 lines)** — `src/components/dev/scenario-picker.tsx`, `src/app/dev/scenarios/page.tsx`, `src/app/dev/reset/page.tsx`.
-6. **AC-3 (state inspector, ~120 lines)** — `src/components/dev/state-inspector.tsx`, `src/app/dev/state-inspector/page.tsx`. Cut to read-only if mid-impl scope stress.
-7. **AC-4 (engine workbench move, ~50 lines)** — `src/app/dev/engine-workbench/page.tsx` (preserve existing) + delete `src/app/workspace/engine-workbench/page.tsx`.
+### P0 — begin v3a-foundation AC-1 impl per H6 ordered sub-sequence
 
-Total estimated impl churn: ~780 lines + tests + verification.md fills + adversarial review = ~1100 lines session 36 churn. Within 1500 warn.
+**Pre-flight blocker:** External preconditions (per acceptance.md §External preconditions table) must be at least partially in place before session 38 starts:
 
-### Pre-flight binding decisions
+1. GitHub label `control-change` exists on the repo.
+2. Branch protection on `main` requires the `control-change` label for PRs touching `.claude/hooks/**` + `scripts/verify-slice.sh` + `.eslintrc` + `vitest.config.ts` + `.claude/subagent-prompts/*.md` + `hooks-checksums.txt` + `.github/workflows/control-change-label.yml` + `.github/workflows/pr-dod.yml`.
+3. Branch protection on `main` requires ≥1 human approval before merge.
 
-1. **Open PR for `claude/S-F7-beta-dev-surface` at session 35 wrap?** Recommended yes — surfaces frozen AC for review before code dilutes the diff. Title: "S-F7-β: dev surface routes + env banner reskin (scaffold — AC frozen)". Body calls out scaffold-only, AC frozen 2026-04-26.
-2. **AC-7 lift bundling** — ship as standalone tooling commit ahead of β's main impl per recommended order, OR bundle inside β's first src/ commit per AC-7 wording? Recommended: standalone first commit (cleaner CI signal — hook test passing in isolation before any new src/ surface).
+If only (1) is in place, session 38 can proceed through S-37-5 (pre-commit-verify hook). (2) and (3) are merge gates not landing gates per the External preconditions table — slice MERGE depends on them, not slice-completion. Session 38 carries through HANDOFF-37 the explicit ask to user.
+
+**H6 ordered sub-sequence (session 38):**
+
+1. **S-37-0 (anticipatory commit, not in original H6):** install `shellspec` dev-dependency + minimal CI workflow that runs `shellspec` on `tests/shellspec/`. Required because S-37-1 needs shellspec to write tests in. ~30 lines. Could fold into S-37-1 if preferred.
+2. **S-37-1:** `tests/shellspec/verify-slice.spec.sh` with deliberate failures (RED). Push. Wait for CI run. Capture `CI-observed-failing` run-ID into a working note (will be embedded in `verification.md` when AC-1 lands). ~50 lines.
+3. **S-37-2:** `scripts/verify-slice.sh` skeleton (file-presence checks: verifies slice dir has `acceptance.md` + `security.md` + `verification.md`; useful-message exit per G17 matching `read-cap.sh` pattern; tmp-repo isolation helper per G15). Skeleton passes against itself AND against `docs/slices/S-F7-alpha-contracts-dev-mode/` reference slice. Failing meta-tests from S-37-1 turn GREEN. ~100 lines.
+4. **S-37-3:** `.claude/hooks-checksums.txt` baseline + `scripts/generate-hooks-checksums.sh` + `session-start.sh` integrity-check addition. ~120 lines.
+5. **S-37-4:** ESLint config addition + `docs/eslint-baseline-allowlist.txt` (empty seed) + CI denial-check workflow. ~100 lines.
+6. **S-37-5:** `.claude/hooks/pre-commit-verify.sh` hook + checksum append. From this commit onwards, every commit on this branch passes through `verify-slice.sh` in incremental mode (skeleton-mode permissive — file-presence-only — until S-38-1's full impl). ~60 lines.
+7. **S-37-6:** `.claude/hooks/exit-plan-review.sh` + `.claude/subagent-prompts/exit-plan-review.md` template (random-nonce-per-invocation framing per H2 BLOCK closure) + git-state-verifier sub-script. ~170 lines.
+8. **S-37-7:** CLAUDE.md `+§"Hard controls (in development)"` stub section (gates table + verdict vocabulary + rollback procedure). ~80 lines.
+
+**Estimated session 38 churn:** 30 + 50 + 100 + 120 + 100 + 60 + 170 + 80 = ~710 lines + commit messages + docs (acceptance.md update if drift) = ~810. Within 1500 warn; under 1000 soft-note. End-of-session 38: skeleton verify-slice.sh + all hook wiring landed; full rule enforcement (real coverage, real ESLint, real TDD blocking) lands in session 39 per S-38-1.
+
+### Stretch (session 38 if early finish; OR session 39)
+
+- S-38-1 verify-slice.sh full impl replacing skeleton (real coverage parser + ESLint check + spec-72-§11 checklist presence)
+- S-38-2 meta-tests full impl
+- S-38-3 control-change-label.yml workflow with path-filter self-inclusion (BLOCK closure for G3+G10)
 
 ### P1 — none. Single-P0 session.
 
-### P2 — surface-level housekeeping
+### P2 — surface housekeeping
 
-- **CLAUDE.md candidate threshold update** — SESSION-CONTEXT line documenting prose-Write threshold should drop from `~200` to `~100` per session 35 evidence (HANDOFF-35 single Write at ~120 lines stream-idle-timed-out).
-- **Provisional-close re-evaluations:** #3 (line-count refined model — fixed by S-TOOL-1 session-base SHA, may be redundant) · #13 (PR-by-session-end — practiced cleanly session 35, may be redundant after #12 lift). Worth a 5-min decision either way at next infra session.
-- **Carry-forward parked:** AUX-3 PWR drift · #7 tdd-guard hook spec · #9 vitest version-quirks · #10 lockfile policy (partially addressed by S-INFRA-1 but full lift = single-lockfile pnpm-only adoption) · #11 compile-time RED · #14 (bundling into S-F7-β AC-7 session 36).
+- HANDOFF-SESSION-37 retro is the wrap doc for this session (`docs/HANDOFF-SESSION-37.md`).
+- The `claude/S-INFRA-rigour-v3` branch may be renamed to `claude/S-INFRA-rigour-v3a-foundation` at session 38 first impl commit per G1 (deferred from session 37 to keep PR-URL stable across planning iterations).
 
-### Stretch
-
-If S-F7-β impl finishes early:
-- Path F (S-TOOL-2 long-prose Write hook) — would have prevented this session's stream-idle-timeout. ~80 lines bash + ~30 lines md + 4-6 vitest tests. Bundles `/refresh-session-context` slash command per session 34 design.
-- S-F2 / S-F3 / S-F4 / S-F6 — next foundation slices in Phase C Step 1 set.
 ## Scope ceiling
 
-Single-P0 session. S-F7-β is foundational and substantial (~1100 lines impl + tests). Don't add adjacent slice work; don't refactor; don't reskin beyond AC-5's spec-71-§4 banner; don't extend fixture realism beyond "deterministic + load-without-crash + spec-71-stage-name accurate" per AC-6 in-scope. If session 36 hits the 1500-line warn mid-impl, **stop and re-slice** — ship what's complete + carry the rest to S-F7-γ. Don't push past 2000.
-## Negative constraints
+Single-P0 session. v3a foundation is the unblocking slice. Don't add adjacent slice work; don't refactor; don't reskin. If session 38 hits the 1500-line warn mid-impl, **stop and re-slice** — ship what's complete + carry rest to session 39. Don't push past 2000.
 
-1. **Do NOT** frame Decouple as a "financial disclosure tool." Spec 42 complete-settlement-workspace framing is load-bearing. Spec 73 is the operational definition of how user-facing copy expresses this — consult it before writing any new user-visible string.
-2. **Phase-C-freeze model RETIRED** (session 24 Option 4). Single-branch-main; no integration branch; no cutover event. If user traffic arrives before Phase C completes, re-introduce freeze via new spec 71 §7a amendment — don't retrofit from pre-Option-4 strikethrough text.
-3. **Do NOT** re-introduce any file from the wiped V1 tree (`src/components/workspace/*`, `src/components/interview/*`, etc.). If a slice needs a V1 pattern, extract as a design doc and rebuild — don't copy-paste.
-4. **Do NOT** re-open 68a-e locked decisions unless new evidence surfaces. Same for 68g C-U4/U5/U6 (locked session 28 via spec 73).
-5. **Do NOT** read pre-pivot specs (03-06, 11, 12). Active framing: 42, 44, 65, 67, 68, 68a-g, 70, 71, 72, 73.
-6. **`NEXT_PUBLIC_DECOUPLE_AUTH_MODE=prod` mandatory in Production** (spec 72 §2 + §7). CI gate enforces; runtime assertion throws on mismatch; `/app/dev/*` returns 404 in prod.
-7. **Read discipline enforced by `.claude/hooks/read-cap.sh`** (session 27 P0.2): full-file Reads of >400-line files blocked without offset+limit; per-turn total >300 blocked. Grep/ls/wc-l before Read remains habit-level; the hook catches the forgotten case.
-8. **V1 legacy palette gone.** Visual canonical = Claude AI Design tool outputs (session 22 wire batches). Airbnb / Emma / Habito + spec 18 palette + spec 27 all superseded.
-9. **Safeguarding V1 = signposting + baseline** (spec 67 Gap 11, spec 72 §9). Detection / decoy / adaptive pacing = V1.5.
-10. **Identity verification waits until consent-order stage** — not signup, not Settle signature (V1 = explicit attestation per 68f S-3).
-11. **MLP not MVP** — scope decisions per slice framed as "what the *loveable* version requires vs what can iterate post-launch." Users are in crisis; loveable is the floor.
-12. **AI extracts facts, app generates questions** — never put reasoning / clarification / gap analysis in AI extraction schemas. result-transformer.ts generates these via spec 13 trees.
-13. **Anthropic SDK uses `output_config.format`** (not `response_format`). All JSON schemas need `additionalProperties: false`. SDK timeout 90s; route maxDuration 300s.
-14. **CLAUDE.md moratorium partially lifted across sessions 31-34.** 6 candidates lifted total. 8 currently parked: AUX-3 · #3 · #7 · #9 · #10 · #11 · #13 · #14. Continue capturing new candidates as HANDOFF notes; don't lift ad hoc within a slice session. Lift after 2 clean uses.
-15. **Don't treat failing tests as spec.** A test that disagrees with shipped code is a signal, not a mandate. Verify which represents the current design decision.
-16. **Don't trust kickoff-prompt factual claims without live verification.** SessionStart hook surfaces live branch state; use it. Session 35 reinforced: kickoff said "10/10 CI green" but combined commit-status was `failure` (Vercel red, infra-pre-existing). Verify against `mcp__github__pull_request_read --method=get_status` + `--method=get_check_runs` separately before building plans on stated PR state.
-17. **DoD CI gate enforces slice-verification on src/ PRs** (session 27 P0.4). Any PR touching `src/` without a `docs/slices/S-*/verification.md` reference fails. Escape hatch: `no-slice-required` label, for truly trivial src/ touches only.
-18. **Spec 73 copy patterns are mandatory for user-facing strings.** §1 replacement vocabulary + §2 banned-words (with §2.4 solicitor/judge-test exception for legal-process contexts) + §3 empty-state verb family + §4 tone templates. Downstream slices that touch user-visible strings reference spec 73 as a DoD input.
-19. **Long-prose Writes: skeleton + Edit-append for any prose Write >~100 lines.** (Threshold lowered from 200 after session 35 evidence — HANDOFF-35 single-Write at ~120 lines stream-idle-timed-out. Until Path F / S-TOOL-2 lands a hook-enforced version, defensive default is skeleton-from-the-start, not 200L ceiling.)
-20. **Dual-lockfile divergence guard.** S-INFRA-1 (session 35) aligned `package-lock.json` + `pnpm-lock.yaml` to `stripe@22.1.0`. Smoke test: `grep -c '22\.[0-9]\+\.[0-9]\+' pnpm-lock.yaml package-lock.json` should match. If divergence recurs, S-INFRA-2 lifts CLAUDE.md candidate #10 (single-lockfile pnpm-only policy).
+## Negative constraints (preserve from session 36)
+
+1. Do NOT frame Decouple as a "financial disclosure tool." Spec 42 complete-settlement-workspace framing is load-bearing.
+2. Phase-C-freeze model RETIRED (session 24 Option 4). Single-branch-main; no integration branch; no cutover event.
+3. Do NOT re-introduce any file from the wiped V1 tree (`src/components/workspace/*` etc.).
+4. Do NOT re-open 68a-e locked decisions unless new evidence surfaces. Same for 68g C-U4/U5/U6 (locked session 28).
+5. Do NOT read pre-pivot specs (03-06, 11, 12). Active framing: 42, 44, 65, 67, 68, 68a-g, 70, 71, 72, 73.
+6. `NEXT_PUBLIC_DECOUPLE_AUTH_MODE=prod` mandatory in Production (spec 72 §2 + §7). CI gate enforces.
+7. Read discipline enforced by `.claude/hooks/read-cap.sh`: full-file Reads of >400-line files blocked without offset+limit; per-turn total >300 blocked.
+8. V1 legacy palette gone. Visual canonical = Claude AI Design tool outputs (session 22).
+9. Safeguarding V1 = signposting + baseline (spec 67 Gap 11, spec 72 §9).
+10. Identity verification waits until consent-order stage.
+11. **MLP not MVP** — scope decisions per slice framed as "what the *loveable* version requires". Users in crisis.
+12. AI extracts facts, app generates questions — never put reasoning in AI extraction schemas.
+13. Anthropic SDK uses `output_config.format` (not `response_format`). All JSON schemas need `additionalProperties: false`. SDK timeout 90s; route maxDuration 300s.
+14. CLAUDE.md moratorium: 6 candidates lifted total. 8 currently parked (AUX-3 · #3 · #7 · #9 · #10 · #11 · #13 · #14). Lift after 2 clean uses.
+15. Don't treat failing tests as spec.
+16. Don't trust kickoff-prompt factual claims without live verification. SessionStart hook surfaces live branch state; use it.
+17. DoD CI gate enforces slice-verification on src/ PRs.
+18. Spec 73 copy patterns are mandatory for user-facing strings.
+19. Long-prose Writes: skeleton + Edit-append for any prose Write >~100 lines.
+20. Dual-lockfile divergence guard (S-INFRA-1 session 35).
+21. **NEW (session 37): Rigour > speed.** Adversarial subagent reviews used at relevant points. v3a-foundation slice exists specifically to fix TDD-skipped + monolithic-functions + DoD-drift discipline lapses surfaced in session 36 self-audit. Once v3a-foundation merges, every commit dogfoods the rigour controls. **No checkbox theatre** — every adversarial finding addressed or explicitly deferred with reasoning.
+22. **NEW (session 37): Rigour-pivot programme has 3 sub-slices** (v3a-foundation NOW; v3b-subagent-suite NEXT; v3c-quality-and-rewrite LAST). v3b + v3c stubs in `docs/slices/S-INFRA-rigour-v3{b,c}-*/acceptance.md` with scope markers; full ACs drafted per slice when each begins.
+
 ## Information tiers
 
 - **Tier 1 (always loaded):** `CLAUDE.md` — positioning, rules, Coding/Engineering/Planning conduct.
 - **Tier 2 (read at session start):** this file.
-- **Tier 3 (read section, not full file, when building in that area):** spec 42 · spec 44 · spec 68 hub + 68a-e · spec 70 Build Map suite · spec 71 · spec 72 · **spec 73 copy patterns** · `docs/engineering-phase-candidates.md` (§E/§F/§G still relevant).
-- **Tier 4 (reference only, don't read proactively):** 68f/g open registers · spec 67 · spec 65 · `docs/HANDOFF-SESSION-*.md` · `docs/handoffs-archive/` · `docs/v2/v2-backlog.md` · `docs/slices/S-*/` as slice-pattern reference. Consult before proposing new work.
+- **Tier 3 (read section, not full file, when building in that area):** spec 42 · spec 44 · spec 68 hub + 68a-e · spec 70 Build Map suite · spec 71 · spec 72 · spec 73 · `docs/slices/S-INFRA-rigour-v3a-foundation/acceptance.md` (the slice plan) · `docs/engineering-phase-candidates.md`.
+- **Tier 4 (reference only, don't read proactively):** 68f/g open registers · spec 67 · spec 65 · `docs/HANDOFF-SESSION-*.md` · `docs/handoffs-archive/` · `docs/v2/v2-backlog.md`.
+
 ## Branch
 
-> **SESSION 36 OUTCOME (2026-04-26):** Two branches in flight. ALL feature work paused until **S-INFRA-rigour-v3a-foundation** merges to main (split per session-36 v1 reviewer; v3a unblocks β, v3b + v3c run in parallel after).
+> **SESSION 37 OUTCOME (2026-04-26):** Three branches in flight; v3a-foundation slice planning phase COMPLETE.
 >
-> 1. **`claude/S-F7-beta-impl`** at HEAD `a3f67ec` — all 7 S-F7-β ACs shipped (28cc585 AC-7 · d8e2246 AC-1 · fcb5028 AC-5 · 2a2232f AC-6 · 857b958 AC-2/pageExtensions · c2abe62 AC-3 · 8166f89 AC-4 · a3f67ec verification.md). Branch pushed; PR NOT opened. β cleanup (security-review skill run, unit tests for handlers, component decomposition, 13-item §72 §11 checklist) parked pending v3a merge.
-> 2. **`claude/S-INFRA-rigour-v3`** at HEAD `405badd` (post-split commit) — original single-slice plan rejected by adversarial subagent v1 review (verdict: request-changes; 2 block-severity findings F3 + F5; single-concern verdict FAIL). Split per reviewer into three slice directories:
->    - `docs/slices/S-INFRA-rigour-v3a-foundation/` — pre-commit + plan-time gates; **merges first → unblocks β**
->    - `docs/slices/S-INFRA-rigour-v3b-subagent-suite/` — pair-programming + 5 adversarial subagent gates (stub acceptance.md only; full ACs drafted at slice start)
->    - `docs/slices/S-INFRA-rigour-v3c-quality-and-rewrite/` — multi-provider 3rd-agent + structured findings + Stryker + ratchet + allowlist parser + PR auto-opener + cron audit + CLAUDE.md "Hard controls" consolidating rewrite (stub only)
+> 1. **`claude/S-INFRA-rigour-v3` at HEAD `d836a04` (13 ahead of `origin/main` `92f77d7`)** — slice planning artefacts only; NO src/ or .claude/hooks/ changes. v5.1 polish committed; planning phase converged at v5 verdict `nit-only`. Branch may be renamed to `claude/S-INFRA-rigour-v3a-foundation` at first impl commit per G1.
+> 2. **`claude/S-F7-beta-impl` at HEAD `a3f67ec` (8 ahead, parked)** — S-F7-β impl from session 36; PR not opened; cleanup pending v3a-foundation merge to main.
+> 3. **`main` at `92f77d7`** — last merged: PR #21 (S-TOOL-1, session 35).
 >
->    v3a-foundation/acceptance.md REVISED in session 36 addressing v1 reviewer findings — reframed DoD-9 as External Preconditions (F3 fix), real self-mod protection via `control-change` PR label workflow (F5 fix), spec 72 §11 13-item checklist binding (F1c), per-language coverage spec (F6), verify-before-planning enforcement in plan-gate (F4e), settings.json hook-registration in checksum scope (F4b), every-commit TDD beats first-commit-only (F2b), bottom-up budget ~940 lines for v3a (F-budget), failing-meta-tests-first as separate SHA before impl (F2), CLAUDE.md "Hard controls (in development)" stub permitted incrementally (F3b), reference-slice dogfood requirement (F6c), clean external-preconditions table (F6d).
+> **Iteration trajectory of v3a-foundation slice planning** (5 adversarial review iterations + 1 polish):
+> - v1: `request-changes`, 6 findings (2 BLOCK F3+F5: DoD-9 unfalsifiable + hooks-checksums self-modification gap; single-concern FAIL on bundled 9-AC slice). → split into v3a + v3b + v3c.
+> - v2: `request-changes`, 24 findings (2 BLOCK G3+G10: control-change-label.yml self-protection recursion gap; single-concern still fails).
+> - v3: `request-changes`, 8 findings (1 BLOCK H2: plan-injection bypass via embedded `</plan-from-author>` tag).
+> - v4: `request-changes`, 4 findings (0 BLOCK; I1 bundle rationale handwaves AC-3/6/8; I2 nonce mechanism under-specified).
+> - **v5: `nit-only`, 2 findings (0 BLOCK + 0 RC + 2 nits J1+J2). Reviewer recommended "proceed-to-AC-1 impl per H6 sub-sequence".**
+> - v5.1 polish: J1+J2 closed (no re-review needed per v5 reviewer's "PR-comment follow-up acceptable" framing).
 >
->    Adversarial subagent v2 review of revised acceptance.md spawned at session-36 wrap — running async at end of session. v2 verdict captured in `acceptance.md.review-v2.json` once complete; if any block-severity issues remain or v2 verdict is `request-changes`, next session iterates BEFORE any src/ work. If v2 verdict is `approve` or `nit-only`, next session begins AC-1 impl with failing-meta-tests-first commit.
->
-> **Next session (37) FIRST ACTIONS:**
-> 1. Check v2 review verdict at `docs/slices/S-INFRA-rigour-v3a-foundation/acceptance.md.review-v2.json` (committed at session-36 wrap or session-37 startup if subagent hadn't returned yet).
-> 2. If v2 verdict not yet `approve` / nit-only: address remaining findings, re-spawn for v3 review, iterate.
-> 3. If clean: rename branch `claude/S-INFRA-rigour-v3` → `claude/S-INFRA-rigour-v3a-foundation` (open question; deferring rename until impl starts to keep current PR-URL stable).
-> 4. Begin AC-1 impl: failing meta-tests for verify-slice.sh as a separate commit SHA, then verify-slice.sh impl commit. Two distinct commits (per F2/F2b).
-> 5. Continue session-37 plan: AC-1 + AC-3 (ESLint config) + AC-4 (pre-commit-verify hook) + AC-8 (CLAUDE.md "Hard controls" stub). Estimated ~470 lines.
+> **Next session (38) FIRST ACTIONS:**
+> 1. Verify branch state per session-start hook. Confirm 13 ahead at `d836a04`.
+> 2. Confirm with user whether the GitHub external preconditions (label `control-change` + branch protection on main) are in place. If yes: full H6 sub-sequence proceeds. If no: S-37-1 + S-37-2 can still proceed (they don't touch protected paths until S-37-3 lands `hooks-checksums.txt`).
+> 3. Decide whether to rename branch to `claude/S-INFRA-rigour-v3a-foundation` now (cleaner audit trail) or keep `claude/S-INFRA-rigour-v3` until PR opens.
+> 4. Begin S-37-0 (shellspec install, if not folded into S-37-1) → S-37-1 (failing meta-tests RED, push, observe CI red, capture run-ID) → continue H6 sub-sequence.
 
-### Branch state at session 36 wrap (verified)
+### Branch state at session 37 wrap (verified)
 
-- Active branch: `claude/S-INFRA-rigour-v3` at HEAD `405badd` (post-split commit) — pushed
-- v2 review subagent: spawned async; result captured in `acceptance.md.review-v2.json` and committed before session ends (or at session-37 startup if not returned in time)
-- Parked branch: `claude/S-F7-beta-impl` at HEAD `a3f67ec` (8 ahead origin/main) — pushed
-- Both branches pushed; both have unopened PRs. v3a slice merges to main FIRST; β PR opens after v3a merges + β cleanup completes.
+- Active: `claude/S-INFRA-rigour-v3` at HEAD `d836a04` (13 ahead, pushed)
+- Parked: `claude/S-F7-beta-impl` at HEAD `a3f67ec` (8 ahead, pushed; resumes post-v3a-merge)
+- `main` at `92f77d7` (no new merges since session 35)
 
-**If session 36 lands on a suffixed orphan** (e.g. `claude/resume-S-F7-beta-dev-surface-XXXXX`): the now-merged `session-start.sh` from PR #21 should auto-surface a `### Branch-resume check` section in the turn-0 context block with the literal `git fetch / git checkout -B / git branch -D` resync recipe. **First natural test of automated detection** — if it doesn't fire, escalate (hook bug or harness behaviour change). Manual recovery still works if needed:
-
-```
-git fetch origin claude/S-F7-beta-dev-surface
-git checkout -B claude/S-F7-beta-dev-surface origin/claude/S-F7-beta-dev-surface
-git branch -D <orphan-suffixed-branch>
-git remote set-head origin main
-```
 ## Key files
 
-Canonical list lives in `CLAUDE.md` §"Key files". Session-36-relevant additions / changes since CLAUDE.md was last updated:
+Canonical list lives in `CLAUDE.md` §"Key files". Session-37-relevant additions:
 
 ```
-docs/HANDOFF-SESSION-35.md                                       — session 35 retro (NEW this wrap)
-docs/slices/S-INFRA-1-stripe-sdk-pin/                            — Stripe SDK fix slice (PR #22, merged)
-docs/slices/S-TOOL-1-line-count-branch-resume/                   — line-count + branch-resume hooks slice (PR #21, merged)
-docs/slices/S-F7-beta-dev-surface/                               — S-F7-β scaffold (NEW; AC frozen 2026-04-26)
-  ├─ acceptance.md                                               — 7 ACs frozen
-  ├─ verification.md                                             — UI-template skeleton, AC sign-off table
-  └─ security.md                                                 — spec 72 §11 13-item checklist skeleton
-src/lib/stripe/client.ts                                         — apiVersion '2026-04-22.dahlia' (S-INFRA-1)
-package.json + package-lock.json + pnpm-lock.yaml                — stripe@22.1.0 aligned across both lockfiles
-.claude/hooks/{line-count,session-start}.sh                      — S-TOOL-1 (now on main)
-tests/unit/hooks-{line-count,session-start}.test.ts              — S-TOOL-1 hook tests (now on main)
+docs/HANDOFF-SESSION-37.md                                       — session 37 retro (NEW)
+docs/slices/S-INFRA-rigour-v3a-foundation/                       — v3a-foundation slice docs
+  ├─ acceptance.md                                               — 8 ACs frozen, v5.1 adversarial-approved
+  ├─ acceptance.md.review-v1.json                                — historical (request-changes; 6 findings)
+  ├─ acceptance.md.review-v2.json                                — historical (request-changes; 24 findings)
+  ├─ acceptance.md.review-v3.json                                — historical (request-changes; 8 findings)
+  ├─ acceptance.md.review-v4.json                                — historical (request-changes; 4 findings)
+  └─ acceptance.md.review-v5.json                                — current (nit-only; 2 nits J1+J2 closed)
+docs/slices/S-INFRA-rigour-v3b-subagent-suite/acceptance.md      — stub (full draft when v3b begins)
+docs/slices/S-INFRA-rigour-v3c-quality-and-rewrite/acceptance.md — stub (full draft when v3c begins)
 ```
 
-**For session 36 S-F7-β impl, primary reference paths:**
+**For session 38 v3a-foundation impl, primary reference paths:**
 
 ```
-docs/workspace-spec/71-rebuild-strategy.md §4 (lines 174-301)    — Dev-mode pattern (3 abstractions · switch · routes · banner · fixtures)
-docs/workspace-spec/71-rebuild-strategy.md §8 (lines 480-515)    — S-F7 slice card
-docs/workspace-spec/70-build-map-slices.md (lines 69-94)          — S-F7 spec-70 slice card
-docs/workspace-spec/72-engineering-security.md §3 + §7 + §11      — Session pattern + dev/prod boundary + 13-item checklist
-src/lib/auth/* + src/lib/store/*                                  — S-F7-α contracts (consume from β; do not modify)
-src/lib/store/scenarios/*.json                                    — α delivered 2 fixtures; β adds 6 more
-src/lib/bank/test-scenarios.ts                                    — Re-use per spec 71 §4 line 283 (bank portions of fixtures)
-src/components/layout/env-banner.tsx                              — Preserve-with-reskin per spec 71 §4 line 260
-src/app/workspace/engine-workbench/page.tsx                       — Move target → src/app/dev/engine-workbench/page.tsx (AC-4)
+docs/slices/S-INFRA-rigour-v3a-foundation/acceptance.md          — THE PLAN (203 lines; AC table at §Acceptance criteria; H6 sub-sequence at §Cross-session plan)
+docs/slices/S-F7-alpha-contracts-dev-mode/                       — α reference slice for DoD-2 (verify-slice.sh must pass against this without modification per F6c)
+.claude/hooks/{line-count,session-start}.sh                      — existing hooks (now subject to AC-2 protection scope when AC-2 lands)
+.github/workflows/pr-dod.yml                                     — existing CI gate (subject to AC-2 protection per G3+G10)
+CLAUDE.md                                                        — recipient of AC-8 "Hard controls (in development)" stub section
 ```
-## Session 36 pre-flight
+
+## Session 38 pre-flight
 
 **Verify (do this first, before any plan):**
 
 ```
 git fetch origin
-git log origin/main -1                                           # confirm c43ca2f stable (or beyond if other PRs landed)
-git log -10 --oneline                                            # confirm session 35 commits visible
-mcp__github__list_pull_requests --head=claude/S-F7-beta-dev-surface
-mcp__github__list_branches                                       # confirm branch state, no orphans
-git status                                                       # working tree clean
-pnpm install                                                     # repo arrives without node_modules
-pnpm test                                                        # confirm 92/92 baseline (S-TOOL-1 tests on main)
+git status                                                       # confirm clean tree
+git rev-parse --short HEAD                                       # expect d836a04
+git log --oneline origin/main..HEAD | wc -l                      # expect 13
+ls docs/slices/S-INFRA-rigour-v3a-foundation/acceptance.md.review-v5.json  # confirm v5 review present
 git remote set-head origin main                                  # required for /security-review skill
 ```
 
 **Pre-flight Qs (ask user before any code):**
 
-1. **Open scaffold PR confirmation** — was the PR opened at session 35 wrap? If no, open before starting impl. If yes, confirm AC contract still as-frozen (no review comments requesting changes).
-2. **AC order confirmation** — implement in dependency order per §"Session 36 priorities" (AC-7 → AC-1 → AC-5 → AC-6 → AC-2 → AC-3 → AC-4), or re-prioritise (e.g. AC-1 + AC-5 first to get visible UI sooner)?
-3. **AC carving requested?** — AC-3 (state inspector) read-only fallback to S-F7-γ if scope stress, or AC-4 (engine workbench move) deferred? Default: full β.
-4. **AC-7 lift bundling** — standalone first commit ahead of β src/ work (recommended), OR bundle inside β's first src/ commit per AC-7 wording?
+1. **External preconditions status** — has the user added the `control-change` label + branch protection on main per the External preconditions table? Affects which H6 commits can land (S-37-1 + S-37-2 are blocker-free; S-37-3 onward depends).
+2. **Branch rename** — rename `claude/S-INFRA-rigour-v3` → `claude/S-INFRA-rigour-v3a-foundation` at first impl commit (cleaner audit) OR keep stable until PR opens?
+3. **Shellspec install positioning** — fold into S-37-1 (cleaner: one commit) OR separate S-37-0 (cleaner: independent install commit)?
 
 **Session discipline (hook-surfaced; restated):**
 
 - Honour Planning conduct from turn 1. Brief-rot in this file is possible — live-verify factual claims.
-- Target ~1500 lines session churn. Hook now reports accurately (S-TOOL-1 fix landed).
-- **Long-prose Writes: skeleton + Edit-append for any prose Write >~100 lines** (lowered from 200 per session 35 evidence; HANDOFF-35 single-Write at ~120 lines stream-idle-timed-out). Path F (S-TOOL-2) lands the hook-enforced version when prioritised.
-- **CLAUDE.md moratorium:** capture candidates as HANDOFF notes; lift after 2 clean uses; don't ad-hoc within a slice session. Bundle #14 lift into S-F7-β AC-7 first commit per session-35 decision.
-- **Honour the 6-item DoD + 13-item security checklist.** S-F7-β is `pr-dod.yml`'s next positive-path activation. Spec 72 §11 13-item is binding (no N/A escape — slice IS the dev/prod boundary surface).
-- **Behavioural-test discipline:** still binding per session-31 lift.
-- **Branch-resume hook now on main** (PR #21 merged). First natural test of automated detection if harness orphans recur.
+- Target ≤1000 lines session-38 churn (well under 1500 warn). H6 sub-sequence's per-commit ordering naturally paces the work.
+- Long-prose Writes: skeleton + Edit-append for any prose Write >~100 lines.
+- **Dogfood discipline**: once S-37-2 lands the verify-slice.sh skeleton + S-37-5 lands the pre-commit hook, every commit on this branch onwards passes through verify-slice.sh in incremental mode. Skeleton-mode permissive (file-presence only) until S-38-1's full impl lands.
+- **G13 gate**: S-37-1 RED commit must be CI-observed-failing before S-37-2 (skeleton) is pushed. This is the externally-verifiable TDD discipline; capture the CI run-ID into `verification.md` AC-1 evidence section.
+- **No bypass via `--no-verify`**: harness-level hooks intercept at the Bash tool layer, not git layer. `git commit --no-verify` doesn't help.
