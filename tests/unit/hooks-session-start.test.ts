@@ -186,3 +186,29 @@ describe("session-start.sh — suffix-orphan detection (AC-2)", () => {
     expect(additionalContext).not.toMatch(/Branch-resume check/i);
   });
 });
+
+describe("session-start.sh — origin/HEAD set (AC-7 / CLAUDE.md candidate #14)", () => {
+  const sessionId = "test-session-origin-head";
+  let fixture: RepoFixture;
+
+  beforeEach(() => {
+    const baseFile = `/tmp/claude-base-${sessionId}.txt`;
+    if (existsSync(baseFile)) unlinkSync(baseFile);
+  });
+
+  afterEach(() => {
+    fixture?.cleanup();
+  });
+
+  it("AC-7: sets origin/HEAD = main on invocation; idempotent across re-runs", () => {
+    fixture = makeRepo({});
+
+    expect(() => sh(`git symbolic-ref refs/remotes/origin/HEAD`, fixture.workdir)).toThrow();
+
+    runHook(fixture.workdir, { session_id: sessionId, source: "startup" });
+    expect(sh(`git symbolic-ref refs/remotes/origin/HEAD`, fixture.workdir)).toBe("refs/remotes/origin/main");
+
+    runHook(fixture.workdir, { session_id: sessionId, source: "resume" });
+    expect(sh(`git symbolic-ref refs/remotes/origin/HEAD`, fixture.workdir)).toBe("refs/remotes/origin/main");
+  });
+});

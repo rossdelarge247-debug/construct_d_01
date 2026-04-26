@@ -182,6 +182,8 @@ These rules govern how Claude makes decisions and builds plans. Guardrails again
 
 **Branch-resume check.** Enforced by `.claude/hooks/session-start.sh` (SessionStart): at turn 0, when the current branch matches the harness suffix pattern `^claude/.+-[A-Za-z0-9]{5}$` AND the non-suffixed canonical branch exists on origin, the context block surfaces a `### Branch-resume check` section with the literal `git fetch / git checkout -B / git branch -D` resync recipe. The hook auto-detects; the discipline is to act on the warning rather than dismiss it. Sessions 33 + 34 each landed on a suffixed orphan when canonical work was on the non-suffixed branch — both lost ~5 minutes to manual `mcp__github__list_branches` diagnosis before the hook existed.
 
+**`origin/HEAD` set.** Enforced by `.claude/hooks/session-start.sh` (SessionStart): the hook runs `git remote set-head origin main 2>/dev/null || true` near the top, before any consumer can hit `fatal: ambiguous argument 'origin/HEAD'`. The `/security-review` skill + several spec-72 CI invocations resolve `origin/HEAD...` and fail noisily without it. Idempotent + offline-safe; no behaviour beyond ensuring the symbolic ref exists.
+
 ## Coding conduct
 
 These rules govern how Claude behaves when editing `src/`. Guardrails against over-engineering, silent decisions, and scope creep. Complementary to Product rules and Technical rules — doesn't replace either.

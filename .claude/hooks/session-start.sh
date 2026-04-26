@@ -12,6 +12,12 @@
 
 set -euo pipefail
 
+# Defensively set origin/HEAD so consumers like `/security-review` don't
+# fail with `fatal: ambiguous argument 'origin/HEAD'`. Idempotent + safe
+# offline — no-op if already set; suppresses errors if main doesn't exist
+# on origin yet (e.g. fresh clone before fetch).
+git remote set-head origin main 2>/dev/null || true
+
 INPUT=$(cat 2>/dev/null || echo '{}')
 SESSION_ID=$(printf '%s' "$INPUT" | jq -r '.session_id // "unknown"' 2>/dev/null || echo "unknown")
 
