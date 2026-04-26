@@ -22,5 +22,5 @@ export async function getStripeClient() {
   }
 
   const Stripe = (await import('stripe')).default
-  return new Stripe(stripeKey!, { apiVersion: '2025-03-31.basil' })
+  return new Stripe(stripeKey!, { apiVersion: '2026-04-22.dahlia' })
 }
