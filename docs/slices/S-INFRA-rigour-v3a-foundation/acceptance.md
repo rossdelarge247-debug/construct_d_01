@@ -1,109 +1,135 @@
-# S-INFRA-rigour-v3 · Hard, programmatically-enforced engineering rigour controls
+# S-INFRA-rigour-v3a-foundation · Commit-time + plan-time safety net
 
-> **STATUS: DRAFT — REQUEST-CHANGES from independent subagent review (session 36, 2026-04-26).**
-> Findings in `acceptance.md.review.json` (committed alongside this draft). Two block-severity findings (F3 unfalsifiable DoD-9; F5 self-modification protection bypassable in single commit) and a single-concern verdict of FAIL — reviewer recommends splitting into 3 sub-slices (foundation → subagent-suite → quality+rewrite) and unblocking β after the foundation slice rather than after the full programme.
-> **Next session: address findings before any src/ work.** Decision pending from the user on whether to split the slice per reviewer recommendation. The text below remains the original draft for reference — do not treat as the agreed plan.
+> **STATUS: REVISED — addresses v1 reviewer findings; pending v2 adversarial review.**
+> v1 review at `acceptance.md.review-v1.json`. Slice split per v1 reviewer recommendation; this slice is now foundation-only. v2 review of this revised acceptance is the next gate before any src/ work.
 
-**Slice ID:** `S-INFRA-rigour-v3`
-**Branch:** `claude/S-INFRA-rigour-v3` (cut from `origin/main` at `92f77d7`)
-**Single-concern:** *Programmatically enforce CLAUDE.md engineering principles (TDD, simplicity, security, adversarial review, slice-sizing) so they bind even under session pressure — replace memory-dependent rules with hooks, scripts, CI checks, and subagent gates that cannot be bypassed without explicit, audited override.*
+**Slice ID:** `S-INFRA-rigour-v3a-foundation`
+**Branch:** `claude/S-INFRA-rigour-v3` (will rename to `claude/S-INFRA-rigour-v3a-foundation` at first impl commit; deferred to keep current PR-URL stable across the planning iteration)
+**Predecessor:** none — first slice in the rigour-v3 programme
+**Successor:** `S-INFRA-rigour-v3b-subagent-suite`
+**Single-concern:** *commit-time and plan-time gates that catch discipline failures before code or plans are committed.* Both gates fire BEFORE work is locked in: pre-commit verifies the slice DoD; plan-gate verifies the plan against CLAUDE.md before code starts. v3b's "during-work review" subagents are out of scope here.
 
-If naming this concern requires "and", split it. The single noun phrase: **enforced engineering rigour**. *(Reviewer flagged this as too broad; see review JSON.)*
+If naming this concern requires "and", split it. The single noun phrase: **pre-commit and pre-plan safety net**. Two words bound by "and" — but they're the same shape (BEFORE-work gates), and reviewer F3c explicitly recommended bundling them as the v3a payload that unblocks β. Marking this acknowledged ambiguity rather than hand-waving past it.
 
-**Max-diff-lines budget:** 2400 lines net across all sessions (slice-program total). Per-session sub-budgets in §"Cross-session plan" below; CI-enforced once the budget gate ships in AC-7.
-
-**Blocks:** All feature work — including S-F7-β cleanup (currently parked at `claude/S-F7-beta-impl` HEAD `a3f67ec`, not yet PR'd). β cleanup resumes only after this slice merges to `main`.
-
-**Why:** A session-36 self-audit revealed systematic discipline lapses despite Tier-1 CLAUDE.md rules being loaded every session: TDD skipped on 5/7 ACs; functions written as monolithic 80–230-line page components against the function-size rule; `/security-review` + `/review` skill runs deferred to PR-time across the whole slice; one slice (AC-2) discovered mid-impl to actually be 4 concerns. Root causes (commit `a3f67ec` self-audit thread): sunk-cost bias under debugging pressure, optimistic deferrals compounding, definition-of-done drift, default React-route-component shape being monolithic, slice-size too big. Mitigations relying on "remember to do X" failed. This slice replaces them with mechanisms that cannot be remembered or forgotten — they fire on every relevant tool call.
+**Blocks:** S-F7-β cleanup (parked at `claude/S-F7-beta-impl` HEAD `a3f67ec`) — β cleanup resumes only after v3a merges to main.
+**Does NOT block:** v3b + v3c. Those slices' planning happens after v3a merges; their impl runs alongside β cleanup.
 
 ---
 
 ## Acceptance criteria
 
-| AC | Concern | Mechanism | Session target |
+| AC | Concern | Mechanism | Carries reviewer-finding fix |
 |---|---|---|---|
-| AC-1 | Foundational safety net | `scripts/verify-slice.sh` workhorse + `.claude/hooks/{pre-commit-verify,tdd-first-every-commit,session-integrity}.sh` + `eslint-baseline-allowlist.txt` + ESLint `max-lines-per-function` + coverage gate via vitest `--coverage` + `.claude/hooks-checksums.txt` for self-modification detection | **36 (this) + 37** |
-| AC-2 | Plan-time gate | `.claude/hooks/exit-plan-review.sh` (PreToolUse on `ExitPlanMode`) spawns subagent with fresh context, reviews plan against CLAUDE.md "Planning conduct" + spec 70 slice-sizing + simplicity-first; blocks plan exit on `architectural` severity findings | 37 |
-| AC-3 | Pair-programming hook | `.claude/hooks/pair-review.sh` (PostToolUse on Edit/Write) — pre-edit intent file (`.claude/edit-intent.txt`) + finding-response loop (`.claude/review-findings.json` with `severity ∈ {block, request-changes, nit}` + `disputed: reason` writer-response) + persistent reviewer memory across edits + reviewer-can-demand-Read | 38 |
-| AC-4 | Adversarial subagent suite | Five PreToolUse subagent gates: (a) commit-message accuracy review on `git commit`; (b) spec-quote enforcement on text matching `per spec X`; (c) `AskUserQuestion` framing review on every question; (d) periodic on-track audit (every N turns or M lines); (e) documentation-honesty review on HANDOFF / verification.md / SESSION-CONTEXT writes | 38–39 |
-| AC-5 | Multi-provider 3rd-agent PR reviewer | GitHub Action invoking a non-Anthropic LLM (OpenAI / Google) via API, anchor-free context (diff + CLAUDE.md only), adversarial role-prompt, severity-calibrated PR-blocking. Closes the cognitive-diversity gap that same-model self-review can't. Requires user to provision API key as repo secret. | 40 |
-| AC-6 | Structured-findings schemas | JSON Schema for `/security-review` + `/review` skill outputs (severity, threat-model-category, fix-recommendation per finding); parser in `scripts/verify-slice.sh` that rejects narrative-blob output + verifies every finding addressed-or-deferred-with-reason | 40 |
-| AC-7 | Quality controls | Stryker mutation testing per slice (≥75% mutants killed); control-tightening-only ratchet CI check (thresholds can only go UP, allowlist can only shrink); time-bound + slice-bound allowlist parser (every entry has `target-slice` + `expires`) | 41 |
-| AC-8 | Tooling | `scripts/open-slice-pr.sh` auto-generates PR body from acceptance.md + verification.md + skill outputs (author can't phrase around concerns); cron-scheduled `scripts/audit-controls.sh` GitHub Action opens monthly state-of-rigour issue (catches silent control atrophy) | 42 |
-| AC-9 | CLAUDE.md "Hard controls" rewrite | Promote rules from Tier-1 text to enforced-by-hook-X references; new top-level §"Hard controls" cataloguing every enforced gate with the script that enforces it, the file path, and the bypass procedure (which itself requires multi-key sign-off). Lands LAST so it documents the actual system rather than aspirations. | 42 |
+| AC-1 | Workhorse verify-slice script | `scripts/verify-slice.sh` running tsc + vitest + leak scan + verification.md/security.md presence + per-language coverage thresholds + spec 72 §11 13-item checklist presence in security.md | F1c (§11 binding); F6 (per-language coverage); F6c (must pass against this slice AND S-F7-α reference slice) |
+| AC-2 | Hooks-checksums + integrity check | `.claude/hooks-checksums.txt` (SHA256 of every `.claude/hooks/*.sh` + `.claude/settings.json` hook-registration block) + integrity check in `session-start.sh` (warns on drift); `.github/workflows/control-change-label.yml` requiring the `control-change` label on any PR touching `.claude/hooks/**`, `.claude/settings.json`, or `hooks-checksums.txt`. Label requires user approval (label-protection branch rule, one-time settings change). | F4b (settings.json registration in checksum scope); F5 (label-gated PRs are the real bypass-prevention; full multi-provider gate lands in v3c) |
+| AC-3 | ESLint function-size rule + allowlist | `max-lines-per-function: [error, { max: 40, IIFEs: true }]` with React-component override `[error, { max: 80 }]` for `*.tsx`; `docs/eslint-baseline-allowlist.txt` seeded empty (β offenders captured when β resumes); CI workflow denies new disable directives outside the allowlist | (none from v1; new rule per session-36 plan) |
+| AC-4 | Pre-commit verify-slice hook | `.claude/hooks/pre-commit-verify.sh` (PreToolUse on Bash matching `git commit`) — runs verify-slice.sh; blocks the commit on red. Harness-level, not git-level — bypasses by `--no-verify` don't apply. | (none from v1; new mechanism per session-36 plan) |
+| AC-5 | TDD-first-every-commit hook | `.claude/hooks/tdd-first-every-commit.sh` (PreToolUse on Bash matching `git commit -- src/`) — staged diff must touch `tests/` OR match a pure-rename / pure-config / pure-visual exemption pattern (whitelist of file globs); blocks otherwise. Every commit, not just first. | F2b (every-commit beats first-commit-only) |
+| AC-6 | Coverage gate | vitest config: `coverage.thresholds.lines: 90` for `.ts/.tsx`; verify-slice.sh parses lcov for new-line coverage on staged diff; fails if new src/ lines uncovered ≥10%. Bash `.sh` hooks tested via `shellspec` at ≥80% line per F6. | F6 (per-language coverage); test-quality substantively, not just structurally |
+| AC-7 | Plan-time gate | `.claude/hooks/exit-plan-review.sh` (PreToolUse on `ExitPlanMode`) spawns fresh-context subagent reviewing the plan against CLAUDE.md "Planning conduct" + spec 70 slice-sizing + simplicity-first; subagent verifies any branch / SHA / state assertion in the plan against actual git (per F4e). Blocks plan exit on `architectural` severity findings. | F4e (verify-before-planning enforcement); reviewer F3c (plan-gate in v3a payload) |
+| AC-8 | CLAUDE.md "Hard controls" stub section | Add new top-level §"Hard controls (in development)" to CLAUDE.md cataloguing the gates this slice ships, each with: file path, fire-time, bypass procedure (concretely defined: PR carries `control-change` label + user approval). Section is a stub that v3b/v3c extend; full consolidation rewrite is v3c's AC. | F3b (incremental CLAUDE.md edits permitted) |
 
-**Sigma check:** 9 ACs. Each is a single concern. AC-1 + AC-4 are bundled because each AC is a *cohesive set of related controls* (foundation; subagent suite) with the same mechanism shape; splitting them further would fragment commits without changing outcomes. AC-2 / AC-3 / AC-5 / AC-7 / AC-8 are cleanly singular.
+**Σ check:** 8 ACs in scope. Total in this table: 8. Match. *(F4c AC-arithmetic verifier deferred to v3b — automated this check then.)*
+
+---
+
+## Bottom-up budget
+
+Per F-budget v1 finding ("estimate appears to be vibes, not bottom-up"):
+
+| AC | Component | Lines |
+|---|---|---|
+| AC-1 | `scripts/verify-slice.sh` (gates + parsers) | 150 |
+| AC-1 | meta-tests via `shellspec` (failing-tests-first commit, then impl commit, separate SHAs per F2) | 100 |
+| AC-2 | `.claude/hooks-checksums.txt` + checksum-generator script | 30 |
+| AC-2 | `session-start.sh` integrity-check addition | 40 |
+| AC-2 | `.github/workflows/control-change-label.yml` | 40 |
+| AC-3 | ESLint config addition + `eslint-baseline-allowlist.txt` (empty seed) + CI denial check | 80 |
+| AC-4 | `pre-commit-verify.sh` hook | 40 |
+| AC-5 | `tdd-first-every-commit.sh` hook | 60 |
+| AC-6 | vitest config + lcov-parser in verify-slice.sh + `shellspec` config | 50 |
+| AC-7 | `exit-plan-review.sh` hook + subagent prompt template + git-state-verifier sub-script | 100 |
+| AC-8 | CLAUDE.md "Hard controls (in development)" §stub | 50 |
+| docs | this `acceptance.md` (revisions) + `security.md` + `verification.md` template + v2 review JSON | 200 |
+| **Total v3a** | | **~940 lines** |
+
+Across 2 sessions (37 + 38) = ~470 each. Reviewer's 3500-5000 estimate was for the FULL programme (v3a + v3b + v3c); v3a alone at ~940 fits.
 
 ---
 
 ## Cross-session plan
 
-**Session 36 (this):** AC-1a — slice planning artefacts (this `acceptance.md` + `security.md` + `verification.md` template) + meta-test fixtures for `verify-slice.sh` (test-first per the rule we're enforcing) + minimum-viable foundational pieces: `verify-slice.sh` skeleton (tsc + vitest + leak-scan + verification-presence), `.claude/hooks-checksums.txt` + integrity check in `session-start.sh`, ESLint `max-lines-per-function` config + initial allowlist seed (zero entries on main; β offenders captured when β resumes), pre-commit-verify hook registered in `settings.json`. Estimated 600 lines. **Does not yet ship: TDD-first-every-commit hook, coverage gate.** Those land session 37.
+**Session 37:** AC-1 (verify-slice.sh + meta-tests, with failing-meta-tests as a separate SHA before impl per F2/F2b) + AC-3 (ESLint config + allowlist) + AC-4 (pre-commit-verify hook) + AC-8 (CLAUDE.md "Hard controls" stub).  ~470 lines. End-of-session 37: branch's first impl commit must pass verify-slice.sh against itself AND against S-F7-α reference slice (per F6c).
 
-**Session 37:** AC-1b — finish foundational layer (TDD-first-every-commit hook + coverage gate via vitest --coverage + threshold enforcement) + AC-2 (plan-time `ExitPlanMode` gate with subagent review). Estimated 400 lines.
+**Session 38:** AC-2 (hooks-checksums + integrity + label workflow) + AC-5 (TDD-first-every-commit) + AC-6 (coverage gate) + AC-7 (plan-time gate). ~470 lines. End-of-session 38: full v3a foundation live, all 8 ACs landed, slice ready for PR + multi-provider review (which will be implemented in v3c — interim review gate is the user + the v2 acceptance reviewer extended for diff-review).
 
-**Session 38:** AC-3 (pair-programming PostToolUse hook + intent-vs-diff cycle) + AC-4a (commit-message subagent) + AC-4b (spec-quote enforcement subagent). Estimated 350 lines.
-
-**Session 39:** AC-4c (`AskUserQuestion` framing review subagent) + AC-4d (periodic on-track audit subagent) + AC-4e (documentation-honesty subagent). Estimated 300 lines.
-
-**Session 40:** AC-5 (multi-provider 3rd-agent reviewer GitHub Action) + AC-6 (structured-findings JSON Schema + parser + skill-template updates). Estimated 350 lines.
-
-**Session 41:** AC-7 (Stryker mutation testing config + threshold gate; control-tightening-only ratchet CI; time-bound + slice-bound allowlist parser). Estimated 300 lines.
-
-**Session 42:** AC-8 (PR auto-opener + cron audit GitHub Action) + AC-9 (CLAUDE.md "Hard controls" rewrite) + slice merge. Estimated 250 lines.
-
-**Total estimated:** ~2400 net new lines across 7 sessions. β cleanup resumes after merge.
+**Session 39:** v3a verification.md fill + adversarial run + security.md fill (13-item §72 §11 checklist evidenced) + open PR. β cleanup unblocks at v3a merge to main.
 
 ---
 
 ## In-scope
 
-- New scripts under `scripts/`
-- New hooks under `.claude/hooks/` registered in `.claude/settings.json`
-- New CI workflows under `.github/workflows/`
-- New JSON Schemas under `schemas/`
-- ESLint config additions in `.eslintrc.cjs` (or `eslint.config.mjs`)
-- New baseline / allowlist files under `docs/eslint-baseline-allowlist.txt` (and similar)
-- Vitest config additions for coverage threshold
-- Stryker config (`stryker.conf.json`) for mutation testing
-- CLAUDE.md updates (final session only) promoting rules to hard-control references
-- Slice artefacts: this `acceptance.md`, `security.md`, `verification.md`, `acceptance.md.review.json` (subagent-generated this session)
+- `scripts/verify-slice.sh` + meta-tests under `tests/shellspec/`
+- `.claude/hooks/{pre-commit-verify,tdd-first-every-commit,exit-plan-review}.sh` + checksum updates in `hooks-checksums.txt`
+- `.claude/hooks-checksums.txt` (new) + checksum-generator script under `scripts/`
+- `session-start.sh` integrity-check addition (incremental edit)
+- `.github/workflows/control-change-label.yml` (new) + extension to existing `pr-dod.yml` to call verify-slice.sh
+- ESLint config additions + `docs/eslint-baseline-allowlist.txt` (empty seed)
+- vitest config additions for coverage thresholds
+- `shellspec` dev-dependency + config
+- Slice artefacts: this `acceptance.md` (revised), `security.md`, `verification.md`, `acceptance.md.review-v2.json` (next subagent run)
+- CLAUDE.md `+§"Hard controls (in development)"` stub section (incremental, NOT consolidating rewrite)
 
-## Out-of-scope
+## Out-of-scope (deferred to v3b / v3c)
 
-- Modifications to existing β-branch code (β remains parked; cleanup is a separate slice)
-- Modifications to existing α `src/lib/**` code (legacy refactor is its own future slice)
-- Per-existing-file enforcement of new ESLint rules (scoped to `src/app/**` + `src/components/**` initially per session-36 confirmation; α / lib refactor deferred)
-- Branch protection rule changes on `main` (one-time GitHub repo-settings change the user makes; not a code commit)
-- Anthropic-API-key provisioning for multi-provider reviewer (user provisions repo secret; AC-5 uses it)
-- Anything that requires human review beyond the multi-provider 3rd-agent (canonical human reviewer is the user's branch-protection setting; this slice does not implement human-review tooling)
+- All five "during-work review" subagent gates (commit-msg, spec-quote, AskUserQuestion-framing, periodic on-track, doc-honesty) — v3b
+- Pair-programming PostToolUse hook + intent file + finding-response loop — v3b
+- AC-arithmetic verifier (F4c) — v3b
+- Snapshot-before-refactor enforcement (F4d) — v3b
+- Multi-provider 3rd-agent reviewer — v3c
+- Structured-findings JSON Schema for `/security-review` + `/review` — v3c
+- DoD-evidence-parser AC (F1) — v3c
+- Deferral-reason-validation (F1b) — v3c
+- Stryker mutation testing — v3c
+- Origin/main-anchored ratchet (F5c) — v3c (full ratchet + bypass procedure)
+- Time-bound + slice-bound allowlist parser — v3c
+- PR auto-opener — v3c
+- Cron audit GitHub Action — v3c
+- CLAUDE.md "Hard controls" CONSOLIDATING rewrite (full §rewrite per AC-9-original) — v3c. v3a only adds an incremental stub section.
+- Modifications to existing β-branch code — separate β-cleanup slice, post-v3a-merge
+- Modifications to existing α `src/lib/**` — own future slice
 
-## Dependencies
+## External preconditions (per F6d)
 
-- `vitest` ≥ 4 (already in pnpm deps)
-- `@stryker-mutator/core` + `@stryker-mutator/vitest-runner` (new dep, AC-7)
-- `eslint` config supporting `max-lines-per-function` (already in deps)
-- `jq` (already in deps for hooks)
-- GitHub Actions runners (already in `.github/workflows/ci.yml`)
-- A non-Anthropic API key for AC-5 (user provisions)
+These must be satisfied before v3a slice-merge to main. They are NOT slice-author-verifiable; track separately in the prerequisites table below with timestamp on completion.
+
+| Precondition | Owner | Status | Verifier |
+|---|---|---|---|
+| GitHub branch protection on `main` requires ≥1 human approval before merge | User | not yet | `scripts/audit-controls.sh` `gh` API call (lands in v3c; until then manual user confirmation) |
+| GitHub branch protection on `main` requires `control-change` label for `.claude/hooks/**` PRs | User | not yet | same as above |
+| Label `control-change` exists on the repo with restricted-applicability (only user can apply) | User | not yet | `gh label list` check |
+
+Slice DoD does NOT depend on these (per F3 fix); slice MERGE does. PR description carries explicit "External preconditions confirmed by user: [signature]" line as the merge gate.
 
 ## Definition of Done (slice-level)
 
-All nine ACs landed across sessions 36–42 with:
+All 8 ACs landed across sessions 37–39 with:
 
 1. Each AC's evidence captured in `verification.md` against actual commit SHA
-2. `scripts/verify-slice.sh` itself passes against this slice (it dogfoods)
-3. `.claude/hooks-checksums.txt` matches all current hooks
-4. ESLint zero-disable check passes
-5. Coverage on this slice's own scripts ≥ 90% (recursion: rigour infra meets its own quality bar)
-6. Adversarial review skills run + outputs structured + addressed
-7. Multi-provider 3rd-agent reviewer (AC-5) approves the merge
-8. PR opened via `scripts/open-slice-pr.sh` (AC-8)
-9. User branch-protection on `main` configured (one-time, captured in HANDOFF as completed external action)
-10. CLAUDE.md updated (AC-9) describing the now-live system
+2. `scripts/verify-slice.sh` passes against (a) this slice's own commits AND (b) the prior `S-F7-α` reference slice without modification (per F6c — catches "wrote tests to match my output" failure mode)
+3. `.claude/hooks-checksums.txt` matches all current `.claude/hooks/*.sh` + the relevant block of `.claude/settings.json` (F4b)
+4. ESLint zero-disable check passes (allowlist remains empty for v3a code; β offenders captured when β resumes)
+5. Per-language coverage on this slice's own scripts: `.sh` ≥80% via shellspec, `.ts` ≥90% via vitest (per F6)
+6. Adversarial subagent re-review on slice diff returns verdict `approve` or `nit-only` (full multi-provider review gate lands in v3c; until then the same subagent template used for plan-review extended for diff-review)
+7. spec 72 §11 13-item security checklist evidenced in `security.md` for this slice — every box has either evidence or explicit deferral text per spec 72 §11 exemption pattern (per F6e)
+8. PR opened with body explicitly listing: external preconditions confirmed (per the prerequisites table); single-concern statement; v2 review verdict reference
+9. CLAUDE.md `+§"Hard controls (in development)"` stub section added incrementally with this slice's gates documented (full consolidating rewrite is v3c's AC, not this slice's)
+
+External preconditions table (above) gates MERGE, not slice-completion.
 
 ## Notes
 
-- The slice DOGFOODS its own controls. Once AC-1 lands, every subsequent commit on this branch must satisfy `verify-slice.sh`. Once AC-3 lands, every Edit on this branch fires pair-review. This forces the controls to be *usable* not just *implemented*.
-- Bootstrapping order matters. AC-1's first commit must be the meta-test fixtures (test-first), THEN the implementation. The failing-tests-pass-after-impl pattern is what makes the rule real.
-- A subagent reviews this `acceptance.md` itself before the first src/ commit on this branch. See `acceptance.md.review.json` (generated session 36 by independent-context Plan-agent invocation against CLAUDE.md slice-sizing + this acceptance.md text).
+- **The slice DOGFOODS its own controls starting at session-37 first impl commit.** Once verify-slice.sh + pre-commit-verify hook are live mid-session-37, every subsequent commit on this branch must pass them. Session 36 itself is exempt (the planning artefacts predate the controls); commits ff1254c + 405badd carry that exemption explicitly. Session-37 onwards: no exemptions on this branch.
+- **Bootstrapping is honour-system for AC-1's failing-meta-tests-first commit** (per F2). Mitigation: commit log is reviewed at slice end (manual user check + the v2 acceptance reviewer extended for diff-review). Two commit SHAs must exist in order — one with failing meta-tests, one with the impl that makes them pass. If the order is wrong, the v3a verification.md adversarial-run section flags it and the slice can't be merged.
+- **A subagent reviews this revised acceptance.md (`acceptance.md.review-v2.json`) before the first src/ commit on this branch** — that's the very next action after this commit. v1 review (request-changes) is preserved at `acceptance.md.review-v1.json` as the reason this revision exists.
+- **Self-modification protection scope.** AC-2 covers `.claude/hooks/**` + `.claude/settings.json` hook-registration block + `hooks-checksums.txt`. It does NOT yet cover `.eslintrc` thresholds, `vitest.config` coverage thresholds, or `verify-slice.sh` itself — full origin/main-anchored ratchet for those lands in v3c (per F5c). Until then, those config files carry a TODO comment referencing v3c and are tracked in the prerequisites table for v3c.

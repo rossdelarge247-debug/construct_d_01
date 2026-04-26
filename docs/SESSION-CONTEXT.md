@@ -124,25 +124,31 @@ Single-P0 session. S-F7-β is foundational and substantial (~1100 lines impl + t
 - **Tier 4 (reference only, don't read proactively):** 68f/g open registers · spec 67 · spec 65 · `docs/HANDOFF-SESSION-*.md` · `docs/handoffs-archive/` · `docs/v2/v2-backlog.md` · `docs/slices/S-*/` as slice-pattern reference. Consult before proposing new work.
 ## Branch
 
-> **SESSION 36 OUTCOME (2026-04-26):** Two branches in flight. ALL feature work paused until S-INFRA-rigour-v3 (or its v3a split per reviewer recommendation) merges to main.
+> **SESSION 36 OUTCOME (2026-04-26):** Two branches in flight. ALL feature work paused until **S-INFRA-rigour-v3a-foundation** merges to main (split per session-36 v1 reviewer; v3a unblocks β, v3b + v3c run in parallel after).
 >
-> 1. **`claude/S-F7-beta-impl`** at HEAD `a3f67ec` — all 7 S-F7-β ACs shipped (28cc585 AC-7 · d8e2246 AC-1 · fcb5028 AC-5 · 2a2232f AC-6 · 857b958 AC-2/pageExtensions · c2abe62 AC-3 · 8166f89 AC-4 · a3f67ec verification.md). Branch is pushed; PR NOT opened. β cleanup (security-review skill run, unit tests for handlers, component decomposition, 13-item §72 §11 checklist) parked pending rigour infra.
-> 2. **`claude/S-INFRA-rigour-v3`** at HEAD `92f77d7` (= origin/main) + uncommitted draft. Slice acceptance.md drafted; adversarial subagent reviewed it and returned `request-changes` with 2 block-severity findings (F3 unfalsifiable DoD-9 on branch-protection; F5 self-modification of hooks-checksums.txt is bypassable in single commit) and a single-concern verdict of FAIL. **Reviewer recommends splitting into 3 sub-slices: v3a (foundation) unblocks β; v3b (subagent-suite); v3c (multi-provider + ratchet + CLAUDE.md rewrite).** Decision pending from user.
+> 1. **`claude/S-F7-beta-impl`** at HEAD `a3f67ec` — all 7 S-F7-β ACs shipped (28cc585 AC-7 · d8e2246 AC-1 · fcb5028 AC-5 · 2a2232f AC-6 · 857b958 AC-2/pageExtensions · c2abe62 AC-3 · 8166f89 AC-4 · a3f67ec verification.md). Branch pushed; PR NOT opened. β cleanup (security-review skill run, unit tests for handlers, component decomposition, 13-item §72 §11 checklist) parked pending v3a merge.
+> 2. **`claude/S-INFRA-rigour-v3`** at HEAD `405badd` (post-split commit) — original single-slice plan rejected by adversarial subagent v1 review (verdict: request-changes; 2 block-severity findings F3 + F5; single-concern verdict FAIL). Split per reviewer into three slice directories:
+>    - `docs/slices/S-INFRA-rigour-v3a-foundation/` — pre-commit + plan-time gates; **merges first → unblocks β**
+>    - `docs/slices/S-INFRA-rigour-v3b-subagent-suite/` — pair-programming + 5 adversarial subagent gates (stub acceptance.md only; full ACs drafted at slice start)
+>    - `docs/slices/S-INFRA-rigour-v3c-quality-and-rewrite/` — multi-provider 3rd-agent + structured findings + Stryker + ratchet + allowlist parser + PR auto-opener + cron audit + CLAUDE.md "Hard controls" consolidating rewrite (stub only)
+>
+>    v3a-foundation/acceptance.md REVISED in session 36 addressing v1 reviewer findings — reframed DoD-9 as External Preconditions (F3 fix), real self-mod protection via `control-change` PR label workflow (F5 fix), spec 72 §11 13-item checklist binding (F1c), per-language coverage spec (F6), verify-before-planning enforcement in plan-gate (F4e), settings.json hook-registration in checksum scope (F4b), every-commit TDD beats first-commit-only (F2b), bottom-up budget ~940 lines for v3a (F-budget), failing-meta-tests-first as separate SHA before impl (F2), CLAUDE.md "Hard controls (in development)" stub permitted incrementally (F3b), reference-slice dogfood requirement (F6c), clean external-preconditions table (F6d).
+>
+>    Adversarial subagent v2 review of revised acceptance.md spawned at session-36 wrap — running async at end of session. v2 verdict captured in `acceptance.md.review-v2.json` once complete; if any block-severity issues remain or v2 verdict is `request-changes`, next session iterates BEFORE any src/ work. If v2 verdict is `approve` or `nit-only`, next session begins AC-1 impl with failing-meta-tests-first commit.
 >
 > **Next session (37) FIRST ACTIONS:**
-> 1. Read `docs/slices/S-INFRA-rigour-v3/acceptance.md.review.json` — full reviewer findings.
-> 2. Get user decision on split (v3 single-slice vs v3a/v3b/v3c per reviewer).
-> 3. Address all block + request-changes findings before any src/ work — particularly: real self-modification protection for hooks-checksums (signed key OR origin/main-anchored ratchet OR append-only audit log); spec 72 §11 13-item security checklist threaded into AC schema; settings.json hook-registration checksum; verify-before-planning enforcement on SHA claims; per-language coverage spec (bats for .sh, vitest for .ts).
-> 4. Re-spawn adversarial subagent on revised acceptance.md until verdict is `approve` or only `nit` findings remain.
-> 5. ONLY THEN begin foundational impl. First commit must be failing meta-tests (test-first), separate SHA from impl commit (per F2 / F2b).
->
-> The expanded subagent-suite (5 gates per session 36 discussion: commit-msg, spec-quote, AskUserQuestion-framing, periodic-on-track, doc-honesty) + multi-provider 3rd-agent reviewer + 6 top-tier additions remain in scope per session-36 user confirmation. Slice structure is what's pending decision, not scope.
+> 1. Check v2 review verdict at `docs/slices/S-INFRA-rigour-v3a-foundation/acceptance.md.review-v2.json` (committed at session-36 wrap or session-37 startup if subagent hadn't returned yet).
+> 2. If v2 verdict not yet `approve` / nit-only: address remaining findings, re-spawn for v3 review, iterate.
+> 3. If clean: rename branch `claude/S-INFRA-rigour-v3` → `claude/S-INFRA-rigour-v3a-foundation` (open question; deferring rename until impl starts to keep current PR-URL stable).
+> 4. Begin AC-1 impl: failing meta-tests for verify-slice.sh as a separate commit SHA, then verify-slice.sh impl commit. Two distinct commits (per F2/F2b).
+> 5. Continue session-37 plan: AC-1 + AC-3 (ESLint config) + AC-4 (pre-commit-verify hook) + AC-8 (CLAUDE.md "Hard controls" stub). Estimated ~470 lines.
 
 ### Branch state at session 36 wrap (verified)
 
-- Active branch: `claude/S-INFRA-rigour-v3` (HEAD `92f77d7`, 0 ahead, 0 behind origin/main; uncommitted: acceptance.md draft + review JSON + this SESSION-CONTEXT edit)
-- Parked branch: `claude/S-F7-beta-impl` (HEAD `a3f67ec`, 8 ahead origin/main)
-- Both pushed (β branch); v3 branch pushed at session-36 commit below.
+- Active branch: `claude/S-INFRA-rigour-v3` at HEAD `405badd` (post-split commit) — pushed
+- v2 review subagent: spawned async; result captured in `acceptance.md.review-v2.json` and committed before session ends (or at session-37 startup if not returned in time)
+- Parked branch: `claude/S-F7-beta-impl` at HEAD `a3f67ec` (8 ahead origin/main) — pushed
+- Both branches pushed; both have unopened PRs. v3a slice merges to main FIRST; β PR opens after v3a merges + β cleanup completes.
 
 **If session 36 lands on a suffixed orphan** (e.g. `claude/resume-S-F7-beta-dev-surface-XXXXX`): the now-merged `session-start.sh` from PR #21 should auto-surface a `### Branch-resume check` section in the turn-0 context block with the literal `git fetch / git checkout -B / git branch -D` resync recipe. **First natural test of automated detection** — if it doesn't fire, escalate (hook bug or harness behaviour change). Manual recovery still works if needed:
 
