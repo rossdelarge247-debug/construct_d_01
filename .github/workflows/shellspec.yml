@@ -1,0 +1,17 @@
+name: shellspec
+on:
+  pull_request:
+  push:
+
+jobs:
+  shellspec:
+    name: shellspec
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install shellspec
+        run: |
+          curl -fsSL https://git.io/shellspec | sh -s -- --yes
+          echo "$HOME/.local/bin" >> "$GITHUB_PATH"
+      - name: Run shellspec
+        run: shellspec
