@@ -70,7 +70,17 @@ jobs:
           node-version: ${{ env.NODE_VERSION }}
           cache: npm
       - run: npm ci
-      - run: npm test
+      # v3b AC-14 — S-INFRA-rigour-v3b-subagent-suite/acceptance.md L106-110:
+      # `--coverage` activates v3a's dormant Gate 5 by producing coverage/lcov.info
+      # via @vitest/coverage-v8. Threshold (≥90%) lives in vitest.config.ts.
+      - run: npm test -- --coverage
+      - name: Upload coverage artefact
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage
+          path: coverage/
+          if-no-files-found: error
+          retention-days: 7
 
   build:
     name: Production build
