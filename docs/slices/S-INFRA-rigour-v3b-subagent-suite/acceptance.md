@@ -33,6 +33,40 @@ Per `docs/slices/S-INFRA-rigour-v3a-foundation/verification.md` § "Adversarial 
 
 9. **Auto-`/review`-on-PR-open as a CI status check (real code-quality gate).** Surfaced session 41: v3a + v3b + v3c collectively cover process discipline (TDD, spec-quote, doc-honesty, intent-vs-code drift, test mutation, reviewer-of-reviewer) but **none ships an automated line-by-line code-review subagent that reads the diff against acceptance criteria + CLAUDE.md "Coding conduct" (simplicity first, names carry the design, small single-purpose functions, effects behind interfaces, surgical changes) and emits findings before the human reviewer arrives.** Closest planned items: (a) pair-programming PostToolUse hook (v3b above) — but its framing is "diff vs declared intent", which catches drift not quality; (b) multi-provider 3rd-agent reviewer (v3c) — backstops a v3b reviewer that doesn't exist; (c) `/review` skill (already shipped) — manual user-invoked only, not gated. Proposed AC: a `pull_request` workflow that runs `claude -p` (or wraps `/review`) over the PR diff with a coding-conduct rubric prompt, posts structured findings as a check run with an `approve` / `nit-only` / `request-changes` / `block` verdict (G23 vocabulary). Same shape as `pr-dod.yml`. Without this, the human reviewer remains the only line-level eyeball, contradicting "rigour > speed".
 
+10. **AUDIT PREREQUISITE — re-read prior parked-candidates before drafting v3b's full AC table.** Surfaced session 41 by user audit ("I'm a little worried some thinking has been lost"). Confirmed: significant TDD-workflow + agentic-checks thinking from earlier sessions and `docs/engineering-phase-candidates.md` was NOT propagated into v3b's stub or the carry-over items 1–9 above. **v3b AC drafting must NOT begin bottom-up from the current 9-item carry-over.** The drafter must first audit the sources below, then re-draft top-down from the full inventory. The session-36 ~1500-line budget estimate is probably right in magnitude but wrong in composition.
+
+   **Specific lost-thinking items (named explicitly so they don't get dropped again):**
+
+   - **(A) `tdd-guard` PreToolUse hook** — `HANDOFF-SESSION-31.md` § 7 (parked candidate, sourced from external TDD-workflow article). Hook fires on `Write`/`Edit` to `src/`, runs the affected test file scoped to the change, **refuses on RED**. *Strength delta:* this gates **behaviour** (tests pass), whereas v3a's shipped AC-5 (`tdd-first-every-commit.sh`) only gates **paperwork** (tests/ is staged alongside src/). The originally-parked stronger version was replaced by the weaker discipline-only check during v3a planning. **Both should ship; they're complementary.** Implementation: PreToolUse:Write/Edit matcher; map `src/<path>` to `tests/<path>.test.ts` (or scoped subset); `npx vitest run <test-file>` on affected test; block on RED with G17 message.
+
+   - **(B) `.claude/agents/slice-reviewer.md` persona** — `docs/engineering-phase-candidates.md` § E (L126). Adversarial pre-commit review persona: takes a slice diff + AC doc + test plan; outputs edge cases missed, security concerns, regression risks, AC gaps, scope creep within the diff. *Strength delta vs item 9 above:* item 9 wraps `claude -p` ad-hoc; this is a **canonicalised persona prompt** repo-committed at `.claude/agents/*.md`. Stable across sessions, version-controlled, not subject to prompt drift. Item 9 should land **on top of** this persona, not instead of it.
+
+   - **(C) `.claude/agents/acceptance-gate.md` persona** — `engineering-phase-candidates.md` § E (L127). Walks the slice's AC list, verifies evidence per AC (test result, screenshot, preview deploy URL), outputs pass/fail-per-AC with specific gap narrative if fail. *Strength delta:* `verify-slice.sh` does file-presence + tooling-runs (tsc / vitest / ESLint) but cannot **read verification.md and judge whether the evidence text actually supports the claim**. The persona does that judgment work. Distinct from anything currently planned.
+
+   - **(D) `.claude/agents/ux-polish-reviewer.md` persona** — `engineering-phase-candidates.md` § E (L128). Reviews micro-interaction / animation / `prefers-reduced-motion` / keyboard-only / screen-reader. *Relevance:* not for v3a (infra slice, no UI surface) but **load-bearing for every src/ slice from S-F1 onwards**. North star demands polish; this is the agent that catches where it's missing.
+
+   - **(E) TDD bail-out criteria** — `engineering-phase-candidates.md` L169. *"When is TDD not tractable and explicit-manual-test-after-code acceptable? Lean: pure-visual UI, visual-regression-only covered surfaces. Everything else: test first."* AC-5 ships an exemption-allowlist *mechanism* but no documented *criteria* for what qualifies. Without criteria, the allowlist will accumulate ad-hoc additions. v3b should land the criteria as a documented rubric (where: `docs/tdd-exemption-allowlist.txt` header? CLAUDE.md? Hard controls stub?).
+
+   - **(F) Preview-deploy verification checklist** — `engineering-phase-candidates.md` L166. DoD item 4 mentions "Preview deploy verified in-browser if UI (golden path + edge cases + prefers-reduced-motion)" but the **exact checklist** (golden path / edge cases / prefers-reduced-motion / keyboard-only / mobile viewport / screen-reader) and **where it's recorded per slice** (`verification.md` § Preview-deploy?) is not formalised. Without the rubric, "verified in-browser" means whatever the engineer felt like checking. v3b should formalise.
+
+   - **(G) `.claude/agents/` location convention** — `engineering-phase-candidates.md` § E L132. *"Repo-level `.claude/agents/` (committed, travels with the project). Not user-home (`~/.claude/`)."* v3a used `.claude/subagent-prompts/exit-plan-review.md` for the exit-plan-review template — close but **inconsistent** with the original convention. v3b should reconcile: either move existing prompt(s) under `.claude/agents/` or document the distinction (e.g. `.claude/subagent-prompts/` for hook-spawned templates vs `.claude/agents/` for review personas — but that's a post-hoc rationalisation, not the original design).
+
+   **Audit scope before v3b AC drafting:**
+
+   - `docs/HANDOFF-SESSION-{30,31,32}.md` — parked-candidates lists. Tier-4 archive per `CLAUDE.md` Information tiers; this audit is the explicit one-time exception per "deliberate audit pass" framing.
+   - `docs/engineering-phase-candidates.md` (full, sections A–F) — the load-bearing source. Items A, B, F (above) are pulled from § E + L166 + L169; sections A–D and L100–L170 may have more.
+   - `docs/v2/v2-backlog.md` (98 items) — `grep -nE 'review|TDD|test|hook|agent'` to surface review/test items that may have been missed.
+   - All v3b carry-over items 1–9 above. Some may collapse into the items A–G; others may stand alone.
+
+   **Drafting protocol:**
+
+   1. Complete the audit. Capture findings in `docs/slices/S-INFRA-rigour-v3b-subagent-suite/audit-findings.md` (one sentence per source item with verdict: include / collapse-into-X / drop-with-reason).
+   2. Re-draft the v3b AC table top-down from the audit-findings file, NOT bottom-up from the 9-item carry-over.
+   3. Run `/security-review` and `/review` against the re-drafted acceptance.md before proceeding to RED-tests-first impl.
+   4. The audit-findings file is committed as part of v3b's S-1 commit; preserved as audit trail.
+
+   **Why this matters now:** v3a shipped a discipline-only AC-5 because session-36's stub-drafter didn't audit session-31's parked candidate; result is the **weaker** TDD gate is now the slice's de facto contract. If v3b drafts bottom-up from the 9-item carry-over, the same pattern repeats: items A–G (which are larger and more important than several of items 1–9) get dropped or under-specified again. **Audit before drafting; draft top-down from audit; ship the right scope.**
+
 **Blocks:** S-INFRA-rigour-v3c (quality-and-rewrite predecessor)
 **Blocked by:** S-INFRA-rigour-v3a-foundation merge to main
 
