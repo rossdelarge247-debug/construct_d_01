@@ -9,6 +9,33 @@
 # Added session 25 in response to the audit finding that Tier-1
 # CLAUDE.md rules don't reliably persist across sessions. See
 # docs/HANDOFF-SESSION-25.md.
+#
+# --- Session-base re-baseline (AC-12, post-PR-#25) ---
+# The cached base SHA at /tmp/claude-base-${SESSION_ID}.txt anchors
+# line-count.sh's session-authored-churn measurement. The original
+# absent-only guard left the cached SHA stale across mid-session
+# `git checkout -B <branch> origin/<branch>` resyncs (the documented
+# Branch-resume recipe in CLAUDE.md), so subsequent line-count deltas
+# included the cross-branch resync diff (~2,200 lines for v3a-foundation
+# in session 40; ~1,447 lines for PR-#25 resync in this session pre-fix).
+#
+# Per docs/slices/S-INFRA-rigour-v3b-subagent-suite/acceptance.md AC-12,
+# the guard is relaxed to: rebaseline when the file is absent OR when
+# `git diff --shortstat <cached-base> HEAD` insertions+deletions ≥ 200.
+# Threshold 200 absorbs normal session churn while catching cross-branch
+# hops (typical inheritance: 1k–5k lines). Same-SHA fires noop because
+# diff = 0 < 200; this is the once-per-hop semantics the spec mandates.
+#
+# Calibration model (from docs/HANDOFF-SESSION-30.md §Calibration data,
+# rebracketed against measured behaviour in sessions 32–43):
+# - Single Edit, in-place modify-N-lines      → `+N this change`
+# - Single Edit, same-length string swap      → `+0 this change`
+# - Edit replace_all hitting N occurrences    → `+N×2 this change`
+# - Edit on tracked file, first post-commit   → anomalous `+350` once
+#                                                (baseline-init artefact)
+# Cumulative session-churn = additions + deletions vs <DIFF_BASE> +
+# untracked-file linecount. Untracked-file lines re-roll when the file
+# is `git add`ed; tracked-file deltas are stable across re-edits.
 
 set -euo pipefail
 
@@ -19,13 +46,44 @@ SESSION_ID=$(printf '%s' "$INPUT" | jq -r '.session_id // "unknown"' 2>/dev/null
 BRANCH=$(git branch --show-current 2>/dev/null || echo "unknown")
 HEAD_SHA=$(git rev-parse --short HEAD 2>/dev/null || echo "unknown")
 
-# Capture the full HEAD SHA as this session's measurement base. Idempotent
-# across resume / clear re-invocations so the base anchors at the FIRST
-# session-start of a given session_id, not later ones. Read by
+# Capture the full HEAD SHA as this session's measurement base. Read by
 # line-count.sh to compute session-authored churn (vs branch-inherited).
+#
+# Rebaseline conditions (per AC-12, header comment above):
+#  (a) base file absent — first hook fire for this session_id;
+#  (b) cumulative `git diff --shortstat` insertions+deletions between
+#      cached base and current HEAD ≥ 200 — catches mid-session
+#      branch-resyncs (harness-orphan → canonical recipe in CLAUDE.md);
+#  (c) cached base SHA unreachable in object store — treat as absent.
+# Same-SHA fires are noop (diff = 0 < 200) — once-per-hop semantics.
 SESSION_BASE_FILE="/tmp/claude-base-${SESSION_ID}.txt"
-if [ ! -f "$SESSION_BASE_FILE" ] && [ "$HEAD_SHA" != "unknown" ]; then
-  git rev-parse HEAD > "$SESSION_BASE_FILE" 2>/dev/null || true
+if [ "$HEAD_SHA" != "unknown" ]; then
+  should_rebaseline=0
+  if [ ! -f "$SESSION_BASE_FILE" ]; then
+    should_rebaseline=1
+  else
+    CACHED_BASE=$(cat "$SESSION_BASE_FILE" 2>/dev/null || echo "")
+    CURRENT_HEAD_FULL=$(git rev-parse HEAD 2>/dev/null || echo "")
+    if [ -n "$CACHED_BASE" ] && [ "$CACHED_BASE" != "$CURRENT_HEAD_FULL" ]; then
+      if git cat-file -e "${CACHED_BASE}^{commit}" 2>/dev/null; then
+        DIFF_TOTAL=$(git diff --shortstat "$CACHED_BASE" "$CURRENT_HEAD_FULL" 2>/dev/null \
+          | awk '{
+              ins=0; del=0
+              for(i=1;i<=NF;i++){
+                if($i ~ /insertion/) ins=$(i-1)
+                if($i ~ /deletion/) del=$(i-1)
+              }
+              print ins+del+0
+            }')
+        [ "${DIFF_TOTAL:-0}" -ge 200 ] && should_rebaseline=1
+      else
+        should_rebaseline=1
+      fi
+    fi
+  fi
+  if [ "$should_rebaseline" -eq 1 ]; then
+    git rev-parse HEAD > "$SESSION_BASE_FILE" 2>/dev/null || true
+  fi
 fi
 
 # Fetch origin/main quietly; tolerate offline
