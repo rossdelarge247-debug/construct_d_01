@@ -51,7 +51,7 @@ Group ordering per acceptance.md L75 + S-3 priority pull-forward (AC-14 first pe
 
 **CI verification:**
 - RED state CI-observed: PR #25 first run on `6b61073` — `Unit + logic tests` job → `failure` (run [`25020431032` job `73279289462`](https://github.com/rossdelarge247-debug/construct_d_01/actions/runs/25020431032/job/73279289462)). All 12 other checks: success.
-- GREEN state CI-observed: pending — fill in run-ID + job-ID at slice wrap.
+- GREEN state CI-observed: PR #25 second run on `09e1de5` — `Unit + logic tests` job → `success` (run [`25020673750` job `73280101422`](https://github.com/rossdelarge247-debug/construct_d_01/actions/runs/25020673750/job/73280101422)). Latest commit `2f4c6d2` (re-baseline + verification.md scaffold) — same job → `success` (run [`25021070315` job `73281396948`](https://github.com/rossdelarge247-debug/construct_d_01/actions/runs/25021070315/job/73281396948)). All 13 + 1-rerun checks green; control-change-label workflow re-fired on `labeled` event → `success` (run [`25021075688` job `73281414401`](https://github.com/rossdelarge247-debug/construct_d_01/actions/runs/25021075688/job/73281414401)).
 
 **H6 manual RED-tests-first temporal ordering (per acceptance.md DoD-7):**
 - RED `6b61073` pushed at `2026-04-27T21:25Z`; CI `failure` observed at `2026-04-27T21:27:08Z`.
