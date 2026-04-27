@@ -108,6 +108,23 @@ The v3b AC table is drafted top-down from this list, NOT bottom-up from carry-ov
 Per `acceptance.md:62-66`:
 
 1. ✅ Audit complete — this file.
-2. **Next:** re-draft v3b AC table top-down from §5 above, NOT bottom-up from carry-over 1–9.
-3. **Then:** run `/security-review` and `/review` against the re-drafted `acceptance.md` BEFORE any RED-tests-first impl.
-4. This file commits as part of v3b's S-1 commit; preserved as audit trail.
+2. ✅ v3b AC table re-drafted top-down from §5 above (acceptance.md @ session 41 commit `517a91b`).
+3. **Next:** run `/security-review` and `/review` against the re-drafted `acceptance.md` BEFORE any RED-tests-first impl. (Deferred to session 42 P0 per session-41 wrap.)
+4. ✅ This file committed as part of v3b's S-1 commit (`517a91b`); preserved as audit trail.
+
+## 7 · Audit completeness verification (gap-closure pass)
+
+After the initial S-1 audit was committed, the user (correctly) pushed back: "have we reviewed the previous session logs and identified all the thinking that had been lost and brought it back into our planning that had been flagged as being missed before?" Honest answer at the time: no — three audit surfaces had been grep-filtered or skipped entirely. Gap-closure pass executed in same session.
+
+| Source | Initial audit | Gap-closure pass | New items found |
+|---|---|---|---|
+| `HANDOFF-SESSION-30.md` (195L) | grep-filtered only | full read | **None.** All 5 HANDOFF-29 parked candidates accounted for in HANDOFF-31 status table (lifted / closed / deferred-into-AC-12 cluster). All §"What could improve" + §"Key decisions" + §"Bugs" items are slice-specific, calibration-data (collapses-into-AC-12), or already in CLAUDE.md Planning conduct (verify-before-planning, distrust-own-summaries). |
+| `HANDOFF-SESSION-31.md` (113L) | §7 only (item A) | full read | **None.** Candidate #7 = item (A) tdd-guard hook (already inventoried). Candidates #1-#6 all lifted/closed per status table at L77-89. §"What could improve" #1-#4 = TDD-vs-regression-harness honesty (lifted as CLAUDE.md "Don't write file-content assertions for logic slices") · A17 boundary failure mode (niche, not subagent scope) · line-count.sh cluster (= AC-12) · wrap-side count error (= Distrust-own-summaries already in CLAUDE.md). |
+| `engineering-phase-candidates.md` §A + §B (L1-71) | unread | full read | **None.** §A "Coding conduct" (Think before coding · Simplicity first · Surgical changes · Goal-driven execution) verified present in CLAUDE.md "Coding conduct" section + 3 additions (Names carry the design · Small single-purpose functions · Effects behind interfaces from session 32). §B "Engineering conventions" (TDD where tractable · Adversarial review gate · Snapshot before refactor · Deterministic over generative · 6-item DoD) verified present in CLAUDE.md "Engineering conventions" section + 2 additions (Don't write file-content assertions for logic slices · AC arithmetic check). |
+| `v2-backlog.md` (185L) | grep-filter, skim-dismiss | grep-result table-row inspection | **None.** All 10 grep matches (items 2, 5, 27, 33, 38, 66, 70, 82, 85) are UX/product features (review modals, document storage, product test coverage, side-by-side PDF, safeguarding continuity, bulk upload). Item #70 "Test suite" is product-coverage backlog (write more vitest tests for extraction + state), distinct from v3a/v3b's *control-plane* test gates. None overlap with v3b adversarial-subagent scope. |
+
+**Gap-closure verdict:** all four un-audited surfaces fully reviewed. **No new v3b items surfaced.** The 15-AC table per §5 stands as the full v3b inventory. Drafting protocol step 3 (`/security-review` + `/review`) remains the next gate — its purpose is to catch what manual audit cannot (hostile-prompt resilience, security implications, AC-rubric flaws), not to repeat this content audit.
+
+**Why no items were missed despite the initial gap:** the v3b carry-over #10 named items A-G already pulled the load-bearing concepts from `engineering-phase-candidates.md` §E + L166 + L169 (the densest source). The CLAUDE.md candidate-tracking discipline (HANDOFF-29 → HANDOFF-30 → HANDOFF-31 status table) had already cleaned through HANDOFF-30/31's parked items by session 31's wrap, leaving only the line-count.sh cluster + tdd-guard candidate to carry forward — both of which were already in v3b's inventory. The system's own discipline closed most of the gap before this audit ran.
+
+**Audit trail integrity:** any future drafter reading this file should treat §1-§5 as the canonical inclusion list and §7 as evidence the audit was complete, not selective. If a new candidate surfaces post-S-1, it goes in v3b's `verification.md` carry-over to v3c — not silently into the AC table without an audit-findings.md update.
