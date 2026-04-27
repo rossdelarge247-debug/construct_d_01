@@ -1,0 +1,6 @@
+9036757a33c172b5883b57368d8cf7e93841ae39dc8466d3edb4538c58c905b6  .claude/hooks/line-count.sh
+41210f600eb740773085675431729939ce20e0a06ff183d8fc3e874fc0db6f6b  .claude/hooks/read-cap.sh
+4eb9adf08713638b40d7f998f2dbe8b9789d888fbb5b52efc6a4bbcbe91ab973  .claude/hooks/session-start.sh
+bcf4171c97f964e80867d5d41388aef2a59649f58f3494e809fbd61eebf0b44f  .claude/hooks/wrap-check.sh
+200507eac9ebd79712bb528930c55ee026f8f8b7b321dddfa109ae78a09e8337  scripts/verify-slice.sh
+4fd36d4cd5d7e751b904462fd66a073f63c0102a3b5866f87ae20bce3a9b1275  .claude/settings.json#hooks

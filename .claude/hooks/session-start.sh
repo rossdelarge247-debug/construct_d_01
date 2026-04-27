@@ -72,6 +72,27 @@ EOF
   fi
 fi
 
+# --- Hooks-checksums integrity check (per acceptance.md AC-2 + G18) ---
+# Surface drift at session start so it's visible at turn 0 rather than
+# discovered later. Non-blocking — emit context regardless of result.
+INTEGRITY_WARNING=""
+if [ -x scripts/hooks-checksums.sh ] && [ -f .claude/hooks-checksums.txt ]; then
+  if ! INTEGRITY_OUT=$(scripts/hooks-checksums.sh --verify 2>&1); then
+    INTEGRITY_WARNING=$(cat <<EOF
+
+
+### Hooks-checksums integrity warning
+
+Drift detected against \`.claude/hooks-checksums.txt\` baseline. Diagnose before any code change — control-plane artefact(s) modified outside an approved control-change PR.
+
+\`\`\`
+$(printf '%s\n' "$INTEGRITY_OUT" | head -25)
+\`\`\`
+EOF
+)
+  fi
+fi
+
 # --- Compose the reminder injected into model context ---
 CONTEXT=$(cat <<EOF
 ## Session-start reminder (project hook, loaded automatically)
@@ -100,7 +121,7 @@ CONTEXT=$(cat <<EOF
 
 If BEHIND > 0 or the working tree contains unexpected files, diagnose before any code changes. Per CLAUDE.md startup rule: "If the harness landed you on a different base, resync before doing anything else — \`git fetch origin <branch>\` then \`git checkout -B <branch> origin/<branch>\`."
 
-Before accepting any factual claim in the kickoff prompt (branch tips, test states, file contents, CI status), verify against the live source. Kickoffs are plans written at a past moment; they rot.${SUFFIX_WARNING}
+Before accepting any factual claim in the kickoff prompt (branch tips, test states, file contents, CI status), verify against the live source. Kickoffs are plans written at a past moment; they rot.${SUFFIX_WARNING}${INTEGRITY_WARNING}
 EOF
 )
 
