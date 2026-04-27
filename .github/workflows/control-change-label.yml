@@ -1,0 +1,83 @@
+name: control-change label required
+
+# Per docs/slices/S-INFRA-rigour-v3a-foundation/acceptance.md AC-2 + L47:
+# "requires the `control-change` label on any PR touching paths in the
+# protected list AND the workflow file itself + `.github/workflows/pr-dod.yml`
+# itself (closes G3+G10 BLOCK recursion gap via path-filter self-inclusion)".
+#
+# Path filter mirrors L199's protected-path enumeration. Self-inclusive:
+# editing this workflow requires the label that triggers this workflow.
+#
+# Bypass procedure (per L93 user-side preconditions):
+#   1. Apply 'control-change' label via PR UI (label has restricted
+#      applicability — only repo admins / designated team can apply).
+#   2. PR must have ≥1 human approval before merge (branch protection).
+# Per L93: "Without [user preconditions] in place, AC-2's label workflow
+# is theatrical (closes G11 — controls prevent Claude from silently
+# weakening, NOT a malicious user)."
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, labeled, unlabeled]
+    paths:
+      # L199 literal protected-path list:
+      - '.claude/hooks/**'
+      - '.claude/settings.json'
+      - '.claude/subagent-prompts/**'
+      - '.claude/hooks-checksums.txt'
+      - 'scripts/verify-slice.sh'
+      - 'eslint.config.mjs'
+      - 'vitest.config.ts'
+      # Self-inclusion + sibling-workflow protection per G3+G10:
+      - '.github/workflows/control-change-label.yml'
+      - '.github/workflows/pr-dod.yml'
+      # Note: L199 omits `scripts/eslint-no-disable.sh`,
+      # `docs/eslint-baseline-allowlist.txt`, and `scripts/git-state-verifier.sh`
+      # which are part of the AC-3/AC-7 chains and ARE in hooks-checksums.txt.
+      # Tracked as v3b carry-over per docs/slices/S-INFRA-rigour-v3b-subagent-suite/acceptance.md.
+
+jobs:
+  require-label:
+    name: control-change label required for control-plane paths
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check for control-change label
+        env:
+          LABELS: ${{ toJson(github.event.pull_request.labels.*.name) }}
+        run: |
+          if printf '%s' "$LABELS" | grep -q '"control-change"'; then
+            echo "PASS — PR carries 'control-change' label; control-plane edits permitted."
+            exit 0
+          fi
+          cat <<'MSG' >&2
+          control-change label required — FAILED.
+
+          This PR modifies a control-plane path but does not carry the
+          'control-change' label.
+
+          Protected paths (per acceptance.md L199):
+            - .claude/hooks/**
+            - .claude/settings.json
+            - .claude/subagent-prompts/**
+            - .claude/hooks-checksums.txt
+            - scripts/verify-slice.sh
+            - eslint.config.mjs
+            - vitest.config.ts
+            - .github/workflows/control-change-label.yml (self)
+            - .github/workflows/pr-dod.yml
+
+          Per docs/slices/S-INFRA-rigour-v3a-foundation/acceptance.md
+          AC-2 (G3+G10 closure): control-plane edits must ship in a PR
+          carrying 'control-change'. The label has restricted
+          applicability and pairs with branch protection requiring ≥1
+          human approval (L93).
+
+          Fix:
+            - Apply the 'control-change' label via the PR UI (requires
+              repo admin / designated team).
+            - Ensure ≥1 human reviewer approves the change.
+
+          See CLAUDE.md §"Hard controls (in development)" (AC-8) for the
+          full bypass procedure once it lands.
+          MSG
+          exit 1

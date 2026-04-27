@@ -20,7 +20,10 @@
 **Carry-over from v3a (deferred concerns from S-37-6 / AC-7):**
 Per `docs/slices/S-INFRA-rigour-v3a-foundation/verification.md` § "Adversarial review — S-37-6 (DoD #3)" — two concerns deferred at v3a ship-time, to be addressed in this slice's AC table when drafted:
 1. **Flip plan-review subagent default-spawn.** v3a ships `EXIT_PLAN_REVIEW_SPAWN=1`-gated; full default-spawn pending ops sign-off on per-`ExitPlanMode` `claude -p` cost / latency. Plan-review is adjacent to the six during-work subagent gates above, so the cost-modelling work is shared.
-2. **Extend AC-2 checksum scope to `scripts/git-state-verifier.sh`.** v3a's L199 enumeration does not currently include the AC-7 sub-script; silent weakening would weaken the AC-7 gate. Either amend the L199 list in v3b's first commit OR rely on per-PR `control-change` label discipline (G18) until then.
+2. **Extend AC-2 protection scope to three artefacts the L199 enumeration omits.** All three sit inside AC-3 / AC-7 chains and ARE in the `hooks-checksums.txt` baseline today, but neither L199 nor the `control-change-label.yml` path filter mention them — silent weakening would weaken the relevant gate. Either amend the L199 list in v3b's first commit OR rely on per-PR `control-change` label discipline (G18) until then.
+   - `scripts/git-state-verifier.sh` — AC-7 plan-time-gate sub-script (called from `exit-plan-review.sh:55`).
+   - `scripts/eslint-no-disable.sh` — AC-3 zero-disable check invoked from `eslint-no-disable.yml`.
+   - `docs/eslint-baseline-allowlist.txt` — AC-3 disable allowlist read by `eslint-no-disable.sh`.
 
 **Blocks:** S-INFRA-rigour-v3c (quality-and-rewrite predecessor)
 **Blocked by:** S-INFRA-rigour-v3a-foundation merge to main
