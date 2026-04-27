@@ -5,8 +5,15 @@ name: control-change label required
 # protected list AND the workflow file itself + `.github/workflows/pr-dod.yml`
 # itself (closes G3+G10 BLOCK recursion gap via path-filter self-inclusion)".
 #
-# Path filter mirrors L199's protected-path enumeration. Self-inclusive:
-# editing this workflow requires the label that triggers this workflow.
+# Self-inclusive: editing this workflow requires the label that triggers
+# this workflow.
+#
+# Trigger model: workflow runs on EVERY PR (no `on.paths:` filter) so the
+# job name is always reported. Step-level path detection (matching
+# pr-dod.yml's pattern) decides whether the label is required. This makes
+# the check usable as a required status check under classic GitHub Branch
+# Protection — `on.paths:` would skip the workflow entirely on
+# non-control-plane PRs, leaving required-check status pending forever.
 #
 # Bypass procedure (per L93 user-side preconditions):
 #   1. Apply 'control-change' label via PR UI (label has restricted
@@ -19,34 +26,38 @@ name: control-change label required
 on:
   pull_request:
     types: [opened, synchronize, reopened, labeled, unlabeled]
-    paths:
-      # L199 literal protected-path list:
-      - '.claude/hooks/**'
-      - '.claude/settings.json'
-      - '.claude/subagent-prompts/**'
-      - '.claude/hooks-checksums.txt'
-      - 'scripts/verify-slice.sh'
-      - 'eslint.config.mjs'
-      - 'vitest.config.ts'
-      # Self-inclusion + sibling-workflow protection per G3+G10:
-      - '.github/workflows/control-change-label.yml'
-      - '.github/workflows/pr-dod.yml'
-      # Note: L199 omits `scripts/eslint-no-disable.sh`,
-      # `docs/eslint-baseline-allowlist.txt`, and `scripts/git-state-verifier.sh`
-      # which are part of the AC-3/AC-7 chains and ARE in hooks-checksums.txt.
-      # Tracked as v3b carry-over per docs/slices/S-INFRA-rigour-v3b-subagent-suite/acceptance.md.
 
 jobs:
   require-label:
     name: control-change label required for control-plane paths
     runs-on: ubuntu-latest
     steps:
-      - name: Check for control-change label
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Detect control-plane changes in this PR
+        id: diff
+        run: |
+          BASE="${{ github.event.pull_request.base.sha }}"
+          HEAD="${{ github.event.pull_request.head.sha }}"
+          # L199 literal protected-path list (anchored ^ at line start):
+          # Self-inclusion + sibling-workflow protection per G3+G10.
+          PROTECTED_RE='^(\.claude/hooks/|\.claude/settings\.json$|\.claude/subagent-prompts/|\.claude/hooks-checksums\.txt$|scripts/verify-slice\.sh$|eslint\.config\.mjs$|vitest\.config\.ts$|\.github/workflows/control-change-label\.yml$|\.github/workflows/pr-dod\.yml$)'
+          # Note: L199 omits `scripts/eslint-no-disable.sh`,
+          # `docs/eslint-baseline-allowlist.txt`, `scripts/git-state-verifier.sh`
+          # — tracked as v3b carry-over (docs/slices/S-INFRA-rigour-v3b-subagent-suite/acceptance.md).
+          COUNT=$(git diff --name-only "$BASE" "$HEAD" | grep -E "$PROTECTED_RE" | wc -l | tr -d ' ')
+          echo "count=$COUNT" >> "$GITHUB_OUTPUT"
+          echo "PR touches $COUNT control-plane file(s) relative to base."
+
+      - name: Require control-change label when control-plane touched
+        if: steps.diff.outputs.count != '0'
         env:
           LABELS: ${{ toJson(github.event.pull_request.labels.*.name) }}
         run: |
           if printf '%s' "$LABELS" | grep -q '"control-change"'; then
-            echo "PASS — PR carries 'control-change' label; control-plane edits permitted."
+            echo "PASS — PR touches control-plane paths AND carries 'control-change' label."
             exit 0
           fi
           cat <<'MSG' >&2
@@ -81,3 +92,7 @@ jobs:
           full bypass procedure once it lands.
           MSG
           exit 1
+
+      - name: Skip reason (no control-plane changes)
+        if: steps.diff.outputs.count == '0'
+        run: echo "PR does not touch control-plane paths; control-change label not required."
