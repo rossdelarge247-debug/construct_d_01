@@ -1,0 +1,11 @@
+# docs/eslint-baseline-allowlist.txt — files where eslint-disable directives are
+# permitted. Each non-comment line is a path glob (shell-style) matched against
+# the file path of any newly-added eslint-disable directive.
+#
+# Seeded EMPTY for v3a per acceptance.md L48: v3a code may not introduce new
+# disables. β offenders are captured when β resumes (added here as glob entries
+# with a comment naming the resume-session and tracking issue).
+#
+# To add an entry: open a PR carrying the 'control-change' label per AC-2;
+# include the rationale (which rule, why disable not refactor, intended cleanup
+# session) inline as a comment above the glob.

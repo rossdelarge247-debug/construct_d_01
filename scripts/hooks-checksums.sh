@@ -37,10 +37,13 @@ compute() {
       printf '%s  %s\n' "$sha" "$f"
     done < <(find .claude/hooks -name '*.sh' -type f 2>/dev/null | sort)
 
-    if [ -f scripts/verify-slice.sh ]; then
-      sha=$(sha256sum scripts/verify-slice.sh | awk '{print $1}')
-      printf '%s  %s\n' "$sha" "scripts/verify-slice.sh"
-    fi
+    for f in scripts/verify-slice.sh scripts/eslint-no-disable.sh \
+             eslint.config.mjs docs/eslint-baseline-allowlist.txt; do
+      if [ -f "$f" ]; then
+        sha=$(sha256sum "$f" | awk '{print $1}')
+        printf '%s  %s\n' "$sha" "$f"
+      fi
+    done
 
     if [ -f .claude/settings.json ]; then
       sha=$(jq -Sc '.hooks // {}' .claude/settings.json | sha256sum | awk '{print $1}')
