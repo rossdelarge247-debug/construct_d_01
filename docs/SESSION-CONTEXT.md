@@ -55,34 +55,34 @@ CLAUDE.md §Planning conduct                                        — #12 Bran
 
 **On `claude/S-INFRA-rigour-v3a-foundation` @ `71fc206` (29 ahead, in flight as PR #24 draft):** v3a-foundation slice content complete; 8/8 ACs PASS. DoD-11 final body refreshed at session 40 wrap (per acceptance.md L184). PR remains DRAFT pending user merge-path decision (see § Session 41 priorities). All session-37 + session-38 budget items landed.
 
-## Session 41 priorities
+## Session 42 priorities
 
-### P0 — decide merge path for PR #24
+> **Numbering note:** the kickoff that opened this work was titled "Session 42 kickoff", but no `HANDOFF-SESSION-41.md` existed at session start. The wrap doc for the just-completed session is filed as `HANDOFF-SESSION-41.md` (filling the natural gap, since `HANDOFF-40` was the last existing handoff). User decides whether to rename the handoff or treat the kickoff label as authoritative — see HANDOFF-SESSION-41 §"What happened" for context.
 
-DoD-3 strict-reading requires `approve` or `nit-only`. Current verdict is procedural `request-changes` (reviewer hit per-turn 300-line read-cap before completing impl-review surface). Three viable paths; user picks:
+### P0 — Run `/security-review` + `/review` against v3b `acceptance.md`
 
-**(a) Accept procedural verdict + content state captured.** Flip PR draft → ready-for-review; user-review on GitHub; merge if reviewer satisfied. Honours the spec content; surfaces the gate-design gap (DoD-3 single-turn structural-infeasibility) as a v3b finding rather than blocking v3a. *My recommendation* — the slice's actual content was reviewed at spec-time across 5 iterations; impl is well-tested (48/48 shellspec) and verified against α reference; the procedural gap is a known v3b carry-over.
+v3b S-1 (audit-findings.md + acceptance.md redraft, 15 ACs top-down from audit) committed at `517a91b` on `claude/audit-v3b-pr24-merge-YUwug`. Drafting protocol step 3 (acceptance.md L65 + audit-findings.md §6) requires `/security-review` + `/review` BEFORE any RED-tests-first impl. Run both skills against the redrafted `acceptance.md` (173 lines, 15 ACs grouped A–E). Address findings or explicit-defer with reasoning recorded in slice `verification.md`. v3a's plan-time gate (AC-7 EXIT_PLAN_REVIEW_SPAWN=1) reviews this acceptance.md when an impl plan is submitted, but the BEFORE-impl skill reviews are independent and load-bearing.
 
-**(b) Re-spawn DoD-3 adversarial review with explicit multi-turn budget.** Partition into spec-side + impl-side + git-history sub-spawns; each fits one turn. ~30-60 min. If verdict is `approve` / `nit-only` → flip to ready-for-review. If `request-changes` on real findings → fix or carry to v3b.
+### P0 (companion) — Watch PR #24 merge state
 
-**(c) Defer fuller analysis to v3b's adversarial-review-process work.** Merge PR #24 as-is with `request-changes` (procedural) + 8 carry-over items captured. Risk: v3b commits land on top of an unfully-reviewed v3a foundation; mitigated by (i) test coverage at slice-completion, (ii) the v3b adversarial-subagent-suite reviews v3b's own code with v3a's gates active.
+PR #24 (S-INFRA-rigour-v3a-foundation) was flipped draft → ready-for-review at session 41 start (per merge path (a) decision). `mergeable_state` is `blocked` because branch protection requires ≥1 human approval — not a CI failure (15/15 check_runs GREEN at `54ce4ec`). Once user approves + merges to main, refresh v3b's expectation: AC-14 (`@vitest/coverage-v8` activation) becomes the natural first impl commit since v3a's coverage gate is now reachable.
 
-### P0 (companion) — DoD-9 `/security-review` skill
+### P1 — v3b S-2: address review findings, freeze AC table
 
-Deferred from session 40 for budget. Run before merge if going path (a) or (c); during re-review if path (b). 5–10 min for control-plane-only diffs; output captured in `security.md`.
+After P0 reviews complete, address findings or defer with reasoning recorded in slice `verification.md`. Re-validate AC-table arithmetic (15 ACs grouped A–E; total budget magnitude ~1500 lines per session-36 estimate, composition revised per audit). Freeze AC table; commit + push as v3b S-2.
 
-### P1 — v3b kickoff (post-merge)
+### P1 — v3b S-3 onwards: RED-tests-first impl per H6 pattern
 
-After PR #24 merges to main, v3b begins:
-- Full AC drafting from `docs/slices/S-INFRA-rigour-v3b-subagent-suite/acceptance.md` (currently 32-line stub + 8 carry-over items at §Carry-over from v3a).
-- v3a's gates dogfood v3b's commits from the first one (`pre-commit-verify.sh` skeleton-mode → full mode; `tdd-first-every-commit.sh` enforcement on src/; AC-7 plan-time gate on any plan).
-- First v3b commit could be activation of `@vitest/coverage-v8` + `ci.yml --coverage` per carry-over item 5.
+Begin impl. AC-14 ships first (gives all subsequent ACs live coverage signal). Then ACs by group order (A → B → C → D → E), with v3a AC-5 (`tdd-first-every-commit.sh` paperwork gate) + v3b AC-6 (`tdd-guard` behaviour gate, once shipped) enforcing.
+
+### P2 — `line-count.sh` re-baseline bug (carry-over #3 / v3b AC-12)
+
+Surfaced live AGAIN this session (third evidence point: session 32 lockfile inflation, session 40 cross-branch resync, session 41 cross-branch resync from main → v3a-foundation tip @ `54ce4ec`). Hook fired STOP at +3,200 session churn while authored content was ~208 lines. v3b AC-12 is the structural fix. Manual workaround if same pattern recurs in session 42: `echo $NEW_HEAD_SHA > /tmp/claude-base-$SESSION_ID.txt` post-resync.
 
 ### P2 — surface housekeeping
 
-- `docs/HANDOFF-SESSION-40.md` is the retro wrap doc for session 40.
-- `docs/slices/S-INFRA-rigour-v3a-foundation/HANDOFF-SLICE-WRAP.md` (consolidating retro across sessions 37–40) was scoped as session-40 stretch but did not land — fold session 40 retro into the slice-level wrap at v3b kickoff or merge-day, whichever is first.
-- `line-count.sh` re-baselining bug surfaced live session 40 — manual one-off applied; v3b carry-over item 3.
+- `docs/HANDOFF-SESSION-41.md` is the retro wrap doc for the just-completed session.
+- `docs/slices/S-INFRA-rigour-v3a-foundation/HANDOFF-SLICE-WRAP.md` (consolidating retro across sessions 37–40 + 41) still pending; defer to PR #24 merge day or v3b mid-impl.
 
 ## Scope ceiling
 
