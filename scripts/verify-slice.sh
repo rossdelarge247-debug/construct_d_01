@@ -157,13 +157,52 @@ if [ -x scripts/eslint-no-disable.sh ]; then
   fi
 fi
 
-# Gate 5: per-language coverage thresholds (S-38-4 activates the parser)
-# Stub-mode placeholder: if coverage/lcov.info is absent, treat as no-coverage-
-# data-yet rather than a gate failure. S-38-4 wires vitest config to emit lcov
-# and replaces this stub with a real per-file new-line-coverage parser.
+# Gate 5: per-language coverage thresholds (AC-6 — acceptance.md L51).
+# Parses coverage/lcov.info for new-line coverage on the PR diff
+# (origin/main...HEAD); fails if uncovered/added > 10% across .ts/.tsx files.
+# Skip-allows when lcov.info is absent (e.g. coverage hasn't been generated yet
+# — CI activation of `vitest run --coverage` is tracked as v3b carry-over per
+# vitest.config.ts header).
 COVERAGE_FILE="coverage/lcov.info"
 if [ -f "$COVERAGE_FILE" ]; then
-  : # S-38-4 lcov parser hooks in here
+  total_added=0
+  total_uncovered=0
+  while IFS= read -r f; do
+    [ -z "$f" ] && continue
+    # Added line numbers in this file's PR diff.
+    added=$(git diff "origin/main...HEAD" -U0 -- "$f" 2>/dev/null \
+      | awk '/^@@/{
+          if (match($0, /\+([0-9]+)(,([0-9]+))?/, m)) {
+            start=m[1]; count=(m[3]==""?1:m[3])
+            for (i=0;i<count;i++) print start+i
+          }
+        }' | sort -un)
+    [ -z "$added" ] && continue
+    # Lines reported uncovered in lcov for this file (DA:N,0 inside SF:f block).
+    uncovered=$(awk -v target="SF:$f" '
+      $0==target { in_block=1; next }
+      /^end_of_record$/ { in_block=0 }
+      in_block && /^DA:[0-9]+,0$/ { sub(/DA:/,""); sub(/,0$/,""); print }
+    ' "$COVERAGE_FILE" | sort -un)
+    file_added=$(printf '%s\n' "$added" | wc -l)
+    file_uncov=$(comm -12 <(printf '%s\n' "$added") <(printf '%s\n' "$uncovered") | wc -l)
+    total_added=$((total_added + file_added))
+    total_uncovered=$((total_uncovered + file_uncov))
+  done < <(git diff "origin/main...HEAD" --name-only -- '*.ts' '*.tsx' 2>/dev/null)
+
+  if [ "$total_added" -gt 0 ] && [ $((total_uncovered * 100)) -gt $((total_added * 10)) ]; then
+    {
+      echo "DENIED: coverage gate — ${total_uncovered} of ${total_added} new src/ lines uncovered (>10%)."
+      echo
+      echo "  Per docs/slices/S-INFRA-rigour-v3a-foundation/acceptance.md AC-6 (L51):"
+      echo "  'fails if new src/ lines uncovered >= 10%' (lines threshold 90% per language)."
+      echo
+      echo "Actionable alternatives:"
+      echo "  - Add tests covering the new src/ lines and re-run vitest --coverage."
+      echo "  - Inspect coverage/lcov.info for which staged lines are reported uncovered."
+    } >&2
+    exit 1
+  fi
 fi
 
 # Gate 6: tsc (type-check)

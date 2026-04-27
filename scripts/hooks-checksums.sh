@@ -38,7 +38,8 @@ compute() {
     done < <(find .claude/hooks -name '*.sh' -type f 2>/dev/null | sort)
 
     for f in scripts/verify-slice.sh scripts/eslint-no-disable.sh \
-             eslint.config.mjs docs/eslint-baseline-allowlist.txt; do
+             eslint.config.mjs docs/eslint-baseline-allowlist.txt \
+             vitest.config.ts; do
       if [ -f "$f" ]; then
         sha=$(sha256sum "$f" | awk '{print $1}')
         printf '%s  %s\n' "$sha" "$f"
