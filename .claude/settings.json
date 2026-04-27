@@ -42,6 +42,11 @@
             "type": "command",
             "command": ".claude/hooks/pre-commit-verify.sh",
             "timeout": 15
+          },
+          {
+            "type": "command",
+            "command": ".claude/hooks/tdd-first-every-commit.sh",
+            "timeout": 10
           }
         ]
       },

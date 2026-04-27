@@ -1,0 +1,16 @@
+# tdd-exemption-allowlist.txt
+#
+# AC-5 (S-INFRA-rigour-v3a-foundation acceptance.md L50): file globs that
+# exempt src/** changes from the TDD-first-every-commit gate. Globs are
+# matched via bash `case` (not extglob); shell-glob syntax — one per line,
+# `#` introduces an end-of-line comment.
+#
+# Categories per L50: pure-rename, pure-config, pure-visual.
+#
+# Empty seed for v3a — every src/ change must include tests/ changes.
+# β-resume rescope (per L48 ESLint allowlist note) populates real exemptions
+# captured during β cleanup. Until populated, this file documents the gate's
+# extension point.
+#
+# Adding an entry is a control-plane change — ship in a PR carrying the
+# 'control-change' label per acceptance.md AC-2 + L199.

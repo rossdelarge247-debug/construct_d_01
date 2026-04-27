@@ -39,7 +39,7 @@ compute() {
 
     for f in scripts/verify-slice.sh scripts/eslint-no-disable.sh \
              eslint.config.mjs docs/eslint-baseline-allowlist.txt \
-             vitest.config.ts; do
+             vitest.config.ts docs/tdd-exemption-allowlist.txt; do
       if [ -f "$f" ]; then
         sha=$(sha256sum "$f" | awk '{print $1}')
         printf '%s  %s\n' "$sha" "$f"
