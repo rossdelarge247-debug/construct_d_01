@@ -226,6 +226,53 @@ Plus the 13-item security checklist in spec 72 §11. No exceptions. A partially-
 
 Enforcement: `.github/PULL_REQUEST_TEMPLATE.md` reproduces this checklist; `.github/workflows/pr-dod.yml` fails any PR that touches `src/` without a `docs/slices/S-*/verification.md` reference in the body (escape hatch: `no-slice-required` label for truly trivial src/ touches).
 
+## Hard controls (in development)
+
+**Status:** in development. This stub catalogues gates landed by `S-INFRA-rigour-v3a-foundation` only. v3b adds the adversarial subagent suite; v3c rewrites this section as a consolidating reference. Canonical source for AC text + rationale is `docs/slices/S-INFRA-rigour-v3a-foundation/acceptance.md`.
+
+### Gates this slice ships
+
+| Gate | File(s) | Fires on | AC | Bypass |
+|---|---|---|---|---|
+| Slice-DoD pre-commit | `.claude/hooks/pre-commit-verify.sh` | `git commit` (PreToolUse:Bash) | AC-4 | resolve slice DoD before retrying |
+| Hooks-checksums drift warning | `.claude/hooks-checksums.txt` + `scripts/hooks-checksums.sh` + warn in `.claude/hooks/session-start.sh` | session start (warn-only; blocking moves to the control-change-label workflow) | AC-2 | re-baseline + ship under `control-change` label |
+| Control-change label requirement | `.github/workflows/control-change-label.yml` | every PR; enforces when L199 protected paths touched | AC-2 | apply `control-change` label (admin-restricted) + ≥1 human approval |
+| ESLint zero-new-disables | `scripts/eslint-no-disable.sh` + `.github/workflows/eslint-no-disable.yml` + `docs/eslint-baseline-allowlist.txt` | every push + PR | AC-3 | add line to baseline allowlist; allowlist edit ships under `control-change` label |
+| ESLint function-size + max-lines | `eslint.config.mjs` | `npm run lint` + CI `Lint` job | AC-3 | edit thresholds under `control-change` label (full origin/main-anchored ratchet lands v3c per F5c) |
+| Plan-time review | `.claude/hooks/exit-plan-review.sh` + `.claude/subagent-prompts/exit-plan-review.md` + `scripts/git-state-verifier.sh` | `ExitPlanMode` (PreToolUse) | AC-7 | address findings + re-attempt; full subagent default-spawn deferred to v3b |
+| Slice-verification PR-body | `.github/workflows/pr-dod.yml` | every PR touching `src/` | pre-S-37 (P0.4) | reference slice's `verification.md` in body, or apply `no-slice-required` label |
+
+Each gate emits a useful-message exit body on failure: what failed, why per spec, concrete remediation.
+
+### Verdict vocabulary (per G23)
+
+Subagent reviews (plan-review per AC-7; future during-work gates per v3b) emit one of four verdicts paired with a severity:
+
+- `approve` — no findings; proceed.
+- `nit-only` — minor findings (style / wording); author may proceed without fixing.
+- `request-changes` — findings the author should address before proceeding; not blocking.
+- `block` — architectural-severity findings; gate refuses to proceed until addressed.
+
+Severity scale: `architectural` · `logic` · `style` · `none`. The plan-review gate (AC-7) blocks on `architectural`; lower severities pass through with the verdict surfaced to the author.
+
+### Rollback procedure (per G19)
+
+Per `docs/slices/S-INFRA-rigour-v3a-foundation/acceptance.md` L201:
+
+> if v3a infrastructure causes operational pain post-merge, rollback is: (a) revert merge commit on main via `git revert -m 1 <merge-sha>` in a new PR carrying the `control-change` label; (b) `.claude/hooks/{pre-commit-verify,tdd-first-every-commit,exit-plan-review}.sh` remain on disk locally but become inert because their `settings.json` registration is reverted; (c) `hooks-checksums.txt` is reverted; (d) the revert PR documents WHY in body so v3a-2 can address the root cause. **No `--no-verify` bypass needed** — harness-level hooks don't intercept `git revert` of unregistered settings.
+
+### Not yet in scope (v3b / v3c carry-over)
+
+Per `docs/slices/S-INFRA-rigour-v3b-subagent-suite/acceptance.md`:
+
+- During-work review subagents — commit-msg accuracy, spec-quote enforcement, AskUserQuestion framing, periodic on-track audit, doc-honesty (v3b)
+- Pair-programming PostToolUse hook with intent file + finding-response loop (v3b)
+- Plan-review subagent default-spawn flip — currently `EXIT_PLAN_REVIEW_SPAWN=1`-gated (v3b)
+- Three protected-path omissions from L199: `scripts/git-state-verifier.sh`, `scripts/eslint-no-disable.sh`, `docs/eslint-baseline-allowlist.txt` (v3b)
+- Origin/main-anchored ratchet for ESLint + coverage thresholds — F5c (v3c)
+- Multi-provider 3rd-agent reviewer, Stryker mutation testing, structured-findings JSON Schema (v3c)
+- Consolidating rewrite of this section (v3c)
+
 ## Visual direction
 
 **Canonical source:** the Claude AI Design tool outputs from session 22 wire batches. Exact visual treatment — colour system, typography, component design, screen layouts — to preserve and rebuild. Copy in the outputs is NOT final; visual treatment IS.
