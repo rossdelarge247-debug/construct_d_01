@@ -93,7 +93,7 @@ The v3b AC table is drafted top-down from this list, NOT bottom-up from carry-ov
 10. Adversarial-review-gate budget convention (= carry-over #8; multi-turn envelope OR partition convention)
 
 **D. Tactical infra (small surface, must-ship)**
-11. AC-2 protected-path scope amendment for three L199 omissions (= carry-over #2)
+11. AC-2 protected-path scope amendment for three L199 omissions (= v3a-side carry-over item #2; not the v3b AC-2 numbered above)
 12. `line-count.sh` session-base re-baseline on branch-resume + meta-test (= carry-over #3, absorbs HANDOFF-30 hook-calibration cluster)
 13. AC-6 lcov parser shellspec meta-test (= carry-over #4)
 14. `@vitest/coverage-v8` dev-dep + `ci.yml --coverage` wiring (= carry-over #5; first v3b commit)
