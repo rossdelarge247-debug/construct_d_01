@@ -63,8 +63,12 @@ Describe 'exit-plan-review.sh'
   End
 
   Describe 'verdict / blocking semantics'
-    It 'allows clean plan with valid current branch + SHA (exit 0)'
-      Data '{"tool_input":{"plan":"S-37-6 builds AC-7 hook on claude/S-INFRA-rigour-v3a-foundation @ 60bede1"}}'
+    It 'allows plan with no git-ref assertions (exit 0)'
+      # Plain-prose plan exercises the verifier-clean → approve path without
+      # depending on specific repo SHAs / branches — keeps the test hermetic
+      # across local + CI shallow-detached-HEAD checkouts. Ref-validation
+      # happy-path coverage lives in git-state-verifier.spec.sh fixture.
+      Data '{"tool_input":{"plan":"Plan body with no SHA or branch references."}}'
       When run script "$HOOK"
       The status should equal 0
     End
