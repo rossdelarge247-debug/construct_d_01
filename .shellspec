@@ -1,0 +1,3 @@
+--default-path tests/shellspec
+--pattern '*.spec.sh'
+--shell bash

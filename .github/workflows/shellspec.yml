@@ -1,0 +1,23 @@
+name: shellspec
+on:
+  pull_request:
+  push:
+
+jobs:
+  shellspec:
+    name: shellspec
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install shellspec
+        # Pinned to 0.28.1 (last known-good; locally CI-sim verified 37/37 GREEN
+        # against this version). Previously installed from `master` HEAD which
+        # is a moving upstream target — caused 4 consecutive failures on
+        # docs-only commit `e93777d` after working on `8bf866f` ~2hrs prior.
+        # To upgrade, change the URL tag + the VERSION arg below; re-baseline
+        # via a CI run before merging.
+        run: |
+          curl -fsSL https://raw.githubusercontent.com/shellspec/shellspec/0.28.1/install.sh | sh -s -- 0.28.1 --yes
+          echo "$HOME/.local/bin" >> "$GITHUB_PATH"
+      - name: Run shellspec
+        run: shellspec

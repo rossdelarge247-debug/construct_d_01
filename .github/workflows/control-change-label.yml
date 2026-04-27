@@ -1,0 +1,98 @@
+name: control-change label required
+
+# Per docs/slices/S-INFRA-rigour-v3a-foundation/acceptance.md AC-2 + L47:
+# "requires the `control-change` label on any PR touching paths in the
+# protected list AND the workflow file itself + `.github/workflows/pr-dod.yml`
+# itself (closes G3+G10 BLOCK recursion gap via path-filter self-inclusion)".
+#
+# Self-inclusive: editing this workflow requires the label that triggers
+# this workflow.
+#
+# Trigger model: workflow runs on EVERY PR (no `on.paths:` filter) so the
+# job name is always reported. Step-level path detection (matching
+# pr-dod.yml's pattern) decides whether the label is required. This makes
+# the check usable as a required status check under classic GitHub Branch
+# Protection — `on.paths:` would skip the workflow entirely on
+# non-control-plane PRs, leaving required-check status pending forever.
+#
+# Bypass procedure (per L93 user-side preconditions):
+#   1. Apply 'control-change' label via PR UI (label has restricted
+#      applicability — only repo admins / designated team can apply).
+#   2. PR must have ≥1 human approval before merge (branch protection).
+# Per L93: "Without [user preconditions] in place, AC-2's label workflow
+# is theatrical (closes G11 — controls prevent Claude from silently
+# weakening, NOT a malicious user)."
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, labeled, unlabeled]
+
+jobs:
+  require-label:
+    name: control-change label required for control-plane paths
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Detect control-plane changes in this PR
+        id: diff
+        run: |
+          BASE="${{ github.event.pull_request.base.sha }}"
+          HEAD="${{ github.event.pull_request.head.sha }}"
+          # L199 literal protected-path list (anchored ^ at line start):
+          # Self-inclusion + sibling-workflow protection per G3+G10.
+          PROTECTED_RE='^(\.claude/hooks/|\.claude/settings\.json$|\.claude/subagent-prompts/|\.claude/hooks-checksums\.txt$|scripts/verify-slice\.sh$|eslint\.config\.mjs$|vitest\.config\.ts$|\.github/workflows/control-change-label\.yml$|\.github/workflows/pr-dod\.yml$)'
+          # Note: L199 omits `scripts/eslint-no-disable.sh`,
+          # `docs/eslint-baseline-allowlist.txt`, `scripts/git-state-verifier.sh`
+          # — tracked as v3b carry-over (docs/slices/S-INFRA-rigour-v3b-subagent-suite/acceptance.md).
+          COUNT=$(git diff --name-only "$BASE" "$HEAD" | grep -E "$PROTECTED_RE" | wc -l | tr -d ' ')
+          echo "count=$COUNT" >> "$GITHUB_OUTPUT"
+          echo "PR touches $COUNT control-plane file(s) relative to base."
+
+      - name: Require control-change label when control-plane touched
+        if: steps.diff.outputs.count != '0'
+        env:
+          LABELS: ${{ toJson(github.event.pull_request.labels.*.name) }}
+        run: |
+          if printf '%s' "$LABELS" | grep -q '"control-change"'; then
+            echo "PASS — PR touches control-plane paths AND carries 'control-change' label."
+            exit 0
+          fi
+          cat <<'MSG' >&2
+          control-change label required — FAILED.
+
+          This PR modifies a control-plane path but does not carry the
+          'control-change' label.
+
+          Protected paths (per acceptance.md L199):
+            - .claude/hooks/**
+            - .claude/settings.json
+            - .claude/subagent-prompts/**
+            - .claude/hooks-checksums.txt
+            - scripts/verify-slice.sh
+            - eslint.config.mjs
+            - vitest.config.ts
+            - .github/workflows/control-change-label.yml (self)
+            - .github/workflows/pr-dod.yml
+
+          Per docs/slices/S-INFRA-rigour-v3a-foundation/acceptance.md
+          AC-2 (G3+G10 closure): control-plane edits must ship in a PR
+          carrying 'control-change'. The label has restricted
+          applicability and pairs with branch protection requiring ≥1
+          human approval (L93).
+
+          Fix:
+            - Apply the 'control-change' label via the PR UI (requires
+              repo admin / designated team).
+            - Ensure ≥1 human reviewer approves the change.
+
+          See CLAUDE.md §"Hard controls (in development)" (AC-8) for the
+          full bypass procedure once it lands.
+          MSG
+          exit 1
+
+      - name: Skip reason (no control-plane changes)
+        if: steps.diff.outputs.count == '0'
+        run: echo "PR does not touch control-plane paths; control-change label not required."

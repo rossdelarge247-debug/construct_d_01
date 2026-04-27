@@ -34,6 +34,31 @@
             "timeout": 10
           }
         ]
+      },
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": ".claude/hooks/pre-commit-verify.sh",
+            "timeout": 15
+          },
+          {
+            "type": "command",
+            "command": ".claude/hooks/tdd-first-every-commit.sh",
+            "timeout": 10
+          }
+        ]
+      },
+      {
+        "matcher": "ExitPlanMode",
+        "hooks": [
+          {
+            "type": "command",
+            "command": ".claude/hooks/exit-plan-review.sh",
+            "timeout": 60
+          }
+        ]
       }
     ]
   }
