@@ -157,12 +157,15 @@ if [ -x scripts/eslint-no-disable.sh ]; then
   fi
 fi
 
-# Gate 5: per-language coverage thresholds (AC-6 — acceptance.md L51).
+# Gate 5: per-language coverage thresholds.
+# v3a AC-6 (S-INFRA-rigour-v3a-foundation/acceptance.md L51 + L178: ".ts ≥90%
+# via vitest"); v3b AC-14 activation (S-INFRA-rigour-v3b-subagent-suite/
+# acceptance.md L106-110: @vitest/coverage-v8 dev-dep + ci.yml --coverage flag
+# produce coverage/lcov.info on every CI run).
 # Parses coverage/lcov.info for new-line coverage on the PR diff
 # (origin/main...HEAD); fails if uncovered/added > 10% across .ts/.tsx files.
-# Skip-allows when lcov.info is absent (e.g. coverage hasn't been generated yet
-# — CI activation of `vitest run --coverage` is tracked as v3b carry-over per
-# vitest.config.ts header).
+# Skip-allow path retained for defensive resilience (e.g. local pre-commit
+# before deps installed). After v3b S-3, CI runs always populate lcov.info.
 COVERAGE_FILE="coverage/lcov.info"
 if [ -f "$COVERAGE_FILE" ]; then
   total_added=0
