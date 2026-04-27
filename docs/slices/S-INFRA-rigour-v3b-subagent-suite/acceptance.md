@@ -17,13 +17,17 @@
 
 **Estimated budget:** to be drafted bottom-up at slice start, but reviewer's session-36 estimate suggested ~1500 lines for the full subagent suite. To be revised against the actual implementation after v3a foundation lands.
 
-**Carry-over from v3a (deferred concerns from S-37-6 / AC-7):**
-Per `docs/slices/S-INFRA-rigour-v3a-foundation/verification.md` § "Adversarial review — S-37-6 (DoD #3)" — two concerns deferred at v3a ship-time, to be addressed in this slice's AC table when drafted:
+**Carry-over from v3a (deferred concerns from S-37-6 / AC-7 + session-40 wrap):**
+Per `docs/slices/S-INFRA-rigour-v3a-foundation/verification.md` § "Adversarial review — S-37-6 (DoD #3)" + session-40 commit `2c676d0` — concerns deferred at v3a ship-time, to be addressed in this slice's AC table when drafted:
 1. **Flip plan-review subagent default-spawn.** v3a ships `EXIT_PLAN_REVIEW_SPAWN=1`-gated; full default-spawn pending ops sign-off on per-`ExitPlanMode` `claude -p` cost / latency. Plan-review is adjacent to the six during-work subagent gates above, so the cost-modelling work is shared.
 2. **Extend AC-2 protection scope to three artefacts the L199 enumeration omits.** All three sit inside AC-3 / AC-7 chains and ARE in the `hooks-checksums.txt` baseline today, but neither L199 nor the `control-change-label.yml` path filter mention them — silent weakening would weaken the relevant gate. Either amend the L199 list in v3b's first commit OR rely on per-PR `control-change` label discipline (G18) until then.
    - `scripts/git-state-verifier.sh` — AC-7 plan-time-gate sub-script (called from `exit-plan-review.sh:55`).
    - `scripts/eslint-no-disable.sh` — AC-3 zero-disable check invoked from `eslint-no-disable.yml`.
    - `docs/eslint-baseline-allowlist.txt` — AC-3 disable allowlist read by `eslint-no-disable.sh`.
+3. **`line-count.sh` session-base does NOT re-baseline on branch-resume.** Surfaced session 40: `.claude/hooks/session-start.sh:27-28` writes `/tmp/claude-base-$SESSION_ID.txt` only when absent. The "Branch-resume check" narrative (L45+) warns the human but doesn't update the file. Resyncing from harness-orphan to canonical mid-session keeps the obsolete base SHA, so subsequent line-count deltas include the cross-branch resync diff (~2,200 lines for v3a-foundation). One-off manual fix in session 40 (`echo $NEW_SHA > /tmp/claude-base-...`); proper fix is either auto-detect post-checkout via a separate `git checkout` pre/post hook or relax the absent-only guard. v3b should add a meta-test and the fix.
+4. **AC-6 lcov parser ships without a shellspec meta-test.** Session 40 commit `95481e5` added the parser inline in `verify-slice.sh` Gate 5 but didn't ship a test — fixture would need fake-git-history + lcov.info, non-trivial in tmp isolation. v3b (or v3c) should add when subagent suite includes integration fixtures.
+5. **`@vitest/coverage-v8` dev-dep + `ci.yml --coverage` wiring.** Required to *activate* AC-6 in CI; v3a ships the gate dormant-until-data-present. v3b's first commit should add the dep + wire the workflow.
+6. **AC-6 F6 ".sh ≥ 80% line via shellspec" invariant is aspirational only.** kcov + shellspec integration not yet in the harness; surfaced as documented intent without a measuring tool. v3c may pull in kcov as part of broader tooling rationalisation.
 
 **Blocks:** S-INFRA-rigour-v3c (quality-and-rewrite predecessor)
 **Blocked by:** S-INFRA-rigour-v3a-foundation merge to main
