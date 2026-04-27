@@ -17,6 +17,11 @@
 
 **Estimated budget:** to be drafted bottom-up at slice start, but reviewer's session-36 estimate suggested ~1500 lines for the full subagent suite. To be revised against the actual implementation after v3a foundation lands.
 
+**Carry-over from v3a (deferred concerns from S-37-6 / AC-7):**
+Per `docs/slices/S-INFRA-rigour-v3a-foundation/verification.md` § "Adversarial review — S-37-6 (DoD #3)" — two concerns deferred at v3a ship-time, to be addressed in this slice's AC table when drafted:
+1. **Flip plan-review subagent default-spawn.** v3a ships `EXIT_PLAN_REVIEW_SPAWN=1`-gated; full default-spawn pending ops sign-off on per-`ExitPlanMode` `claude -p` cost / latency. Plan-review is adjacent to the six during-work subagent gates above, so the cost-modelling work is shared.
+2. **Extend AC-2 checksum scope to `scripts/git-state-verifier.sh`.** v3a's L199 enumeration does not currently include the AC-7 sub-script; silent weakening would weaken the AC-7 gate. Either amend the L199 list in v3b's first commit OR rely on per-PR `control-change` label discipline (G18) until then.
+
 **Blocks:** S-INFRA-rigour-v3c (quality-and-rewrite predecessor)
 **Blocked by:** S-INFRA-rigour-v3a-foundation merge to main
 
