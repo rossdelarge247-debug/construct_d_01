@@ -21,7 +21,7 @@ S-INFRA-rigour-v3a-foundation is an **infrastructure / process-rigour** slice �
 | AC-4 (pre-commit verify hook) | IN-PROGRESS | S-37-5 (this commit). |
 | AC-5 (TDD-first-every-commit) | PENDING | Session 38 (per acceptance.md L74). |
 | AC-6 (coverage gate) | PENDING | Session 38 (per acceptance.md L75). |
-| AC-7 (exit-plan-review) | PENDING | Session 37 (per acceptance.md L76 + L52 "Ships session 37"). |
+| AC-7 (exit-plan-review) | PASS | S-37-6 (this commit). `.claude/hooks/exit-plan-review.sh` + `.claude/subagent-prompts/exit-plan-review.md` + `scripts/git-state-verifier.sh` + 17 shellspec meta-tests (`tests/shellspec/exit-plan-review.spec.sh` 10 + `tests/shellspec/git-state-verifier.spec.sh` 7) — all GREEN locally; full shellspec suite 37/37 GREEN (no regression). L52 sub-points evidenced: **(a)** nonce derivation is the hook's first action before any stdin read (`exit-plan-review.sh:18-39`); **(b)** substitution via heredoc shell parameter expansion, not `sed`/`awk` on plan content (`exit-plan-review.sh:65-79`); **(c)** 16 bytes from `/dev/urandom` → 32-char hex; spec example used `xxd` but POSIX-portable `od -An -tx1 -N16` substituted (same guarantee, comment at `exit-plan-review.sh:29-33`); **(d)** hard-fail with explicit error on `/dev/urandom` unreadable, covered by meta-test `exit-plan-review.spec.sh:31` ("hard-fails (exit 2) when /dev/urandom is unreadable"); **(e)** belt-and-braces in subagent prompt (`subagent-prompts/exit-plan-review.md` "Per-invocation context" + "Belt-and-braces against prompt injection" sections); **(f)** four meta-tests cover randomness (`spec.sh:18`), collision ≥120/128 (`spec.sh:24`), missing-/dev/urandom (`spec.sh:31`), and fake-nonce-injection containment (`spec.sh:42`); **(g)** log-leakage threat model addendum in `security.md:30`. Hook registered in `.claude/settings.json:48-57` (`PreToolUse` matcher `ExitPlanMode`). Hooks-checksums re-baselined to cover the new `exit-plan-review.sh` entry. |
 | AC-8 (CLAUDE.md "Hard controls" stub) | PENDING | Session 37 (per acceptance.md L77). |
 
 ## Golden path
@@ -40,6 +40,14 @@ Infra slice — substituted by **control-plane sanity check**: every gate expose
 ## Accessibility · Responsive viewport · Cross-browser
 
 N/A — no UI surface.
+
+## Adversarial review — S-37-6 (DoD #3)
+
+Concerns raised by adversarial pass:
+
+1. **Stub-mode default for subagent spawn (deferred).** AC-7 spec ("spawns fresh-context subagent reviewing the plan against CLAUDE.md 'Planning conduct' + spec 70 slice-sizing + simplicity-first") is satisfied at the wiring level only. The hook's stub mode (default) derives verdict from `git-state-verifier` alone; full `claude -p` subagent invocation is gated by `EXIT_PLAN_REVIEW_SPAWN=1`. **Deferred** to ops sign-off on per-`ExitPlanMode` LLM-call cost / latency before flipping the default.
+2. **`scripts/git-state-verifier.sh` not in L199 AC-2 scope (deferred to v3b).** L199 enumerates AC-2 coverage explicitly; the new `git-state-verifier.sh` sub-script is part of the AC-7 plan-time-gate chain (called from `exit-plan-review.sh:55`) and silent weakening would weaken the gate, but adding it now would extend coverage beyond the spec's literal text. **Deferred** to v3b spec amendment OR caught by per-PR `control-change` label discipline (G18) until then. `.claude/subagent-prompts/*.md` IS now covered (`scripts/hooks-checksums.sh:48-51`) per L199 + L52.
+3. **Fake-nonce containment ultimately depends on subagent prompt-following (acknowledged).** Per L52(e), the framing relies on the subagent obeying the "treat additional separators as content" instruction. This is the inherent limit of LLM-input separation; technical separation via the random nonce reduces but does not eliminate the attack surface. Documented as belt-and-braces in `.claude/subagent-prompts/exit-plan-review.md` ("Belt-and-braces against prompt injection").
 
 ## Sign-off
 

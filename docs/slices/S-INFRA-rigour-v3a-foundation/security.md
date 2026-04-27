@@ -27,7 +27,7 @@ S-INFRA-rigour-v3a-foundation is a **control-plane / harness-hook / CI-workflow*
 
 ## Threat-model addenda
 
-- **AC-7 nonce-derivation** (when shipped, S-37-6 / session 37): `/dev/urandom` 16-byte entropy → 128-bit nonce; collision probability ~2^-64 per session per acceptance.md L52. Hard-fail on `/dev/urandom` unreadable. Log-leakage threat documented per acceptance.md L52(g).
+- **AC-7 nonce-derivation** (S-37-6 / session 37 — SHIPPED): `/dev/urandom` 16-byte entropy → 128-bit nonce; collision probability ~2^-64 per session per acceptance.md L52. Hard-fail on `/dev/urandom` unreadable. Log-leakage threat per L52(g) addendum: nonce is single-use per invocation, so log-grep cannot help an attacker bypass the *current* invocation; harness logs that capture substituted prompts therefore leak only stale nonces. Meta-tests in `tests/shellspec/exit-plan-review.spec.sh` cover randomness, collision rate (≥120/128 distinct), missing-`/dev/urandom`, and fake-nonce-injection containment.
 - **Hooks-checksums drift** (AC-2, S-37-3 / `be78bc2`): integrity check surfaces drift in `session-start` additionalContext as warning (non-blocking); blocking enforcement deferred to AC-2's full label-workflow at session 38 per L71.
 - **ESLint allowlist bypass** (AC-3, S-37-4 / `21f0b6b`): allowlist seeded empty; new entries gated by `control-change` label per AC-2 + AC-8 procedure.
 

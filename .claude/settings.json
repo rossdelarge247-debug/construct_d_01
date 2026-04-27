@@ -44,6 +44,16 @@
             "timeout": 15
           }
         ]
+      },
+      {
+        "matcher": "ExitPlanMode",
+        "hooks": [
+          {
+            "type": "command",
+            "command": ".claude/hooks/exit-plan-review.sh",
+            "timeout": 60
+          }
+        ]
       }
     ]
   }
