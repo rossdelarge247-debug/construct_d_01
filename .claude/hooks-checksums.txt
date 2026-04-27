@@ -2,7 +2,7 @@ b591bc2f0e8ea48373808f7bac7efd096d622b0eb51fd6a7735602a030d1df3b  .claude/hooks/
 9036757a33c172b5883b57368d8cf7e93841ae39dc8466d3edb4538c58c905b6  .claude/hooks/line-count.sh
 25020038fa5a8de3fe6b68920fd5e0c364a08f90fece3f34aeed102471591357  .claude/hooks/pre-commit-verify.sh
 41210f600eb740773085675431729939ce20e0a06ff183d8fc3e874fc0db6f6b  .claude/hooks/read-cap.sh
-4eb9adf08713638b40d7f998f2dbe8b9789d888fbb5b52efc6a4bbcbe91ab973  .claude/hooks/session-start.sh
+8aa9a26f28ae55f46fa4594c7aff27d313654313adb2627a5debf3832f97632a  .claude/hooks/session-start.sh
 672069feda3f1524ef9bf7d1c7f4acc398ba07c8fa34b4094462634cc9cb7814  .claude/hooks/tdd-first-every-commit.sh
 bcf4171c97f964e80867d5d41388aef2a59649f58f3494e809fbd61eebf0b44f  .claude/hooks/wrap-check.sh
 2eac917defaa3729db0b02a16694719a687bf0dce3eafd128b56a166cd3756d1  scripts/verify-slice.sh
