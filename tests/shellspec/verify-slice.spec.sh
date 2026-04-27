@@ -4,7 +4,7 @@
 # + G15 tmp-fixture isolation. Script does not yet exist; deliberate failures
 # pushed to CI to capture run-ID per acceptance.md DoD-7 + G13.
 
-Describe 'verify-slice.sh (skeleton-mode contract)'
+Describe 'verify-slice.sh (file-presence contract)'
   setup() {
     SPEC_TMP="$(mktemp -d -t verify-slice-spec.XXXXXX)"
     SLICE_DIR="$SPEC_TMP/slice"
@@ -16,9 +16,22 @@ Describe 'verify-slice.sh (skeleton-mode contract)'
   BeforeEach 'setup'
   AfterEach 'cleanup'
 
+  # Helper: write a security.md that satisfies the §11-checklist gate so tests
+  # in this Describe block exercise the file-presence gate in isolation. The
+  # §11 contract itself is exercised by the second Describe block below.
+  write_section11_security() {
+    {
+      printf '# Security\n\n## §11 checklist\n\n'
+      printf '| Box | Item | Status | Notes |\n|---|---|---|---|\n'
+      for i in 1 2 3 4 5 6 7 8 9 10 11 12 13; do
+        printf '| %s | item-%s | n/a | placeholder |\n' "$i" "$i"
+      done
+    } > "$SLICE_DIR/security.md"
+  }
+
   It 'exits 0 when slice dir contains acceptance.md + security.md + verification.md'
     : > "$SLICE_DIR/acceptance.md"
-    : > "$SLICE_DIR/security.md"
+    write_section11_security
     : > "$SLICE_DIR/verification.md"
     When call scripts/verify-slice.sh "$SLICE_DIR"
     The status should be success
