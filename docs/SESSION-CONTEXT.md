@@ -37,7 +37,7 @@ Next.js 16.2, React 19, TypeScript, Tailwind 4, Supabase, Claude AI, Vercel Pro.
 - **(session 39): v3a session-37-budget complete.** AC-1 skeleton + AC-2 (both parts) + AC-3 + AC-4 + AC-7 + AC-8 PASS per `verification.md`. Plan-time gate (AC-7) live with random-nonce framing. Control-change-label workflow live with step-level path detection (branch-protection-compatible).
 - **NEW (session 40): v3a session-38-budget complete + slice content shipped.** AC-1 (full impl) + AC-5 + AC-6 added to PASS rows; AC-4 promoted from IN-PROGRESS to PASS (perf 0.024s incremental, well under G16 5s). `scripts/verify-slice.sh` is now the 7-gate workhorse (file-presence + §11 13-item checklist + leak-scan + ESLint denial check + tsc + vitest + per-language coverage), modes `incremental` (default; pre-commit) vs `--full` (CI). `.claude/hooks/tdd-first-every-commit.sh` is the AC-5 PreToolUse:Bash gate. `vitest.config.ts` carries `lines: 90` thresholds (gate dormant until `@vitest/coverage-v8` + `--coverage` wiring; v3b activates). 48/48 shellspec GREEN at `2c676d0`. AC-2 protected scope extended (`vitest.config.ts`, `docs/tdd-exemption-allowlist.txt`). DoD-3 verdict is procedural `request-changes` (reviewer hit read-cap); DoD-7 honest gap on S-38-2/S-38-1 timing. 8/8 ACs PASS; 8 v3b carry-over items recorded.
 
-### Built (on main as of `92f77d7`)
+### Built (on main as of `18c2a0c`)
 
 ```
 src/lib/auth/{dev-auth-gate,dev-session,index,types}.ts          — S-F7-α (PR #20, session 34)
@@ -46,55 +46,48 @@ src/lib/store/scenarios/{cold-sarah,sarah-mid-build}.json         — S-F7-α (P
 src/lib/stripe/client.ts                                          — apiVersion aligned (S-INFRA-1, PR #22, session 35)
 package.json + lockfiles                                          — stripe@22.1.0 pinned
 .claude/hooks/{line-count,session-start}.sh                       — S-TOOL-1 (PR #21, session 35)
+.claude/hooks/{pre-commit-verify,tdd-first-every-commit,exit-plan-review,read-cap,wrap-check}.sh  — v3a-foundation (PR #24, session 41)
+.claude/hooks-checksums.txt + scripts/hooks-checksums.sh          — v3a-foundation integrity baseline (PR #24)
+.github/workflows/{control-change-label,eslint-no-disable,pr-dod,shellspec}.yml  — v3a-foundation CI gates (PR #24)
+scripts/{verify-slice,git-state-verifier,eslint-no-disable}.sh    — v3a-foundation control plane (PR #24)
+docs/eslint-baseline-allowlist.txt + docs/tdd-exemption-allowlist.txt  — v3a-foundation allowlists (PR #24)
+vitest.config.ts                                                  — coverage threshold + lcov reporter (v3a AC-6, PR #24)
 tests/unit/hooks-{line-count,session-start}.test.ts               — S-TOOL-1 hook tests
-docs/slices/{S-F1,S-B-1,S-B-2,S-C-U4,S-F7-alpha,S-INFRA-1,S-TOOL-1,S-F7-beta}/  — slice docs
-CLAUDE.md §Planning conduct                                        — #12 Branch-resume check (session 34)
+tests/shellspec/                                                  — v3a meta-tests (PR #24)
+docs/slices/{S-F1,S-B-1,S-B-2,S-C-U4,S-F7-alpha,S-INFRA-1,S-TOOL-1,S-F7-beta,S-INFRA-rigour-v3a-foundation}/  — slice docs
+CLAUDE.md §{Planning conduct, Coding conduct, Engineering conventions, Hard controls (in development)}  — sessions 34, 37, 41
 ```
 
-**On `claude/S-F7-beta-impl` (8 ahead, parked):** S-F7-β impl (session 36); PR not opened; cleanup parked pending v3a merge.
+**On `claude/S-F7-beta-impl` (8 ahead, parked):** S-F7-β impl (session 36); PR not opened; cleanup parked pending v3b complete.
 
-**On `claude/S-INFRA-rigour-v3a-foundation` @ `71fc206` (29 ahead, in flight as PR #24 draft):** v3a-foundation slice content complete; 8/8 ACs PASS. DoD-11 final body refreshed at session 40 wrap (per acceptance.md L184). PR remains DRAFT pending user merge-path decision (see § Session 41 priorities). All session-37 + session-38 budget items landed.
+**On `claude/audit-v3b-pr24-merge-YUwug` @ `b94cddf` (5 ahead, pushed):** v3b S-1 (audit + acceptance.md redraft) + S-2 (`/security-review` + `/review` + 11 findings addressed). AC table frozen at session-42 wrap; impl phase opens at session 43. No PR yet (deferred per session-42 P1).
 
-## Session 42 priorities
+**Ghost: `claude/security-review-v3b-Cb8KB`** — 4 cherry-pick commits identical to v3b S-1 (session 42 reconciliation; abandoned per pivot to canonical). Safe to delete on origin.
 
-> **Numbering note:** the kickoff that opened this work was titled "Session 42 kickoff", but no `HANDOFF-SESSION-41.md` existed at session start. The wrap doc for the just-completed session is filed as `HANDOFF-SESSION-41.md` (filling the natural gap, since `HANDOFF-40` was the last existing handoff). User decides whether to rename the handoff or treat the kickoff label as authoritative — see HANDOFF-SESSION-41 §"What happened" for context.
+## Session 43 priorities
 
-### P0 — Run `/security-review` + `/review` against v3b `acceptance.md`
+> **Numbering:** session 41 = v3b S-1 (audit + acceptance.md redraft) wrapped as `HANDOFF-SESSION-41.md`. Session 42 = v3b S-2 (`/security-review` + `/review` + 11 findings addressed) wrapped as `HANDOFF-SESSION-42.md`. Session 43 = v3b S-3 onwards (impl phase opens with AC-14 `@vitest/coverage-v8` activation).
 
-v3b S-1 (audit-findings.md + acceptance.md redraft, 15 ACs top-down from audit) committed at `517a91b` on `claude/audit-v3b-pr24-merge-YUwug`. Drafting protocol step 3 (acceptance.md L65 + audit-findings.md §6) requires `/security-review` + `/review` BEFORE any RED-tests-first impl. Run both skills against the redrafted `acceptance.md` (173 lines, 15 ACs grouped A–E). Address findings or explicit-defer with reasoning recorded in slice `verification.md`. v3a's plan-time gate (AC-7 EXIT_PLAN_REVIEW_SPAWN=1) reviews this acceptance.md when an impl plan is submitted, but the BEFORE-impl skill reviews are independent and load-bearing.
+### P0 — v3b S-3: `@vitest/coverage-v8` activation (AC-14)
 
-### P0 (companion) — PR #24 merged + audit branch rebased ✅ (post-session-41 follow-up)
+First impl commit. Activates v3a's dormant coverage gate. Per `acceptance.md` AC-14 (L106-110, post-S-2 edits): add `@vitest/coverage-v8` devDep + wire `vitest.config.ts` for `lcov` reporter + update `.github/workflows/ci.yml` to run `pnpm vitest --coverage` + verify-slice.sh Gate 5 enforces ≥**90%** threshold per spec 72 F6 (matches v3a `acceptance.md` L178; v3b inherits, does not regress — finalised at S-2 per R-8 resolution). RED-tests-first per H6 pattern; manual DoD-7 discipline until v3b AC-7 (pre-push gate) ships at S-N.
 
-**PR #24 merged** at `2026-04-27T19:23:07Z` (squash-merge, `merged_by: rossdelarge247-debug`). Main moved `92f77d7` → `18c2a0c` ("S-INFRA-rigour-v3a-foundation: rigour controls foundation (#24)"). v3a-foundation slice now on main; coverage gate (AC-6) reachable; AC-14 (`@vitest/coverage-v8` activation) is the natural first impl commit.
+### P1 — v3b S-4 onwards: ACs by group order (A → B → C → D → E)
 
-**Audit branch rebased onto new main** via `git rebase --onto origin/main 54ce4ec` (clean replay of 3 v3b commits; squash collapse meant patch-id detection didn't drop them automatically). Force-pushed with lease. Branch state at session-42 start:
+After AC-14 lands. AC-12 (`line-count.sh` re-baseline fix, group D) is high-priority — fixes the bug that has fired false-positive STOPs across sessions 32, 40, 41, 42. After AC-12 ships, the manual `/tmp/claude-base-*.txt` workaround can retire. Then group A personas (AC-1..5: `slice-reviewer`, `acceptance-gate`, `ux-polish-reviewer`, retain/drop metric, `.claude/agents/` vs `subagent-prompts/` reconciliation) → group B hooks (AC-6 `tdd-guard`, AC-7 pre-push DoD-7 gate) → group C doc/convention (AC-8 TDD bail-out rubric, AC-9 preview-deploy checklist, AC-10 adversarial-review budget) → remaining group D (AC-11 L199 amendment, AC-13 lcov parser meta-test) → group E (AC-15 plan-review default-spawn flip after measurement).
 
-- `claude/audit-v3b-pr24-merge-YUwug` HEAD: `d2da7e7` (was `78d7ab1` pre-rebase)
-- 3 commits ahead of `origin/main` (was 44):
-  - `25dc85f` v3b S-1: audit-findings.md + acceptance.md redraft
-  - `6a488e8` session 41 wrap: HANDOFF-SESSION-41 + SESSION-CONTEXT refresh
-  - `d2da7e7` v3b S-1b: audit-findings.md §7 gap-closure verification
-- Behind: 0
-- `/tmp/claude-base-$SESSION_ID.txt` re-baselined to `d2da7e7` post-rebase to suppress carry-over #3 false-positive STOPs in next session.
+### P1 — Optional: open draft PR for v3b commits (`origin/main..HEAD`, currently 5)
 
-**Implication for session 42 P0:** acceptance.md content is byte-identical pre/post rebase; `/security-review` + `/review` proceed as planned. **Optional now-unblocked:** open a draft PR for the 3 v3b commits (clean diff against main) so the reviews can attach to a PR rather than the branch alone — drafter's call at session start.
-
-### P1 — v3b S-2: address review findings, freeze AC table
-
-After P0 reviews complete, address findings or defer with reasoning recorded in slice `verification.md`. Re-validate AC-table arithmetic (15 ACs grouped A–E; total budget magnitude ~1500 lines per session-36 estimate, composition revised per audit). Freeze AC table; commit + push as v3b S-2.
-
-### P1 — v3b S-3 onwards: RED-tests-first impl per H6 pattern
-
-Begin impl. AC-14 ships first (gives all subsequent ACs live coverage signal). Then ACs by group order (A → B → C → D → E), with v3a AC-5 (`tdd-first-every-commit.sh` paperwork gate) + v3b AC-6 (`tdd-guard` behaviour gate, once shipped) enforcing.
+Defer to S-3 ship if slice-verification scaffolding lands then. pr-dod.yml requires `verification.md` reference OR `no-slice-required` label — neither exists yet. Opening a PR now adds CI cycles without unblocking impl.
 
 ### P2 — `line-count.sh` re-baseline bug (carry-over #3 / v3b AC-12)
 
-**Fourth evidence point this session** (sessions 32 lockfile, 40 cross-branch resync, 41 cross-branch resync from main → v3a-foundation tip, 41-followup post-merge rebase). Manual workaround applied at end of session 41 (re-baselined `/tmp/claude-base-*.txt` to current HEAD); v3b AC-12 is the structural fix. **Re-apply manual workaround in session 42 if any branch resync happens** (`echo $(git rev-parse HEAD) > /tmp/claude-base-$SESSION_ID.txt`).
+**Fifth evidence point** (sessions 32 lockfile, 40 cross-branch resync, 41 cross-branch resync, 41-followup post-merge rebase, 42 cross-branch pivot from `claude/security-review-v3b-Cb8KB` to `claude/audit-v3b-pr24-merge-YUwug`). Manual workaround re-applied at session-42 start (re-baselined `/tmp/claude-base-*.txt` to current HEAD post-pivot). v3b AC-12 (now P1 as part of S-4 group D priority bump) is the structural fix.
 
 ### P2 — surface housekeeping
 
-- `docs/HANDOFF-SESSION-41.md` is the retro wrap doc for session 41 (does not yet capture the post-wrap PR #24 merge + rebase follow-up; consider an addendum at session-42 wrap or fold into v3b S-2 commit message).
-- `docs/slices/S-INFRA-rigour-v3a-foundation/HANDOFF-SLICE-WRAP.md` (consolidating retro across sessions 37–41) still pending; defer to v3b mid-impl or v3c kickoff.
+- **Ghost branch cleanup:** `origin/claude/security-review-v3b-Cb8KB` exists with 4 cherry-pick commits identical to v3b S-1 (no unique work) — abandoned mid-session-42 per pivot to canonical. Safe to delete; left for user to call.
+- `docs/slices/S-INFRA-rigour-v3a-foundation/HANDOFF-SLICE-WRAP.md` (consolidating retro across sessions 37–42) still pending; defer to v3b mid-impl or v3c kickoff.
 
 ## Scope ceiling
 
@@ -134,84 +127,73 @@ Single-P0 session. v3a foundation is the unblocking slice. Don't add adjacent sl
 
 ## Branch
 
-### Branch state at session-40 wrap (verified live, not from kickoff memory)
+### Branch state at session-42 wrap (verified live, not from kickoff memory)
 
-- **Active:** `claude/S-INFRA-rigour-v3a-foundation` @ `71fc206` · 29 ahead of `origin/main` `92f77d7` · pushed · in flight as PR #24 (draft; DoD-11 body refreshed; awaiting merge-path decision). 8/8 ACs PASS in `verification.md`; DoD-3 verdict procedural `request-changes`; DoD-7 honest gap on S-38-2/S-38-1 timing.
-- **Parked:** `claude/S-F7-beta-impl` @ `a3f67ec` · 8 ahead · pushed. Resumes post-v3a merge.
-- **`main`** @ `92f77d7` · no new merges since PR #21 (S-TOOL-1, session 35).
+- **Active:** `claude/audit-v3b-pr24-merge-YUwug` @ `b94cddf` · 5 ahead of `origin/main` `18c2a0c` · 0 behind · pushed · no PR yet (deferred). v3b S-1 + S-2 shipped; AC table frozen; reviews `approve` post-resolution.
+- **Parked:** `claude/S-F7-beta-impl` @ `a3f67ec` · 8 ahead · pushed. Resumes post-v3b complete.
+- **Ghost on origin (safe to delete):** `claude/security-review-v3b-Cb8KB` · 4 cherry-pick commits = v3b S-1; abandoned mid-session-42 per pivot to canonical.
+- **`main`** @ `18c2a0c` · PR #24 (S-INFRA-rigour-v3a-foundation) merged at `2026-04-27T19:23:07Z`.
 
-### Iteration trajectory of v3a-foundation slice (planning + impl)
+### Iteration trajectory of v3b-subagent-suite slice (planning)
 
-Spec planning: 5 adversarial review iterations converged at v5 nit-only (v1 → v2 → v3 → v4 → **v5** → v5.1 polish).
-Impl: session 37 (S-37-0..5) skeleton + AC-3/4 → session 38 (recovered crash + AC-1 skeleton + AC-2 part 1) → session 39 (AC-7 + AC-2 part 2 + AC-8) → session 40 (S-38-1/2/3/4 → 8/8 ACs PASS).
+S-1 (session 41, `25dc85f` + `6a488e8` + `d2da7e7`): one-time deliberate pass over Tier-4 archive sources → `audit-findings.md` (130L; full inventory) → `acceptance.md` redrafted top-down to 15 ACs grouped A–E.
+S-2 (session 42, `b94cddf`): `/security-review` zero findings (per FP rule 16); `/review` 17 findings, 7 logic-severity. User accepted all 5 recommended defaults for load-bearing logic findings. 11 in-scope findings addressed; 2 deferred with reasoning; 4 approved unchanged. Verdict shifted `request-changes` → `approve`. AC table frozen.
 
-### Next session (41) FIRST ACTIONS
+### Next session (43) FIRST ACTIONS
 
-1. Verify branch state per `.claude/hooks/session-start.sh`. Expected: HEAD `71fc206` or further ahead. **Heads-up:** line-count hook may show inflated baseline if cross-branch resync happens — see v3b carry-over item 3 (manual fix is `echo $NEW_SHA > /tmp/claude-base-${SESSION_ID}.txt`).
-2. Re-fetch PR #24 CI status via `mcp__github__pull_request_read get_check_runs` — confirm runs at `71fc206` are GREEN.
-3. **Decide merge path with user (P0):** (a) accept procedural request-changes + flip PR ready, (b) re-spawn DoD-3 review with multi-turn budget, (c) defer to v3b. Default recommendation: (a).
-4. Run `/security-review` skill if path (a) or (c) — capture in `security.md`.
-5. If merging: v3b kickoff per § Session 41 priorities P1.
+1. Verify branch state per `.claude/hooks/session-start.sh`. Expected: HEAD `b94cddf` or further ahead. **Heads-up:** line-count hook may show inflated baseline if cross-branch resync happens — manual fix is `echo $(git rev-parse HEAD) > /tmp/claude-base-${SESSION_ID}.txt` until v3b AC-12 ships.
+2. Confirm PR #24 still merged + main tip is still `18c2a0c` (or newer if other PRs merged): `mcp__github__pull_request_read pullNumber=24` returns `state: closed, merged: true`.
+3. **v3b S-3 = AC-14 `@vitest/coverage-v8` activation** per kickoff §P0. Read `acceptance.md` AC-14 (post-S-2 edits — coverage floor is now ≥**90%** matching v3a). RED-tests-first per H6 pattern; manual DoD-7 discipline until v3b AC-7 ships.
+4. **Optional — open draft PR for the 5 v3b commits.** Defer if S-3 also adds `verification.md` scaffolding.
+5. **Optional — delete ghost branch** (`origin/claude/security-review-v3b-Cb8KB`) once user confirms.
 
 ## Key files
 
-Canonical list lives in `CLAUDE.md` §"Key files". Session-40-relevant additions:
+Canonical list lives in `CLAUDE.md` §"Key files". Session-41 + session-42 additions for v3b:
 
 ```
-docs/HANDOFF-SESSION-40.md                                        — session 40 retro (NEW)
-docs/slices/S-INFRA-rigour-v3a-foundation/
-  ├─ acceptance.md                                                — 8 ACs frozen, v5.1 adversarial-approved
-  ├─ verification.md                                              — 8/8 ACs PASS + § Adversarial review — session 40 (procedural request-changes)
-  └─ security.md                                                  — spec-72 §11 checklist (table-row form, all 13 boxes)
-docs/slices/S-INFRA-rigour-v3b-subagent-suite/acceptance.md       — stub + § Carry-over from v3a (8 items at session-40 wrap)
-
-.claude/hooks/tdd-first-every-commit.sh                           — AC-5 PreToolUse:Bash gate (NEW session 40)
-docs/tdd-exemption-allowlist.txt                                  — AC-5 file-glob allowlist (NEW; empty seed per L48 pattern)
-tests/shellspec/tdd-first-every-commit.spec.sh                    — AC-5 meta-tests, 6 examples (NEW session 40)
-
-scripts/verify-slice.sh                                           — AC-1 full-mode impl (replaced skeleton at session 40); modes incremental + --full
-vitest.config.ts                                                  — AC-6 coverage thresholds + lcov reporter (NEW session 40; in AC-2 protected scope)
-tests/shellspec/verify-slice.spec.sh                              — extended with 5 §11-checklist contract tests (10 examples total)
-
-.claude/settings.json                                             — PreToolUse:Bash matcher now carries pre-commit-verify + tdd-first-every-commit (session 40)
-.claude/hooks-checksums.txt                                       — 15 entries (session-40 baseline; was 12)
-scripts/hooks-checksums.sh                                        — explicit-file list extended (vitest.config.ts + tdd-exemption-allowlist.txt)
-
-.github/workflows/shellspec.yml                                   — pinned to shellspec 0.28.1 (session 40 parallel CI fix `5adec84`)
+docs/HANDOFF-SESSION-41.md                                                          — session 41 retro (v3b S-1)
+docs/HANDOFF-SESSION-42.md                                                          — session 42 retro (v3b S-2 + reconciliation; NEW)
+docs/slices/S-INFRA-rigour-v3b-subagent-suite/
+  ├─ acceptance.md                                                                  — 15 ACs frozen at session-42; reviews approve post-resolution
+  ├─ audit-findings.md                                                              — full audit trail; §5 = 15-AC inventory; §7 = gap-closure verification
+  ├─ security.md                                                                    — spec-72 §11 checklist; /security-review zero findings (NEW session 42)
+  └─ review-findings.md                                                             — 17 /review findings; resolution log; verdict request-changes → approve (NEW session 42)
 ```
 
-**For session 41 (merge-path decision + v3b kickoff), primary reference paths:**
+**For session 43 (v3b S-3 = AC-14 impl), primary reference paths:**
 
 ```
-docs/slices/S-INFRA-rigour-v3a-foundation/acceptance.md           — THE PLAN (AC table; DoD L170-186; protection scope L199; rollback L201; PR-body refresh L184)
-docs/slices/S-INFRA-rigour-v3a-foundation/verification.md         — 8/8 PASS + adversarial-review state + DoD-7 honest gap
-docs/slices/S-INFRA-rigour-v3b-subagent-suite/acceptance.md       — 32-line stub + 8 carry-over items; full AC drafting starts at v3b kickoff
-scripts/verify-slice.sh                                           — full-mode workhorse (incremental + --full)
-.claude/hooks/{pre-commit-verify,tdd-first-every-commit}.sh       — both gates now live on PreToolUse:Bash
+docs/slices/S-INFRA-rigour-v3b-subagent-suite/acceptance.md       — THE PLAN (15 ACs; DoD L170+; protection scope per AC-11)
+docs/slices/S-INFRA-rigour-v3b-subagent-suite/review-findings.md  — resolution log; what was pinned at S-2 (regex, timeouts, thresholds)
+docs/slices/S-INFRA-rigour-v3a-foundation/acceptance.md           — v3a (merged); inherited 12-item DoD L170-186; F6/F6c coverage threshold
+package.json + vitest.config.ts                                   — extension targets for AC-14 (devDep + coverage config)
+.github/workflows/ci.yml                                          — extension target for AC-14 (--coverage flag)
+scripts/verify-slice.sh                                           — Gate 5 reads coverage/lcov.info per AC-14 spec
 ```
 
-## Session 41 pre-flight
+## Session 43 pre-flight
 
 **Verify (do this first, before any plan):**
 
 ```
 git fetch origin
 git status                                                        # confirm clean tree
-git rev-parse --short HEAD                                        # expect 71fc206 (or further ahead)
-git log --oneline origin/main..HEAD | wc -l                       # expect 29 (or +N from interim commits)
+git rev-parse --short HEAD                                        # expect b94cddf (or further ahead)
+git log --oneline origin/main..HEAD | wc -l                       # expect 5 (or +N from interim commits)
+mcp__github__pull_request_read pullNumber=24                      # confirm state: closed, merged: true
 ```
-
-Plus: `mcp__github__pull_request_read get_check_runs pullNumber=24` to confirm CI is GREEN at HEAD before any merge-path discussion.
 
 **Pre-flight Qs (ask user before any code):**
 
-1. **Merge path for PR #24?** DoD-3 verdict is procedural `request-changes` (reviewer hit read-cap). Three viable paths: (a) accept procedural verdict + flip ready-for-review → merge, (b) re-spawn DoD-3 with multi-turn budget → re-decide, (c) defer fuller review to v3b + merge with caveats. Default recommendation: (a). *Status: open.*
-2. **Run `/security-review` skill before merge?** DoD-9 evidence; deferred from session 40 for budget. 5–10 min for control-plane-only diffs. *Status: open.*
+1. **Open draft PR for the 5 v3b commits?** Defer if S-3 ships `verification.md` scaffolding (which can ship with PR open). Default recommendation: open after AC-14 lands. *Status: open.*
+2. **Delete ghost branch `claude/security-review-v3b-Cb8KB` on origin?** No unique work; safe to delete. *Status: open.*
 
 **Session discipline (hook-surfaced; restated):**
 
 - Honour Planning conduct from turn 1. SessionStart hook surfaces live branch state — use it; distrust kickoff memory.
-- **Heads-up — line-count.sh re-baseline bug.** v3b carry-over item 3. If session lands on a harness-orphan and resyncs to canonical, the cumulative count will be inflated by the canonical-branch diff. Manual one-off fix: `echo $(git rev-parse HEAD) > /tmp/claude-base-${SESSION_ID}.txt`.
+- **Heads-up — line-count.sh re-baseline bug.** Fifth evidence point at session 42. If session lands on a harness-orphan and resyncs to canonical, the cumulative count will be inflated by the canonical-branch diff. Manual one-off fix: `echo $(git rev-parse HEAD) > /tmp/claude-base-${SESSION_ID}.txt`. Structural fix = v3b AC-12 (now P1 priority for S-4 group D).
 - Long-prose Writes: skeleton + Edit-append for any prose Write >~100 lines.
-- **Dogfood discipline (live now):** every commit passes `pre-commit-verify.sh` (full-mode incremental) AND `tdd-first-every-commit.sh`. Plan-time gate (AC-7) fires on ExitPlanMode. v3a's gates dogfood themselves and v3b from day 1.
+- **Dogfood discipline (live now):** every commit passes `pre-commit-verify.sh` AND `tdd-first-every-commit.sh`. Plan-time gate (AC-7) fires on ExitPlanMode. v3a's gates dogfood themselves and v3b from day 1.
 - **No bypass via `--no-verify`:** harness-level hooks intercept at the Bash tool layer, not git layer.
+- **H6 RED-tests-first pattern (manual until v3b AC-7 ships):** RED commit pushed AND CI-observed-failing BEFORE GREEN impl pushed. AC-14 is the first impl commit to dogfood this.
