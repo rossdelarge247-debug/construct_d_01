@@ -61,14 +61,25 @@ jobs:
           # inline-file pattern when >300L).
           git diff "$BASE_SHA" "$HEAD_SHA" > /tmp/pr-diff.txt
 
-          # Locate slice acceptance.md from PR body (preferred per pr-dod.yml
-          # convention) or branch-name `claude/S-XX-...` pattern fallback.
-          SLICE_AC=$(printf '%s' "$PR_BODY" | grep -oE 'docs/slices/S-[A-Za-z0-9-]+/acceptance\.md' | head -1 || true)
-          if [ -z "$SLICE_AC" ]; then
-            SLICE_FROM_BRANCH=$(printf '%s' "$BRANCH" | grep -oE 'S-[A-Za-z0-9-]+' | head -1 || true)
-            if [ -n "$SLICE_FROM_BRANCH" ] && [ -f "docs/slices/$SLICE_FROM_BRANCH/acceptance.md" ]; then
-              SLICE_AC="docs/slices/$SLICE_FROM_BRANCH/acceptance.md"
-            fi
+          # Locate slice acceptance.md: prefer the branch-derived slice path
+          # (deterministic; matches conventional `claude/<slice-name>` naming);
+          # fall back to PR body grep when branch resolution misses.
+          #
+          # Without the branch-first preference, a PR body that incidentally
+          # cites an unrelated slice path (e.g. in §"References", §"Forward-
+          # only rename", or §"Sibling-slice precedent" sections) can mis-
+          # resolve to that slice. Observed in PR #38 (session 50) where
+          # §"Forward-only rename" listed S-F7-alpha-contracts-dev-mode/
+          # acceptance.md as one of four historical references; `grep -oE
+          # ... | head -1` grabbed it instead of the branch-mapped slice.
+          # Consequence: persona compared diff against wrong AC; finding
+          # body started "block is S-F7-alpha-contracts-dev-mode (...); PR
+          # diff is for S-INFRA-rigour-v3c-prior-art-amendments-easy".
+          SLICE_FROM_BRANCH=$(printf '%s' "$BRANCH" | grep -oE 'S-[A-Za-z0-9-]+' | head -1 || true)
+          if [ -n "$SLICE_FROM_BRANCH" ] && [ -f "docs/slices/$SLICE_FROM_BRANCH/acceptance.md" ]; then
+            SLICE_AC="docs/slices/$SLICE_FROM_BRANCH/acceptance.md"
+          else
+            SLICE_AC=$(printf '%s' "$PR_BODY" | grep -oE 'docs/slices/S-[A-Za-z0-9-]+/acceptance\.md' | head -1 || true)
           fi
 
           # Compose the prompt envelope per slice-reviewer.md "Per-invocation
