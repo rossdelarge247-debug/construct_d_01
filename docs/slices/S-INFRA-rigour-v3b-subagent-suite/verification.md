@@ -161,9 +161,26 @@ Per AC-10 spec 72b §Decision criteria: `wc -l docs/slices/S-INFRA-rigour-v3b-su
 
 Hooks-checksums re-baselined to 17 entries (pre-push-dod7.sh + tdd-guard.sh hashes both changed). All dryruns re-verified pre-commit.
 
-**Sub-spawns 2-6 (test surface + doc surface) remain deferred** — captured definitively as v3c carry-over: `docs/workspace-spec/72b-adversarial-review-budget.md` should add an Option C (pre-load file content inline in subagent prompt; bypasses Read tool entirely). Reviewer at PR-time inherits this gap; encouraged to do the deferred reviews with full file access.
+### S-5 round-3: CI exposed two latent bugs the local dryruns + sub-spawn reviews missed
 
-**S-5 final verdict: `request-changes` → `approve-with-deferred-review`** (sub-spawn-1 blockers resolved; remaining surfaces honestly deferred to PR-time review with explicit gap documentation).
+CI on `fedaeed` + `75de567` flagged **9 shellspec failures** across 3 spec files. Investigation surfaced two pre-existing latent bugs that the entire S-5 review chain (initial sub-spawn 1 + round-2 sub-spawn 1-redux + author dryruns) had missed because dryruns invoked the hooks directly via `bash hook.sh <<<'$JSON'` (which works) rather than via the spec runner (which does not).
+
+- **ShellSpec stdin bug (tdd-guard + pre-push-dod7).** Both spec files used `When call CMD <<<"$INPUT"` to pipe stdin. ShellSpec's `When` does NOT pass stdin from inline redirects — the redirect attaches to ShellSpec's interpreter, not the called command. Hooks received EMPTY stdin → silent exit 0 from `[ -z "$INPUT" ] && exit 0`. **All 21 fixtures (7 tdd-guard + 14 pre-push-dod7) were giving false signals**: blocking-path tests expecting rc=2 failed-loud (got rc=0); pass-path tests expecting rc=0 silently passed for the wrong reason. Pre-existing bug from `6f30870` — never previously caught because CI on the original ship (PR #26) ran the same broken specs and saw the same false-positive "passing" pattern. **Fixed in `0b7e183`:** convert all 21 fixtures to use ShellSpec's `Data:expand` block. Local run now 88 examples / 0 failures.
+- **Gate 3b trailing-newline bug (verify-slice.sh L156).** The `while IFS= read -r line; do ... done < $ALLOWLIST_FILE` loop silently dropped the final entry when the file had no trailing newline (read returns non-zero on EOF-without-NL → loop body skipped). Single-entry untagged allowlists slipped past the gate. Pre-existing bug from `6f30870`. **Fixed in `0b7e183`:** standard idiom `while IFS= read -r line || [ -n "$line" ]; do ...`.
+
+**Why this slipped through every prior review:**
+
+- Author dryruns invoked the hook directly (`bash hook.sh <<<'$JSON'`) — works correctly. Never invoked via the spec runner.
+- Sub-spawn 1 (impl review) focused on hook code, not spec-runner semantics.
+- Sub-spawn 1 redux focused on hook bugs (`gh api` failure path, repo regex, etc.) — surfaced 5 real bugs but again did not invoke specs.
+- Sub-spawns 2-6 (would have reviewed the spec surface) were structurally deferred by the read-cap.
+- Original CI run on PR #26 saw the SAME false-positive pattern (existed from `6f30870`); shellspec ran clean because the broken pass-path tests masked the broken block-path tests.
+
+**v3c carry-over (sharpened):** Spec 72b should add a "spec validation by deliberate impl-break" check to the per-slice DoD — temporarily emit BLOCK from a passing path → pass-path tests should turn red. If they don't, the spec stdin/setup is broken. Would have caught this in seconds. Also: CI shellspec failures should be the trigger for a sub-spawn 2-3 (test-surface) review, not deferred — when the spec surface is itself broken, no other gate can catch it.
+
+**Sub-spawns 2-6 (test surface + doc surface) remain partially deferred** — `0b7e183` addressed the test-surface stdin bug because it was provably broken; the rest of the test surface (assertion completeness, edge-case coverage) and 6 doc files still benefit from PR-time review with full file access.
+
+**S-5 final verdict: `approve-with-deferred-review` (with caveat).** Hook surface fixes locked + spec surface stdin bug resolved + Gate 3b allowlist bug resolved. Doc surface deferred. The lesson recorded above is more important than the bug fixes themselves.
 
 ## Sign-off
 
