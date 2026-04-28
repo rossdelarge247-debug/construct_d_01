@@ -20,19 +20,6 @@
 
 *(AC-arithmetic verifier (F4c) consolidated to **v3b** only per v3a-v3 revision — was previously listed in both v3b and v3c stubs.)*
 
-## Multi-provider consensus framework (candidate; session-48 addition)
-
-Extends the existing "Multi-provider 3rd-agent PR reviewer" bullet above. Original scope: single non-Anthropic LLM as tie-breaker when same-provider specialists disagree. Extended scope (candidate, awaiting measurement data from first 3 src/ slices under spec 72c 7-dim Claude-only baseline): **N providers in parallel reviewing same PR, consensus required to merge.** Different providers have different bias profiles (Claude strong on architectural reasoning + spec citation; GPT strong on edge cases + boilerplate test gaps; Gemini strong on diff-localised syntax/typing); cognitive-diversity argument is the same as multi-dimension partition within Claude (§spec 72c §1) but on the provider axis instead of the rubric axis. Spec 72c §4 personas become a 2-axis matrix (dimension × provider) under this extension.
-
-**Three open questions parked for v3c kickoff** (resolve with data, not a priori):
-1. **Consensus rule** — unanimous (high false-positive risk) vs majority of N (e.g. 2-of-3) vs verdict-weighted (`block` requires unanimous, `request-changes` majority, `nit-only` informational from any single).
-2. **Provider mix** — N=3 default candidates: Claude · GPT · Gemini. Local code-llama as cheap narrow-specialist supplement vs full-rubric reviewer.
-3. **Cost vs signal** — N=3 × 7 dimensions = 21 invocations per PR (~$2 baseline before differential mode kicks in per spec 72c §6). Operating point: full multi-provider only on `src/` slices + diffs >300L; doc-only / copy-flips stay single-provider.
-
-**Decision gate at v3c kickoff:** re-evaluate after first 3 src/ slices ship under 7-dim Claude-only suite (per spec 72c §8 retain/drop measurement). Architecture choice in (1)/(2)/(3) above informed by which finding categories single-provider missed in those 3 slices. Ahead-of-data design here would repeat the architectural-smell pattern shipped in PR #32 (build-then-measure → cheaper than measure-then-build).
-
-**Cross-ref:** spec 72c §9 last bullet (the original tie-breaker carry-over now framed as the narrow case of this broader framework).
-
 **Estimated budget:** to be drafted bottom-up at slice start. Reviewer's session-36 estimate suggested ~1500-2000 lines for the full quality + multi-provider + rewrite stack.
 
 **Blocks:** none — final slice
