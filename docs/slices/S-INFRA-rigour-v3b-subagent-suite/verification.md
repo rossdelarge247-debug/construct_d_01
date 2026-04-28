@@ -331,6 +331,17 @@ After the fix-up commit `f476d41`, two empty-trigger commits validated the AC-1 
 
 **v3c carry-over (sharpened):** Extend the spec 72b §"Spec validation by deliberate impl-break" check from shell+ShellSpec runners to **LLM CLI integration** — temporarily corrupt the persona's response or the CLI invocation; the workflow's parsing should fail-loud (or report the corruption). Would have caught the `claude -p` transcript-envelope assumption pre-ship.
 
+### Round 3: persona reviews round-2 fixes
+
+After `8bfdfb4` (round 2 fixes), workflow [`25059471679`](https://github.com/rossdelarge247-debug/construct_d_01/actions/runs/25059471679) ran the slice-reviewer on the round-2 diff. Posted check-run `73409941931` `neutral` (`request-changes` / `logic` / 2 findings).
+
+**The 2 round-3 findings** (verbatim from check-run summary):
+
+1. **`edge-case`** — sed fence-strip in `auto-review.yml` was buggy: `printf '%s\n' "$RESULT"` appends a trailing newline, so the closing fence is no longer on the last line for `sed '$'` to match. Closing fence retained → jq parse fails silently → `PERSONA_JSON='{}'` → defaults fire → contradictory `block` / 0-findings posted with empty summary. **Resolved** in this round (`<round-4-sha>`): replaced two-`sed` form with `grep -v '^[[:space:]]*` `'` (any markdown fence line removed regardless of position).
+2. **`simplicity`** — dead step-outputs `nonce` and `diff_lines` written to `$GITHUB_OUTPUT` but never referenced by downstream steps (both fully consumed within the compose step). **Resolved** in this round: removed both `echo ... >> "$GITHUB_OUTPUT"` lines.
+
+**Why round 3 IS the strongest demonstration of AC-1's value:** the persona caught a latent bug — the sed-strip would only manifest when the model wraps response in fences, which the workflow logs show DIDN'T happen this round (round-2 ran with parsed-direct path, never hit the fallback). The persona surfaced the bug from CODE INSPECTION, not from observing it fail. This is exactly the "defensive depth" the persona's edge-case criterion is designed to provide.
+
 ### S-6 final verdict
 
 **`request-changes` → `approve` after fix-up commit.** All architectural and logic findings actioned in fix-up commit (TBD-SHA). Style findings (none in this round) and minor drift items folded into the corresponding criterion exception clauses. Sub-spawn 3 re-spawn pending. Residual-injection disclosed honestly per session-46 lesson "honest gap recording over false approve".

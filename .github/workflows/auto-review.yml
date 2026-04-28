@@ -56,13 +56,10 @@ jobs:
         run: |
           set -euo pipefail
           NONCE=$(openssl rand -hex 16)
-          echo "nonce=$NONCE" >> "$GITHUB_OUTPUT"
 
           # Diff (file under review for the persona; spec 72b Option C
           # inline-file pattern when >300L).
           git diff "$BASE_SHA" "$HEAD_SHA" > /tmp/pr-diff.txt
-          DIFF_LINES=$(wc -l < /tmp/pr-diff.txt)
-          echo "diff_lines=$DIFF_LINES" >> "$GITHUB_OUTPUT"
 
           # Locate slice acceptance.md from PR body (preferred per pr-dod.yml
           # convention) or branch-name `claude/S-XX-...` pattern fallback.
@@ -117,10 +114,16 @@ jobs:
           echo "::endgroup::"
 
           RESULT=$(jq -r '.result // .text // .content // ""' /tmp/review-output.json)
+          # Try direct JSON parse; fall back to stripping ALL markdown
+          # fence lines (```json / ```) regardless of position; fall back
+          # to {} so downstream defaults fire honestly. The grep-based
+          # fence strip is robust to trailing-newline edge cases the
+          # earlier `sed '1{...}'/'${...}'` form missed (round-3 finding
+          # #1: `printf '%s\n'` appends NL → closing fence not on last
+          # line for `sed '$'` → fence retained → jq fails silently).
           PERSONA_JSON=$(printf '%s' "$RESULT" | jq -c '.' 2>/dev/null) \
-            || PERSONA_JSON=$(printf '%s\n' "$RESULT" \
-                 | sed -E '1{/^[[:space:]]*```(json)?[[:space:]]*$/d;}' \
-                 | sed -E '${/^[[:space:]]*```[[:space:]]*$/d;}' \
+            || PERSONA_JSON=$(printf '%s' "$RESULT" \
+                 | grep -v '^[[:space:]]*```' \
                  | jq -c '.' 2>/dev/null) \
             || PERSONA_JSON='{}'
 
