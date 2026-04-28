@@ -243,6 +243,7 @@ Enforcement: `.github/PULL_REQUEST_TEMPLATE.md` reproduces this checklist; `.git
 | ESLint function-size + max-lines | `eslint.config.mjs` | `npm run lint` + CI `Lint` job | AC-3 | edit thresholds under `control-change` label (full origin/main-anchored ratchet lands v3c per F5c) |
 | Plan-time review | `.claude/hooks/exit-plan-review.sh` + `.claude/subagent-prompts/exit-plan-review.md` + `scripts/git-state-verifier.sh` | `ExitPlanMode` (PreToolUse) | AC-7 | address findings + re-attempt; full subagent default-spawn deferred to v3b |
 | Slice-verification PR-body | `.github/workflows/pr-dod.yml` | every PR touching `src/` | pre-S-37 (P0.4) | reference slice's `verification.md` in body, or apply `no-slice-required` label |
+| Auto-review on PR (slice-reviewer) | `.claude/agents/slice-reviewer.md` + `.github/workflows/auto-review.yml` | `pull_request:opened/synchronize` | v3b AC-1 | informational at v3b ship; verdict posts as check run (no merge gate); skips with `neutral` if `ANTHROPIC_API_KEY` repo secret absent |
 
 Each gate emits a useful-message exit body on failure: what failed, why per spec, concrete remediation.
 
@@ -267,6 +268,14 @@ Two `.claude/` directories carry subagent files; the distinction is by spawn pat
 Both locations are committed (versioned with the codebase). Per `docs/engineering-phase-candidates.md` §E L132: *"Storage: repo-level `.claude/agents/` (committed, travels with the project). Not user-home (`~/.claude/`) — those are personal and don't version with the codebase."* Same principle applies to `subagent-prompts/`.
 
 v3b persona shipments per AC-1/2/3 (slice-reviewer, acceptance-gate, ux-polish-reviewer) land under `.claude/agents/`. v3a's `exit-plan-review.md` stays under `.claude/subagent-prompts/` — it's a hook-spawned template, not a session-spawned persona.
+
+**Invocation conventions** (per v3b S-6 ship; AC-1/2/3):
+
+- **`slice-reviewer.md` (AC-1)** — auto-spawned by `.github/workflows/auto-review.yml` on `pull_request:opened/synchronize`; verdict posts as a check run. Inputs: PR diff + linked slice `acceptance.md` (located via PR-body path or `claude/S-XX-...` branch heuristic) + CLAUDE.md "Coding conduct" §. May also be spawned manually via the `Agent` tool for ad-hoc review of an in-progress diff.
+- **`acceptance-gate.md` (AC-2)** — persona file ships at v3b S-6; **invocation wiring lands at S-F1** (the first src/ slice). Spawned at slice-completion time by `/wrap` or main-session call. Inputs: slice `acceptance.md` + slice `verification.md` + CLAUDE.md "Engineering conventions §Definition of Done". Verdict is informational at v3b ship; auto-blocking PR merge deferred to v3c per AC-2 §Out of scope.
+- **`ux-polish-reviewer.md` (AC-3)** — dormant at v3b ship (no `src/` UI surface in v3a/v3b infra slices). Active from S-F1 onwards. Spawned during slice-completion for any AC whose `In scope` mentions UI surface (`src/app/**`, `src/components/**`, or any `*.tsx` rendered to the browser). Inputs: slice diff + slice `acceptance.md` + spec 72a six-dim rubric + slice `verification.md` `## Preview-deploy verification` section.
+
+All three personas emit strict-JSON output per the `Verdict vocabulary` above. Persona prompts include nonced fenced delimiters for each input, and accept spec 72b Option C inline-file content (`--- BEGIN <path> NONCE --- ... --- END <path> NONCE ---`) for atomic files >300 lines.
 
 ### Preview-deploy verification rubric (per v3b AC-9)
 

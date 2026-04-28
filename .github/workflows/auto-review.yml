@@ -1,0 +1,255 @@
+name: auto-review (slice-reviewer persona)
+
+# Per docs/slices/S-INFRA-rigour-v3b-subagent-suite/acceptance.md AC-1:
+# "CI workflow .github/workflows/auto-review.yml runs `claude -p` (or wraps
+# /review) on pull_request opened/synchronize against the diff + linked AC
+# + CLAUDE.md "Coding conduct" rubric, posts a check run with one of the
+# four verdicts per CLAUDE.md "Hard controls > Verdict vocabulary"."
+#
+# Out: integration with branch-protection (defer to v3c per AC-1 §Scope).
+# This workflow is informational at v3b ship — verdict appears as a
+# success / neutral / failure check run but does not gate merge.
+#
+# Secret precondition: ANTHROPIC_API_KEY must be set as a repo secret.
+# Workflow gracefully skips with a `neutral` check run when absent (per
+# session-47 design choice — honest defer rather than hard-require).
+
+on:
+  pull_request:
+    types: [opened, synchronize]
+
+permissions:
+  contents: read
+  pull-requests: read
+  checks: write
+
+jobs:
+  auto-review:
+    name: auto-review (slice-reviewer persona)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check ANTHROPIC_API_KEY presence
+        id: secret-check
+        env:
+          KEY_PRESENT: ${{ secrets.ANTHROPIC_API_KEY != '' }}
+        run: |
+          if [ "$KEY_PRESENT" = "true" ]; then
+            echo "skip=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "skip=true" >> "$GITHUB_OUTPUT"
+            echo "ANTHROPIC_API_KEY not configured — auto-review will skip with neutral verdict."
+          fi
+
+      - uses: actions/checkout@v4
+        if: steps.secret-check.outputs.skip == 'false'
+        with:
+          fetch-depth: 0
+
+      - name: Compose review brief (diff + slice AC + coding-conduct)
+        id: brief
+        if: steps.secret-check.outputs.skip == 'false'
+        env:
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+          PR_BODY: ${{ github.event.pull_request.body }}
+          BRANCH: ${{ github.head_ref }}
+        run: |
+          set -euo pipefail
+          NONCE=$(openssl rand -hex 16)
+
+          # Diff (file under review for the persona; spec 72b Option C
+          # inline-file pattern when >300L).
+          git diff "$BASE_SHA" "$HEAD_SHA" > /tmp/pr-diff.txt
+
+          # Locate slice acceptance.md from PR body (preferred per pr-dod.yml
+          # convention) or branch-name `claude/S-XX-...` pattern fallback.
+          SLICE_AC=$(printf '%s' "$PR_BODY" | grep -oE 'docs/slices/S-[A-Za-z0-9-]+/acceptance\.md' | head -1 || true)
+          if [ -z "$SLICE_AC" ]; then
+            SLICE_FROM_BRANCH=$(printf '%s' "$BRANCH" | grep -oE 'S-[A-Za-z0-9-]+' | head -1 || true)
+            if [ -n "$SLICE_FROM_BRANCH" ] && [ -f "docs/slices/$SLICE_FROM_BRANCH/acceptance.md" ]; then
+              SLICE_AC="docs/slices/$SLICE_FROM_BRANCH/acceptance.md"
+            fi
+          fi
+
+          # Compose the prompt envelope per slice-reviewer.md "Per-invocation
+          # context" section: persona prompt + nonce + fenced inputs.
+          {
+            cat .claude/agents/slice-reviewer.md
+            echo
+            echo "Your per-invocation nonce: $NONCE"
+            echo
+            printf '<pr-diff-%s>\n' "$NONCE"
+            cat /tmp/pr-diff.txt
+            printf '</pr-diff-%s>\n\n' "$NONCE"
+            if [ -n "$SLICE_AC" ] && [ -f "$SLICE_AC" ]; then
+              printf '<slice-ac-%s>\n' "$NONCE"
+              cat "$SLICE_AC"
+              printf '</slice-ac-%s>\n\n' "$NONCE"
+            fi
+            printf '<coding-conduct-%s>\n' "$NONCE"
+            # awk range patterns include the stop-line, so pipe through
+            # `head -n -1` to drop the trailing `## Engineering conventions`
+            # header from the coding-conduct fence content (round-5 nit-2).
+            awk '/^## Coding conduct/,/^## Engineering conventions/' CLAUDE.md | head -n -1
+            printf '</coding-conduct-%s>\n' "$NONCE"
+          } > /tmp/review-brief.txt
+
+      - name: Invoke slice-reviewer (claude -p) + extract verdict
+        id: review
+        # 10-minute ceiling on the LLM CLI invocation — guards against
+        # network-partition hangs + streaming-response-never-terminates
+        # cases that wouldn't trigger `set -e` or `if: failure()`. If
+        # the step times out the runner kills it; the
+        # `Post failure-fallback check run` step then fires
+        # (`if: failure()`) and posts a neutral diagnostic. Closes
+        # round-6 finding (edge-case: bare CLI invocation could
+        # consume up to 6h GitHub job ceiling on hang).
+        timeout-minutes: 10
+        if: steps.secret-check.outputs.skip == 'false'
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+        run: |
+          set -euo pipefail
+          # `claude -p --output-format=json` wraps the response in a
+          # transcript envelope: `{type, subtype, result, usage,
+          # session_id, ...}`. The persona's strict-JSON output lives in
+          # `.result` as a STRING — possibly wrapped in markdown code
+          # fences (model quirk). Parse robustly: extract `.result`, try
+          # JSON-parse direct, fall back to fence-stripped, fall back to
+          # empty object (which makes downstream defaults fire honestly).
+          npx -y @anthropic-ai/claude-code -p --output-format=json < /tmp/review-brief.txt > /tmp/review-output.json
+
+          # Debug: surface raw output structure for future diagnostics.
+          echo "::group::raw claude output (first 100 lines)"
+          head -100 /tmp/review-output.json || true
+          echo "::endgroup::"
+
+          RESULT=$(jq -r '.result // .text // .content // ""' /tmp/review-output.json)
+          # Try direct JSON parse; fall back to stripping ALL markdown
+          # fence lines (```json / ```) regardless of position; fall back
+          # to {} so downstream defaults fire honestly. The grep-based
+          # fence strip is robust to trailing-newline edge cases the
+          # earlier `sed '1{...}'/'${...}'` form missed (round-3 finding
+          # #1: `printf '%s\n'` appends NL → closing fence not on last
+          # line for `sed '$'` → fence retained → jq fails silently).
+          PERSONA_JSON=$(printf '%s' "$RESULT" | jq -c '.' 2>/dev/null) \
+            || PERSONA_JSON=$(printf '%s' "$RESULT" \
+                 | grep -v '^[[:space:]]*```' \
+                 | jq -c '.' 2>/dev/null) \
+            || PERSONA_JSON='{}'
+
+          echo "::group::extracted persona JSON"
+          printf '%s\n' "$PERSONA_JSON"
+          echo "::endgroup::"
+
+          # Parse-failed sentinel: when both jq parses exhaust and
+          # PERSONA_JSON='{}', the verdict/severity/findings defaults
+          # would silently fire (`block`/`architectural`/0) — posting a
+          # contradictory failure check-run with empty summary. The
+          # `if: failure()` fallback step doesn't cover this because
+          # this step still exits 0. Emit a sentinel verdict that maps
+          # to `neutral` with diagnostic title; raw output already
+          # logged in the `::group::raw claude output` block above.
+          # Closes v3b S-6 round-4 #1 finding.
+          if [ "$PERSONA_JSON" = '{}' ]; then
+            VERDICT="parse-failed"
+            SEVERITY="none"
+            FINDINGS_COUNT=0
+            printf '[]' > /tmp/findings.json
+          else
+            VERDICT=$(printf '%s' "$PERSONA_JSON" | jq -r '.verdict // "block"')
+            SEVERITY=$(printf '%s' "$PERSONA_JSON" | jq -r '.severity // "architectural"')
+            # Operator precedence: `//` binds looser than `|`, so bracket
+            # the default → null `.findings` → empty array → length 0.
+            FINDINGS_COUNT=$(printf '%s' "$PERSONA_JSON" | jq -r '(.findings // []) | length')
+            # Save findings JSON to file for the post-step (avoids multi-
+            # line GITHUB_OUTPUT escaping).
+            printf '%s' "$PERSONA_JSON" | jq -c '.findings // []' | head -c 60000 > /tmp/findings.json
+          fi
+
+          echo "verdict=$VERDICT" >> "$GITHUB_OUTPUT"
+          echo "severity=$SEVERITY" >> "$GITHUB_OUTPUT"
+          echo "findings_count=$FINDINGS_COUNT" >> "$GITHUB_OUTPUT"
+
+      - name: Post check run (verdict)
+        if: steps.secret-check.outputs.skip == 'false' && steps.review.outputs.verdict
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+          VERDICT: ${{ steps.review.outputs.verdict }}
+          SEVERITY: ${{ steps.review.outputs.severity }}
+          FINDINGS_COUNT: ${{ steps.review.outputs.findings_count }}
+        run: |
+          set -euo pipefail
+          # Map verdict → conclusion per CLAUDE.md "Hard controls > Verdict
+          # vocabulary": approve / nit-only → success; request-changes →
+          # neutral (informational at v3b ship); block → failure.
+          # Plus parse-failed sentinel (round-4 #1): unparseable persona
+          # output → neutral with diagnostic title (NOT misleading-block-
+          # default-fail).
+          case "$VERDICT" in
+            approve|nit-only) CONCLUSION="success" ;;
+            request-changes)  CONCLUSION="neutral" ;;
+            block)            CONCLUSION="failure" ;;
+            parse-failed)     CONCLUSION="neutral" ;;
+            *)                CONCLUSION="failure" ;;
+          esac
+          if [ "$VERDICT" = "parse-failed" ]; then
+            TITLE="persona output unparseable — see workflow log"
+          else
+            TITLE="$VERDICT — $FINDINGS_COUNT finding(s) [$SEVERITY]"
+          fi
+          # Findings JSON pre-extracted by the review step (sourced from
+          # the persona's parsed output, NOT the transcript envelope).
+          SUMMARY=$(cat /tmp/findings.json)
+          # Build nested JSON via `jq -n` and pipe to `gh api --input -`.
+          # `gh api --field "output[title]=..."` does NOT reliably emit
+          # nested `output: {title, summary}` JSON (the form-encoded
+          # bracket syntax is `gh`-version-dependent + undocumented).
+          # `--input -` with constructed JSON is the safe form.
+          jq -n \
+            --arg name 'auto-review (slice-reviewer persona)' \
+            --arg head_sha "$HEAD_SHA" \
+            --arg conclusion "$CONCLUSION" \
+            --arg title "$TITLE" \
+            --arg summary "$SUMMARY" \
+            '{name: $name, head_sha: $head_sha, status: "completed", conclusion: $conclusion, output: {title: $title, summary: $summary}}' \
+          | gh api "repos/${{ github.repository }}/check-runs" --method POST --input -
+
+      - name: Post skip notice (when secret absent)
+        if: steps.secret-check.outputs.skip == 'true'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+        run: |
+          set -euo pipefail
+          # Same nested-JSON-via-jq pattern as the verdict path.
+          jq -n \
+            --arg name 'auto-review (slice-reviewer persona)' \
+            --arg head_sha "$HEAD_SHA" \
+            '{name: $name, head_sha: $head_sha, status: "completed", conclusion: "neutral", output: {title: "Skipped — ANTHROPIC_API_KEY not configured", summary: "Set ANTHROPIC_API_KEY as a repo secret to enable auto-review per docs/slices/S-INFRA-rigour-v3b-subagent-suite/acceptance.md AC-1."}}' \
+          | gh api "repos/${{ github.repository }}/check-runs" --method POST --input -
+
+      - name: Post failure-fallback check run (when an earlier step crashed)
+        # `if: failure()` runs only when an earlier step in this job failed
+        # AND the secret was present (so we entered the live-review path).
+        # Mirrors the secret-absent skip path's explicit neutral posting:
+        # ensures the Checks list always gets a slice-reviewer entry even
+        # when the review pipeline crashes (npx unavailable, jq parse
+        # failure, gh api outage, etc.) — author sees a diagnostic neutral
+        # instead of just a failed workflow with no surfaced reason.
+        # Closes the v3b S-6 round-2 #2 finding (edge-case: pipefail
+        # crash → no posted check-run → empty Checks list).
+        if: failure() && steps.secret-check.outputs.skip == 'false'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        run: |
+          set -euo pipefail
+          jq -n \
+            --arg name 'auto-review (slice-reviewer persona)' \
+            --arg head_sha "$HEAD_SHA" \
+            --arg run_url "$RUN_URL" \
+            '{name: $name, head_sha: $head_sha, status: "completed", conclusion: "neutral", output: {title: "Review pipeline crashed — see workflow log", summary: ("auto-review.yml failed before posting a verdict (npx install, claude invocation, jq parse, or gh api). Inspect the workflow log: " + $run_url + " — common causes: API outage, malformed persona output, runner network issue. v3b S-6 round-2 #2 fallback per AC-1 informational gate.")}}' \
+          | gh api "repos/${{ github.repository }}/check-runs" --method POST --input -
