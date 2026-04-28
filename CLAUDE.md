@@ -112,6 +112,11 @@ docs/workspace-spec/70-build-map-slices.md          — 33-slice catalogue (engi
 Rebuild + engineering (Phase C preparation — session 23)
 docs/workspace-spec/71-rebuild-strategy.md          — Folder structure, stable-lib paths, S-F7 dev-mode, Phase C sequencing. §5 + §7a amended session 24 (Option 4): bulk V1 removal, single-branch-main workflow, no integration branch, no cutover event
 docs/workspace-spec/72-engineering-security.md      — Engineering security principles (data classification, env vars, auth/session, RLS, validation, logging, dev/prod boundary, third-party, safeguarding, pen-test readiness, per-slice security DoD)
+docs/workspace-spec/72a-preview-deploy-rubric.md    — 6-dimension preview-deploy verification rubric (golden path · edge cases · prefers-reduced-motion · keyboard-only · mobile viewport · screen-reader); reviewed by ux-polish-reviewer persona from S-F1
+docs/workspace-spec/72b-adversarial-review-budget.md — Adversarial review budget (Option A/B/C; spec-validation-by-impl-break check)
+docs/workspace-spec/72c-multi-agent-review-framework.md — Multi-agent review framework (§1-§9; orchestrator + 7 dimension specialists + verdict aggregation + differential mode + test-fixture seeding + measurement); session 48
+docs/slices/S-INFRA-arch-smell-trigger/{acceptance,verification}.md — v3b S-7 sibling slice (CLAUDE.md §Architectural-smell-trigger paragraph; PR #32 merged session 48)
+docs/slices/S-INFRA-persona-suite-v2-multi-agent/acceptance.md — v3b S-8 setup (6 ACs; spec 72c contract; impl deferred to session 49+; PR #33 merged session 48)
 docs/engineering-phase-candidates.md                — Parked CLAUDE.md additions for Phase C kickoff (Karpathy coding conduct, engineering conventions, per-slice AC + test plan templates)
 
 Hook + CI enforcement (sessions 25 + 27)
