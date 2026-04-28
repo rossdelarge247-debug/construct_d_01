@@ -252,16 +252,36 @@ Enforcement: `.github/PULL_REQUEST_TEMPLATE.md` reproduces this checklist; `.git
 
 Each gate emits a useful-message exit body on failure: what failed, why per spec, concrete remediation.
 
-### Verdict vocabulary (per G23)
+### Verdict vocabulary (per G23 + AC-5 Conventional Comments adoption)
 
-Subagent reviews (plan-review per AC-7; future during-work gates per v3b) emit one of four verdicts paired with a severity:
+Subagent reviews emit findings using the [Conventional Comments](https://conventionalcomments.org/) vocabulary verbatim. Each finding carries a `label` (the comment intent) and a `blocking` boolean (the merge-gate decoration). The top-level `verdict` is derived deterministically from the findings array — no separate severity scale.
 
-- `approve` — no findings; proceed.
-- `nit-only` — minor findings (style / wording); author may proceed without fixing.
-- `request-changes` — findings the author should address before proceeding; not blocking.
-- `block` — architectural-severity findings; gate refuses to proceed until addressed.
+**Labels (verbatim from conventionalcomments.org):**
 
-Severity scale: `architectural` · `logic` · `style` · `none`. The plan-review gate (AC-7) blocks on `architectural`; lower severities pass through with the verdict surfaced to the author.
+- `praise` — highlight something positive; never blocking.
+- `nitpick` — trivial preference (whitespace, naming-style); non-blocking by default.
+- `suggestion` — proposed improvement; blocking only with explicit `(blocking)` decoration.
+- `issue` — problem found; blocking by default unless author explicitly marks `(non-blocking)`.
+- `todo` — small needed action before merge; blocking by default.
+- `question` — clarification request; never blocking.
+- `thought` — idea worth sharing; never blocking.
+- `chore` — housekeeping (rebase, update changelog); non-blocking by default.
+- `note` — point to highlight without recommending action; never blocking.
+
+**Verdict derivation rules** (deterministic; computed by the orchestrator from findings, NOT emitted by personas):
+
+- `block` — at least one finding has `blocking: true`.
+- `request-changes` — at least one non-blocking finding with `label ∈ {issue, suggestion, todo}`.
+- `nit-only` — at least one finding with `label ∈ {nitpick, chore}` and no findings above.
+- `approve` — empty findings, OR only `label ∈ {praise, question, thought, note}` findings.
+
+**Check-run conclusion mapping** (auto-review.yml posts to GitHub):
+
+- `failure` ← `block` (gate refuses; `architectural` finding equivalent).
+- `neutral` ← `request-changes` or `nit-only` (informational; author should address but not blocking the merge button at v3b ship).
+- `success` ← `approve`.
+
+This vocabulary supersedes the prior `verdict × severity` matrix (`approve / nit-only / request-changes / block × architectural / logic / style / none`). Personas SHOULD NOT emit a top-level `severity` field; the workflow derives the check-run conclusion from the findings array itself.
 
 ### Subagent file locations (per v3b AC-5)
 
