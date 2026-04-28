@@ -96,6 +96,15 @@ jobs:
 
       - name: Invoke slice-reviewer (claude -p) + extract verdict
         id: review
+        # 10-minute ceiling on the LLM CLI invocation — guards against
+        # network-partition hangs + streaming-response-never-terminates
+        # cases that wouldn't trigger `set -e` or `if: failure()`. If
+        # the step times out the runner kills it; the
+        # `Post failure-fallback check run` step then fires
+        # (`if: failure()`) and posts a neutral diagnostic. Closes
+        # round-6 finding (edge-case: bare CLI invocation could
+        # consume up to 6h GitHub job ceiling on hang).
+        timeout-minutes: 10
         if: steps.secret-check.outputs.skip == 'false'
         env:
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}

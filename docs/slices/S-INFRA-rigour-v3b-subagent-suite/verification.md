@@ -362,9 +362,19 @@ After `586f167` (round 4 fixes), workflow [`25060308785`](https://github.com/ros
 
 Decision against deferring per the verdict-vocabulary contract: both fixes are 1-3 lines + addressing them gives a clean `approve` end state vs `nit-only` defer-eligible. Per the convergence criterion ("iterate until verdict is `approve`/`nit-only` AND remaining findings warrant defer"), addressing nits when fixes are trivial costs less than carrying them as v3c carry-overs.
 
-### Round 6: convergence run (post-nit-cleanup)
+### Round 6: post-nit-cleanup — surfaced new substantive finding
 
-After applying both round-5 nits, push triggers round-6 workflow run; expected verdict `approve` (verdict-vocabulary *"no findings; proceed"*) — final entry to be filled at convergence.
+After `715a03e` (round 5 nit fixes), workflow [`25060861538`](https://github.com/rossdelarge247-debug/construct_d_01/actions/runs/25060861538) ran the slice-reviewer on the round-5 diff. Posted check-run `73414912422` `neutral` (`request-changes` / `logic` / 1 finding). **Verdict regressed from round-5 `nit-only` to round-6 `request-changes`** — the persona surfaced a new substantive issue absent from prior rounds.
+
+**The 1 round-6 finding** (verbatim from check-run summary):
+
+1. **`edge-case`** — `npx -y @anthropic-ai/claude-code -p --output-format=json < /tmp/review-brief.txt > /tmp/review-output.json` has no timeout; a CLI hang (network partition after connection established, streaming response that never terminates) would NOT trigger `if: failure()` and would consume up to GitHub's 6-hour job ceiling — leaving the check-run unposted and the PR waiting indefinitely. **Resolved** in round-7 commit: added `timeout-minutes: 10` to the review step. If runner kills it, the `Post failure-fallback check run` (`if: failure()`) fires and posts a neutral diagnostic. Real hang risk; trivial fix.
+
+**Why this finding is high-signal:** the round-5 fix didn't introduce the hang risk — it has been present since the workflow's first commit. The persona surfaced it ON ROUND 6 because the prior rounds' findings were on more visible issues (parse bug, ac-gap, sed-strip, sentinel, doc-drift, dead outputs, awk range). Once the visible-issue rate dropped, attention shifted to less-obvious-but-real risks. This is exactly the "defensive depth" AC-1 was designed to provide.
+
+### Round 7: convergence run (post-timeout-add)
+
+After applying round-6 timeout fix, push triggers round-7 workflow run; expected verdict `approve` (or another substantive finding, in which case decision criterion: address if trivial OR defer-with-reasoning per established pattern after 7+ productive rounds).
 
 ### S-6 final verdict
 
