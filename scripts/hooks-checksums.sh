@@ -51,6 +51,11 @@ compute() {
       printf '%s  %s\n' "$sha" "$f"
     done < <(find .claude/subagent-prompts -name '*.md' -type f 2>/dev/null | sort)
 
+    while IFS= read -r f; do
+      sha=$(sha256sum "$f" | awk '{print $1}')
+      printf '%s  %s\n' "$sha" "$f"
+    done < <(find .claude/agents -name '*.md' -type f 2>/dev/null | sort)
+
     if [ -f .claude/settings.json ]; then
       sha=$(jq -Sc '.hooks // {}' .claude/settings.json | sha256sum | awk '{print $1}')
       printf '%s  %s\n' "$sha" ".claude/settings.json#hooks"

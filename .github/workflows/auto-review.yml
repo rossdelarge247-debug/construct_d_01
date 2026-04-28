@@ -1,0 +1,160 @@
+name: auto-review (slice-reviewer persona)
+
+# Per docs/slices/S-INFRA-rigour-v3b-subagent-suite/acceptance.md AC-1:
+# "CI workflow .github/workflows/auto-review.yml runs `claude -p` (or wraps
+# /review) on pull_request opened/synchronize against the diff + linked AC
+# + CLAUDE.md "Coding conduct" rubric, posts a check run with one of the
+# four verdicts per CLAUDE.md "Hard controls > Verdict vocabulary"."
+#
+# Out: integration with branch-protection (defer to v3c per AC-1 §Scope).
+# This workflow is informational at v3b ship — verdict appears as a
+# success / neutral / failure check run but does not gate merge.
+#
+# Secret precondition: ANTHROPIC_API_KEY must be set as a repo secret.
+# Workflow gracefully skips with a `neutral` check run when absent (per
+# session-47 design choice — honest defer rather than hard-require).
+
+on:
+  pull_request:
+    types: [opened, synchronize]
+
+permissions:
+  contents: read
+  pull-requests: read
+  checks: write
+
+jobs:
+  auto-review:
+    name: auto-review (slice-reviewer persona)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check ANTHROPIC_API_KEY presence
+        id: secret-check
+        env:
+          KEY_PRESENT: ${{ secrets.ANTHROPIC_API_KEY != '' }}
+        run: |
+          if [ "$KEY_PRESENT" = "true" ]; then
+            echo "skip=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "skip=true" >> "$GITHUB_OUTPUT"
+            echo "ANTHROPIC_API_KEY not configured — auto-review will skip with neutral verdict."
+          fi
+
+      - uses: actions/checkout@v4
+        if: steps.secret-check.outputs.skip == 'false'
+        with:
+          fetch-depth: 0
+
+      - name: Compose review brief (diff + slice AC + coding-conduct)
+        id: brief
+        if: steps.secret-check.outputs.skip == 'false'
+        env:
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+          PR_BODY: ${{ github.event.pull_request.body }}
+          BRANCH: ${{ github.head_ref }}
+        run: |
+          set -euo pipefail
+          NONCE=$(openssl rand -hex 16)
+          echo "nonce=$NONCE" >> "$GITHUB_OUTPUT"
+
+          # Diff (file under review for the persona; spec 72b Option C
+          # inline-file pattern when >300L).
+          git diff "$BASE_SHA" "$HEAD_SHA" > /tmp/pr-diff.txt
+          DIFF_LINES=$(wc -l < /tmp/pr-diff.txt)
+          echo "diff_lines=$DIFF_LINES" >> "$GITHUB_OUTPUT"
+
+          # Locate slice acceptance.md from PR body (preferred per pr-dod.yml
+          # convention) or branch-name `claude/S-XX-...` pattern fallback.
+          SLICE_AC=$(printf '%s' "$PR_BODY" | grep -oE 'docs/slices/S-[A-Za-z0-9-]+/acceptance\.md' | head -1 || true)
+          if [ -z "$SLICE_AC" ]; then
+            SLICE_FROM_BRANCH=$(printf '%s' "$BRANCH" | grep -oE 'S-[A-Za-z0-9-]+' | head -1 || true)
+            if [ -n "$SLICE_FROM_BRANCH" ] && [ -f "docs/slices/$SLICE_FROM_BRANCH/acceptance.md" ]; then
+              SLICE_AC="docs/slices/$SLICE_FROM_BRANCH/acceptance.md"
+            fi
+          fi
+          echo "slice_ac=${SLICE_AC:-<none>}" >> "$GITHUB_OUTPUT"
+
+          # Compose the prompt envelope per slice-reviewer.md "Per-invocation
+          # context" section: persona prompt + nonce + fenced inputs.
+          {
+            cat .claude/agents/slice-reviewer.md
+            echo
+            echo "Your per-invocation nonce: $NONCE"
+            echo
+            printf '<pr-diff-%s>\n' "$NONCE"
+            cat /tmp/pr-diff.txt
+            printf '</pr-diff-%s>\n\n' "$NONCE"
+            if [ -n "$SLICE_AC" ] && [ -f "$SLICE_AC" ]; then
+              printf '<slice-ac-%s>\n' "$NONCE"
+              cat "$SLICE_AC"
+              printf '</slice-ac-%s>\n\n' "$NONCE"
+            fi
+            printf '<coding-conduct-%s>\n' "$NONCE"
+            awk '/^## Coding conduct/,/^## Engineering conventions/' CLAUDE.md
+            printf '</coding-conduct-%s>\n' "$NONCE"
+          } > /tmp/review-brief.txt
+
+      - name: Invoke slice-reviewer (claude -p)
+        id: review
+        if: steps.secret-check.outputs.skip == 'false'
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+        run: |
+          set -euo pipefail
+          # Pipe the brief into `claude -p` with JSON output. The persona
+          # file mandates strict-JSON output; we capture stdout and parse.
+          npx -y @anthropic-ai/claude-code -p --output-format=json < /tmp/review-brief.txt > /tmp/review-output.json
+          # Extract verdict + severity + findings count.
+          VERDICT=$(jq -r '.verdict // "block"' /tmp/review-output.json)
+          SEVERITY=$(jq -r '.severity // "architectural"' /tmp/review-output.json)
+          FINDINGS_COUNT=$(jq -r '.findings | length // 0' /tmp/review-output.json)
+          echo "verdict=$VERDICT" >> "$GITHUB_OUTPUT"
+          echo "severity=$SEVERITY" >> "$GITHUB_OUTPUT"
+          echo "findings_count=$FINDINGS_COUNT" >> "$GITHUB_OUTPUT"
+
+      - name: Post check run (verdict)
+        if: steps.secret-check.outputs.skip == 'false' && steps.review.outputs.verdict
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+          VERDICT: ${{ steps.review.outputs.verdict }}
+          SEVERITY: ${{ steps.review.outputs.severity }}
+          FINDINGS_COUNT: ${{ steps.review.outputs.findings_count }}
+        run: |
+          set -euo pipefail
+          # Map verdict → conclusion per CLAUDE.md "Hard controls > Verdict
+          # vocabulary": approve / nit-only → success; request-changes →
+          # neutral (informational at v3b ship); block → failure.
+          case "$VERDICT" in
+            approve|nit-only) CONCLUSION="success" ;;
+            request-changes)  CONCLUSION="neutral" ;;
+            block)            CONCLUSION="failure" ;;
+            *)                CONCLUSION="failure" ;;
+          esac
+          TITLE="$VERDICT — $FINDINGS_COUNT finding(s) [$SEVERITY]"
+          SUMMARY=$(jq -c '.findings // []' /tmp/review-output.json | head -c 60000)
+          gh api "repos/${{ github.repository }}/check-runs" \
+            --method POST \
+            --field name='auto-review (slice-reviewer persona)' \
+            --field head_sha="$HEAD_SHA" \
+            --field status=completed \
+            --field conclusion="$CONCLUSION" \
+            --field "output[title]=$TITLE" \
+            --field "output[summary]=$SUMMARY"
+
+      - name: Post skip notice (when secret absent)
+        if: steps.secret-check.outputs.skip == 'true'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+        run: |
+          set -euo pipefail
+          gh api "repos/${{ github.repository }}/check-runs" \
+            --method POST \
+            --field name='auto-review (slice-reviewer persona)' \
+            --field head_sha="$HEAD_SHA" \
+            --field status=completed \
+            --field conclusion=neutral \
+            --field 'output[title]=Skipped — ANTHROPIC_API_KEY not configured' \
+            --field 'output[summary]=Set ANTHROPIC_API_KEY as a repo secret to enable auto-review per docs/slices/S-INFRA-rigour-v3b-subagent-suite/acceptance.md AC-1.'
