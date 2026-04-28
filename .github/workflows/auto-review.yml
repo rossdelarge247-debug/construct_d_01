@@ -131,15 +131,30 @@ jobs:
           printf '%s\n' "$PERSONA_JSON"
           echo "::endgroup::"
 
-          VERDICT=$(printf '%s' "$PERSONA_JSON" | jq -r '.verdict // "block"')
-          SEVERITY=$(printf '%s' "$PERSONA_JSON" | jq -r '.severity // "architectural"')
-          # Operator precedence: `//` binds looser than `|`, so bracket
-          # the default → null `.findings` → empty array → length 0.
-          FINDINGS_COUNT=$(printf '%s' "$PERSONA_JSON" | jq -r '(.findings // []) | length')
-
-          # Save findings JSON to file for the post-step (avoids multi-
-          # line GITHUB_OUTPUT escaping).
-          printf '%s' "$PERSONA_JSON" | jq -c '.findings // []' | head -c 60000 > /tmp/findings.json
+          # Parse-failed sentinel: when both jq parses exhaust and
+          # PERSONA_JSON='{}', the verdict/severity/findings defaults
+          # would silently fire (`block`/`architectural`/0) — posting a
+          # contradictory failure check-run with empty summary. The
+          # `if: failure()` fallback step doesn't cover this because
+          # this step still exits 0. Emit a sentinel verdict that maps
+          # to `neutral` with diagnostic title; raw output already
+          # logged in the `::group::raw claude output` block above.
+          # Closes v3b S-6 round-4 #1 finding.
+          if [ "$PERSONA_JSON" = '{}' ]; then
+            VERDICT="parse-failed"
+            SEVERITY="none"
+            FINDINGS_COUNT=0
+            printf '[]' > /tmp/findings.json
+          else
+            VERDICT=$(printf '%s' "$PERSONA_JSON" | jq -r '.verdict // "block"')
+            SEVERITY=$(printf '%s' "$PERSONA_JSON" | jq -r '.severity // "architectural"')
+            # Operator precedence: `//` binds looser than `|`, so bracket
+            # the default → null `.findings` → empty array → length 0.
+            FINDINGS_COUNT=$(printf '%s' "$PERSONA_JSON" | jq -r '(.findings // []) | length')
+            # Save findings JSON to file for the post-step (avoids multi-
+            # line GITHUB_OUTPUT escaping).
+            printf '%s' "$PERSONA_JSON" | jq -c '.findings // []' | head -c 60000 > /tmp/findings.json
+          fi
 
           echo "verdict=$VERDICT" >> "$GITHUB_OUTPUT"
           echo "severity=$SEVERITY" >> "$GITHUB_OUTPUT"
@@ -158,13 +173,21 @@ jobs:
           # Map verdict → conclusion per CLAUDE.md "Hard controls > Verdict
           # vocabulary": approve / nit-only → success; request-changes →
           # neutral (informational at v3b ship); block → failure.
+          # Plus parse-failed sentinel (round-4 #1): unparseable persona
+          # output → neutral with diagnostic title (NOT misleading-block-
+          # default-fail).
           case "$VERDICT" in
             approve|nit-only) CONCLUSION="success" ;;
             request-changes)  CONCLUSION="neutral" ;;
             block)            CONCLUSION="failure" ;;
+            parse-failed)     CONCLUSION="neutral" ;;
             *)                CONCLUSION="failure" ;;
           esac
-          TITLE="$VERDICT — $FINDINGS_COUNT finding(s) [$SEVERITY]"
+          if [ "$VERDICT" = "parse-failed" ]; then
+            TITLE="persona output unparseable — see workflow log"
+          else
+            TITLE="$VERDICT — $FINDINGS_COUNT finding(s) [$SEVERITY]"
+          fi
           # Findings JSON pre-extracted by the review step (sourced from
           # the persona's parsed output, NOT the transcript envelope).
           SUMMARY=$(cat /tmp/findings.json)

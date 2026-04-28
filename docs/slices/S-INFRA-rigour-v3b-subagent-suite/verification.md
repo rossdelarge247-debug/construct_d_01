@@ -342,6 +342,15 @@ After `8bfdfb4` (round 2 fixes), workflow [`25059471679`](https://github.com/ros
 
 **Why round 3 IS the strongest demonstration of AC-1's value:** the persona caught a latent bug — the sed-strip would only manifest when the model wraps response in fences, which the workflow logs show DIDN'T happen this round (round-2 ran with parsed-direct path, never hit the fallback). The persona surfaced the bug from CODE INSPECTION, not from observing it fail. This is exactly the "defensive depth" the persona's edge-case criterion is designed to provide.
 
+### Round 4: persona reviews round-3 fixes
+
+After `1ef38b3` (round 3 fixes), workflow [`25059852647`](https://github.com/rossdelarge247-debug/construct_d_01/actions/runs/25059852647) ran the slice-reviewer on the round-3 diff. Posted check-run `73411125083` `neutral` (`request-changes` / `logic` / 2 findings).
+
+**The 2 round-4 findings** (verbatim from check-run summary):
+
+1. **`edge-case`** — when both jq parses exhaust and `PERSONA_JSON='{}'`, the `verdict / severity / findings` defaults silently fire (`block` / `architectural` / 0 findings) → posts a contradictory `failure` check-run with title *"block — 0 finding(s) [architectural]"* and empty summary; `if: failure()` fallback doesn't cover this because the step still exits 0. **Resolved**: explicit parse-failed sentinel — `if [ "$PERSONA_JSON" = '{}' ]`, set `VERDICT=parse-failed` + custom title *"persona output unparseable — see workflow log"* + `CONCLUSION=neutral`. Raw output still in `::group::` log for diagnosis.
+2. **`regression`** — CLAUDE.md "Invocation conventions" paragraph documented Option C with the OLD non-nonce format `--- BEGIN <path> --- ... --- END <path> ---`; spec 72b + the three persona files in this same diff were updated to the nonce-bound form `--- BEGIN <path> NONCE ---`; future sessions using CLAUDE.md as source would generate non-nonce-bound content, re-opening the prompt-injection vector. **Resolved**: CLAUDE.md L276 updated to nonce-bound form, matches spec 72b verbatim.
+
 ### S-6 final verdict
 
 **`request-changes` → `approve` after fix-up commit.** All architectural and logic findings actioned in fix-up commit (TBD-SHA). Style findings (none in this round) and minor drift items folded into the corresponding criterion exception clauses. Sub-spawn 3 re-spawn pending. Residual-injection disclosed honestly per session-46 lesson "honest gap recording over false approve".
