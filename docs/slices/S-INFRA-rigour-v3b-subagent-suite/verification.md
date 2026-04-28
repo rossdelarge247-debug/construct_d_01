@@ -372,15 +372,41 @@ After `715a03e` (round 5 nit fixes), workflow [`25060861538`](https://github.com
 
 **Why this finding is high-signal:** the round-5 fix didn't introduce the hang risk — it has been present since the workflow's first commit. The persona surfaced it ON ROUND 6 because the prior rounds' findings were on more visible issues (parse bug, ac-gap, sed-strip, sentinel, doc-drift, dead outputs, awk range). Once the visible-issue rate dropped, attention shifted to less-obvious-but-real risks. This is exactly the "defensive depth" AC-1 was designed to provide.
 
-### Round 7: convergence run (post-timeout-add)
+### Round 7: convergence reached
 
-After applying round-6 timeout fix, push triggers round-7 workflow run; expected verdict `approve` (or another substantive finding, in which case decision criterion: address if trivial OR defer-with-reasoning per established pattern after 7+ productive rounds).
+After `007130b` (round 6 timeout fix), workflow [`25061142368`](https://github.com/rossdelarge247-debug/construct_d_01/actions/runs/25061142368) ran the slice-reviewer on the round-6 diff. Posted check-run [`73416034853`](https://github.com/rossdelarge247-debug/construct_d_01/runs/73416034853) `success` (`approve` or `nit-only`). **Convergence reached** per CLAUDE.md verdict vocabulary.
+
+### Recursive review observations (session-47 meta-analysis)
+
+7 rounds of recursive self-review surfaced a usable dataset for v3c upgrade design:
+
+1. **Single-pass persona review has high false-negative rate.** Each round caught issues prior rounds demonstrably missed, even when prior diffs were larger (R1: 660L diff / 0 substantive; R6: 20L diff / 1 substantive). Slice-reviewer rubric has ~7-8 dimensions; in any pass the persona deeply explores 2-3.
+2. **Static review and integration testing find different bugs.** R1 (parse-default, only catchable via end-to-end run) vs R6 (timeout, only catchable via inspection of bare `npx`). Both required.
+3. **Topical exhaustion ≠ global done.** R5 → R6 was a verdict regression (`nit-only` → `request-changes`). Once visible-issue rate dropped, attention shifted to latent risks. Convergence in single-agent recursion = "all dimensions exhausted", not "no findings".
+4. **Architectural-smell signal.** All 6 rounds of substantive findings were clustered in `auto-review.yml`. A round-3 step-back review would have asked whether the workflow's monolithic structure (parsing + diagnostic + check-run posting + skip + failure-fallback inline) was the right abstraction. Pulling parsing into `scripts/auto-review-parse.sh` with shellspec tests would have pre-caught rounds 4-6 at test time. CLAUDE.md §"Architectural-smell trigger" added in this session's commit cycle to codify this lesson for future slices.
+
+### v3c carry-over: persona-suite-v2 multi-agent dimension-partitioned reviewer
+
+Recommended v3b S-8 stretch (between this slice's merge and first src/ slice) OR v3c kickoff slice. Spec candidate at `docs/workspace-spec/72c-multi-agent-review-framework.md` (TBD). Six AC shape:
+
+1. **Dimension-partitioned orchestrator** — `scripts/spawn-multi-reviewer.sh` or workflow that fans out to 5-7 single-dimension specialists, aggregates findings, deduplicates, emits unified verdict.
+2. **Per-dimension specialist personas** — `.claude/agents/reviewer-{coding-conduct,ac-gap,edge-case,security,regression,spec-citation,simplicity}.md` (each one a single rubric dimension).
+3. **Rubric-checklist v2 of `slice-reviewer.md`** — forces tick-through-all-dimensions in single-agent mode for differential reviews.
+4. **Differential-review mode** — for fix-up commits, review delta only (not whole diff).
+5. **Test-fixture seeding harness** — synthetic-diff fixture with deliberately-injected findings, run quarterly; if persona suite misses a seeded finding, rubric is broken.
+6. **AC-4 retain/drop measurement** — compare single-agent recursive (current; measured this session at 6 substantive + 2 nit + 0 across 7 rounds) vs multi-agent dimension-partitioned (rounds-to-converge + total tokens + finding-coverage).
+
+Expected payoff: 1-2 rounds vs 7+ for current pattern. 5-7× tokens per single-pass review but should reduce TOTAL token spend across iteration cycles. Measurement informs the long-run pattern.
 
 ### S-6 final verdict
 
-**`request-changes` → `approve` after fix-up commit.** All architectural and logic findings actioned in fix-up commit (TBD-SHA). Style findings (none in this round) and minor drift items folded into the corresponding criterion exception clauses. Sub-spawn 3 re-spawn pending. Residual-injection disclosed honestly per session-46 lesson "honest gap recording over false approve".
+**Pre-CI adversarial review (DoD-3 + DoD-13 four-sub-spawn): `request-changes` → `approve` after fix-up commit `f476d41`.** 20 logic findings actioned across 4 sub-spawns; 1 drift partial-deferred with scaffolding-exemption clause; residual prompt-injection disclosed honestly per session-46 lesson.
 
-**Re-baseline triggered:** persona file changes invalidate the initial hooks-checksums.txt baseline shipped with `1a70883`. `scripts/hooks-checksums.sh --generate` re-runs in the fix-up commit; new hashes recorded.
+**Live recursive auto-review on PR #30 (post-merge of `f476d41`): 7 rounds; converged to `success`** (`approve` or `nit-only`) at round 7 (commit `007130b`). Total findings actioned across rounds 1-6: **8 substantive logic findings + 2 style nits + 1 workflow-integration bug**. Round-by-round detail in §Round 1 through §Round 7 above. Recursive review constitutes the strongest possible AC-1 live evidence: the slice-reviewer persona reviewed its own ship-PR + each subsequent fix-up commit, surfaced real findings each round, and the author actioned every substantive finding before convergence.
+
+**Re-baseline triggered:** persona file changes invalidate the initial hooks-checksums.txt baseline shipped with `1a70883`. `scripts/hooks-checksums.sh --generate` re-runs in the fix-up commit; new hashes recorded. Subsequent rounds 2-7 do NOT touch persona files (workflow + verification.md + CLAUDE.md only); hooks-checksums.txt unchanged from `f476d41`.
+
+**v3b 12/15 → 15/15.** AC-1 (slice-reviewer persona + auto-review.yml CI gate) PASS via inline structural validation + 7-round recursive live execution. AC-2 (acceptance-gate persona) PASS via inline structural validation; runtime invocation wiring deferred to S-F1. AC-3 (ux-polish-reviewer persona) PASS via inline structural validation; dormant until S-F1.
 
 ## Sign-off
 
