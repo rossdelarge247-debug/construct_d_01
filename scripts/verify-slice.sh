@@ -144,6 +144,46 @@ if [ -n "$LEAK_HITS" ]; then
   exit 1
 fi
 
+# Gate 3b: TDD-exemption-allowlist category-tag enforcement (v3b AC-8).
+# Runs in BOTH modes (allowlist quality is mode-independent).
+# Per acceptance.md AC-8: each allowlist entry must carry a `category:glob`
+# tag matching one of {pure-visual-ui, pure-rename, pure-config}. Untagged
+# entries fail-loud — prevents ad-hoc bail-out accumulation.
+ALLOWLIST_FILE="docs/tdd-exemption-allowlist.txt"
+if [ -f "$ALLOWLIST_FILE" ]; then
+  ALLOWED_CATEGORIES='pure-visual-ui|pure-rename|pure-config'
+  bad_entries=()
+  while IFS= read -r line || [ -n "$line" ]; do
+    line="${line%%#*}"
+    line="${line#"${line%%[![:space:]]*}"}"
+    line="${line%"${line##*[![:space:]]}"}"
+    [ -z "$line" ] && continue
+    if ! [[ "$line" =~ ^($ALLOWED_CATEGORIES): ]]; then
+      bad_entries+=("$line")
+    fi
+  done < "$ALLOWLIST_FILE"
+  if [ "${#bad_entries[@]}" -gt 0 ]; then
+    {
+      echo "DENIED: tdd-exemption-allowlist gate — untagged or unknown-category entries."
+      echo
+      echo "  File: $ALLOWLIST_FILE"
+      echo "  Allowed categories: pure-visual-ui, pure-rename, pure-config"
+      echo
+      echo "  Offending entries:"
+      for e in "${bad_entries[@]}"; do echo "    - $e"; done
+      echo
+      echo "  Per docs/slices/S-INFRA-rigour-v3b-subagent-suite/acceptance.md AC-8:"
+      echo "  each entry must be \`category:glob\` with category in the allowed set."
+      echo "  See $ALLOWLIST_FILE header for the rubric + examples + non-examples."
+      echo
+      echo "Actionable alternatives:"
+      echo "  - Re-tag the entry, e.g. \`pure-visual-ui:src/foo.tsx\`."
+      echo "  - If no category fits, the change is NOT exempt — write the test."
+    } >&2
+    exit 1
+  fi
+fi
+
 # --- Full-mode-only gates (4-7) -------------------------------------------
 
 if [ "$MODE" = "incremental" ]; then

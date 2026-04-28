@@ -47,6 +47,11 @@
             "type": "command",
             "command": ".claude/hooks/tdd-first-every-commit.sh",
             "timeout": 10
+          },
+          {
+            "type": "command",
+            "command": ".claude/hooks/pre-push-dod7.sh",
+            "timeout": 30
           }
         ]
       },
@@ -57,6 +62,16 @@
             "type": "command",
             "command": ".claude/hooks/exit-plan-review.sh",
             "timeout": 60
+          }
+        ]
+      },
+      {
+        "matcher": "Write|Edit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": ".claude/hooks/tdd-guard.sh",
+            "timeout": 120
           }
         ]
       }

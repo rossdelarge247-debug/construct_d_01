@@ -202,11 +202,11 @@ These rules govern how Claude behaves when editing `src/`. Guardrails against ov
 
 ## Engineering conventions
 
-**TDD where tractable.** Write the test first, then the code to pass it. Applies to logic, rules, data transforms, API routes, signal/engine work. Not mandatory for pure-visual UI (visual regression covers that), but preferred wherever state or branching logic exists.
+**TDD where tractable.** Write the test first, then the code to pass it. Applies to logic, rules, data transforms, API routes, signal/engine work. Not mandatory for pure-visual UI (visual regression covers that), but preferred wherever state or branching logic exists. Bail-out criteria are documented as the rubric in `docs/tdd-exemption-allowlist.txt` header (per v3b AC-8) — entries must carry a `category:glob` tag matching one of three categories (`pure-visual-ui`, `pure-rename`, `pure-config`); untagged entries fail-loud at `verify-slice.sh` Gate 3b (runs in both incremental + full modes).
 
 **Don't write file-content assertions for logic slices.** If the unit under test is a function with branching/computation, exercise it with inputs and assert outputs. File-content / regex assertions are reserved for pure-string slices (copy-flips) and structural-parity invariants (e.g. CSS↔TS token alignment per S-F1). Refactor-fragility is the smell.
 
-**Adversarial review gate (per slice).** Before committing any slice or significant change, run one adversarial review pass. Two options: (1) explicit prompt — "poke holes in this; find edge cases, security issues, regression risks"; (2) `/review` or `/security-review` skill. Output is a list of concerns. Either address or explicitly defer with reasoning. No slice ships without this gate.
+**Adversarial review gate (per slice).** Before committing any slice or significant change, run one adversarial review pass. Two options: (1) explicit prompt — "poke holes in this; find edge cases, security issues, regression risks"; (2) `/review` or `/security-review` skill. Output is a list of concerns. Either address or explicitly defer with reasoning. No slice ships without this gate. When `wc -l docs/slices/S-XX/acceptance.md` >300, follow the budget convention at `docs/workspace-spec/72b-adversarial-review-budget.md` (per v3b AC-10): partition into 3 sub-spawns (300-1000L) or declare a multi-turn budget envelope (>1000L); slice setup §Pre-flight notes which option applies.
 
 **Snapshot before refactor.** Any refactor over ~50 lines or touching more than 2 files: commit a checkpoint on the branch first. Cheap rollback insurance, explicit before/after diff when reviewing.
 
@@ -254,6 +254,39 @@ Subagent reviews (plan-review per AC-7; future during-work gates per v3b) emit o
 - `block` — architectural-severity findings; gate refuses to proceed until addressed.
 
 Severity scale: `architectural` · `logic` · `style` · `none`. The plan-review gate (AC-7) blocks on `architectural`; lower severities pass through with the verdict surfaced to the author.
+
+### Subagent file locations (per v3b AC-5)
+
+Two `.claude/` directories carry subagent files; the distinction is by spawn pattern, not by content category:
+
+- **`.claude/subagent-prompts/`** — hook-spawned prompt templates. Loaded by hook scripts via explicit path read (e.g. `.claude/hooks/exit-plan-review.sh` reads `.claude/subagent-prompts/exit-plan-review.md`). Filename is referenced from the hook script directly.
+- **`.claude/agents/`** — review personas spawned by the main session via `Agent` tool calls or `/review`-class skills. Filename = persona name; file body = persona rubric.
+
+Both locations are committed (versioned with the codebase). Per `docs/engineering-phase-candidates.md` §E L132: *"Storage: repo-level `.claude/agents/` (committed, travels with the project). Not user-home (`~/.claude/`) — those are personal and don't version with the codebase."* Same principle applies to `subagent-prompts/`.
+
+v3b persona shipments per AC-1/2/3 (slice-reviewer, acceptance-gate, ux-polish-reviewer) land under `.claude/agents/`. v3a's `exit-plan-review.md` stays under `.claude/subagent-prompts/` — it's a hook-spawned template, not a session-spawned persona.
+
+### Preview-deploy verification rubric (per v3b AC-9)
+
+DoD item 4 ("Preview deploy verified in-browser if UI") gains a six-dimension contract at `docs/workspace-spec/72a-preview-deploy-rubric.md`: golden path · edge cases · `prefers-reduced-motion` · keyboard-only · mobile viewport (375×667) · screen-reader. Each `src/`-touching slice's `verification.md` MUST include a `## Preview-deploy verification` section with one row per dimension + Status + Evidence. The AC-3 `ux-polish-reviewer` persona reviews this section once active (S-F1 onwards). Dormant at v3a/v3b — those slices have no UI surface.
+
+### Persona retain/drop metric (per v3b AC-4)
+
+After the first 3 src/ slices ship (S-F1 onwards), each `.claude/agents/*.md` persona is re-evaluated against an explicit retain-or-drop verdict. The metric is verbatim per `docs/engineering-phase-candidates.md` §E L129:
+
+> *"**Retain criteria:** if the agent catches at least one issue the main conversation missed per 2-3 slices, retain. Otherwise drop — added friction without value."*
+
+And L133:
+
+> *"**Re-evaluate after first 3 slices.** Record the retention/drop decision in that session's handoff."*
+
+**HANDOFF template extension.** Each `docs/HANDOFF-SESSION-N.md` for a session that ships an `src/` slice gains a `## Persona findings recorded` section, with one row per active persona logging:
+
+- Persona name (filename in `.claude/agents/`)
+- Findings count for that slice (count + brief one-line summary each)
+- Whether any finding was an issue the main conversation missed (Y/N)
+
+After three `src/` slices, the third slice's HANDOFF renders an explicit retain-or-drop verdict per persona; the verdict is committed as part of that slice's wrap docs (HANDOFF + SESSION-CONTEXT). Personas dropped at that point have their files removed from `.claude/agents/` (control-plane change → ship under `control-change` label).
 
 ### Rollback procedure (per G19)
 

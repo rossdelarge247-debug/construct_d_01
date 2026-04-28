@@ -1,0 +1,6 @@
+this is not a valid lcov file
+random garbage line
+DA:without:context
+SF: missing-end-of-record
+DA:not-a-number,maybe
+{ invalid json } [ that drifted ]
