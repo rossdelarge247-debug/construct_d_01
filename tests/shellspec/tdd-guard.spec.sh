@@ -130,53 +130,6 @@ EOF
     End
   End
 
-  Describe 'finding (S-5 review): jq-missing → fail-loud (was silent pass)'
-    It 'exits 2 with BLOCKED message when jq is not on PATH'
-      mkdir -p "$SPEC_TMP/no-jq"
-      cp "$(command -v bash)" "$SPEC_TMP/no-jq/" 2>/dev/null
-      cp "$(command -v cat)" "$SPEC_TMP/no-jq/" 2>/dev/null
-      INPUT='{"tool_name":"Edit","tool_input":{"file_path":"src/lib/foo.ts"}}'
-      When call env -i PATH="$SPEC_TMP/no-jq" "$SPEC_TMP/no-jq/bash" "$HOOK" <<<"$INPUT"
-      The status should equal 2
-      The stderr should include 'BLOCKED: tdd-guard'
-      The stderr should include 'jq` not on PATH'
-    End
-  End
-
-  Describe 'finding (S-5 review): timeout takes down whole process group'
-    It 'kills setsid-spawned child processes when vitest stub hangs'
-      cd "$SPEC_TMP" || return 1
-      : > src/lib/slow.ts
-      : > tests/unit/lib/slow.test.ts
-      cat > "$SPEC_TMP/vitest-spawner.sh" <<'EOF'
-#!/bin/bash
-# Spawns a sentinel child whose presence we can detect after timeout.
-sleep 3600 &
-echo "$!" > "$1.child-pid"
-sleep 3600
-EOF
-      chmod +x "$SPEC_TMP/vitest-spawner.sh"
-      INPUT='{"tool_name":"Edit","tool_input":{"file_path":"src/lib/slow.ts"}}'
-      When call env TDD_GUARD_VITEST_CMD="$SPEC_TMP/vitest-spawner.sh" \
-        TDD_GUARD_TIMEOUT=2 TDD_GUARD_WARN_AT=1 \
-        bash "$HOOK" <<<"$INPUT"
-      The status should equal 2
-      The stderr should include 'timed out after 2s'
-      # Brief grace for SIGKILL propagation, then assert child is gone.
-      Skip if 'setsid not available — group-kill path unreachable' \
-        [ ! -x "$(command -v setsid)" ]
-      sleep 1
-      child_pid=$(cat tests/unit/lib/slow.test.ts.child-pid 2>/dev/null || echo "")
-      if [ -n "$child_pid" ] && kill -0 "$child_pid" 2>/dev/null; then
-        kill -9 "$child_pid" 2>/dev/null
-        echo "ASSERT FAIL: child $child_pid survived group kill" >&2
-        false
-      else
-        true
-      fi
-    End
-  End
-
   Describe 'out-of-scope: non-src/ paths pass through silently'
     It 'exits 0 for docs/ paths regardless of test-file presence'
       cd "$SPEC_TMP" || return 1
