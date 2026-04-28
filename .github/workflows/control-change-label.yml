@@ -43,10 +43,12 @@ jobs:
           HEAD="${{ github.event.pull_request.head.sha }}"
           # L199 literal protected-path list (anchored ^ at line start):
           # Self-inclusion + sibling-workflow protection per G3+G10.
-          PROTECTED_RE='^(\.claude/hooks/|\.claude/settings\.json$|\.claude/subagent-prompts/|\.claude/hooks-checksums\.txt$|scripts/verify-slice\.sh$|eslint\.config\.mjs$|vitest\.config\.ts$|\.github/workflows/control-change-label\.yml$|\.github/workflows/pr-dod\.yml$)'
-          # Note: L199 omits `scripts/eslint-no-disable.sh`,
-          # `docs/eslint-baseline-allowlist.txt`, `scripts/git-state-verifier.sh`
-          # — tracked as v3b carry-over (docs/slices/S-INFRA-rigour-v3b-subagent-suite/acceptance.md).
+          # v3b AC-11 amendment (2026-04-28): three previously-omitted paths
+          # added (scripts/git-state-verifier.sh, scripts/eslint-no-disable.sh,
+          # docs/eslint-baseline-allowlist.txt). Other candidates (.claude/agents/,
+          # scripts/hooks-checksums.sh, docs/tdd-exemption-allowlist.txt) deferred
+          # to v3c per AC-11 §Scope (three named files only).
+          PROTECTED_RE='^(\.claude/hooks/|\.claude/settings\.json$|\.claude/subagent-prompts/|\.claude/hooks-checksums\.txt$|scripts/verify-slice\.sh$|scripts/git-state-verifier\.sh$|scripts/eslint-no-disable\.sh$|eslint\.config\.mjs$|vitest\.config\.ts$|docs/eslint-baseline-allowlist\.txt$|\.github/workflows/control-change-label\.yml$|\.github/workflows/pr-dod\.yml$)'
           COUNT=$(git diff --name-only "$BASE" "$HEAD" | grep -E "$PROTECTED_RE" | wc -l | tr -d ' ')
           echo "count=$COUNT" >> "$GITHUB_OUTPUT"
           echo "PR touches $COUNT control-plane file(s) relative to base."
@@ -66,14 +68,17 @@ jobs:
           This PR modifies a control-plane path but does not carry the
           'control-change' label.
 
-          Protected paths (per acceptance.md L199):
+          Protected paths (per acceptance.md L199; v3b AC-11 amendment):
             - .claude/hooks/**
             - .claude/settings.json
             - .claude/subagent-prompts/**
             - .claude/hooks-checksums.txt
             - scripts/verify-slice.sh
+            - scripts/git-state-verifier.sh        (v3b AC-11)
+            - scripts/eslint-no-disable.sh         (v3b AC-11)
             - eslint.config.mjs
             - vitest.config.ts
+            - docs/eslint-baseline-allowlist.txt   (v3b AC-11)
             - .github/workflows/control-change-label.yml (self)
             - .github/workflows/pr-dod.yml
 
