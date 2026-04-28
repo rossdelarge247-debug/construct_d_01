@@ -372,9 +372,24 @@ After `715a03e` (round 5 nit fixes), workflow [`25060861538`](https://github.com
 
 **Why this finding is high-signal:** the round-5 fix didn't introduce the hang risk — it has been present since the workflow's first commit. The persona surfaced it ON ROUND 6 because the prior rounds' findings were on more visible issues (parse bug, ac-gap, sed-strip, sentinel, doc-drift, dead outputs, awk range). Once the visible-issue rate dropped, attention shifted to less-obvious-but-real risks. This is exactly the "defensive depth" AC-1 was designed to provide.
 
-### Round 7: convergence reached
+### Round 7: first convergence
 
-After `007130b` (round 6 timeout fix), workflow [`25061142368`](https://github.com/rossdelarge247-debug/construct_d_01/actions/runs/25061142368) ran the slice-reviewer on the round-6 diff. Posted check-run [`73416034853`](https://github.com/rossdelarge247-debug/construct_d_01/runs/73416034853) `success` (`approve` or `nit-only`). **Convergence reached** per CLAUDE.md verdict vocabulary.
+After `007130b` (round 6 timeout fix), workflow [`25061142368`](https://github.com/rossdelarge247-debug/construct_d_01/actions/runs/25061142368) ran the slice-reviewer on the round-6 diff. Posted check-run [`73416034853`](https://github.com/rossdelarge247-debug/construct_d_01/runs/73416034853) `success` (`approve` or `nit-only`). **First convergence** per CLAUDE.md verdict vocabulary.
+
+### Round 8: scope-creep block (post-meta-analysis push)
+
+After `5295364` (meta-analysis + smell-trigger + final-verdict-update commit), workflow [`25063307577`](https://github.com/rossdelarge247-debug/construct_d_01/actions/runs/25063307577) ran the slice-reviewer on the round-7 diff plus the new content. Posted check-run [`73424009293`](https://github.com/rossdelarge247-debug/construct_d_01/runs/73424009293) **`failure` (`block` / `architectural` / 2 findings)** — the persona applied the very smell-trigger we just added to the meta-additions themselves.
+
+**The 2 round-8 findings** (verbatim from check-run summary):
+
+1. **`scope-creep` (architectural)** — *"This CLAUDE.md Engineering conventions addition is not declared in any AC's In scope (ACs 1–15 cover persona files, workflow, checksums, invocation conventions, and gate table row) and is not listed in any Out of scope; per criterion 2 it is undeclared scope — either back-fill it as an explicit AC or defer to v3c where it can be properly scoped and verifiable."* **Resolved**: reverted the §Architectural-smell trigger paragraph from CLAUDE.md in this PR (commit `<round-9-sha>`); re-ships via sibling PR `S-INFRA-arch-smell-trigger` off main with proper acceptance.md.
+2. **`regression`** — *"spec 72b's Option C delimiter format changed to nonce-bound form but .claude/subagent-prompts/exit-plan-review.md (the v3a hook-spawned prompt that may use Option C) is absent from the diff; if it references the old `--- BEGIN <path> (<size> lines) ---` syntax it is now spec-inconsistent — verify and update it in this PR or document explicitly that it does not use Option C."* **Resolved**: spec 72b §"Option C" gains a new §"Scope: session-spawned personas only" sub-section explicitly clarifying that hook-spawned templates under `.claude/subagent-prompts/` use XML-style nonced envelopes (e.g. `<plan-from-author-NONCE>` in exit-plan-review.md), not Option C inline-file syntax — verified in-session that exit-plan-review.md does NOT reference the BEGIN/END delimiters.
+
+**Why round 8 IS the most valuable AC-1 evidence:** the persona blocked on the `block`-severity addition that was itself a session-47 lesson capture. We followed our own newly-written rule (revert + re-scope into a sibling slice) rather than patching round-9 the same file. **Recursive self-application of the rigour gate, in real-time.**
+
+### Round 9: re-convergence (post-revert)
+
+After this revert + clarification commit, push triggers round-9 workflow run; expected `approve`/`nit-only` since both findings are addressed. The smell-trigger codification ships independently in the sibling PR.
 
 ### Recursive review observations (session-47 meta-analysis)
 
@@ -383,7 +398,7 @@ After `007130b` (round 6 timeout fix), workflow [`25061142368`](https://github.c
 1. **Single-pass persona review has high false-negative rate.** Each round caught issues prior rounds demonstrably missed, even when prior diffs were larger (R1: 660L diff / 0 substantive; R6: 20L diff / 1 substantive). Slice-reviewer rubric has ~7-8 dimensions; in any pass the persona deeply explores 2-3.
 2. **Static review and integration testing find different bugs.** R1 (parse-default, only catchable via end-to-end run) vs R6 (timeout, only catchable via inspection of bare `npx`). Both required.
 3. **Topical exhaustion ≠ global done.** R5 → R6 was a verdict regression (`nit-only` → `request-changes`). Once visible-issue rate dropped, attention shifted to latent risks. Convergence in single-agent recursion = "all dimensions exhausted", not "no findings".
-4. **Architectural-smell signal.** All 6 rounds of substantive findings were clustered in `auto-review.yml`. A round-3 step-back review would have asked whether the workflow's monolithic structure (parsing + diagnostic + check-run posting + skip + failure-fallback inline) was the right abstraction. Pulling parsing into `scripts/auto-review-parse.sh` with shellspec tests would have pre-caught rounds 4-6 at test time. CLAUDE.md §"Architectural-smell trigger" added in this session's commit cycle to codify this lesson for future slices.
+4. **Architectural-smell signal.** All 6 rounds of substantive findings were clustered in `auto-review.yml`. A round-3 step-back review would have asked whether the workflow's monolithic structure (parsing + diagnostic + check-run posting + skip + failure-fallback inline) was the right abstraction. Pulling parsing into `scripts/auto-review-parse.sh` with shellspec tests would have pre-caught rounds 4-6 at test time. **Codified as a CLAUDE.md "Engineering conventions" addition in a sibling PR** (`S-INFRA-arch-smell-trigger`, opened off main alongside this slice) — initial inclusion in this PR was correctly flagged as scope-creep by round-8 auto-review (architectural-severity), reverted, re-shipped via the sibling slice with proper acceptance.md scoping. Live demonstration of the rigour gate working as designed.
 
 ### v3c carry-over: persona-suite-v2 multi-agent dimension-partitioned reviewer
 
@@ -402,7 +417,7 @@ Expected payoff: 1-2 rounds vs 7+ for current pattern. 5-7× tokens per single-p
 
 **Pre-CI adversarial review (DoD-3 + DoD-13 four-sub-spawn): `request-changes` → `approve` after fix-up commit `f476d41`.** 20 logic findings actioned across 4 sub-spawns; 1 drift partial-deferred with scaffolding-exemption clause; residual prompt-injection disclosed honestly per session-46 lesson.
 
-**Live recursive auto-review on PR #30 (post-merge of `f476d41`): 7 rounds; converged to `success`** (`approve` or `nit-only`) at round 7 (commit `007130b`). Total findings actioned across rounds 1-6: **8 substantive logic findings + 2 style nits + 1 workflow-integration bug**. Round-by-round detail in §Round 1 through §Round 7 above. Recursive review constitutes the strongest possible AC-1 live evidence: the slice-reviewer persona reviewed its own ship-PR + each subsequent fix-up commit, surfaced real findings each round, and the author actioned every substantive finding before convergence.
+**Live recursive auto-review on PR #30 (post-merge of `f476d41`): 9 rounds.** First convergence at round 7 (`success` on `007130b`); round 8 reblocked at `block` (architectural-severity scope-creep on the meta-analysis addition + spec-72b regression risk on hook-spawned templates); round 9 re-convergence post-revert + spec-72b clarification. **Total findings actioned across rounds 1-8: 9 substantive logic + 2 architectural + 2 style + 1 workflow-integration bug** = 14 actionable items. Round-by-round detail in §Round 1 through §Round 9 above. Recursive review constitutes the strongest possible AC-1 live evidence: the slice-reviewer persona reviewed its own ship-PR + each subsequent fix-up commit, surfaced real findings each round, the author actioned every substantive finding, and at round 8 the persona blocked on a scope-creep addition that the author then surgically reverted + re-scoped into a sibling slice — recursive self-application of the rigour gate in real-time.
 
 **Re-baseline triggered:** persona file changes invalidate the initial hooks-checksums.txt baseline shipped with `1a70883`. `scripts/hooks-checksums.sh --generate` re-runs in the fix-up commit; new hashes recorded. Subsequent rounds 2-7 do NOT touch persona files (workflow + verification.md + CLAUDE.md only); hooks-checksums.txt unchanged from `f476d41`.
 

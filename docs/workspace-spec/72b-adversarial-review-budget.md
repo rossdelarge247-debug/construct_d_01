@@ -94,6 +94,10 @@ The sub-spawn's effective per-turn read budget for cross-references is `300 − 
 
 **Practical ceiling:** inline files of up to ~600L; beyond that, partition the file by section using `Read offset+limit` per sub-spawn (Option A territory).
 
+### Scope: session-spawned personas only
+
+Option C applies to v3b session-spawned personas under `.claude/agents/` (`slice-reviewer.md`, `acceptance-gate.md`, `ux-polish-reviewer.md`). It does NOT apply to v3a hook-spawned templates under `.claude/subagent-prompts/` — those use XML-style nonced envelopes (e.g. `<plan-from-author-NONCE>...</plan-from-author-NONCE>` in `exit-plan-review.md`) for plan/verifier inputs, not file-content inlining; their input shape is fixed at hook-fire time, not selected per slice.
+
 ### Use when
 
 - Source >300 lines AND atomic (no natural file-per-spawn partition).
