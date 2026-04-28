@@ -108,7 +108,11 @@ jobs:
           # Extract verdict + severity + findings count.
           VERDICT=$(jq -r '.verdict // "block"' /tmp/review-output.json)
           SEVERITY=$(jq -r '.severity // "architectural"' /tmp/review-output.json)
-          FINDINGS_COUNT=$(jq -r '.findings | length // 0' /tmp/review-output.json)
+          # Operator precedence: `//` binds looser than `|`, so
+          # `.findings | length // 0` parses as `.findings | (length // 0)` —
+          # if `.findings` is null, `length` errors out before `//` fires.
+          # Bracket the default so null → empty array → length 0.
+          FINDINGS_COUNT=$(jq -r '(.findings // []) | length' /tmp/review-output.json)
           echo "verdict=$VERDICT" >> "$GITHUB_OUTPUT"
           echo "severity=$SEVERITY" >> "$GITHUB_OUTPUT"
           echo "findings_count=$FINDINGS_COUNT" >> "$GITHUB_OUTPUT"
@@ -134,14 +138,19 @@ jobs:
           esac
           TITLE="$VERDICT — $FINDINGS_COUNT finding(s) [$SEVERITY]"
           SUMMARY=$(jq -c '.findings // []' /tmp/review-output.json | head -c 60000)
-          gh api "repos/${{ github.repository }}/check-runs" \
-            --method POST \
-            --field name='auto-review (slice-reviewer persona)' \
-            --field head_sha="$HEAD_SHA" \
-            --field status=completed \
-            --field conclusion="$CONCLUSION" \
-            --field "output[title]=$TITLE" \
-            --field "output[summary]=$SUMMARY"
+          # Build nested JSON via `jq -n` and pipe to `gh api --input -`.
+          # `gh api --field "output[title]=..."` does NOT reliably emit
+          # nested `output: {title, summary}` JSON (the form-encoded
+          # bracket syntax is `gh`-version-dependent + undocumented).
+          # `--input -` with constructed JSON is the safe form.
+          jq -n \
+            --arg name 'auto-review (slice-reviewer persona)' \
+            --arg head_sha "$HEAD_SHA" \
+            --arg conclusion "$CONCLUSION" \
+            --arg title "$TITLE" \
+            --arg summary "$SUMMARY" \
+            '{name: $name, head_sha: $head_sha, status: "completed", conclusion: $conclusion, output: {title: $title, summary: $summary}}' \
+          | gh api "repos/${{ github.repository }}/check-runs" --method POST --input -
 
       - name: Post skip notice (when secret absent)
         if: steps.secret-check.outputs.skip == 'true'
@@ -150,11 +159,9 @@ jobs:
           HEAD_SHA: ${{ github.event.pull_request.head.sha }}
         run: |
           set -euo pipefail
-          gh api "repos/${{ github.repository }}/check-runs" \
-            --method POST \
-            --field name='auto-review (slice-reviewer persona)' \
-            --field head_sha="$HEAD_SHA" \
-            --field status=completed \
-            --field conclusion=neutral \
-            --field 'output[title]=Skipped — ANTHROPIC_API_KEY not configured' \
-            --field 'output[summary]=Set ANTHROPIC_API_KEY as a repo secret to enable auto-review per docs/slices/S-INFRA-rigour-v3b-subagent-suite/acceptance.md AC-1.'
+          # Same nested-JSON-via-jq pattern as the verdict path.
+          jq -n \
+            --arg name 'auto-review (slice-reviewer persona)' \
+            --arg head_sha "$HEAD_SHA" \
+            '{name: $name, head_sha: $head_sha, status: "completed", conclusion: "neutral", output: {title: "Skipped — ANTHROPIC_API_KEY not configured", summary: "Set ANTHROPIC_API_KEY as a repo secret to enable auto-review per docs/slices/S-INFRA-rigour-v3b-subagent-suite/acceptance.md AC-1."}}' \
+          | gh api "repos/${{ github.repository }}/check-runs" --method POST --input -

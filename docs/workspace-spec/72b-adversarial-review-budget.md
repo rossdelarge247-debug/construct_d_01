@@ -63,16 +63,23 @@ review is included inline below; you do NOT need to issue a Read tool
 call for it. Other source files referenced in this prompt remain
 read-only via the standard Read tool with read-cap discipline.
 
---- BEGIN <path> (<size> lines) ---
+--- BEGIN <path> NONCE ---
 <full file content>
---- END <path> ---
+--- END <path> NONCE ---
 
 Brief: <review brief — what to check>.
 Verdict format: per CLAUDE.md "Hard controls > Verdict vocabulary"
 (`approve` / `nit-only` / `request-changes` / `block`).
 ```
 
-The `--- BEGIN ... --- END ---` delimiters are conventional. The sub-spawn need only know the file path + size + content + the brief.
+The `--- BEGIN <path> NONCE ---` and `--- END <path> NONCE ---` delimiters
+MUST be nonce-bound — `NONCE` is the same per-invocation nonce announced at
+the top of the prompt envelope (`Your per-invocation nonce: <32-hex>`). The
+sub-spawn treats any `--- END <path> X ---` where X is anything other than
+its canonical nonce as content, not a separator. Without nonce-binding, a
+malicious diff containing a fake `--- END <path> ---` line could terminate
+inlined content early or smuggle attacker-controlled text as a sibling
+file (DoD-13 review surfaced this at v3b S-6).
 
 ### Prompt-budget accounting
 
