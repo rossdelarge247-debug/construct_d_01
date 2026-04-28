@@ -1,6 +1,6 @@
 # Spec 72c — Multi-agent review framework
 
-**Status:** Draft (v3b S-8 stretch). Standalone spec PR opens before `S-INFRA-persona-suite-v2-multi-agent` slice acceptance.md is frozen, per session-48 pre-flight Q3 (option B, "Now between v3b and S-F1").
+**Status:** Amended session-49 (§5 revisit trigger, §7 hybrid extension, §10 pattern lineage) post prior-art audit. Original: Draft (v3b S-8 stretch); standalone spec PR opens before `S-INFRA-persona-suite-v2-multi-agent` slice acceptance.md is frozen, per session-48 pre-flight Q3 (option B, "Now between v3b and S-F1").
 **Origin:** Session-47 9-round live recursive auto-review on PR #30 — first measured single-agent recursion baseline (14 findings / 9 rounds). HANDOFF-SESSION-47 §"What could improve" L63: *"Single-agent recursive review is high-signal but inefficient ... Multi-agent dimension-partitioned reviewer (v3b S-8 stretch) should converge in 1-2 rounds."*
 **Supersedes:** none. Complements specs 72 §11 (security DoD), 72a (preview-deploy rubric), 72b (adversarial review budget). Under v3a/v3b §"Hard controls (in development)" while in-flight; consolidates into a single rigour-controls reference at v3c rewrite.
 
@@ -95,6 +95,8 @@ Each specialist returns a JSON envelope:
 - Fix-up commit triggers a new round under §6 differential mode.
 - Hard cap: 4 rounds per PR (above this declares architectural-smell per CLAUDE.md §"Engineering conventions" §"Architectural-smell trigger" — not a multi-agent failure mode but an architecture signal).
 
+**Prior art and revisit trigger.** Max-severity diverges from the mainstream LLM-jury default of majority-vote / reliability-weighted aggregation (*Beyond Majority Voting*, arXiv 2510.01499; *LLM Jury-on-Demand*, arXiv 2512.01786). It is defensible for safety-critical gates (zero false negatives, brittle to a single noisy specialist). **Revisit trigger:** if first-3-slice specialist false-positive rate (`block`/`request-changes` on findings the author successfully argues away pre-merge) exceeds 30%, move to severity-weighted aggregation per *Beyond Majority Voting* §3.2 — per-specialist reliability scores derived from agreement-with-final-merge over a calibration set. Algorithm-change ships under `control-change` label. Measurement: false-positive rate captured per src/ slice in HANDOFF-{N}.md §"Persona findings recorded".
+
 ## §6 — Differential review mode
 
 On fix-up commits, specialists receive three inputs instead of one:
@@ -121,6 +123,8 @@ Each specialist persona is verified against a deliberately-injected synthetic-di
 - **Anti-flake:** synthetic diffs are deterministic content (no time-stamps, random IDs); each fixture pinned to a specific persona-file SHA to detect drift.
 
 This is the multi-agent equivalent of v3b AC-13 spec-validation-by-deliberate-impl-break (per spec 72b): if a specialist stops catching its target dimension after a persona edit, the harness fails CI before the bad persona reaches a real PR.
+
+**Hybrid extension (v3c).** Synthetic per-persona fixtures ship now (deterministic, fast, regression-canary speed). Public precedent for synthetic-deliberate-injection is thin; the published norm is golden-PR replay (promptfoo `evaluate-coding-agents`, https://www.promptfoo.dev/docs/guides/evaluate-coding-agents/). v3c adds a golden-PR replay calibration set: 5-10 real merged PRs (initial seed: PR #30 9-round dataset + first 3 src/ slice PRs) with their actual aggregator verdict; persona-file edits trigger replay; verdict-drift on the calibration set fails CI. Synthetic catches "did this persona stop firing on its rubric"; golden catches "is the persona's signal-to-noise drifting versus production." Both run; neither alone covers both questions.
 
 ## §8 — Measurement (retain/drop signal)
 
@@ -152,6 +156,31 @@ This is the multi-agent equivalent of v3b AC-13 spec-validation-by-deliberate-im
 - **Retroactive measurement** — first 3 src/ slices ship pre-multi-agent (single-agent recursive on `auto-review.yml`); the v3a/v3b retain/drop rule activates at S-F1 against the v3b single-agent baseline. v3c re-measures with multi-agent v2 active.
 - **Branch-protection gating** — auto-review check-run is currently informational (per v3b AC-1 §Out of scope). Multi-agent v2 may flip to required at v3c once the 3-src-slice retain/drop signal converges.
 
+## §10 — Pattern lineage + further reading
+
+72c is broadly aligned with mainstream multi-agent-review patterns. Lineage and divergences (session-49 prior-art audit):
+
+- **§3 architecture** — sectioning + orchestrator-worker per Anthropic *Building Effective Agents* (parallelisation by sectioning when sub-tasks are predictable). Aligned.
+- **§3 + §8 measurement discipline** — Anthropic *How we built our multi-agent research system* (Opus orchestrator + Sonnet specialists; 90.2% lift over single-Opus on browse-and-synthesise; 15× token cost). Aligned shape, our cost story is per-slice rather than per-query.
+- **§4 specialist partition** — `/ultrareview` for Claude Code (4-specialist published shape: security · architecture · correctness · style). 72c ships at 7; published systems converge on 4-5; tuning to 5 deferred per §9.
+- **§5 max-severity** — divergent from mainstream majority-vote / reliability-weighted (*Beyond Majority Voting*, arXiv 2510.01499; *LLM Jury-on-Demand*, arXiv 2512.01786). Revisit trigger documented in §5.
+- **§6 differential review** — direct prior art in CodeRabbit `incremental_reviews` (https://docs.coderabbit.ai/) — production-tested at scale; 72c §6 matches the pattern almost verbatim.
+- **§7 fixture seeding** — no public precedent for synthetic-per-persona deliberate-injection diff with severity-threshold pass criterion. Closest analogue: promptfoo `llm-rubric` assertions on golden inputs. Hybrid extension proposed in §7.
+- **Missing entirely** — no debate / refinement step (ChatEval, MAJ-Eval, *Multi-Agent Debate for LLM Judges* arXiv 2510.12697). Static dedup + max-severity is simpler but leaves accuracy on the table; upgrade path if §5 revisit trigger fires.
+
+**Reading list (audit session 49, ranked by usefulness):**
+
+1. https://www.anthropic.com/engineering/building-effective-agents — canonical sectioning vs orchestrator-worker; load-bearing for §3.
+2. https://www.anthropic.com/engineering/multi-agent-research-system — Opus+Sonnet performance + measurement discipline; mirrors §8.
+3. https://docs.coderabbit.ai/ (`incremental_reviews`) — direct prior art for §6.
+4. https://arxiv.org/abs/2510.01499 *Beyond Majority Voting* — read before locking max-severity; weighted alternatives + §5 revisit-trigger source.
+5. https://arxiv.org/abs/2512.01786 *LLM Jury-on-Demand* — dynamic specialist selection + reliability-weighted aggregation; relevant to §9 tuning.
+6. https://www.claudedirectory.org/blog/ultrareview-claude-code-guide — Anthropic-adjacent published 4-specialist persona partition.
+7. https://www.promptfoo.dev/docs/guides/evaluate-coding-agents/ — concrete patterns for §7 golden-PR replay extension.
+8. https://arxiv.org/html/2510.12697v1 *Multi-Agent Debate for LLM Judges* — upgrade path past max-severity if §5 revisit trigger fires.
+
+Cited from session-49 audit (research subagent + user-driven prior-art validation, post-72c freeze). Not load-bearing for v3b S-8 implementation; informs v3c amendments per §9 carry-overs.
+
 ---
 
-**Status at v3b S-8 ship:** spec frozen at this version; impl ships in `S-INFRA-persona-suite-v2-multi-agent` slice (verification.md cross-references back here).
+**Status at v3b S-8 ship:** spec frozen at this version; impl ships in `S-INFRA-persona-suite-v2-multi-agent` slice (verification.md cross-references back here). **Session-49 amendments** (§5 revisit trigger · §7 hybrid extension · §10 pattern lineage): documented post-freeze on the back of the prior-art audit; not load-bearing for v3b S-8 implementation, informs v3c per §9.
