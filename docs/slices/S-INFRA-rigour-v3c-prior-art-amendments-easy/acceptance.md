@@ -2,7 +2,7 @@
 
 **STATUS: in-progress** — AC-1 through AC-4 ship in this PR; AC-5 through AC-7 carry scope-marker only (full AC draft lands when each sub-slice begins).
 
-**Scope marker** (per `.claude/agents/slice-reviewer.md` criterion 2 §Exception (b) — deferred-slice scope-marker update):
+**Scope marker** (deferred ACs explicitly declared in §AC-5/6/7 below as deferred-with-reasoning; in-scope by declaration in this acceptance.md):
 
 - **AC-1 through AC-4** — citation + "100% rule" rename — IN SCOPE for this PR
 - **AC-5 through AC-7** — Conventional Comments verbatim · ESLint `--suppress-all` migration · jest-axe + axe-playwright + Storybook test-runner — DEFERRED to follow-on PRs (each requires design + multi-file changes; some carry control-plane risk requiring `control-change` label)
@@ -119,13 +119,10 @@ Each requires explicit design + rollback procedure; not appropriate for citation
 ## Pre-flight notes
 
 - This slice ships **AC-1 through AC-4 inline** — 4 small CLAUDE.md edits totalling ~8 added lines.
-- **AC-5 through AC-7 carry scope markers only** per `.claude/agents/slice-reviewer.md` criterion 2 §Exception (b) (deferred-slice scope-marker update). Each will land as a separate sub-slice PR when its turn arrives.
+- **AC-5 through AC-7 carry scope markers only** — each is declared in §AC-5/6/7 below as deferred-with-reasoning, making it in-scope by declaration in this acceptance.md. Each will land as a separate sub-slice PR when its turn arrives.
 - **No `control-change` label required**: `CLAUDE.md` is at repo-root and is NOT in `.claude/hooks-checksums.txt` baseline scope. The 4 inline edits touch CLAUDE.md only — clean ship.
 - **Adversarial review**: single-turn citation-style; expected `approve` or `nit-only` verdict. Spec 72b §"Use when" applies (acceptance.md is well under 300L; Option C inline-content single-spawn).
-- **Auto-review.yml** will fire on this PR. Per `.claude/agents/slice-reviewer.md` criterion 2 §Exceptions:
-  - The 4 IN-SCOPE CLAUDE.md edits are scope-aligned ACs (no §Exception needed; they ARE the slice's stated work).
-  - The 3 DEFERRED scope markers fall under §Exception (b) — diff confined to scope-marker / status-header / candidate-section ranges of an AC carrying `STATUS: deferred`.
-  - Recursive precedent: PR #37 validated §Exceptions on a comparable diff profile.
+- **Auto-review.yml** will fire on this PR. Both the 4 IN-SCOPE CLAUDE.md edits and the 3 DEFERRED scope-markers are in-scope by declaration in this acceptance.md (the IN-SCOPE work is the slice's stated work; the DEFERRED scope-markers are explicitly declared in §AC-5/6/7 as deferred-with-reasoning, with full follow-on touches enumerated). No reliance on `slice-reviewer.md` exception clauses — on current `main`, criterion 2 has only the original unlabeled Incidental-scaffolding exception (the labelled (a)-(d) extension ships in PR #37, currently open).
 
 ## References
 
@@ -133,6 +130,6 @@ Each requires explicit design + rollback procedure; not appropriate for citation
 - Reading list (spec 72c §10): shipped via commit `79014a3` in PR #37
 - Audit framing (5 enhancements + 3 simplifications + 4 citations across 15 controls A-O): `docs/SESSION-CONTEXT.md` §"Session 50 priorities §P0b"
 - Sibling-slice precedent (single-AC citation slice): PR #37 `S-INFRA-v3c-rubric-extension/{acceptance,verification}.md`
-- Slice-reviewer rubric (criterion 2 §Exceptions a-d): `.claude/agents/slice-reviewer.md`
+- Slice-reviewer rubric on current `main`: `.claude/agents/slice-reviewer.md` (single unlabeled Incidental-scaffolding exception; the labelled (a)-(d) extension ships in PR #37, pending merge — not relied on by this slice)
 - Adversarial review budget: `docs/workspace-spec/72b-adversarial-review-budget.md` §"Use when" (Option C inline-content single-spawn)
 - Multi-agent review framework (post-amendments): `docs/workspace-spec/72c-multi-agent-review-framework.md` §5 (verdict aggregation) + §10 (pattern lineage + reading list)

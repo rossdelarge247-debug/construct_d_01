@@ -55,7 +55,7 @@
 
 ## DoD trace (CLAUDE.md §"Engineering conventions" §"Definition of Done")
 
-1. **AC met with evidence** — AC-1 through AC-4 PASS; verification points above. AC-5 through AC-7 DEFERRED with explicit scope-marker per slice-reviewer §Exception (b).
+1. **AC met with evidence** — AC-1 through AC-4 PASS; verification points above. AC-5 through AC-7 DEFERRED with explicit scope-marker — declared in `acceptance.md` §AC-5/6/7 as deferred-with-reasoning (in-scope by declaration in the same acceptance.md).
 2. **Tests written and passing** — N/A (doc-only citation edits + scope-marker drafts; no logic surface; per CLAUDE.md §"Don't write file-content assertions for logic slices" the verification points above are the appropriate evidence form).
 3. **Adversarial review done** — Live auto-review.yml (slice-reviewer persona) fires on PR open. The slice's IN-SCOPE work (4 citation/rename edits) and DEFERRED scope-marker structure are both covered by §Exceptions (b) + (c) extension shipped in PR #37 (sibling slice). Pre-PR-open author-side review: 4 grep verifications confirmed; rename forward-only; no stray references in CLAUDE.md to old name.
 4. **Preview deploy verified in-browser** — N/A (no UI surface; CLAUDE.md + acceptance.md doc edits only).
@@ -67,7 +67,7 @@ Security checklist evidence: see `security.md` in this slice directory (3 PASS /
 ## Adversarial review status
 
 - **Pre-PR-open:** Single-turn citation-style review per spec 72b §"Use when" (Option C inline-content single-spawn — acceptance.md 138L < 300L threshold). 4 verifications via grep; rename forward-only intent verified; no stray references.
-- **Live auto-review (slice-reviewer.md):** Will fire on PR open. Recursive context — this PR is the second consumer of the §Exceptions (a-d) shipped in PR #37 (the first was PR #37 itself). Expected verdict `approve` or `nit-only` on the IN-SCOPE 4 edits; §Exception (b) covers the 3 DEFERRED scope-markers.
+- **Live auto-review (slice-reviewer.md):** Will fire on PR open. The auto-review on current `main` runs the persona without the labelled (a)-(d) extension (that ships in PR #37, currently open). Both the 4 IN-SCOPE CLAUDE.md edits and the 3 DEFERRED scope-markers in this slice are in-scope by declaration within `acceptance.md` itself — the IN-SCOPE work is the slice's stated work, and the DEFERRED scope-markers are explicitly declared in §AC-5/6/7 as deferred-with-reasoning. No reliance on a non-existent `§Exception (b)` label.
 
 ## Sign-off
 
