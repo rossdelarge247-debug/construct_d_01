@@ -1,16 +1,61 @@
 # tdd-exemption-allowlist.txt
 #
-# AC-5 (S-INFRA-rigour-v3a-foundation acceptance.md L50): file globs that
-# exempt src/** changes from the TDD-first-every-commit gate. Globs are
-# matched via bash `case` (not extglob); shell-glob syntax — one per line,
-# `#` introduces an end-of-line comment.
+# Allowlist of file globs that exempt src/** changes from the TDD-first
+# gates: tdd-first-every-commit (v3a AC-5; gates paperwork) AND tdd-guard
+# (v3b AC-6; gates behaviour).
 #
-# Categories per L50: pure-rename, pure-config, pure-visual.
+# ─── Bail-out rubric (per v3b AC-8; engineering-phase-candidates §G L169) ───
 #
-# Empty seed for v3a — every src/ change must include tests/ changes.
-# β-resume rescope (per L48 ESLint allowlist note) populates real exemptions
-# captured during β cleanup. Until populated, this file documents the gate's
-# extension point.
+#   "Lean: pure-visual UI, visual-regression-only covered surfaces.
+#    Everything else: test first."
 #
-# Adding an entry is a control-plane change — ship in a PR carrying the
-# 'control-change' label per acceptance.md AC-2 + L199.
+# Allowed categories (each entry MUST carry one as a `category:glob` tag):
+#
+#   pure-visual-ui      — UI surface where state machines / branching
+#                         logic do not exist; visual-regression coverage
+#                         is the test seam. Example: a presentational
+#                         component whose only inputs are layout props.
+#                         Non-example: a component that reads from a
+#                         store, renders different children per state,
+#                         or handles user input — that's logic, test it.
+#
+#   pure-rename         — file renames + import-path updates with no
+#                         behaviour change. Example: `src/lib/foo.ts` →
+#                         `src/lib/feature/foo.ts` with no edits beyond
+#                         the path move. Non-example: rename + behaviour
+#                         tweak in same commit — split it.
+#
+#   pure-config         — config-shape edits (tsconfig paths, vitest
+#                         settings, env-var declarations). Example:
+#                         adding a path alias. Non-example: config
+#                         that gates app behaviour at runtime — that's
+#                         logic, test the consumer.
+#
+# ─── Format ───
+#
+# One entry per line: `category:glob` (categories above only). Globs are
+# matched via bash `case` (not extglob); shell-glob syntax. `#` introduces
+# an end-of-line comment. Untagged entries (no `category:` prefix) are
+# rejected by `verify-slice.sh` Gate 4 fail-loud (per AC-8).
+#
+# ─── Examples ───
+#
+#   pure-visual-ui:src/components/marketing/hero.tsx
+#   pure-rename:src/lib/feature/old-path.ts
+#   pure-config:src/config/paths.ts
+#
+# ─── Non-examples (test these instead, do NOT add to allowlist) ───
+#
+#   src/lib/store/dev-store.ts            — has branching logic
+#   src/app/api/bank/connect/route.ts     — handles user input + state
+#   src/components/workspace/page.tsx     — reads store, renders states
+#
+# ─── Adding an entry ───
+#
+# Adding an entry is a control-plane change in spirit. This file is NOT
+# yet enumerated in L199 / control-change-label.yml path-filter (deferred
+# to v3c per v3b AC-11 §Scope: "three named files only"). Until then,
+# adding entries should still ship under 'control-change' by author
+# discipline; reviewers should reject untagged additions.
+#
+# v3a/v3b seed: empty. Real exemptions populate from β-resume rescope.
