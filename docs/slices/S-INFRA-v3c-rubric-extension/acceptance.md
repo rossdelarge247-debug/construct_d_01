@@ -62,6 +62,7 @@ The loveable floor: a future PR opening with a doc-only diff (CLAUDE.md edit, sp
   - Renumber the prior §Example 3 (security finding) to §Example 4.
   - Re-baseline `.claude/hooks-checksums.txt` (slice-reviewer.md SHA changes).
   - Slice docs (this file + `verification.md`).
+  - Session wrap protocol outputs (`docs/HANDOFF-SESSION-49.md` + `docs/SESSION-CONTEXT.md` refresh) required by CLAUDE.md §"Wrapping up a session" — bundled into this PR per the session-49 wrap discipline; not separable from the rubric-extension branch since session 49 ran the rubric extension as its sole P0 and wrapped on the same branch.
 - **Out of scope:**
   - New finding categories in the JSON output schema's `category` enum (the three exceptions refine when scope-creep should NOT fire; they don't add new finding types).
   - Modifications to the other personas (`acceptance-gate.md`, `ux-polish-reviewer.md`) — their rubrics don't currently exhibit the same false-positive pattern; defer until S-F1 measurement.
