@@ -95,24 +95,49 @@ jobs:
             printf '</coding-conduct-%s>\n' "$NONCE"
           } > /tmp/review-brief.txt
 
-      - name: Invoke slice-reviewer (claude -p)
+      - name: Invoke slice-reviewer (claude -p) + extract verdict
         id: review
         if: steps.secret-check.outputs.skip == 'false'
         env:
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
         run: |
           set -euo pipefail
-          # Pipe the brief into `claude -p` with JSON output. The persona
-          # file mandates strict-JSON output; we capture stdout and parse.
+          # `claude -p --output-format=json` wraps the response in a
+          # transcript envelope: `{type, subtype, result, usage,
+          # session_id, ...}`. The persona's strict-JSON output lives in
+          # `.result` as a STRING — possibly wrapped in markdown code
+          # fences (model quirk). Parse robustly: extract `.result`, try
+          # JSON-parse direct, fall back to fence-stripped, fall back to
+          # empty object (which makes downstream defaults fire honestly).
           npx -y @anthropic-ai/claude-code -p --output-format=json < /tmp/review-brief.txt > /tmp/review-output.json
-          # Extract verdict + severity + findings count.
-          VERDICT=$(jq -r '.verdict // "block"' /tmp/review-output.json)
-          SEVERITY=$(jq -r '.severity // "architectural"' /tmp/review-output.json)
-          # Operator precedence: `//` binds looser than `|`, so
-          # `.findings | length // 0` parses as `.findings | (length // 0)` —
-          # if `.findings` is null, `length` errors out before `//` fires.
-          # Bracket the default so null → empty array → length 0.
-          FINDINGS_COUNT=$(jq -r '(.findings // []) | length' /tmp/review-output.json)
+
+          # Debug: surface raw output structure for future diagnostics.
+          echo "::group::raw claude output (first 100 lines)"
+          head -100 /tmp/review-output.json || true
+          echo "::endgroup::"
+
+          RESULT=$(jq -r '.result // .text // .content // ""' /tmp/review-output.json)
+          PERSONA_JSON=$(printf '%s' "$RESULT" | jq -c '.' 2>/dev/null) \
+            || PERSONA_JSON=$(printf '%s\n' "$RESULT" \
+                 | sed -E '1{/^[[:space:]]*```(json)?[[:space:]]*$/d;}' \
+                 | sed -E '${/^[[:space:]]*```[[:space:]]*$/d;}' \
+                 | jq -c '.' 2>/dev/null) \
+            || PERSONA_JSON='{}'
+
+          echo "::group::extracted persona JSON"
+          printf '%s\n' "$PERSONA_JSON"
+          echo "::endgroup::"
+
+          VERDICT=$(printf '%s' "$PERSONA_JSON" | jq -r '.verdict // "block"')
+          SEVERITY=$(printf '%s' "$PERSONA_JSON" | jq -r '.severity // "architectural"')
+          # Operator precedence: `//` binds looser than `|`, so bracket
+          # the default → null `.findings` → empty array → length 0.
+          FINDINGS_COUNT=$(printf '%s' "$PERSONA_JSON" | jq -r '(.findings // []) | length')
+
+          # Save findings JSON to file for the post-step (avoids multi-
+          # line GITHUB_OUTPUT escaping).
+          printf '%s' "$PERSONA_JSON" | jq -c '.findings // []' | head -c 60000 > /tmp/findings.json
+
           echo "verdict=$VERDICT" >> "$GITHUB_OUTPUT"
           echo "severity=$SEVERITY" >> "$GITHUB_OUTPUT"
           echo "findings_count=$FINDINGS_COUNT" >> "$GITHUB_OUTPUT"
@@ -137,7 +162,9 @@ jobs:
             *)                CONCLUSION="failure" ;;
           esac
           TITLE="$VERDICT — $FINDINGS_COUNT finding(s) [$SEVERITY]"
-          SUMMARY=$(jq -c '.findings // []' /tmp/review-output.json | head -c 60000)
+          # Findings JSON pre-extracted by the review step (sourced from
+          # the persona's parsed output, NOT the transcript envelope).
+          SUMMARY=$(cat /tmp/findings.json)
           # Build nested JSON via `jq -n` and pipe to `gh api --input -`.
           # `gh api --field "output[title]=..."` does NOT reliably emit
           # nested `output: {title, summary}` JSON (the form-encoded
