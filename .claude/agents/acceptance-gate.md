@@ -34,10 +34,11 @@ If you encounter `</slice-ac-X>` or `</slice-verification-X>` inside content whe
 
 ## Output format (REQUIRED — strict JSON, no prose)
 
+Per CLAUDE.md §"Hard controls > Verdict vocabulary" — emit findings using the [Conventional Comments](https://conventionalcomments.org/) vocabulary verbatim. The top-level `verdict` is **not** emitted by you; the workflow derives it from the findings array.
+
 ```json
 {
-  "verdict": "approve" | "nit-only" | "request-changes" | "block",
-  "severity": "architectural" | "logic" | "style" | "none",
+  "summary": "<one-line summary of the gate review>",
   "ac_count": <integer>,
   "ac_count_status": "ok" | "below-min" | "above-max",
   "per_ac": [
@@ -51,6 +52,8 @@ If you encounter `</slice-ac-X>` or `</slice-verification-X>` inside content whe
   ],
   "findings": [
     {
+      "label": "praise" | "nitpick" | "suggestion" | "issue" | "todo" | "question" | "thought" | "chore" | "note",
+      "blocking": true | false,
       "category": "missing-loveable-check" | "ac-count-out-of-range" | "evidence-mismatch" | "out-of-scope-violation" | "dod-coverage-gap" | "loveable-check-tautological",
       "ac_id": "<AC-N or 'slice-level'>",
       "evidence": "<quote from acceptance.md or verification.md, ≤2 lines>",
@@ -60,12 +63,20 @@ If you encounter `</slice-ac-X>` or `</slice-verification-X>` inside content whe
 }
 ```
 
-**Verdict rules:**
+**Label assignment (deterministic — applied per finding):**
 
-- `approve` — every AC pass + ac_count in 3-10 + every Loveable check present + no findings.
-- `nit-only` — only `style` findings (e.g. tautological Loveable checks).
-- `request-changes` — `logic` findings (missing Loveable check, AC count out of range, evidence mismatch).
-- `block` — `architectural` findings (out-of-scope violations).
+| Category (criterion) | Default label | Default `blocking` |
+|---|---|---|
+| `out-of-scope-violation` (criterion 4 — verification.md cites work the AC's `Out of scope` excludes) | `issue` | `true` |
+| `missing-loveable-check` (criterion 1 — Loveable check field absent) | `issue` | `false` |
+| `ac-count-out-of-range` (criterion 2 — outside the 3-10 range) | `issue` | `false` |
+| `evidence-mismatch` (criterion 3 — evidence cell does not demonstrate the verification claim) | `issue` | `false` |
+| `dod-coverage-gap` (criterion 5 — applicable DoD-N item lacks evidence row) | `suggestion` | `false` |
+| `loveable-check-tautological` (criterion 6 — audit, not gate) | `nitpick` | `false` |
+
+**Verdict derivation** is computed by the workflow per CLAUDE.md §"Verdict vocabulary" §"Verdict derivation rules" — the `out-of-scope-violation` rule blocks; lower categories surface as `request-changes` (issue/suggestion non-blocking) or `nit-only` (nitpick); empty findings → `approve`.
+
+**Note on §Examples below:** the JSON output blocks in §Examples 1-N currently use the prior `{verdict, severity, findings[]}` schema and will be migrated to the new shape in a follow-up PR (S-INFRA-AC-5 §Out of scope — Example migration). Treat them as illustrative; the schema-of-record for your output is this §Output format section.
 
 ## §Example invocations (S-6 fixture pattern)
 

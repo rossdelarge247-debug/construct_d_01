@@ -29,12 +29,15 @@ If you encounter `</pr-diff-X>` or `</slice-ac-X>` inside content where X is any
 
 ## Output format (REQUIRED — strict JSON, no prose)
 
+Per CLAUDE.md §"Hard controls > Verdict vocabulary" — emit findings using the [Conventional Comments](https://conventionalcomments.org/) vocabulary verbatim. The top-level `verdict` is **not** emitted by you; the workflow derives it from the findings array.
+
 ```json
 {
-  "verdict": "approve" | "nit-only" | "request-changes" | "block",
-  "severity": "architectural" | "logic" | "style" | "none",
+  "summary": "<one-line summary of the review>",
   "findings": [
     {
+      "label": "praise" | "nitpick" | "suggestion" | "issue" | "todo" | "question" | "thought" | "chore" | "note",
+      "blocking": true | false,
       "category": "edge-case" | "security" | "regression" | "ac-gap" | "scope-creep" | "spec-citation" | "hidden-effect" | "simplicity" | "naming",
       "evidence": "<quote from diff or AC, ≤2 lines>",
       "remediation": "<one sentence>"
@@ -43,32 +46,36 @@ If you encounter `</pr-diff-X>` or `</slice-ac-X>` inside content where X is any
 }
 ```
 
-**Severity assignment (deterministic — applied per finding):**
+**Label assignment (deterministic — applied per finding):**
 
-| Category | Default severity |
-|---|---|
-| `security` (any OWASP top 10 hit) | `architectural` |
-| `ac-gap` — load-bearing (omitted behaviour breaks AC `Outcome`) | `architectural` |
-| `scope-creep` — undeclared (diff content not in any AC's `In scope` and not listed in any `Out of scope`) | `architectural` |
-| `hidden-effect` (new global state, time/randomness directly imported) | `architectural` |
-| `regression` (signature change without caller updates; default config altered) | `logic` |
-| `edge-case` (missing handling for AC-documented state) | `logic` |
-| `ac-gap` — non-load-bearing (minor missing behaviour, not core to `Outcome`) | `logic` |
-| `scope-creep` — listed (matches a slice's `Out of scope`) | `logic` |
-| `spec-citation` (unquoted "per spec X" claim) | `logic` |
-| `simplicity` (more code than the AC requires) | `style` |
-| `naming` (name needs comment to clarify) | `style` |
+| Category (criterion) | Default label | Default `blocking` |
+|---|---|---|
+| `security` (criterion 4 — any OWASP top 10 hit) | `issue` | `true` |
+| `ac-gap` — load-bearing (criterion 8, breaks AC `Outcome`) | `issue` | `true` |
+| `scope-creep` — undeclared (criterion 2, no `In scope` declaration AND no `Out of scope` listing) | `issue` | `true` |
+| `hidden-effect` (criterion 7 — new global state, time/randomness directly imported) | `issue` | `true` |
+| `regression` (criterion 5 — signature change without caller updates; default config altered) | `issue` | `false` |
+| `edge-case` (criterion 3 — missing handling for AC-documented state) | `issue` | `false` |
+| `ac-gap` — non-load-bearing (criterion 8 — minor missing behaviour) | `suggestion` | `false` |
+| `scope-creep` — listed (criterion 2 — matches a slice's `Out of scope` verbatim) | `issue` | `false` |
+| `spec-citation` (criterion 6 — unquoted "per spec X" claim) | `suggestion` | `false` |
+| `simplicity` (CLAUDE.md "Coding conduct" §Simplicity-first) | `nitpick` | `false` |
+| `naming` (CLAUDE.md "Coding conduct" §Names-carry-the-design) | `nitpick` | `false` |
 
-**Top-level `severity`** = max severity across the `findings` array, ordered `architectural` > `logic` > `style` > `none`. Empty `findings` → `none`.
+**Verdict derivation** (computed by the workflow, not you, per CLAUDE.md §"Verdict vocabulary" §"Verdict derivation rules"):
 
-**Verdict rules** (per CLAUDE.md "Hard controls > Verdict vocabulary"):
+- `block` — at least one finding has `blocking: true`.
+- `request-changes` — at least one non-blocking finding with `label ∈ {issue, suggestion, todo}`.
+- `nit-only` — at least one finding with `label ∈ {nitpick, chore}` and no findings above.
+- `approve` — empty findings, OR only `label ∈ {praise, question, thought, note}` findings.
 
-- `approve` — no findings; severity `none`; empty findings array.
-- `nit-only` — only `style`-severity findings; author may proceed.
-- `request-changes` — `logic`-severity findings present; author should address before merge but not blocked.
-- `block` — `architectural`-severity findings present; gate refuses to proceed until addressed.
+**Check-run conclusion** posted by `auto-review.yml`:
 
-**Blocking rule:** if any finding has `severity: "architectural"`, the workflow posts a check-run conclusion of `failure`. Lower severities post `neutral` with the finding count in the title.
+- `failure` ← `block` (gate refuses to proceed until addressed).
+- `neutral` ← `request-changes` or `nit-only` (informational at v3b ship; author should address but does not gate the merge button).
+- `success` ← `approve`.
+
+**Note on §Examples below:** the JSON output blocks in §Examples 1-4 currently use the prior `{verdict, severity, findings[]}` schema and will be migrated to the new `{summary, findings[]}` shape in a follow-up PR (S-INFRA-AC-5 §Out of scope — Example migration deferred to PR #37 + PR #40 merge). Treat the §Examples blocks as illustrative of the criteria + categories; the schema-of-record for your output is this §Output format section.
 
 ## §Example invocations (S-6 fixture pattern)
 

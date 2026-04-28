@@ -153,22 +153,33 @@ jobs:
           # Closes v3b S-6 round-4 #1 finding.
           if [ "$PERSONA_JSON" = '{}' ]; then
             VERDICT="parse-failed"
-            SEVERITY="none"
             FINDINGS_COUNT=0
             printf '[]' > /tmp/findings.json
           else
-            VERDICT=$(printf '%s' "$PERSONA_JSON" | jq -r '.verdict // "block"')
-            SEVERITY=$(printf '%s' "$PERSONA_JSON" | jq -r '.severity // "architectural"')
-            # Operator precedence: `//` binds looser than `|`, so bracket
-            # the default → null `.findings` → empty array → length 0.
+            # Per CLAUDE.md §"Verdict vocabulary" §"Verdict derivation
+            # rules" (Conventional Comments adoption from AC-5): the
+            # persona emits findings with `label` + `blocking` per finding
+            # but does NOT emit a top-level verdict — we derive it here
+            # deterministically. Order matters; first match wins.
             FINDINGS_COUNT=$(printf '%s' "$PERSONA_JSON" | jq -r '(.findings // []) | length')
+            BLOCKING_COUNT=$(printf '%s' "$PERSONA_JSON" | jq -r '[.findings // [] | .[] | select(.blocking == true)] | length')
+            ACTION_COUNT=$(printf '%s' "$PERSONA_JSON" | jq -r '[.findings // [] | .[] | select(.label == "issue" or .label == "suggestion" or .label == "todo")] | length')
+            NIT_COUNT=$(printf '%s' "$PERSONA_JSON" | jq -r '[.findings // [] | .[] | select(.label == "nitpick" or .label == "chore")] | length')
+            if [ "$BLOCKING_COUNT" -gt 0 ]; then
+              VERDICT="block"
+            elif [ "$ACTION_COUNT" -gt 0 ]; then
+              VERDICT="request-changes"
+            elif [ "$NIT_COUNT" -gt 0 ]; then
+              VERDICT="nit-only"
+            else
+              VERDICT="approve"
+            fi
             # Save findings JSON to file for the post-step (avoids multi-
             # line GITHUB_OUTPUT escaping).
             printf '%s' "$PERSONA_JSON" | jq -c '.findings // []' | head -c 60000 > /tmp/findings.json
           fi
 
           echo "verdict=$VERDICT" >> "$GITHUB_OUTPUT"
-          echo "severity=$SEVERITY" >> "$GITHUB_OUTPUT"
           echo "findings_count=$FINDINGS_COUNT" >> "$GITHUB_OUTPUT"
 
       - name: Post check run (verdict)
@@ -177,27 +188,26 @@ jobs:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           HEAD_SHA: ${{ github.event.pull_request.head.sha }}
           VERDICT: ${{ steps.review.outputs.verdict }}
-          SEVERITY: ${{ steps.review.outputs.severity }}
           FINDINGS_COUNT: ${{ steps.review.outputs.findings_count }}
         run: |
           set -euo pipefail
-          # Map verdict → conclusion per CLAUDE.md "Hard controls > Verdict
-          # vocabulary": approve / nit-only → success; request-changes →
-          # neutral (informational at v3b ship); block → failure.
-          # Plus parse-failed sentinel (round-4 #1): unparseable persona
-          # output → neutral with diagnostic title (NOT misleading-block-
-          # default-fail).
+          # Map verdict → conclusion per CLAUDE.md §"Verdict vocabulary"
+          # §"Check-run conclusion mapping": approve → success;
+          # request-changes / nit-only → neutral (informational at v3b
+          # ship); block → failure. Plus parse-failed sentinel (round-4
+          # #1): unparseable persona output → neutral with diagnostic
+          # title (NOT misleading-block-default-fail).
           case "$VERDICT" in
-            approve|nit-only) CONCLUSION="success" ;;
-            request-changes)  CONCLUSION="neutral" ;;
-            block)            CONCLUSION="failure" ;;
-            parse-failed)     CONCLUSION="neutral" ;;
-            *)                CONCLUSION="failure" ;;
+            approve)                       CONCLUSION="success" ;;
+            request-changes|nit-only)      CONCLUSION="neutral" ;;
+            block)                         CONCLUSION="failure" ;;
+            parse-failed)                  CONCLUSION="neutral" ;;
+            *)                             CONCLUSION="failure" ;;
           esac
           if [ "$VERDICT" = "parse-failed" ]; then
             TITLE="persona output unparseable — see workflow log"
           else
-            TITLE="$VERDICT — $FINDINGS_COUNT finding(s) [$SEVERITY]"
+            TITLE="$VERDICT — $FINDINGS_COUNT finding(s)"
           fi
           # Findings JSON pre-extracted by the review step (sourced from
           # the persona's parsed output, NOT the transcript envelope).

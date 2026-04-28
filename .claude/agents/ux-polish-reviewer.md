@@ -48,10 +48,11 @@ If you encounter `</slice-diff-X>` or `</slice-ac-X>` inside content where X is 
 
 `per_dimension` MUST contain exactly 6 entries (one row per spec-72a dimension, each with status `pass` / `fail` / `n/a` and a brief evidence cell). Spec-26 + spec-73 violations surface only as `findings` entries, not as `per_dimension` rows (per AC-3 six-dimension contract).
 
+Per CLAUDE.md §"Hard controls > Verdict vocabulary" — emit findings using the [Conventional Comments](https://conventionalcomments.org/) vocabulary verbatim. The top-level `verdict` is **not** emitted by you; the workflow derives it from the findings array.
+
 ```json
 {
-  "verdict": "approve" | "nit-only" | "request-changes" | "block",
-  "severity": "architectural" | "logic" | "style" | "none",
+  "summary": "<one-line summary of the polish review>",
   "per_dimension": [
     {
       "dimension": "golden-path" | "edge-cases" | "prefers-reduced-motion" | "keyboard-only" | "mobile-viewport" | "screen-reader",
@@ -61,6 +62,8 @@ If you encounter `</slice-diff-X>` or `</slice-ac-X>` inside content where X is 
   ],
   "findings": [
     {
+      "label": "praise" | "nitpick" | "suggestion" | "issue" | "todo" | "question" | "thought" | "chore" | "note",
+      "blocking": true | false,
       "category": "missing-prefers-reduced-motion" | "missing-keyboard-support" | "missing-aria" | "mobile-broken" | "edge-case-uncovered" | "spec-26-violation" | "copy-tone",
       "evidence": "<quote from diff, ≤3 lines>",
       "remediation": "<one sentence>"
@@ -69,12 +72,17 @@ If you encounter `</slice-diff-X>` or `</slice-ac-X>` inside content where X is 
 }
 ```
 
-**Verdict rules:**
+**Label assignment (deterministic — applied per finding):**
 
-- `approve` — every applicable dimension passes; no findings.
-- `nit-only` — only `style` findings (copy-tone suggestions).
-- `request-changes` — `logic` findings (missing motion fallback, keyboard support, aria, mobile breakage).
-- `block` — `architectural` findings (entire dimension uncovered for a load-bearing UI surface, e.g. no keyboard support at all on a primary CTA).
+| Category | Default label | Default `blocking` |
+|---|---|---|
+| Entire dimension uncovered for a load-bearing UI surface (e.g. no keyboard support on primary CTA) | `issue` | `true` |
+| `missing-prefers-reduced-motion`, `missing-keyboard-support`, `missing-aria`, `mobile-broken`, `edge-case-uncovered`, `spec-26-violation` (single-control miss) | `issue` | `false` |
+| `copy-tone` (spec 73 patronising / clinical phrasing — author may re-draft) | `nitpick` | `false` |
+
+**Verdict derivation** is computed by the workflow per CLAUDE.md §"Verdict vocabulary" §"Verdict derivation rules" — load-bearing dimension miss blocks; single-control miss surfaces as `request-changes`; copy-tone alone surfaces as `nit-only`; empty findings → `approve`.
+
+**Note on §Examples below:** the JSON output blocks in §Examples 1-N currently use the prior `{verdict, severity, findings[]}` schema and will be migrated to the new shape in a follow-up PR (S-INFRA-AC-5 §Out of scope — Example migration). Treat them as illustrative; the schema-of-record for your output is this §Output format section.
 
 ## §Example invocations (S-6 fixture pattern)
 
