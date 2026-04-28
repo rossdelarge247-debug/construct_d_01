@@ -351,6 +351,21 @@ After `1ef38b3` (round 3 fixes), workflow [`25059852647`](https://github.com/ros
 1. **`edge-case`** — when both jq parses exhaust and `PERSONA_JSON='{}'`, the `verdict / severity / findings` defaults silently fire (`block` / `architectural` / 0 findings) → posts a contradictory `failure` check-run with title *"block — 0 finding(s) [architectural]"* and empty summary; `if: failure()` fallback doesn't cover this because the step still exits 0. **Resolved**: explicit parse-failed sentinel — `if [ "$PERSONA_JSON" = '{}' ]`, set `VERDICT=parse-failed` + custom title *"persona output unparseable — see workflow log"* + `CONCLUSION=neutral`. Raw output still in `::group::` log for diagnosis.
 2. **`regression`** — CLAUDE.md "Invocation conventions" paragraph documented Option C with the OLD non-nonce format `--- BEGIN <path> --- ... --- END <path> ---`; spec 72b + the three persona files in this same diff were updated to the nonce-bound form `--- BEGIN <path> NONCE ---`; future sessions using CLAUDE.md as source would generate non-nonce-bound content, re-opening the prompt-injection vector. **Resolved**: CLAUDE.md L276 updated to nonce-bound form, matches spec 72b verbatim.
 
+### Round 5: persona reviews round-4 fixes — first non-`request-changes` verdict
+
+After `586f167` (round 4 fixes), workflow [`25060308785`](https://github.com/rossdelarge247-debug/construct_d_01/actions/runs/25060308785) ran the slice-reviewer on the round-4 diff. Posted check-run `73412665314` `success` (`nit-only` / `style` / 2 findings). **First convergence-eligible verdict** per CLAUDE.md verdict vocabulary *"`nit-only` — minor findings (style / wording); author may proceed without fixing"*.
+
+**The 2 round-5 findings** (verbatim from check-run summary):
+
+1. **`simplicity`** — `slice_ac` step output unused (no downstream step reads `steps.brief.outputs.slice_ac`); same dead-output pattern as round-3's `nonce`/`diff_lines`. **Resolved** in round-6 commit: removed.
+2. **`simplicity`** — `awk '/^## Coding conduct/,/^## Engineering conventions/' CLAUDE.md` includes the stop-line, so the trailing `## Engineering conventions` header appended to the coding-conduct content fed to the persona. **Resolved** in round-6 commit: piped through `head -n -1` to drop the trailing header line.
+
+Decision against deferring per the verdict-vocabulary contract: both fixes are 1-3 lines + addressing them gives a clean `approve` end state vs `nit-only` defer-eligible. Per the convergence criterion ("iterate until verdict is `approve`/`nit-only` AND remaining findings warrant defer"), addressing nits when fixes are trivial costs less than carrying them as v3c carry-overs.
+
+### Round 6: convergence run (post-nit-cleanup)
+
+After applying both round-5 nits, push triggers round-6 workflow run; expected verdict `approve` (verdict-vocabulary *"no findings; proceed"*) — final entry to be filled at convergence.
+
 ### S-6 final verdict
 
 **`request-changes` → `approve` after fix-up commit.** All architectural and logic findings actioned in fix-up commit (TBD-SHA). Style findings (none in this round) and minor drift items folded into the corresponding criterion exception clauses. Sub-spawn 3 re-spawn pending. Residual-injection disclosed honestly per session-46 lesson "honest gap recording over false approve".

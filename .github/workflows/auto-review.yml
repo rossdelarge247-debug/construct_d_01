@@ -70,7 +70,6 @@ jobs:
               SLICE_AC="docs/slices/$SLICE_FROM_BRANCH/acceptance.md"
             fi
           fi
-          echo "slice_ac=${SLICE_AC:-<none>}" >> "$GITHUB_OUTPUT"
 
           # Compose the prompt envelope per slice-reviewer.md "Per-invocation
           # context" section: persona prompt + nonce + fenced inputs.
@@ -88,7 +87,10 @@ jobs:
               printf '</slice-ac-%s>\n\n' "$NONCE"
             fi
             printf '<coding-conduct-%s>\n' "$NONCE"
-            awk '/^## Coding conduct/,/^## Engineering conventions/' CLAUDE.md
+            # awk range patterns include the stop-line, so pipe through
+            # `head -n -1` to drop the trailing `## Engineering conventions`
+            # header from the coding-conduct fence content (round-5 nit-2).
+            awk '/^## Coding conduct/,/^## Engineering conventions/' CLAUDE.md | head -n -1
             printf '</coding-conduct-%s>\n' "$NONCE"
           } > /tmp/review-brief.txt
 
