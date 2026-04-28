@@ -192,3 +192,27 @@ jobs:
             --arg head_sha "$HEAD_SHA" \
             '{name: $name, head_sha: $head_sha, status: "completed", conclusion: "neutral", output: {title: "Skipped — ANTHROPIC_API_KEY not configured", summary: "Set ANTHROPIC_API_KEY as a repo secret to enable auto-review per docs/slices/S-INFRA-rigour-v3b-subagent-suite/acceptance.md AC-1."}}' \
           | gh api "repos/${{ github.repository }}/check-runs" --method POST --input -
+
+      - name: Post failure-fallback check run (when an earlier step crashed)
+        # `if: failure()` runs only when an earlier step in this job failed
+        # AND the secret was present (so we entered the live-review path).
+        # Mirrors the secret-absent skip path's explicit neutral posting:
+        # ensures the Checks list always gets a slice-reviewer entry even
+        # when the review pipeline crashes (npx unavailable, jq parse
+        # failure, gh api outage, etc.) — author sees a diagnostic neutral
+        # instead of just a failed workflow with no surfaced reason.
+        # Closes the v3b S-6 round-2 #2 finding (edge-case: pipefail
+        # crash → no posted check-run → empty Checks list).
+        if: failure() && steps.secret-check.outputs.skip == 'false'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        run: |
+          set -euo pipefail
+          jq -n \
+            --arg name 'auto-review (slice-reviewer persona)' \
+            --arg head_sha "$HEAD_SHA" \
+            --arg run_url "$RUN_URL" \
+            '{name: $name, head_sha: $head_sha, status: "completed", conclusion: "neutral", output: {title: "Review pipeline crashed — see workflow log", summary: ("auto-review.yml failed before posting a verdict (npx install, claude invocation, jq parse, or gh api). Inspect the workflow log: " + $run_url + " — common causes: API outage, malformed persona output, runner network issue. v3b S-6 round-2 #2 fallback per AC-1 informational gate.")}}' \
+          | gh api "repos/${{ github.repository }}/check-runs" --method POST --input -
