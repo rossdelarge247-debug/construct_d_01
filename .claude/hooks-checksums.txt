@@ -1,11 +1,11 @@
 b591bc2f0e8ea48373808f7bac7efd096d622b0eb51fd6a7735602a030d1df3b  .claude/hooks/exit-plan-review.sh
 9036757a33c172b5883b57368d8cf7e93841ae39dc8466d3edb4538c58c905b6  .claude/hooks/line-count.sh
 25020038fa5a8de3fe6b68920fd5e0c364a08f90fece3f34aeed102471591357  .claude/hooks/pre-commit-verify.sh
-9edbaf304cce062dbcf6e93335229680aaee5ac13770d71ddf1828a7ef804b97  .claude/hooks/pre-push-dod7.sh
+c0f1ab5d9b8dd52f8306c76bb5e4ecebd1d85430e43efd93972e11e4a331ee30  .claude/hooks/pre-push-dod7.sh
 41210f600eb740773085675431729939ce20e0a06ff183d8fc3e874fc0db6f6b  .claude/hooks/read-cap.sh
 8aa9a26f28ae55f46fa4594c7aff27d313654313adb2627a5debf3832f97632a  .claude/hooks/session-start.sh
 672069feda3f1524ef9bf7d1c7f4acc398ba07c8fa34b4094462634cc9cb7814  .claude/hooks/tdd-first-every-commit.sh
-579a1a2da5e078fe9a5434c71c96253df4ec84d1ad7ef4d44c4c27b61dcaa4da  .claude/hooks/tdd-guard.sh
+b28d87fb5cfd1ab79e2ed6f8f13b4e04e7f5d89207464ed0c88907d2474f8692  .claude/hooks/tdd-guard.sh
 bcf4171c97f964e80867d5d41388aef2a59649f58f3494e809fbd61eebf0b44f  .claude/hooks/wrap-check.sh
 8c535fc21a89b74b6dffd110f076dc8b14ec182885035f121ba48dd2e80f4f38  scripts/verify-slice.sh
 3357b92b80da11ef704159543567d104769a889d39cfe4b9acbb012b5c718afa  scripts/eslint-no-disable.sh

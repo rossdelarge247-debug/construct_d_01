@@ -38,8 +38,19 @@ set -uo pipefail
 INPUT=$(cat || true)
 [ -z "$INPUT" ] && exit 0
 
-TOOL_NAME=$(printf '%s' "$INPUT" | jq -r '.tool_name // empty' 2>/dev/null || echo "")
-FILE_PATH=$(printf '%s' "$INPUT" | jq -r '.tool_input.file_path // empty' 2>/dev/null || echo "")
+if ! command -v jq >/dev/null 2>&1; then
+  {
+    echo "BLOCKED: tdd-guard — \`jq\` not on PATH."
+    echo "  This hook parses tool_input via jq; without it the gate is inert."
+    echo "  Install jq (e.g. \`apt install jq\`) or add the affected path to"
+    echo "  docs/tdd-exemption-allowlist.txt (under 'control-change' label)"
+    echo "  if you need to bypass on a host without jq."
+  } >&2
+  exit 2
+fi
+
+TOOL_NAME=$(printf '%s' "$INPUT" | jq -r '.tool_name // empty')
+FILE_PATH=$(printf '%s' "$INPUT" | jq -r '.tool_input.file_path // empty')
 
 # Out-of-band tools: pass through silently.
 case "$TOOL_NAME" in
@@ -137,8 +148,21 @@ if [ -z "${TDD_GUARD_VITEST_CMD:-}" ] && ! command -v npx >/dev/null 2>&1; then
   exit 0
 fi
 
+# Spawn vitest in its own process group so timeout-cleanup can take down
+# the whole tree (vitest spawns node workers that survive a bare `kill`).
+# `setsid` makes the bash parent the session leader of a fresh group;
+# kill -- -PID then signals every process in that group.
+# Fallback to plain background if setsid is missing (BSD systems).
+USE_SETSID=0
+if command -v setsid >/dev/null 2>&1; then
+  USE_SETSID=1
+fi
 # shellcheck disable=SC2086  # word-splitting required: $VITEST_CMD may carry args.
-$VITEST_CMD "$TEST_FILE" >"$TMP_OUT" 2>&1 &
+if [ "$USE_SETSID" -eq 1 ]; then
+  setsid bash -c "$VITEST_CMD \"$TEST_FILE\" >\"$TMP_OUT\" 2>&1" &
+else
+  $VITEST_CMD "$TEST_FILE" >"$TMP_OUT" 2>&1 &
+fi
 VITEST_PID=$!
 
 ELAPSED=0
@@ -151,9 +175,19 @@ while kill -0 "$VITEST_PID" 2>/dev/null; do
     WARNED=1
   fi
   if [ "$ELAPSED" -ge "$TIMEOUT_BUDGET" ]; then
-    kill "$VITEST_PID" 2>/dev/null
-    sleep 1
-    kill -9 "$VITEST_PID" 2>/dev/null || true
+    # Take down the whole process group when setsid was used; otherwise
+    # signal just the child. Negative-PID is "the process group with
+    # this PGID" per kill(2). Catches node workers vitest may have
+    # spawned (per finding #5 from S-5 sub-spawn 1).
+    if [ "$USE_SETSID" -eq 1 ]; then
+      kill -TERM -- "-$VITEST_PID" 2>/dev/null
+      sleep 1
+      kill -KILL -- "-$VITEST_PID" 2>/dev/null || true
+    else
+      kill "$VITEST_PID" 2>/dev/null
+      sleep 1
+      kill -9 "$VITEST_PID" 2>/dev/null || true
+    fi
     {
       echo "BLOCKED: tdd-guard — vitest run for $TEST_FILE timed out after ${TIMEOUT_BUDGET}s."
       echo

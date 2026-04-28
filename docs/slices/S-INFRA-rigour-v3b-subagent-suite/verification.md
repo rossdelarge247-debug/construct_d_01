@@ -148,6 +148,23 @@ Per AC-10 spec 72b §Decision criteria: `wc -l docs/slices/S-INFRA-rigour-v3b-su
 
 **S-5 verdict: `request-changes` (downgraded from `block` after #1/#2 false-positive verification) + 4 deferred re-reviews to follow-up.** Acceptable to ship pending: a follow-up adversarial pass on the unreviewed surfaces (pre-push-dod7.sh + 4 shellspecs + 6 doc files) at PR review time, where reviewer has full file access without the agent read-cap constraint.
 
+### S-5 review-driven fixes (post-initial-commit)
+
+**Re-spawn round 2** dispatched 6 fresh agents with tighter scopes (per spec 72b 4th-option — file-per-spawn). Sub-spawn 1-redux (pre-push-dod7.sh) succeeded and surfaced **2 architectural blockers** plus 4 logic findings. Sub-spawns 2-6 hit the same read-cap structural issue (~298L of system-reminder prelude consumes the budget before file reads). Sub-spawn 1-redux findings actioned in commit:
+
+- **#3 BLOCK (`logic`):** repo regex `[^/.]+/[^/.]+` truncated `org/repo.js` → `org/repo`, breaking gh API for any repo with `.` in name. **Fixed:** regex changed to `[^/[:space:]]+/[^/[:space:]]+$` + post-strip optional `.git` suffix + defensive REPO shape validation. Locked in shellspec at `tests/shellspec/pre-push-dod7.spec.sh` §"finding-#3 (S-5 review): repo regex permits `.` in repo name".
+- **#7 BLOCK (`architectural`):** any `gh api` failure (rate-limit / 5xx / network blip / expired auth) → empty RAW → block every push. Worst-case: GitHub incident → no one can push. **Fixed:** distinguish gh-exit-non-zero (API unreachable → warn-pass with explanatory stderr) from gh-exit-zero-with-empty-body (real anomaly → block). Stderr captured separately to a tmpfile; no longer pollutes JSON parsing. Locked in shellspec §"finding-#7 (S-5 review): gh API failure → warn-pass not block".
+- **#1 (`logic`):** jq missing → silent pass. **Fixed:** explicit `command -v jq` precondition + BLOCKED message + exit 2. Same fix applied to tdd-guard.sh (which had the same pattern). Locked in shellspec §"finding (S-5 review): jq-missing → fail-loud".
+- **#5 (`logic`):** push regex over-matched `git push --dry-run` and under-handled `git push -d` / `git push origin :foo`. **Fixed:** added explicit pass-through cases for `--dry-run` / `-d` / `--delete` / colon-prefix refspec. Locked in shellspec §"finding-#5 (S-5 review): out-of-scope push variants pass-through" (3 fixtures).
+- **#11 (`style`):** PRIOR_MSG / HEAD_MSG echoed verbatim → terminal escape sequences in commit subjects render in user's terminal. **Fixed:** wrapped in `printf '%q'` for both BLOCKED message bodies. Author-controlled but worth defending against pasted/imported commits.
+- **Bonus tdd-guard fix (S-5 sub-spawn 1 finding #5 from initial review):** `kill -9 $PID` left orphan node child processes vitest spawned. **Fixed:** `setsid`-spawn vitest into its own process group; timeout cleanup uses `kill -TERM -- -PGID` then `kill -KILL -- -PGID` to take down the whole tree. Locked in shellspec §"finding (S-5 review): timeout takes down whole process group" with sentinel-child-pid assertion.
+
+Hooks-checksums re-baselined to 17 entries (pre-push-dod7.sh + tdd-guard.sh hashes both changed). All dryruns re-verified pre-commit.
+
+**Sub-spawns 2-6 (test surface + doc surface) remain deferred** — captured definitively as v3c carry-over: `docs/workspace-spec/72b-adversarial-review-budget.md` should add an Option C (pre-load file content inline in subagent prompt; bypasses Read tool entirely). Reviewer at PR-time inherits this gap; encouraged to do the deferred reviews with full file access.
+
+**S-5 final verdict: `request-changes` → `approve-with-deferred-review`** (sub-spawn-1 blockers resolved; remaining surfaces honestly deferred to PR-time review with explicit gap documentation).
+
 ## Sign-off
 
 Per slice-wrap PR (S-3 close — last AC of v3b ships, OR explicit early-ship of S-3 only).

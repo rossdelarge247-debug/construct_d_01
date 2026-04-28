@@ -30,10 +30,34 @@ set -uo pipefail
 INPUT=$(cat || true)
 [ -z "$INPUT" ] && exit 0
 
-COMMAND=$(printf '%s' "$INPUT" | jq -r '.tool_input.command // empty' 2>/dev/null || echo "")
+if ! command -v jq >/dev/null 2>&1; then
+  {
+    echo "BLOCKED: pre-push-dod7 — \`jq\` not on PATH."
+    echo "  This hook parses tool_input via jq; without it the gate is inert."
+    echo "  Install jq (e.g. \`apt install jq\`) or set DOD7_OVERRIDE=1 for"
+    echo "  an audited bypass (record reason in slice verification.md)."
+  } >&2
+  exit 2
+fi
 
-# (a) Match `git push` precisely.
+COMMAND=$(printf '%s' "$INPUT" | jq -r '.tool_input.command // empty')
+
+# (a) Match `git push` precisely AND skip out-of-scope variants:
+#   --dry-run        — no commits move; gating pointless
+#   -d / --delete    — branch-deletion push; no impl racing
+#   :branch (force-empty src) — same as --delete
 if ! [[ "$COMMAND" =~ (^|[[:space:]])git[[:space:]]+push($|[[:space:]]) ]]; then
+  exit 0
+fi
+if [[ "$COMMAND" =~ (^|[[:space:]])--dry-run($|[[:space:]]) ]]; then
+  exit 0
+fi
+if [[ "$COMMAND" =~ (^|[[:space:]])(-d|--delete)($|[[:space:]]) ]]; then
+  exit 0
+fi
+# `git push origin :foo` — colon-prefixed refspec is a delete in pre-receive
+# parlance. `:foo` or `+:foo` patterns.
+if [[ "$COMMAND" =~ [[:space:]]\+?:[A-Za-z0-9_/.-]+($|[[:space:]]) ]]; then
   exit 0
 fi
 
@@ -79,47 +103,68 @@ if [ "$GH_CMD" = "gh" ] && ! command -v gh >/dev/null 2>&1; then
 fi
 
 # Query check-runs for the prior commit. Repo derived from origin remote.
+# Regex permits `.` in repo names (org/repo.js) and strips optional .git suffix.
 REMOTE_URL=$(git config --get remote.origin.url 2>/dev/null || echo "")
-REPO=$(printf '%s' "$REMOTE_URL" | sed -E 's#.*github\.com[:/]([^/]+/[^/.]+)(\.git)?#\1#')
+REPO=$(printf '%s' "$REMOTE_URL" | sed -E 's#.*github\.com[:/]([^/[:space:]]+/[^/[:space:]]+)$#\1#; s#\.git$##')
 if [ -z "$REPO" ] || [ "$REPO" = "$REMOTE_URL" ]; then
   echo "pre-push-dod7: could not parse owner/repo from remote ($REMOTE_URL); pass-through." >&2
   exit 0
 fi
+# Defensive validation: REPO must be `owner/repo` shape with safe chars only.
+if ! [[ "$REPO" =~ ^[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+$ ]]; then
+  echo "pre-push-dod7: REPO ($REPO) failed shape validation; pass-through." >&2
+  exit 0
+fi
 
 # `gh api repos/{repo}/commits/{sha}/check-runs` returns {"total_count":N,"check_runs":[...]}.
-# (d.iii) blocks when:
-#   - total_count == 0 (no run yet) OR
-#   - any run is in-progress / queued (not yet completed).
-RAW=$($GH_CMD api "repos/${REPO}/commits/${PRIOR_SHA}/check-runs" 2>/dev/null || echo "")
+# Distinguish three outcomes per finding #7:
+#   GH_RC=0           — API succeeded; parse JSON to decide block vs pass.
+#   GH_RC=non-zero    — API unreachable (network / rate-limit / auth) → warn-pass.
+#   gh missing on PATH — already handled above as warn-pass.
+# This keeps the gate from blocking every push during a GitHub incident.
+GH_STDERR=$(mktemp -t pre-push-dod7-gh-stderr.XXXXXX)
+if RAW=$($GH_CMD api "repos/${REPO}/commits/${PRIOR_SHA}/check-runs" 2>"$GH_STDERR"); then
+  GH_RC=0
+else
+  GH_RC=$?
+fi
+GH_ERR=$(cat "$GH_STDERR" 2>/dev/null || echo "")
+rm -f "$GH_STDERR"
+if [ "$GH_RC" -ne 0 ]; then
+  {
+    echo "pre-push-dod7: \`gh api\` failed (rc=$GH_RC) — API unreachable / rate-limited / auth expired."
+    echo "  Could not verify CI state for $PRIOR_SHA. Pass-through (warn) per finding-#7 fix:"
+    echo "  network failure should not block pushes during a GitHub incident."
+    echo "  If you intended to gate on CI state, fix gh auth + retry, or set DOD7_OVERRIDE=1."
+  } >&2
+  exit 0
+fi
 if [ -z "$RAW" ]; then
   {
-    echo "BLOCKED: pre-push-dod7 — could not retrieve check-runs for prior RED commit."
+    echo "BLOCKED: pre-push-dod7 — gh succeeded but returned empty body for prior RED commit."
     echo
     echo "  Prior commit: $PRIOR_SHA"
-    echo "  Prior msg:    $PRIOR_MSG"
+    echo "  Prior msg:    $(printf '%q' "$PRIOR_MSG")"
     echo
-    echo "  Per AC-7 (v3b): RED commit must be CI-observed-failing before"
-    echo "  the candidate GREEN commit ships. Without check-runs data, we"
-    echo "  cannot verify that condition."
+    echo "  This shouldn't happen on a healthy API. Investigate before pushing."
     echo
     echo "Actionable alternatives:"
     echo "  - Wait for CI to start on the prior commit, then re-run push."
-    echo "  - Set DOD7_OVERRIDE=1 + record reasoning in slice verification.md"
-    echo "    (e.g. CI hasn't fired due to known infra issue)."
+    echo "  - Set DOD7_OVERRIDE=1 + record reasoning in slice verification.md."
   } >&2
   exit 2
 fi
 
-TOTAL=$(printf '%s' "$RAW" | jq -r '.total_count // 0' 2>/dev/null || echo 0)
-PENDING=$(printf '%s' "$RAW" | jq -r '[.check_runs[]? | select(.status != "completed")] | length' 2>/dev/null || echo 0)
+TOTAL=$(printf '%s' "$RAW" | jq -r '.total_count // 0')
+PENDING=$(printf '%s' "$RAW" | jq -r '[.check_runs[]? | select(.status != "completed")] | length')
 
 if [ "$TOTAL" -eq 0 ] || [ "$PENDING" -gt 0 ]; then
   {
     echo "BLOCKED: pre-push-dod7 — prior RED commit's CI has not yet observed RED state."
     echo
     echo "  Prior commit: $PRIOR_SHA"
-    echo "  Prior msg:    $PRIOR_MSG"
-    echo "  HEAD msg:     $HEAD_MSG"
+    echo "  Prior msg:    $(printf '%q' "$PRIOR_MSG")"
+    echo "  HEAD msg:     $(printf '%q' "$HEAD_MSG")"
     echo "  CI total runs: $TOTAL"
     echo "  CI pending:    $PENDING (status != completed)"
     echo

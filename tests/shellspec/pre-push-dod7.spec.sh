@@ -167,4 +167,68 @@ EOF
       The status should be success
     End
   End
+
+  Describe 'finding-#5 (S-5 review): out-of-scope push variants pass-through'
+    It 'exits 0 for `git push --dry-run`'
+      cd "$SPEC_TMP" || return 1
+      make_commit "RED: meta-tests"
+      make_commit "feat: impl"
+      INPUT='{"tool_input":{"command":"git push --dry-run origin HEAD"}}'
+      When call bash "$HOOK" <<<"$INPUT"
+      The status should be success
+    End
+
+    It 'exits 0 for `git push -d origin foo` (branch delete)'
+      cd "$SPEC_TMP" || return 1
+      make_commit "RED: meta-tests"
+      make_commit "feat: impl"
+      INPUT='{"tool_input":{"command":"git push -d origin foo"}}'
+      When call bash "$HOOK" <<<"$INPUT"
+      The status should be success
+    End
+
+    It 'exits 0 for `git push origin :foo` (colon-prefix delete)'
+      cd "$SPEC_TMP" || return 1
+      make_commit "RED: meta-tests"
+      make_commit "feat: impl"
+      INPUT='{"tool_input":{"command":"git push origin :foo"}}'
+      When call bash "$HOOK" <<<"$INPUT"
+      The status should be success
+    End
+  End
+
+  Describe 'finding-#3 (S-5 review): repo regex permits `.` in repo name'
+    It 'parses `org/repo.js.git` correctly (gh stub invoked, completed → pass)'
+      cd "$SPEC_TMP" || return 1
+      git remote remove origin
+      git remote add origin https://github.com/test-owner/test-repo.js.git
+      make_commit "RED: meta-tests"
+      make_commit "feat: impl"
+      make_gh_stub "$SPEC_TMP/gh-stub.sh" '{"total_count":1,"check_runs":[{"status":"completed","conclusion":"failure"}]}'
+      INPUT='{"tool_input":{"command":"git push origin HEAD"}}'
+      When call env DOD7_GH_CMD="$SPEC_TMP/gh-stub.sh" \
+        bash "$HOOK" <<<"$INPUT"
+      The status should be success
+    End
+  End
+
+  Describe 'finding-#7 (S-5 review): gh API failure → warn-pass not block'
+    It 'exits 0 with warn message when gh stub exits non-zero'
+      cd "$SPEC_TMP" || return 1
+      make_commit "RED: meta-tests"
+      make_commit "feat: impl"
+      cat > "$SPEC_TMP/gh-fail.sh" <<'EOF'
+#!/bin/bash
+echo "API rate-limited" >&2
+exit 4
+EOF
+      chmod +x "$SPEC_TMP/gh-fail.sh"
+      INPUT='{"tool_input":{"command":"git push origin HEAD"}}'
+      When call env DOD7_GH_CMD="$SPEC_TMP/gh-fail.sh" \
+        bash "$HOOK" <<<"$INPUT"
+      The status should be success
+      The stderr should include 'gh api` failed (rc=4)'
+      The stderr should include 'Pass-through (warn)'
+    End
+  End
 End
