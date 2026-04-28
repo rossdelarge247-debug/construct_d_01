@@ -70,8 +70,11 @@ EOF
       # CI returns 1 run, status=in_progress → pending=1 → block.
       make_gh_stub "$SPEC_TMP/gh-stub.sh" '{"total_count":1,"check_runs":[{"status":"in_progress","conclusion":null}]}'
       INPUT='{"tool_input":{"command":"git push origin HEAD"}}'
+      Data:expand
+        #|$INPUT
+      End
       When call env DOD7_GH_CMD="$SPEC_TMP/gh-stub.sh" \
-        bash "$HOOK" <<<"$INPUT"
+        bash "$HOOK"
       The status should equal 2
       The stderr should include 'BLOCKED: pre-push-dod7'
       The stderr should include 'CI has not yet observed RED state'
@@ -84,8 +87,11 @@ EOF
       make_commit "feat: implement bar"
       make_gh_stub "$SPEC_TMP/gh-stub.sh" '{"total_count":0,"check_runs":[]}'
       INPUT='{"tool_input":{"command":"git push -u origin HEAD"}}'
+      Data:expand
+        #|$INPUT
+      End
       When call env DOD7_GH_CMD="$SPEC_TMP/gh-stub.sh" \
-        bash "$HOOK" <<<"$INPUT"
+        bash "$HOOK"
       The status should equal 2
       The stderr should include 'CI total runs: 0'
     End
@@ -99,8 +105,11 @@ EOF
       # Stub would BLOCK (in-progress) if invoked — proves short-circuit.
       make_gh_stub "$SPEC_TMP/gh-stub.sh" '{"total_count":0,"check_runs":[]}'
       INPUT='{"tool_input":{"command":"git push origin HEAD"}}'
+      Data:expand
+        #|$INPUT
+      End
       When call env DOD7_GH_CMD="$SPEC_TMP/gh-stub.sh" \
-        bash "$HOOK" <<<"$INPUT"
+        bash "$HOOK"
       The status should be success
     End
   End
@@ -112,8 +121,11 @@ EOF
       make_commit "feat: implement foo logic"
       make_gh_stub "$SPEC_TMP/gh-stub.sh" '{"total_count":0,"check_runs":[]}'
       INPUT='{"tool_input":{"command":"git push origin HEAD"}}'
+      Data:expand
+        #|$INPUT
+      End
       When call env DOD7_GH_CMD="$SPEC_TMP/gh-stub.sh" \
-        bash "$HOOK" <<<"$INPUT"
+        bash "$HOOK"
       The status should be success
     End
 
@@ -124,8 +136,11 @@ EOF
       # 1 run, status=completed, conclusion=failure (the expected RED).
       make_gh_stub "$SPEC_TMP/gh-stub.sh" '{"total_count":1,"check_runs":[{"status":"completed","conclusion":"failure"}]}'
       INPUT='{"tool_input":{"command":"git push origin HEAD"}}'
+      Data:expand
+        #|$INPUT
+      End
       When call env DOD7_GH_CMD="$SPEC_TMP/gh-stub.sh" \
-        bash "$HOOK" <<<"$INPUT"
+        bash "$HOOK"
       The status should be success
     End
   End
@@ -136,8 +151,11 @@ EOF
       make_commit "RED: meta-tests for foo"
       make_commit "feat: implement foo"
       INPUT='{"tool_input":{"command":"git push origin HEAD"}}'
+      Data:expand
+        #|$INPUT
+      End
       When call env DOD7_OVERRIDE=1 \
-        bash "$HOOK" <<<"$INPUT"
+        bash "$HOOK"
       The status should be success
       The stderr should include 'DOD7_OVERRIDE=1 set'
       The stderr should include 'Record the reason'
@@ -147,13 +165,19 @@ EOF
   Describe 'out-of-scope: non-push Bash commands pass through silently'
     It 'exits 0 for git commit'
       INPUT='{"tool_input":{"command":"git commit -m foo"}}'
-      When call bash "$HOOK" <<<"$INPUT"
+      Data:expand
+        #|$INPUT
+      End
+      When call bash "$HOOK"
       The status should be success
     End
 
     It 'exits 0 for unrelated bash commands'
       INPUT='{"tool_input":{"command":"ls -la"}}'
-      When call bash "$HOOK" <<<"$INPUT"
+      Data:expand
+        #|$INPUT
+      End
+      When call bash "$HOOK"
       The status should be success
     End
   End
@@ -163,7 +187,10 @@ EOF
       cd "$SPEC_TMP" || return 1
       make_commit "RED: meta-tests for foo"
       INPUT='{"tool_input":{"command":"git push -u origin HEAD"}}'
-      When call bash "$HOOK" <<<"$INPUT"
+      Data:expand
+        #|$INPUT
+      End
+      When call bash "$HOOK"
       The status should be success
     End
   End
@@ -174,7 +201,10 @@ EOF
       make_commit "RED: meta-tests"
       make_commit "feat: impl"
       INPUT='{"tool_input":{"command":"git push --dry-run origin HEAD"}}'
-      When call bash "$HOOK" <<<"$INPUT"
+      Data:expand
+        #|$INPUT
+      End
+      When call bash "$HOOK"
       The status should be success
     End
 
@@ -183,7 +213,10 @@ EOF
       make_commit "RED: meta-tests"
       make_commit "feat: impl"
       INPUT='{"tool_input":{"command":"git push -d origin foo"}}'
-      When call bash "$HOOK" <<<"$INPUT"
+      Data:expand
+        #|$INPUT
+      End
+      When call bash "$HOOK"
       The status should be success
     End
 
@@ -192,7 +225,10 @@ EOF
       make_commit "RED: meta-tests"
       make_commit "feat: impl"
       INPUT='{"tool_input":{"command":"git push origin :foo"}}'
-      When call bash "$HOOK" <<<"$INPUT"
+      Data:expand
+        #|$INPUT
+      End
+      When call bash "$HOOK"
       The status should be success
     End
   End
@@ -206,8 +242,11 @@ EOF
       make_commit "feat: impl"
       make_gh_stub "$SPEC_TMP/gh-stub.sh" '{"total_count":1,"check_runs":[{"status":"completed","conclusion":"failure"}]}'
       INPUT='{"tool_input":{"command":"git push origin HEAD"}}'
+      Data:expand
+        #|$INPUT
+      End
       When call env DOD7_GH_CMD="$SPEC_TMP/gh-stub.sh" \
-        bash "$HOOK" <<<"$INPUT"
+        bash "$HOOK"
       The status should be success
     End
   End
@@ -224,8 +263,11 @@ exit 4
 EOF
       chmod +x "$SPEC_TMP/gh-fail.sh"
       INPUT='{"tool_input":{"command":"git push origin HEAD"}}'
+      Data:expand
+        #|$INPUT
+      End
       When call env DOD7_GH_CMD="$SPEC_TMP/gh-fail.sh" \
-        bash "$HOOK" <<<"$INPUT"
+        bash "$HOOK"
       The status should be success
       The stderr should include 'gh api` failed (rc=4)'
       The stderr should include 'Pass-through (warn)'

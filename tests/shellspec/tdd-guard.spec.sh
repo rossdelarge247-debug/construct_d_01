@@ -50,6 +50,12 @@ EOF
     chmod +x "$1"
   }
 
+  # Per ShellSpec docs: stdin to `When call CMD` cannot be passed via
+  # `<<<"$VAR"` — that redirect attaches to ShellSpec's interpreter,
+  # not to the called command. Use `Data` (literal) or `Data:expand`
+  # (variable-interpolating) blocks. Using Data:expand throughout for
+  # variable-driven INPUT.
+
   Describe 'fixture (1) — green-path passes through'
     It 'exits 0 silently when vitest stub returns success'
       cd "$SPEC_TMP" || return 1
@@ -57,9 +63,12 @@ EOF
       : > tests/unit/lib/foo.test.ts
       make_stub "$SPEC_TMP/vitest-stub.sh" 0
       INPUT='{"tool_name":"Edit","tool_input":{"file_path":"src/lib/foo.ts"}}'
+      Data:expand
+        #|$INPUT
+      End
       When call env TDD_GUARD_VITEST_CMD="$SPEC_TMP/vitest-stub.sh" \
         TDD_GUARD_TIMEOUT=10 TDD_GUARD_WARN_AT=5 \
-        bash "$HOOK" <<<"$INPUT"
+        bash "$HOOK"
       The status should be success
     End
   End
@@ -71,9 +80,12 @@ EOF
       : > tests/unit/lib/foo.test.ts
       make_stub "$SPEC_TMP/vitest-stub.sh" 1
       INPUT='{"tool_name":"Edit","tool_input":{"file_path":"src/lib/foo.ts"}}'
+      Data:expand
+        #|$INPUT
+      End
       When call env TDD_GUARD_VITEST_CMD="$SPEC_TMP/vitest-stub.sh" \
         TDD_GUARD_TIMEOUT=10 TDD_GUARD_WARN_AT=5 \
-        bash "$HOOK" <<<"$INPUT"
+        bash "$HOOK"
       The status should equal 2
       The stderr should include 'BLOCKED: tdd-guard'
       The stderr should include 'RED test for src/lib/foo.ts'
@@ -86,13 +98,16 @@ EOF
       cd "$SPEC_TMP" || return 1
       : > src/lib/legacy.ts
       # Tagged glob (per v3b AC-8 rubric): "category:glob".
-      echo "tagged-pure-visual-ui:src/lib/legacy.ts" > docs/tdd-exemption-allowlist.txt
+      echo "pure-visual-ui:src/lib/legacy.ts" > docs/tdd-exemption-allowlist.txt
       # Stub that would FAIL if invoked — proves allowlist short-circuits.
       make_stub "$SPEC_TMP/vitest-stub.sh" 1
       INPUT='{"tool_name":"Edit","tool_input":{"file_path":"src/lib/legacy.ts"}}'
+      Data:expand
+        #|$INPUT
+      End
       When call env TDD_GUARD_VITEST_CMD="$SPEC_TMP/vitest-stub.sh" \
         TDD_GUARD_TIMEOUT=10 TDD_GUARD_WARN_AT=5 \
-        bash "$HOOK" <<<"$INPUT"
+        bash "$HOOK"
       The status should be success
     End
   End
@@ -103,9 +118,12 @@ EOF
       : > src/lib/orphan.ts
       # No tests/unit/lib/orphan.test.ts.
       INPUT='{"tool_name":"Write","tool_input":{"file_path":"src/lib/orphan.ts"}}'
+      Data:expand
+        #|$INPUT
+      End
       When call env TDD_GUARD_VITEST_CMD=/bin/false \
         TDD_GUARD_TIMEOUT=10 TDD_GUARD_WARN_AT=5 \
-        bash "$HOOK" <<<"$INPUT"
+        bash "$HOOK"
       The status should equal 2
       The stderr should include 'test file missing'
       The stderr should include 'tests/unit/lib/orphan.test.ts'
@@ -121,9 +139,12 @@ EOF
       make_hang_stub "$SPEC_TMP/vitest-hang.sh"
       # 2s budget, 1s warn. Spec resolves in ~3s wall time.
       INPUT='{"tool_name":"Edit","tool_input":{"file_path":"src/lib/slow.ts"}}'
+      Data:expand
+        #|$INPUT
+      End
       When call env TDD_GUARD_VITEST_CMD="$SPEC_TMP/vitest-hang.sh" \
         TDD_GUARD_TIMEOUT=2 TDD_GUARD_WARN_AT=1 \
-        bash "$HOOK" <<<"$INPUT"
+        bash "$HOOK"
       The status should equal 2
       The stderr should include 'timed out after 2s'
       The stderr should include 'BLOCKED: tdd-guard'
@@ -134,14 +155,20 @@ EOF
     It 'exits 0 for docs/ paths regardless of test-file presence'
       cd "$SPEC_TMP" || return 1
       INPUT='{"tool_name":"Edit","tool_input":{"file_path":"docs/anything.md"}}'
-      When call bash "$HOOK" <<<"$INPUT"
+      Data:expand
+        #|$INPUT
+      End
+      When call bash "$HOOK"
       The status should be success
     End
 
     It 'exits 0 for non-Write/Edit tool calls'
       cd "$SPEC_TMP" || return 1
       INPUT='{"tool_name":"Bash","tool_input":{"command":"ls"}}'
-      When call bash "$HOOK" <<<"$INPUT"
+      Data:expand
+        #|$INPUT
+      End
+      When call bash "$HOOK"
       The status should be success
     End
   End

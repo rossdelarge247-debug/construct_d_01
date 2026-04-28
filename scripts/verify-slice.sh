@@ -153,7 +153,7 @@ ALLOWLIST_FILE="docs/tdd-exemption-allowlist.txt"
 if [ -f "$ALLOWLIST_FILE" ]; then
   ALLOWED_CATEGORIES='pure-visual-ui|pure-rename|pure-config'
   bad_entries=()
-  while IFS= read -r line; do
+  while IFS= read -r line || [ -n "$line" ]; do
     line="${line%%#*}"
     line="${line#"${line%%[![:space:]]*}"}"
     line="${line%"${line##*[![:space:]]}"}"
