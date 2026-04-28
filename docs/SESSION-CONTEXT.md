@@ -1,4 +1,4 @@
-# Session 43 Wrap Context Block (heading into session 44)
+# Session 45 Wrap Context Block (heading into session 46)
 
 ## Product positioning (preserve across sessions)
 
@@ -22,7 +22,9 @@ Next.js 16.2, React 19, TypeScript, Tailwind 4, Supabase, Claude AI, Vercel Pro.
 - **Session 40:** Session-38 budget closed — S-38-2 RED (`31be543`) + S-38-1 GREEN (`e45152b`) for verify-slice.sh full-mode impl; S-38-4 (`95481e5`) for vitest coverage config + lcov parser (AC-6); S-38-3 RED (`9862158`) + GREEN (`2c676d0`) for `tdd-first-every-commit.sh` (AC-5). 8/8 ACs PASS in `verification.md`; PR #24 DoD-11-form refresh; DoD-3 procedural `request-changes` verdict (read-cap hit); DoD-7 temporal-gap surfaced as `PASS-with-DoD-7-gap` honestly. PR remained DRAFT pending merge-path decision.
 - **Session 41:** PR #24 merged on `2026-04-27T19:23:07Z`. v3b S-1 (`25dc85f` + `6a488e8` + `d2da7e7`): one-time deliberate Tier-4 archive pass → `audit-findings.md` (130L; full inventory) → `acceptance.md` redrafted top-down to 15 ACs grouped A-E. Branch: `claude/audit-v3b-pr24-merge-YUwug`.
 - **Session 42:** v3b S-2 (`b94cddf`). `/security-review` zero findings. `/review` 17 findings; 7 logic-severity. User accepted all 5 recommended defaults for load-bearing logic findings (R-4 timeout, R-5 regex, R-6 line-count source, R-7 N threshold, R-8 coverage threshold raised to ≥90% to match v3a). 11 in-scope findings addressed; 2 deferred; 4 approved unchanged. Verdict `request-changes` → `approve`. AC table frozen at b94cddf.
-- **Session 43 (this wrap):** v3b S-3 (AC-14 `@vitest/coverage-v8` activation) — first impl commit of v3b. Branch reconciliation Option B: harness landed on orphan `claude/activate-vitest-coverage-v8-uIaBF` (just origin/main); user authorised pivot to canonical `claude/audit-v3b-pr24-merge-YUwug` to continue v3b lineage. RED `6b61073` (vitest wiring assertions: package.json devDep + ci.yml --coverage) — RED state CI-observed-failing on PR #25 first run (job `73279289462`) before GREEN pushed (H6 manual temporal-ordering satisfied). GREEN `09e1de5` (deps + vitest.config + ci.yml --coverage + upload-artifact + verify-slice.sh comment + threshold removal per AC-14 L109 OOS clause). Follow-up `2f4c6d2`: hooks-checksums re-baseline + verification.md scaffold (15-AC table; AC-14 PASS row; remaining 14 PENDING). PR #25 opened as draft with `control-change` label per L199 self-protection on vitest.config.ts + verify-slice.sh edits. Adversarial review verdict `approve` (8 findings; 2 nit-only carry-overs; 0 architectural). AC-14 ships; 1/15 v3b ACs landed.
+- **Session 43:** v3b S-3 (AC-14 `@vitest/coverage-v8` activation) — first impl commit of v3b. PR #25 opened + merged. AC-14 ships; 1/15 v3b ACs landed.
+- **Session 44:** v3b S-4 (AC-12 `line-count.sh` re-baseline structural fix). PR #26 opened + merged with `control-change` label. AC-12 ships; 2/15 v3b ACs landed.
+- **Session 45 (this wrap):** v3b S-5 (10 ACs in one PR — AC-4/5/6/7/8/9/10/11/13 + AC-14 attribution fix). User pushed back on one-AC-per-session muscle memory; honest re-examination showed line-count budget + branch hygiene + adversarial review allow batching. Three commits on `claude/land-pr26-v3b-s5-5hFoW`: `b0148a0` (docs/rubrics) + `6f30870` (hooks/gates/meta-tests) + `e866240` (adversarial review evidence + line-citation fixes). 1204L additions / 33 deletions across 21 files. 8 new files: 2 hooks (`tdd-guard.sh` · `pre-push-dod7.sh`), 4 shellspec files (24+ examples; all dry-run-verified pre-commit), 4 lcov fixtures, 2 spec docs (`72a-preview-deploy-rubric.md` · `72b-adversarial-review-budget.md`). Adversarial review per spec 72b Option B (3 sub-spawns); sub-spawn 1 emitted 12 findings (#1+#2 verified false positives — bash `case` glob matches `src/lib/foo.ts` correctly; #3-#11 v3c improvements); sub-spawns 2+3 read-cap-blocked (captured as v3c carry-over: spec 72b should add 4th option = pre-load files inline in agent prompt for ~900L+ diffs). PR #27 opened as draft with `control-change` label required. **v3b 12/15.**
 
 ## Current state
 
@@ -67,30 +69,37 @@ CLAUDE.md §{Planning conduct, Coding conduct, Engineering conventions, Hard con
 
 **Ghost: `claude/security-review-v3b-Cb8KB`** — 4 cherry-pick commits identical to v3b S-1 (session 42 reconciliation; abandoned per pivot to canonical). Safe to delete on origin.
 
-## Session 44 priorities
+## Session 46 priorities
 
-> **Numbering:** session 41 = v3b S-1 (audit + acceptance.md redraft). Session 42 = v3b S-2 (reviews + 11 findings addressed; AC table frozen). Session 43 = v3b S-3 (AC-14 `@vitest/coverage-v8` activation; PR #25 opened with `control-change` label). Session 44 = v3b S-4 onwards (next ACs in group order; AC-12 priority-bumped per kickoff §P2).
+> **Numbering:** session 41 v3b S-1 (audit + AC redraft) · session 42 v3b S-2 (reviews + findings) · session 43 v3b S-3 (AC-14 vitest coverage; PR #25 merged) · session 44 v3b S-4 (AC-12 line-count re-baseline; PR #26 merged) · session 45 v3b S-5 (10 ACs; PR #27 draft pending merge). Session 46 = v3b S-6 (persona suite + AC-15 protocol).
 
-### P0 — Merge PR #25 (v3b S-3) when control-change-label CI re-run + your review complete
+### P0 — Merge PR #27 (v3b S-5) when control-change-label applied + your review complete
 
-PR #25 opened as draft with `control-change` label applied (admin-restricted; you authorised at session-43 wrap). Once the labeled-event re-runs the control-change-label workflow + you approve the diff, the PR is mergeable. AC-14 acceptance: PASS (4 wiring artefacts + 1 meta-test; CI run [`25020431032`/job `73279289462`](https://github.com/rossdelarge247-debug/construct_d_01/actions/runs/25020431032/job/73279289462) → `failure` on RED, then `success` post-GREEN). Adversarial review verdict `approve` (8 findings; 2 nit-only carry-overs).
+PR #27 opened as draft with `control-change` label required (touches `.claude/hooks/{tdd-guard,pre-push-dod7}.sh`, `.claude/settings.json`, `.claude/hooks-checksums.txt`, `scripts/verify-slice.sh`, `.github/workflows/control-change-label.yml`, `docs/eslint-baseline-allowlist.txt` transitively). Adversarial review per spec 72b Option B verdict: `request-changes` (downgraded from `block` after #1/#2 false-positive verification) + 4 deferred re-reviews to PR-time review where reviewer has full file access without read-cap.
 
-After merge: branch `claude/audit-v3b-pr24-merge-YUwug` retired or used as base for S-4. Decision deferred to session 44 kickoff.
+**PR-time reviewer should re-do sub-spawns 2 + 3** (test surface + doc surface) — they were blocked by the 300L per-turn read-cap during S-5 ship. Expected re-review surfaces: 4 shellspec files (540L total) + 6 doc files. After PR review + label, merge.
 
-### P1 — v3b S-4: AC-12 (line-count.sh re-baseline structural fix)
+### P1 — v3b S-6: persona suite (AC-1 + AC-2 + AC-3 paired ship)
 
-**Priority bumped** per session-43 P2 kickoff after fifth+sixth evidence points (session 43 hit it twice: once at the harness-orphan resync, once would-have at the GREEN base-file logic). Per `acceptance.md` AC-12 (R-7 resolution): N=200 cumulative `git diff --shortstat` insertions+deletions threshold; once-per-hop semantics — every checkout-to-different-branch SHA triggers rebaseline; same-branch reset does not. RED-tests-first per H6 pattern; **AC-7 pre-push gate is NOT yet shipped** so manual H6 discipline still required at S-4 (push RED + observe CI failing before pushing GREEN). After AC-12 lands, the manual `/tmp/claude-base-*.txt` workaround retires.
+Three remaining ACs in v3b are all "new persona file" surfaces:
+- **AC-1** — `slice-reviewer.md` persona + auto-on-PR-open CI gate (`.github/workflows/auto-review.yml` runs `claude -p` on `pull_request:opened/synchronize`).
+- **AC-2** — `acceptance-gate.md` persona (slice-completion-time AC pass/fail-with-narrative judgment).
+- **AC-3** — `ux-polish-reviewer.md` persona (dormant at v3b ship; active from S-F1 onwards).
 
-### P1 — v3b S-5..S-N: remaining 13 ACs by group order
+These pair because they all land in `.claude/agents/` (the location AC-5 just defined) and share the persona-file format. Better as one focused PR than three sequential PRs. AC-1's CI gate is the only one with a runtime surface; AC-2/AC-3 are persona files + invocation conventions in CLAUDE.md.
 
-Group A personas (AC-1..5: `slice-reviewer`, `acceptance-gate`, `ux-polish-reviewer`, retain/drop metric, `.claude/agents/` vs `subagent-prompts/` reconciliation) → group B hooks (AC-6 `tdd-guard`, **AC-7 pre-push DoD-7 gate** — closes H6 procedural gap) → group C doc/convention (AC-8 TDD bail-out rubric, AC-9 preview-deploy checklist, AC-10 adversarial-review budget) → remaining group D (AC-11 L199 amendment — three protected-path omissions, AC-13 lcov parser meta-test) → group E (AC-15 plan-review default-spawn flip after measurement).
+Pre-flight scope check per spec 72b: read AC-1/AC-2/AC-3 verbatim before planning; AC-1 specifically claims "Persona file `.claude/agents/slice-reviewer.md` exists + is integrity-protected via `hooks-checksums.txt`" — so AC-1 ships with hooks-checksums re-baseline. Plan branch as `claude/v3b-S-6-persona-suite-<5char>`.
+
+### P1 — v3b S-7: AC-15 plan-review default-spawn flip
+
+After persona suite ships + first 3 src/ slices ship (S-F1 onwards), AC-15 flips the `EXIT_PLAN_REVIEW_SPAWN=1` gate to default-on. Out of scope until measurement protocol per AC-4 retain/drop has data — defer to v3c.
 
 ### P2 — surface housekeeping
 
-- **AC-14 doc-attribution carry-over** (per session-43 adversarial-review A-1 + A-2): `acceptance.md:108` cites "spec 72 F6" but spec 72 has zero F6/coverage references; F6 is a v3a-internal label. v3a `acceptance.md` L51 specifies `coverage.thresholds.lines: 90` literally; v3b S-3 GREEN removed the global threshold per AC-14 L109 OOS clause but didn't amend v3a's text. Carry-over: amend AC-14 attribution to v3a `acceptance.md` L51/L178 in v3b S-N (cheap one-line edit); document v3a L51 vs vitest.config.ts text-divergence as v3b → v3c carry-over.
-- **Ghost branch cleanup:** `origin/claude/security-review-v3b-Cb8KB` still on origin with 4 cherry-pick commits identical to v3b S-1 (no unique work). Safe to delete; user-action item.
-- `docs/slices/S-INFRA-rigour-v3a-foundation/HANDOFF-SLICE-WRAP.md` (consolidating retro across sessions 37–42) still pending; defer to v3b mid-impl or v3c kickoff.
-- `claude/activate-vitest-coverage-v8-uIaBF` orphan branch on origin (harness-created at session 43 turn 0; no commits beyond origin/main `18c2a0c`). Safe to delete.
+- **v3c carry-over: spec 72b 4th option.** Pre-load files inline in agent prompt for ~900L+ diffs where partition still exceeds 300L per-turn read-cap. Sub-spawns 2+3 of S-5 review hit this wall.
+- **v3c carry-over: tdd-guard.sh improvements** from S-5 sub-spawn 1 findings #3-#11: orphan child-process cleanup on timeout (`setsid` + `kill -- -PID`), jq-missing fail-loud, dispatch-by-prefix consolidation for stacked PreToolUse:Bash hooks.
+- **v3c carry-over: protected-path expansion.** `.claude/agents/`, `scripts/hooks-checksums.sh`, `docs/tdd-exemption-allowlist.txt` deferred from AC-11 §Scope.
+- `docs/slices/S-INFRA-rigour-v3a-foundation/HANDOFF-SLICE-WRAP.md` (consolidating retro across sessions 37-43) still pending; defer to v3c kickoff.
 
 ## Scope ceiling
 
@@ -178,22 +187,23 @@ docs/slices/S-INFRA-rigour-v3b-subagent-suite/verification.md     — fill AC-12
 tests/shellspec/                                                  — meta-test target dir for AC-12 hook tests
 ```
 
-## Session 44 pre-flight
+## Session 46 pre-flight
 
 **Verify (do this first, before any plan):**
 
 ```
 git fetch origin
 git status                                                                  # confirm clean tree
-git rev-parse --short HEAD                                                  # expect 2f4c6d2 if PR open, or main tip if PR merged
-mcp__github__pull_request_read pullNumber=25 method=get                     # confirm state (open / closed-merged / closed-unmerged)
-mcp__github__list_pull_requests state=closed base=main perPage=5            # check if PR #25 merged into main
+git rev-parse --short HEAD origin/main                                      # current state vs main tip
+mcp__github__pull_request_read pullNumber=27 method=get                     # PR #27 v3b S-5 status (open/merged)
+mcp__github__list_pull_requests state=closed base=main perPage=5            # check recent merges
 ```
 
 **Pre-flight Qs (ask user before any code):**
 
-1. **PR #25 status:** if merged, retire `claude/audit-v3b-pr24-merge-YUwug` and open S-4 from main; if still open, address review feedback before S-4. *Status: open.*
-2. **Delete orphan branches** `origin/claude/security-review-v3b-Cb8KB` (4 abandoned cherry-picks) + `origin/claude/activate-vitest-coverage-v8-uIaBF` (harness orphan from session 43)? Both safe to delete; left for user. *Status: open.*
+1. **PR #27 status:** if merged, retire `claude/land-pr26-v3b-s5-5hFoW` and open S-6 from main; if still open with `request-changes` (sub-spawns 2+3 deferred), do those re-reviews FIRST before S-6 to clear the gate honestly.
+2. **Persona suite scope:** confirm AC-1 + AC-2 + AC-3 paired ship for S-6 (vs single-AC-per-PR muscle memory). All three land in `.claude/agents/` per AC-5; share format; cleaner as one PR.
+3. **CI for AC-1's auto-review workflow:** AC-1 specifies `.github/workflows/auto-review.yml` running `claude -p` on PR open. This is a runtime-cost concern — needs `ANTHROPIC_API_KEY` secret in repo settings + budget for per-PR token spend. Confirm with user before shipping AC-1's CI gate.
 3. **Apply AC-14 doc-attribution carry-over** as part of S-4? One-line edit to `acceptance.md:108` re-attributing "spec 72 F6" → v3a `acceptance.md` L51/L178. Cheap and load-bearing for spec-quote integrity. *Status: open.*
 
 **Session discipline (hook-surfaced; restated):**
