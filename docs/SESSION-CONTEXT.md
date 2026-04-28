@@ -1,4 +1,4 @@
-# Session 47 Wrap Context Block (heading into session 48)
+# Session 48 Wrap Context Block (heading into session 49)
 
 ## Product positioning (preserve across sessions)
 
@@ -25,7 +25,8 @@ Next.js 16.2, React 19, TypeScript, Tailwind 4, Supabase, Claude AI, Vercel Pro.
 - **Session 43:** v3b S-3 (AC-14 `@vitest/coverage-v8` activation) — first impl commit of v3b. PR #25 opened + merged. AC-14 ships; 1/15 v3b ACs landed.
 - **Session 44:** v3b S-4 (AC-12 `line-count.sh` re-baseline structural fix). PR #26 opened + merged with `control-change` label. AC-12 ships; 2/15 v3b ACs landed.
 - **Session 45:** v3b S-5 ship (10 ACs in one PR — AC-4/5/6/7/8/9/10/11/13 + AC-14 attribution fix). Three lockstep commits: `b0148a0` + `6f30870` + `e866240`. Adversarial review per spec 72b Option B (3 sub-spawns); sub-spawn 1 emitted 12 findings (#1+#2 verified false positives); sub-spawns 2+3 read-cap-blocked. PR #27 opened as draft with `control-change` label required.
-- **Session 47 (this wrap):** v3b S-6 — persona suite (AC-1 + AC-2 + AC-3 + auto-review.yml CI gate) ships **v3b 12/15 → 15/15**. PR #29 amends spec 72b with Option C (atomic-file inline content >300L) + spec-validation-by-impl-break check; merged as `b4e29ae`. PR #30 (S-6) opens with 2 commits (`1a70883` initial + `f476d41` 4-sub-spawn-review fix-up addressing 20 logic findings); user sets `ANTHROPIC_API_KEY` repo secret; live recursive auto-review on the slice's own ship-PR runs **9 rounds** with commits `d3dedb9` → `ac2b986` → `8bfdfb4` → `1ef38b3` → `586f167` → `715a03e` → `007130b` → `5295364` → `31ebc51`; converges twice (rounds 7 + 9) with one block at round 8 caught by the persona on a CLAUDE.md scope-creep + spec 72b regression risk that we'd just introduced — recursive self-application of the rigour gate, in real-time. Total findings actioned: 9 logic + 2 architectural + 2 style + 1 workflow integration = 14 items. Strategic conversation: spec'd `S-INFRA-persona-suite-v2-multi-agent` as v3b S-8 stretch (option B) per session-47 9-round dataset showing single-agent recursion is high-signal but inefficient. PR #30 ready for user merge at session wrap. Sibling PR `S-INFRA-arch-smell-trigger` (carry-over) ships the §Architectural-smell paragraph that round 8 correctly flagged as scope-creep.
+- **Session 47:** v3b S-6 — persona suite (AC-1 + AC-2 + AC-3 + auto-review.yml CI gate) ships **v3b 12/15 → 15/15**. PR #29 amends spec 72b with Option C (atomic-file inline content >300L) + spec-validation-by-impl-break check; merged as `b4e29ae`. PR #30 (S-6) opens with 2 commits (`1a70883` initial + `f476d41` 4-sub-spawn-review fix-up addressing 20 logic findings); user sets `ANTHROPIC_API_KEY` repo secret; live recursive auto-review on the slice's own ship-PR runs **9 rounds** with commits `d3dedb9` → `ac2b986` → `8bfdfb4` → `1ef38b3` → `586f167` → `715a03e` → `007130b` → `5295364` → `31ebc51`; converges twice (rounds 7 + 9) with one block at round 8 caught by the persona on a CLAUDE.md scope-creep + spec 72b regression risk that we'd just introduced — recursive self-application of the rigour gate, in real-time. Total findings actioned: 9 logic + 2 architectural + 2 style + 1 workflow integration = 14 items. Strategic conversation: spec'd `S-INFRA-persona-suite-v2-multi-agent` as v3b S-8 stretch (option B) per session-47 9-round dataset showing single-agent recursion is high-signal but inefficient. PR #30 ready for user merge at session wrap. Sibling PR `S-INFRA-arch-smell-trigger` (carry-over) ships the §Architectural-smell paragraph that round 8 correctly flagged as scope-creep.
+- **Session 48 (this wrap):** v3b S-7 sibling slice + v3b S-8 setup + v3c stub. **PR #32 (`S-INFRA-arch-smell-trigger`)** ships the §Architectural-smell-trigger paragraph to CLAUDE.md §Engineering conventions verbatim (recovered from `git show 31ebc51`); 3 files / +141; merged at `8160854` after fix-up commit `4688ffa` corrected verify-before-planning slip on persona-suite-liveness claims (kickoff said PR #30 had merged; live verification showed open + behind). **PR #30 merged during session** at `792b73e` via `mcp__github__update_pull_request_branch` after main advanced past base; v3b 12/15 → 15/15 ACs on main; auto-review.yml + 3 personas live. **PR #33 (`S-INFRA-persona-suite-v2-multi-agent` setup)** opens with `9ffd447`: spec 72c (157L; §1-§9 multi-agent review framework) + 6-AC acceptance.md (155L; verbatim 6-AC shape from SESSION-CONTEXT L82-89). v3c stub commit `54b7c66` added then reverted as `5f74340` after auto-review round 1 correctly flagged it as cross-slice scope-creep (real architectural finding; gate worked). **PR #34 (`v3c stub: multi-provider consensus framework`)** opens standalone off origin/main with `b8df8bb` (cherry-pick of `54b7c66` minus the spec 72c §9 cross-ref edit which is deferred to tiny follow-up PR after #33 + #34 merge). PR #33 round-2 + PR #34 round-1 both `block` (specifics not retrieved — pattern-guess: rubric over-strictness on doc-only/deferred-slice/spec-design diff profile). Architectural-smell-trigger applied recursively at round 3 → step back, record, wrap. PR #33 + PR #34 open at session wrap; v3c rubric extension surfaced as new v3c carry-over (3 categories: deferred-slice scope-marker · spec-design content · revert commits). Session-48 recursive-self-application dataset (3 rounds in 30min) joins session-47's 9-round single-agent dataset as v3c retain/drop measurement input.
 - **Session 46:** v3b S-5 review-driven fixes — three rounds. **Round 2 (file-per-spawn re-spawn):** sub-spawn 1-redux on `pre-push-dod7.sh` succeeded (workaround for read-cap structural issue), surfaced 6 actionable findings (2 architectural + 4 logic). Fixed in `fedaeed`: repo regex truncated `org/repo.js` (broke gh API for any repo with `.`); gh API failure was blocking every push (GitHub-incident-equals-blocked-pushes); jq-missing silent pass; push-regex over/under-match for `--dry-run`/`-d`/`:branch`; commit-msg escape rendering; tdd-guard `kill -9` orphan node procs (`setsid` + `kill -- -PGID` group-kill). **Round 3 (CI exposed two latent pre-existing bugs):** ShellSpec `When call CMD <<<"$INPUT"` does NOT pipe stdin → all 21 pre-existing fixtures (7 tdd-guard + 14 pre-push-dod7) were giving false signals since `6f30870`; converted to `Data:expand` blocks. Gate 3b `while read` dropped final allowlist entry without trailing NL; fixed via `|| [ -n "$line" ]` idiom. **Round 4 (Vercel unblock):** pnpm-lock missing `@vitest/coverage-v8` specifier since `ead649f` (PR #25) — every PR's Vercel deployment failing; regenerated via `pnpm install --lockfile-only` in `5e184b4`. PR #27 marked ready-for-review at `5e184b4`; merged to `main` as `189996f`. **v3b 12/15** (all S-5 ACs landed).
 
 ## Current state
@@ -44,7 +45,7 @@ Next.js 16.2, React 19, TypeScript, Tailwind 4, Supabase, Claude AI, Vercel Pro.
 - **(session 39): v3a session-37-budget complete.** AC-1 skeleton + AC-2 (both parts) + AC-3 + AC-4 + AC-7 + AC-8 PASS per `verification.md`. Plan-time gate (AC-7) live with random-nonce framing. Control-change-label workflow live with step-level path detection (branch-protection-compatible).
 - **NEW (session 40): v3a session-38-budget complete + slice content shipped.** AC-1 (full impl) + AC-5 + AC-6 added to PASS rows; AC-4 promoted from IN-PROGRESS to PASS (perf 0.024s incremental, well under G16 5s). `scripts/verify-slice.sh` is now the 7-gate workhorse (file-presence + §11 13-item checklist + leak-scan + ESLint denial check + tsc + vitest + per-language coverage), modes `incremental` (default; pre-commit) vs `--full` (CI). `.claude/hooks/tdd-first-every-commit.sh` is the AC-5 PreToolUse:Bash gate. `vitest.config.ts` carries `lines: 90` thresholds (gate dormant until `@vitest/coverage-v8` + `--coverage` wiring; v3b activates). 48/48 shellspec GREEN at `2c676d0`. AC-2 protected scope extended (`vitest.config.ts`, `docs/tdd-exemption-allowlist.txt`). DoD-3 verdict is procedural `request-changes` (reviewer hit read-cap); DoD-7 honest gap on S-38-2/S-38-1 timing. 8/8 ACs PASS; 8 v3b carry-over items recorded.
 
-### Built (on main as of `189996f`)
+### Built (on main as of `5e09357`)
 
 ```
 src/lib/auth/{dev-auth-gate,dev-session,index,types}.ts          — S-F7-α (PR #20, session 34)
@@ -63,49 +64,58 @@ tests/unit/hooks-{line-count,session-start}.test.ts               — S-TOOL-1 h
 tests/shellspec/                                                  — v3a meta-tests (PR #24)
 docs/slices/{S-F1,S-B-1,S-B-2,S-C-U4,S-F7-alpha,S-INFRA-1,S-TOOL-1,S-F7-beta,S-INFRA-rigour-v3a-foundation}/  — slice docs
 CLAUDE.md §{Planning conduct, Coding conduct, Engineering conventions, Hard controls (in development)}  — sessions 34, 37, 41
+.claude/agents/{slice-reviewer,acceptance-gate,ux-polish-reviewer}.md  — v3b S-6 (PR #30, session 48 merge)
+.github/workflows/auto-review.yml                                   — v3b S-6 (PR #30, session 48 merge)
+CLAUDE.md §"Architectural-smell trigger" paragraph at L211             — v3b S-7 (PR #32 sibling slice, session 48)
+docs/slices/S-INFRA-arch-smell-trigger/{acceptance,verification}.md — v3b S-7 (PR #32, session 48)
+docs/workspace-spec/72c-multi-agent-review-framework.md             — v3b S-8 setup (PR #33, session 48 merge)
+docs/slices/S-INFRA-persona-suite-v2-multi-agent/acceptance.md      — v3b S-8 setup (PR #33, session 48 merge)
 ```
 
 **On `claude/S-F7-beta-impl` (8 ahead, parked):** S-F7-β impl (session 36); PR not opened; cleanup parked pending v3b complete.
 
 **Retired (post-merge, safe to delete on origin):** `claude/audit-v3b-pr24-merge-YUwug` (S-1/2/3 merged via PR #25), `claude/land-pr26-v3b-s5-5hFoW` (S-5 merged via PR #27 as `189996f`), `claude/security-review-v3b-Cb8KB` (4 abandoned cherry-picks from session 42), `claude/activate-vitest-coverage-v8-uIaBF` (harness orphan from session 43).
 
-## Session 48 priorities
+## Session 49 priorities
 
-> **Numbering:** session 41 v3b S-1 · session 42 v3b S-2 · session 43 v3b S-3 · session 44 v3b S-4 · session 45 v3b S-5 ship · session 46 v3b S-5 review-fixes (PR #27 merged) · session 47 v3b S-6 persona suite (PR #29 merged + PR #30 ready-for-merge with 9-round live recursive auto-review). Session 48 = v3b S-7 sibling slice (Architectural-smell trigger codification) **+** v3b S-8 stretch (multi-agent reviewer v2).
+> **Numbering:** session 41 v3b S-1 · session 42 v3b S-2 · session 43 v3b S-3 · session 44 v3b S-4 · session 45 v3b S-5 ship · session 46 v3b S-5 review-fixes (PR #27 merged) · session 47 v3b S-6 persona suite (PR #29 merged + PR #30 ready-for-merge with 9-round live recursive auto-review) · session 48 v3b S-7 sibling slice (PR #32 merged) + v3b S-8 setup (PR #33 open) + v3c stub (PR #34 open) + PR #30 merged + recursive-self-application dataset (3 rounds in 30min). Session 49 = PR #33 + PR #34 disposition + v3b S-8 impl OR v3c rubric extension.
 
-### P0 — Sibling slice `S-INFRA-arch-smell-trigger`
+### P0 — PR #34 + wrap-PR disposition (turn-0 verification)
 
-Small slice. Ships the §Architectural-smell trigger paragraph that PR #30's round-8 auto-review correctly flagged as scope-creep + had reverted from PR #30 in `31ebc51`. Verbatim text already drafted (ships from session-47 commit `5295364` content; reverted from PR #30; preserved in `docs/HANDOFF-SESSION-47.md` §What happened Stage 4 row 8). Branch: `claude/arch-smell-trigger-<5char>` off main (post-PR-30-merge). Estimated 30-60min: ~50L acceptance.md + 2L CLAUDE.md addition + verification.md PASS row + small adversarial-review pass. **Triggers session-48 auto-review on PR open** — first non-S-6 slice to exercise the persona suite live; AC-4 retain/drop measurement begins (or starts measurement from S-F1 — TBD at slice setup).
+PR #33 merged at session-48 wrap (`5e09357`); PR #34 + wrap-PR remain. Turn-0: `mcp__github__list_pull_requests state=closed perPage=5` to confirm merge state — `git rev-parse HEAD origin/main` alone is not sufficient (session-48 lesson learned, NEW v3c carry-over).
 
-### P0 — v3b S-8 stretch: multi-agent persona suite v2
+- **PR #34 (v3c stub: multi-provider consensus framework):** 13L addition to v3c slice acceptance.md; persona-block on round 1 (likely rubric-mismatch on deferred-slice scope-marker update). Override-merge OR address rubric mismatch first (see P0 below). Either way, sub-PR after merge ships spec 72c §9 cross-ref tiny edit (P1 below).
+- **Session-48 wrap PR (this one):** HANDOFF-48 + SESSION-CONTEXT refresh + CLAUDE.md key-files update; opens off origin/main from `claude/session-48-wrap-6c109`. Expected GREEN.
 
-`S-INFRA-persona-suite-v2-multi-agent` per session-47 strategic call (option B from "what's best?" → "B" decision). Six-AC shape drafted in v3b verification.md §v3c carry-over:
+### P0 — v3c rubric extension OR proceed with S-8 impl
 
-1. **Dimension-partitioned orchestrator** (`scripts/spawn-multi-reviewer.sh` or workflow that fans to 5-7 single-dimension specialists; aggregates findings; deduplicates; emits unified verdict).
-2. **Per-dimension specialist personas** (`.claude/agents/reviewer-{coding-conduct,ac-gap,edge-case,security,regression,spec-citation,simplicity}.md`).
-3. **Rubric-checklist v2 of `slice-reviewer.md`** (forces tick-through-all-dimensions in single-agent mode for differential reviews).
-4. **Differential-review mode** (review delta only on fix-up commits).
-5. **Test-fixture seeding harness** (synthetic-diff fixture with deliberately-injected findings; quarterly).
-6. **AC-4 retain/drop measurement** (compare single-agent recursive — current; baseline = session-47's 9-round dataset = 14 findings / 9 rounds — vs multi-agent dimension-partitioned).
+Decision to make at session 49 turn 0 (after merge-state verification):
 
-Spec candidate at `docs/workspace-spec/72c-multi-agent-review-framework.md` (TBD; ~100-150L; could ship in S-8 setup or as standalone spec PR before).
+- **Option A: Ship v3c rubric extension first.** Edit `.claude/agents/slice-reviewer.md` with three new categories — (a) scope-marker update on deferred-AC slice, (b) spec-design content review, (c) revert commits within an open PR. Control-plane change → `control-change` label + DoD-13 fresh-context subagent review + hooks-checksums re-baseline. Lands as part of v3c S-1 or earlier. Unblocks future docs-only / deferred-slice / spec-design PRs from false-positive `block` verdicts.
+- **Option B: Proceed with S-INFRA-persona-suite-v2-multi-agent impl.** 6 ACs + ~9 files / ~700-900L diff per `acceptance.md §Pre-flight notes`. Depends on PR #33 merge (spec 72c + AC contract on main). Will surface need for the v3c rubric extension before its own auto-review fires productively — could end up doing rubric extension mid-slice anyway.
 
-Builds between PR #30 merge and first src/ slice (S-F1). Session 48 budget: spec drafting + AC freezing realistic; impl probably session 49.
+Recommendation: Option A first, then S-8 impl with the rubric pre-emptively fixed. Avoids the round-2 false-positive pattern session 48 just hit twice.
 
-### P1 — Branch-protection adjust
+### P1 — spec 72c §9 cross-ref tiny follow-up PR
 
-Make `auto-review (slice-reviewer persona)` check informational-only (matches AC-1 §Out of scope: *"informational at v3b ship; auto-blocking PR merge deferred to v3c"*). Session 47 saw `mergeable_state: blocked` on PR #30 with stale auto-review check-run on a prior SHA. ~5min in repo settings; not Claude action.
+After PR #33 + PR #34 both merge: rewrite spec 72c §9 last bullet from current "tie-breaker" wording to cross-ref the v3c slice's §"Multi-provider consensus framework (candidate)" section. ~3L change; standalone PR off main; expected GREEN. Recorded as session-48 deferred edit (cherry-pick to PR #34 conflict because spec 72c didn't exist on main yet).
 
-### P2 — surface housekeeping (carry-over from session 46 + sharpened by session 47)
+### P2 — surface housekeeping (carry-over from sessions 46-48)
 
-- **v3c carry-over: spec 72b "Use when" criterion tightening** — cumulative-cross-reference accounting on top of file size (carried; sub-3 of S-6 review needed Option C re-spawn despite persona <300L because cumulative cross-refs pushed cap exhaustion).
-- **v3c carry-over: pnpm-lock drift CI gate** — `pnpm install --frozen-lockfile` on PRs touching `package.json` (carried from session 46).
-- **v3c carry-over: verdict-coercion fixture for personas** — synthetic test injecting malicious-prompt-style verdict request into PR body; persona's belt-and-braces guard mitigates; needs automated test (carried + sharpened by S-6 round-8 lesson).
-- **v3c carry-over: scaffolding-exemption rule deterministic codification** — currently author-judgement; codify (carried).
-- **v3c carry-over: AC-4 persona retain/drop activation** — first 3 src/ slices onwards (or sibling-slice if it counts as a measurement point).
-- **v3c carry-over: HANDOFF-SLICE-WRAP.md for v3a-foundation** — consolidating retro across sessions 37-43+46+47 (carried).
-- **v3c carry-over: query Vercel via `get_status`** (carried from session 46; document in CLAUDE.md or wrap-check.sh).
-- **v3c carry-over: protected-path expansion** (carried; `.claude/agents/`, `scripts/hooks-checksums.sh`, `docs/tdd-exemption-allowlist.txt`).
+- **NEW (session 48): v3c rubric extension.** Three new categories for `slice-reviewer.md` (deferred-slice scope-marker · spec-design content · revert commits). See P0 above.
+- **NEW (session 48): turn-0 PR-merge verification step.** `mcp__github__list_pull_requests state=closed perPage=5` is required, not optional.
+- **NEW (session 48): check-run output body retrievability.** mcp `get_check_runs` returns `conclusion` only; `output.summary` not exposed. v3c needs a path: tool extension, GITHUB_TOKEN env var auth via Bash, or workflow comment-post pattern.
+- **NEW (session 48): spec 72c S-8 contract status open question.** Same ahead-of-data critique applied to spec 72c itself — re-evaluate at session 49 with fresh framing whether spec 72c contract should similarly defer to "scope-marker only" until S-F1 measurement data exists.
+- **NEW (session 48): architectural-smell-trigger threshold tuning.** Round 3 correct for impl-regression-risk; might lower to round 2 for spec/doc PRs where iteration is structurally cheap.
+- **NEW (session 48): smell-trigger paragraph worked-example update.** CLAUDE.md L211 currently cites only PR #30's 6-round example. Session-48's 3-round + step-back pattern is a second worked example.
+- **v3c carry-over: spec 72b "Use when" criterion tightening** — cumulative-cross-reference accounting on top of file size.
+- **v3c carry-over: pnpm-lock drift CI gate** — `pnpm install --frozen-lockfile` on PRs touching `package.json`.
+- **v3c carry-over: verdict-coercion fixture for personas** — synthetic test injecting malicious-prompt-style verdict request into PR body.
+- **v3c carry-over: scaffolding-exemption rule deterministic codification** — currently author-judgement; codify.
+- **v3c carry-over: AC-4 persona retain/drop activation** — first 3 src/ slices onwards.
+- **v3c carry-over: HANDOFF-SLICE-WRAP.md for v3a-foundation** — consolidating retro across sessions 37-43+46+47+48.
+- **v3c carry-over: query Vercel via `get_status`** (document in CLAUDE.md or wrap-check.sh).
+- **v3c carry-over: protected-path expansion** (`.claude/agents/`, `scripts/hooks-checksums.sh`, `docs/tdd-exemption-allowlist.txt`).
 
 ## Scope ceiling
 
@@ -145,29 +155,32 @@ Single-P0 session. v3a foundation is the unblocking slice. Don't add adjacent sl
 
 ## Branch
 
-### Branch state at session-47 wrap (verified live, not from kickoff memory)
+### Branch state at session-48 wrap (verified live, not from kickoff memory)
 
-- **Active wrap:** `claude/session-47-wrap-S47W1` (this branch) — HANDOFF-SESSION-47 + SESSION-CONTEXT refresh; wrap PR opened from this branch.
-- **Ready-for-merge:** `claude/persona-suite-ac-3TTf6` @ `31ebc51` (PR #30; S-6 persona suite; 11 commits ahead of main; 17/17 CI checks GREEN at session wrap including auto-review round-9 `success`; control-change label applied; ready for user merge).
-- **Just-merged:** `claude/spec-72b-option-c-OptCx` → squashed to `main` as `b4e29ae` (PR #29; spec 72b Option C + impl-break). Branch retiring; safe to delete on origin if not auto-deleted.
+- **Active wrap:** `claude/session-48-wrap-6c109` (this branch) — HANDOFF-SESSION-48 + SESSION-CONTEXT refresh + CLAUDE.md key-files update; wrap PR opens from this branch off origin/main.
+- **Open:** `claude/v3c-multi-provider-consensus-stub-dcf7a` @ `b8df8bb` (PR #34; v3c stub standalone; persona-block round 1 likely rubric-mismatch; ready for user merge OR address via v3c rubric extension first).
+- **Just-merged this session:** `claude/persona-suite-ac-3TTf6` → `792b73e` (PR #30; v3b S-6 persona suite; via `update_pull_request_branch`). `claude/sibling-slice-multi-agent-zhkr4` → `8160854` (PR #32; sibling) + `5e09357` (PR #33; S-8 setup; same branch reused per session-48 pre-flight Q2).
 - **Parked:** `claude/S-F7-beta-impl` @ `a3f67ec` · 8 ahead · pushed. Resumes post-v3b complete.
-- **`main`** @ `b4e29ae` at session-47 wrap; will advance to PR-#30-merge SHA before session 48 starts.
-- **v3b 15/15** ACs in PR #30 (pending merge); session 48 ships sibling slice + S-8 stretch.
+- **`main`** @ `5e09357` at session-48 wrap (PR #33 merge tip); advances to PR-#34-merge + wrap-PR-merge SHA before session 49 starts.
+- **v3b 15/15** ACs landed (PR #27 + PR #30); v3b S-7 sibling slice landed (PR #32); v3b S-8 setup landed (PR #33). v3b S-8 impl deferred to session 49.
 
 ### Iteration trajectory of v3b-subagent-suite slice
 
 - **S-1 to S-5** (sessions 41-46): see SESSION-46 wrap for detail; 12/15 ACs landed via PRs #25-#27 across 6 sessions.
-- **S-6** (session 47, `1a70883..31ebc51` on PR #30): 3 personas + auto-review.yml + DoD-13 4-sub-spawn pre-CI review (20 findings actioned in `f476d41`) + **9-round live recursive auto-review** post `ANTHROPIC_API_KEY` setup (rounds 1-9; converged at rounds 7 + 9 with one block at round 8 self-applied to scope-creep finding). 14 actionable findings actioned across 9 rounds. v3b 12/15 → 15/15.
+- **S-6** (session 47, `1a70883..31ebc51` on PR #30; merged session 48 at `792b73e`): 3 personas + auto-review.yml + DoD-13 4-sub-spawn pre-CI review + **9-round live recursive auto-review** (14 actionable findings; converged at rounds 7 + 9 with one block at round 8 self-applied to scope-creep finding). v3b 12/15 → 15/15. Auto-review.yml + 3 personas live on main since `792b73e` (session 48).
+- **S-7 sibling** (session 48, PR #32 merged at `8160854`): §Architectural-smell-trigger paragraph to CLAUDE.md §Engineering conventions verbatim. Caught real scope-creep on PR #33 round 1 + flagged rubric over-strictness on rounds 2-3 (PR #33 round 2 + PR #34 round 1) — first live persona invocations on non-S-6 PRs.
+- **S-8 setup** (session 48, PR #33 merged at `5e09357`): spec 72c (157L; §1-§9 multi-agent review framework) + 6-AC acceptance.md (155L). Contract frozen; impl deferred to session 49.
 
-### Next session (48) FIRST ACTIONS
+### Next session (49) FIRST ACTIONS
 
-1. **Verify branch state + PR #30 merge.** Expected: clean working tree; `main` @ S-6-merge-SHA (assuming user merged between sessions). Confirm via `mcp__github__list_pull_requests state=closed perPage=3`.
-2. **Verify wrap PR (this session) merged.** `git log --oneline -5 origin/main` should show wrap commit + S-6 merge as latest.
-3. **P0 — Sibling slice `S-INFRA-arch-smell-trigger`.** Branch: `claude/arch-smell-trigger-<5char>` off main. Recover the §Architectural-smell paragraph from `docs/HANDOFF-SESSION-47.md` Stage-4 row-8 (verbatim text); draft `docs/slices/S-INFRA-arch-smell-trigger/acceptance.md` (1-2 ACs); commit; open PR. Live auto-review fires on PR open — first non-S-6 PR to exercise the persona; AC-4 retain/drop measurement starts here OR at S-F1 (TBD at setup).
-4. **P0 — v3b S-8 stretch `S-INFRA-persona-suite-v2-multi-agent` setup.** Draft `docs/slices/S-INFRA-persona-suite-v2-multi-agent/acceptance.md` with the 6-AC shape from `HANDOFF-47.md`. May ship spec 72c first (`docs/workspace-spec/72c-multi-agent-review-framework.md`) as a standalone spec PR. Impl in session 49 likely.
-5. **P1 — Adjust branch protection** (user action; ~5min) so `auto-review (slice-reviewer persona)` is informational-only.
-6. **AC-7 pre-push gate is LIVE** (session-46 ship). H6 RED→GREEN structurally enforced.
-7. **AC-12 `line-count.sh` rebaseline-on-resync is LIVE** (session-44 ship). Manual `/tmp/claude-base-*.txt` workaround retired.
+1. **Turn-0 PR-merge verification.** `mcp__github__list_pull_requests state=closed perPage=5` to confirm PR #34 + wrap-PR (this) merge state. `git rev-parse HEAD origin/main` alone is NOT sufficient (session-48 lesson; new v3c carry-over).
+2. **Verify branch state + working tree clean.** Per CLAUDE.md startup rule: if BEHIND > 0 or unexpected files, resync.
+3. **P0 disposition (Option A vs B):**
+   - **Option A: v3c rubric extension first** — edit `.claude/agents/slice-reviewer.md` with three new categories (deferred-slice scope-marker · spec-design content · revert commits). Control-plane change → `control-change` label + DoD-13 + hooks-checksums re-baseline. Unblocks future doc-only / deferred-slice PRs from false-positive `block` verdicts. Recommended.
+   - **Option B: S-INFRA-persona-suite-v2-multi-agent impl** — 6 ACs + ~9 files / ~700-900L diff per acceptance.md §Pre-flight notes. Will likely surface need for v3c rubric extension mid-slice anyway.
+4. **P1 — spec 72c §9 cross-ref tiny follow-up PR** after PR #34 merges.
+5. **AC-12 line-count.sh rebaseline-on-resync is LIVE** (session-44 ship); applied this session at PR #32 merge → had tracking-artifact false-positive 1,500-warn (counted PR #30's +995 against new baseline). Real session-48 churn was ~600L. Fix: separate "tracked" vs "untracked" surfacing in hook output to avoid false-warn confusion. v3c carry-over.
+6. **AC-1 auto-review.yml is LIVE** (post-PR-30 merge). Fires on every PR; verdict posts as check-run; informational-at-v3b-ship per AC-1 §Out of scope (not auto-blocking; rubric mismatch on doc-only/deferred-slice/spec-design PRs is known false-positive vector — see P0 Option A above).
 
 ## Key files
 
@@ -202,23 +215,26 @@ docs/workspace-spec/72c-multi-agent-review-framework.md           — TBD draft 
 CLAUDE.md §"Engineering conventions"                              — sibling-slice target for §Architectural-smell paragraph (verbatim from HANDOFF-47 row-8)
 ```
 
-## Session 48 pre-flight
+## Session 49 pre-flight
 
-**Verify (do this first, before any plan):**
+**Verify (do this first, before any plan; session-48 lesson learned):**
 
 ```
 git fetch origin
 git status                                                                  # confirm clean tree
-git rev-parse --short HEAD origin/main                                      # expect S-6-merge-SHA (post-PR-#30)
-mcp__github__list_pull_requests state=closed base=main perPage=3            # confirm PR #30 + wrap PR in recent merges
+git rev-parse --short HEAD origin/main                                      # expect post-PR-34-merge SHA (or 5e09357 if PR #34 + wrap-PR not merged)
+mcp__github__list_pull_requests state=closed base=main perPage=5            # confirm PR #34 + wrap-PR in recent merges
+                                                                            # (NEW: this step is REQUIRED, not optional;
+                                                                            # git rev-parse confirms branch alignment but
+                                                                            # not which PRs merged — session-48 v3c carry-over)
 ```
 
 **Pre-flight Qs (ask user before any code):**
 
-1. **PR #30 + wrap PR merge state.** Both expected merged before session 48 starts. If PR #30 didn't merge, address blocking reason first (likely branch-protection mismatch with AC-1 §Out of scope — adjust BP to make auto-review informational-only).
-2. **Sibling-slice scope** — confirm `S-INFRA-arch-smell-trigger` ships in session 48 with 1-2 ACs (§Architectural-smell trigger paragraph in CLAUDE.md "Engineering conventions") OR fold into the v3b S-8 stretch slice setup (the smell-trigger paragraph is itself an artefact of the multi-agent v2 reasoning).
-3. **v3b S-8 vs v3c**: confirm option-B-from-session-47 (build multi-agent v2 NOW, between v3b complete and S-F1) vs deferring to v3c kickoff. If S-8: spec 72c first (standalone spec PR), then `S-INFRA-persona-suite-v2-multi-agent` slice with 6 ACs.
-4. **Branch-protection adjust** — user-side ~5min. Confirm done OR record as v3c carry-over if not.
+1. **PR #34 + wrap-PR merge state.** Confirm merged before session 49 starts. If PR #34 still open with persona-block: option to override-merge OR address via v3c rubric extension first (P0 above).
+2. **P0 disposition: v3c rubric extension first (Option A) vs S-8 impl first (Option B).** Option A recommended — unblocks future doc-only / deferred-slice / spec-design PRs from false-positive `block` verdicts before S-8's own auto-review fires.
+3. **Spec 72c S-8 contract status open question** (session-48 §What could improve carry-over): same ahead-of-data critique I'd just made about spec 72d-candidate applies to spec 72c itself. Re-evaluate at session 49 with fresh framing whether spec 72c contract should similarly defer to "scope-marker only" until S-F1 measurement data exists, OR whether spec 72c's contract is justified as setup-not-impl (impl gated on session 49 anyway).
+4. **Tiny spec 72c §9 cross-ref follow-up PR** after PR #34 merges — ~3L change rewriting §9 last bullet from "tie-breaker" to cross-ref the v3c slice §"Multi-provider consensus framework (candidate)" section. Standalone PR off main; ship together with P1 or independently.
 
 **Session discipline (hook-surfaced; restated):**
 
