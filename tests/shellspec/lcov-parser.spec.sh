@@ -10,7 +10,7 @@
 # AC-13 row records the divergence + reasoning.
 #
 # Per AC-13 §Scope ("tests document not modify"): the awk script under test
-# is replicated verbatim from scripts/verify-slice.sh:185-189 rather than
+# is replicated verbatim from scripts/verify-slice.sh:225-228 rather than
 # extracted into a wrapper. Testing-by-replication; if the parser changes,
 # this spec must be updated in lockstep — guard against silent drift.
 #
@@ -20,7 +20,7 @@
 Describe 'verify-slice.sh Gate 5 lcov parser (v3a AC-6 / v3b AC-13)'
   fixtures_dir="tests/shellspec/fixtures"
 
-  # Replicates scripts/verify-slice.sh:185-189 awk script verbatim.
+  # Replicates scripts/verify-slice.sh:225-228 awk script verbatim.
   # If you edit the parser there, update this function in lockstep.
   parse_uncovered_lines() {
     local target_file="$1" lcov="$2"
