@@ -6,6 +6,15 @@
 # branch-derived path preferred over PR-body grep.
 
 Describe 'auto-review-slice-resolve.sh'
+  # Capture absolute path to the script BEFORE setup() cd's into the temp
+  # repo. shellspec runs from project root so $PWD resolves correctly at
+  # Describe-level eval time. Same pattern used by tests/shellspec/{git-state-
+  # verifier,line-count-rebaseline,tdd-first-every-commit,tdd-guard,pre-push-
+  # dod7}.spec.sh. Per PR #47 review (slice-reviewer comment 4343099334) —
+  # hardcoding /home/user/... fails in CI where repo lives at
+  # /home/runner/work/construct_d_01/construct_d_01/.
+  RESOLVE_SCRIPT="$PWD/scripts/auto-review-slice-resolve.sh"
+
   setup() {
     SPEC_TMP="$(mktemp -d -t auto-review-resolve-spec.XXXXXX)"
     REPO="$SPEC_TMP"
@@ -24,7 +33,7 @@ Describe 'auto-review-slice-resolve.sh'
   # Branch-derived path (preferred when slice file exists)
 
   It 'returns branch-derived path when slice exists on disk'
-    When call /home/user/construct_d_01/scripts/auto-review-slice-resolve.sh "claude/S-FOO" ""
+    When call "$RESOLVE_SCRIPT" "claude/S-FOO" ""
     The output should equal 'docs/slices/S-FOO/acceptance.md'
     The status should be success
   End
@@ -33,7 +42,7 @@ Describe 'auto-review-slice-resolve.sh'
     # PR #38 (session 50) cited S-F7-alpha-contracts-dev-mode in body
     # but branch was claude/S-INFRA-rigour-v3c-prior-art-amendments-easy.
     # Branch-derived must win.
-    When call /home/user/construct_d_01/scripts/auto-review-slice-resolve.sh "claude/S-FOO" "see docs/slices/S-BAR/acceptance.md for details"
+    When call "$RESOLVE_SCRIPT" "claude/S-FOO" "see docs/slices/S-BAR/acceptance.md for details"
     The output should equal 'docs/slices/S-FOO/acceptance.md'
     The status should be success
   End
@@ -41,19 +50,19 @@ Describe 'auto-review-slice-resolve.sh'
   # PR-body fallback (when branch resolution misses)
 
   It 'falls back to PR body when branch-derived slice file is missing'
-    When call /home/user/construct_d_01/scripts/auto-review-slice-resolve.sh "claude/S-NONEXISTENT" "see docs/slices/S-BAR/acceptance.md for details"
+    When call "$RESOLVE_SCRIPT" "claude/S-NONEXISTENT" "see docs/slices/S-BAR/acceptance.md for details"
     The output should equal 'docs/slices/S-BAR/acceptance.md'
     The status should be success
   End
 
   It 'falls back to PR body when branch has no S-* token'
-    When call /home/user/construct_d_01/scripts/auto-review-slice-resolve.sh "claude/feature-rename-no-slice-token" "see docs/slices/S-BAR/acceptance.md"
+    When call "$RESOLVE_SCRIPT" "claude/feature-rename-no-slice-token" "see docs/slices/S-BAR/acceptance.md"
     The output should equal 'docs/slices/S-BAR/acceptance.md'
     The status should be success
   End
 
   It 'extracts first slice path from PR body when multiple are cited'
-    When call /home/user/construct_d_01/scripts/auto-review-slice-resolve.sh "claude/feature" "first: docs/slices/S-FOO/acceptance.md, then docs/slices/S-BAR/acceptance.md"
+    When call "$RESOLVE_SCRIPT" "claude/feature" "first: docs/slices/S-FOO/acceptance.md, then docs/slices/S-BAR/acceptance.md"
     The output should equal 'docs/slices/S-FOO/acceptance.md'
     The status should be success
   End
@@ -61,13 +70,13 @@ Describe 'auto-review-slice-resolve.sh'
   # Empty / no-resolution cases
 
   It 'returns empty string when both branch resolution and PR body miss'
-    When call /home/user/construct_d_01/scripts/auto-review-slice-resolve.sh "claude/feature-no-token" "no slice paths in body"
+    When call "$RESOLVE_SCRIPT" "claude/feature-no-token" "no slice paths in body"
     The output should equal ''
     The status should be success
   End
 
   It 'returns empty string when both inputs are empty'
-    When call /home/user/construct_d_01/scripts/auto-review-slice-resolve.sh "" ""
+    When call "$RESOLVE_SCRIPT" "" ""
     The output should equal ''
     The status should be success
   End
@@ -77,7 +86,7 @@ Describe 'auto-review-slice-resolve.sh'
   It 'handles branch with lower-case s prefix as no-match (case-sensitive S-* token regex)'
     # PR-body fallback fires because lowercase s- doesn't match the
     # uppercase grep pattern; PR body is empty here so output empty.
-    When call /home/user/construct_d_01/scripts/auto-review-slice-resolve.sh "claude/s-typo-lowercase" ""
+    When call "$RESOLVE_SCRIPT" "claude/s-typo-lowercase" ""
     The output should equal ''
     The status should be success
   End
