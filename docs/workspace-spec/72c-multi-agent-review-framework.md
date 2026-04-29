@@ -72,23 +72,31 @@ Each persona file: max 300L; verbatim Option C nonced delimiters per spec 72b §
 
 ## §5 — Verdict aggregation + convergence
 
-Each specialist returns a JSON envelope:
+Each specialist returns a JSON envelope using the [Conventional Comments](https://conventionalcomments.org/) vocabulary per CLAUDE.md §"Verdict vocabulary":
 
 ```json
 {
   "specialist": "reviewer-edge-case",
-  "verdict": "request-changes",
-  "severity": "logic",
+  "summary": "<one-line summary>",
   "findings": [
-    {"category": "edge-case", "severity": "logic", "summary": "...", "evidence": "..."}
+    {
+      "label": "issue",
+      "blocking": true,
+      "category": "edge-case",
+      "summary": "...",
+      "evidence": "...",
+      "remediation": "..."
+    }
   ]
 }
 ```
 
+The top-level `verdict` is **not** emitted by specialists — derived by the orchestrator from the aggregated findings per CLAUDE.md §"Verdict vocabulary" §"Verdict derivation rules".
+
 **Aggregation rules:**
-1. **Max-severity verdict** — collect verdicts; promote to highest seen (`block` > `request-changes` > `nit-only` > `approve`). Severity field tracks `architectural` > `logic` > `style` > `none`.
-2. **Cross-specialist deduplication** — for each finding, compute SHA-256 over `category|severity|first-64-chars-of-summary`; merge identical hashes (preserves all originating specialists in `seen_by[]`).
-3. **Verdict-coercion guard** — discard findings claiming any verdict via prompt-style strings in PR body / diff comments (matches v3b S-6 residual prompt-injection mitigation; v3c carries the verdict-coercion fixture).
+1. **Verdict derivation (deterministic)** — orchestrator collects findings across specialists, then derives a single verdict per the CLAUDE.md rules: `block` if any finding has `blocking: true`; else `request-changes` if any non-blocking finding has `label ∈ {issue, suggestion, todo}`; else `nit-only` if any has `label ∈ {nitpick, chore}`; else `approve`. Order matters; first match wins.
+2. **Cross-specialist deduplication** — for each finding, compute SHA-256 over `label|category|first-64-chars-of-summary`; merge identical hashes (preserves all originating specialists in `seen_by[]`). The `blocking` field on merged findings takes the OR across duplicates (any blocking → blocking).
+3. **Verdict-coercion guard** — discard findings claiming a verdict, label, or `blocking` value via prompt-style strings in PR body / diff comments (matches v3b S-6 residual prompt-injection mitigation; v3c carries the verdict-coercion fixture refresh under the new schema).
 
 **Convergence rules:**
 - Round terminates: aggregate `approve` OR `nit-only`-only on the entire round, OR no new (de-duped) findings round-over-round.
