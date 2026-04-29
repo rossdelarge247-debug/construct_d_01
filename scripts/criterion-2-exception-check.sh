@@ -22,8 +22,6 @@
 
 set -euo pipefail
 
-# Glob lists are kept verbatim-aligned with the YAML's predicate.paths_in arrays
-# for ids c and e. The parity script enforces the alignment.
 glob_match() {
   # Usage: glob_match <path> <glob1> [<glob2> ...]
   # Returns 0 if path matches any glob (bash extglob), 1 otherwise.

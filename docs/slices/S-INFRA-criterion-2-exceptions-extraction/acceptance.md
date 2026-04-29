@@ -16,7 +16,7 @@ Per CLAUDE.md §"Coding conduct" §"Architectural-smell trigger":
 
 1. `.claude/agents/criterion-2-exceptions.yaml` — structured source of truth with one entry per exception (id, name, deterministic flag, predicate, treatment, carve-outs, precedent).
 2. `scripts/criterion-2-exception-check.sh` — deterministic file-glob pre-filter for ids `c` (spec-design content) and `e` (session-wrap docs); ids `a`/`b`/`d` pass through as `requires-judgement`. The persona makes the final call on judgement-required cases.
-3. `tests/shellspec/criterion-2-exception-check.spec.sh` — 14 test cases covering each exception's positive + negative paths + multi-file diff + edge cases (empty stdin, blank lines, whitespace, anchored-glob non-match).
+3. `tests/shellspec/criterion-2-exception-check.spec.sh` — 15 test cases covering each exception's positive + negative paths + multi-file diff + edge cases (empty stdin, blank lines, whitespace, anchored-glob non-match).
 4. `slice-reviewer.md` criterion 2 paragraph — prose sub-clauses (a-e) replaced with a 5-row markdown summary table referencing the YAML; the verbatim treatment + carve-out text is preserved inline in the table cells so the LLM persona has full context without a separate `Read` call. References to `criterion 2 exception (b)` / `(e)` elsewhere in the file (lines 133, 152, 157, 180, 190, 195) keep their letter-id semantics.
 
 ## Dependencies
@@ -53,7 +53,7 @@ Per CLAUDE.md §"Coding conduct" §"Architectural-smell trigger":
 
 ## AC-2 · Eligibility-check extracted to `scripts/criterion-2-exception-check.sh` with shellspec coverage
 
-- **Outcome:** `scripts/criterion-2-exception-check.sh` reads a list of changed files (one per line) on stdin and emits one tab-separated line per file: `<path>\t<exception-id|none|requires-judgement>\t<reason>`. Hardcoded path globs cover ids `c` (`docs/workspace-spec/*` + `docs/design-source/*` — bash `[[ == ]]` `*` matches `/` so nested paths are covered without explicit `**`) and `e` (`docs/HANDOFF-SESSION-*.md` + `docs/SESSION-CONTEXT.md`); `docs/slices/<id>/{acceptance,verification,security}.md` pass through as `requires-judgement` (exception (b) candidate); other paths emit `none`. The script does not parse the YAML at runtime — globs are kept aligned with `predicate.paths_in` arrays in the YAML by the head-comment convention. `tests/shellspec/criterion-2-exception-check.spec.sh` exercises 14 cases including each exception's positive path, anchored-glob non-match (`docs/handoffs-archive/HANDOFF-SESSION-12.md` → `none`), multi-file order preservation, blank-line skipping, empty-stdin → empty-output, and space-bearing paths.
+- **Outcome:** `scripts/criterion-2-exception-check.sh` reads a list of changed files (one per line) on stdin and emits one tab-separated line per file: `<path>\t<exception-id|none|requires-judgement>\t<reason>`. Hardcoded path globs cover ids `c` (`docs/workspace-spec/*` + `docs/design-source/*` — bash `[[ == ]]` `*` matches `/` so nested paths are covered without explicit `**`) and `e` (`docs/HANDOFF-SESSION-*.md` + `docs/SESSION-CONTEXT.md`); `docs/slices/<id>/{acceptance,verification,security}.md` pass through as `requires-judgement` (exception (b) candidate); other paths emit `none`. The script does not parse the YAML at runtime — globs are kept aligned with `predicate.paths_in` arrays in the YAML by the head-comment convention. `tests/shellspec/criterion-2-exception-check.spec.sh` exercises 15 cases including each exception's positive path, anchored-glob non-match (`docs/handoffs-archive/HANDOFF-SESSION-12.md` → `none`), multi-file order preservation, blank-line skipping, empty-stdin → empty-output, and space-bearing paths.
 - **Verification:**
   1. `[ -x scripts/criterion-2-exception-check.sh ]` — file is executable.
   2. `head -1 scripts/criterion-2-exception-check.sh` → `#!/usr/bin/env bash` (matches existing `scripts/` convention).
@@ -65,19 +65,19 @@ Per CLAUDE.md §"Coding conduct" §"Architectural-smell trigger":
   8. `printf 'src/lib/foo.ts\n' | scripts/criterion-2-exception-check.sh` → emits a line containing `\tnone\t`.
   9. `printf 'docs/slices/S-INFRA-foo/acceptance.md\n' | scripts/criterion-2-exception-check.sh` → emits a line containing `\trequires-judgement\t`.
   10. `printf 'docs/handoffs-archive/HANDOFF-SESSION-12.md\n' | scripts/criterion-2-exception-check.sh` → emits a line containing `\tnone\t` (anchored-glob non-match — does NOT match the `docs/HANDOFF-SESSION-*.md` glob outside `docs/` root).
-  11. **Local shellspec run:** `shellspec tests/shellspec/criterion-2-exception-check.spec.sh` reports `14 examples, 0 failures` (verified locally pre-PR-open).
-  12. **Full-suite regression:** `shellspec` (no args) reports `139 examples, 0 failures` (125 existing + 14 new; verified locally pre-PR-open).
+  11. **Local shellspec run:** `shellspec tests/shellspec/criterion-2-exception-check.spec.sh` reports `15 examples, 0 failures` (verified locally pre-PR-open; round-3 added a 15th case for `security.md` requires-judgement coverage).
+  12. **Full-suite regression:** `shellspec` (no args) reports `140 examples, 0 failures` (125 existing + 15 new; verified locally).
   13. **CI gating:** `.github/workflows/shellspec.yml` runs `shellspec` (no args) which auto-discovers `tests/shellspec/*.spec.sh` per the `.shellspec --pattern` config — the new spec file ships CI-gated automatically without workflow edits.
 - **In scope:**
   - `scripts/criterion-2-exception-check.sh` — new file. Hardcoded globs for ids `c` + `e`; pass-through for `b` candidates; `none` fallthrough.
-  - `tests/shellspec/criterion-2-exception-check.spec.sh` — new file; 14 test cases.
+  - `tests/shellspec/criterion-2-exception-check.spec.sh` — new file; 15 test cases.
 - **Out of scope:**
   - Wiring the script into `.github/workflows/auto-review.yml` — see AC-1 §Out of scope.
   - Parsing the YAML at runtime — the YAML is documentation/structured-reference; the script's predicates are imperative copies. Parity convention documented in YAML head comment.
   - Extension to non-deterministic predicates (a)/(d) — `requires-judgement` pass-through is the contract.
 - **Opens blocked:** none.
-- **Loveable check:** A future maintainer wires this script into `auto-review.yml` to pre-classify diff files before invoking the persona. They run the existing 14-case shellspec contract first to confirm the script's behaviour, then add a workflow step like `git diff --name-only $BASE...HEAD | scripts/criterion-2-exception-check.sh > /tmp/exceptions-pre-check.txt` and inject the file into the persona's prompt. The script's stdin/stdout interface is testable and stable. Yes — meets the floor.
-- **Evidence at wrap:** `verification.md` AC-2 row + commit SHA + local shellspec output (`14 examples, 0 failures`) + full-suite green (`139 examples, 0 failures`).
+- **Loveable check:** A future maintainer wires this script into `auto-review.yml` to pre-classify diff files before invoking the persona. They run the existing 15-case shellspec contract first to confirm the script's behaviour, then add a workflow step like `git diff --name-only $BASE...HEAD | scripts/criterion-2-exception-check.sh > /tmp/exceptions-pre-check.txt` and inject the file into the persona's prompt. The script's stdin/stdout interface is testable and stable. Yes — meets the floor.
+- **Evidence at wrap:** `verification.md` AC-2 row + commit SHA + local shellspec output (`15 examples, 0 failures`) + full-suite green (`140 examples, 0 failures`).
 
 ## Architectural-smell-trigger acknowledgement
 
@@ -87,4 +87,4 @@ This slice IS the architectural-smell-trigger response: 5 sub-clauses on one par
 
 | Date | Reviewer | Outcome | Notes |
 |---|---|---|---|
-| 2026-04-29 | Author (session 52) | Draft | 2 ACs; YAML + script + shellspec + persona-table edit; 14-case shellspec verified locally; full-suite 139 examples 0 failures; control-change label required (slice-reviewer.md L199-protected). |
+| 2026-04-29 | Author (session 52) | Draft | 2 ACs; YAML + script + shellspec + persona-table edit; 15-case shellspec verified locally; full-suite 140 examples 0 failures; control-change label required (slice-reviewer.md L199-protected). |

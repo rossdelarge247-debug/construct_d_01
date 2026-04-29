@@ -5,7 +5,7 @@
 | AC | Status | Evidence |
 |---|---|---|
 | AC-1 · §Exceptions extracted to YAML + persona-prompt summary table | PASS | Verification points 1-8 below — YAML valid; 5 entries; persona table + references present; baseline re-baselined. |
-| AC-2 · `scripts/criterion-2-exception-check.sh` + shellspec | PASS | Verification points 1-13 below — script behaviour green for each predicate path; local `shellspec tests/shellspec/criterion-2-exception-check.spec.sh` reports `14 examples, 0 failures`; full suite `139 examples, 0 failures`. |
+| AC-2 · `scripts/criterion-2-exception-check.sh` + shellspec | PASS | Verification points 1-13 below — script behaviour green for each predicate path; local `shellspec tests/shellspec/criterion-2-exception-check.spec.sh` reports `15 examples, 0 failures`; full suite `140 examples, 0 failures`. |
 
 ## Verification commands (static — all green at HEAD)
 
@@ -37,8 +37,8 @@ printf 'src/lib/foo.ts\n'                              | scripts/criterion-2-exc
 printf 'docs/slices/S-INFRA-foo/acceptance.md\n'       | scripts/criterion-2-exception-check.sh | grep -q $'\trequires-judgement\t' && echo "AC-2.9 OK"
 printf 'docs/handoffs-archive/HANDOFF-SESSION-12.md\n' | scripts/criterion-2-exception-check.sh | grep -q $'\tnone\t'             && echo "AC-2.10 OK"
 
-shellspec tests/shellspec/criterion-2-exception-check.spec.sh                  # expect: 14 examples, 0 failures
-shellspec                                                                       # expect: 139 examples, 0 failures
+shellspec tests/shellspec/criterion-2-exception-check.spec.sh                  # expect: 15 examples, 0 failures
+shellspec                                                                       # expect: 140 examples, 0 failures
 ```
 
 ## Local shellspec output (recorded at HEAD pre-PR-open)
@@ -46,17 +46,17 @@ shellspec                                                                       
 ```
 $ shellspec tests/shellspec/criterion-2-exception-check.spec.sh
 Running: /usr/bin/bash [bash 5.2.21(1)-release]
-..............
+...............
 
-Finished in 0.27 seconds (user 0.23 seconds, sys 0.07 seconds)
-14 examples, 0 failures
+Finished in 0.38 seconds (user 0.31 seconds, sys 0.12 seconds)
+15 examples, 0 failures
 
 $ shellspec
 Running: /usr/bin/bash [bash 5.2.21(1)-release]
-...........................................................................................................................................
+............................................................................................................................................
 
-Finished in 10.96 seconds (user 5.41 seconds, sys 1.81 seconds)
-139 examples, 0 failures
+Finished in 12.38 seconds (user 6.44 seconds, sys 2.59 seconds)
+140 examples, 0 failures
 ```
 
 ## Live recursive re-test
@@ -85,7 +85,7 @@ If recursive re-test surfaces:
 |---|---|---|
 | `.claude/agents/criterion-2-exceptions.yaml` | +94 | new file (structured source of truth) |
 | `scripts/criterion-2-exception-check.sh` | +80 | new file (executable, +x; deterministic pre-filter) |
-| `tests/shellspec/criterion-2-exception-check.spec.sh` | +139 | new file (14 test cases) |
+| `tests/shellspec/criterion-2-exception-check.spec.sh` | +147 | new file (15 test cases) |
 | `.claude/agents/slice-reviewer.md` | +9 / -6 net | criterion 2 §Exceptions: prose sub-clauses replaced by 5-row markdown table |
 | `.claude/hooks-checksums.txt` | +1 / -1 net | slice-reviewer.md SHA re-baselined |
 | `docs/slices/S-INFRA-criterion-2-exceptions-extraction/acceptance.md` | new | this slice's contract |
@@ -97,7 +97,7 @@ Per CLAUDE.md §"Engineering conventions" §"Adversarial review gate": one adver
 
 - **Q: Does the table format lose any rubric content vs the prose form?** A: No — table cells preserve verbatim treatment + carve-out + precedent text. Sample-checked (b) and (e) cells against pre-edit prose: same content, same emphasis (`**...**`), same backtick code spans, same precedent suffix. Persona context-length within ±5%.
 - **Q: Could the script's hardcoded globs drift from the YAML's `predicate.paths_in`?** A: Yes if both files are edited independently without cross-checking. Mitigation: YAML head comment documents the alignment convention; parity-check script deferred until first observed drift (per simplicity-first). If drift becomes a maintenance pain point, lift the parity script as a follow-up — it would be ~30L of bash + 2 shellspec cases.
-- **Q: Does the new script have an injection surface?** A: Stdin-only input; output is `printf '%s\t%s\t%s\n' "$path" "$id" "$reason"` with literal-format strings; no `eval`, no command-substitution-on-input, no path-as-command interpretation. Path-with-spaces preserved (test case 14). No injection surface.
+- **Q: Does the new script have an injection surface?** A: Stdin-only input; output is `printf '%s\t%s\t%s\n' "$path" "$id" "$reason"` with literal-format strings; no `eval`, no command-substitution-on-input, no path-as-command interpretation. Path-with-spaces preserved (test case 15). No injection surface.
 - **Q: Why does `docs/slices/<id>/{acceptance,verification,security}.md` pass through as `requires-judgement` rather than auto-classify (b)?** A: Exception (b) requires reading the slice's `STATUS:` header AND verifying diff confinement — both content-level checks the LLM is better at than bash regex. Pre-filter intentionally limited to pure-path globs (c, e); content-checks delegated to the persona.
 - **Q: Should `.claude/agents/criterion-2-exceptions.yaml` be added to the hooks-checksum baseline (since modifying it could change persona behaviour)?** A: Not in this slice. The YAML is documentation-grade (the persona reads the markdown table, not the YAML; the script doesn't parse the YAML). Modification would be visible in PR review. Tracking expansion can land if the YAML becomes runtime-consumed.
 
@@ -106,7 +106,7 @@ No findings deferred; all concerns either addressed in this slice or explicitly 
 ## Definition of Done (per CLAUDE.md §"Engineering conventions" §"Definition of Done")
 
 1. **All ACs met with evidence.** ✅ AC-1 + AC-2 verification points all green at HEAD.
-2. **Tests written and passing.** ✅ 14 new shellspec cases; full suite 139 examples, 0 failures.
+2. **Tests written and passing.** ✅ 15 new shellspec cases; full suite 140 examples, 0 failures.
 3. **Adversarial review done; concerns addressed or explicitly deferred.** ✅ See §"Adversarial review pre-flight" above.
 4. **Preview deploy verified in-browser if UI.** N/A — no `src/` touched; no UI surface.
 5. **No regression in adjacent slices.** ✅ Full shellspec suite green; existing `criterion 2 exception (b)` / `(e)` references in §Examples preserved with letter-id semantics.
