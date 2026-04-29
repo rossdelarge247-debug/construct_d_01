@@ -80,8 +80,6 @@ Per CLAUDE.md §"Hard controls > Verdict vocabulary" — emit findings using the
 - `neutral` ← `request-changes` or `nit-only` (informational at v3b ship; author should address but does not gate the merge button).
 - `success` ← `approve`.
 
-**Note on §Examples below:** the JSON output blocks in §Examples 1-4 currently use the prior `{verdict, severity, findings[]}` schema and will be migrated to the new `{summary, findings[]}` shape in a follow-up PR (S-INFRA-AC-5 §Out of scope — Example migration deferred to PR #37 + PR #40 merge). Treat the §Examples blocks as illustrative of the criteria + categories; the schema-of-record for your output is this §Output format section.
-
 ## §Example invocations (S-6 fixture pattern)
 
 ### Example 1 — scope-creep listed (AC-1's mandated test fixture)
@@ -103,10 +101,11 @@ Per CLAUDE.md §"Hard controls > Verdict vocabulary" — emit findings using the
 
 ```json
 {
-  "verdict": "request-changes",
-  "severity": "logic",
+  "summary": "AdminSession addition matches the slice's Out of scope listing verbatim (deferred to S-F8).",
   "findings": [
     {
+      "label": "issue",
+      "blocking": false,
       "category": "scope-creep",
       "evidence": "+export type AdminSession = { id: string; permissions: string[] };",
       "remediation": "AdminSession is explicitly listed in the slice's Out of scope (deferred to S-F8); remove from this diff and re-introduce in the S-F8 slice."
@@ -115,7 +114,7 @@ Per CLAUDE.md §"Hard controls > Verdict vocabulary" — emit findings using the
 }
 ```
 
-**Why this is `logic`-severity, not `architectural`:** AdminSession matches the `Out of scope` listing verbatim — criterion 2's listed clause (`logic`) applies, not the undeclared clause (`architectural`). Per criterion 2, *"Out-of-scope listing always takes precedence over undeclared-scope."*
+**Why `label: issue, blocking: false`:** AdminSession matches the `Out of scope` listing verbatim — per the §Output format label-assignment table, `scope-creep` listed maps to `issue` + `blocking: false` (workflow derives `request-changes`). Per criterion 2, *"Out-of-scope listing always takes precedence over undeclared-scope"* — undeclared-scope would instead map to `issue` + `blocking: true` (deriving `block`).
 
 ### Example 2 — clean diff matching AC
 
@@ -126,8 +125,7 @@ Per CLAUDE.md §"Hard controls > Verdict vocabulary" — emit findings using the
 
 ```json
 {
-  "verdict": "approve",
-  "severity": "none",
+  "summary": "Diff matches AC verification text; no findings.",
   "findings": []
 }
 ```
@@ -151,13 +149,12 @@ Per CLAUDE.md §"Hard controls > Verdict vocabulary" — emit findings using the
 
 ```json
 {
-  "verdict": "approve",
-  "severity": "none",
+  "summary": "Deferred-slice scope-marker update; criterion 2 exception (b) applies — empty findings.",
   "findings": []
 }
 ```
 
-**Why approve:** per criterion 2 exception (b), the slice has deferred status; scope-marker updates are pre-AC-freeze draft content; no ACs are frozen against which to gate scope-creep. Without exception (b) the diff would have been false-positive flagged as undeclared scope (`architectural`). Session-48 dataset: this exact diff profile blocked PR #34 round 1 before this rubric extension.
+**Why approve:** per criterion 2 exception (b), the slice has deferred status; scope-marker updates are pre-AC-freeze draft content; no ACs are frozen against which to gate scope-creep. Without exception (b) the diff would have been false-positive flagged as undeclared scope (mapped to `issue` + `blocking: true`, deriving `block`). Session-48 dataset: this exact diff profile blocked PR #34 round 1 before this rubric extension.
 
 ### Example 4 — security finding
 
@@ -167,10 +164,11 @@ Per CLAUDE.md §"Hard controls > Verdict vocabulary" — emit findings using the
 
 ```json
 {
-  "verdict": "block",
-  "severity": "architectural",
+  "summary": "Unvalidated query parameter flowed into Supabase query; RLS bypass risk.",
   "findings": [
     {
+      "label": "issue",
+      "blocking": true,
       "category": "security",
       "evidence": "supabase.from('users').select().eq('id', req.query.userId)",
       "remediation": "Validate `userId` matches expected UUID shape at the system boundary; without it, RLS is bypassed for any string the client sends. See spec 72 §6 input-validation."
@@ -189,13 +187,12 @@ Per CLAUDE.md §"Hard controls > Verdict vocabulary" — emit findings using the
 
 ```json
 {
-  "verdict": "approve",
-  "severity": "none",
+  "summary": "Wrap-doc additions are operational artefacts under criterion 2 exception (e); no findings on substantive slice scope.",
   "findings": []
 }
 ```
 
-**Why approve:** per criterion 2 exception (e), `docs/HANDOFF-SESSION-N.md` and `docs/SESSION-CONTEXT.md` are operational artefacts shipped per CLAUDE.md §"Wrapping up a session" mandate (steps 2-3). They are not slice scope; the wrap protocol mandates they ship on the same branch as the session's substantive work. Pair the rest of the diff against the slice's stated AC scope as normal. Without exception (e) the wrap docs would have been false-positive flagged as undeclared scope (`architectural`). Session-50 dataset: this exact diff profile produced the `block` verdict on PR #37 round 1 before this exception shipped.
+**Why approve:** per criterion 2 exception (e), `docs/HANDOFF-SESSION-N.md` and `docs/SESSION-CONTEXT.md` are operational artefacts shipped per CLAUDE.md §"Wrapping up a session" mandate (steps 2-3). They are not slice scope; the wrap protocol mandates they ship on the same branch as the session's substantive work. Pair the rest of the diff against the slice's stated AC scope as normal. Without exception (e) the wrap docs would have been false-positive flagged as undeclared scope (mapped to `issue` + `blocking: true`, deriving `block`). Session-50 dataset: this exact diff profile produced the `block` verdict on PR #37 round 1 before this exception shipped.
 
 ## Out of scope for this persona
 

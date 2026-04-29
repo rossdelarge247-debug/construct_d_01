@@ -76,8 +76,6 @@ Per CLAUDE.md §"Hard controls > Verdict vocabulary" — emit findings using the
 
 **Verdict derivation** is computed by the workflow per CLAUDE.md §"Verdict vocabulary" §"Verdict derivation rules" — the `out-of-scope-violation` rule blocks; lower categories surface as `request-changes` (issue/suggestion non-blocking) or `nit-only` (nitpick); empty findings → `approve`.
 
-**Note on §Examples below:** the JSON output blocks in §Examples 1-N currently use the prior `{verdict, severity, findings[]}` schema and will be migrated to the new shape in a follow-up PR (S-INFRA-AC-5 §Out of scope — Example migration). Treat them as illustrative; the schema-of-record for your output is this §Output format section.
-
 ## §Example invocations (S-6 fixture pattern)
 
 ### Example 1 — AC-2's mandated test fixture (missing Loveable check on one AC + mismatched evidence on a different AC)
@@ -131,8 +129,7 @@ The two failure modes are split across distinct ACs to prove they fire independe
 
 ```json
 {
-  "verdict": "request-changes",
-  "severity": "logic",
+  "summary": "AC-2 missing Loveable check; AC-3 evidence cell empty under PASS — two independent failures on different ACs.",
   "ac_count": 4,
   "ac_count_status": "ok",
   "per_ac": [
@@ -142,8 +139,8 @@ The two failure modes are split across distinct ACs to prove they fire independe
     { "ac_id": "AC-4", "status": "pass", "loveable_check_present": true, "narrative": "README §\"Helper chain\" added at ghi789." }
   ],
   "findings": [
-    { "category": "missing-loveable-check", "ac_id": "AC-2", "evidence": "AC-2 has no `Loveable check:` field", "remediation": "Add Loveable check per engineering-phase-candidates §C L86." },
-    { "category": "evidence-mismatch", "ac_id": "AC-3", "evidence": "Verification: 'tests/unit/qux.test.ts asserts qux(null) → baz(null).' / Evidence cell: empty.", "remediation": "Either add concrete observable (commit SHA + test path + assertion) or change AC-3 status to fail-deferred-with-reason." }
+    { "label": "issue", "blocking": false, "category": "missing-loveable-check", "ac_id": "AC-2", "evidence": "AC-2 has no `Loveable check:` field", "remediation": "Add Loveable check per engineering-phase-candidates §C L86." },
+    { "label": "issue", "blocking": false, "category": "evidence-mismatch", "ac_id": "AC-3", "evidence": "Verification: 'tests/unit/qux.test.ts asserts qux(null) → baz(null).' / Evidence cell: empty.", "remediation": "Either add concrete observable (commit SHA + test path + assertion) or change AC-3 status to fail-deferred-with-reason." }
   ]
 }
 ```
@@ -158,13 +155,12 @@ The two findings appear on different ACs (`ac_id: "AC-2"` vs `ac_id: "AC-3"`), p
 
 ```json
 {
-  "verdict": "request-changes",
-  "severity": "logic",
+  "summary": "AC count 2 is below the §C L89 minimum of 3.",
   "ac_count": 2,
   "ac_count_status": "below-min",
   "per_ac": [...],
   "findings": [
-    { "category": "ac-count-out-of-range", "ac_id": "slice-level", "evidence": "ac_count=2", "remediation": "Per §C L89, minimum is 3 AC; re-slice or add AC for missing concerns." }
+    { "label": "issue", "blocking": false, "category": "ac-count-out-of-range", "ac_id": "slice-level", "evidence": "ac_count=2", "remediation": "Per §C L89, minimum is 3 AC; re-slice or add AC for missing concerns." }
   ]
 }
 ```

@@ -82,8 +82,6 @@ Per CLAUDE.md §"Hard controls > Verdict vocabulary" — emit findings using the
 
 **Verdict derivation** is computed by the workflow per CLAUDE.md §"Verdict vocabulary" §"Verdict derivation rules" — load-bearing dimension miss blocks; single-control miss surfaces as `request-changes`; copy-tone alone surfaces as `nit-only`; empty findings → `approve`.
 
-**Note on §Examples below:** the JSON output blocks in §Examples 1-N currently use the prior `{verdict, severity, findings[]}` schema and will be migrated to the new shape in a follow-up PR (S-INFRA-AC-5 §Out of scope — Example migration). Treat them as illustrative; the schema-of-record for your output is this §Output format section.
-
 ## §Example invocations (S-6 fixture pattern)
 
 ### Example 1 — AC-3's mandated test fixture (component diff missing prefers-reduced-motion fallback)
@@ -109,8 +107,7 @@ Per CLAUDE.md §"Hard controls > Verdict vocabulary" — emit findings using the
 
 ```json
 {
-  "verdict": "request-changes",
-  "severity": "logic",
+  "summary": "WelcomeCarousel uses motion.div without prefers-reduced-motion fallback; single-control miss.",
   "per_dimension": [
     { "dimension": "golden-path", "status": "pass", "evidence": "WelcomeCarousel renders motion.div per AC verification text." },
     { "dimension": "edge-cases", "status": "n/a", "evidence": "AC verification has no boundary states; carousel renders only the static slide-in." },
@@ -121,6 +118,8 @@ Per CLAUDE.md §"Hard controls > Verdict vocabulary" — emit findings using the
   ],
   "findings": [
     {
+      "label": "issue",
+      "blocking": false,
       "category": "missing-prefers-reduced-motion",
       "evidence": "<motion.div animate={{ x: 100, opacity: 1 }} transition={{ duration: 0.6 }}>",
       "remediation": "Wrap with `useReducedMotion()`: `const reduce = useReducedMotion(); animate={reduce ? { opacity: 1 } : { x: 100, opacity: 1 }}`. Per spec 26 + CLAUDE.md \"Technical rules\"."
@@ -137,8 +136,7 @@ Per CLAUDE.md §"Hard controls > Verdict vocabulary" — emit findings using the
 
 ```json
 {
-  "verdict": "approve",
-  "severity": "none",
+  "summary": "All six dimensions pass; no findings.",
   "per_dimension": [
     { "dimension": "golden-path", "status": "pass", "evidence": "primary CTA wired to `onClick={handleSubmit}` with explicit success-state navigation." },
     { "dimension": "edge-cases", "status": "pass", "evidence": "loading + error states present per AC; empty state via `disabled` prop on CTA." },
