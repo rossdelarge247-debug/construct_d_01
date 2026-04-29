@@ -74,7 +74,7 @@ Populated post-impl. Expected:
 - `.claude/hooks/session-start.sh` — `-30L` (Hooks-checksums drift warning block removed)
 - `.claude/settings.json` — `-3L` (PreToolUse hook entry removed)
 - `CLAUDE.md` — net `~-50L` (two L199 rows removed + arch-smell paragraph rewrite +5L net)
-- `docs/tdd-exemption-allowlist.txt` — `+3L` (slice-path exemption entries per Pre-flight notes)
+- `docs/tdd-exemption-allowlist.txt` — **no change** (decision at impl: allowlist exempts `src/**` from TDD-first gate; this slice touches no `src/**`; gate doesn't fire; no entries needed; original pre-flight claim was over-prescribed — see acceptance.md §Pre-flight notes for audit-trail rationale)
 - `docs/slices/S-INFRA-rigour-v3c-prior-art-amendments-structural/{acceptance,verification,security}.md` — new files (~+250L combined)
 
 **Net:** ~−300L production / +250L docs = ~−50L total.
