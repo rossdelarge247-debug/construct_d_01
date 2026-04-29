@@ -12,18 +12,19 @@ Spec 42 authoritative for positioning. Spec 68 suite (hub + 68a-e locked + 68f/g
 
 Next.js 16.2, React 19, TypeScript, Tailwind 4, Supabase, Claude AI, Vercel Pro. Single-branch-main workflow (spec 71 §7a Option 4): no `phase-c` integration, no cutover event. Slice work on short-lived feature branches → PR → main. Tink credentials in Vercel env. Stripe SDK pinned at `^22.1.0`.
 
-## What sessions 41-51 accomplished (rolling window)
+## What sessions 41-52 accomplished (rolling window)
 
 - **Sessions 41-46:** v3b S-1 through S-5 — 12/15 ACs landed via PRs #25-#27 across 6 sessions.
 - **Session 47:** v3b S-6 (PR #30 9-round live recursive auto-review; 14 findings; v3b 12/15 → 15/15). Auto-review.yml + 3 personas live.
 - **Session 48:** v3b S-7 sibling slice (PR #32 §Architectural-smell-trigger) + v3b S-8 setup (PR #33 spec 72c + 6-AC acceptance.md) + v3c stub (PR #34).
 - **Session 49:** v3c rubric extension (criterion 2 §Exceptions a-d) + spec 72c §5/§7/§10 prior-art amendments + audit findings queued.
 - **Session 50:** 6 PRs merged — PR #36 (72c §9 cross-ref), #37 (criterion 2 §Exceptions a-d), #38 (citations + 100%-rule rename), #39 (slice-resolver fix), #40 (§Exception (e) wrap docs), #41 (Conv Comments verbatim), #42 (fix-up).
-- **Session 51 (this wrap):** **Rigour-suite delivery push, session 1 of 3.** 4 substantial PRs in flight (1 merged mid-session, 3 OPEN ready to merge): PR #44 (§Examples migration to Conv Comments schema), PR #45 (auto-review findings posted as PR comment with markdown table — visibility fix; merged @ `d3dc103`), PR #46 (verdict-derivation arithmetic extracted to `scripts/derive-verdict.sh` + 15-case shellspec; verdict-coercion fixture per spec 72c §5 rule 3 NOW CI-GATED), PR #47 (slice-AC resolver + persona-JSON parser extracted to `scripts/auto-review-{slice-resolve,parse}.sh` + 21-case shellspec; latent empty-stdin edge case fixed). After all 4 merge, `auto-review.yml` shrinks 276L → ~340L (+64 net thanks to PR #45's comment-posting; -19 + -21 from PR #46/47 extractions; net positive due to comment-posting feature). All non-trivial logic now in tested scripts under `tests/shellspec/` (109 examples, 0 failures locally).
+- **Session 51:** Rigour-suite delivery push, session 1 of 3. 4 substantial PRs merged: PR #44 (§Examples migration to Conv Comments schema), PR #45 (auto-review findings posted as PR comment with markdown table — visibility fix), PR #46 (verdict-derivation arithmetic extracted to `scripts/derive-verdict.sh` + 16-case shellspec; verdict-coercion fixture per spec 72c §5 rule 3 NOW CI-GATED), PR #47 (slice-AC resolver + persona-JSON parser extracted to `scripts/auto-review-{slice-resolve,parse}.sh` + 21-case shellspec; latent empty-stdin edge case fixed). All non-trivial logic now in tested scripts under `tests/shellspec/`.
+- **Session 52 (this wrap):** **Rigour-suite delivery push, session 2 of 3.** Two substantial PRs opened, BOTH merged. **PR #50** (`S-INFRA-rigour-parse-failed-pipeline-crashed-merge-gate`, merged @ `68b752d`) promoted both `parse-failed` AND pipeline-crash failure-fallback paths in `auto-review.yml` from `neutral` to `failure`; secret-missing skip stays `neutral` for fork-PR compatibility; CLAUDE.md L251 gate-table row updated for partial-promotion semantics. **PR #49** (`S-INFRA-criterion-2-exceptions-extraction`, merged @ `7395949`) extracted criterion 2 §Exceptions sub-clauses (a-e) from prose paragraphs in `slice-reviewer.md` to a structured YAML (`.claude/agents/criterion-2-exceptions.yaml`) + deterministic file-glob pre-filter at `scripts/criterion-2-exception-check.sh` (15-case shellspec) + 5-row markdown summary table inline in the persona prompt; control-change label applied. PR #49 went through 6 rounds of auto-review iteration before last-iteration declared (each round caught real polish-level issues; refined stop signal in commit msgs to distinguish polish from correctness).
 
 ## Current state
 
-### Locked (through session 51)
+### Locked (through session 52)
 
 - 5-phase journey (Start · Build · Reconcile · Settle · Finalise) per spec 42.
 - Document-as-spine (4-doc lifecycle) per spec 44.
@@ -35,9 +36,9 @@ Next.js 16.2, React 19, TypeScript, Tailwind 4, Supabase, Claude AI, Vercel Pro.
 - Stripe SDK pinned `^22.1.0`. Both lockfiles aligned.
 - **v3a-foundation shipped** (PR #24 merged session 41) — 8 ACs PASS; verify-slice.sh 7-gate workhorse; tdd-first-every-commit, control-change-label, plan-time gate all live.
 - **v3b shipped** — 15/15 ACs landed (PRs #25-#27 + #30 + #32 + #33 across sessions 41-48); auto-review.yml + 3 personas (slice-reviewer + acceptance-gate + ux-polish-reviewer) live on main.
-- **v3c partial — session-50 batch landed:** rubric extension §Exceptions (a)-(e) on slice-reviewer.md (PR #37 + PR #40); 4 citations + "100% rule" rename in CLAUDE.md (PR #38); slice-resolver fix in auto-review.yml (PR #39); Conventional Comments schema cascade across CLAUDE.md §Verdict vocabulary + spec 72c §5 + 3 personas + auto-review.yml parser (PR #41).
+- **v3c partial — sessions 50+51+52 batch landed:** rubric extension §Exceptions (a)-(e) on slice-reviewer.md (PR #37 + PR #40 + PR #49 still open); 4 citations + "100% rule" rename in CLAUDE.md (PR #38); slice-resolver fix in auto-review.yml (PR #39); Conventional Comments schema cascade (PR #41); §Examples migration to Conv Comments (PR #44); auto-review findings as PR comment (PR #45); verdict-derivation extraction with shellspec (PR #46); resolver + parser extraction (PR #47); rigour-malfunction paths promoted to merge-gating failure (PR #50). v3c programme **~98% complete** at session-52 wrap; remaining substantive items: v3b S-8 multi-agent persona suite v2 impl (P1; ~700-900L), P0b-structural (CODEOWNERS migration · pre-commit-verify deprecation · arch-smell reframe; ~400-600L), comment-posting extraction (deferred per smell-trigger build-then-measure).
 
-### Built (on main as of `d3dc103`; PRs #44/#46/#47 OPEN, ready to merge)
+### Built (on main as of `7395949`; both session-52 work PRs merged)
 
 ```
 src/lib/auth/{dev-auth-gate,dev-session,index,types}.ts          — S-F7-α (PR #20)
@@ -77,33 +78,25 @@ scripts/auto-review-parse.sh + tests/shellspec/auto-review-parse.spec.sh   — p
 
 **Parked branch:** `claude/S-F7-beta-impl` @ `a3f67ec` · 8 ahead · pushed. Resumes post-rigour-suite complete.
 
-## Session 52 priorities
+## Session 53 priorities
 
-> **Numbering:** session 51 was rigour-suite session 1 of 3 — shipped 4 substantial PRs (PR #44 §Examples migration · PR #45 findings-comment MERGED · PR #46 derive-verdict extraction + verdict-coercion fixture · PR #47 resolver+parser extraction). Session 52 = rigour-suite session 2 of 3, **opens with PR5 (criterion 2 §Exceptions table extraction)**, then v3b S-8 multi-agent persona suite v2.
+> **Numbering:** session 52 was rigour-suite session 2 of 3 — shipped PR #50 (parse-failed/pipeline-crash → failure merge-gating); PR #49 (criterion 2 §Exceptions extraction) still open at wrap. Session 53 = **rigour-suite session 3 of 3**: closes the v3c programme by shipping v3b S-8 (multi-agent persona suite v2). After session 53, the rigour suite is ~100% complete and S-F1 (first `src/` slice) is the canonical next priority.
 
-### P0 — `S-INFRA-criterion-2-exceptions-table-extraction` (deferred from session 51)
+### P0 — v3b S-8 impl (multi-agent persona suite v2)
 
-`slice-reviewer.md` criterion 2 §Exceptions has accrued 5 sub-clauses (a-e) — each shipped with its own slice + adversarial review iteration. Per CLAUDE.md §"Architectural-smell trigger": continuing to patch criterion 2 incrementally is interest, not principal. Refactor to structured table/YAML + extract eligibility-check logic to `scripts/criterion-2-exception-check.sh` with shellspec coverage. ~150-250L. **L199-protected** (`slice-reviewer.md`) → `control-change` label required. Branch off main (NOT off PR #44's branch); PR #44 should merge before this PR opens to avoid file-conflict on `slice-reviewer.md`.
+`S-INFRA-persona-suite-v2-multi-agent` per PR #33-merged acceptance.md (6 ACs already drafted; ~700-900L diff). Spec 72c §5/§7/§10 amendments inform the impl — particularly §7 hybrid fixture seeding (synthetic ships now; golden-PR replay v3c). This is the **last big rigour-suite piece**; absorbs most of session 53. Branch fresh off main; the slice file already exists at `docs/slices/S-INFRA-persona-suite-v2-multi-agent/acceptance.md`. Pre-flight: re-read PR #33's 6 ACs + spec 72c §5/§7/§10 before any code.
 
-### P1 — v3b S-8 impl (multi-agent persona suite v2)
+### P1 — v3c P0b-structural (3 simplifications carried from session 49)
 
-`S-INFRA-persona-suite-v2-multi-agent` per PR #33-merged acceptance.md (6 ACs; ~700-900L diff). Spec 72c §5/§7/§10 amendments inform the impl — particularly §7 hybrid fixture seeding (synthetic ships now; golden-PR replay v3c). Recommended for second half of session 52 if there's room; otherwise session-53 opener.
+`S-INFRA-rigour-v3c-prior-art-amendments-structural`: CODEOWNERS migration (replace hooks-checksums + control-change-label with `.github/CODEOWNERS`); pre-commit-verify deprecation question; arch-smell trigger reframe as prompt rule not gate. Each needs explicit design + rollback procedure. Big slice; **pick fresh-context session 54** if S-8 absorbs all of session 53.
 
-### P2 — Promote `parse-failed` / `pipeline-crashed` from `neutral` to `failure` (merge-gating)
+### P2 — S-F1 kickoff (first src/ slice; design-system tokens)
 
-Current state per CLAUDE.md L181: auto-review verdicts (including the new parse-failed sentinel) post as `neutral` check-runs that don't gate the merge button. PR #45's comment-posting now makes failure modes visible in the PR thread — but a distracted reviewer could still merge an unreviewed PR. Promotion to `failure` would make these blocking. **User-decision lever** — this changes the rigour suite from "informational at v3b" to "merge-gating at v3c". Discuss before shipping.
+**Now unblocked** — rigour suite is ~98% complete; S-8 closes it. AC-4 retain/drop measurement activates after first 3 src/ slices ship; S-F1 is the dataset-seeder. Per spec 70 Build Map: design-system token extraction from `docs/design-source/` → `src/lib/design-system/{tokens,components}/` with CSS↔TS structural-parity invariant tests. ~400-600L; 5-8 ACs. **Session 54 or 55** if S-8 + P0b-structural land first; **session 53 second half** if S-8 finishes early.
 
-### P3 — v3c P0b-structural (3 simplifications carried from session 49)
+### P3 — Comment-posting extraction (architectural-smell-trigger build-then-measure; deferred)
 
-`S-INFRA-rigour-v3c-prior-art-amendments-structural`: CODEOWNERS migration (replace hooks-checksums + control-change-label with `.github/CODEOWNERS`); pre-commit-verify deprecation question; arch-smell trigger reframe as prompt rule not gate. Each needs explicit design + rollback procedure. Big slice; pick fresh-context. **Recommended as session-53 sole P0** to leave room for review iteration.
-
-### P4 — Comment-posting extraction (architectural-smell-trigger build-then-measure)
-
-`scripts/auto-review-post-comment.sh` extraction if PR #45's comment-posting accrues findings rounds. Round 1 was clean; defer extraction until round 3+ cluster per the trigger doctrine.
-
-### P5 — S-F1 kickoff (first src/ slice; design-system tokens)
-
-**Now unblocked** — rigour suite is effectively complete after session-51 PRs land on main. AC-4 retain/drop measurement activates after first 3 src/ slices ship; S-F1 is the dataset-seeder. Per spec 70 Build Map: design-system token extraction from `docs/design-source/` → `src/lib/design-system/{tokens,components}/` with CSS↔TS structural-parity invariant tests. ~400-600L; 5-8 ACs. **Session 53 or 54** depending on rigour-suite cleanup pace.
+`scripts/auto-review-post-comment.sh` extraction if PR #45's comment-posting accrues findings rounds. PR #49 + #50 didn't surface any clustered findings on the comment-posting block. Defer extraction until round-3+ cluster per the trigger doctrine.
 
 ## Scope ceiling
 
@@ -145,16 +138,13 @@ Single-P0 session. S-F1 (or whichever priority you pick) is THE unblocking work.
 
 ## Branch
 
-### Branch state at session-51 wrap (verified live)
+### Branch state at session-52 wrap (verified live)
 
-- **Wrap branch:** `claude/wrap-session-51` (this commit's branch).
-- **`main` tip:** `d3dc103` (PR #45 merged mid-session; PR #43 session-50 wrap is the prior commit).
-- **Open PRs at wrap (3 from session 51, all ready to merge):**
-  - **PR #44** `S-INFRA-AC-5-examples-migration` — `control-change` label applied; 1 behind main (PR #45 advanced main; click "Update branch" then merge). Touches 3 persona files; no real conflicts.
-  - **PR #46** `S-INFRA-derive-verdict-script-extract` — base = current main (`d3dc103`). Ready to merge as-is. After merge, PR #47 needs button-click rebase (different region of `auto-review.yml`).
-  - **PR #47** `S-INFRA-auto-review-resolver-parser-extract` — base = current main (`d3dc103`). Ready to merge as-is. After merge, PR #46 needs button-click rebase.
-  - **Recommended order:** #46 → #47 → #44 (or any order works; #46+#47 mutually trigger one another's rebase but cleanly).
-- **Parked:** `claude/S-F7-beta-impl` @ `a3f67ec` · 8 ahead · pushed. Resumes post-rigour-suite complete.
+- **Wrap branch:** `claude/wrap-session-52` (this commit's branch).
+- **`main` tip:** `7395949` (PR #49 merged @ wrap-PR-write-time; prior was `68b752d` = PR #50 merge; prior was `f423322` = session-51 wrap).
+- **Open PRs at wrap from session 52:** none. Wrap PR (`claude/wrap-session-52`) opens after this commit.
+- **Closed/merged this session:** PR #50 (`S-INFRA-rigour-parse-failed-pipeline-crashed-merge-gate`) merged @ `68b752d`; PR #49 (`S-INFRA-criterion-2-exceptions-extraction`) merged @ `7395949` (during wrap-doc authoring; webhook delivered the merge event).
+- **Parked:** `claude/S-F7-beta-impl` @ `a3f67ec` · 8 ahead · pushed. Resumes post-rigour-suite complete (i.e. after S-8 lands).
 - **Live rigour gates:**
   - `tdd-guard.sh` — Write/Edit on `src/**.{ts,tsx}` requires green vitest run (v3b AC-6).
   - `pre-push-dod7.sh` — pre-push gate enforces 7-item slice-DoD (v3b AC-7).
@@ -162,7 +152,7 @@ Single-P0 session. S-F1 (or whichever priority you pick) is THE unblocking work.
   - `pre-commit-verify.sh` — slice-DoD verification before commit.
   - `exit-plan-review.sh` — plan-time review on ExitPlanMode.
   - `read-cap.sh` — Read tool turn-budget cap.
-  - `auto-review.yml` — slice-reviewer persona on every PR (now Conv Comments schema).
+  - `auto-review.yml` — slice-reviewer persona on every PR. **NEW (session 52 PR #50):** `parse-failed` + pipeline-crash now → `failure` (merge-gating); `request-changes`/`nit-only` → `neutral` (advisory); secret-missing skip → `neutral` (forks unaffected).
   - `control-change-label.yml` — gates L199-protected paths.
   - `pr-dod.yml` — slice-verification reference required on `src/` PRs.
 - **AC-2 acceptance-gate** + **AC-3 ux-polish-reviewer** shipped + dormant until S-F1.
@@ -170,31 +160,28 @@ Single-P0 session. S-F1 (or whichever priority you pick) is THE unblocking work.
 
 ### v3c trajectory + remaining rigour work
 
-**The big picture (layman summary):** rigour-suite programme is **~95% complete** (was 85% at session 50; session 51 closed §Examples migration · findings-comment visibility fix · verdict-derivation extraction · resolver+parser extraction). Once PR #44/#46/#47 merge, only **2 substantive items remain**: criterion 2 §Exceptions table extraction (P0 next session) and v3b S-8 multi-agent persona suite v2 (P1). Plus 3 user-decision levers (parse-failed→failure promotion · CODEOWNERS migration · S-F1 kickoff).
+**The big picture (layman summary):** rigour-suite programme is **~98% complete** (was 95% at session 51; session 52 closed criterion 2 §Exceptions extraction + parse-failed/pipeline-crash merge-gating promotion). Only **1 substantive item remains** before pure `src/` work: v3b S-8 multi-agent persona suite v2 (P0 session 53). Plus 1 cleanup slice (P0b-structural) and 1 deferred extraction (comment-posting).
 
 **Remaining work shape:**
 
 | Piece | Size | Status | Why |
 |---|---|---|---|
-| §Exceptions table extraction (P0 session 52) | medium (~150-250L) | queued | 5 sub-clauses (a-e) on slice-reviewer.md; architectural-smell-trigger says extract. L199 → control-change. |
-| v3b S-8 multi-agent persona suite v2 | large (~700-900L) | queued | 6 ACs drafted. Spec 72c §7 hybrid fixture seeding. Better with real src/ traffic. |
-| Promote parse-failed → failure (merge-gating) | small (~30-50L) | user-decision lever | Currently neutral per L181; PR #45 makes failures visible in PR thread. Promote when ready. |
-| P0b-structural (CODEOWNERS · pre-commit-verify deprecation · arch-smell reframe) | large (~400-600L) | session-53 candidate | Each needs design + rollback procedure. Pick fresh-context. |
-| Comment-posting extraction | medium (~100-150L) | architectural-smell-trigger; defer to round 3+ | PR #45 round 1 was clean. Build-then-measure. |
-| S-F1 kickoff (first src/ slice) | medium (~400-600L) | now unblocked | Dataset-seeder for AC-4 retain/drop. Session 53/54 candidate. |
-| Mutation testing / Stryker · property-based / fuzz · golden-PR replay | various | v3c carry-over | Per spec 72c §"Out of scope". Not blocking. |
+| v3b S-8 multi-agent persona suite v2 (P0 session 53) | large (~700-900L) | queued | 6 ACs drafted in PR #33 acceptance.md. Spec 72c §5/§7/§10 amendments inform impl. Last big rigour-suite piece. |
+| P0b-structural (CODEOWNERS · pre-commit-verify deprecation · arch-smell reframe) | large (~400-600L) | session-54 candidate | Each needs design + rollback procedure. Pick fresh-context. |
+| S-F1 kickoff (first src/ slice; design-system tokens) | medium (~400-600L) | unblocked once S-8 lands | Dataset-seeder for AC-4 retain/drop. Session 54/55 candidate; or 53 if S-8 finishes early. |
+| Comment-posting extraction | medium (~100-150L) | architectural-smell-trigger; deferred | PR #45 + PR #49 + PR #50 surfaced no findings clustering on the comment-posting block. Build-then-measure; defer until round-3+ cluster. |
+| Mutation testing / Stryker · property-based / fuzz · golden-PR replay · multi-provider 3rd reviewer · structured-findings JSON Schema | various | v3c carry-over | Per spec 72c §"Out of scope". Not blocking. |
 
-**Net: ~1-2 more sessions of cleanup before pure src/ work (S-F1) becomes the focus.** Session 51 closed 4 of the 6 remaining items the prior session had queued.
+**Net: 1 more session (53) of rigour-suite cleanup, then `src/` work (S-F1) becomes the focus.** Session 52 closed 2 of the 3 remaining items the prior session had queued (only S-8 left).
 
-### Next session (52) FIRST ACTIONS
+### Next session (53) FIRST ACTIONS
 
-1. **Turn-0 verification.** `git rev-parse --short HEAD origin/main` for current main tip. `mcp__github__list_pull_requests state=closed base=main perPage=15` to confirm PR #44/#46/#47 merge state (should all be merged before P0 starts; if not, flag to user). `mcp__github__list_pull_requests state=open base=main perPage=10` for currently open. Read SessionStart hook output.
+1. **Turn-0 verification.** `git rev-parse --short HEAD origin/main` for current main tip. `mcp__github__list_pull_requests state=open base=main perPage=10` for currently open PRs (should be empty if all session-52 PRs merged including the wrap PR). Read SessionStart hook output.
 2. **Verify branch state + working tree clean.** Resync if BEHIND > 0.
-3. **Confirm priority with user.** Session 52 P0 recommended = `S-INFRA-criterion-2-exceptions-table-extraction`. Alternatives: P1 v3b S-8 · P2 promote parse-failed→failure · P3 P0b-structural · P4 comment-posting extraction · P5 S-F1.
-4. **If P0 (§Exceptions table extraction):** verify PR #44 is merged on main (else file-conflict on `slice-reviewer.md`); branch fresh off main; refactor 5 sub-clauses to YAML/table; extract eligibility-check to `scripts/criterion-2-exception-check.sh` with shellspec; re-baseline `slice-reviewer.md` SHA in `.claude/hooks-checksums.txt`; ship under `control-change` label. ~150-250L.
-5. **If P1 (v3b S-8):** read PR #33-merged acceptance.md (6 ACs already drafted); apply spec 72c §5/§7/§10 amendments. ~700-900L; absorbs most of a session.
-6. **If P2 (parse-failed → failure):** small workflow YAML edit; high-value lever; ~30-50L. Useful warm-up if user wants to ship the merge-gating decision.
-7. **Live rigour gates** — every commit dogfoods them. Don't `--no-verify` unless explicit. Plan-time gate fires on ExitPlanMode.
+3. **Confirm priority with user.** Session 53 P0 recommended = **v3b S-8 multi-agent persona suite v2 impl**. Alternatives: P1 P0b-structural · P2 S-F1 kickoff.
+4. **If P0 (v3b S-8):** read `docs/slices/S-INFRA-persona-suite-v2-multi-agent/acceptance.md` (6 ACs drafted in PR #33 — already merged); read spec 72c §5/§7/§10 amendments; branch fresh off main as `claude/S-INFRA-persona-suite-v2-multi-agent` (or similar); design implementation around §7 hybrid fixture seeding (synthetic ships now; golden-PR replay v3c carry-over). ~700-900L; absorbs most of a session.
+5. **If S-8 finishes mid-session:** consider whether to roll into S-F1 (per Coding conduct §Surgical changes — may stretch session budget) or wrap early.
+6. **Live rigour gates** — every commit dogfoods them. Don't `--no-verify` unless explicit. Plan-time gate fires on ExitPlanMode. **Session 52 promotion in effect:** persona parse-failed or workflow crash now BLOCKS the merge button; re-running the workflow is the escape hatch.
 
 ## Key files
 
