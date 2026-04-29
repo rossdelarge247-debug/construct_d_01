@@ -82,7 +82,7 @@ Populated post-impl. Expected:
 ## DoD trace (CLAUDE.md §"Engineering conventions" §"Definition of Done")
 
 1. **AC met with evidence** — Populated at impl. AC-1/2/3 verification points above.
-2. **Tests written and passing** — N/A. Pure config/control-plane removal; no logic surface; per CLAUDE.md §"Don't write file-content assertions for logic slices" the per-AC grep verifications above are the appropriate evidence form. Slice path added to `docs/tdd-exemption-allowlist.txt` under `pure-config:` category at impl time.
+2. **Tests written and passing** — N/A. Pure config/control-plane removal; no logic surface; per CLAUDE.md §"Don't write file-content assertions for logic slices" the per-AC grep verifications above are the appropriate evidence form. **No `tdd-exemption-allowlist.txt` entry was added or needed:** the allowlist exempts `src/**` from the TDD-first gate (per its own L3-5 header); this slice touches no `src/**` files, so the gate doesn't fire on any commit. The original pre-flight wording "add slice path … at impl time" was over-prescribed at draft — see `acceptance.md` §Pre-flight notes for audit-trail rationale.
 3. **Adversarial review done** — Live `auto-review.yml` (slice-reviewer persona) fires on PR open. Pre-PR-open author review per spec 72b §"Use when" Option C (acceptance.md <300L; single-spawn).
 4. **Preview deploy verified in-browser** — N/A (no UI surface).
 5. **No regression in adjacent slices** — Verified at impl. Expected: `pr-dod.yml` CI checks remain green (unchanged); `auto-review.yml` runs against the persona files (untouched in this slice); shellspec suite unchanged. The legacy `control-change-label.yml` workflow is removed atomically with the CODEOWNERS replacement so there is no enforcement-gap window.
