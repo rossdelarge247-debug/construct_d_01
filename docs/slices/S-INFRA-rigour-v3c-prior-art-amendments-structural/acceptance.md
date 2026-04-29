@@ -84,10 +84,10 @@ Cuts happen by re-scoping CODEOWNERS path list smaller (e.g. drop `eslint.config
 
 - **Outcome:** `CLAUDE.md` §"Engineering conventions" §"Architectural-smell trigger" rewritten from numeric round-count rule (≥3 rounds = trigger) to qualitative judgement prompt (clustered findings = consideration). Cunningham/Fowler-aligned: smell is judgement, not metric. No more round-counting incentive to game.
 - **Verification:**
-  1. `CLAUDE.md` §"Architectural-smell trigger" no longer contains the literal string "≥3 rounds" or any numeric round-count rule.
+  1. `CLAUDE.md` §"Architectural-smell trigger" active-rule clause no longer uses "≥3 rounds" or any numeric round-count as a trigger. (Rationale-mention of the deprecated rule — e.g. *"the v3a numeric '≥3 rounds' trigger was deprecated session 53 because round-counting incentivises gaming"* — is intentional and is NOT a live rule; it explains WHY the rule was reframed for future readers. A literal `grep "≥3 rounds"` returning 1 is OK provided the match is in the rationale clause, not the active rule.)
   2. Replacement text contains the literal frame: *"clustered findings in a single file ... reviewer's judgement is the gate ... patches feel like interest payment rather than principal"*.
   3. v3b S-6 worked example (auto-review.yml 6-round case) preserved as illustrative narrative — the example still teaches the pattern; the rule itself stops measuring rounds.
-  4. No other CLAUDE.md sections reference the old round-count rule (grep `≥3 rounds` returns no matches outside historical handoffs).
+  4. No other CLAUDE.md sections (outside the §"Architectural-smell trigger" deprecation-rationale clause + historical handoffs) reference the old round-count rule. `grep -c "≥3 rounds" CLAUDE.md` ≤ 1 (the single allowed match is the rationale-mention in the rewritten §"Architectural-smell trigger" — see step 1).
   5. Persona files (`.claude/agents/slice-reviewer.md` + others) reference the rule via CLAUDE.md ref only — no embedded copy of the round-count text exists in any persona file (verified by grep). Rewrite of CLAUDE.md propagates transitively.
 - **In scope:** single CLAUDE.md §"Architectural-smell trigger" paragraph rewrite (~50L → ~35L). No persona-file edits.
 - **Out of scope:**
