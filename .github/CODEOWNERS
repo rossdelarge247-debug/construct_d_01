@@ -1,0 +1,26 @@
+# CODEOWNERS — control-plane code-owner protection
+#
+# Replaces .claude/hooks-checksums.txt + scripts/hooks-checksums.sh +
+# .github/workflows/control-change-label.yml per session-49 prior-art audit
+# (HANDOFF-49 L27: "we're re-implementing CODEOWNERS").
+#
+# Enforcement requires branch-protection setting on `main`:
+#   required_pull_request_reviews.require_code_owner_reviews=true
+# See docs/slices/S-INFRA-rigour-v3c-prior-art-amendments-structural/verification.md
+# §"Pre-flight setup" for the gh api command.
+#
+# Path scope = union of legacy L199 regex + hooks-checksums.txt baseline.
+# Single owner suffices at single-developer project stage; migrate to a team
+# line when collaborators join.
+
+.claude/hooks/**                    @rossdelarge247-debug
+.claude/agents/**                   @rossdelarge247-debug
+.claude/subagent-prompts/**         @rossdelarge247-debug
+.claude/settings.json               @rossdelarge247-debug
+scripts/**                          @rossdelarge247-debug
+.github/workflows/**                @rossdelarge247-debug
+.github/CODEOWNERS                  @rossdelarge247-debug
+eslint.config.mjs                   @rossdelarge247-debug
+vitest.config.ts                    @rossdelarge247-debug
+docs/eslint-baseline-allowlist.txt  @rossdelarge247-debug
+docs/tdd-exemption-allowlist.txt    @rossdelarge247-debug
