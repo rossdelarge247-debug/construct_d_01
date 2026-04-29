@@ -1,0 +1,93 @@
+# Criterion 2 §Exceptions — structured source of truth.
+#
+# Consumed by:
+#   - .claude/agents/slice-reviewer.md (criterion 2 paragraph references this file;
+#     the persona's prompt also embeds a summary markdown table mirroring the
+#     `id` / `name` / `predicate.summary` / `treatment` / `carve_outs` fields).
+#   - scripts/criterion-2-exception-check.sh (pre-filters file-glob deterministic
+#     exceptions before the persona is invoked; non-deterministic predicates
+#     pass through as `requires-judgement`). The script hardcodes path globs
+#     for ids c and e — keep them aligned with `predicate.paths_in` here when
+#     editing either side. (Parity-check script deferred until first drift.)
+#
+# Each entry MUST set `deterministic: true|partial|false` so the script can
+# decide whether to short-circuit or pass through:
+#   true     — predicate is purely file-path globs; script emits the id.
+#   partial  — predicate has a deterministic file/path component AND a
+#              content/judgement component; script emits `requires-judgement`
+#              and the persona makes the final call.
+#   false    — predicate requires LLM judgement; script emits
+#              `requires-judgement` for any path matching the slice's diff.
+
+exceptions:
+  - id: a
+    name: incidental-scaffolding
+    deterministic: false
+    predicate:
+      summary: "Diff content directly required by an in-scope change (imports, type re-exports, test boilerplate, lockfile updates)."
+      kind: judgement
+    treatment: "The in-scope change's verification text covers it."
+    carve_outs: []
+    precedent: "criterion 2 baseline rubric (no specific PR; standard scaffolding allowance)."
+
+  - id: b
+    name: deferred-slice-scope-marker-update
+    deterministic: partial
+    predicate:
+      summary: "Diff lines confined to a deferred slice's pre-AC-freeze sections (`STATUS:` header, `**Scope marker**` bullets, draft `## <candidate-name>` sections); slice's acceptance.md must carry `STATUS: deferred — full AC draft lands when this slice begins` (or equivalent)."
+      kind: composite
+      requires:
+        - "Linked slice acceptance.md carries `STATUS: deferred` (or equivalent draft-status header)."
+        - "Diff confined to: `STATUS:` header line, `**Scope marker**` bullets, `## <candidate-name>` draft-mode sections (modelled on `## Multi-provider consensus framework (candidate; session-48 addition)`)."
+      excludes:
+        - "Diff touching AC-bearing sections (`## AC-N`, `## In scope`, `## Out of scope`, `## Verification`, `## Review log` finality rows) — standard scope-creep rule applies in full; fabricated ACs are NOT exempt."
+    treatment: "Pre-AC-freeze content is by-design; review for internal consistency + cross-reference correctness only."
+    carve_outs:
+      - "Fabricated ACs in deferred-slice files are NOT exempt — standard scope-creep rule applies."
+    precedent: "v3c carry-over from session-48 PR #34 false-positive."
+
+  - id: c
+    name: spec-design-content
+    deterministic: true
+    predicate:
+      summary: "PR shipping content under `docs/workspace-spec/` or `docs/design-source/` without code surface."
+      kind: file-glob
+      paths_in:
+        - "docs/workspace-spec/**"
+        - "docs/design-source/**"
+    treatment: "Specs precede the ACs that reference them; specs cannot be in-scope to themselves. Apply criterion 6 (spec-citation) for any 'matches spec X' claim; review for internal consistency + cross-reference correctness."
+    carve_outs:
+      - "Criterion 4 (security) applies unconditionally — auth flows, secrets handling, RLS-bypass paths must be checked against OWASP top 10 + spec 72 §11 even when no code is in the diff."
+      - "Criterion 7 (hidden state / hidden effects) applies unconditionally — side-effecty patterns documented in specs must still be flagged."
+    precedent: "v3c carry-over from session-48 PR #33 round-2 false-positive."
+
+  - id: d
+    name: revert-commits-within-pr
+    deterministic: false
+    predicate:
+      summary: "Within-PR revert commits — handled per invocation mode (cumulative diff vs differential-review)."
+      kind: invocation-mode
+      cases:
+        - mode: "cumulative (pull_request:synchronize)"
+          handling: "Self-enforcing at runtime — reverted content cancels out, absent from review surface; no separate handling needed."
+        - mode: "differential-review (spec 72c §6)"
+          handling: "Removal lines that exactly invert an addition from the prior-findings list are valid self-correction — do NOT flag as regression or scope-creep; match against prior-findings state and treat as resolution."
+    treatment: "See predicate handling per invocation mode."
+    carve_outs:
+      - "Original addition's findings still stand if unaddressed in cumulative diff."
+    precedent: "v3c carry-over from session-48 PR #33 commit `5f74340` (v3c stub revert) precedent."
+
+  - id: e
+    name: claude-md-session-wrap-docs
+    deterministic: true
+    predicate:
+      summary: "Diff includes `docs/HANDOFF-SESSION-{N}.md` (per-session retro) or modifications to `docs/SESSION-CONTEXT.md` (rolling context block) — CLAUDE.md §'Wrapping up a session' steps 1-3 mandate these on the session's branch."
+      kind: file-glob
+      paths_in:
+        - "docs/HANDOFF-SESSION-*.md"
+        - "docs/SESSION-CONTEXT.md"
+    treatment: "Operational artefacts by declaration of CLAUDE.md §'Wrapping up a session' §1-3 — not substantive slice scope. Review the rest of the diff against the slice's stated AC scope as normal."
+    carve_outs:
+      - "Criterion 4 (security) applies unconditionally — wrap docs disclosing secrets, auth flows, or RLS-bypass paths must be flagged."
+      - "Criterion 7 (hidden state) applies unconditionally — wrap docs documenting side-effecty patterns must be flagged."
+    precedent: "v3c carry-over from session-50 PR #37 false-positive (HANDOFF-SESSION-49.md + SESSION-CONTEXT.md refresh shipped in `cf51b7c` without explicit AC §In scope listing — same false-positive class as (b) and (c))."
