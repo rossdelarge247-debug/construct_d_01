@@ -24,7 +24,7 @@ set -euo pipefail
 
 glob_match() {
   # Usage: glob_match <path> <glob1> [<glob2> ...]
-  # Returns 0 if path matches any glob (bash extglob), 1 otherwise.
+  # Returns 0 if path matches any glob (bash `[[ == ]]` pattern matching), 1 otherwise.
   local path="$1"; shift
   local glob
   for glob in "$@"; do

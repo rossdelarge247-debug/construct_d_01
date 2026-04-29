@@ -126,7 +126,7 @@ Describe 'criterion-2-exception-check.sh'
     The line 1 of output should include $'\te\t'
   End
 
-  It 'emits empty output for empty stdin'
+  It 'emits empty output for blank-line-only stdin'
     Data
       #|
     End
