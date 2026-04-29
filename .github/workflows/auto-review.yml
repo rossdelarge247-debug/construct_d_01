@@ -137,38 +137,19 @@ jobs:
           # findings-only at /tmp/findings.json).
           printf '%s' "$PERSONA_JSON" > /tmp/persona-output.json
 
-          # Parse-failed sentinel: when both jq parses exhaust and
-          # PERSONA_JSON='{}', the verdict/severity/findings defaults
-          # would silently fire (`block`/`architectural`/0) — posting a
-          # contradictory failure check-run with empty summary. The
-          # `if: failure()` fallback step doesn't cover this because
-          # this step still exits 0. Emit a sentinel verdict that maps
-          # to `neutral` with diagnostic title; raw output already
-          # logged in the `::group::raw claude output` block above.
-          # Closes v3b S-6 round-4 #1 finding.
-          if [ "$PERSONA_JSON" = '{}' ]; then
-            VERDICT="parse-failed"
+          # Verdict-derivation arithmetic extracted to scripts/derive-verdict.sh
+          # (S-INFRA-derive-verdict-script-extract). Test contract: tests/
+          # shellspec/derive-verdict.spec.sh covers the 8-row edge-case
+          # table from PR #41 verification.md + verdict-coercion fixture
+          # adversarial inputs per spec 72c §5 rule 3. parse-failed
+          # sentinel is handled inside the script.
+          VERDICT=$(printf '%s' "$PERSONA_JSON" | scripts/derive-verdict.sh)
+
+          if [ "$VERDICT" = "parse-failed" ]; then
             FINDINGS_COUNT=0
             printf '[]' > /tmp/findings.json
           else
-            # Per CLAUDE.md §"Verdict vocabulary" §"Verdict derivation
-            # rules" (Conventional Comments adoption from AC-5): the
-            # persona emits findings with `label` + `blocking` per finding
-            # but does NOT emit a top-level verdict — we derive it here
-            # deterministically. Order matters; first match wins.
             FINDINGS_COUNT=$(printf '%s' "$PERSONA_JSON" | jq -r '(.findings // []) | length')
-            BLOCKING_COUNT=$(printf '%s' "$PERSONA_JSON" | jq -r '[.findings // [] | .[] | select(.blocking == true)] | length')
-            ACTION_COUNT=$(printf '%s' "$PERSONA_JSON" | jq -r '[.findings // [] | .[] | select(.label == "issue" or .label == "suggestion" or .label == "todo")] | length')
-            NIT_COUNT=$(printf '%s' "$PERSONA_JSON" | jq -r '[.findings // [] | .[] | select(.label == "nitpick" or .label == "chore")] | length')
-            if [ "$BLOCKING_COUNT" -gt 0 ]; then
-              VERDICT="block"
-            elif [ "$ACTION_COUNT" -gt 0 ]; then
-              VERDICT="request-changes"
-            elif [ "$NIT_COUNT" -gt 0 ]; then
-              VERDICT="nit-only"
-            else
-              VERDICT="approve"
-            fi
             # Save findings JSON to file for the post-step (avoids multi-
             # line GITHUB_OUTPUT escaping).
             printf '%s' "$PERSONA_JSON" | jq -c '.findings // []' | head -c 60000 > /tmp/findings.json
