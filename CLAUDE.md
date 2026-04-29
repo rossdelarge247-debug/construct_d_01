@@ -241,7 +241,6 @@ Enforcement: `.github/PULL_REQUEST_TEMPLATE.md` reproduces this checklist; `.git
 
 | Gate | File(s) | Fires on | AC | Bypass |
 |---|---|---|---|---|
-| Slice-DoD pre-commit | `.claude/hooks/pre-commit-verify.sh` | `git commit` (PreToolUse:Bash) | AC-4 | resolve slice DoD before retrying |
 | CODEOWNERS code-owner review | `.github/CODEOWNERS` + GitHub branch-protection (`required_pull_request_reviews.require_code_owner_reviews=true`) | every PR touching CODEOWNERS-listed paths; enforces via GitHub Reviewers panel | v3c P0b-structural AC-1 | conscious admin-bypass click ("Merge without waiting for required review") in solo-operator context (sole code-owner = PR author; GitHub hard rule prevents self-approval); rigour gate = auto-review.yml + admin-click-as-conscious-act |
 | ESLint zero-new-disables | `scripts/eslint-no-disable.sh` + `.github/workflows/eslint-no-disable.yml` + `docs/eslint-baseline-allowlist.txt` | every push + PR | AC-3 | add line to baseline allowlist; allowlist edit ships under `control-change` label |
 | ESLint function-size + max-lines | `eslint.config.mjs` | `npm run lint` + CI `Lint` job | AC-3 | edit thresholds under `control-change` label (full origin/main-anchored ratchet lands v3c per F5c) |
@@ -250,6 +249,8 @@ Enforcement: `.github/PULL_REQUEST_TEMPLATE.md` reproduces this checklist; `.git
 | Auto-review on PR (slice-reviewer) | `.claude/agents/slice-reviewer.md` + `.github/workflows/auto-review.yml` | `pull_request:opened/synchronize` | v3b AC-1 + S-INFRA-rigour-parse-failed-pipeline-crashed-merge-gate (session 52) | partially merge-gating: `block` + `parse-failed` + pipeline-crash → `failure` (the rigour-malfunction paths gate the merge); `request-changes` + `nit-only` → `neutral` (advisory only); `approve` → `success`; skip on missing `ANTHROPIC_API_KEY` → `neutral` (forks unaffected) |
 
 Each gate emits a useful-message exit body on failure: what failed, why per spec, concrete remediation.
+
+Slice-DoD enforcement is CI-only via `.github/workflows/pr-dod.yml` — no pre-commit hook gates DoD (per v3c P0b-structural AC-2 deprecation; pre-commit is wrong layer for completeness checks per session-49 prior-art audit verdict).
 
 ### Verdict vocabulary (per G23 + AC-5 Conventional Comments adoption)
 
