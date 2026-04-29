@@ -7,8 +7,14 @@ name: auto-review (slice-reviewer persona)
 # four verdicts per CLAUDE.md "Hard controls > Verdict vocabulary"."
 #
 # Out: integration with branch-protection (defer to v3c per AC-1 §Scope).
-# This workflow is informational at v3b ship — verdict appears as a
-# success / neutral / failure check run but does not gate merge.
+# This workflow is mostly informational at v3b ship — `approve` →
+# `success`, `request-changes`/`nit-only` → `neutral` (advisory only).
+# Two failure modes DO gate the merge button (per S-INFRA-rigour-parse-
+# failed-pipeline-crashed-merge-gate, session 52): `block` verdict →
+# `failure`; `parse-failed` (persona output unparseable) → `failure`;
+# pipeline-crash (`if: failure()` fallback) → `failure`. Skip on
+# missing `ANTHROPIC_API_KEY` stays `neutral` so fork PRs aren't gated
+# by a secret they can't access.
 #
 # Secret precondition: ANTHROPIC_API_KEY must be set as a repo secret.
 # Workflow gracefully skips with a `neutral` check run when absent (per
@@ -169,15 +175,18 @@ jobs:
           set -euo pipefail
           # Map verdict → conclusion per CLAUDE.md §"Verdict vocabulary"
           # §"Check-run conclusion mapping": approve → success;
-          # request-changes / nit-only → neutral (informational at v3b
-          # ship); block → failure. Plus parse-failed sentinel (round-4
-          # #1): unparseable persona output → neutral with diagnostic
-          # title (NOT misleading-block-default-fail).
+          # request-changes / nit-only → neutral (advisory only);
+          # block → failure. Plus parse-failed sentinel: unparseable
+          # persona output → `failure` (was `neutral` pre-S-INFRA-
+          # rigour-parse-failed-pipeline-crashed-merge-gate; promoted
+          # session 52 — a malformed persona output means no review
+          # actually happened and merging would skip the rigour gate).
+          # The unknown-verdict default also fails closed.
           case "$VERDICT" in
             approve)                       CONCLUSION="success" ;;
             request-changes|nit-only)      CONCLUSION="neutral" ;;
             block)                         CONCLUSION="failure" ;;
-            parse-failed)                  CONCLUSION="neutral" ;;
+            parse-failed)                  CONCLUSION="failure" ;;
             *)                             CONCLUSION="failure" ;;
           esac
           if [ "$VERDICT" = "parse-failed" ]; then
@@ -311,11 +320,14 @@ jobs:
       - name: Post failure-fallback check run (when an earlier step crashed)
         # `if: failure()` runs only when an earlier step in this job failed
         # AND the secret was present (so we entered the live-review path).
-        # Mirrors the secret-absent skip path's explicit neutral posting:
-        # ensures the Checks list always gets a slice-reviewer entry even
-        # when the review pipeline crashes (npx unavailable, jq parse
-        # failure, gh api outage, etc.) — author sees a diagnostic neutral
-        # instead of just a failed workflow with no surfaced reason.
+        # Posts a `failure` check run + diagnostic PR comment so the
+        # author sees a surfaced reason. Pipeline-crash → failure
+        # (per S-INFRA-rigour-parse-failed-pipeline-crashed-merge-gate,
+        # session 52 — was `neutral` pre-promotion; a workflow-level
+        # crash means no review happened and merging would skip the
+        # rigour gate). Re-running the workflow may succeed if the
+        # cause was transient (npx unavailable, jq parse, gh api
+        # outage, runner OOM) — that re-run is the escape hatch.
         # Closes the v3b S-6 round-2 #2 finding (edge-case: pipefail
         # crash → no posted check-run → empty Checks list).
         if: failure() && steps.secret-check.outputs.skip == 'false'
@@ -331,12 +343,12 @@ jobs:
             --arg name 'auto-review (slice-reviewer persona)' \
             --arg head_sha "$HEAD_SHA" \
             --arg run_url "$RUN_URL" \
-            '{name: $name, head_sha: $head_sha, status: "completed", conclusion: "neutral", output: {title: "Review pipeline crashed — see workflow log", summary: ("auto-review.yml failed before posting a verdict (npx install, claude invocation, jq parse, or gh api). Inspect the workflow log: " + $run_url + " — common causes: API outage, malformed persona output, runner network issue. v3b S-6 round-2 #2 fallback per AC-1 informational gate.")}}' \
+            '{name: $name, head_sha: $head_sha, status: "completed", conclusion: "failure", output: {title: "Review pipeline crashed — see workflow log", summary: ("auto-review.yml failed before posting a verdict (npx install, claude invocation, jq parse, or gh api). Inspect the workflow log: " + $run_url + " — common causes: API outage, malformed persona output, runner network issue. Re-run the workflow to retry; if the cause was transient the next run will succeed and supersede this failure check.")}}' \
           | gh api "repos/${{ github.repository }}/check-runs" --method POST --input -
 
           # Mirror as a PR comment (same marker → idempotent).
           MARKER='<!-- auto-review-comment:slice-reviewer -->'
-          BODY=$(printf '%s\n\n## auto-review · slice-reviewer persona\n\n**Verdict:** 💥 pipeline-crashed — review did not produce a verdict\n\nThe auto-review workflow failed before posting a verdict (npx install, `claude` invocation, jq parse, or `gh api`). Common causes: API outage, malformed persona output, runner network issue.\n\nInspect the [workflow log](%s) on commit `%s` for the actual error. v3b S-6 round-2 #2 fallback per AC-1 informational gate.\n\n---\n_Auto-posted by `auto-review.yml`. Informational at v3b ship — does not gate the merge button. Re-running the workflow may succeed if the cause was transient._\n' "$MARKER" "$RUN_URL" "$HEAD_SHA")
+          BODY=$(printf '%s\n\n## auto-review · slice-reviewer persona\n\n**Verdict:** 💥 pipeline-crashed — review did not produce a verdict\n\nThe auto-review workflow failed before posting a verdict (npx install, `claude` invocation, jq parse, or `gh api`). Common causes: API outage, malformed persona output, runner network issue.\n\nInspect the [workflow log](%s) on commit `%s` for the actual error.\n\n---\n_Auto-posted by `auto-review.yml`. Pipeline-crash promotes to `failure` (the merge button is gated until the workflow re-runs successfully). Re-running the workflow is the escape hatch: if the cause was transient, the next run will supersede this failure with a real verdict._\n' "$MARKER" "$RUN_URL" "$HEAD_SHA")
           COMMENT_ID=$(gh api "repos/${REPO}/issues/${PR_NUMBER}/comments?per_page=100" --paginate \
             --jq ".[] | select(.body | contains(\"${MARKER}\")) | .id" \
             | head -n 1 || true)
