@@ -20,7 +20,7 @@ on:
 
 permissions:
   contents: read
-  pull-requests: read
+  pull-requests: write
   checks: write
 
 jobs:
@@ -153,6 +153,11 @@ jobs:
           printf '%s\n' "$PERSONA_JSON"
           echo "::endgroup::"
 
+          # Persist the full persona JSON for downstream steps (comment
+          # rendering reads .summary + .findings; check-run summary uses
+          # findings-only at /tmp/findings.json).
+          printf '%s' "$PERSONA_JSON" > /tmp/persona-output.json
+
           # Parse-failed sentinel: when both jq parses exhaust and
           # PERSONA_JSON='{}', the verdict/severity/findings defaults
           # would silently fire (`block`/`architectural`/0) — posting a
@@ -237,10 +242,88 @@ jobs:
             '{name: $name, head_sha: $head_sha, status: "completed", conclusion: $conclusion, output: {title: $title, summary: $summary}}' \
           | gh api "repos/${{ github.repository }}/check-runs" --method POST --input -
 
+      - name: Post findings PR comment (verdict path)
+        # Always-post (per session-51 design call): every auto-review run
+        # lands a PR comment so the author never has to dig through the
+        # Checks tab to find the persona's findings JSON. Idempotent via
+        # the marker — first push POSTs, subsequent pushes PATCH the
+        # same comment in place. parse-failed renders a diagnostic body
+        # (no findings to render). Skip + crash paths each post their
+        # own comment via the steps below.
+        if: steps.secret-check.outputs.skip == 'false' && steps.review.outputs.verdict
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          REPO: ${{ github.repository }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+          VERDICT: ${{ steps.review.outputs.verdict }}
+          FINDINGS_COUNT: ${{ steps.review.outputs.findings_count }}
+        run: |
+          set -euo pipefail
+          MARKER='<!-- auto-review-comment:slice-reviewer -->'
+
+          case "$VERDICT" in
+            approve)         HEADLINE='**Verdict:** ✅ approve' ;;
+            nit-only)        HEADLINE='**Verdict:** 💬 nit-only (informational at v3b ship)' ;;
+            request-changes) HEADLINE='**Verdict:** 🟡 request-changes (informational at v3b ship)' ;;
+            block)           HEADLINE='**Verdict:** 🛑 block (informational at v3b ship)' ;;
+            parse-failed)    HEADLINE='**Verdict:** ⚠️ parse-failed — persona output unparseable' ;;
+            *)               HEADLINE="**Verdict:** \`$VERDICT\`" ;;
+          esac
+
+          # Render summary line + findings table from /tmp/persona-output.json.
+          # parse-failed branch wrote '{}' there; jq fallbacks render
+          # empty summary + empty table cleanly.
+          SUMMARY=$(jq -r '.summary // ""' /tmp/persona-output.json)
+          if [ -n "$SUMMARY" ]; then
+            SUMMARY_BLOCK=$(printf '\n\n> %s' "$SUMMARY")
+          else
+            SUMMARY_BLOCK=""
+          fi
+
+          TABLE=$(jq -r '
+            (.findings // []) as $f
+            | if ($f | length) == 0 then ""
+              else
+                "\n\n| Label | Blocking | Category | Evidence | Remediation |\n|---|:---:|---|---|---|\n"
+                + ( $f | map(
+                    "| `\(.label // "?")`"
+                    + (if (.blocking // false) then " **(blocking)**" else "" end)
+                    + " | \(.blocking // false)"
+                    + " | `\(.category // "?")`"
+                    + " | " + ((.evidence // "") | gsub("\\|"; "\\|") | gsub("\n"; " "))
+                    + " | " + ((.remediation // "") | gsub("\\|"; "\\|") | gsub("\n"; " "))
+                    + " |"
+                  ) | join("\n") )
+              end
+          ' /tmp/persona-output.json)
+
+          FOOTER=$(printf '\n\n---\n_Auto-posted by [`auto-review.yml`](%s) on commit `%s`. Workflow derives verdict deterministically from findings array per CLAUDE.md §"Verdict vocabulary"; labels follow [Conventional Comments](https://conventionalcomments.org/). Informational at v3b ship — does not gate the merge button._\n' \
+            "$RUN_URL" "$HEAD_SHA")
+
+          BODY=$(printf '%s\n\n## auto-review · slice-reviewer persona\n\n%s — %s finding(s)%s%s%s' \
+            "$MARKER" "$HEADLINE" "$FINDINGS_COUNT" "$SUMMARY_BLOCK" "$TABLE" "$FOOTER")
+
+          # Find existing marker-tagged comment (idempotency across pushes).
+          COMMENT_ID=$(gh api "repos/${REPO}/issues/${PR_NUMBER}/comments?per_page=100" --paginate \
+            --jq ".[] | select(.body | contains(\"${MARKER}\")) | .id" \
+            | head -n 1 || true)
+
+          if [ -n "${COMMENT_ID:-}" ]; then
+            jq -n --arg body "$BODY" '{body: $body}' \
+              | gh api "repos/${REPO}/issues/comments/${COMMENT_ID}" --method PATCH --input -
+          else
+            jq -n --arg body "$BODY" '{body: $body}' \
+              | gh api "repos/${REPO}/issues/${PR_NUMBER}/comments" --method POST --input -
+          fi
+
       - name: Post skip notice (when secret absent)
         if: steps.secret-check.outputs.skip == 'true'
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          REPO: ${{ github.repository }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
           HEAD_SHA: ${{ github.event.pull_request.head.sha }}
         run: |
           set -euo pipefail
@@ -250,6 +333,20 @@ jobs:
             --arg head_sha "$HEAD_SHA" \
             '{name: $name, head_sha: $head_sha, status: "completed", conclusion: "neutral", output: {title: "Skipped — ANTHROPIC_API_KEY not configured", summary: "Set ANTHROPIC_API_KEY as a repo secret to enable auto-review per docs/slices/S-INFRA-rigour-v3b-subagent-suite/acceptance.md AC-1."}}' \
           | gh api "repos/${{ github.repository }}/check-runs" --method POST --input -
+
+          # Mirror as a PR comment (same marker as verdict path → idempotent).
+          MARKER='<!-- auto-review-comment:slice-reviewer -->'
+          BODY=$(printf '%s\n\n## auto-review · slice-reviewer persona\n\n**Verdict:** ⏭️ skipped — `ANTHROPIC_API_KEY` not configured\n\nSet `ANTHROPIC_API_KEY` as a repo secret to enable auto-review per `docs/slices/S-INFRA-rigour-v3b-subagent-suite/acceptance.md` AC-1.\n\n---\n_Auto-posted by `auto-review.yml`. Informational._\n' "$MARKER")
+          COMMENT_ID=$(gh api "repos/${REPO}/issues/${PR_NUMBER}/comments?per_page=100" --paginate \
+            --jq ".[] | select(.body | contains(\"${MARKER}\")) | .id" \
+            | head -n 1 || true)
+          if [ -n "${COMMENT_ID:-}" ]; then
+            jq -n --arg body "$BODY" '{body: $body}' \
+              | gh api "repos/${REPO}/issues/comments/${COMMENT_ID}" --method PATCH --input -
+          else
+            jq -n --arg body "$BODY" '{body: $body}' \
+              | gh api "repos/${REPO}/issues/${PR_NUMBER}/comments" --method POST --input -
+          fi
 
       - name: Post failure-fallback check run (when an earlier step crashed)
         # `if: failure()` runs only when an earlier step in this job failed
@@ -264,6 +361,8 @@ jobs:
         if: failure() && steps.secret-check.outputs.skip == 'false'
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          REPO: ${{ github.repository }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
           HEAD_SHA: ${{ github.event.pull_request.head.sha }}
           RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
         run: |
@@ -274,3 +373,17 @@ jobs:
             --arg run_url "$RUN_URL" \
             '{name: $name, head_sha: $head_sha, status: "completed", conclusion: "neutral", output: {title: "Review pipeline crashed — see workflow log", summary: ("auto-review.yml failed before posting a verdict (npx install, claude invocation, jq parse, or gh api). Inspect the workflow log: " + $run_url + " — common causes: API outage, malformed persona output, runner network issue. v3b S-6 round-2 #2 fallback per AC-1 informational gate.")}}' \
           | gh api "repos/${{ github.repository }}/check-runs" --method POST --input -
+
+          # Mirror as a PR comment (same marker → idempotent).
+          MARKER='<!-- auto-review-comment:slice-reviewer -->'
+          BODY=$(printf '%s\n\n## auto-review · slice-reviewer persona\n\n**Verdict:** 💥 pipeline-crashed — review did not produce a verdict\n\nThe auto-review workflow failed before posting a verdict (npx install, `claude` invocation, jq parse, or `gh api`). Common causes: API outage, malformed persona output, runner network issue.\n\nInspect the [workflow log](%s) on commit `%s` for the actual error. v3b S-6 round-2 #2 fallback per AC-1 informational gate.\n\n---\n_Auto-posted by `auto-review.yml`. Informational at v3b ship — does not gate the merge button. Re-running the workflow may succeed if the cause was transient._\n' "$MARKER" "$RUN_URL" "$HEAD_SHA")
+          COMMENT_ID=$(gh api "repos/${REPO}/issues/${PR_NUMBER}/comments?per_page=100" --paginate \
+            --jq ".[] | select(.body | contains(\"${MARKER}\")) | .id" \
+            | head -n 1 || true)
+          if [ -n "${COMMENT_ID:-}" ]; then
+            jq -n --arg body "$BODY" '{body: $body}' \
+              | gh api "repos/${REPO}/issues/comments/${COMMENT_ID}" --method PATCH --input -
+          else
+            jq -n --arg body "$BODY" '{body: $body}' \
+              | gh api "repos/${REPO}/issues/${PR_NUMBER}/comments" --method POST --input -
+          fi
