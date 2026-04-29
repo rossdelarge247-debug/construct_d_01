@@ -14,8 +14,9 @@
 # deferred-slice scope marker, (d) within-PR revert) emit `requires-judgement`
 # for any file path; the LLM persona makes the final call.
 #
-# Source of truth for the predicates is criterion-2-exceptions.yaml; this
-# script's hardcoded globs are kept in sync via scripts/criterion-2-parity-check.sh.
+# Keep these globs in sync with `predicate.paths_in` in
+# .claude/agents/criterion-2-exceptions.yaml (ids c + e). Parity-check script
+# deferred until first observed drift — see that YAML's head comment.
 #
 # Test contract: tests/shellspec/criterion-2-exception-check.spec.sh.
 
