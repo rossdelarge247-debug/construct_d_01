@@ -53,8 +53,8 @@ exceptions:
       summary: "PR shipping content under `docs/workspace-spec/` or `docs/design-source/` without code surface."
       kind: file-glob
       paths_in:
-        - "docs/workspace-spec/**"
-        - "docs/design-source/**"
+        - "docs/workspace-spec/*"
+        - "docs/design-source/*"
     treatment: "Specs precede the ACs that reference them; specs cannot be in-scope to themselves. Apply criterion 6 (spec-citation) for any 'matches spec X' claim; review for internal consistency + cross-reference correctness."
     carve_outs:
       - "Criterion 4 (security) applies unconditionally — auth flows, secrets handling, RLS-bypass paths must be checked against OWASP top 10 + spec 72 §11 even when no code is in the diff."

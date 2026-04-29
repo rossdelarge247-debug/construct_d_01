@@ -52,10 +52,8 @@ classify_path() {
   # Exception (c): spec-design content.
   if glob_match "$path" \
       'docs/workspace-spec/*' \
-      'docs/workspace-spec/**' \
-      'docs/design-source/*' \
-      'docs/design-source/**'; then
-    printf '%s\t%s\t%s\n' "$path" 'c' 'matches docs/workspace-spec/** or docs/design-source/** (spec-design glob)'
+      'docs/design-source/*'; then
+    printf '%s\t%s\t%s\n' "$path" 'c' 'matches docs/workspace-spec/* or docs/design-source/* (spec-design glob; bash `[[ == ]]` `*` matches `/`)'
     return
   fi
 
