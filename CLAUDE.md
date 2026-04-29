@@ -248,7 +248,7 @@ Enforcement: `.github/PULL_REQUEST_TEMPLATE.md` reproduces this checklist; `.git
 | ESLint function-size + max-lines | `eslint.config.mjs` | `npm run lint` + CI `Lint` job | AC-3 | edit thresholds under `control-change` label (full origin/main-anchored ratchet lands v3c per F5c) |
 | Plan-time review | `.claude/hooks/exit-plan-review.sh` + `.claude/subagent-prompts/exit-plan-review.md` + `scripts/git-state-verifier.sh` | `ExitPlanMode` (PreToolUse) | AC-7 | address findings + re-attempt; full subagent default-spawn deferred to v3b |
 | Slice-verification PR-body | `.github/workflows/pr-dod.yml` | every PR touching `src/` | pre-S-37 (P0.4) | reference slice's `verification.md` in body, or apply `no-slice-required` label |
-| Auto-review on PR (slice-reviewer) | `.claude/agents/slice-reviewer.md` + `.github/workflows/auto-review.yml` | `pull_request:opened/synchronize` | v3b AC-1 | informational at v3b ship; verdict posts as check run (no merge gate); skips with `neutral` if `ANTHROPIC_API_KEY` repo secret absent |
+| Auto-review on PR (slice-reviewer) | `.claude/agents/slice-reviewer.md` + `.github/workflows/auto-review.yml` | `pull_request:opened/synchronize` | v3b AC-1 + S-INFRA-rigour-parse-failed-pipeline-crashed-merge-gate (session 52) | partially merge-gating: `block` + `parse-failed` + pipeline-crash → `failure` (the rigour-malfunction paths gate the merge); `request-changes` + `nit-only` → `neutral` (advisory only); `approve` → `success`; skip on missing `ANTHROPIC_API_KEY` → `neutral` (forks unaffected) |
 
 Each gate emits a useful-message exit body on failure: what failed, why per spec, concrete remediation.
 
