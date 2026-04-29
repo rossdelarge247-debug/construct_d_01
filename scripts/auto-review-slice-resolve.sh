@@ -26,6 +26,10 @@ BRANCH="${1:-}"
 PR_BODY="${2:-}"
 
 SLICE_FROM_BRANCH=$(printf '%s' "$BRANCH" | grep -oE 'S-[A-Za-z0-9-]+' | head -1 || true)
+# Hidden constraint (per PR #47 review 4343099334): the relative `docs/slices/...`
+# path requires CWD = repo root. auto-review.yml guarantees this via
+# `actions/checkout@v4` running before this script invocation. Local callers
+# must `cd` to repo root first.
 if [ -n "$SLICE_FROM_BRANCH" ] && [ -f "docs/slices/$SLICE_FROM_BRANCH/acceptance.md" ]; then
   echo "docs/slices/$SLICE_FROM_BRANCH/acceptance.md"
 else
