@@ -61,26 +61,13 @@ jobs:
           # inline-file pattern when >300L).
           git diff "$BASE_SHA" "$HEAD_SHA" > /tmp/pr-diff.txt
 
-          # Locate slice acceptance.md: prefer the branch-derived slice path
-          # (deterministic; matches conventional `claude/<slice-name>` naming);
-          # fall back to PR body grep when branch resolution misses.
-          #
-          # Without the branch-first preference, a PR body that incidentally
-          # cites an unrelated slice path (e.g. in §"References", §"Forward-
-          # only rename", or §"Sibling-slice precedent" sections) can mis-
-          # resolve to that slice. Observed in PR #38 (session 50) where
-          # §"Forward-only rename" listed S-F7-alpha-contracts-dev-mode/
-          # acceptance.md as one of four historical references; `grep -oE
-          # ... | head -1` grabbed it instead of the branch-mapped slice.
-          # Consequence: persona compared diff against wrong AC; finding
-          # body started "block is S-F7-alpha-contracts-dev-mode (...); PR
-          # diff is for S-INFRA-rigour-v3c-prior-art-amendments-easy".
-          SLICE_FROM_BRANCH=$(printf '%s' "$BRANCH" | grep -oE 'S-[A-Za-z0-9-]+' | head -1 || true)
-          if [ -n "$SLICE_FROM_BRANCH" ] && [ -f "docs/slices/$SLICE_FROM_BRANCH/acceptance.md" ]; then
-            SLICE_AC="docs/slices/$SLICE_FROM_BRANCH/acceptance.md"
-          else
-            SLICE_AC=$(printf '%s' "$PR_BODY" | grep -oE 'docs/slices/S-[A-Za-z0-9-]+/acceptance\.md' | head -1 || true)
-          fi
+          # Slice acceptance.md resolution extracted to scripts/auto-review-
+          # slice-resolve.sh (S-INFRA-auto-review-resolver-parser-extract).
+          # Test contract: tests/shellspec/auto-review-slice-resolve.spec.sh
+          # covers branch-derived preference + PR-body fallback + edge cases.
+          # Branch-first preference per PR #39 (session 50) closes PR #38
+          # false-positive class.
+          SLICE_AC=$(scripts/auto-review-slice-resolve.sh "$BRANCH" "$PR_BODY")
 
           # Compose the prompt envelope per slice-reviewer.md "Per-invocation
           # context" section: persona prompt + nonce + fenced inputs.
@@ -135,19 +122,11 @@ jobs:
           head -100 /tmp/review-output.json || true
           echo "::endgroup::"
 
-          RESULT=$(jq -r '.result // .text // .content // ""' /tmp/review-output.json)
-          # Try direct JSON parse; fall back to stripping ALL markdown
-          # fence lines (```json / ```) regardless of position; fall back
-          # to {} so downstream defaults fire honestly. The grep-based
-          # fence strip is robust to trailing-newline edge cases the
-          # earlier `sed '1{...}'/'${...}'` form missed (round-3 finding
-          # #1: `printf '%s\n'` appends NL → closing fence not on last
-          # line for `sed '$'` → fence retained → jq fails silently).
-          PERSONA_JSON=$(printf '%s' "$RESULT" | jq -c '.' 2>/dev/null) \
-            || PERSONA_JSON=$(printf '%s' "$RESULT" \
-                 | grep -v '^[[:space:]]*```' \
-                 | jq -c '.' 2>/dev/null) \
-            || PERSONA_JSON='{}'
+          # Persona JSON extraction extracted to scripts/auto-review-parse.sh
+          # (S-INFRA-auto-review-resolver-parser-extract). Test contract:
+          # tests/shellspec/auto-review-parse.spec.sh covers .result extraction
+          # + fence-stripping + fallback to '{}' on any parse failure.
+          PERSONA_JSON=$(scripts/auto-review-parse.sh < /tmp/review-output.json)
 
           echo "::group::extracted persona JSON"
           printf '%s\n' "$PERSONA_JSON"
@@ -158,38 +137,19 @@ jobs:
           # findings-only at /tmp/findings.json).
           printf '%s' "$PERSONA_JSON" > /tmp/persona-output.json
 
-          # Parse-failed sentinel: when both jq parses exhaust and
-          # PERSONA_JSON='{}', the verdict/severity/findings defaults
-          # would silently fire (`block`/`architectural`/0) — posting a
-          # contradictory failure check-run with empty summary. The
-          # `if: failure()` fallback step doesn't cover this because
-          # this step still exits 0. Emit a sentinel verdict that maps
-          # to `neutral` with diagnostic title; raw output already
-          # logged in the `::group::raw claude output` block above.
-          # Closes v3b S-6 round-4 #1 finding.
-          if [ "$PERSONA_JSON" = '{}' ]; then
-            VERDICT="parse-failed"
+          # Verdict-derivation arithmetic extracted to scripts/derive-verdict.sh
+          # (S-INFRA-derive-verdict-script-extract). Test contract: tests/
+          # shellspec/derive-verdict.spec.sh covers the 8-row edge-case
+          # table from PR #41 verification.md + verdict-coercion fixture
+          # adversarial inputs per spec 72c §5 rule 3. parse-failed
+          # sentinel is handled inside the script.
+          VERDICT=$(printf '%s' "$PERSONA_JSON" | scripts/derive-verdict.sh)
+
+          if [ "$VERDICT" = "parse-failed" ]; then
             FINDINGS_COUNT=0
             printf '[]' > /tmp/findings.json
           else
-            # Per CLAUDE.md §"Verdict vocabulary" §"Verdict derivation
-            # rules" (Conventional Comments adoption from AC-5): the
-            # persona emits findings with `label` + `blocking` per finding
-            # but does NOT emit a top-level verdict — we derive it here
-            # deterministically. Order matters; first match wins.
             FINDINGS_COUNT=$(printf '%s' "$PERSONA_JSON" | jq -r '(.findings // []) | length')
-            BLOCKING_COUNT=$(printf '%s' "$PERSONA_JSON" | jq -r '[.findings // [] | .[] | select(.blocking == true)] | length')
-            ACTION_COUNT=$(printf '%s' "$PERSONA_JSON" | jq -r '[.findings // [] | .[] | select(.label == "issue" or .label == "suggestion" or .label == "todo")] | length')
-            NIT_COUNT=$(printf '%s' "$PERSONA_JSON" | jq -r '[.findings // [] | .[] | select(.label == "nitpick" or .label == "chore")] | length')
-            if [ "$BLOCKING_COUNT" -gt 0 ]; then
-              VERDICT="block"
-            elif [ "$ACTION_COUNT" -gt 0 ]; then
-              VERDICT="request-changes"
-            elif [ "$NIT_COUNT" -gt 0 ]; then
-              VERDICT="nit-only"
-            else
-              VERDICT="approve"
-            fi
             # Save findings JSON to file for the post-step (avoids multi-
             # line GITHUB_OUTPUT escaping).
             printf '%s' "$PERSONA_JSON" | jq -c '.findings // []' | head -c 60000 > /tmp/findings.json
