@@ -61,26 +61,13 @@ jobs:
           # inline-file pattern when >300L).
           git diff "$BASE_SHA" "$HEAD_SHA" > /tmp/pr-diff.txt
 
-          # Locate slice acceptance.md: prefer the branch-derived slice path
-          # (deterministic; matches conventional `claude/<slice-name>` naming);
-          # fall back to PR body grep when branch resolution misses.
-          #
-          # Without the branch-first preference, a PR body that incidentally
-          # cites an unrelated slice path (e.g. in §"References", §"Forward-
-          # only rename", or §"Sibling-slice precedent" sections) can mis-
-          # resolve to that slice. Observed in PR #38 (session 50) where
-          # §"Forward-only rename" listed S-F7-alpha-contracts-dev-mode/
-          # acceptance.md as one of four historical references; `grep -oE
-          # ... | head -1` grabbed it instead of the branch-mapped slice.
-          # Consequence: persona compared diff against wrong AC; finding
-          # body started "block is S-F7-alpha-contracts-dev-mode (...); PR
-          # diff is for S-INFRA-rigour-v3c-prior-art-amendments-easy".
-          SLICE_FROM_BRANCH=$(printf '%s' "$BRANCH" | grep -oE 'S-[A-Za-z0-9-]+' | head -1 || true)
-          if [ -n "$SLICE_FROM_BRANCH" ] && [ -f "docs/slices/$SLICE_FROM_BRANCH/acceptance.md" ]; then
-            SLICE_AC="docs/slices/$SLICE_FROM_BRANCH/acceptance.md"
-          else
-            SLICE_AC=$(printf '%s' "$PR_BODY" | grep -oE 'docs/slices/S-[A-Za-z0-9-]+/acceptance\.md' | head -1 || true)
-          fi
+          # Slice acceptance.md resolution extracted to scripts/auto-review-
+          # slice-resolve.sh (S-INFRA-auto-review-resolver-parser-extract).
+          # Test contract: tests/shellspec/auto-review-slice-resolve.spec.sh
+          # covers branch-derived preference + PR-body fallback + edge cases.
+          # Branch-first preference per PR #39 (session 50) closes PR #38
+          # false-positive class.
+          SLICE_AC=$(scripts/auto-review-slice-resolve.sh "$BRANCH" "$PR_BODY")
 
           # Compose the prompt envelope per slice-reviewer.md "Per-invocation
           # context" section: persona prompt + nonce + fenced inputs.
@@ -135,19 +122,11 @@ jobs:
           head -100 /tmp/review-output.json || true
           echo "::endgroup::"
 
-          RESULT=$(jq -r '.result // .text // .content // ""' /tmp/review-output.json)
-          # Try direct JSON parse; fall back to stripping ALL markdown
-          # fence lines (```json / ```) regardless of position; fall back
-          # to {} so downstream defaults fire honestly. The grep-based
-          # fence strip is robust to trailing-newline edge cases the
-          # earlier `sed '1{...}'/'${...}'` form missed (round-3 finding
-          # #1: `printf '%s\n'` appends NL → closing fence not on last
-          # line for `sed '$'` → fence retained → jq fails silently).
-          PERSONA_JSON=$(printf '%s' "$RESULT" | jq -c '.' 2>/dev/null) \
-            || PERSONA_JSON=$(printf '%s' "$RESULT" \
-                 | grep -v '^[[:space:]]*```' \
-                 | jq -c '.' 2>/dev/null) \
-            || PERSONA_JSON='{}'
+          # Persona JSON extraction extracted to scripts/auto-review-parse.sh
+          # (S-INFRA-auto-review-resolver-parser-extract). Test contract:
+          # tests/shellspec/auto-review-parse.spec.sh covers .result extraction
+          # + fence-stripping + fallback to '{}' on any parse failure.
+          PERSONA_JSON=$(scripts/auto-review-parse.sh < /tmp/review-output.json)
 
           echo "::group::extracted persona JSON"
           printf '%s\n' "$PERSONA_JSON"
