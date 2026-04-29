@@ -69,8 +69,6 @@ classify_path() {
   printf '%s\t%s\t%s\n' "$path" 'none' 'no deterministic exception path-glob match'
 }
 
-shopt -s extglob globstar nullglob
-
 while IFS= read -r line; do
   # Trim trailing whitespace; skip blank lines.
   line="${line%"${line##*[![:space:]]}"}"

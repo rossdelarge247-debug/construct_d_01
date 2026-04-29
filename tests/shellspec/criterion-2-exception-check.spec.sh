@@ -68,6 +68,14 @@ Describe 'criterion-2-exception-check.sh'
     The line 1 of output should include $'\trequires-judgement\t'
   End
 
+  It 'passes docs/slices/<id>/security.md through as requires-judgement'
+    Data
+      #|docs/slices/S-INFRA-foo/security.md
+    End
+    When call scripts/criterion-2-exception-check.sh
+    The line 1 of output should include $'\trequires-judgement\t'
+  End
+
   It 'classifies src/ paths as none'
     Data
       #|src/lib/foo.ts

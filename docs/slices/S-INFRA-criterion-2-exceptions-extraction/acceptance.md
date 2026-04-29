@@ -41,7 +41,7 @@ Per CLAUDE.md §"Coding conduct" §"Architectural-smell trigger":
   - `.claude/agents/criterion-2-exceptions.yaml` — new file (~95L).
   - `.claude/agents/slice-reviewer.md` — replace lines 11-16 (criterion 2 paragraph + 5 sub-clauses) with new paragraph + 5-row markdown table. Net delta within ±5% line count.
   - `.claude/hooks-checksums.txt` — slice-reviewer.md SHA re-baselined.
-  - Slice docs (this file + `verification.md`).
+  - Slice docs (this file + `verification.md` + `security.md`).
 - **Out of scope:**
   - Changing the substantive rules of any exception (a)-(e) — this is pure extraction; the rules stay verbatim. Promotion of `c`/`e` from "by-design exception" to "auto-classified" is a separate decision (CI-wiring follow-up).
   - Parity-check script (`scripts/criterion-2-parity-check.sh`) enforcing YAML ↔ table ↔ script-globs alignment — deferred until first observed drift, per CLAUDE.md §"Don't add error handling for scenarios that can't happen". YAML's head-comment documents the alignment convention.
