@@ -132,6 +132,19 @@ Describe 'derive-verdict.sh'
     The status should be success
   End
 
+  It 'returns parse-failed when .findings is present but not an array (per PR #46 review 4343354539)'
+    # `.findings` field exists but is a string (not the expected array
+    # shape). Without the explicit array-type guard the downstream jq
+    # `.[]` invocation exits non-zero, leaving VERDICT empty in the
+    # caller. Map to parse-failed sentinel for predictable behaviour.
+    Data
+      #|{"summary": "x", "findings": "not-an-array"}
+    End
+    When call scripts/derive-verdict.sh
+    The output should equal 'parse-failed'
+    The status should be success
+  End
+
   It 'returns approve for object without findings field (defaults to empty array)'
     Data
       #|{"summary": "x"}

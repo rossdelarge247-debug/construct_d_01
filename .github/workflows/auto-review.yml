@@ -155,7 +155,7 @@ jobs:
 
           # Persist the full persona JSON for downstream steps (comment
           # rendering reads .summary + .findings; check-run summary uses
-          # findings-only at /tmp/findings.json). From PR #45.
+          # findings-only at /tmp/findings.json).
           printf '%s' "$PERSONA_JSON" > /tmp/persona-output.json
 
           # Verdict-derivation arithmetic extracted to scripts/derive-verdict.sh

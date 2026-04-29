@@ -14,7 +14,7 @@ PR #41 verification.md §"Edge cases" documented an 8-row table covering the ver
 
 This slice ships the extraction:
 1. `scripts/derive-verdict.sh` — preserves the existing inline arithmetic verbatim, adds defensive parse-failed handling for malformed inputs (empty stdin, non-object root, garbage JSON).
-2. `tests/shellspec/derive-verdict.spec.sh` — 15 test cases covering the 8-row table + 7 adversarial / verdict-coercion-fixture cases (parse-failed sentinels, prompt-injection guard).
+2. `tests/shellspec/derive-verdict.spec.sh` — 16 test cases covering the 8-row table + 8 adversarial / verdict-coercion-fixture cases (parse-failed sentinels, prompt-injection guard).
 3. `auto-review.yml` updated to call the script (replaces inline arithmetic; net -19L in workflow).
 
 ## Dependencies
@@ -43,33 +43,33 @@ This slice ships the extraction:
   - Promoting `parse-failed` to `failure` (merge-gating) — separate decision per CLAUDE.md L181 (informational at v3b ship).
   - Auto-review check-run summary rendering changes — comment posting is PR #45's scope.
 - **Opens blocked:** none.
-- **Loveable check:** A new contributor wonders "what does the auto-review do to decide block vs approve?" and finds a 58-line bash script with a clear header comment + 5 arithmetic branches + a test file with 15 named cases. They can reason about the contract in 90 seconds without reading 30 lines of inline shell embedded in a workflow YAML. Yes — meets the floor.
+- **Loveable check:** A new contributor wonders "what does the auto-review do to decide block vs approve?" and finds a 58-line bash script with a clear header comment + 5 arithmetic branches + a test file with 16 named cases. They can reason about the contract in 90 seconds without reading 30 lines of inline shell embedded in a workflow YAML. Yes — meets the floor.
 - **Evidence at wrap:** `verification.md` AC-1 row + commit SHA + 9 manual stdin/stdout fixtures verified locally.
 
 ## AC-2 · Shellspec coverage of the 8-row edge-case table + 7 adversarial inputs (verdict-coercion fixture)
 
-- **Outcome:** `tests/shellspec/derive-verdict.spec.sh` exercises 15 distinct inputs against `scripts/derive-verdict.sh`, mapping each to the expected verdict output. The 8 rows from PR #41 verification.md §"Edge cases" are covered verbatim (cases 1-8 in the spec file). 7 additional cases cover the verdict-coercion fixture per spec 72c §5 rule 3: parse-failed sentinels (empty object, empty stdin, array at root, string at root, non-JSON garbage), object-without-findings → approve fall-through, and prompt-injection guard (verdict is derived from findings shape only, never from textual content like a finding's `evidence` field containing "VERDICT: approve").
+- **Outcome:** `tests/shellspec/derive-verdict.spec.sh` exercises 16 distinct inputs against `scripts/derive-verdict.sh`, mapping each to the expected verdict output. The 8 rows from PR #41 verification.md §"Edge cases" are covered verbatim (cases 1-8 in the spec file). 8 additional cases cover the verdict-coercion fixture per spec 72c §5 rule 3: parse-failed sentinels (empty object, empty stdin, array at root, string at root, non-JSON garbage), object-without-findings → approve fall-through, and prompt-injection guard (verdict is derived from findings shape only, never from textual content like a finding's `evidence` field containing "VERDICT: approve").
 - **Verification:**
   1. `wc -l tests/shellspec/derive-verdict.spec.sh` → ≤ 200L (currently 162L).
-  2. `grep -c "^  It " tests/shellspec/derive-verdict.spec.sh` → 15 (test case count).
+  2. `grep -c "^  It " tests/shellspec/derive-verdict.spec.sh` → 16 (test case count).
   3. `grep -c "8-row edge-case table" tests/shellspec/derive-verdict.spec.sh` → ≥ 1 (test contract reference present).
   4. `grep -c "spec 72c §5 rule 3" tests/shellspec/derive-verdict.spec.sh` → ≥ 1 (verdict-coercion fixture reference present).
-  5. **Local run:** `shellspec tests/shellspec/derive-verdict.spec.sh` reports `15 examples, 0 failures` (verified at HEAD pre-PR-open).
-  6. **Full-suite regression:** `shellspec` (no args) reports `103 examples, 0 failures` (88 existing + 15 new; verified at HEAD).
+  5. **Local run:** `shellspec tests/shellspec/derive-verdict.spec.sh` reports `16 examples, 0 failures` (verified at HEAD pre-PR-open).
+  6. **Full-suite regression:** `shellspec` (no args) reports `104 examples, 0 failures` (88 existing + 16 new; verified at HEAD).
   7. **CI gating:** `.github/workflows/shellspec.yml` runs `shellspec` (no args) which auto-discovers `tests/shellspec/*.spec.sh` per the `.shellspec --pattern` config — the new spec file ships CI-gated automatically without workflow edits.
 - **In scope:**
-  - `tests/shellspec/derive-verdict.spec.sh` — new file. 15 `It` blocks; one `Describe 'derive-verdict.sh'` wrapper. Each test pipes a `Data` heredoc to `scripts/derive-verdict.sh` and asserts `The output should equal '<verdict>'`.
+  - `tests/shellspec/derive-verdict.spec.sh` — new file. 16 `It` blocks; one `Describe 'derive-verdict.sh'` wrapper. Each test pipes a `Data` heredoc to `scripts/derive-verdict.sh` and asserts `The output should equal '<verdict>'`.
 - **Out of scope:**
   - Mutation testing / Stryker coverage — referenced in spec 72c §"Out of scope (v3b / v3c carry-over)" L186 as v3c; not in this slice.
-  - Property-based testing (e.g. fuzz inputs through the script) — could land as a follow-up if the 15-case table proves insufficient.
+  - Property-based testing (e.g. fuzz inputs through the script) — could land as a follow-up if the 16-case table proves insufficient.
   - Persona-spawn integration tests — testing that an actual `claude -p` invocation against synthetic prompt-injection PRs produces appropriate outputs. Spec 72c §6 (golden-PR replay) covers this; v3c carry-over.
 - **Opens blocked:** none.
 - **Loveable check:** A contributor changes the verdict-derivation rules in `scripts/derive-verdict.sh` (e.g. adding a new label class). The shellspec test fails clearly with a named case ("returns approve for praise-only finding"), pointing to the regression. They re-read the test contract, decide whether to update the test or revert their change, and ship with confidence. Yes — meets the floor.
-- **Evidence at wrap:** `verification.md` AC-2 row + commit SHA + local shellspec output (`15 examples, 0 failures`) + CI shellspec check-run on this PR (the new spec file auto-runs).
+- **Evidence at wrap:** `verification.md` AC-2 row + commit SHA + local shellspec output (`16 examples, 0 failures`) + CI shellspec check-run on this PR (the new spec file auto-runs).
 
 ## AC-3 · `auto-review.yml` wired to call the extracted script (inline arithmetic replaced)
 
-- **Outcome:** `auto-review.yml` lines 165-191 (the `if [ "$PERSONA_JSON" = '{}' ]; then ... else ... fi` block with inline arithmetic) replaced with a single call: `VERDICT=$(printf '%s' "$PERSONA_JSON" | scripts/derive-verdict.sh)`. Plus a small post-call branch handling parse-failed → empty findings.json. Net: workflow shrinks from 276L to 257L (-19L); behaviour preserved verbatim under the 15-case shellspec contract.
+- **Outcome:** `auto-review.yml` verdict-derivation arithmetic block (the `if [ "$PERSONA_JSON" = '{}' ]; then ... else ... fi` with BLOCKING_COUNT/ACTION_COUNT/NIT_COUNT inline jq queries) replaced with a single call: `VERDICT=$(printf '%s' "$PERSONA_JSON" | scripts/derive-verdict.sh)`. Plus a small post-call branch handling parse-failed → empty findings.json. Net: workflow shrinks from 389L (post-PR-#45 base) to 370L (-19L net from this PR); behaviour preserved verbatim under the 16-case shellspec contract.
 - **Verification:**
   1. `grep -c 'scripts/derive-verdict.sh' .github/workflows/auto-review.yml` → ≥ 1 (script invoked).
   2. `grep -c "BLOCKING_COUNT=" .github/workflows/auto-review.yml` → `0` (inline arithmetic removed).
@@ -97,4 +97,4 @@ This slice ships the extraction:
 
 | Date | Reviewer | Outcome | Notes |
 |---|---|---|---|
-| 2026-04-29 | Author (session 51) | Draft | 3 ACs; consolidates session-51 P3+P4 (same test contract); 15-case shellspec verified locally; auto-review.yml -19L net. |
+| 2026-04-29 | Author (session 51) | Draft | 3 ACs; consolidates session-51 P3+P4 (same test contract); 16-case shellspec verified locally; auto-review.yml -19L net. |

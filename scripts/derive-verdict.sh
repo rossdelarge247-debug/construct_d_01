@@ -43,6 +43,15 @@ if ! printf '%s' "$INPUT" | jq -e 'type == "object"' >/dev/null 2>&1; then
   exit 0
 fi
 
+# Guard: .findings present but not an array (e.g. `{"findings": "not-an-array"}`)
+# would pass the object-type check above but cause the arithmetic jq invocations
+# below to exit non-zero (`.[]` on a string is invalid). Per PR #46 review
+# (slice-reviewer comment 4343354539). Treat as parse-failed.
+if printf '%s' "$INPUT" | jq -e 'has("findings") and (.findings | type) != "array"' >/dev/null 2>&1; then
+  echo "parse-failed"
+  exit 0
+fi
+
 BLOCKING_COUNT=$(printf '%s' "$INPUT" | jq -r '[.findings // [] | .[] | select(.blocking == true)] | length')
 ACTION_COUNT=$(printf '%s' "$INPUT" | jq -r '[.findings // [] | .[] | select(.label == "issue" or .label == "suggestion" or .label == "todo")] | length')
 NIT_COUNT=$(printf '%s' "$INPUT" | jq -r '[.findings // [] | .[] | select(.label == "nitpick" or .label == "chore")] | length')
