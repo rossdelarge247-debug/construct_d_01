@@ -172,4 +172,127 @@ Describe 'derive-verdict.sh'
     The status should be success
   End
 
+  # --multi k=N mode (per spec 72c §5 session-54 amendment + S-INFRA-
+  # persona-suite-v2-multi-agent AC-1). Aggregator counts deduped-
+  # finding votes via `len(seen_by)` against quorum threshold N.
+  # Spec lock-in: blocking findings count ONLY toward block tier; if
+  # block quorum unmet, those findings do NOT fall through to action
+  # tier (per spec 72c §5: "non-blocking finding with `label ∈ {...}`").
+
+  It '--multi k=1 returns approve for empty findings (back-compat with single-mode)'
+    Data
+      #|{"summary": "x", "findings": []}
+    End
+    When call scripts/derive-verdict.sh --multi k=1
+    The output should equal 'approve'
+    The status should be success
+  End
+
+  It '--multi k=1 returns block when 1 specialist emits blocking (functionally equivalent to first-fault-blocks)'
+    Data
+      #|{"summary": "x", "findings": [{"label": "issue", "blocking": true, "category": "security", "seen_by": ["reviewer-security"]}]}
+    End
+    When call scripts/derive-verdict.sh --multi k=1
+    The output should equal 'block'
+    The status should be success
+  End
+
+  It '--multi k=1 returns request-changes when 1 specialist emits non-blocking action'
+    Data
+      #|{"summary": "x", "findings": [{"label": "issue", "blocking": false, "category": "regression", "seen_by": ["reviewer-correctness"]}]}
+    End
+    When call scripts/derive-verdict.sh --multi k=1
+    The output should equal 'request-changes'
+    The status should be success
+  End
+
+  It '--multi k=2 returns block when 2 specialists emit blocking via deduped finding (seen_by length 2)'
+    Data
+      #|{"summary": "x", "findings": [{"label": "issue", "blocking": true, "category": "security", "seen_by": ["reviewer-security", "reviewer-correctness"]}]}
+    End
+    When call scripts/derive-verdict.sh --multi k=2
+    The output should equal 'block'
+    The status should be success
+  End
+
+  It '--multi k=2 returns approve when 1 specialist emits blocking (quorum unmet; blocking does NOT fall through to action tier per spec 72c §5)'
+    # Spec 72c §5: "request-changes if ≥k_changes specialists emit a
+    # non-blocking finding with label ∈ {issue, suggestion, todo}".
+    # Blocking findings count ONLY toward block tier. If block quorum
+    # unmet, they do NOT cascade — the finding's blocking==true means
+    # it never appears in the action-tier vote count.
+    Data
+      #|{"summary": "x", "findings": [{"label": "issue", "blocking": true, "category": "security", "seen_by": ["reviewer-security"]}]}
+    End
+    When call scripts/derive-verdict.sh --multi k=2
+    The output should equal 'approve'
+    The status should be success
+  End
+
+  It '--multi k=2 returns request-changes when 2 specialists emit non-blocking action via separate findings'
+    Data
+      #|{"summary": "x", "findings": [{"label": "issue", "blocking": false, "category": "regression", "seen_by": ["reviewer-correctness"]}, {"label": "suggestion", "blocking": false, "category": "scope-creep", "seen_by": ["reviewer-architecture"]}]}
+    End
+    When call scripts/derive-verdict.sh --multi k=2
+    The output should equal 'request-changes'
+    The status should be success
+  End
+
+  It '--multi k=2 returns nit-only when 2 specialists emit nitpick (deduped or via separate findings)'
+    Data
+      #|{"summary": "x", "findings": [{"label": "nitpick", "blocking": false, "category": "naming", "seen_by": ["reviewer-style", "reviewer-correctness"]}]}
+    End
+    When call scripts/derive-verdict.sh --multi k=2
+    The output should equal 'nit-only'
+    The status should be success
+  End
+
+  It '--multi k=3 returns approve when only 2 specialists emit blocking (supermajority unmet)'
+    Data
+      #|{"summary": "x", "findings": [{"label": "issue", "blocking": true, "category": "security", "seen_by": ["reviewer-security", "reviewer-correctness"]}]}
+    End
+    When call scripts/derive-verdict.sh --multi k=3
+    The output should equal 'approve'
+    The status should be success
+  End
+
+  It '--multi k=2 defaults seen_by to length 1 when missing (back-compat with non-deduped findings)'
+    # Persona output may omit seen_by (single-specialist case where the
+    # finding has no aggregator-side dedupe). Treat as 1 vote — the
+    # finding is from one specialist.
+    Data
+      #|{"summary": "x", "findings": [{"label": "issue", "blocking": true, "category": "security"}]}
+    End
+    When call scripts/derive-verdict.sh --multi k=2
+    The output should equal 'approve'
+    The status should be success
+  End
+
+  It '--multi without k= argument defaults to k=1'
+    Data
+      #|{"summary": "x", "findings": [{"label": "issue", "blocking": true, "category": "security", "seen_by": ["reviewer-security"]}]}
+    End
+    When call scripts/derive-verdict.sh --multi
+    The output should equal 'block'
+    The status should be success
+  End
+
+  It '--multi k=2 sums votes across findings (3 findings × 1 specialist each = 3 votes; ≥ k_changes=2)'
+    Data
+      #|{"summary": "x", "findings": [{"label": "issue", "blocking": false, "seen_by": ["reviewer-correctness"]}, {"label": "suggestion", "blocking": false, "seen_by": ["reviewer-architecture"]}, {"label": "todo", "blocking": false, "seen_by": ["reviewer-style"]}]}
+    End
+    When call scripts/derive-verdict.sh --multi k=2
+    The output should equal 'request-changes'
+    The status should be success
+  End
+
+  It '--multi k=2 returns parse-failed for malformed input (parse-failed sentinel preserved across modes)'
+    Data
+      #|{}
+    End
+    When call scripts/derive-verdict.sh --multi k=2
+    The output should equal 'parse-failed'
+    The status should be success
+  End
+
 End
