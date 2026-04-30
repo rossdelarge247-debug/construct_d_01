@@ -218,6 +218,11 @@ jobs:
 
       - name: Download all specialist envelopes
         if: needs.brief.outputs.skip == 'false'
+        # continue-on-error so all-4-crash produces parse-failed via the
+        # aggregator's all-missing path, not pipeline-crashed via the
+        # job's failure-fallback (download-artifact@v4 fails by default
+        # when zero artifacts match the pattern).
+        continue-on-error: true
         uses: actions/download-artifact@v4
         with:
           path: /tmp/envelope-artifacts
@@ -286,11 +291,10 @@ jobs:
           FINDINGS_COUNT: ${{ steps.aggregate.outputs.findings_count }}
         run: |
           set -euo pipefail
-          # Verdict → conclusion mapping per CLAUDE.md §"Verdict vocabulary"
-          # §"Check-run conclusion mapping": approve → success;
-          # request-changes / nit-only → neutral; block → failure;
-          # parse-failed → failure (all 4 specialists unparseable means
-          # no review actually happened); unknown-verdict default fails
+          # Verdict → conclusion mapping per CLAUDE.md §"Verdict
+          # vocabulary" §"Check-run conclusion mapping". parse-failed
+          # promotes to failure (all 4 specialists unparseable means no
+          # review actually happened); unknown-verdict default fails
           # closed.
           case "$VERDICT" in
             approve)                       CONCLUSION="success" ;;
