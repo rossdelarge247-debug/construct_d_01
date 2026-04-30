@@ -69,9 +69,6 @@ case "$SUBCMD" in
     ;;
 esac
 
-# Phase 1: classify each dimension as present-and-valid OR inconclusive.
-# A valid envelope is `{summary, findings: array}` (the persona output
-# shape). Empty/missing/malformed envelopes go to inconclusive.
 PRESENT=()
 INCONCLUSIVE=()
 
@@ -89,16 +86,11 @@ for DIM in "${DIMENSIONS[@]}"; do
   fi
 done
 
-# Phase 2: assemble findings across present specialists with seen_by[] tagged.
-# Each specialist's findings are projected into `+ {seen_by: [name]}`;
-# all findings concatenate; group_by([label, category, evidence[0:64]])
-# then merges identical-hash findings into one entry with seen_by[]
-# union and `blocking = OR` across the group. Dedup hash field is
-# `evidence` (not `summary`) — personas don't emit per-finding summary
-# per the established baseline (slice-reviewer.md / acceptance-gate.md /
-# ux-polish-reviewer.md output schemas); evidence is universally
-# present and is a quoted-from-diff fragment that gives the strongest
-# substantive-equivalence signal. Spec 72c §5 rule 2.
+# Dedup hash field is `evidence` (not `summary`) — personas don't emit
+# per-finding summary per the established baseline (slice-reviewer.md /
+# acceptance-gate.md / ux-polish-reviewer.md output schemas); evidence
+# is universally present and is a quoted-from-diff fragment that gives
+# the strongest substantive-equivalence signal. Spec 72c §5 rule 2.
 ALL_FINDINGS='[]'
 for SPEC in "${PRESENT[@]}"; do
   F="$DIR/$SPEC.json"
@@ -118,10 +110,9 @@ DEDUPED_FINDINGS=$(printf '%s' "$ALL_FINDINGS" | jq -c '
   })
 ')
 
-# Phase 3: compute verdict + shadow tiers via derive-verdict.sh --multi.
-# All-inconclusive case short-circuits to parse-failed (no specialist
-# signal at all); otherwise feed the deduped envelope through the
-# arithmetic helper for k=1 (live), k=2 + k=3 (shadow monitor).
+# All-inconclusive case short-circuits to parse-failed so an empty
+# findings array isn't silently approved when the actual signal is
+# "no specialist responded".
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 DERIVE="$SCRIPT_DIR/derive-verdict.sh"
 
@@ -136,9 +127,10 @@ else
   SHADOW_K3=$(printf '%s' "$ENVELOPE" | "$DERIVE" --multi k=3)
 fi
 
-# Phase 4: emit output. degraded + inconclusive_dimensions surface
-# only when ≥1 specialist failed; preserves a clean output shape for
-# the all-green path.
+# `degraded` + `inconclusive_dimensions` surface only when ≥1
+# specialist failed; preserves a clean output shape on the all-green
+# path so downstream consumers don't render a misleading "degraded:
+# false" marker on every successful aggregation.
 INCONCLUSIVE_JSON='[]'
 if [ ${#INCONCLUSIVE[@]} -gt 0 ]; then
   INCONCLUSIVE_JSON=$(printf '%s\n' "${INCONCLUSIVE[@]}" | jq -R -s 'split("\n") | map(select(length > 0))')
