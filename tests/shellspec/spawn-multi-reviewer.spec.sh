@@ -115,6 +115,8 @@ Describe 'spawn-multi-reviewer.sh aggregate'
     # actually returning empty findings).
     When call scripts/spawn-multi-reviewer.sh aggregate "$SHELLSPEC_TMPBASE"
     The output should include '"verdict": "parse-failed"'
+    The output should include '"would_have_been_k1": "parse-failed"'
+    The output should include '"would_have_been_k3": "parse-failed"'
     The output should include '"degraded": true'
     The output should include '"security"'
     The output should include '"architecture"'

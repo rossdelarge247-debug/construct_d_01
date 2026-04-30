@@ -359,8 +359,8 @@ jobs:
             DEGRADED_BLOCK=""
           fi
 
-          # Suppress shadow monitor on parse-failed path — SHADOW_K1/K3
-          # echo back "parse-failed" sentinel which carries no signal.
+          # Suppress shadow monitor on parse-failed path — sentinel
+          # carries no signal.
           if [ "$VERDICT" = "parse-failed" ]; then
             SHADOW_BLOCK=""
           else
