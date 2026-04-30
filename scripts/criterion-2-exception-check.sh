@@ -1,6 +1,9 @@
 #!/usr/bin/env bash
 # criterion-2-exception-check.sh — deterministic pre-filter for criterion 2
-# §Exceptions in .claude/agents/slice-reviewer.md.
+# scope-creep exceptions catalogued in .claude/agents/criterion-2-exceptions.yaml
+# (consumed by reviewer-architecture.md and reviewer-correctness.md per
+# spec 72c §4 partition; previously catalogued inline in the retired
+# slice-reviewer.md §Exceptions).
 #
 # Reads a list of changed files (one per line) on stdin. For each file, emits
 # one tab-separated line on stdout:

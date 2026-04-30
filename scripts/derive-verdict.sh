@@ -6,10 +6,11 @@
 # Two modes:
 #
 #   1. SINGLE MODE (default; no flags) — input is a single persona's
-#      output shape `{summary, findings[]}` (slice-reviewer / acceptance-
-#      gate / ux-polish-reviewer). Each finding contributes 1 toward its
-#      tier; verdict tier fires on first count > 0. Back-compat with the
-#      PR #41 ship.
+#      output shape `{summary, findings[]}` (acceptance-gate / ux-polish-
+#      reviewer / individual reviewer-{security,architecture,correctness,
+#      style} envelope). Each finding contributes 1 toward its tier;
+#      verdict tier fires on first count > 0. Back-compat with the PR #41
+#      ship.
 #
 #   2. MULTI MODE (--multi k=N flag) — input is the orchestrator's
 #      aggregated envelope `{summary, findings[]}` where each finding

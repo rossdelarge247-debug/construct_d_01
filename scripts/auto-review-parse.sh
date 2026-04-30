@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # auto-review-parse.sh
 #
-# Extracts the slice-reviewer persona's strict-JSON output from the
+# Extracts a persona's strict-JSON output from the
 # claude -p --output-format=json transcript envelope. Reads envelope
 # from stdin; writes the persona JSON (or '{}' parse-failed sentinel)
 # to stdout. Always exit 0.

@@ -151,7 +151,7 @@ Per CLAUDE.md §"Hard controls > Verdict vocabulary" — emit findings using the
 
 ## Out of scope for this persona
 
-- Code review of business logic (delegated to `slice-reviewer` persona).
+- Code review of business logic (delegated to the multi-agent reviewer suite — `reviewer-{security,architecture,correctness,style}` per `auto-review.yml` matrix fan-out).
 - AC contract review (delegated to `acceptance-gate` persona).
 - Visual regression — pixel-level layout diffs (deferred to a Phase C visual-regression tool decision per spec 72a §"Out of scope").
 - Browser-compat testing across IE / Safari versions (deferred to a Phase C browserslist decision).

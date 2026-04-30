@@ -1,24 +1,30 @@
-name: auto-review (slice-reviewer persona)
+name: auto-review (multi-agent · 4 specialists)
 
-# Per docs/slices/S-INFRA-rigour-v3b-subagent-suite/acceptance.md AC-1:
-# "CI workflow .github/workflows/auto-review.yml runs `claude -p` (or wraps
-# /review) on pull_request opened/synchronize against the diff + linked AC
-# + CLAUDE.md "Coding conduct" rubric, posts a check run with one of the
-# four verdicts per CLAUDE.md "Hard controls > Verdict vocabulary"."
+# Per docs/slices/S-INFRA-persona-suite-v2-multi-agent/acceptance.md AC-1:
+# orchestrator fans out to 4 specialist subagents in parallel (matrix
+# strategy across `security · architecture · correctness · style` per
+# spec 72c §3-§4), collects per-specialist envelopes, aggregates via
+# `scripts/spawn-multi-reviewer.sh aggregate` (k=1 default + shadow
+# k=2/k=3 monitor per spec 72c §5), posts a unified check-run +
+# findings comment.
 #
-# Out: integration with branch-protection (defer to v3c per AC-1 §Scope).
+# Replaces the session-47 single-agent recursive baseline (slice-
+# reviewer.md retired atomically with this workflow flip per AC-5).
+# Degraded mode (≥1 specialist inconclusive) reported in the
+# aggregator output; no fallback to a single-agent re-run per
+# AC-1 verification 3 + spec 72c §3.
+#
+# Out: integration with branch-protection (defer to v3c per spec 72c §9).
 # This workflow is mostly informational at v3b ship — `approve` →
 # `success`, `request-changes`/`nit-only` → `neutral` (advisory only).
 # Two failure modes DO gate the merge button (per S-INFRA-rigour-parse-
 # failed-pipeline-crashed-merge-gate, session 52): `block` verdict →
-# `failure`; `parse-failed` (persona output unparseable) → `failure`;
-# pipeline-crash (`if: failure()` fallback) → `failure`. Skip on
-# missing `ANTHROPIC_API_KEY` stays `neutral` so fork PRs aren't gated
-# by a secret they can't access.
+# `failure`; `parse-failed` (all 4 specialist outputs unparseable) →
+# `failure`; pipeline-crash (`if: failure()` fallback) → `failure`.
+# Skip on missing `ANTHROPIC_API_KEY` stays `neutral` so fork PRs
+# aren't gated by a secret they can't access.
 #
 # Secret precondition: ANTHROPIC_API_KEY must be set as a repo secret.
-# Workflow gracefully skips with a `neutral` check run when absent (per
-# session-47 design choice — honest defer rather than hard-require).
 
 on:
   pull_request:
@@ -30,9 +36,11 @@ permissions:
   checks: write
 
 jobs:
-  auto-review:
-    name: auto-review (slice-reviewer persona)
+  brief:
+    name: auto-review · compose briefs
     runs-on: ubuntu-latest
+    outputs:
+      skip: ${{ steps.secret-check.outputs.skip }}
     steps:
       - name: Check ANTHROPIC_API_KEY presence
         id: secret-check
@@ -51,8 +59,7 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Compose review brief (diff + slice AC + coding-conduct)
-        id: brief
+      - name: Compose per-specialist briefs (diff + slice AC + coding-conduct)
         if: steps.secret-check.outputs.skip == 'false'
         env:
           BASE_SHA: ${{ github.event.pull_request.base.sha }}
@@ -61,127 +68,203 @@ jobs:
           BRANCH: ${{ github.head_ref }}
         run: |
           set -euo pipefail
-          NONCE=$(openssl rand -hex 16)
+          mkdir -p /tmp/briefs
 
-          # Diff (file under review for the persona; spec 72b Option C
+          # Diff (file under review for each persona; spec 72b Option C
           # inline-file pattern when >300L).
           git diff "$BASE_SHA" "$HEAD_SHA" > /tmp/pr-diff.txt
 
-          # Slice acceptance.md resolution extracted to scripts/auto-review-
-          # slice-resolve.sh (S-INFRA-auto-review-resolver-parser-extract).
-          # Test contract: tests/shellspec/auto-review-slice-resolve.spec.sh
-          # covers branch-derived preference + PR-body fallback + edge cases.
-          # Branch-first preference per PR #39 (session 50) closes PR #38
-          # false-positive class.
+          # Slice acceptance.md resolution (re-used unchanged from the
+          # single-agent baseline). Branch-first preference per PR #39
+          # (session 50).
           SLICE_AC=$(scripts/auto-review-slice-resolve.sh "$BRANCH" "$PR_BODY")
 
-          # Compose the prompt envelope per slice-reviewer.md "Per-invocation
-          # context" section: persona prompt + nonce + fenced inputs.
-          {
-            cat .claude/agents/slice-reviewer.md
-            echo
-            echo "Your per-invocation nonce: $NONCE"
-            echo
-            printf '<pr-diff-%s>\n' "$NONCE"
-            cat /tmp/pr-diff.txt
-            printf '</pr-diff-%s>\n\n' "$NONCE"
-            if [ -n "$SLICE_AC" ] && [ -f "$SLICE_AC" ]; then
-              printf '<slice-ac-%s>\n' "$NONCE"
-              cat "$SLICE_AC"
-              printf '</slice-ac-%s>\n\n' "$NONCE"
-            fi
-            printf '<coding-conduct-%s>\n' "$NONCE"
-            # awk range patterns include the stop-line, so pipe through
-            # `head -n -1` to drop the trailing `## Engineering conventions`
-            # header from the coding-conduct fence content (round-5 nit-2).
-            awk '/^## Coding conduct/,/^## Engineering conventions/' CLAUDE.md | head -n -1
-            printf '</coding-conduct-%s>\n' "$NONCE"
-          } > /tmp/review-brief.txt
+          # Compose one brief per dimension. Each persona file already
+          # carries its own rubric + JSON output schema + verdict-coercion
+          # guard (per AC-2). Brief shape mirrors the prior single-agent
+          # composition: persona body + nonce + fenced inputs.
+          for DIM in security architecture correctness style; do
+            NONCE=$(openssl rand -hex 16)
+            {
+              cat ".claude/agents/reviewer-${DIM}.md"
+              echo
+              echo "Your per-invocation nonce: $NONCE"
+              echo
+              printf '<pr-diff-%s>\n' "$NONCE"
+              cat /tmp/pr-diff.txt
+              printf '</pr-diff-%s>\n\n' "$NONCE"
+              if [ -n "$SLICE_AC" ] && [ -f "$SLICE_AC" ]; then
+                printf '<slice-ac-%s>\n' "$NONCE"
+                cat "$SLICE_AC"
+                printf '</slice-ac-%s>\n\n' "$NONCE"
+              fi
+              printf '<coding-conduct-%s>\n' "$NONCE"
+              # Drop trailing `## Engineering conventions` header that
+              # awk's range pattern includes.
+              awk '/^## Coding conduct/,/^## Engineering conventions/' CLAUDE.md | head -n -1
+              printf '</coding-conduct-%s>\n' "$NONCE"
+            } > "/tmp/briefs/${DIM}.txt"
+          done
 
-      - name: Invoke slice-reviewer (claude -p) + extract verdict
-        id: review
-        # 10-minute ceiling on the LLM CLI invocation — guards against
-        # network-partition hangs + streaming-response-never-terminates
-        # cases that wouldn't trigger `set -e` or `if: failure()`. If
-        # the step times out the runner kills it; the
-        # `Post failure-fallback check run` step then fires
-        # (`if: failure()`) and posts a neutral diagnostic. Closes
-        # round-6 finding (edge-case: bare CLI invocation could
-        # consume up to 6h GitHub job ceiling on hang).
-        timeout-minutes: 10
+      - name: Upload briefs artifact
         if: steps.secret-check.outputs.skip == 'false'
+        uses: actions/upload-artifact@v4
+        with:
+          name: auto-review-briefs
+          path: /tmp/briefs/
+          retention-days: 1
+
+  specialist:
+    name: auto-review · ${{ matrix.dimension }}
+    needs: brief
+    if: needs.brief.outputs.skip == 'false'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    strategy:
+      fail-fast: false
+      matrix:
+        dimension: [security, architecture, correctness, style]
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+          sparse-checkout: scripts
+
+      - name: Download briefs artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: auto-review-briefs
+          path: /tmp/briefs
+
+      - name: Invoke specialist (claude -p)
         env:
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          DIM: ${{ matrix.dimension }}
         run: |
           set -euo pipefail
-          # `claude -p --output-format=json` wraps the response in a
-          # transcript envelope: `{type, subtype, result, usage,
-          # session_id, ...}`. The persona's strict-JSON output lives in
-          # `.result` as a STRING — possibly wrapped in markdown code
-          # fences (model quirk). Parse robustly: extract `.result`, try
-          # JSON-parse direct, fall back to fence-stripped, fall back to
-          # empty object (which makes downstream defaults fire honestly).
-          npx -y @anthropic-ai/claude-code -p --output-format=json < /tmp/review-brief.txt > /tmp/review-output.json
+          npx -y @anthropic-ai/claude-code -p --output-format=json \
+            < "/tmp/briefs/${DIM}.txt" > "/tmp/raw-${DIM}.json"
 
-          # Debug: surface raw output structure for future diagnostics.
-          echo "::group::raw claude output (first 100 lines)"
-          head -100 /tmp/review-output.json || true
+          echo "::group::raw claude output (${DIM}; first 50 lines)"
+          head -50 "/tmp/raw-${DIM}.json" || true
           echo "::endgroup::"
 
-          # Persona JSON extraction extracted to scripts/auto-review-parse.sh
-          # (S-INFRA-auto-review-resolver-parser-extract). Test contract:
-          # tests/shellspec/auto-review-parse.spec.sh covers .result extraction
-          # + fence-stripping + fallback to '{}' on any parse failure.
-          PERSONA_JSON=$(scripts/auto-review-parse.sh < /tmp/review-output.json)
+          # Parse via the shared auto-review-parse.sh (re-used unchanged
+          # from single-agent baseline).
+          mkdir -p /tmp/envelopes
+          scripts/auto-review-parse.sh < "/tmp/raw-${DIM}.json" > "/tmp/envelopes/${DIM}.json"
 
-          echo "::group::extracted persona JSON"
-          printf '%s\n' "$PERSONA_JSON"
+          echo "::group::parsed envelope (${DIM})"
+          cat "/tmp/envelopes/${DIM}.json"
           echo "::endgroup::"
 
-          # Persist the full persona JSON for downstream steps (comment
-          # rendering reads .summary + .findings; check-run summary uses
-          # findings-only at /tmp/findings.json).
-          printf '%s' "$PERSONA_JSON" > /tmp/persona-output.json
+      - name: Upload specialist envelope artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: auto-review-envelope-${{ matrix.dimension }}
+          path: /tmp/envelopes/${{ matrix.dimension }}.json
+          retention-days: 1
+          if-no-files-found: ignore
 
-          # Verdict-derivation arithmetic extracted to scripts/derive-verdict.sh
-          # (S-INFRA-derive-verdict-script-extract). Test contract: tests/
-          # shellspec/derive-verdict.spec.sh covers the 8-row edge-case
-          # table from PR #41 verification.md + verdict-coercion fixture
-          # adversarial inputs per spec 72c §5 rule 3. parse-failed
-          # sentinel is handled inside the script.
-          VERDICT=$(printf '%s' "$PERSONA_JSON" | scripts/derive-verdict.sh)
+  aggregate:
+    name: auto-review · aggregate + post
+    needs: [brief, specialist]
+    if: always() && needs.brief.result == 'success'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write
+      checks: write
+    steps:
+      - uses: actions/checkout@v4
+        if: needs.brief.outputs.skip == 'false'
+        with:
+          fetch-depth: 1
+          sparse-checkout: scripts
+
+      - name: Download all specialist envelopes
+        if: needs.brief.outputs.skip == 'false'
+        uses: actions/download-artifact@v4
+        with:
+          path: /tmp/envelope-artifacts
+          pattern: auto-review-envelope-*
+          merge-multiple: false
+
+      - name: Aggregate envelopes + derive verdict
+        id: aggregate
+        if: needs.brief.outputs.skip == 'false'
+        run: |
+          set -euo pipefail
+          # Move per-dimension envelopes into the flat directory shape
+          # `spawn-multi-reviewer.sh aggregate` expects:
+          #   /tmp/envelopes/{security,architecture,correctness,style}.json
+          # Missing files → aggregator marks that dimension `inconclusive`
+          # and degrades gracefully; all-missing → `parse-failed`.
+          mkdir -p /tmp/envelopes
+          for DIM in security architecture correctness style; do
+            SRC="/tmp/envelope-artifacts/auto-review-envelope-${DIM}/${DIM}.json"
+            if [ -f "$SRC" ]; then
+              mv "$SRC" "/tmp/envelopes/${DIM}.json"
+            else
+              echo "specialist envelope missing for dimension: ${DIM}"
+            fi
+          done
+
+          # Aggregate. Output is the unified envelope per
+          # spawn-multi-reviewer.sh contract: {summary, findings[],
+          # verdict, would_have_been_k2, would_have_been_k3, degraded?,
+          # inconclusive_dimensions?}.
+          AGGREGATE_JSON=$(scripts/spawn-multi-reviewer.sh aggregate /tmp/envelopes)
+
+          echo "::group::aggregated envelope"
+          printf '%s\n' "$AGGREGATE_JSON" | jq .
+          echo "::endgroup::"
+
+          printf '%s' "$AGGREGATE_JSON" > /tmp/persona-output.json
+
+          VERDICT=$(printf '%s' "$AGGREGATE_JSON" | jq -r '.verdict')
+          SHADOW_K2=$(printf '%s' "$AGGREGATE_JSON" | jq -r '.would_have_been_k2')
+          SHADOW_K3=$(printf '%s' "$AGGREGATE_JSON" | jq -r '.would_have_been_k3')
+          DEGRADED=$(printf '%s' "$AGGREGATE_JSON" | jq -r '.degraded // false')
+          INCONCLUSIVE=$(printf '%s' "$AGGREGATE_JSON" | jq -r '(.inconclusive_dimensions // []) | join(",")')
 
           if [ "$VERDICT" = "parse-failed" ]; then
             FINDINGS_COUNT=0
             printf '[]' > /tmp/findings.json
           else
-            FINDINGS_COUNT=$(printf '%s' "$PERSONA_JSON" | jq -r '(.findings // []) | length')
-            # Save findings JSON to file for the post-step (avoids multi-
-            # line GITHUB_OUTPUT escaping).
-            printf '%s' "$PERSONA_JSON" | jq -c '.findings // []' | head -c 60000 > /tmp/findings.json
+            FINDINGS_COUNT=$(printf '%s' "$AGGREGATE_JSON" | jq -r '(.findings // []) | length')
+            printf '%s' "$AGGREGATE_JSON" | jq -c '.findings // []' | head -c 60000 > /tmp/findings.json
           fi
 
-          echo "verdict=$VERDICT" >> "$GITHUB_OUTPUT"
-          echo "findings_count=$FINDINGS_COUNT" >> "$GITHUB_OUTPUT"
+          {
+            echo "verdict=$VERDICT"
+            echo "shadow_k2=$SHADOW_K2"
+            echo "shadow_k3=$SHADOW_K3"
+            echo "degraded=$DEGRADED"
+            echo "inconclusive=$INCONCLUSIVE"
+            echo "findings_count=$FINDINGS_COUNT"
+          } >> "$GITHUB_OUTPUT"
 
       - name: Post check run (verdict)
-        if: steps.secret-check.outputs.skip == 'false' && steps.review.outputs.verdict
+        if: needs.brief.outputs.skip == 'false' && steps.aggregate.outputs.verdict
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           HEAD_SHA: ${{ github.event.pull_request.head.sha }}
-          VERDICT: ${{ steps.review.outputs.verdict }}
-          FINDINGS_COUNT: ${{ steps.review.outputs.findings_count }}
+          VERDICT: ${{ steps.aggregate.outputs.verdict }}
+          SHADOW_K2: ${{ steps.aggregate.outputs.shadow_k2 }}
+          SHADOW_K3: ${{ steps.aggregate.outputs.shadow_k3 }}
+          DEGRADED: ${{ steps.aggregate.outputs.degraded }}
+          INCONCLUSIVE: ${{ steps.aggregate.outputs.inconclusive }}
+          FINDINGS_COUNT: ${{ steps.aggregate.outputs.findings_count }}
         run: |
           set -euo pipefail
-          # Map verdict → conclusion per CLAUDE.md §"Verdict vocabulary"
+          # Verdict → conclusion mapping per CLAUDE.md §"Verdict vocabulary"
           # §"Check-run conclusion mapping": approve → success;
-          # request-changes / nit-only → neutral (advisory only);
-          # block → failure. Plus parse-failed sentinel: unparseable
-          # persona output → `failure` (was `neutral` pre-S-INFRA-
-          # rigour-parse-failed-pipeline-crashed-merge-gate; promoted
-          # session 52 — a malformed persona output means no review
-          # actually happened and merging would skip the rigour gate).
-          # The unknown-verdict default also fails closed.
+          # request-changes / nit-only → neutral; block → failure;
+          # parse-failed → failure (all 4 specialists unparseable means
+          # no review actually happened); unknown-verdict default fails
+          # closed.
           case "$VERDICT" in
             approve)                       CONCLUSION="success" ;;
             request-changes|nit-only)      CONCLUSION="neutral" ;;
@@ -189,21 +272,18 @@ jobs:
             parse-failed)                  CONCLUSION="failure" ;;
             *)                             CONCLUSION="failure" ;;
           esac
+
           if [ "$VERDICT" = "parse-failed" ]; then
-            TITLE="persona output unparseable — see workflow log"
+            TITLE="all 4 specialist outputs unparseable — see workflow log"
+          elif [ "$DEGRADED" = "true" ]; then
+            TITLE="$VERDICT — $FINDINGS_COUNT finding(s) · degraded ($INCONCLUSIVE inconclusive)"
           else
-            TITLE="$VERDICT — $FINDINGS_COUNT finding(s)"
+            TITLE="$VERDICT — $FINDINGS_COUNT finding(s) · k=1 (shadow k=2:$SHADOW_K2 k=3:$SHADOW_K3)"
           fi
-          # Findings JSON pre-extracted by the review step (sourced from
-          # the persona's parsed output, NOT the transcript envelope).
+
           SUMMARY=$(cat /tmp/findings.json)
-          # Build nested JSON via `jq -n` and pipe to `gh api --input -`.
-          # `gh api --field "output[title]=..."` does NOT reliably emit
-          # nested `output: {title, summary}` JSON (the form-encoded
-          # bracket syntax is `gh`-version-dependent + undocumented).
-          # `--input -` with constructed JSON is the safe form.
           jq -n \
-            --arg name 'auto-review (slice-reviewer persona)' \
+            --arg name 'auto-review (multi-agent · 4 specialists)' \
             --arg head_sha "$HEAD_SHA" \
             --arg conclusion "$CONCLUSION" \
             --arg title "$TITLE" \
@@ -212,38 +292,44 @@ jobs:
           | gh api "repos/${{ github.repository }}/check-runs" --method POST --input -
 
       - name: Post findings PR comment (verdict path)
-        # Always-post (per session-51 design call): every auto-review run
-        # lands a PR comment so the author never has to dig through the
-        # Checks tab to find the persona's findings JSON. Idempotent via
-        # the marker — first push POSTs, subsequent pushes PATCH the
-        # same comment in place. parse-failed renders a diagnostic body
-        # (no findings to render). Skip + crash paths each post their
-        # own comment via the steps below.
-        if: steps.secret-check.outputs.skip == 'false' && steps.review.outputs.verdict
+        # New marker (`auto-review-comment:multi-agent`) so legacy single-
+        # agent comments (`auto-review-comment:slice-reviewer`) aren't
+        # patched in place — multi-agent comments thread independently
+        # for visibility during the recursive-validation window.
+        if: needs.brief.outputs.skip == 'false' && steps.aggregate.outputs.verdict
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           REPO: ${{ github.repository }}
           PR_NUMBER: ${{ github.event.pull_request.number }}
           HEAD_SHA: ${{ github.event.pull_request.head.sha }}
           RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
-          VERDICT: ${{ steps.review.outputs.verdict }}
-          FINDINGS_COUNT: ${{ steps.review.outputs.findings_count }}
+          VERDICT: ${{ steps.aggregate.outputs.verdict }}
+          SHADOW_K2: ${{ steps.aggregate.outputs.shadow_k2 }}
+          SHADOW_K3: ${{ steps.aggregate.outputs.shadow_k3 }}
+          DEGRADED: ${{ steps.aggregate.outputs.degraded }}
+          INCONCLUSIVE: ${{ steps.aggregate.outputs.inconclusive }}
+          FINDINGS_COUNT: ${{ steps.aggregate.outputs.findings_count }}
         run: |
           set -euo pipefail
-          MARKER='<!-- auto-review-comment:slice-reviewer -->'
+          MARKER='<!-- auto-review-comment:multi-agent -->'
 
           case "$VERDICT" in
             approve)         HEADLINE='**Verdict:** ✅ approve' ;;
             nit-only)        HEADLINE='**Verdict:** 💬 nit-only (informational at v3b ship)' ;;
             request-changes) HEADLINE='**Verdict:** 🟡 request-changes (informational at v3b ship)' ;;
-            block)           HEADLINE='**Verdict:** 🛑 block (informational at v3b ship)' ;;
-            parse-failed)    HEADLINE='**Verdict:** ⚠️ parse-failed — persona output unparseable' ;;
+            block)           HEADLINE='**Verdict:** 🛑 block' ;;
+            parse-failed)    HEADLINE='**Verdict:** ⚠️ parse-failed — all 4 specialist outputs unparseable' ;;
             *)               HEADLINE="**Verdict:** \`$VERDICT\`" ;;
           esac
 
-          # Render summary line + findings table from /tmp/persona-output.json.
-          # parse-failed branch wrote '{}' there; jq fallbacks render
-          # empty summary + empty table cleanly.
+          if [ "$DEGRADED" = "true" ]; then
+            DEGRADED_BLOCK=$(printf '\n\n> ⚠️ degraded mode — %s specialist(s) inconclusive (envelope missing or unparseable). Verdict computed from remaining specialists per spec 72c §3.' "$INCONCLUSIVE")
+          else
+            DEGRADED_BLOCK=""
+          fi
+
+          SHADOW_BLOCK=$(printf '\n\n_Quorum at `k=1` (default per spec 72c §5). Shadow monitor: `k=2` would have been `%s`; `k=3` would have been `%s`._' "$SHADOW_K2" "$SHADOW_K3")
+
           SUMMARY=$(jq -r '.summary // ""' /tmp/persona-output.json)
           if [ -n "$SUMMARY" ]; then
             SUMMARY_BLOCK=$(printf '\n\n> %s' "$SUMMARY")
@@ -255,12 +341,13 @@ jobs:
             (.findings // []) as $f
             | if ($f | length) == 0 then ""
               else
-                "\n\n| Label | Blocking | Category | Evidence | Remediation |\n|---|:---:|---|---|---|\n"
+                "\n\n| Label | Blocking | Category | Seen by | Evidence | Remediation |\n|---|:---:|---|---|---|---|\n"
                 + ( $f | map(
                     "| `\(.label // "?")`"
                     + (if (.blocking // false) then " **(blocking)**" else "" end)
                     + " | \(.blocking // false)"
                     + " | `\(.category // "?")`"
+                    + " | " + ((.seen_by // []) | map("`" + . + "`") | join(", "))
                     + " | " + ((.evidence // "") | gsub("\\|"; "\\|") | gsub("\n"; " "))
                     + " | " + ((.remediation // "") | gsub("\\|"; "\\|") | gsub("\n"; " "))
                     + " |"
@@ -268,13 +355,12 @@ jobs:
               end
           ' /tmp/persona-output.json)
 
-          FOOTER=$(printf '\n\n---\n_Auto-posted by [`auto-review.yml`](%s) on commit `%s`. Workflow derives verdict deterministically from findings array per CLAUDE.md §"Verdict vocabulary"; labels follow [Conventional Comments](https://conventionalcomments.org/). Informational at v3b ship — does not gate the merge button._\n' \
+          FOOTER=$(printf '\n\n---\n_Auto-posted by [`auto-review.yml`](%s) on commit `%s`. 4 specialists fanned out under matrix strategy per spec 72c §3; verdict derived deterministically by `scripts/spawn-multi-reviewer.sh aggregate` per CLAUDE.md §"Verdict vocabulary"; labels follow [Conventional Comments](https://conventionalcomments.org/). Informational at v3b ship — does not gate the merge button._\n' \
             "$RUN_URL" "$HEAD_SHA")
 
-          BODY=$(printf '%s\n\n## auto-review · slice-reviewer persona\n\n%s — %s finding(s)%s%s%s' \
-            "$MARKER" "$HEADLINE" "$FINDINGS_COUNT" "$SUMMARY_BLOCK" "$TABLE" "$FOOTER")
+          BODY=$(printf '%s\n\n## auto-review · multi-agent (4 specialists)\n\n%s — %s finding(s)%s%s%s%s%s' \
+            "$MARKER" "$HEADLINE" "$FINDINGS_COUNT" "$DEGRADED_BLOCK" "$SUMMARY_BLOCK" "$TABLE" "$SHADOW_BLOCK" "$FOOTER")
 
-          # Find existing marker-tagged comment (idempotency across pushes).
           COMMENT_ID=$(gh api "repos/${REPO}/issues/${PR_NUMBER}/comments?per_page=100" --paginate \
             --jq ".[] | select(.body | contains(\"${MARKER}\")) | .id" \
             | head -n 1 || true)
@@ -288,7 +374,7 @@ jobs:
           fi
 
       - name: Post skip notice (when secret absent)
-        if: steps.secret-check.outputs.skip == 'true'
+        if: needs.brief.outputs.skip == 'true'
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           REPO: ${{ github.repository }}
@@ -296,16 +382,14 @@ jobs:
           HEAD_SHA: ${{ github.event.pull_request.head.sha }}
         run: |
           set -euo pipefail
-          # Same nested-JSON-via-jq pattern as the verdict path.
           jq -n \
-            --arg name 'auto-review (slice-reviewer persona)' \
+            --arg name 'auto-review (multi-agent · 4 specialists)' \
             --arg head_sha "$HEAD_SHA" \
-            '{name: $name, head_sha: $head_sha, status: "completed", conclusion: "neutral", output: {title: "Skipped — ANTHROPIC_API_KEY not configured", summary: "Set ANTHROPIC_API_KEY as a repo secret to enable auto-review per docs/slices/S-INFRA-rigour-v3b-subagent-suite/acceptance.md AC-1."}}' \
+            '{name: $name, head_sha: $head_sha, status: "completed", conclusion: "neutral", output: {title: "Skipped — ANTHROPIC_API_KEY not configured", summary: "Set ANTHROPIC_API_KEY as a repo secret to enable auto-review per docs/slices/S-INFRA-persona-suite-v2-multi-agent/acceptance.md AC-1."}}' \
           | gh api "repos/${{ github.repository }}/check-runs" --method POST --input -
 
-          # Mirror as a PR comment (same marker as verdict path → idempotent).
-          MARKER='<!-- auto-review-comment:slice-reviewer -->'
-          BODY=$(printf '%s\n\n## auto-review · slice-reviewer persona\n\n**Verdict:** ⏭️ skipped — `ANTHROPIC_API_KEY` not configured\n\nSet `ANTHROPIC_API_KEY` as a repo secret to enable auto-review per `docs/slices/S-INFRA-rigour-v3b-subagent-suite/acceptance.md` AC-1.\n\n---\n_Auto-posted by `auto-review.yml`. Informational._\n' "$MARKER")
+          MARKER='<!-- auto-review-comment:multi-agent -->'
+          BODY=$(printf '%s\n\n## auto-review · multi-agent (4 specialists)\n\n**Verdict:** ⏭️ skipped — `ANTHROPIC_API_KEY` not configured\n\nSet `ANTHROPIC_API_KEY` as a repo secret to enable auto-review per `docs/slices/S-INFRA-persona-suite-v2-multi-agent/acceptance.md` AC-1.\n\n---\n_Auto-posted by `auto-review.yml`. Informational._\n' "$MARKER")
           COMMENT_ID=$(gh api "repos/${REPO}/issues/${PR_NUMBER}/comments?per_page=100" --paginate \
             --jq ".[] | select(.body | contains(\"${MARKER}\")) | .id" \
             | head -n 1 || true)
@@ -318,19 +402,10 @@ jobs:
           fi
 
       - name: Post failure-fallback check run (when an earlier step crashed)
-        # `if: failure()` runs only when an earlier step in this job failed
-        # AND the secret was present (so we entered the live-review path).
-        # Posts a `failure` check run + diagnostic PR comment so the
-        # author sees a surfaced reason. Pipeline-crash → failure
-        # (per S-INFRA-rigour-parse-failed-pipeline-crashed-merge-gate,
-        # session 52 — was `neutral` pre-promotion; a workflow-level
-        # crash means no review happened and merging would skip the
-        # rigour gate). Re-running the workflow may succeed if the
-        # cause was transient (npx unavailable, jq parse, gh api
-        # outage, runner OOM) — that re-run is the escape hatch.
-        # Closes the v3b S-6 round-2 #2 finding (edge-case: pipefail
-        # crash → no posted check-run → empty Checks list).
-        if: failure() && steps.secret-check.outputs.skip == 'false'
+        # Pipeline-crash → failure (per S-INFRA-rigour-parse-failed-
+        # pipeline-crashed-merge-gate, session 52). Re-running the
+        # workflow is the escape hatch.
+        if: failure() && needs.brief.outputs.skip == 'false'
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           REPO: ${{ github.repository }}
@@ -340,15 +415,14 @@ jobs:
         run: |
           set -euo pipefail
           jq -n \
-            --arg name 'auto-review (slice-reviewer persona)' \
+            --arg name 'auto-review (multi-agent · 4 specialists)' \
             --arg head_sha "$HEAD_SHA" \
             --arg run_url "$RUN_URL" \
-            '{name: $name, head_sha: $head_sha, status: "completed", conclusion: "failure", output: {title: "Review pipeline crashed — see workflow log", summary: ("auto-review.yml failed before posting a verdict (npx install, claude invocation, jq parse, or gh api). Inspect the workflow log: " + $run_url + " — common causes: API outage, malformed persona output, runner network issue. Re-run the workflow to retry; if the cause was transient the next run will succeed and supersede this failure check.")}}' \
+            '{name: $name, head_sha: $head_sha, status: "completed", conclusion: "failure", output: {title: "Review pipeline crashed — see workflow log", summary: ("auto-review.yml failed before posting a verdict (artifact upload/download, claude invocation, jq parse, or gh api). Inspect the workflow log: " + $run_url + " — common causes: API outage, malformed persona output, runner network issue, all 4 specialists timing out. Re-run the workflow to retry; if the cause was transient the next run will succeed and supersede this failure check.")}}' \
           | gh api "repos/${{ github.repository }}/check-runs" --method POST --input -
 
-          # Mirror as a PR comment (same marker → idempotent).
-          MARKER='<!-- auto-review-comment:slice-reviewer -->'
-          BODY=$(printf '%s\n\n## auto-review · slice-reviewer persona\n\n**Verdict:** 💥 pipeline-crashed — review did not produce a verdict\n\nThe auto-review workflow failed before posting a verdict (npx install, `claude` invocation, jq parse, or `gh api`). Common causes: API outage, malformed persona output, runner network issue.\n\nInspect the [workflow log](%s) on commit `%s` for the actual error.\n\n---\n_Auto-posted by `auto-review.yml`. Pipeline-crash promotes to `failure` (the merge button is gated until the workflow re-runs successfully). Re-running the workflow is the escape hatch: if the cause was transient, the next run will supersede this failure with a real verdict._\n' "$MARKER" "$RUN_URL" "$HEAD_SHA")
+          MARKER='<!-- auto-review-comment:multi-agent -->'
+          BODY=$(printf '%s\n\n## auto-review · multi-agent (4 specialists)\n\n**Verdict:** 💥 pipeline-crashed — review did not produce a verdict\n\nThe auto-review workflow failed before posting a verdict (artifact upload/download, `claude` invocation, jq parse, or `gh api`). Common causes: API outage, malformed persona output, runner network issue, all 4 specialists timing out.\n\nInspect the [workflow log](%s) on commit `%s` for the actual error.\n\n---\n_Auto-posted by `auto-review.yml`. Pipeline-crash promotes to `failure` (the merge button is gated until the workflow re-runs successfully). Re-running the workflow is the escape hatch._\n' "$MARKER" "$RUN_URL" "$HEAD_SHA")
           COMMENT_ID=$(gh api "repos/${REPO}/issues/${PR_NUMBER}/comments?per_page=100" --paginate \
             --jq ".[] | select(.body | contains(\"${MARKER}\")) | .id" \
             | head -n 1 || true)
