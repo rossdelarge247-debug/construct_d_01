@@ -16,5 +16,5 @@
     "reviewer-correctness": "3c00934341dbf397d0530e42e476ec4835068f9be987f2804e37d46e474fa78b",
     "reviewer-style": "84367eaa17a442d98f295fe50cafa0a2dbe763528cc780f6aa8e35af1a88b43c"
   },
-  "_notes": "shadow_k2 reconstructed: 14 findings distributed across 4 specialists per spec 72c §4 dimension mapping (security 0, architecture 2, correctness 11, style 2). At k=2 quorum, no single tier reaches 2 specialists agreeing on the same SHA-equivalent finding given the distribution → approve. personas_sha256 reflects the persona files at SHA-capture time; the session-47 single-agent baseline didn't have specialist personas (slice-reviewer.md was sole reviewer), so SHAs were captured at the time this seed gained replay infrastructure. Drift relative to these SHAs signals persona evolution since capture; observation-only signal at run-replay.sh."
+  "_notes": "shadow_k2 reconstructed: 14 findings distributed across 4 specialists per spec 72c §4 dimension mapping (security 0, architecture 2, correctness 11, style 2). At k=2 quorum, no single tier reaches 2 specialists agreeing on the same SHA-equivalent finding given the distribution → approve. personas_sha256 reflects persona files at seed-capture time; delta against current state signals evolution since capture; observation-only signal at run-replay.sh."
 }
