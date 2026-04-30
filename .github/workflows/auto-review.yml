@@ -229,11 +229,9 @@ jobs:
         if: needs.brief.outputs.skip == 'false'
         run: |
           set -euo pipefail
-          # Move per-dimension envelopes into the flat directory shape
-          # `spawn-multi-reviewer.sh aggregate` expects:
-          #   /tmp/envelopes/{security,architecture,correctness,style}.json
-          # Missing files → aggregator marks that dimension `inconclusive`
-          # and degrades gracefully; all-missing → `parse-failed`.
+          # Missing envelope files → aggregator marks that dimension
+          # `inconclusive` and degrades gracefully; all-missing →
+          # `parse-failed`.
           mkdir -p /tmp/envelopes
           for DIM in security architecture correctness style; do
             SRC="/tmp/envelope-artifacts/auto-review-envelope-${DIM}/${DIM}.json"
