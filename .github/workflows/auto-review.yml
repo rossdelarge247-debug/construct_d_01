@@ -244,9 +244,6 @@ jobs:
             fi
           done
 
-          # Output contract per `spawn-multi-reviewer.sh aggregate`:
-          # {summary, findings[], verdict, would_have_been_k2,
-          # would_have_been_k3, degraded?, inconclusive_dimensions?}.
           AGGREGATE_JSON=$(scripts/spawn-multi-reviewer.sh aggregate /tmp/envelopes)
 
           echo "::group::aggregated envelope"
