@@ -1,7 +1,11 @@
 #!/bin/bash
 # Tests for scripts/spawn-multi-reviewer.sh — multi-agent persona suite
-# aggregator. Verifies AC-1 verifications 2 + 3 + 4 + 5 of slice
-# S-INFRA-persona-suite-v2-multi-agent.
+# aggregator. Verifies AC-1 verifications 2 + 3 + 5 of slice
+# S-INFRA-persona-suite-v2-multi-agent. (AC-1 verification 4 — workflow
+# skip behaviour when ANTHROPIC_API_KEY is absent — is workflow-level,
+# not aggregator-level; the aggregate subcommand has no API-key
+# awareness. That verification is exercised at session-55 impl PR's
+# auto-review.yml workflow tests.)
 #
 # Each test sets up a temporary envelopes directory with mock specialist
 # outputs, invokes `aggregate <dir>`, and asserts on the unified output
