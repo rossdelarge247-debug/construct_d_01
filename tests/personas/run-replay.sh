@@ -74,9 +74,8 @@ for PR_DIR in "$GOLDEN_DIR"/*/; do
   # Assertion 2: differential mode shows the full trajectory —
   # resolved_count == prior cumulative count; new_count == 0; no
   # current findings tagged was_in_prior (since current has no findings).
-  PRIOR_NORMALIZED=$(jq -c '[.[] | del(._round, ._session_47_persona_dimension)]' "$PRIOR_FINDINGS")
   PRIOR_TMP=$(mktemp)
-  printf '%s' "$PRIOR_NORMALIZED" > "$PRIOR_TMP"
+  jq -c '[.[] | del(._round, ._session_47_persona_dimension)]' "$PRIOR_FINDINGS" > "$PRIOR_TMP"
 
   DIFF_OUT=$("$ORCHESTRATOR" aggregate "$ENVELOPES_DIR" --differential --prior-findings "$PRIOR_TMP")
   rm -f "$PRIOR_TMP"

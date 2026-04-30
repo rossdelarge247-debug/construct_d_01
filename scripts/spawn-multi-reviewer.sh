@@ -155,13 +155,10 @@ DEDUPED_FINDINGS=$(printf '%s' "$ALL_FINDINGS" | jq -c '
   })
 ')
 
-# Differential mode: annotate each current finding with was_in_prior
-# (true if its [label, category, evidence-prefix] tuple matches a prior
-# finding's hash); emit prior_findings_resolved (prior findings whose
-# tuple is absent from current); emit token_metrics counts. Persona-
-# side filtering per spec 72c §6 is the upstream half (specialists
-# scope review to prior-still-present + new-this-round); this block is
-# the downstream observability + verification surface.
+# Dedup tuple key: [label, category, evidence-prefix] (matches the
+# cross-specialist dedup hash above). Persona-side filtering per spec
+# 72c §6 is the upstream half; this block is the downstream
+# observability surface only.
 RESOLVED_FINDINGS='[]'
 DIFFERENTIAL_FIELDS_JQ='{}'
 if [ "$DIFFERENTIAL" = "true" ]; then
