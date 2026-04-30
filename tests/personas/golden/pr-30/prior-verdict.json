@@ -10,5 +10,11 @@
   "source_verification_md": "docs/slices/S-INFRA-rigour-v3b-subagent-suite/verification.md",
   "session_captured": 47,
   "single_agent_baseline": true,
-  "_notes": "shadow_k2 reconstructed: 14 findings distributed across 4 specialists per spec 72c §4 dimension mapping (security 0, architecture 2, correctness 11, style 2). At k=2 quorum, no single tier reaches 2 specialists agreeing on the same SHA-equivalent finding given the distribution → approve."
+  "personas_sha256": {
+    "reviewer-security": "2287284a231a32ccc1aef0affde5c7e91148cca0a7a9c1e33cb07351a34e6e6e",
+    "reviewer-architecture": "75d06b0fa9bd7d10478f050750094777311c5731cdda99356a5db475b8a69782",
+    "reviewer-correctness": "3c00934341dbf397d0530e42e476ec4835068f9be987f2804e37d46e474fa78b",
+    "reviewer-style": "84367eaa17a442d98f295fe50cafa0a2dbe763528cc780f6aa8e35af1a88b43c"
+  },
+  "_notes": "shadow_k2 reconstructed: 14 findings distributed across 4 specialists per spec 72c §4 dimension mapping (security 0, architecture 2, correctness 11, style 2). At k=2 quorum, no single tier reaches 2 specialists agreeing on the same SHA-equivalent finding given the distribution → approve. personas_sha256 reflects persona files at seed-capture time; delta against current state signals evolution since capture; observation-only signal at run-replay.sh."
 }

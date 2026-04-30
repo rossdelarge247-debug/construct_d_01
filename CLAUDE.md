@@ -341,15 +341,26 @@ Per `docs/slices/S-INFRA-rigour-v3a-foundation/acceptance.md` L201:
 
 ### Not yet in scope (v3b / v3c carry-over)
 
-Per `docs/slices/S-INFRA-rigour-v3b-subagent-suite/acceptance.md`:
+Canonical sources: `docs/HANDOFF-SESSION-55.md` §"v3c carry-overs" + spec 72c §9 §"Out of scope" + `docs/slices/S-INFRA-rigour-v3b-subagent-suite/acceptance.md`. Ranked picks for the next session live in the most recent HANDOFF §"Next session priorities".
 
-- During-work review subagents — commit-msg accuracy, spec-quote enforcement, AskUserQuestion framing, periodic on-track audit, doc-honesty (v3b)
-- Pair-programming PostToolUse hook with intent file + finding-response loop (v3b)
-- Plan-review subagent default-spawn flip — currently `EXIT_PLAN_REVIEW_SPAWN=1`-gated (v3b)
-- Three protected-path omissions from L199: `scripts/git-state-verifier.sh`, `scripts/eslint-no-disable.sh`, `docs/eslint-baseline-allowlist.txt` (v3b)
-- Origin/main-anchored ratchet for ESLint + coverage thresholds — F5c (v3c)
-- Multi-provider 3rd-agent reviewer, Stryker mutation testing, structured-findings JSON Schema (v3c)
-- Consolidating rewrite of this section (v3c)
+**Review-flow completion:**
+- AC-3 persona-side prompt-input wiring — workflow injects prior-round findings into per-specialist prompts to close the differential-mode token-cost loop (currently aggregator-side only; spec 72c §6 + §9)
+- Pre-flight self-review hook — local pre-push hook OR `/preflight` slash command that runs all 4 specialists against staged diff (HANDOFF-55 lesson #6: estimated 4-6 rounds saved per PR)
+- During-work review subagents — commit-msg accuracy, spec-quote enforcement, AskUserQuestion framing, periodic on-track audit, doc-honesty
+- Pair-programming PostToolUse hook with intent file + finding-response loop
+- Plan-review subagent default-spawn flip — currently `EXIT_PLAN_REVIEW_SPAWN=1`-gated
+
+**Drift / regression detection:**
+- Synthetic-deliberate-injection per-persona fixtures (spec 72c §7 hybrid: catches per-persona regressions golden-replay alone can't isolate)
+- Live persona drift detection — quarterly cron re-invocation against golden seeds (recurring API budget; spec 72c §9)
+
+**External integrations:**
+- Multi-provider 3rd-agent reviewer (GPT/Gemini for cross-provider diversity; spec 72c §"Out of scope")
+- Stryker mutation testing on persona prompts
+
+**Other:**
+- Origin/main-anchored ratchet for ESLint + coverage thresholds — F5c
+- Structured-findings JSON Schema validation (spec 72c §9)
 
 ## Visual direction
 

@@ -93,6 +93,29 @@ for PR_DIR in "$GOLDEN_DIR"/*/; do
     printf 'PASS: differential new_count (0)\n'
   fi
 
+  if jq -e '.personas_sha256' "$PRIOR_VERDICT" > /dev/null 2>&1; then
+    for DIM in security architecture correctness style; do
+      EXPECTED_SHA=$(jq -r ".personas_sha256[\"reviewer-$DIM\"] // \"\"" "$PRIOR_VERDICT")
+      [ -n "$EXPECTED_SHA" ] || continue
+      PERSONA_FILE="$REPO_ROOT/.claude/agents/reviewer-$DIM.md"
+      if [ ! -f "$PERSONA_FILE" ]; then
+        printf 'MISSING: reviewer-%s.md not found at %s\n' "$DIM" "$PERSONA_FILE"
+        continue
+      fi
+      if command -v sha256sum >/dev/null 2>&1; then
+        ACTUAL_SHA=$(sha256sum "$PERSONA_FILE" | awk '{print $1}')
+      elif command -v shasum >/dev/null 2>&1; then
+        ACTUAL_SHA=$(shasum -a 256 "$PERSONA_FILE" | awk '{print $1}')
+      else
+        printf 'SKIP: neither sha256sum nor shasum available; cannot verify reviewer-%s.md drift\n' "$DIM"
+        continue
+      fi
+      if [ "$ACTUAL_SHA" != "$EXPECTED_SHA" ]; then
+        printf 'DRIFT: reviewer-%s.md changed since seed capture (current %s vs seed %s)\n' "$DIM" "$ACTUAL_SHA" "$EXPECTED_SHA"
+      fi
+    done
+  fi
+
   rm -rf "$ENVELOPES_DIR" "$PRIOR_TMP"
   trap - EXIT
 done
