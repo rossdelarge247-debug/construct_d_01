@@ -115,16 +115,11 @@ jobs:
           retention-days: 1
 
       - name: Post failure-fallback check run (when brief-job crashed)
-        # Pipeline-crash → failure (per S-INFRA-rigour-parse-failed-
-        # pipeline-crashed-merge-gate, session 52). The aggregate job's
-        # own failure-fallback only fires when aggregate runs at all —
-        # but aggregate's `needs: [brief, specialist]` + `if: always() &&
-        # needs.brief.result == 'success'` skips it entirely on brief
-        # failure. Without this step, a brief-job crash would post no
-        # check-run and the merge button would NOT be gated by the
-        # session-52 promotion. Mirrors the aggregate job's fallback step
-        # so brief-internal crashes (slice-resolve, awk, openssl, etc.)
-        # still surface as `failure`.
+        # Without this step, a brief-job crash would post no check-run
+        # and the merge button would NOT be gated by the pipeline-crash
+        # → failure rule: aggregate's `needs.brief.result == 'success'`
+        # gate skips it entirely on brief failure, so brief must surface
+        # its own failure here. Mirrors the aggregate job's fallback.
         if: failure() && steps.secret-check.outputs.skip == 'false'
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -157,7 +152,11 @@ jobs:
   specialist:
     name: auto-review · ${{ matrix.dimension }}
     needs: brief
-    if: needs.brief.outputs.skip == 'false'
+    # Explicit `needs.brief.result == 'success'` matches aggregate's
+    # gate. An explicit `if:` replaces the implicit `success()` check;
+    # without the result check, a brief-job crash AFTER secret-check sets
+    # skip=false would still start 4 specialists wastefully.
+    if: needs.brief.result == 'success' && needs.brief.outputs.skip == 'false'
     runs-on: ubuntu-latest
     timeout-minutes: 10
     strategy:
