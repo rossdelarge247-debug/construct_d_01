@@ -1,9 +1,9 @@
 # S-INFRA-persona-suite-v2-multi-agent — Acceptance criteria
 
 **Slice:** S-INFRA-persona-suite-v2-multi-agent
-**Spec ref:** `docs/workspace-spec/72c-multi-agent-review-framework.md` (this slice's impl spec); references session-47 9-round single-agent recursive baseline at `docs/slices/S-INFRA-rigour-v3b-subagent-suite/verification.md` §"Round 1" through §"Round 9"
-**Phase(s):** Infra (rigour-pivot programme; v3b S-8 stretch)
-**Status:** Draft
+**Spec ref:** `docs/workspace-spec/72c-multi-agent-review-framework.md` (this slice's impl spec; session-54-amended for §3-§5-§7-§9-§10 alignment with prior-art audit findings); references session-47 9-round single-agent recursive baseline at `docs/slices/S-INFRA-rigour-v3b-subagent-suite/verification.md` §"Round 1" through §"Round 9"
+**Phase(s):** Infra (rigour-pivot programme; v3b S-8 — last substantive piece of v3b)
+**Status:** Re-draft (session 54). Supersedes the session-48 draft. Realigned to /ultrareview 4-partition + majority-vote `k`-quorum default + golden-PR replay primary per spec 72c session-54 amendment.
 
 ---
 
@@ -11,136 +11,129 @@
 
 Session-47 PR #30 shipped a single-agent recursive review baseline (3 personas + `auto-review.yml`). Live measurement on the slice's own ship-PR ran 9 rounds with 14 actionable findings. Per `HANDOFF-SESSION-47.md` §"What could improve" L63: *"Single-agent recursive review is high-signal but inefficient. 9 rounds × ~3min CI + ~$0.10 API per round = ~$1 + 30min wall-clock. Multi-agent dimension-partitioned reviewer (v3b S-8 stretch) should converge in 1-2 rounds. The single-agent attention pattern is non-deterministic across rubric dimensions — each round explored 2-3 of the 7-8 dimensions deeply."*
 
-This slice ships the multi-agent v2 framework specified at `docs/workspace-spec/72c-multi-agent-review-framework.md`: orchestrator + 7 dimension-specialist personas + verdict aggregator + differential-review mode + test-fixture seeding + retain/drop measurement activation. Beats the single-agent recursive baseline on rounds-to-converge (≤2 vs 9) AND total tokens (≤3× round-1 vs ~9× round-1).
+This slice ships the multi-agent v2 framework specified at `docs/workspace-spec/72c-multi-agent-review-framework.md` (session-54-amended): orchestrator + **4** dimension-specialist personas (`security · architecture · correctness · style` per /ultrareview published convergence at §10 L173) + verdict aggregator under **`k`-of-N quorum with shadow-monitor** (default `k=1` for back-compat with current `derive-verdict.sh` first-fault-blocks behaviour; aggregator emits `would_have_been_k2` / `would_have_been_k3` for §5 revisit-trigger calibration) + differential-review mode + **golden-PR replay** fixture harness (primary; synthetic-deliberate-injection deferred to v3c per spec 72c §7). Beats the single-agent recursive baseline on rounds-to-converge (≤2 vs 9) AND total tokens (≤3× round-1 vs ~9× round-1) per spec 72c §8 KPI table.
+
+**What changed since the session-48 draft.** The session-48 draft proposed 7 specialists + max-severity aggregation + synthetic-deliberate-injection fixtures. The session-49 prior-art audit captured at spec 72c §10 found that (a) published systems converge on 4-5 specialists with the specific `/ultrareview` partition `security · architecture · correctness · style` (§10 L173); (b) mainstream LLM-jury aggregation is majority-vote / reliability-weighted, not max-severity (§10 L174); (c) golden-PR replay is the published fixture-harness pattern (promptfoo precedent, §10 L176-187); synthetic-deliberate-injection has no public precedent (§7 L135). The session-48 draft was designs-ahead-of-data on three dimensions; session-54 spec amendment + this re-draft realign all three to the audit findings before impl begins. Per `docs/HANDOFF-SESSION-48.md` L82: *"spec 72c also designs ahead-of-data (7-specialist Claude-only framework before any src/ slice has measured single-agent baseline)."* That recursive critique is now applied as load-bearing change.
 
 ## Dependencies
 
-- **Upstream:** PR #30 (v3b S-6 persona suite — single-agent baseline + `auto-review.yml`) merged. Required because (a) the single-agent baseline is the comparison artefact for AC-6 retain/drop measurement, (b) AC-1 orchestrator extends/migrates `auto-review.yml` which must exist on main, (c) spec 72b Option C (locked at PR #29) is the persona-file convention.
-- **Status at slice draft (session 48):** PR #30 still open, `mergeable_state: behind` (post-PR-31 merge). PR #32 (sibling — `S-INFRA-arch-smell-trigger`) merged ahead at `8160854`.
-- **Open decisions required:** none (spec 72c is being shipped alongside this slice).
-- **Re-use / Preserve-with-reskin paths touched:** `auto-review.yml` (extended to fan-out orchestrator); `.claude/agents/slice-reviewer.md` (refactored to rubric-checklist v2 per AC-3); `.claude/hooks-checksums.txt` (re-baselined).
-- **Discarded paths deleted at DoD:** none (single-agent personas remain as fallback per spec 72c §3 "specialist timeout → fallback to single-agent recursive").
+- **Upstream:** PR #30 (v3b S-6 single-agent persona suite + `auto-review.yml`) merged session 47. PR #41 (Conventional Comments verdict vocabulary; `scripts/derive-verdict.sh`) merged session 50. PR #46 (`derive-verdict.sh` parse-failed + jq-array guard) merged session 51. PR #50 (auto-review merge-gates on parse-failed + pipeline-crash) merged session 52. PR #52 (P0b-structural: hooks-checksums + control-change-label removed; CODEOWNERS becomes sole control-plane gate; pre-commit-verify deprecated) merged session 53.
+- **Downstream blocked-by:** S-F1 (first src/ slice) — AC-6 retain/drop measurement clock starts at S-F1 per spec 72c §8 L154; deferred entirely from this slice's ACs per session-53 user decision.
+- **Re-use / Preserve-with-reskin paths touched:** `auto-review.yml` (extended to fan-out orchestrator under matrix strategy); `scripts/derive-verdict.sh` (extended with `--multi k=N` mode for quorum aggregation; existing single-persona behaviour preserved at `k=1` default); `scripts/auto-review-parse.sh` and `scripts/auto-review-slice-resolve.sh` (re-used unchanged by orchestrator).
+- **Discarded paths deleted at DoD:** `.claude/agents/slice-reviewer.md` (retired atomically with AC-2 ship per AC-5; the 4 specialists supersede it). `acceptance-gate.md` and `ux-polish-reviewer.md` are unchanged — they cover orthogonal roles (slice-completion AC verification and UI-surface review respectively) and are not part of the PR-review fan-out.
+- **Solo-operator code-owner gate awareness** (CLAUDE.md negative constraint #23 from session 53). This slice touches `.claude/agents/**`, `scripts/**`, `.github/workflows/**` — all CODEOWNERS-protected. Merge requires conscious admin-bypass click ("Merge without waiting for required review") in the solo-operator context. By design.
 
 ## Pre-flight notes
 
-- **Slice size pre-flight.** Estimated ~9 files / ~700-900L diff (orchestrator script + 7 specialist personas + workflow extensions + 7 fixtures + verification.md). ≥300L acceptance.md likely once impl AC narrative fills out — adversarial review per spec 72b Option B (3 sub-spawns) or Option C (atomic-file inline) per `wc -l` at freeze.
-- **TDD-applicable surface.** `scripts/spawn-multi-reviewer.sh` (orchestrator + aggregator) is logic surface — RED ShellSpec fixtures first per CLAUDE.md §"TDD where tractable" + AC-5 tdd-first-every-commit hook. Personas + fixtures are pure-prose under tdd-exemption-allowlist `pure-config:.claude/agents/*` + `pure-config:tests/personas/fixtures/*.diff` (entries to be added at impl time).
-- **Spec 72b adversarial review budget.** Each persona file ≤300L per spec 72c §4 (matches v3b S-6 persona size); orchestrator script + workflow ≤300L. Persona-fixture pairs reviewed together per dimension (sub-spawn per dimension) — 7 sub-spawns sized to spec 72b Option B partition rules.
-- **DoD-13 persona recursion lock** (per v3b acceptance.md L129). Each new persona reviewed by an independent fresh-context subagent before merge — applied to all 7 specialist personas.
-- **Spec-validation-by-deliberate-impl-break** (per v3b S-6 spec 72b Option C lesson + AC-13 of v3b). For each specialist: deliberately break its target dimension in the persona file → fixture in test-fixture seeding harness should turn red. Confirms the specialist actually catches what it claims to catch.
-- **Branch sequencing.** This slice ships on `claude/sibling-slice-multi-agent-zhkr4` (same branch as PR #32 sibling, per session-48 pre-flight Q2 "two PRs, one branch"). Local branch reset to `origin/main 8160854` post-PR-32 merge; new commits land on top. Force-push will be required to update `origin/claude/sibling-slice-multi-agent-zhkr4` (which still holds pre-merge state).
-- **Architectural-smell awareness** (CLAUDE.md §Engineering conventions, shipped via PR #32). The orchestrator script is the at-risk-of-smell file — parsing + fan-out + aggregator + check-run posting could collapse into one inline shell file (the v3b S-6 `auto-review.yml` smell). Pre-empted: AC-1 explicitly factors orchestrator-vs-aggregator into separate functions with shellspec-tested seams.
+- **Slice size pre-flight.** Estimated ~10-12 files / ~1100-1500L diff total when this slice ships impl: spec amendment (already in-flight on this PR; ~80-100L net) + this `acceptance.md` re-draft (~150L) + 4 specialist personas (~150-200L each) + `scripts/spawn-multi-reviewer.sh` (~150-200L) + `scripts/derive-verdict.sh --multi` extension (~30-50L) + `auto-review.yml` fan-out (~80-120L net) + golden-replay harness `tests/personas/golden/...` + `tests/personas/run-replay.sh` (~100-150L) + ShellSpec fixtures + persona-fixtures workflow + slice `verification.md`. Likely ≥300L `acceptance.md` once impl AC narrative fills out — adversarial review per spec 72b Option B (3 sub-spawns) or Option C (atomic-file inline) per `wc -l` at freeze.
+- **Session-54 PR scope.** This PR ships **only** the spec 72c session-54 amendment + this re-draft. **Impl deferred to session 55 PR.** Rationale per CLAUDE.md §"Coding conduct" §"Surgical changes": design contract should freeze before impl starts; mixing them risks late-design churn. The session-55 impl PR opens against the frozen contract.
+- **TDD-applicable surface (session 55 impl).** `scripts/spawn-multi-reviewer.sh` (orchestrator + aggregator) is logic surface — RED ShellSpec fixtures first per CLAUDE.md §"TDD where tractable". `scripts/derive-verdict.sh --multi` mode is logic surface — extend `tests/shellspec/derive-verdict.spec.sh` RED-first. Personas + golden-replay diffs are pure-prose / deterministic content under the tdd-exemption-allowlist `pure-config:.claude/agents/*` + `pure-config:tests/personas/golden/**/*` (entries to be added at session-55 impl time).
+- **Spec 72b adversarial review budget.** Each persona file ≤300L per spec 72c §4 (target ≤200L via include-by-reference for verdict vocab + JSON schema; orchestrator + workflow ≤300L). Persona-fixture pairs reviewed together per dimension (sub-spawn per dimension) — 4 sub-spawns at session-55 impl PR. This session-54 design-only PR is ~250L combined diff (spec + acceptance.md re-draft); single sub-spawn covers it.
+- **DoD-13 persona recursion lock** (per v3b acceptance.md L129). Each new persona reviewed by an independent fresh-context subagent before merge — applied to all 4 specialist personas at session-55 impl PR.
+- **Golden-replay seed honesty.** Initial seed at session-55 impl is 1 PR (PR #30 9-round dataset converted from the recorded round transcript). The other 3 PRs accumulate as src/ slices ship from S-F1 onwards. Seed of 1 is below the promptfoo precedent (5-10 PRs); pass tolerance (±1 finding count, ≥50% specialist overlap per spec 72c §7) reflects this — calibrates as seed grows. Honest framing in slice `verification.md` at wrap.
+- **Architectural-smell awareness** (CLAUDE.md §Engineering conventions, qualitative trigger per PR #52 amendment). The orchestrator script is the at-risk-of-smell file — parsing + fan-out + aggregator + check-run posting could collapse into one inline shell file (the v3b S-6 `auto-review.yml` smell that PR #45 + PR #46 had to extract). Pre-empted: AC-1 explicitly factors orchestrator-vs-aggregator into separate functions with shellspec-tested seams, mirroring the `auto-review-parse.sh` extraction precedent.
 
 ## MLP framing
 
-The loveable floor: a future Claude session opens a `src/` PR; auto-review fans to 7 specialists in parallel; convergence in ≤2 rounds; findings de-duplicated cleanly across specialists; differential mode keeps round-2 cheap; test-fixture harness catches persona drift before it reaches a real PR. Rounds-3+ are an architectural-smell signal (per CLAUDE.md §Engineering conventions §"Architectural-smell trigger" — shipped PR #32) rather than a multi-agent failure mode.
+The loveable floor: a future Claude session opens a `src/` PR; auto-review fans to 4 specialists in parallel under matrix strategy; convergence in ≤2 rounds; findings de-duplicated cleanly across specialists with `seen_by[]` attribution; differential mode keeps round-2 cheap; golden-PR replay catches persona drift before it reaches a real PR. Rounds 3+ are an architectural-smell signal (per CLAUDE.md §Engineering conventions §"Architectural-smell trigger" — qualitative per PR #52 amendment) rather than a multi-agent failure mode.
 
-Cuts happen by re-slicing: a partial-suite (e.g. 3 specialists active + 4 deferred) is preferable to a 7-specialist suite where two are mis-tuned. Persona-by-persona DoD-13 reviews enable this.
+Cuts happen by re-slicing: a partial-suite (e.g. 3 specialists active + 1 deferred) is preferable to a 4-specialist suite where one is mis-tuned. Persona-by-persona DoD-13 reviews enable this. The fallback path (single-agent recursive via `slice-reviewer.md`) is **retired** at this slice's ship per AC-5 — the loveable floor includes accepting degraded-mode (3-of-4 specialists when one times out) as the only failure response, not a separate exhaustive single-agent re-run. This is the simplicity-first call (CLAUDE.md §"Coding conduct"): one review path is loveable, two parallel review paths are an over-engineered fallback structure that data hasn't justified.
 
 ---
 
-## AC-1 · Dimension-partitioned orchestrator
+## AC-1 · Dimension-partitioned orchestrator with `k`-quorum aggregation
 
-- **Outcome:** A PR push event triggers an orchestrator that fans out to N specialist reviewer subagents in parallel, collects their JSON envelopes, deduplicates findings, computes a unified verdict via max-severity aggregation, and posts a single check-run on the PR.
+- **Outcome:** A PR push event triggers an orchestrator that fans out to the 4 specialist reviewer subagents in parallel, collects their JSON envelopes, deduplicates findings via 64-char text-prefix SHA-256 (preserving `seen_by[]` per spec 72c §5 rule 2), computes a unified verdict via `k`-of-N quorum aggregation (default `k=1` per spec 72c §5; matches first-fault-blocks behaviour of the current single-persona `derive-verdict.sh`), emits shadow `would_have_been_k2` / `would_have_been_k3` fields for monitoring, and posts a single check-run on the PR.
 - **Verification:**
-  1. `scripts/spawn-multi-reviewer.sh` exists, accepts a PR diff + slice AC + CLAUDE.md sections as input, and returns a unified verdict + finding list as JSON output.
-  2. ShellSpec fixture exercises the orchestrator with a mock 3-specialist response set (1 `approve`, 1 `request-changes/logic`, 1 `nit-only/style`); verifies aggregated verdict = `request-changes`, severity = `logic`, finding count post-dedupe matches.
-  3. ShellSpec fixture exercises specialist-failure-mode: one specialist times out at 10min cap → orchestrator falls back to single-agent recursive (`.claude/agents/slice-reviewer.md`) with a `degraded` field in the output envelope.
-  4. ShellSpec fixture exercises ANTHROPIC_API_KEY-absent: orchestrator gracefully skips with `neutral` check-run (matches v3b S-6 PR #30 §"Skipped — ANTHROPIC_API_KEY not configured").
-  5. `.github/workflows/auto-review.yml` extended to invoke `scripts/spawn-multi-reviewer.sh` (v2 path) by default; v1 single-agent path retained as named subcommand for fallback.
-- **In scope:** orchestrator script + aggregator function + workflow extension + 4 ShellSpec fixtures + JSON output schema documented in spec 72c §3.
+  1. `scripts/spawn-multi-reviewer.sh` exists, accepts a PR diff path + slice AC path + CLAUDE.md sections path as positional inputs, and writes a unified verdict + finding list as JSON to stdout matching the envelope shape documented in spec 72c §3 + §5. Shellspec fixture `tests/shellspec/spawn-multi-reviewer.spec.sh` exercises the happy path with all 4 specialists returning structured JSON.
+  2. ShellSpec fixture exercises the orchestrator with a mock 4-specialist response set: 1 `approve` (empty findings), 1 `request-changes`-shaped (one finding with `label: issue, blocking: false`), 1 `block`-shaped (one finding with `label: issue, blocking: true`), 1 `nit-only`-shaped (one finding with `label: nitpick`); aggregator at default `k=1` returns top-level `verdict: block`; `would_have_been_k2` returns `request-changes` (only 1 specialist had blocking, fewer than 2 of 4); `would_have_been_k3` returns `nit-only`. Verifies the verdict tier downgrades correctly as `k` increases through the quorum thresholds.
+  3. ShellSpec fixture exercises specialist-failure-mode: one specialist times out at 10min cap → orchestrator falls into degraded mode per spec 72c §3 (timed-out specialist's dimension marked `inconclusive` in aggregator output; remaining 3 specialists' findings aggregated normally; top-level output includes `degraded: true` + `inconclusive_dimensions: ["<dimension>"]`). No fallback to a single-agent re-run; degraded mode is the failure response per AC-5 retirement.
+  4. ShellSpec fixture exercises ANTHROPIC_API_KEY-absent: orchestrator gracefully skips with the same `neutral` check-run framing as the current `auto-review.yml` skip path (shape preserved verbatim from PR #30 §"Skipped — ANTHROPIC_API_KEY not configured" — forks unaffected, same skip behaviour).
+  5. ShellSpec fixture exercises cross-specialist deduplication per spec 72c §5 rule 2: two specialists (`security` + `correctness`) both flag the same SHA-256-equivalent finding (same `label|category|first-64-chars-of-summary`); aggregated output contains 1 deduped finding entry with `seen_by: ["reviewer-security", "reviewer-correctness"]`; `k`-quorum derivation counts this as 2 specialist votes (deduped finding counts `len(seen_by)` toward the verdict tier per spec 72c §5 rule 2 last sentence).
+  6. `.github/workflows/auto-review.yml` extended to invoke `scripts/spawn-multi-reviewer.sh` under matrix strategy across the 4 specialists; the legacy single-`claude -p`-against-`slice-reviewer.md` invocation is **removed** from the workflow at this slice's ship (atomic with AC-5 retirement). The workflow's existing skip-when-ANTHROPIC_API_KEY-absent + check-run-posting + findings-comment-posting steps are preserved structurally; only the persona-invocation block changes.
+- **In scope:** orchestrator script + aggregator function + `derive-verdict.sh --multi k=N` extension + workflow extension under matrix strategy + 5 ShellSpec fixtures + JSON output schema documented in spec 72c §3 + §5.
 - **Out of scope:**
   - Specialist persona files themselves (AC-2).
-  - Differential review mode (AC-4) — orchestrator initially runs full-diff per specialist; differential mode wires in AC-4.
+  - Differential review mode (AC-3) — orchestrator initially runs full-diff per specialist; differential mode wires in AC-3.
   - Multi-provider 3rd-agent reviewer (v3c per spec 72c §9).
-- **Opens blocked:** none (spec 72c §3 + §5 are the closed input).
-- **Loveable check:** A future Claude session sees parallel green check-runs per specialist on a PR within ~3min, all green = approve, any red = single aggregated finding list with attribution. Yes — meets the floor.
-- **Evidence at wrap:** verification.md AC-1 row + commit SHA + first-PR-after-merge live invocation log.
+  - Threshold flip away from `k=1` default — gated on §5 revisit trigger fire after first 3 src/ slice measurements.
+- **Opens blocked:** none (spec 72c §3 + §5 are the closed input post session-54 amendment).
+- **Loveable check:** A future Claude session sees parallel green check-runs per specialist on a PR within ~3min via matrix strategy; all green → `approve`; any red → single aggregated finding list with `seen_by[]` attribution; degraded-mode (one specialist timed out) shows the verdict + a clear `inconclusive_dimensions` warning. Yes — meets the floor.
+- **Evidence at wrap:** `verification.md` AC-1 row + commit SHA(s) + first-PR-after-merge live invocation log showing 4 parallel matrix jobs + aggregated check-run + shadow `k=2`/`k=3` fields populated.
 
-## AC-2 · Per-dimension specialist personas
+## AC-2 · Four specialist personas (security · architecture · correctness · style)
 
-- **Outcome:** Seven specialist persona files ship under `.claude/agents/reviewer-{coding-conduct,ac-gap,edge-case,security,regression,spec-citation,simplicity}.md`, each ≤300L, each scoped to exactly one rubric dimension per spec 72c §4 table.
+- **Outcome:** Four specialist persona files ship under `.claude/agents/reviewer-{security,architecture,correctness,style}.md`, each ≤300L (target ≤200L via include-by-reference for verdict vocab + JSON schema), each scoped to exactly one rubric dimension per spec 72c §4 table. The criterion mapping from the retiring `slice-reviewer.md` 8-criterion rubric is preserved verbatim per spec 72c §4 — `correctness` is heaviest (5 absorbed criteria) by design.
 - **Verification:**
-  1. Seven persona files exist at the spec'd paths; `wc -l` returns ≤300 for each.
-  2. Each persona file declares (a) one named rubric dimension verbatim from spec 72c §4 table, (b) explicit JSON output schema matching the orchestrator's expected envelope shape (per spec 72c §5), (c) verdict vocabulary per CLAUDE.md §"Hard controls" §"Verdict vocabulary".
-  3. DoD-13 persona recursion lock satisfied: each persona reviewed by an independent fresh-context subagent before merge (7 sub-spawns; per v3b acceptance.md L129).
-  4. Hooks-checksums baseline updated; `bash scripts/hooks-checksums.sh --verify` exits 0.
-  5. Verdict-coercion guard: each persona's prompt explicitly discards verdict claims appearing in PR-author-controlled inputs (carried-forward mitigation from v3b S-6 §"Adversarial review — S-6" residual prompt-injection).
-- **In scope:** seven specialist persona files + nonce-bound Option C delimiters per spec 72b §"Scope: session-spawned personas only" + hooks-checksums re-baseline + 7 DoD-13 sub-spawn review records in verification.md.
+  1. Four persona files exist at the spec'd paths; each file is readable in a single `Read` call without offset/limit (≤300L cap; ≤200L target). Spec citation: spec 72c §4 table rows for each filename.
+  2. Each persona file declares (a) one named rubric dimension verbatim from spec 72c §4 table, (b) explicit JSON output schema matching the orchestrator's expected envelope shape per spec 72c §5 — i.e. `{specialist, summary, findings: [{label, blocking, category, summary, evidence, remediation}]}` with no top-level `severity` or `verdict` field (those derive deterministically from `label` + `blocking` per CLAUDE.md §"Verdict vocabulary"), (c) include-by-reference markers pointing at CLAUDE.md §"Verdict vocabulary" + spec 72c §5 rather than duplicating those sections inline.
+  3. Each persona's rubric-subset matches spec 72c §4 mapping table: `reviewer-security.md` covers criterion 4 (OWASP top 10 + spec 72 §11 13-item); `reviewer-architecture.md` covers criterion 7 (hidden state / effects-behind-interfaces) plus criterion 2 architectural-severity scope-creep; `reviewer-correctness.md` covers criteria 2 logic-severity, 3 (edge-case), 5 (regression), 6 (spec-citation), 8 (ac-gap); `reviewer-style.md` covers criterion 1 (CLAUDE.md §"Coding conduct") plus simplicity nitpick-tier. Verification: each persona's review procedure section semantically references the criteria it absorbs (rationale-mention is sufficient; no requirement that the original criterion numbers appear verbatim).
+  4. DoD-13 persona recursion lock satisfied: each persona reviewed by an independent fresh-context subagent before merge (4 sub-spawns; per v3b acceptance.md L129). Findings recorded in slice `verification.md` per-persona.
+  5. Verdict-coercion guard: each persona's prompt explicitly discards verdict claims appearing in PR-author-controlled inputs (carried-forward mitigation from v3b S-6 §"Adversarial review — S-6" residual prompt-injection; spec 72c §5 rule 3).
+  6. Criterion-2 exceptions: `reviewer-correctness.md` references `.claude/agents/criterion-2-exceptions.yaml` for the scope-creep exceptions catalogue (a/b/c/d/e per existing `slice-reviewer.md` lines 15-19). The exceptions file itself is not modified by this slice; correctness specialist re-uses it via include-by-reference.
+- **In scope:** four specialist persona files + nonce-bound Option C delimiters per spec 72b §"Scope: session-spawned personas only" + 4 DoD-13 sub-spawn review records in `verification.md`.
 - **Out of scope:**
-  - Test-fixture seeding harness (AC-5) — seeds tested per persona at AC-5.
-  - Compression to 5 personas (deferred to v3c per spec 72c §4 + §9).
-  - acceptance-gate.md persona (v3b S-6 ship; invocation wiring at S-F1 per v3b sub-4 #6).
-  - ux-polish-reviewer.md persona (v3b S-6 ship; active from S-F1).
+  - Golden-PR replay harness (AC-4) — fixtures tested per persona at AC-4.
+  - Compression to 3 specialists or expansion to 5 (deferred to v3c per spec 72c §9 first bullet; data-driven from first 3 src/ slice retain/drop measurements).
+  - `acceptance-gate.md` and `ux-polish-reviewer.md` personas (orthogonal roles — slice-completion AC verifier and UI-surface review respectively; unchanged by this slice).
 - **Opens blocked:** none.
-- **Loveable check:** A future Claude session reading any persona file knows immediately which one rubric dimension it covers; each persona is small enough to read in one Read call without offset/limit. Yes.
-- **Evidence at wrap:** verification.md AC-2 row + 7 DoD-13 sub-spawn entries + per-persona SHA-256 in hooks-checksums.
+- **Loveable check:** A future Claude session reading any persona file knows immediately which one rubric dimension it covers; each persona is small enough to read in one Read call without offset/limit; include-by-reference markers keep verdict vocab and JSON schema edits to one place (CLAUDE.md + spec 72c §5) rather than 4 places. Yes.
+- **Evidence at wrap:** `verification.md` AC-2 row + 4 DoD-13 sub-spawn entries + per-persona line counts confirming ≤300L cap.
 
-## AC-3 · Rubric-checklist v2 of `slice-reviewer.md`
+## AC-3 · Differential-review mode
 
-- **Outcome:** `.claude/agents/slice-reviewer.md` is refactored into a tick-through-all-dimensions checklist persona that fires when (a) single-agent fallback is invoked (per AC-1 specialist-timeout case), (b) a slice profile selects single-agent mode per spec 72c §2.
+- **Outcome:** On a fix-up commit (round ≥2 of a multi-round PR), specialists receive prior-round findings JSON in addition to the new diff, and scope review to (a) findings still present + (b) findings introduced by the fix-up. Round ≥2 token cost ≤1/Nth of round-1 (where N is fix-up-to-original diff-size ratio). Direct prior art per spec 72c §10 L175: CodeRabbit `incremental_reviews` — production-tested at scale; spec 72c §6 matches the pattern almost verbatim.
 - **Verification:**
-  1. `.claude/agents/slice-reviewer.md` content includes an explicit "tick all 7 rubric dimensions before emitting verdict" gate at the head of its review procedure; references spec 72c §4 table verbatim.
-  2. The persona's JSON output schema includes a `dimensions_covered: string[]` field listing each dimension reviewed in this run; aggregator validates this list = 7 (single-agent mode requirement).
-  3. ShellSpec fixture exercises the persona on a synthetic 3-finding diff (one each of coding-conduct + edge-case + spec-citation); persona returns all 3 findings with `dimensions_covered: 7`.
-  4. Differential review mode (AC-4) extension: when invoked under differential mode, persona scopes to (a) prior-round findings still present + (b) new findings introduced; `dimensions_covered` still = 7 but findings list scoped to delta.
-- **In scope:** v2 refactor of slice-reviewer.md persona file; backward-compat shape for the existing v3b S-6 single-agent invocation path.
-- **Out of scope:**
-  - acceptance-gate.md + ux-polish-reviewer.md personas (v3b S-6 ship; not refactored here).
-  - Removal of the v1 single-agent path — kept as fallback per spec 72c §3.
-- **Opens blocked:** none.
-- **Loveable check:** When multi-agent specialists time out and fallback triggers, the single-agent path is structurally exhaustive — coverage parity with multi-agent in degraded mode. Yes.
-- **Evidence at wrap:** verification.md AC-3 row + slice-reviewer.md SHA-256 in hooks-checksums + ShellSpec fixture pass.
-
-## AC-4 · Differential-review mode
-
-- **Outcome:** On a fix-up commit (round ≥2 of a multi-round PR), specialists receive prior-round findings JSON in addition to the new diff, and scope review to (a) findings still present + (b) findings introduced by the fix-up. Round ≥2 token cost ≤1/Nth of round-1 (where N is fix-up-to-original diff-size ratio).
-- **Verification:**
-  1. `scripts/spawn-multi-reviewer.sh --differential` mode accepts `--prior-findings <path-to-json>` argument; passes it to each specialist via prompt input.
-  2. ShellSpec fixture exercises round-2 invocation: synthetic round-1 with 3 findings → fix-up commit resolving 2 → orchestrator under differential mode returns: 1 still-present finding + any new round-2 findings only.
-  3. ShellSpec fixture exercises round-2 fix-up that introduces a regression: round-1 diff had 0 security findings; fix-up introduces an unsanitised input boundary; security specialist returns 1 new finding under differential mode.
-  4. Token-cost measurement: round-2 invocation reports total prompt tokens; ratio to round-1 ≤ (fix-up_diff_lines / original_diff_lines + 0.2) buffer for prior-findings overhead.
-- **In scope:** orchestrator extension + per-specialist prompt-input wiring + 2 ShellSpec fixtures + token-cost measurement instrumentation.
+  1. `scripts/spawn-multi-reviewer.sh --differential` mode accepts `--prior-findings <path-to-json>` argument; passes it to each specialist via prompt-input file alongside the fix-up diff.
+  2. ShellSpec fixture exercises round-2 invocation: synthetic round-1 with 3 findings (one each from `correctness`, `security`, `style`) → fix-up commit resolving 2 (the `security` and `style` findings) → orchestrator under differential mode returns: 1 still-present finding (the `correctness` one) + any new round-2 findings only.
+  3. ShellSpec fixture exercises round-2 fix-up that introduces a regression: round-1 diff had 0 security findings; fix-up introduces an unsanitised input boundary; `reviewer-security.md` returns 1 new finding under differential mode flagged with `category: security`. The `architecture`, `correctness`, `style` specialists should not flag this — the fixture asserts only `security` fires.
+  4. Token-cost measurement: round-2 invocation reports total prompt tokens; ratio to round-1 is recorded in the orchestrator's output envelope under a `token_metrics` field for monitoring. No hard CI-gate threshold at v3b ship — the `≤(fix-up_diff_lines / original_diff_lines + 0.2)` ratio target from spec 72c §6 is observation-only at first 3 src/ slices, then re-evaluated.
+- **In scope:** orchestrator `--differential` flag + per-specialist prompt-input wiring + 2 ShellSpec fixtures + `token_metrics` instrumentation in the output envelope.
 - **Out of scope:**
   - First-round (round-1) review path — already covered by AC-1.
-  - Hard cap on rounds — declares architectural-smell at round 4+ per CLAUDE.md (PR #32) trigger.
+  - Hard cap on rounds — declares architectural-smell at round 4+ per CLAUDE.md (PR #32 + PR #52 amendment) qualitative trigger.
+  - CI-gate threshold on `token_metrics` ratio — observation-only at v3b ship.
 - **Opens blocked:** none.
-- **Loveable check:** Round-2 of a 2-round fix-up returns in 1/3 the time + 1/3 the cost of round-1 with full regression coverage on the patch. Yes.
-- **Evidence at wrap:** verification.md AC-4 row + ShellSpec fixture pass + token-cost ratio recorded for first src/ slice using multi-agent.
+- **Loveable check:** Round-2 of a 2-round fix-up returns in roughly 1/3 the time + 1/3 the cost of round-1 with full regression coverage on the patch (per CodeRabbit prior-art shape). Yes.
+- **Evidence at wrap:** `verification.md` AC-3 row + 2 ShellSpec fixture passes + token-cost ratio recorded for first src/ slice using multi-agent (deferred to S-F1 measurement window).
 
-## AC-5 · Test-fixture seeding harness
+## AC-4 · Golden-PR replay fixture harness
 
-- **Outcome:** Each specialist persona is verified against a deliberately-injected synthetic-diff fixture; fixtures run quarterly (cron) + on every persona-file change (CI gate); pass criterion = specialist returns ≥1 finding mentioning the target rubric item at severity ≥`logic`.
+- **Outcome:** A golden-PR replay calibration set ships under `tests/personas/golden/<pr-id>/{diff.patch,prior-verdict.json,prior-findings.json}`; `tests/personas/run-replay.sh` invokes the orchestrator against each replayed diff and asserts verdict-tier match + finding-count tolerance + per-specialist `seen_by[]` overlap; CI workflow `.github/workflows/persona-fixtures.yml` triggers on persona-file or orchestrator-script changes; quarterly cron `.github/workflows/persona-fixtures-cron.yml` opens an issue on drift. Per spec 72c §7 (session-54 amendment): golden-replay primary at v3b ship, synthetic-deliberate-injection deferred to v3c.
 - **Verification:**
-  1. Seven fixtures exist at `tests/personas/fixtures/{coding-conduct,ac-gap,edge-case,security,regression,spec-citation,simplicity}.diff`; content is deterministic (no time-stamps, random IDs).
-  2. `tests/personas/run-fixtures.sh` invokes each persona against its fixture; returns exit 0 only when all 7 specialists return ≥1 finding mentioning their target rubric item with severity ≥`logic`.
-  3. Spec-validation-by-deliberate-impl-break (per v3b AC-13 + spec 72b): for each specialist, verify `run-fixtures.sh` turns red when the persona file is deliberately broken (e.g. rubric item description deleted from prompt) → restored to green when the persona is restored.
-  4. CI gate `.github/workflows/persona-fixtures.yml` triggers on `.claude/agents/reviewer-*.md` file changes; fails PR if `run-fixtures.sh` exits non-zero.
-  5. Quarterly cron: `.github/workflows/persona-fixtures-cron.yml` runs first day of each quarter; opens an issue if any specialist fails (drift signal).
-- **In scope:** 7 fixtures + `run-fixtures.sh` + 2 workflows + verification.md test-coverage record per fixture.
+  1. Initial seed `tests/personas/golden/pr-30/{diff.patch,prior-verdict.json,prior-findings.json}` exists, derived from the session-47 PR #30 9-round single-agent recursive transcript at `docs/slices/S-INFRA-rigour-v3b-subagent-suite/verification.md` §"Round 1" through §"Round 9". `prior-verdict.json` records the final-round verdict tier (`approve` post-round-9). `prior-findings.json` records the cumulative 14 actionable findings with their `label` + `blocking` + `category` fields per the Conventional Comments vocab from PR #41.
+  2. `tests/personas/run-replay.sh` invokes the orchestrator (under `scripts/spawn-multi-reviewer.sh`) against each `<pr-id>/diff.patch`; asserts (a) aggregator verdict tier exactly matches `prior-verdict.json`; (b) finding count is within ±1 of `prior-findings.json` length; (c) per-specialist `seen_by[]` overlap with `prior-findings.json` is ≥50% (i.e. the same dimensions surface the same findings, not a different specialist coincidentally flagging unrelated ones). Exit code 0 only when all three pass for every replayed PR.
+  3. CI gate `.github/workflows/persona-fixtures.yml` triggers on path-filter `.claude/agents/reviewer-*.md` OR `scripts/spawn-multi-reviewer.sh` OR `scripts/derive-verdict.sh`; runs `tests/personas/run-replay.sh`; fails the PR if exit code non-zero. ANTHROPIC_API_KEY-absent → workflow skips with a `neutral` check-run shape (forks unaffected; matches AC-1 verification 4 + the existing `auto-review.yml` skip pattern).
+  4. Quarterly cron `.github/workflows/persona-fixtures-cron.yml` runs first day of each quarter; opens a GitHub issue (via `mcp__github__issue_write` shape if invoked manually, or `gh api` from the workflow) titled `persona-replay drift Q<n> <year>` listing each drifted replay and the diff between observed verdict and `prior-verdict.json`. Drift is the signal for either persona-file regression or natural rubric evolution — issue-opening surfaces it for human triage.
+  5. Anti-flake: each `<pr-id>/diff.patch` is pinned to the merged commit SHA recorded in the file's leading comment header; `prior-verdict.json` records the persona-file SHAs active when the verdict was captured, for traceability when drift fires; pass tolerance (±1 finding count, ≥50% specialist overlap) is documented in spec 72c §7 and calibrates as the seed grows past 1 PR.
+  6. Honest framing on seed size: at v3b S-8 ship the seed is **1 PR** (PR #30 only). The other 3 PRs accumulate from S-F1 onwards as src/ slices ship. The promptfoo precedent (spec 72c §10 L187) targets 5-10 PRs; v3b ship is below that. Pass tolerance and §5 revisit-trigger calibration both use seed-size-aware logic, captured in slice `verification.md` at wrap.
+- **In scope:** PR #30 golden-replay seed conversion + `tests/personas/run-replay.sh` + 2 workflows (CI gate + quarterly cron) + slice `verification.md` test-coverage record per replay.
 - **Out of scope:**
-  - Mutation testing (Stryker on persona prompts) — v3c per spec 72c §9.
-  - Cross-specialist fixture (testing aggregator dedupe with multiple specialists firing on same finding) — separate fixture under AC-1's ShellSpec coverage; not duplicated here.
+  - Synthetic-deliberate-injection per-persona fixtures (deferred to v3c per spec 72c §7 + §9).
+  - Mutation testing on persona prompts (Stryker — v3c per spec 72c §9).
+  - Cross-specialist replay fixture (testing aggregator dedupe with multiple specialists firing on same finding) — covered by AC-1 verification 5 ShellSpec; not duplicated here.
+  - Seed expansion beyond PR #30 — accumulates from S-F1 onwards as src/ slices ship; not blocking for this slice's DoD.
 - **Opens blocked:** none.
-- **Loveable check:** Persona drift caught at CI time, not at user-facing PR-review time. A bad persona edit fails CI within ~3min. Yes.
-- **Evidence at wrap:** verification.md AC-5 row + `run-fixtures.sh` green run + 7 deliberate-break records (one per specialist) showing red→green cycle.
+- **Loveable check:** Persona drift caught at CI time, not at user-facing PR-review time. A bad persona edit fails CI within ~3min via the path-filtered workflow. The seed-of-1 honest framing prevents over-confidence in the harness while still providing real signal on the most expensive measured baseline (the session-47 9-round dataset). Yes.
+- **Evidence at wrap:** `verification.md` AC-4 row + `run-replay.sh` green run on PR #30 seed + 2 workflow files + seed-size honesty paragraph cross-referencing spec 72c §7.
 
-## AC-6 · AC-4 (v3a) retain/drop measurement activation
+## AC-5 · `slice-reviewer.md` retirement (atomic with AC-2 ship)
 
-- **Outcome:** Each `src/` slice from S-F1 onwards records a per-specialist findings count + retain/drop verdict in `HANDOFF-SESSION-{N}.md` §"Persona findings recorded". After the third `src/` slice ships, an aggregate retain-or-drop verdict is rendered per specialist + at the suite level, vs the session-47 9-round single-agent recursive baseline.
+- **Outcome:** `.claude/agents/slice-reviewer.md` is removed from the repo at this slice's ship event, atomically with the 4 specialist personas landing under AC-2 and the `auto-review.yml` flip under AC-1. The 4 specialists' rubric subsets (per spec 72c §4 mapping table) cover the criteria that `slice-reviewer.md` previously held; no rubric is dropped, only re-partitioned. Per session-54 user decision: clean retirement preferred over preserving as a fallback persona — simplicity-first per CLAUDE.md §"Coding conduct" §Simplicity-first.
 - **Verification:**
-  1. `HANDOFF-SESSION-{N}.md` template (per v3a acceptance.md L168 + this AC) extends with `## Persona findings recorded` section: one row per active specialist + per active legacy persona (slice-reviewer.md fallback, acceptance-gate, ux-polish-reviewer); columns = persona name + findings count + brief one-line summary each + Y/N "issue main conversation missed".
-  2. `/wrap` checklist (per CLAUDE.md §"Wrapping up a session") gains a step verifying §"Persona findings recorded" is filled before HANDOFF commit (only when an `src/` slice shipped that session).
-  3. Aggregate verdict at third `src/` slice: per-specialist retain-or-drop per the v3a-imported retain criterion (verbatim from `docs/engineering-phase-candidates.md` §C L129: *"if the agent catches at least one issue the main conversation missed per 2-3 slices, retain. Otherwise drop — added friction without value."*).
-  4. Suite-level KPI verdict per spec 72c §8 KPI table: rounds-to-converge × token cost × wall-clock vs single-agent recursive baseline (14 findings / 9 rounds / ~$1 / ~30min). Recorded in third `src/` slice's HANDOFF + verification.md cross-cutting.
-  5. Drop verdicts result in persona file removal (control-plane change → `control-change` label per `.github/workflows/control-change-label.yml`); retain verdicts result in no action.
-- **In scope:** HANDOFF template extension + /wrap checklist extension + aggregate-verdict measurement procedure + retain/drop record format.
+  1. `.claude/agents/slice-reviewer.md` no longer exists in the repo at this slice's ship commit. The file's prior content's substantive coverage is traceable into the 4 specialists per the spec 72c §4 mapping table — verified by AC-2 verification 3 (each persona's rubric subset matches the mapping table).
+  2. `.github/workflows/auto-review.yml` no longer references `slice-reviewer.md` after this slice's ship. The workflow's persona-invocation block has been replaced with the matrix-strategy fan-out per AC-1 verification 6. The skip-on-ANTHROPIC_API_KEY-absent path remains structurally — its existing references to `slice-reviewer (slice-reviewer persona)` workflow-name string update to `multi-agent (4 specialists)` or equivalent without breaking the existing skip behaviour for forks.
+  3. `CLAUDE.md` §"Subagent file locations (per v3b AC-5)" references to `slice-reviewer.md` are updated to reflect the retirement: prior text *"the slice-reviewer.md / acceptance-gate.md / ux-polish-reviewer.md persona files in .claude/agents/"* becomes *"the reviewer-{security,architecture,correctness,style}.md persona files plus acceptance-gate.md + ux-polish-reviewer.md in .claude/agents/"* (semantic update; literal wording may differ as long as the 4-specialist suite + 2 orthogonal personas are accurately reflected).
+  4. `CLAUDE.md` §"Hard controls (in development)" §"Subagent file locations" §"Invocation conventions" — the `slice-reviewer.md (AC-1)` bullet is removed and replaced with a 4-specialist bullet describing matrix-strategy fan-out via `scripts/spawn-multi-reviewer.sh`.
+  5. The session-55 impl PR's body documents the retirement in the description (alongside the 4-specialist + matrix fan-out additions); slice-completion `acceptance-gate.md` persona's review confirms AC-5 evidence row in `verification.md` is filled.
+- **In scope:** deletion of `.claude/agents/slice-reviewer.md` + CLAUDE.md updates referencing it + `auto-review.yml` reference cleanup (atomic with AC-1 workflow extension).
 - **Out of scope:**
-  - Activation pre-S-F1 (sibling slice S-INFRA-arch-smell-trigger PR #32 was a candidate but pre-dates this AC's framework; recorded as missed measurement per spec 72c §8).
-  - Multi-provider / mutation-testing measurements (v3c per spec 72c §9).
+  - Updates to `acceptance-gate.md` or `ux-polish-reviewer.md` — these are unchanged and unaffected by the retirement.
+  - Changes to slice `acceptance.md` template references to `slice-reviewer.md` invocation — the slice-template references at `docs/slices/_template-*` (if any) aren't touched; future slices will reference the multi-agent suite by spec 72c §3 architecture rather than persona-by-name.
+  - Retention of `slice-reviewer.md` as a fallback for specialist-timeout — explicitly **not** retained per session-54 user decision; degraded mode (3-of-4 specialists per AC-1 verification 3) is the failure response.
 - **Opens blocked:** none.
-- **Loveable check:** A future Claude session reading the third-`src/`-slice HANDOFF sees an explicit retain-or-drop verdict per persona; bad personas exit the suite cleanly; the verdict is reproducible from the 3 prior slices' records. Yes.
-- **Evidence at wrap:** verification.md AC-6 row + HANDOFF template diff + /wrap checklist update + (eventual) third-`src/`-slice aggregate verdict.
+- **Loveable check:** A future Claude session reading `auto-review.yml` sees one review path (matrix fan-out across 4 specialists) rather than two (matrix + single-agent fallback). One path is loveable; two parallel paths would be over-engineered fallback infrastructure that data hasn't justified at v3b ship. Yes.
+- **Evidence at wrap:** `verification.md` AC-5 row + git diff confirming `slice-reviewer.md` deleted + `auto-review.yml` references updated + `CLAUDE.md` §"Subagent file locations" diff.
 
 ---
 
@@ -148,8 +141,9 @@ Cuts happen by re-slicing: a partial-suite (e.g. 3 specialists active + 4 deferr
 
 | Date | Reviewer | Outcome | Notes |
 |---|---|---|---|
-| 2026-04-28 | Author (session 48) | Draft | 6 ACs per spec 72c §3-§8; verbatim 6-AC shape from SESSION-CONTEXT L82-89 |
+| 2026-04-28 | Author (session 48) | Draft | 6 ACs per spec 72c §3-§8; 7-specialist + max-severity + synthetic-injection |
+| 2026-04-30 | Author (session 54) | Re-draft | 5 ACs realigned per spec 72c session-54 amendment: 4-specialist (/ultrareview); majority-vote `k`-quorum default with shadow-monitor; golden-PR replay primary; AC-3 (slice-reviewer v2 refactor) dropped — slice-reviewer.md retires atomically with AC-2 ship; AC-6 (retain/drop activation) deferred per session-53 user decision and tracked at spec 72c §8 + §9 |
 | | User | | AC frozen — implementation may begin |
-| | Live auto-review (slice-reviewer persona) | | Forward-pending PR #30 merge |
+| | Live auto-review (current persona suite) | | Pending PR open |
 
 **AC is the contract.** Change requests after freeze roll into re-drafting AC + re-slicing.
