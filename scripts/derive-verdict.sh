@@ -16,10 +16,11 @@
 #      may include `seen_by: [string, ...]` listing the specialists that
 #      flagged it after dedupe (spec 72c §5 rule 2). A finding contributes
 #      `len(seen_by)` votes (default 1 when absent/empty/non-array);
-#      verdict tier fires when votes ≥ N for that tier. Per spec 72c §5
-#      session-54 amendment: blocking findings count ONLY toward block
-#      tier (filtered out of action-tier vote count) — block-quorum-unmet
-#      does NOT cascade.
+#      verdict tier fires when votes ≥ N for that tier. Default N is 2
+#      per spec 72c §5 session-56 amendment (quorum-of-half across the 4
+#      specialists). Per spec 72c §5 session-54 amendment: blocking
+#      findings count ONLY toward block tier (filtered out of action-
+#      tier vote count) — block-quorum-unmet does NOT cascade.
 #
 # Output values per CLAUDE.md §"Hard controls > Verdict vocabulary"
 # §"Verdict derivation rules":
@@ -53,7 +54,7 @@
 set -euo pipefail
 
 MODE=single
-K=1
+K=2
 
 while [ $# -gt 0 ]; do
   case "$1" in

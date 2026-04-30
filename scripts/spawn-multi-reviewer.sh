@@ -18,8 +18,8 @@
 # substantive-equivalence signal. Preserves originating specialists
 # in `seen_by[]`; pipes the unified `{summary, findings[]}` envelope
 # through `derive-verdict.sh --multi k=N` for the live verdict +
-# shadow `would_have_been_k2` / `_k3` fields per spec 72c §5
-# session-54 amendment.
+# shadow `would_have_been_k1` / `_k3` fields per spec 72c §5
+# session-56 amendment (default k=2; shadow k=1 + k=3).
 #
 # Output: a single unified JSON envelope to stdout, suitable as a
 # drop-in replacement for the single-persona output that the existing
@@ -27,11 +27,11 @@
 #
 # Output shape:
 #   {
-#     summary: "multi-agent aggregate (k=1 default)",
+#     summary: "multi-agent aggregate (k=2 default)",
 #     findings: [{label, blocking, category, summary, evidence,
 #                 remediation, seen_by: [specialist...]}, ...],
 #     verdict: "block" | "request-changes" | "nit-only" | "approve" | "parse-failed",
-#     would_have_been_k2: "<verdict>",
+#     would_have_been_k1: "<verdict>",
 #     would_have_been_k3: "<verdict>",
 #     degraded?: true,                       # present only when ≥1 specialist inconclusive
 #     inconclusive_dimensions?: [string...]  # specialist names that failed to produce a valid envelope
@@ -42,11 +42,11 @@
 #   - Specialist's envelope file non-JSON or wrong shape (no `findings` array) → `inconclusive`.
 #   - All four specialists inconclusive → verdict = `parse-failed` (sentinel; no specialist signal at all).
 #   - Otherwise: aggregate the present specialists' findings; verdict computed via
-#     `derive-verdict.sh --multi k=1`; degraded flag surfaces in output for
+#     `derive-verdict.sh --multi k=2`; degraded flag surfaces in output for
 #     downstream visibility.
 #
 # Spec ref: docs/workspace-spec/72c-multi-agent-review-framework.md §3 + §5
-#           (session-54 amendment); slice acceptance.md AC-1.
+#           (session-54 + session-56 amendments); slice acceptance.md AC-1.
 # Test contract: tests/shellspec/spawn-multi-reviewer.spec.sh.
 
 set -euo pipefail
@@ -213,12 +213,12 @@ DERIVE="$SCRIPT_DIR/derive-verdict.sh"
 
 if [ ${#PRESENT[@]} -eq 0 ]; then
   VERDICT=parse-failed
-  SHADOW_K2=parse-failed
+  SHADOW_K1=parse-failed
   SHADOW_K3=parse-failed
 else
   ENVELOPE=$(jq -cn --argjson f "$DEDUPED_FINDINGS" '{summary: "aggregate", findings: $f}')
-  VERDICT=$(printf '%s' "$ENVELOPE" | "$DERIVE" --multi k=1)
-  SHADOW_K2=$(printf '%s' "$ENVELOPE" | "$DERIVE" --multi k=2)
+  VERDICT=$(printf '%s' "$ENVELOPE" | "$DERIVE" --multi k=2)
+  SHADOW_K1=$(printf '%s' "$ENVELOPE" | "$DERIVE" --multi k=1)
   SHADOW_K3=$(printf '%s' "$ENVELOPE" | "$DERIVE" --multi k=3)
 fi
 
@@ -237,16 +237,16 @@ DEGRADED=false
 jq -n \
   --argjson findings "$DEDUPED_FINDINGS" \
   --arg verdict "$VERDICT" \
-  --arg shadow_k2 "$SHADOW_K2" \
+  --arg shadow_k1 "$SHADOW_K1" \
   --arg shadow_k3 "$SHADOW_K3" \
   --argjson degraded "$DEGRADED" \
   --argjson inconclusive "$INCONCLUSIVE_JSON" \
   --argjson differential "$DIFFERENTIAL_FIELDS_JSON" \
   '{
-    summary: "multi-agent aggregate (k=1 default)",
+    summary: "multi-agent aggregate (k=2 default)",
     findings: $findings,
     verdict: $verdict,
-    would_have_been_k2: $shadow_k2,
+    would_have_been_k1: $shadow_k1,
     would_have_been_k3: $shadow_k3
   }
   + (if $degraded then {degraded: true, inconclusive_dimensions: $inconclusive} else {} end)
