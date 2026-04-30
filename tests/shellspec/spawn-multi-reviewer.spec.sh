@@ -156,11 +156,9 @@ Describe 'spawn-multi-reviewer.sh aggregate'
     The stderr should include 'directory not found'
   End
 
-  # AC-3 differential mode: aggregator annotates findings with
-  # was_in_prior + emits prior_findings_resolved + token_metrics counts.
-  # Persona-side filtering per spec 72c §6 is upstream of the aggregator
-  # (specialists scope review to prior-still-present + new-this-round);
-  # these fixtures exercise the aggregator's downstream observability.
+  # These fixtures exercise the aggregator's downstream observability
+  # only; the upstream persona-side filtering per spec 72c §6 is a
+  # separate surface.
 
   It 'annotates findings with was_in_prior + emits prior_findings_resolved (AC-3 verification 2)'
     # Round-1 had 3 findings: correctness (still present), security (resolved),

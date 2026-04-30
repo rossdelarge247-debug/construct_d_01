@@ -1,19 +1,12 @@
 #!/usr/bin/env bash
 # run-replay.sh — deterministic aggregator-only replay of golden-PR
-# fixtures (v3b S-8 AC-4).
+# fixtures.
 #
-# For each `tests/personas/golden/<pr-id>/` seed:
-#   1. Partition prior-findings.json across 4 synthetic specialist
-#      envelopes per the persona's _session_47_persona_dimension field.
-#   2. Invoke `scripts/spawn-multi-reviewer.sh aggregate` against the
-#      synthetic envelopes; assert verdict matches prior-verdict.json.
-#   3. Invoke aggregate again with `--differential --prior-findings
-#      prior-findings.json`; assert all 14 findings are tagged
-#      was_in_prior=true and resolved_count=0 + new_count=0.
-#
-# Persona drift detection (live `claude -p` re-invocation) is NOT
-# attempted at v3b ship — see tests/personas/golden/pr-30/README.md
-# §"Honest framing".
+# Live persona re-invocation is intentionally not attempted: API budget
+# per replay run + persona-prompt regression is an orthogonal failure
+# mode to aggregator-logic regression (which is what this replay
+# covers). See tests/personas/golden/<pr-id>/README.md for per-seed
+# context.
 #
 # Exit 0 on pass; exit non-zero with diagnostic on first failure.
 
@@ -46,11 +39,10 @@ for PR_DIR in "$GOLDEN_DIR"/*/; do
   EXPECTED_VERDICT=$(jq -r '.verdict' "$PRIOR_VERDICT")
   EXPECTED_PRIOR_COUNT=$(jq -r '.findings_count' "$PRIOR_VERDICT")
 
-  # Replay semantic: prior-findings = round-1-through-N cumulative state
-  # (14 findings actioned across rounds 1-9); synthetic envelopes =
-  # final round state (round 9, all findings resolved → empty). The
-  # replay tests the trajectory: starting from N findings, all
-  # resolved by final round → verdict converges to prior-verdict.
+  # Synthetic envelopes represent the seed's final-round state (all
+  # prior findings resolved → empty). Replay then tests the trajectory:
+  # starting from N findings to 0 findings → verdict converges to
+  # prior-verdict.
   ENVELOPES_DIR=$(mktemp -d)
   trap 'rm -rf "$ENVELOPES_DIR"' EXIT
 
