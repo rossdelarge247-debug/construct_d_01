@@ -71,6 +71,7 @@ esac
 
 PRESENT=()
 INCONCLUSIVE=()
+declare -A CONTENT
 
 for DIM in "${DIMENSIONS[@]}"; do
   F="$DIR/$DIM.json"
@@ -78,11 +79,13 @@ for DIM in "${DIMENSIONS[@]}"; do
     INCONCLUSIVE+=("$DIM")
     continue
   fi
-  if printf '%s' "$(cat "$F")" \
+  CONTENT[$DIM]=$(cat "$F")
+  if printf '%s' "${CONTENT[$DIM]}" \
     | jq -e 'type == "object" and (.findings // null | type == "array")' >/dev/null 2>&1; then
     PRESENT+=("$DIM")
   else
     INCONCLUSIVE+=("$DIM")
+    unset 'CONTENT[$DIM]'
   fi
 done
 
@@ -93,8 +96,7 @@ done
 # the strongest substantive-equivalence signal. Spec 72c §5 rule 2.
 ALL_FINDINGS='[]'
 for SPEC in "${PRESENT[@]}"; do
-  F="$DIR/$SPEC.json"
-  ALL_FINDINGS=$(printf '%s\n%s' "$ALL_FINDINGS" "$(cat "$F")" | jq -cs --arg spec "$SPEC" '
+  ALL_FINDINGS=$(printf '%s\n%s' "$ALL_FINDINGS" "${CONTENT[$SPEC]}" | jq -cs --arg spec "$SPEC" '
     .[0] + ((.[1].findings // []) | map(. + {seen_by: [$spec]}))
   ')
 done

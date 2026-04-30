@@ -48,7 +48,7 @@ Emit a single JSON object matching the envelope shape in spec 72c §5. Do NOT em
     {
       "label": "praise" | "nitpick" | "suggestion" | "issue" | "todo" | "question" | "thought" | "chore" | "note",
       "blocking": true | false,
-      "category": "simplicity" | "naming",
+      "category": "simplicity" | "naming" | "commenting",
       "evidence": "<quote from diff, ≤2 lines>",
       "remediation": "<one sentence>"
     }
@@ -58,13 +58,15 @@ Emit a single JSON object matching the envelope shape in spec 72c §5. Do NOT em
 
 **Label assignment for style categories** (deterministic):
 
-| Sub-category | Default label | Default `blocking` |
-|---|---|---|
-| Surgical-changes violation (criterion 1 — adjacent reformat) | `nitpick` | `false` |
-| Simplicity-first violation, line-count variant (criterion 2) | `nitpick` | `false` |
-| Names-carry-the-design (criterion 3) | `nitpick` | `false` |
-| Small-single-purpose function violation (criterion 4) | `nitpick` | `false` |
-| Comments narrating WHAT (criterion 5 — explicit CLAUDE.md NEVER rule) | `issue` | `false` |
+| Sub-category | Category | Default label | Default `blocking` |
+|---|---|---|---|
+| Surgical-changes violation (criterion 1 — adjacent reformat) | `simplicity` | `nitpick` | `false` |
+| Simplicity-first violation, line-count variant (criterion 2) | `simplicity` | `nitpick` | `false` |
+| Names-carry-the-design (criterion 3) | `naming` | `nitpick` | `false` |
+| Small-single-purpose function violation (criterion 4) | `simplicity` | `nitpick` | `false` |
+| Comments narrating WHAT (criterion 5 — explicit CLAUDE.md NEVER rule) | `commenting` | `issue` | `false` |
+
+`commenting` is a separate category from `simplicity` because criterion 5 is a CLAUDE.md hard rule (NEVER framing) with `issue` label vs criteria 1/2/4 simplicity-tier `nitpick` label. Distinct category preserves finding traceability when a future retain/drop measurement audits which rubric items each persona is firing on.
 
 ## §Example invocations
 
