@@ -6,10 +6,10 @@
 # Two modes:
 #
 #   1. SINGLE MODE (default; no flags) — input is a single persona's
-#      output shape `{summary, findings[]}` (slice-reviewer / acceptance-
-#      gate / ux-polish-reviewer). Each finding contributes 1 toward its
-#      tier; verdict tier fires on first count > 0. Back-compat with the
-#      PR #41 ship.
+#      output shape `{summary, findings[]}` (acceptance-gate / ux-polish-
+#      reviewer / individual reviewer-{security,architecture,correctness,
+#      style} envelope). Each finding contributes 1 toward its tier;
+#      verdict tier fires on first count > 0.
 #
 #   2. MULTI MODE (--multi k=N flag) — input is the orchestrator's
 #      aggregated envelope `{summary, findings[]}` where each finding
@@ -45,9 +45,9 @@
 # integer k value).
 #
 # Test contract: tests/shellspec/derive-verdict.spec.sh covers the
-# 8-row edge-case table from PR #41 verification.md + adversarial
-# inputs from the verdict-coercion fixture (spec 72c §5 rule 3) +
-# 12-row --multi mode coverage from S-INFRA-persona-suite-v2-multi-
+# verdict-tier edge-case table + adversarial inputs from the verdict-
+# coercion fixture (spec 72c §5 rule 3) + --multi mode coverage from
+# S-INFRA-persona-suite-v2-multi-
 # agent AC-1 verification 2 + 5.
 
 set -euo pipefail
@@ -91,8 +91,7 @@ fi
 
 # Guard: .findings present but not an array (e.g. `{"findings": "not-an-array"}`)
 # would pass the object-type check above but cause the arithmetic jq invocations
-# below to exit non-zero (`.[]` on a string is invalid). Per PR #46 review
-# (slice-reviewer comment 4343354539). Treat as parse-failed.
+# below to exit non-zero (`.[]` on a string is invalid). Treat as parse-failed.
 if printf '%s' "$INPUT" | jq -e 'has("findings") and (.findings | type) != "array"' >/dev/null 2>&1; then
   echo "parse-failed"
   exit 0

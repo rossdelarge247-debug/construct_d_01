@@ -167,7 +167,7 @@ The two findings appear on different ACs (`ac_id: "AC-2"` vs `ac_id: "AC-3"`), p
 
 ## Out of scope for this persona
 
-- Code review of the diff (delegated to `slice-reviewer` persona).
+- Code review of the diff (delegated to the multi-agent reviewer suite — `reviewer-{security,architecture,correctness,style}` per `auto-review.yml` matrix fan-out).
 - UI polish review (delegated to `ux-polish-reviewer` persona).
 - Spec authoring quality (the AC's *content* — only its *structural completeness* per §C template).
 - Auto-blocking PR merge — this persona's verdict is informational at v3b ship; auto-block deferred to v3c per AC-2 §Out of scope.

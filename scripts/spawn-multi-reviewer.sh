@@ -95,8 +95,9 @@ for DIM in "${DIMENSIONS[@]}"; do
 done
 
 # Dedup hash field is `evidence` (not `summary`) — personas don't emit
-# per-finding summary per the established baseline (slice-reviewer.md /
-# acceptance-gate.md / ux-polish-reviewer.md output schemas); evidence
+# per-finding summary per the established baseline (reviewer-{security,
+# architecture,correctness,style}.md / acceptance-gate.md /
+# ux-polish-reviewer.md output schemas); evidence
 # is universally present and is a quoted-from-diff fragment that gives
 # the strongest substantive-equivalence signal. Spec 72c §5 rule 2.
 ALL_FINDINGS='[]'
