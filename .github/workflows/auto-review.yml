@@ -114,6 +114,46 @@ jobs:
           path: /tmp/briefs/
           retention-days: 1
 
+      - name: Post failure-fallback check run (when brief-job crashed)
+        # Pipeline-crash → failure (per S-INFRA-rigour-parse-failed-
+        # pipeline-crashed-merge-gate, session 52). The aggregate job's
+        # own failure-fallback only fires when aggregate runs at all —
+        # but aggregate's `needs: [brief, specialist]` + `if: always() &&
+        # needs.brief.result == 'success'` skips it entirely on brief
+        # failure. Without this step, a brief-job crash would post no
+        # check-run and the merge button would NOT be gated by the
+        # session-52 promotion. Mirrors the aggregate job's fallback step
+        # so brief-internal crashes (slice-resolve, awk, openssl, etc.)
+        # still surface as `failure`.
+        if: failure() && steps.secret-check.outputs.skip == 'false'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          REPO: ${{ github.repository }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        run: |
+          set -euo pipefail
+          jq -n \
+            --arg name 'auto-review (multi-agent · 4 specialists)' \
+            --arg head_sha "$HEAD_SHA" \
+            --arg run_url "$RUN_URL" \
+            '{name: $name, head_sha: $head_sha, status: "completed", conclusion: "failure", output: {title: "Review pipeline crashed in brief-compose — see workflow log", summary: ("auto-review.yml `brief` job failed before composing per-specialist prompts (slice-resolve, awk range, openssl, persona-file read, or artifact upload). Inspect the workflow log: " + $run_url + " — re-run the workflow to retry; if the cause was transient the next run will succeed and supersede this failure check.")}}' \
+          | gh api "repos/${{ github.repository }}/check-runs" --method POST --input -
+
+          MARKER='<!-- auto-review-comment:multi-agent -->'
+          BODY=$(printf '%s\n\n## auto-review · multi-agent (4 specialists)\n\n**Verdict:** 💥 pipeline-crashed — review did not produce a verdict\n\nThe `brief` job failed before composing per-specialist prompts (slice-resolve, awk range, openssl, persona-file read, or artifact upload). Common causes: missing persona file, malformed `CLAUDE.md` range pattern, runner network issue.\n\nInspect the [workflow log](%s) on commit `%s` for the actual error.\n\n---\n_Auto-posted by `auto-review.yml` (brief-job fallback). Pipeline-crash promotes to `failure` (the merge button is gated until the workflow re-runs successfully). Re-running the workflow is the escape hatch._\n' "$MARKER" "$RUN_URL" "$HEAD_SHA")
+          COMMENT_ID=$(gh api "repos/${REPO}/issues/${PR_NUMBER}/comments?per_page=100" --paginate \
+            --jq ".[] | select(.body | contains(\"${MARKER}\")) | .id" \
+            | head -n 1 || true)
+          if [ -n "${COMMENT_ID:-}" ]; then
+            jq -n --arg body "$BODY" '{body: $body}' \
+              | gh api "repos/${REPO}/issues/comments/${COMMENT_ID}" --method PATCH --input -
+          else
+            jq -n --arg body "$BODY" '{body: $body}' \
+              | gh api "repos/${REPO}/issues/${PR_NUMBER}/comments" --method POST --input -
+          fi
+
   specialist:
     name: auto-review · ${{ matrix.dimension }}
     needs: brief
