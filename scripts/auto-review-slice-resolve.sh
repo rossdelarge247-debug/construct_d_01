@@ -9,14 +9,12 @@
 # Outputs the slice acceptance.md path on stdout, or empty string.
 # Always exit 0.
 #
-# Why branch-first: a PR body that incidentally cites an unrelated slice
-# path (e.g. in §"References", §"Forward-only rename", or §"Sibling-
-# slice precedent" sections) can mis-resolve to that slice. Observed in
-# PR #38 (session 50) where §"Forward-only rename" listed
-# S-F7-alpha-contracts-dev-mode/acceptance.md as one of four historical
-# references; `grep -oE ... | head -1` grabbed it instead of the
-# branch-mapped slice. Consequence: persona compared diff against wrong
-# AC. PR #39 (session 50) fixed this with the branch-first preference.
+# Why branch-first: a PR body that incidentally cites an unrelated
+# slice path (e.g. in §"References", §"Forward-only rename", or
+# §"Sibling-slice precedent" sections) can mis-resolve to that slice
+# — `grep -oE ... | head -1` grabs the first match rather than the
+# branch-mapped slice, so the persona ends up comparing the diff
+# against the wrong AC.
 #
 # Test contract: tests/shellspec/auto-review-slice-resolve.spec.sh.
 

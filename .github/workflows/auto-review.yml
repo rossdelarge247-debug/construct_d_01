@@ -8,19 +8,17 @@ name: auto-review (multi-agent · 4 specialists)
 # k=2/k=3 monitor per spec 72c §5), posts a unified check-run +
 # findings comment.
 #
-# Replaces the session-47 single-agent recursive baseline (slice-
-# reviewer.md retired atomically with this workflow flip per AC-5).
-# Degraded mode (≥1 specialist inconclusive) reported in the
+# Replaces the prior single-agent persona invocation. Degraded mode
+# (≥1 specialist inconclusive) reported in the
 # aggregator output; no fallback to a single-agent re-run per
 # AC-1 verification 3 + spec 72c §3.
 #
 # Out: integration with branch-protection (defer to v3c per spec 72c §9).
 # This workflow is mostly informational at v3b ship — `approve` →
 # `success`, `request-changes`/`nit-only` → `neutral` (advisory only).
-# Two failure modes DO gate the merge button (per S-INFRA-rigour-parse-
-# failed-pipeline-crashed-merge-gate, session 52): `block` verdict →
-# `failure`; `parse-failed` (all 4 specialist outputs unparseable) →
-# `failure`; pipeline-crash (`if: failure()` fallback) → `failure`.
+# Two failure modes gate the merge button: `block` verdict → `failure`;
+# `parse-failed` (all 4 specialist outputs unparseable) → `failure`;
+# pipeline-crash (`if: failure()` fallback) → `failure`.
 # Skip on missing `ANTHROPIC_API_KEY` stays `neutral` so fork PRs
 # aren't gated by a secret they can't access.
 #
@@ -39,6 +37,7 @@ jobs:
   brief:
     name: auto-review · compose briefs
     runs-on: ubuntu-latest
+    timeout-minutes: 5
     outputs:
       skip: ${{ steps.secret-check.outputs.skip }}
     steps:
@@ -74,9 +73,6 @@ jobs:
           # inline-file pattern when >300L).
           git diff "$BASE_SHA" "$HEAD_SHA" > /tmp/pr-diff.txt
 
-          # Slice acceptance.md resolution (re-used unchanged from the
-          # single-agent baseline). Branch-first preference per PR #39
-          # (session 50).
           SLICE_AC=$(scripts/auto-review-slice-resolve.sh "$BRANCH" "$PR_BODY")
 
           # Compose one brief per dimension. Each persona file already
@@ -188,8 +184,6 @@ jobs:
           head -50 "/tmp/raw-${DIM}.json" || true
           echo "::endgroup::"
 
-          # Parse via the shared auto-review-parse.sh (re-used unchanged
-          # from single-agent baseline).
           mkdir -p /tmp/envelopes
           scripts/auto-review-parse.sh < "/tmp/raw-${DIM}.json" > "/tmp/envelopes/${DIM}.json"
 
@@ -440,9 +434,8 @@ jobs:
           fi
 
       - name: Post failure-fallback check run (when an earlier step crashed)
-        # Pipeline-crash → failure (per S-INFRA-rigour-parse-failed-
-        # pipeline-crashed-merge-gate, session 52). Re-running the
-        # workflow is the escape hatch.
+        # Pipeline-crash → failure. Re-running the workflow is the
+        # escape hatch.
         if: failure() && needs.brief.outputs.skip == 'false'
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
