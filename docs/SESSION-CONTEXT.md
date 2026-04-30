@@ -1,4 +1,4 @@
-# Session 54 Wrap Context Block (heading into session 55)
+# Session 55 Wrap Context Block (heading into session 56)
 
 ## Product positioning (preserve across sessions)
 
@@ -12,7 +12,7 @@ Spec 42 authoritative for positioning. Spec 68 suite (hub + 68a-e locked + 68f/g
 
 Next.js 16.2, React 19, TypeScript, Tailwind 4, Supabase, Claude AI, Vercel Pro. Single-branch-main workflow (spec 71 §7a Option 4): no `phase-c` integration, no cutover event. Slice work on short-lived feature branches → PR → main. Tink credentials in Vercel env. Stripe SDK pinned at `^22.1.0`.
 
-## What sessions 41-54 accomplished (rolling window)
+## What sessions 41-55 accomplished (rolling window)
 
 - **Sessions 41-46:** v3b S-1 through S-5 — 12/15 ACs landed via PRs #25-#27 across 6 sessions.
 - **Session 47:** v3b S-6 (PR #30 9-round live recursive auto-review; 14 findings; v3b 12/15 → 15/15). Auto-review.yml + 3 personas live.
@@ -37,8 +37,8 @@ Next.js 16.2, React 19, TypeScript, Tailwind 4, Supabase, Claude AI, Vercel Pro.
 - **Hook + CI enforcement (post-PR-52 simplified):** SessionStart · PostToolUse Write/Edit · PreToolUse Read · PreToolUse ExitPlanMode (exit-plan-review). **Removed PR #52:** PreToolUse Bash pre-commit-verify hook (deprecated; CI pr-dod.yml is sole DoD gate); hooks-checksums (CODEOWNERS replaces); `.github/workflows/control-change-label.yml` (CODEOWNERS replaces). **Added PR #52:** `.github/CODEOWNERS` is sole control-plane gate for L199-protected paths.
 - Stripe SDK pinned `^22.1.0`. Both lockfiles aligned.
 - **v3a-foundation shipped** (PR #24 merged session 41) — 8 ACs PASS; verify-slice.sh 7-gate workhorse; tdd-first-every-commit + plan-time gate live (control-change-label retired PR #52, replaced by CODEOWNERS).
-- **v3b shipped — 15/15 + S-8 partial.** PRs #25-#27 + #30 + #32 + #33 (sessions 41-48) for the 15 ACs; **PR #54 session-54** for v3b S-8 design contract + AC-1 partial (`derive-verdict.sh --multi` + `spawn-multi-reviewer.sh aggregate`) + AC-2 (4 specialist personas at `.claude/agents/reviewer-{security,architecture,correctness,style}.md`). auto-review.yml still invokes single-agent `slice-reviewer.md` at session-54 wrap; AC-3 differential + AC-4 golden-PR replay + AC-5 retirement deferred to session 55.
-- **v3c shipped — sessions 50+51+52+53 batch landed + session-54 spec amendment.** Sessions 50-52 batch (PRs #36-#42 + #44-#47 + #49 + #50). Session 53 PR #52 P0b-structural (CODEOWNERS migration; pre-commit-verify deprecation; arch-smell qualitative reframing). Session 54 PR #54 spec 72c §3 + §4 + §5 + §7 + §9 + §10 amendments per /ultrareview prior-art audit application. v3c programme **~99% complete** at session-54 wrap; remaining: v3b S-8 session-55 completion (orchestrator fan-out + workflow rewire + golden-replay + slice-reviewer.md retirement); comment-posting extraction (still build-then-measure deferred; no clustered findings yet).
+- **v3b FULLY SHIPPED — 15/15 + S-8 atomic ship across 3 PRs.** PRs #25-#27 + #30 + #32 + #33 (sessions 41-48) for the 15 ACs; **PR #54 session-54** for v3b S-8 design + AC-1 partial + AC-2; **PR #56 session-55** for AC-1 v6 fan-out + AC-5 `slice-reviewer.md` retirement (auto-review.yml flipped to 4-specialist matrix-strategy fan-out); **PR #57 session-55** for AC-3 differential mode + AC-4 golden-PR replay + DoD-13 4 fresh-context persona reviews + verification.md final population. Multi-agent suite is the live review path on main.
+- **v3c shipped — sessions 50+51+52+53 batch landed + session-54 spec amendment + session-55 multi-agent ship.** Sessions 50-52 batch (PRs #36-#42 + #44-#47 + #49 + #50). Session 53 PR #52 P0b-structural (CODEOWNERS migration; pre-commit-verify deprecation; arch-smell qualitative reframing). Session 54 PR #54 spec 72c amendments per /ultrareview prior-art audit application. Session 55 PR #56 + #57 closed v3b S-8 atomically. **v3c efficiency layer remaining for session 56+:** k=2 default flip (highest single-lever); anti-pattern catalogue; verification.md final-state convention; AC-3 persona-side prompt-input wiring; live persona drift detection; multi-provider 3rd-agent reviewer; Stryker mutation testing; etc. (see HANDOFF-SESSION-55 §"v3c carry-overs" for full list).
 
 ### Built (on main as of `b4d7e6c`; PR #52 + PR #54 merged through session 54)
 
@@ -84,36 +84,40 @@ scripts/criterion-2-exception-check.sh + tests/shellspec/criterion-2-exception-c
 
 **Parked branch:** `claude/S-F7-beta-impl` @ `a3f67ec` · 8 ahead · pushed. Resumes post-rigour-suite complete.
 
-## Session 55 priorities
+## Session 56 priorities
 
-> **Numbering:** session 53 closed P0b-structural (PR #52); session 54 closed v3b S-8 design + AC-1 partial + AC-2 (PR #54). Session 55 = **complete v3b S-8 ship**: orchestrator fan-out + auto-review.yml matrix-strategy rewire + AC-3 differential mode + AC-4 golden-PR replay seed + AC-5 slice-reviewer.md retirement + DoD-13 4 sub-spawn persona reviews. After session 55, the rigour suite is canonically complete and S-F1 (first `src/` slice) is the priority + AC-4 retain/drop measurement clock starts.
+> **Numbering:** session 54 shipped v3b S-8 design + AC-1 partial + AC-2 (PR #54). Session 55 closed v3b S-8 across PR #56 (AC-1 v6 + AC-5) + PR #57 (AC-3 + AC-4 + DoD-13). The rigour-suite v3b programme is now canonically complete on main; session 56 starts the v3c efficiency layer + first src/ slice activation. Session 55's 11-round retrospective on PR #56 + 5-round retrospective on PR #57 produced ranked improvement options (see HANDOFF-SESSION-55 §"Lessons learned" + §"Session 56 priority recommendations").
 
-### P0 — v3b S-8 completion (multi-agent persona suite v2 — orchestrator + workflow + harness + retirement)
+### P0 — k=2 default flip (highest single-lever efficiency change)
 
-Atomic ship event closing v3b S-8. Outstanding pieces per session-54 PR #54 acceptance.md `Out of scope` listings:
+Per spec 72c §5 revisit trigger: "if first-3-src-slice false-positive rate exceeds 30%, flip default to `k=2`". The implicit clock starts at S-F1, but PR #56 + #57 shadow data (n=2 calibration points) already strongly supports the flip — both PRs would have converged at round 4-5 instead of 5-11 at quorum-of-half. Spec amendment + `derive-verdict.sh` default change. Mitigation: shadow `would_have_been_k=1` field stays in output for monitoring + manual override per spec amendment. Estimated ~30 min impl + ~50L spec + 2 fixtures. Lowest risk per the empirical signal already collected.
 
-- **AC-1 verification 1 + 6 (orchestrator + workflow):** the fan-out side. Either extend `scripts/spawn-multi-reviewer.sh` with a `fan-out` subcommand (constructs per-specialist prompts with nonced fences from diff + slice AC + CLAUDE.md sections), or inline the prompt-template construction in `auto-review.yml` matrix-strategy steps. Design TBD at session-55 start; prefer the simpler of the two unless one provides material testability gain. Then `auto-review.yml` rewire: replace single-`claude -p`-against-`slice-reviewer.md` with matrix-strategy job spawning 4 parallel `claude -p` invocations (one per specialist), aggregator job runs `spawn-multi-reviewer.sh aggregate /tmp/envelopes/` and posts unified check-run + findings comment via existing posting steps. AC-1 verification 4 (ANTHROPIC_API_KEY-absent skip) lives at the workflow level — its ShellSpec equivalent sits in workflow-level integration testing, not the aggregator script's tests.
-- **AC-3 differential-review mode:** `--differential --prior-findings <path>` flag on the orchestrator; per-specialist prompt-input wiring; 2 ShellSpec fixtures; `token_metrics` field instrumentation in output envelope. Direct CodeRabbit `incremental_reviews` prior art per spec 72c §10.
-- **AC-4 golden-PR replay harness:** convert `docs/slices/S-INFRA-rigour-v3b-subagent-suite/verification.md` §Round-1 through §Round-9 into `tests/personas/golden/pr-30/{diff.patch,prior-verdict.json,prior-findings.json}`. `tests/personas/run-replay.sh` invokes the orchestrator, asserts verdict-tier match + finding-count tolerance + per-specialist `seen_by[]` overlap. CI workflow `.github/workflows/persona-fixtures.yml` triggers on persona-file or orchestrator-script changes. Quarterly cron workflow opens drift issue. Honest framing: seed-of-1 at v3b ship per spec 72c §7; expands as src/ slices accumulate.
-- **AC-5 slice-reviewer.md retirement (atomic with AC-1 workflow rewire):** delete `.claude/agents/slice-reviewer.md`; update CLAUDE.md §"Subagent file locations" + §"Hard controls" §"Invocation conventions" to replace single-agent fallback narrative with 4-specialist matrix-strategy fan-out; `auto-review.yml` reference cleanup. Atomic single-commit OR same-PR change with the orchestrator rewire.
-- **DoD-13 persona recursion lock:** 4 fresh-context subagent reviews of the 4 specialist personas (now exercisable post-orchestrator); record findings per-persona in slice `verification.md`.
-- **Slice `verification.md`** at wrap with all 5 ACs evidenced.
+### P1 — Anti-pattern catalogue in CLAUDE.md
 
-Estimated total: ~700-1000L across orchestrator extension + workflow rewire + golden-replay harness + 2 CI workflows + slice-reviewer.md deletion + CLAUDE.md updates + verification.md. Single-PR session if achievable; otherwise split: PR-A orchestrator + workflow rewire + slice-reviewer.md retirement (atomic flip); PR-B golden-replay harness + AC-3 differential + AC-4 measurement framework.
+Codify session-55 empirics into CLAUDE.md §Coding conduct + §Engineering conventions: explicit don't-do-this examples for the 5-6 most-fired finding patterns from PR #56 + #57 (provenance comments / narration of WHAT / slice-AC citations / sibling references / hard-coded counts in general code). Round 7 of PR-A added "no PR provenance in persistent comments" to `reviewer-style.md` per session-55 empirics; this expands the discipline into the canonical CLAUDE.md surface so future PRs avoid these at authoring time rather than catching at round 1-N. Estimated ~30 min. Compounds with k=2 flip.
 
-### P1 — S-F1 kickoff (first src/ slice; design-system tokens)
+### P2 — verification.md final-state convention
 
-**Unblocked once P0 lands.** Rigour-suite programme is canonically complete; AC-4 retain/drop measurement activates at S-F1 per spec 72c §8. Per spec 70 Build Map: design-system token extraction from `docs/design-source/` → `src/lib/design-system/{tokens,components}/` with CSS↔TS structural-parity invariant tests. ~400-600L; 5-8 ACs. **Session 55 second half** if P0 lands fast; otherwise **session 56**.
+CLAUDE.md §Engineering conventions §Definition of Done #1 wording tweak: clarify "verification.md is the final-state evidence record assembled at slice ship; round-by-round audit detail belongs in HANDOFF or the wrap PR description." Eliminates the doc-vs-doc inconsistency churn that drove PR #56 rounds 5/8/11 ac-gap findings. Estimated ~10 min.
 
-### P2 — Comment-posting extraction (architectural-smell-trigger build-then-measure; still deferred)
+### P3 — S-F1 kickoff (first src/ slice; design-system tokens)
 
-`scripts/auto-review-post-comment.sh` extraction if PR #45's comment-posting accrues clustered findings. PR #49 + #50 + #52 + #54 didn't surface any clustered findings on the comment-posting block. Defer until round-3+ cluster per the qualitative arch-smell-trigger doctrine.
+**Unblocked.** Rigour-suite v3b programme canonically complete on main. Per spec 70 Build Map: design-system token extraction from `docs/design-source/` → `src/lib/design-system/{tokens,components}/` with CSS↔TS structural-parity invariant tests. ~400-600L; 5-8 ACs. Activates AC-4 retain/drop measurement clock per spec 72c §8 + the `ux-polish-reviewer` persona for the first time (UI surface). **First real-workload exercise of the multi-agent suite** (PR #56 + #57 were infra-shaped diffs).
 
-### P3 — Session-53 wrap PR #53 (RESOLVED at session-54-wrap-rebase)
+### P4 — v3c slice candidates (single-issue-sized; pick from queue based on session 56 budget)
 
-**Status: RESOLVED.** PR #53 (`claude/wrap-session-53` @ `948837334`) was OPEN at session-54 turn 0 and remained open through most of session 54. **User merged PR #53 mid-wrap** at `79805ce` after the session-54 wrap PR #55 had already opened against `b4d7e6c`. This created a SESSION-CONTEXT.md merge conflict on PR #55 (both PRs touched the same file from a common session-52 base).
+Per HANDOFF-SESSION-55 §"v3c carry-overs":
 
-**Conflict resolution (this rebase):** session-54 wrap PR #55 rebased on origin/main (now at `79805ce`); SESSION-CONTEXT.md conflict resolved by taking the session-54-wrap version (this file) as the base — it's a true superset of PR #53's session-53 content. Session-53 retro `HANDOFF-SESSION-53.md` preserved on main from PR #53 (untouched by this rebase). PR #53's §"Rigour-suite completeness (layman summary)" table merged into this file (see §"Rigour-suite completeness" below) with the v3b S-8 row updated for session-54 ship state. Negative constraints renumbering preserved with all four (#23 rebase-on-main, #24 don't-cite-forward, #25 solo-op, #26 AC-drafting smell) — PR #53's version had inadvertently overwritten #23 + #24 with the new constraints; this file restores the full sequence.
+- **AC-3 persona-side prompt-input wiring** (workflow-level injection of prior findings into per-specialist prompts; closes the round-N token cost ≤1/Nth round-1 loveable-check from spec 72c §6) — own design space (comment-based extraction OR hidden-JSON marker). ~4-6 hour design + impl.
+- **Pre-flight self-review hook** (locally spawning the 4 specialists before push; estimated 4-6 round savings per PR; ~$0.40 per push) — slash-command or git pre-push hook. Defer until S-F1 produces real-workload data confirming the projection.
+- **Live persona drift detection** (quarterly cron; live `claude -p` per specialist per replay seed) — gated on API budget allocation per spec 72c §9.
+- **Persona-file SHA tracking** in `prior-verdict.json` — lands alongside live drift detection.
+- **Origin/main-anchored ESLint + coverage ratchet** (F5c carry-over from v3a).
+- **Multi-provider 3rd-agent reviewer** (Claude + GPT + Gemini cross-check per spec 72c §9).
+- **Stryker mutation testing on persona prompts**.
+- **Synthetic-deliberate-injection per-persona fixtures** (vs v3b's golden-replay primary).
+- **Structured-findings JSON Schema** validation.
+- **CLAUDE.md §"Hard controls" §"Not yet in scope"** consolidating rewrite (currently a stub).
 
 ## Scope ceiling
 
@@ -157,71 +161,86 @@ Single-P0 session. S-F1 (or whichever priority you pick) is THE unblocking work.
 
 ## Branch
 
-### Branch state at session-54 wrap (verified live)
+### Branch state at session-55 wrap (verified live)
 
-- **Wrap branch:** `claude/wrap-session-54` (this commit's branch).
-- **`main` tip:** `b4d7e6c` (PR #54 squash-merged via solo-operator admin-bypass mid-session-54). Prior: `495e473` = PR #52 merge (session 53). Prior: `7395949` = session-52 wrap.
-- **Open PRs at wrap from session 54:** wrap PR (this branch) opens after this commit. Plus the **carry-over open PR**: PR #53 (`claude/wrap-session-53` @ `948837334`) — session-53 wrap, never merged — surfaced in §Session 55 priorities P3 for user reconciliation.
-- **Closed/merged this session:** PR #54 (`S-INFRA-persona-suite-v2-multi-agent`) merged @ `b4d7e6c`.
-- **Parked:** `claude/S-F7-beta-impl` @ `a3f67ec` · 8 ahead · pushed. Resumes post-rigour-suite complete (i.e. after session-55 ships v3b S-8 completion).
-- **Live rigour gates (post-session-54; CODEOWNERS as sole control-plane gate):**
+- **Wrap branch:** `claude/wrap-session-55` (this commit's branch).
+- **`main` tip:** `83421c8` (PR #57 squash-merged via solo-operator admin-bypass mid-session-55). Prior: `80ba85b` = PR #56 merge (session 55 PR-A). Prior: `65bb453` = session-54 wrap.
+- **Open PRs at session-55 wrap:** wrap PR (this branch) opens after this commit. **No carry-over open PRs** — both PR #56 + PR #57 merged cleanly mid-session.
+- **Closed/merged this session:** PR #56 (`S-INFRA-persona-suite-v2-multi-agent` PR-A: AC-1 v6 + AC-5) merged @ `80ba85b`; PR #57 (PR-B: AC-3 + AC-4 + DoD-13) merged @ `83421c8`.
+- **Parked:** `claude/S-F7-beta-impl` @ `a3f67ec` · 8 ahead · pushed. Unblocked now that v3b S-8 is fully shipped on main; resumption is a session-56+ user call (vs starting S-F1 first-src-slice fresh).
+- **Live rigour gates (post-session-55):**
   - `tdd-guard.sh` — Write/Edit on `src/**.{ts,tsx}` requires green vitest run (v3b AC-6).
   - `pre-push-dod7.sh` — pre-push gate enforces 7-item slice-DoD (v3b AC-7).
   - `tdd-first-every-commit.sh` — PreToolUse:Bash enforces TDD discipline.
   - `exit-plan-review.sh` — plan-time review on ExitPlanMode.
   - `read-cap.sh` — Read tool turn-budget cap.
-  - `auto-review.yml` — slice-reviewer persona on every PR (until session-55 atomic flip to multi-agent matrix-strategy fan-out per AC-1 verification 6 + AC-5 retirement). Session-52 promotion in effect: `parse-failed` + pipeline-crash → `failure` (merge-gating); `request-changes` / `nit-only` → `neutral` (advisory); secret-missing skip → `neutral` (forks unaffected).
-  - `pr-dod.yml` — slice-verification reference required on `src/` PRs (sole DoD gate per session-53 PR #52 pre-commit-verify deprecation).
-  - `.github/CODEOWNERS` — sole control-plane gate for L199-protected paths (session-53 PR #52; replaced hooks-checksums + control-change-label.yml).
-- **Removed PR #52:** `pre-commit-verify.sh` hook · `hooks-checksums.txt` + `scripts/hooks-checksums.sh` · `.github/workflows/control-change-label.yml`.
+  - `auto-review.yml` — **multi-agent 4-specialist matrix-strategy fan-out** (PR #56 ship): brief job composes per-specialist prompts → specialist matrix runs `claude -p` per dimension → aggregate job runs `spawn-multi-reviewer.sh aggregate` + posts unified check-run + comment. `block` + `parse-failed` + pipeline-crash → `failure` (merge-gating); `request-changes` + `nit-only` → `neutral` (advisory); secret-missing skip → `neutral` (forks unaffected).
+  - `pr-dod.yml` — slice-verification reference required on `src/` PRs (sole DoD gate per session-53 PR #52).
+  - `.github/CODEOWNERS` — sole control-plane gate for protected paths.
+  - `persona-fixtures.yml` — path-filtered golden-PR replay CI (PR #57 ship): runs `tests/personas/run-replay.sh` on `reviewer-*.md` / orchestrator-script / fixture changes.
+- **Retired session 55:** `slice-reviewer.md` persona (PR #56 atomic flip to 4-specialist suite per AC-5).
 - **AC-2 acceptance-gate** + **AC-3 ux-polish-reviewer** still shipped + dormant until S-F1.
 - **AC-4 retain/drop measurement** activates after first 3 src/ slices ship (S-F1 onwards).
 
 ### v3c / v3b trajectory + remaining rigour work
 
-**The big picture (layman summary):** rigour-suite programme is **~99% complete** (was 98% at session 52; session 53 closed P0b-structural; session 54 closed v3b S-8 design contract + AC-1 partial + AC-2). Only **1 substantive item remains** before pure `src/` work: v3b S-8 completion (orchestrator fan-out + workflow rewire + AC-3 differential + AC-4 golden-replay + AC-5 retirement; P0 session 55).
+**The big picture (layman summary):** rigour-suite v3b programme is **canonically complete on main** as of session 55. PR #56 + PR #57 closed v3b S-8 atomically. Multi-agent matrix-strategy fan-out is the live review path. Session 56 starts the **v3c efficiency layer** + **first src/ slice** (S-F1) — the first real-workload exercise of the multi-agent suite.
 
-**Remaining work shape:**
+**Remaining work shape (v3c efficiency layer + post-v3b carry-overs):**
 
 | Piece | Size | Status | Why |
 |---|---|---|---|
-| v3b S-8 completion (P0 session 55) | medium-large (~700-1000L) | queued | Orchestrator fan-out subcommand (or inline workflow YAML), `auto-review.yml` matrix rewire, AC-3 differential mode, AC-4 golden-PR replay seed + harness + 2 CI workflows, AC-5 slice-reviewer.md retirement (atomic with workflow rewire), DoD-13 4 sub-spawn persona reviews, slice verification.md. Last rigour-suite piece. |
-| S-F1 kickoff (first src/ slice; design-system tokens) | medium (~400-600L) | unblocked once S-8 lands | Dataset-seeder for AC-4 retain/drop. Session 55 second half if S-8 lands fast; otherwise session 56. |
-| Comment-posting extraction | medium (~100-150L) | architectural-smell-trigger; deferred | PR #45 + PR #49 + PR #50 + PR #52 + PR #54 surfaced no findings clustering on the comment-posting block. Build-then-measure; defer until round-3+ cluster. |
-| Synthetic-deliberate-injection per-persona fixtures | medium (~200-300L) | v3c carry-over per spec 72c §7 + §9 | Adds once first-3-src-slice retain/drop data confirms 4-partition holds; complements golden-replay primary. |
-| `k`-quorum threshold calibration | small (~30-50L spec amendment) | data-driven from S-F1+ shadow-monitor output | Flip default `k=1` → `k=2` if first-3-slice false-positive rate >30% per spec 72c §5 revisit trigger. |
-| Mutation testing / Stryker · property-based / fuzz · multi-provider 3rd reviewer · structured-findings JSON Schema · multi-provider consensus framework full spec 72d | various | v3c carry-over | Per spec 72c §9 §"Out of scope". Not blocking. |
+| **k=2 default flip** (P0 session 56) | small (~30-50L spec amendment + 2 fixtures) | calibrated; ready to ship | Highest single-lever efficiency change. PR #56 + #57 shadow data show n=2 calibration points strongly support flipping early (vs the spec 72c §5 first-3-src-slice trigger); both PRs would have converged at round 4-5 vs 5-11 at quorum-of-half. |
+| **Anti-pattern catalogue in CLAUDE.md** (P1 session 56) | small (~50-80L doc) | calibrated from session-55 empirics | Codifies the 5-6 most-fired finding patterns (provenance comments, narration of WHAT, slice-AC citations rotting, sibling references, hard-coded counts in general code) into CLAUDE.md §Coding conduct + §Engineering conventions so future PRs avoid these at authoring time. |
+| **verification.md final-state convention** (P2 session 56) | tiny (~10L doc tweak) | needed | CLAUDE.md §DoD #1 wording change: "verification.md is final-state evidence assembled at slice ship; round-by-round audit detail belongs in HANDOFF or wrap PR description." Eliminates doc-vs-doc inconsistency churn. |
+| **S-F1 first src/ slice** (P3 session 56) | medium (~400-600L) | unblocked | Design-system tokens; activates AC-4 retain/drop measurement clock + first exercise of `ux-polish-reviewer` persona on real UI surface. |
+| **AC-3 persona-side prompt-input wiring** | medium (~4-6h design + impl) | v3c | Workflow-level injection of prior findings into per-specialist prompts; closes the round-N token-cost ≤1/Nth round-1 loveable-check from spec 72c §6. |
+| **Pre-flight self-review hook** | medium (slash-command or pre-push hook) | v3c (defer until S-F1 data) | Locally spawning the 4 specialists before push. Estimated 4-6 round savings per PR per session-55 retrospective. |
+| **Live persona drift detection** | medium (live `claude -p` per replay seed) | gated on API budget | Quarterly cron drift workflow per spec 72c §9. |
+| **Persona-file SHA tracking** | small | lands with live drift detection | `prior-verdict.json` records active persona SHAs at capture time. |
+| **Comment-posting extraction** | medium (~100-150L) | architectural-smell-trigger; deferred | No clustered findings yet through PR #57. Build-then-measure. |
+| **Multi-provider 3rd-agent reviewer** | large | v3c carry-over per spec 72c §9 | Claude + GPT + Gemini cross-check. |
+| **Origin/main-anchored ESLint + coverage ratchet** | medium | F5c carry-over from v3a | |
+| **Stryker mutation testing on persona prompts** | medium | v3c carry-over | |
+| **Synthetic-deliberate-injection per-persona fixtures** | medium (~200-300L) | v3c carry-over per spec 72c §7 + §9 | Complements golden-replay primary; adds when first-3-src-slice retain/drop data validates 4-partition. |
+| **Structured-findings JSON Schema validation** | small-medium | v3c carry-over | |
+| **CLAUDE.md §"Hard controls" §"Not yet in scope" consolidating rewrite** | medium-large | v3c carry-over | Currently a stub. |
 
-**Net: 1 more session (55) of rigour-suite cleanup, then `src/` work (S-F1) becomes the focus.** Session 53 closed P0b-structural; session 54 closed S-8 design + AC-1 partial + AC-2; session 55 closes the remaining S-8 ACs.
+**Net: v3b is shipped; session 56 picks from the ranked v3c portfolio above (P0-P3) with P0 being the highest ROI.**
 
-### Next session (55) FIRST ACTIONS
+### Next session (56) FIRST ACTIONS
 
-1. **Turn-0 verification.** SessionStart hook surfaces live branch state. `mcp__github__list_pull_requests state=open base=main perPage=10` — should show wrap PR (this) + PR #53 (session-53 wrap, still open per §Session 55 priorities P3).
-2. **Reconcile PR #53.** Per §Session 55 priorities P3: ask user (a) merge separately + resolve SESSION-CONTEXT conflict, (b) close unmerged, or (c) port to fresh commit. Recommend (a). Resolve before starting impl work.
-3. **Verify branch state + working tree clean.** Resync if BEHIND > 0. Branch fresh off main for the impl PR.
-4. **Confirm priority with user.** Session 55 P0 recommended = **v3b S-8 completion** (orchestrator + workflow + golden-replay + retirement + DoD-13). Alternatives: defer pieces (e.g. defer AC-4 golden-replay to session 56) if scope exceeds session budget.
-5. **If P0 (v3b S-8 completion):** Re-read `docs/slices/S-INFRA-persona-suite-v2-multi-agent/acceptance.md` AC-1 (`Out of scope`) + AC-3 + AC-4 + AC-5 + Pre-flight notes §"Session-54 PR scope" listing the deferred items. Re-read spec 72c §3 + §5 + §7 (session-54 amended). Branch fresh off main as `claude/S-INFRA-persona-suite-v2-multi-agent-impl-completion` (or similar). Sequence: orchestrator fan-out → workflow rewire (atomic with AC-5 slice-reviewer.md deletion + CLAUDE.md updates) → AC-3 differential → AC-4 golden-replay → DoD-13 4 sub-spawn reviews → verification.md.
-6. **Live rigour gates** — every commit dogfoods them. Plan-time gate fires on ExitPlanMode. Auto-review still uses single-agent `slice-reviewer.md` until the atomic flip in this session's PR; expect 2-5 rounds of single-agent recursion before stop-signal per session-54 pattern.
-7. **CODEOWNERS solo-operator pattern** — every control-plane PR (this session's PR will touch `.claude/agents/**`, `scripts/**`, `.github/workflows/**`) requires conscious admin-bypass click. Surface this expectation upfront with user.
+1. **Turn-0 verification.** SessionStart hook surfaces live branch state. `mcp__github__list_pull_requests state=open base=main perPage=10` — expect empty post-wrap (PR #56 + #57 both merged session 55; session-55 wrap PR merged at session 56 turn 0).
+2. **Verify branch state + working tree clean.** Resync if BEHIND > 0. Branch fresh off main for any impl PR.
+3. **Confirm priority with user.** Session 56 P0 recommended = **k=2 default flip** per HANDOFF-SESSION-55 §"Session 56 priority recommendations". P1 = anti-pattern catalogue. P2 = verification.md final-state convention. P3 = S-F1 first src/ slice. Multiple small PRs achievable in one session vs single large PR; user picks.
+4. **If P0 (k=2 default flip):** re-read spec 72c §5 (revisit-trigger text) + `scripts/derive-verdict.sh` (current default `k=1`). Branch fresh off main as `claude/decouple-session-56-k2-flip` (or similar). Sequence: spec amendment → `derive-verdict.sh` default change + add 2 ShellSpec fixtures (k=1 still works as opt-in; k=2 is default) → verification.md → admin-bypass merge.
+5. **If P1 (anti-pattern catalogue):** re-read CLAUDE.md §"Coding conduct" + §"Engineering conventions" + HANDOFF-SESSION-55 §"Lessons learned" §3 (style specialist's most-fired patterns). Append explicit don't-do-this catalogue to CLAUDE.md. ~30 min.
+6. **If P3 (S-F1 first src/ slice):** re-read spec 70 Build Map + S-F1 acceptance.md (or draft if not yet authored). First src/ slice ships design-system token extraction; activates AC-4 retain/drop measurement clock + `ux-polish-reviewer` persona. **Multi-agent KPI calibration data point n=3.**
+7. **Live rigour gates** — every commit dogfoods them. Multi-agent auto-review now lives on main (`auto-review.yml` 3-job matrix-strategy fan-out); expect 2-5 rounds per PR at current `k=1` default (this is what the P0 flip addresses).
+8. **CODEOWNERS solo-operator pattern (#25)** — k=2 flip touches `scripts/derive-verdict.sh` + spec 72c (CODEOWNERS-protected); admin-bypass merge required. Anti-pattern catalogue touches CLAUDE.md + persona files (CODEOWNERS-protected); same. Surface upfront when opening these PRs.
+9. **Promote session-55 negative constraints (#27 + #28)?** HANDOFF-SESSION-55 §"Negative constraints discovered" proposes #27 (verification.md as final-state) + #28 (don't freeze AC text more ambitious than impl budget). User decision at session-56 turn 1; if accepted, append to negative-constraints register (currently 26 entries in CLAUDE.md / this file).
 
 ## Key files
 
-Canonical list lives in `CLAUDE.md` §"Key files". Session-54 additions:
+Canonical list lives in `CLAUDE.md` §"Key files". Session-55 additions (atop session-54):
 
 ```
-docs/HANDOFF-SESSION-54.md                                        — session 54 retro (NEW)
-docs/slices/S-INFRA-persona-suite-v2-multi-agent/acceptance.md    — re-drafted end-to-end session 54 (5 ACs; was 6; PR #54 MERGED @ b4d7e6c)
-.claude/agents/reviewer-security.md                               — 132L; OWASP top 10 + spec 72 §11 (PR #54 MERGED)
-.claude/agents/reviewer-architecture.md                           — 117L; hidden-effect + criterion 2 architectural variant (PR #54 MERGED)
-.claude/agents/reviewer-correctness.md                            — 117L; criteria 2 logic / 3 / 5 / 6 / 8 (PR #54 MERGED; heaviest specialist by design)
-.claude/agents/reviewer-style.md                                  — 121L; criterion 1 + commenting category (PR #54 MERGED)
-scripts/spawn-multi-reviewer.sh                                   — 162L; aggregator subcommand; tuple-based jq group_by dedup; emits shadow k=2/k=3 (PR #54 MERGED); test contract: tests/shellspec/spawn-multi-reviewer.spec.sh
-tests/shellspec/spawn-multi-reviewer.spec.sh                      — 9 cases (AC-1 verifications 2/3/5)
-docs/workspace-spec/72c-multi-agent-review-framework.md           — session-54 amendments to §3 + §4 + §5 + §7 + §9 + §10 + Status (load-bearing prior-art audit application; PR #54 MERGED)
-scripts/derive-verdict.sh                                         — `--multi k=N` quorum mode added session 54 (PR #54 MERGED); single-mode unchanged
-tests/shellspec/derive-verdict.spec.sh                            — 28 cases (16 single-mode + 12 multi-mode session 54)
-.github/workflows/auto-review.yml                                 — still single-agent against slice-reviewer.md at session-54 wrap; matrix-strategy fan-out lands at session-55 atomic flip per AC-1 verification 6 + AC-5
-.claude/agents/slice-reviewer.md                                  — RETIRES at session-55 atomic flip with the multi-agent suite (per session-54 PR #54 AC-5)
+docs/HANDOFF-SESSION-55.md                                        — session 55 retro (NEW)
+docs/slices/S-INFRA-persona-suite-v2-multi-agent/verification.md  — final-state evidence for AC-1 + AC-2 + AC-3 + AC-4 + AC-5 (PR #57 ship)
+docs/slices/S-INFRA-persona-suite-v2-multi-agent/acceptance.md    — multiple session-55 amendments (AC-3 §Outcome / §In scope / §Out of scope; AC-4 §Outcome / §Verifications 2/3/4/5; AC-5 §In scope) reflecting the v3b deterministic-replay ship vs the session-54 aspirational scope
+.github/workflows/auto-review.yml                                 — REWRITTEN as 3-job matrix-strategy fan-out (brief → specialist matrix → aggregate); new comment marker `auto-review-comment:multi-agent` (PR #56 MERGED @ 80ba85b)
+.github/workflows/persona-fixtures.yml                            — NEW path-filtered golden-PR replay CI; `actions/checkout@SHA` pinned (PR #57 MERGED @ 83421c8)
+.claude/agents/slice-reviewer.md                                  — DELETED (-205L; retired session 55 atomic with PR #56 workflow flip per AC-5)
+scripts/spawn-multi-reviewer.sh                                   — extended with `--differential --prior-findings <path>` flag (PR #57); annotates `was_in_prior` + emits `prior_findings_resolved` + `token_metrics` count summary
+tests/shellspec/spawn-multi-reviewer.spec.sh                      — 13 cases (9 prior + 4 new for AC-3 verifications 2/3 + 2 validation)
+tests/personas/run-replay.sh                                      — NEW deterministic aggregator-only replay harness (PR #57)
+tests/personas/golden/pr-30/{README.md,diff.patch,prior-findings.json,prior-verdict.json}  — NEW seed-of-1 fixture pinned to PR #30 merge SHA `792b73ef40dfad90b7db05c3d01d18559183e3ae` (PR #57)
+.claude/agents/reviewer-correctness.md                            — minor fix at PR #57 round 0 (DoD-13): redirect dangling `slice-reviewer.md §Output format` reference to in-file label-assignment defaults
+.claude/agents/reviewer-style.md                                  — minor extensions at PR #57 round 0 (DoD-13): "no PR provenance in persistent comments" added to anti-pattern catalogue at criterion 5; `severity` added to verdict-coercion discard list
+.claude/agents/acceptance-gate.md                                 — delegation-reference update (slice-reviewer → multi-agent reviewer suite; PR #56)
+.claude/agents/ux-polish-reviewer.md                              — delegation-reference update (same; PR #56)
+scripts/{auto-review-parse,derive-verdict,criterion-2-exception-check,auto-review-slice-resolve}.sh — header-comment cleanup (provenance trim + slice-reviewer dangling-ref redirect; PR #56 + #57)
+CLAUDE.md                                                         — §Hard controls Gates-this-slice-ships table updated to multi-agent row; §Subagent file locations + §Invocation conventions rewritten to 4-specialist matrix-strategy narrative (PR #56)
 ```
 
 ## Rigour-suite completeness (layman summary)
@@ -230,8 +249,7 @@ tests/shellspec/derive-verdict.spec.sh                            — 28 cases (
 |---|---|---|---|
 | **v3a-foundation** | ✅ SHIPPED | 33-41 (PR #24) | `verify-slice.sh`, `tdd-first-every-commit`, plan-time gate |
 | **v3b subagent suite (S-1 to S-7)** | ✅ SHIPPED | 41-48 | `auto-review.yml`, slice-reviewer + acceptance-gate + ux-polish-reviewer personas, arch-smell trigger |
-| **v3b S-8 multi-agent persona suite v2 (design + AC-1 partial + AC-2)** | ✅ SHIPPED | 54 (PR #54) | spec 72c session-54 amendment (4-partition + majority-vote + golden-replay primary); 5-AC re-draft acceptance.md; `derive-verdict.sh --multi k=N`; `spawn-multi-reviewer.sh aggregate`; 4 specialist personas (`reviewer-{security,architecture,correctness,style}.md`); 21 ShellSpec cases |
-| **v3b S-8 completion (AC-1 fan-out + workflow rewire + AC-3 + AC-4 + AC-5 + DoD-13)** | 🟡 PENDING SESSION 55 | — | Orchestrator fan-out subcommand or inline workflow YAML; `auto-review.yml` matrix-strategy; differential-review mode; golden-PR replay seed (PR #30 transcript) + `run-replay.sh` + 2 CI workflows; `slice-reviewer.md` retirement atomic with workflow rewire; CLAUDE.md §"Subagent file locations" updates; 4 fresh-context persona reviews |
+| **v3b S-8 multi-agent persona suite v2 (full ship: design + AC-1 + AC-2 + AC-3 + AC-4 + AC-5 + DoD-13)** | ✅ FULLY SHIPPED | 54 (PR #54) + 55 (PR #56 + #57) | spec 72c amended; 4 specialist personas; orchestrator + aggregator + `--differential --prior-findings`; auto-review.yml 3-job matrix-strategy fan-out; `slice-reviewer.md` retired; golden-PR replay seed-of-1 + `run-replay.sh` + path-filtered CI; DoD-13 4 fresh-context persona reviews; 13 ShellSpec cases on aggregator |
 | **v3c rubric extension §Exceptions (a)-(e)** | ✅ SHIPPED | 49-52 | `slice-reviewer.md` §Exceptions extracted to `criterion-2-exceptions.yaml` + scripted pre-filter |
 | **v3c citations + 100%-rule rename** | ✅ SHIPPED | 50 (PR #38) | CLAUDE.md citations: Hillel Wayne TDD, Mikado, PMI WBS, Cline + Plan Mode |
 | **v3c slice-resolver fix** | ✅ SHIPPED | 50 (PR #39) | `auto-review.yml` resolver |
@@ -247,35 +265,40 @@ tests/shellspec/derive-verdict.spec.sh                            — 28 cases (
 | **v3c synthetic-deliberate-injection per-persona fixtures** | 🔵 v3c CARRY-OVER | — | Per spec 72c §7 + §9 (golden-replay primary at v3b ship; synthetic adds when 4-partition validated) |
 | **v3c carry-overs (Stryker mutation · property-based fuzz · multi-provider 3rd reviewer · structured-findings JSON Schema · multi-provider consensus framework full spec 72d)** | 🔵 OUT OF SCOPE | — | Per spec 72c §9; not blocking S-F1 or main programme |
 
-**Net state at session-54 wrap:** **rigour-suite programme is ~99% complete** — control-plane simplification (sessions 50-53 batch + session-54 spec amendment) settled; v3b S-8 design contract + AC-1 partial + AC-2 shipped on main via PR #54. **Only 1 substantive item remains before pure `src/` work:** v3b S-8 completion (session 55 P0). After session 55 ships the orchestrator fan-out + workflow rewire + AC-3/4/5 + DoD-13, the rigour-suite programme is canonically complete and S-F1 (first src/ slice) becomes the priority + AC-4 retain/drop measurement clock starts.
+**Net state at session-55 wrap:** **rigour-suite v3b programme is canonically complete on main.** PR #56 + #57 closed v3b S-8 atomically; multi-agent matrix-strategy fan-out is the live review path. S-F1 (first src/ slice) is the next priority + AC-4 retain/drop measurement clock starts on first src/ work. v3c is the post-v3b efficiency layer (k=2 default flip, anti-pattern catalogue, persona-side prompt-input wiring, live drift detection, etc.) — see §"Session 56 priorities" for the ranked roadmap and HANDOFF-SESSION-55 §"v3c carry-overs" for the full deferred list.
 
-## Session 55 pre-flight
+## Session 56 pre-flight
 
 **Verify (do this first, before any plan):**
 
 ```
 git fetch origin
 git status                                                                   # confirm clean tree
-git rev-parse --short HEAD origin/main                                       # current main tip (expected: post-wrap-PR-merged tip)
-mcp__github__list_pull_requests state=closed base=main perPage=15            # confirm session-54 wrap PR + PR #54 merged
-mcp__github__list_pull_requests state=open  base=main perPage=10             # what's currently open (PR #53 carry-over likely; resolve per §Session 55 priorities P3)
+git rev-parse --short HEAD origin/main                                       # expected: post-session-55-wrap merge
+mcp__github__list_pull_requests state=closed base=main perPage=10            # confirm PR #56 + #57 + session-55 wrap PR merged
+mcp__github__list_pull_requests state=open  base=main perPage=10             # expect empty post-wrap
 ```
 
 **Pre-flight Qs (ask user before any code):**
 
-1. **PR #53 reconciliation.** Per §Session 55 priorities P3: merge separately, close unmerged, or port content. Recommend merge separately + take session-54 SESSION-CONTEXT version on conflict.
-2. **Priority for session 55?** Recommended P0 = **v3b S-8 completion** per §Session 55 priorities (orchestrator + workflow + golden-replay + retirement + DoD-13). Alternatives: split P0 across 2 PRs if scope exceeds budget; P1 = S-F1 if S-8 lands fast.
-3. **CODEOWNERS solo-operator pattern.** Confirm with user that the session-55 P0 PR will require admin-bypass click (touches `.claude/agents/**`, `scripts/**`, `.github/workflows/**`). By design per negative constraint #25.
-4. **Recursive validation expected?** Session-55 P0 PR will atomically replace `slice-reviewer.md` with the 4-specialist suite. The very same PR that ships the new auto-review path will be reviewed by the OLD slice-reviewer (since the workflow rewire only takes effect on the next PR after merge). The atomic flip means session-55 PR review is single-agent; subsequent PRs are multi-agent. Surface this with user before starting impl.
-5. **Spec 72c §1 + §8 KPI prediction.** Multi-agent target ≤2 rounds for the equivalent finding-density. First post-flip PR will measure this. Record per-specialist findings count + retain/drop framework per AC-4 + spec 72c §8 once first 3 src/ slices ship.
+1. **Priority for session 56?** Recommended P0 = **k=2 default flip** per §Session 56 priorities + HANDOFF-SESSION-55 §"Session 56 priority recommendations". P1 = anti-pattern catalogue. P2 = verification.md final-state convention. P3 = S-F1 first src/ slice.
+2. **k=2 flip risk acceptance.** Confirm with user that flipping default `k` from 1 to 2 at n=2 (rather than the spec 72c §5 "first 3 src/ slices" trigger) is acceptable — shadow `k=1` field stays in output for monitoring; manual override available. Both PR #56 + #57 shadow data show the flip would suppress most late-round single-specialist findings (the noise) while preserving cross-specialist agreement (the real signal).
+3. **S-F1 start condition.** Activates AC-4 retain/drop measurement clock + first exercise of `ux-polish-reviewer` persona on real UI surface. PR #56 + #57 were infra-shaped diffs; S-F1 is the first real-workload test of the multi-agent suite.
+4. **CODEOWNERS solo-operator pattern (#25).** k=2 flip touches `scripts/derive-verdict.sh` + spec 72c (CODEOWNERS-protected); admin-bypass merge required. Anti-pattern catalogue touches `CLAUDE.md` + persona files (CODEOWNERS-protected); same. Surface upfront when opening these PRs.
+5. **Multi-agent KPI measurement opportunity.** First src/ slice (S-F1) is the n=3 calibration data point against the spec 72c §5 false-positive-rate revisit trigger. Record per-specialist findings count + retain/drop tally in HANDOFF-SESSION-56 §"Persona findings recorded".
 
 **Session discipline (hook-surfaced; restated):**
 
 - Honour Planning conduct from turn 1. SessionStart hook surfaces live branch state — use it; distrust kickoff memory.
-- Live gates (post-PR-52 simplified): `tdd-guard` · `pre-push-dod7` · `tdd-first-every-commit` · `exit-plan-review` · `read-cap` · `auto-review.yml` · `pr-dod.yml` · `.github/CODEOWNERS`.
+- Live gates: `tdd-guard` · `pre-push-dod7` · `tdd-first-every-commit` · `exit-plan-review` · `read-cap` · `auto-review.yml` (now multi-agent matrix-strategy fan-out) · `pr-dod.yml` · `.github/CODEOWNERS` · `persona-fixtures.yml` (path-filtered golden-replay).
 - Long-prose Writes: skeleton + Edit-append for any prose Write >~100 lines (negative constraint #19).
-- Auto-review iteration stop-signal (session 54 lesson 4): convergence stalls at 2-finding polish-tier plateau with single-agent recursive; declare iteration stop at the 2-finding plateau if findings are demonstrably non-substantive. Multi-agent should compress this to ≤2 rounds total post-session-55 ship.
+- Auto-review iteration stop-signal: per session-55 retrospective, current `k=1` produces 5-11 round trajectories; shadow `k=2` would compress to 4-5. The k=2 flip is itself the P0 to bring this in line.
 - **Dogfood discipline:** every commit passes the gates. No `--no-verify` unless explicit user authorisation.
-- **Architectural-smell-trigger:** ≥3 rounds of findings clustered in one file → step back + extract before patching round 4.
-- **Verdict vocabulary** (post-PR-#41): Conventional Comments labels + `(blocking)`. Personas emit findings; workflow derives verdict deterministically.
+- **Architectural-smell-trigger:** qualitative judgement per CLAUDE.md amended PR #52; reviewer's call when patches feel like interest payment vs principal.
+- **Verdict vocabulary:** Conventional Comments labels + `(blocking)`. Personas emit findings; orchestrator derives verdict via `scripts/derive-verdict.sh`.
 - **AC-4 retain/drop** activates after first 3 src/ slices ship. S-F1 starts the dataset.
+
+**Negative constraint candidates from session 55 (proposed; promote at session-56 turn 1 if user agrees):**
+
+- **#27** — Verification.md is final-state, not a running log. Append-as-you-go creates round-N+1 inconsistency findings. Round-by-round multi-agent log lives in HANDOFF or PR description.
+- **#28** — Don't freeze AC text more ambitious than the implementation budget. Anchor §In scope to a concrete next-session impl budget, not aspirational scope. Session-54 AC for AC-3 + AC-4 over-spec'd what session-55 could ship; cost was 5+ rounds of ac-gap findings on PR #57.
