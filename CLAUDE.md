@@ -205,6 +205,15 @@ These rules govern how Claude behaves when editing `src/`. Guardrails against ov
 
 **Goal-driven execution.** Convert each task into verifiable success criteria before writing code. Test-first where tractable. Strong criteria enable independent looping; weak criteria require re-clarification and slow velocity.
 
+**Comments: WHY not WHAT, no temporal provenance.** Reinforces the system-prompt rule with concrete anti-patterns the multi-agent style specialist flags repeatedly (session-55 + session-56 empirics; enforced by `.claude/agents/reviewer-style.md`):
+- **PR / session / slice provenance** in persistent comments or test descriptions ("PR #56 round 7", "session-56 amendment", "slice S-F1 AC-3") — rot fast; live in PR description.
+- **Sibling-step references** ("Mirrors the aggregate fallback", "same as Y above") — break when one side moves; describe the local invariant directly instead.
+- **Narration of WHAT** — file/type enumerations the surrounding code structure already shows; well-named identifiers already convey purpose.
+- **Hard-coded counts that describe historical state** ("14 findings actioned across rounds 1-9") in general-purpose code — replace with `length()` or a named constant if relevant; otherwise drop.
+- **Code lineage** ("added for the Y flow", "handles issue #123", "used by X") — PR description, not code.
+
+Spec §Status footers ARE the right place for lineage tracking (lineage IS the section's purpose); code comments and persistent test descriptions are not.
+
 ## Engineering conventions
 
 **TDD where tractable.** Write the test first, then the code to pass it. Applies to logic, rules, data transforms, API routes, signal/engine work. Not mandatory for pure-visual UI (visual regression covers that), but preferred wherever state or branching logic exists. Bail-out criteria are documented as the rubric in `docs/tdd-exemption-allowlist.txt` header (per v3b AC-8) — entries must carry a `category:glob` tag matching one of three categories (`pure-visual-ui`, `pure-rename`, `pure-config`); untagged entries fail-loud at `verify-slice.sh` Gate 3b (runs in both incremental + full modes). Per [Hillel Wayne, "I have complicated feelings about TDD"](https://buttondown.com/hillelwayne/archive/i-have-complicated-feelings-about-tdd-8403/) — TDD is a calibration tool for your sense of code, not a universal mandate; the bail-out categories above match Wayne's "good for some code, bad for others" framing.
@@ -222,7 +231,7 @@ These rules govern how Claude behaves when editing `src/`. Guardrails against ov
 **Deterministic over generative.** For repetitive scaffolding (new slice folder, codegen, boilerplate, branch setup), prefer bash/CLI over prompting Claude. Reserve Claude for reasoning tasks. Extends the "prefer dedicated tools over Bash when one fits" rule — the inverse is also true when deterministic is cheaper.
 
 **Definition of Done (per slice).** A slice ships only when all six are true:
-1. All acceptance criteria met, with evidence per AC
+1. All acceptance criteria met, with evidence per AC in `verification.md` (final-state record assembled at slice ship; round-by-round multi-agent audit detail belongs in HANDOFF or PR description, not in `verification.md` itself — append-as-you-go creates internal-consistency findings round-over-round)
 2. Tests written and passing (unit + integration + visual as applicable)
 3. Adversarial review done; concerns addressed or explicitly deferred
 4. Preview deploy verified in-browser if UI (golden path + edge cases + prefers-reduced-motion)
