@@ -54,7 +54,15 @@ set -euo pipefail
 readonly DIMENSIONS=(security architecture correctness style)
 
 usage() {
-  printf 'usage: %s aggregate <envelopes-dir>\n' "$0" >&2
+  cat <<EOF >&2
+usage: $0 aggregate <envelopes-dir> [--differential --prior-findings <path>]
+
+  aggregate <envelopes-dir>          dedupe + verdict from per-specialist envelopes
+  --differential                     annotate findings as was_in_prior + emit
+                                     prior_findings_resolved + token_metrics
+  --prior-findings <path>            JSON-array file of prior-round findings
+                                     (required when --differential is set)
+EOF
   exit 2
 }
 
@@ -63,11 +71,40 @@ usage() {
 SUBCMD="$1"
 shift
 
+DIFFERENTIAL=false
+PRIOR_FINDINGS_PATH=""
+
 case "$SUBCMD" in
   aggregate)
-    [ $# -eq 1 ] || usage
+    [ $# -ge 1 ] || usage
     DIR="$1"
+    shift
     [ -d "$DIR" ] || { printf 'spawn-multi-reviewer.sh: directory not found: %s\n' "$DIR" >&2; exit 2; }
+    while [ $# -gt 0 ]; do
+      case "$1" in
+        --differential)
+          DIFFERENTIAL=true
+          shift
+          ;;
+        --prior-findings)
+          [ $# -ge 2 ] || usage
+          PRIOR_FINDINGS_PATH="$2"
+          shift 2
+          ;;
+        *)
+          printf 'spawn-multi-reviewer.sh: unknown flag: %s\n' "$1" >&2
+          usage
+          ;;
+      esac
+    done
+    if [ "$DIFFERENTIAL" = "true" ] && [ -z "$PRIOR_FINDINGS_PATH" ]; then
+      printf 'spawn-multi-reviewer.sh: --differential requires --prior-findings <path>\n' >&2
+      exit 2
+    fi
+    if [ -n "$PRIOR_FINDINGS_PATH" ] && [ ! -f "$PRIOR_FINDINGS_PATH" ]; then
+      printf 'spawn-multi-reviewer.sh: prior findings file not found: %s\n' "$PRIOR_FINDINGS_PATH" >&2
+      exit 2
+    fi
     ;;
   *)
     usage
@@ -118,6 +155,59 @@ DEDUPED_FINDINGS=$(printf '%s' "$ALL_FINDINGS" | jq -c '
   })
 ')
 
+# Differential mode: annotate each current finding with was_in_prior
+# (true if its [label, category, evidence-prefix] tuple matches a prior
+# finding's hash); emit prior_findings_resolved (prior findings whose
+# tuple is absent from current); emit token_metrics counts. Persona-
+# side filtering per spec 72c §6 is the upstream half (specialists
+# scope review to prior-still-present + new-this-round); this block is
+# the downstream observability + verification surface.
+RESOLVED_FINDINGS='[]'
+DIFFERENTIAL_FIELDS_JQ='{}'
+if [ "$DIFFERENTIAL" = "true" ]; then
+  PRIOR_FINDINGS=$(cat "$PRIOR_FINDINGS_PATH")
+  if ! printf '%s' "$PRIOR_FINDINGS" | jq -e 'type == "array"' >/dev/null 2>&1; then
+    printf 'spawn-multi-reviewer.sh: prior findings file must contain a JSON array\n' >&2
+    exit 2
+  fi
+
+  DEDUPED_FINDINGS=$(printf '%s\n%s' "$DEDUPED_FINDINGS" "$PRIOR_FINDINGS" | jq -cs '
+    .[0] as $current | .[1] as $prior |
+    ($prior | map([.label, .category, ((.evidence // "")[0:64])])) as $prior_keys |
+    $current | map(
+      . + {was_in_prior: ([.label, .category, ((.evidence // "")[0:64])] | IN($prior_keys[]))}
+    )
+  ')
+
+  RESOLVED_FINDINGS=$(printf '%s\n%s' "$DEDUPED_FINDINGS" "$PRIOR_FINDINGS" | jq -cs '
+    .[0] as $current | .[1] as $prior |
+    ($current | map([.label, .category, ((.evidence // "")[0:64])])) as $current_keys |
+    $prior | map(select(([.label, .category, ((.evidence // "")[0:64])] | IN($current_keys[])) | not))
+  ')
+
+  PRIOR_COUNT=$(printf '%s' "$PRIOR_FINDINGS" | jq 'length')
+  CURRENT_COUNT=$(printf '%s' "$DEDUPED_FINDINGS" | jq 'length')
+  RESOLVED_COUNT=$(printf '%s' "$RESOLVED_FINDINGS" | jq 'length')
+  NEW_COUNT=$(printf '%s' "$DEDUPED_FINDINGS" | jq '[.[] | select(.was_in_prior == false)] | length')
+
+  DIFFERENTIAL_FIELDS_JQ=$(jq -n \
+    --argjson resolved "$RESOLVED_FINDINGS" \
+    --argjson prior_count "$PRIOR_COUNT" \
+    --argjson current_count "$CURRENT_COUNT" \
+    --argjson resolved_count "$RESOLVED_COUNT" \
+    --argjson new_count "$NEW_COUNT" \
+    '{
+      differential: true,
+      prior_findings_resolved: $resolved,
+      token_metrics: {
+        prior_count: $prior_count,
+        current_count: $current_count,
+        resolved_count: $resolved_count,
+        new_count: $new_count
+      }
+    }')
+fi
+
 # All-inconclusive case short-circuits to parse-failed so an empty
 # findings array isn't silently approved when the actual signal is
 # "no specialist responded".
@@ -154,10 +244,13 @@ jq -n \
   --arg shadow_k3 "$SHADOW_K3" \
   --argjson degraded "$DEGRADED" \
   --argjson inconclusive "$INCONCLUSIVE_JSON" \
+  --argjson differential "$DIFFERENTIAL_FIELDS_JQ" \
   '{
     summary: "multi-agent aggregate (k=1 default)",
     findings: $findings,
     verdict: $verdict,
     would_have_been_k2: $shadow_k2,
     would_have_been_k3: $shadow_k3
-  } + (if $degraded then {degraded: true, inconclusive_dimensions: $inconclusive} else {} end)'
+  }
+  + (if $degraded then {degraded: true, inconclusive_dimensions: $inconclusive} else {} end)
+  + $differential'
