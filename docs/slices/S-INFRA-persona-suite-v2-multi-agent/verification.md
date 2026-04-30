@@ -94,7 +94,7 @@ PR-A subset (AC-1 v1+v6 + AC-5):
 
 1. ✅ ACs met with evidence — AC-1 v1-3+5+6 + AC-5 v1-5 evidenced above; AC-1 v4 deferred-as-no-op with rationale; AC-2 + AC-3 + AC-4 + DoD-13 deferred to PR-B per acceptance.md Pre-flight.
 2. ✅ Tests passing — `tests/shellspec/spawn-multi-reviewer.spec.sh` (4 ShellSpec fixtures shipped at PR #54) green in CI; bash syntax + YAML parse green locally.
-3. ✅ Adversarial review done — multi-agent auto-review on this PR (3 rounds; convergence at round 3 per the table above).
+3. ✅ Adversarial review done — multi-agent auto-review on this PR (4 rounds at k=1 default; shadow k=2 hit `approve` at round 4; convergence at round 4 + final-amendment commit per the table above).
 4. N/A — no UI surface in this slice.
 5. ✅ No regression in adjacent slices — `auto-review-parse.sh` / `derive-verdict.sh` / `auto-review-slice-resolve.sh` unchanged in logic; comment-header updates only.
 6. ✅ No relevant 68f/g entries blocked.
