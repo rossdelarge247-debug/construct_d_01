@@ -268,9 +268,18 @@ Describe 'derive-verdict.sh'
     The status should be success
   End
 
-  It '--multi without k= argument defaults to k=1'
+  It '--multi without k= argument defaults to k=2: 1-specialist blocking finding does not meet quorum → approve'
     Data
       #|{"summary": "x", "findings": [{"label": "issue", "blocking": true, "category": "security", "seen_by": ["reviewer-security"]}]}
+    End
+    When call scripts/derive-verdict.sh --multi
+    The output should equal 'approve'
+    The status should be success
+  End
+
+  It '--multi without k= argument defaults to k=2: deduped finding with seen_by length 2 satisfies quorum → block'
+    Data
+      #|{"summary": "x", "findings": [{"label": "issue", "blocking": true, "category": "security", "seen_by": ["reviewer-security", "reviewer-correctness"]}]}
     End
     When call scripts/derive-verdict.sh --multi
     The output should equal 'block'

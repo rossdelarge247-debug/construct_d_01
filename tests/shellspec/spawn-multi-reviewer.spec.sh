@@ -41,17 +41,18 @@ Describe 'spawn-multi-reviewer.sh aggregate'
     write_envelope style "$EMPTY_FINDINGS_STYLE"
     When call scripts/spawn-multi-reviewer.sh aggregate "$SHELLSPEC_TMPBASE"
     The output should include '"verdict": "approve"'
-    The output should include '"would_have_been_k2": "approve"'
+    The output should include '"would_have_been_k1": "approve"'
     The output should include '"would_have_been_k3": "approve"'
     The output should not include '"degraded"'
     The status should be success
   End
 
-  It 'returns block at k=1 with shadow downgrade at k=2/k=3 (AC-1 verification 2)'
-    # Per spec 72c §5: at k=1 any blocking finding produces block; at k=2
-    # only 1 specialist flagged (seen_by length 1) so vote count < 2 →
-    # downgrades to action tier (still 0 votes there because action filter
-    # excludes blocking findings) → approve.
+  It 'returns approve at k=2 default with shadow k=1 block + shadow k=3 approve (AC-1 verification 2)'
+    # Per spec 72c §5: at k=2 default, only 1 specialist flagged the
+    # blocking finding (seen_by length 1) so block-tier vote count < 2 →
+    # falls to action tier (still 0 votes there because action filter
+    # excludes blocking findings) → approve. Shadow k=1 reproduces the
+    # prior default's verdict: 1 blocking vote suffices → block.
     # Per-finding schema: {label, blocking, category, evidence, remediation}
     # — no per-finding summary (top-level summary is the persona's review
     # summary; evidence is the dedup hash field per spec 72c §5 rule 2).
@@ -60,8 +61,8 @@ Describe 'spawn-multi-reviewer.sh aggregate'
     write_envelope correctness '{"specialist":"reviewer-correctness","summary":"sub","findings":[{"label":"suggestion","blocking":false,"category":"spec-citation","evidence":"per spec X","remediation":"quote it"}]}'
     write_envelope style '{"specialist":"reviewer-style","summary":"nit","findings":[{"label":"nitpick","blocking":false,"category":"naming","evidence":"data: any","remediation":"rename"}]}'
     When call scripts/spawn-multi-reviewer.sh aggregate "$SHELLSPEC_TMPBASE"
-    The output should include '"verdict": "block"'
-    The output should include '"would_have_been_k2": "approve"'
+    The output should include '"verdict": "approve"'
+    The output should include '"would_have_been_k1": "block"'
     The output should include '"would_have_been_k3": "approve"'
     The status should be success
   End
@@ -80,7 +81,7 @@ Describe 'spawn-multi-reviewer.sh aggregate'
     write_envelope style "$EMPTY_FINDINGS_STYLE"
     When call scripts/spawn-multi-reviewer.sh aggregate "$SHELLSPEC_TMPBASE"
     The output should include '"verdict": "block"'
-    The output should include '"would_have_been_k2": "block"'
+    The output should include '"would_have_been_k1": "block"'
     The output should include '"would_have_been_k3": "approve"'
     The status should be success
     # Single deduped finding entry (not 2): identical evidence + label
@@ -114,6 +115,8 @@ Describe 'spawn-multi-reviewer.sh aggregate'
     # actually returning empty findings).
     When call scripts/spawn-multi-reviewer.sh aggregate "$SHELLSPEC_TMPBASE"
     The output should include '"verdict": "parse-failed"'
+    The output should include '"would_have_been_k1": "parse-failed"'
+    The output should include '"would_have_been_k3": "parse-failed"'
     The output should include '"degraded": true'
     The output should include '"security"'
     The output should include '"architecture"'
