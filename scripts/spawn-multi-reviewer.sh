@@ -89,9 +89,14 @@ done
 
 # Phase 2: assemble findings across present specialists with seen_by[] tagged.
 # Each specialist's findings are projected into `+ {seen_by: [name]}`;
-# all findings concatenate; group_by([label, category, summary[0:64]])
+# all findings concatenate; group_by([label, category, evidence[0:64]])
 # then merges identical-hash findings into one entry with seen_by[]
-# union and `blocking = OR` across the group.
+# union and `blocking = OR` across the group. Dedup hash field is
+# `evidence` (not `summary`) — personas don't emit per-finding summary
+# per the established baseline (slice-reviewer.md / acceptance-gate.md /
+# ux-polish-reviewer.md output schemas); evidence is universally
+# present and is a quoted-from-diff fragment that gives the strongest
+# substantive-equivalence signal. Spec 72c §5 rule 2.
 ALL_FINDINGS='[]'
 for SPEC in "${PRESENT[@]}"; do
   F="$DIR/$SPEC.json"
@@ -101,11 +106,10 @@ for SPEC in "${PRESENT[@]}"; do
 done
 
 DEDUPED_FINDINGS=$(printf '%s' "$ALL_FINDINGS" | jq -c '
-  group_by([.label, .category, ((.summary // "")[0:64])]) | map({
+  group_by([.label, .category, ((.evidence // "")[0:64])]) | map({
     label: .[0].label,
     blocking: any(.[]; .blocking == true),
     category: .[0].category,
-    summary: .[0].summary,
     evidence: .[0].evidence,
     remediation: .[0].remediation,
     seen_by: (map(.seen_by[]) | unique)
