@@ -44,7 +44,8 @@ for PR_DIR in "$GOLDEN_DIR"/*/; do
   # starting from N findings to 0 findings → verdict converges to
   # prior-verdict.
   ENVELOPES_DIR=$(mktemp -d)
-  trap 'rm -rf "$ENVELOPES_DIR"' EXIT
+  PRIOR_TMP=$(mktemp)
+  trap 'rm -rf "$ENVELOPES_DIR" "$PRIOR_TMP"' EXIT
 
   for DIM in security architecture correctness style; do
     jq -n --arg spec "reviewer-$DIM" '
@@ -71,14 +72,9 @@ for PR_DIR in "$GOLDEN_DIR"/*/; do
     printf 'PASS: final-round finding count (0)\n'
   fi
 
-  # Assertion 2: differential mode shows the full trajectory —
-  # resolved_count == prior cumulative count; new_count == 0; no
-  # current findings tagged was_in_prior (since current has no findings).
-  PRIOR_TMP=$(mktemp)
   jq -c '[.[] | del(._round, ._session_47_persona_dimension)]' "$PRIOR_FINDINGS" > "$PRIOR_TMP"
 
   DIFF_OUT=$("$ORCHESTRATOR" aggregate "$ENVELOPES_DIR" --differential --prior-findings "$PRIOR_TMP")
-  rm -f "$PRIOR_TMP"
 
   RESOLVED_COUNT=$(printf '%s' "$DIFF_OUT" | jq -r '.token_metrics.resolved_count')
   NEW_COUNT=$(printf '%s' "$DIFF_OUT" | jq -r '.token_metrics.new_count')
@@ -97,7 +93,7 @@ for PR_DIR in "$GOLDEN_DIR"/*/; do
     printf 'PASS: differential new_count (0)\n'
   fi
 
-  rm -rf "$ENVELOPES_DIR"
+  rm -rf "$ENVELOPES_DIR" "$PRIOR_TMP"
   trap - EXIT
 done
 
