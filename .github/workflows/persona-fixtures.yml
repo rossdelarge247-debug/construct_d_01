@@ -1,0 +1,40 @@
+name: persona-fixtures (golden-PR replay)
+
+# Per docs/slices/S-INFRA-persona-suite-v2-multi-agent/acceptance.md
+# AC-4: golden-PR replay harness asserts orchestrator stability against
+# known-state inputs. Triggers on persona-file or orchestrator-script
+# changes; fails the PR if any replay assertion fails.
+#
+# v3b ship: deterministic aggregator-only replay (no live `claude -p`
+# calls). Persona drift detection via live re-invocation is deferred
+# to v3c per spec 72c §9 — would require API budget per replay run.
+
+on:
+  pull_request:
+    types: [opened, synchronize]
+    paths:
+      - '.claude/agents/reviewer-*.md'
+      - 'scripts/spawn-multi-reviewer.sh'
+      - 'scripts/derive-verdict.sh'
+      - 'tests/personas/**'
+  push:
+    branches: [main]
+    paths:
+      - '.claude/agents/reviewer-*.md'
+      - 'scripts/spawn-multi-reviewer.sh'
+      - 'scripts/derive-verdict.sh'
+      - 'tests/personas/**'
+
+permissions:
+  contents: read
+
+jobs:
+  replay:
+    name: golden-PR replay
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Run golden-PR replay
+        run: tests/personas/run-replay.sh

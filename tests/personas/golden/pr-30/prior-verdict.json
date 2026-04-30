@@ -1,0 +1,14 @@
+{
+  "verdict": "approve",
+  "rounds": 9,
+  "findings_count": 14,
+  "first_convergence_round": 7,
+  "final_convergence_round": 9,
+  "shadow_k2_at_round_9_reconstructed": "approve",
+  "source_pr": "rossdelarge247-debug/construct_d_01#30",
+  "source_slice": "S-INFRA-rigour-v3b-subagent-suite",
+  "source_verification_md": "docs/slices/S-INFRA-rigour-v3b-subagent-suite/verification.md",
+  "session_captured": 47,
+  "single_agent_baseline": true,
+  "_notes": "shadow_k2 reconstructed: 14 findings distributed across 4 specialists per spec 72c §4 dimension mapping (security 0, architecture 2, correctness 11, style 2). At k=2 quorum, no single tier reaches 2 specialists agreeing on the same SHA-equivalent finding given the distribution → approve."
+}

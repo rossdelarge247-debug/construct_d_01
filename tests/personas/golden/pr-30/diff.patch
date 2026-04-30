@@ -1,0 +1,28 @@
+# PR #30 — golden-replay diff anchor
+#
+# This file pins the metadata for replay assertions; the byte-level
+# diff is derivable from the merged commit on main via:
+#
+#   git show <PR-30-merge-sha>
+#
+# At v3b ship the replay is **deterministic aggregator-only** (per
+# README.md §"Replay assertions"); no diff-patch consumption is
+# required. When live persona drift detection ships at v3c, this
+# file will be replaced with the actual byte-level patch (or a
+# pointer to a generated artifact pinned to the merge SHA).
+#
+# Source PR:    rossdelarge247-debug/construct_d_01#30
+# Source slice: S-INFRA-rigour-v3b-subagent-suite (v3b S-6)
+# Captured:     session 47
+#
+# Files touched (per session-47 transcript):
+#   .claude/agents/slice-reviewer.md         (now retired at session 55)
+#   .claude/hooks/pre-push-dod7.sh
+#   .claude/hooks/tdd-guard.sh
+#   .github/workflows/auto-review.yml        (rewritten at session 55)
+#   scripts/auto-review-parse.sh             (extracted post-PR-#30)
+#   scripts/auto-review-slice-resolve.sh     (extracted post-PR-#30)
+#   scripts/derive-verdict.sh                (added at PR #41)
+#   tests/shellspec/pre-push-dod7.spec.sh
+#   tests/shellspec/tdd-guard.spec.sh
+#   docs/slices/S-INFRA-rigour-v3b-subagent-suite/{acceptance,verification}.md

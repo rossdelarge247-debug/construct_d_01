@@ -1,0 +1,128 @@
+[
+  {
+    "label": "issue",
+    "blocking": true,
+    "category": "regex",
+    "evidence": "repo regex `[^/.]+/[^/.]+` truncated `org/repo.js` → `org/repo`, breaking gh API for any repo with `.` in name",
+    "remediation": "regex `[^/[:space:]]+/[^/[:space:]]+$` + post-strip optional `.git` suffix + defensive REPO shape validation",
+    "_round": 1,
+    "_session_47_persona_dimension": "correctness"
+  },
+  {
+    "label": "issue",
+    "blocking": true,
+    "category": "edge-case",
+    "evidence": "any `gh api` failure (rate-limit / 5xx / network blip / expired auth) → empty RAW → blocks every push; GitHub incident → no one can push",
+    "remediation": "distinguish gh-exit-non-zero (API unreachable → warn-pass with explanatory stderr) from gh-exit-zero-with-empty-body (real anomaly → block); stderr captured separately to a tmpfile",
+    "_round": 1,
+    "_session_47_persona_dimension": "architecture"
+  },
+  {
+    "label": "issue",
+    "blocking": true,
+    "category": "edge-case",
+    "evidence": "jq missing → silent pass (no precondition check; same pattern in tdd-guard.sh)",
+    "remediation": "explicit `command -v jq` precondition + BLOCKED message + exit 2",
+    "_round": 1,
+    "_session_47_persona_dimension": "correctness"
+  },
+  {
+    "label": "issue",
+    "blocking": true,
+    "category": "regex",
+    "evidence": "push regex over-matched `git push --dry-run` and under-handled `git push -d` / `git push origin :foo` colon-prefix delete",
+    "remediation": "explicit pass-through cases for `--dry-run` / `-d` / `--delete` / colon-prefix refspec",
+    "_round": 1,
+    "_session_47_persona_dimension": "correctness"
+  },
+  {
+    "label": "issue",
+    "blocking": false,
+    "category": "security",
+    "evidence": "PRIOR_MSG / HEAD_MSG echoed verbatim → terminal escape sequences in commit subjects render in user's terminal",
+    "remediation": "wrap in `printf '%q'` for both BLOCKED message bodies",
+    "_round": 1,
+    "_session_47_persona_dimension": "style"
+  },
+  {
+    "label": "issue",
+    "blocking": false,
+    "category": "logic",
+    "evidence": "kill -9 $PID left orphan node child processes that vitest spawned in tdd-guard.sh timeout cleanup",
+    "remediation": "setsid-spawn vitest into its own process group; timeout cleanup uses kill -TERM -- -PGID then kill -KILL -- -PGID",
+    "_round": 2,
+    "_session_47_persona_dimension": "correctness"
+  },
+  {
+    "label": "issue",
+    "blocking": false,
+    "category": "portability",
+    "evidence": "`mktemp -t` portability across platforms (Linux-only target so OK at v3b but flagged for awareness)",
+    "remediation": "use mktemp without -t flag for portable tmpfile creation; defer to v3c if cross-platform support requested",
+    "_round": 2,
+    "_session_47_persona_dimension": "correctness"
+  },
+  {
+    "label": "issue",
+    "blocking": false,
+    "category": "logic",
+    "evidence": "ShellSpec stdin bug — `When call CMD <<<\"$INPUT\"` does NOT pass stdin from inline redirects; redirect attaches to ShellSpec interpreter, not called command. Hooks received EMPTY stdin → silent exit 0",
+    "remediation": "convert all 21 fixtures to use ShellSpec's `Data:expand` block; all hook fixtures previously gave false signals",
+    "_round": 3,
+    "_session_47_persona_dimension": "correctness"
+  },
+  {
+    "label": "issue",
+    "blocking": false,
+    "category": "logic",
+    "evidence": "Gate 3b trailing-newline bug: `while IFS= read -r line; do ... done < $ALLOWLIST_FILE` silently dropped final entry when file had no trailing newline",
+    "remediation": "standard idiom `while IFS= read -r line || [ -n \"$line\" ]; do ...`",
+    "_round": 3,
+    "_session_47_persona_dimension": "correctness"
+  },
+  {
+    "label": "issue",
+    "blocking": false,
+    "category": "edge-case",
+    "evidence": "3 stacked PreToolUse:Bash hooks add per-call latency (real but no breaking impact)",
+    "remediation": "consolidate into single hook with internal dispatch; deferred to v3c improvement candidate",
+    "_round": 4,
+    "_session_47_persona_dimension": "architecture"
+  },
+  {
+    "label": "issue",
+    "blocking": false,
+    "category": "logic",
+    "evidence": "relative path assumes repo-root cwd (matches v3a hook convention; not a regression but worth noting)",
+    "remediation": "explicit `cd \"$(git rev-parse --show-toplevel)\"` at hook entry; v3c carry-over",
+    "_round": 4,
+    "_session_47_persona_dimension": "correctness"
+  },
+  {
+    "label": "nitpick",
+    "blocking": false,
+    "category": "style",
+    "evidence": "minor inconsistencies in error-message capitalisation across hook scripts",
+    "remediation": "lowercase first letter on continued sentences post-colon; consistent style across error path",
+    "_round": 5,
+    "_session_47_persona_dimension": "style"
+  },
+  {
+    "label": "issue",
+    "blocking": true,
+    "category": "scope-creep",
+    "evidence": "round 8 surfaced architectural-severity scope-creep on a meta-analysis addition + spec-72b regression risk on hook-spawned templates",
+    "remediation": "surgically revert the meta-analysis addition + re-scope into a sibling slice; clarify spec-72b applicability to hook-spawned templates in spec amendment",
+    "_round": 8,
+    "_session_47_persona_dimension": "architecture"
+  },
+  {
+    "label": "issue",
+    "blocking": false,
+    "category": "workflow-integration",
+    "evidence": "auto-review.yml workflow integration bug — unspecified workflow-level integration finding actioned across rounds 7-9 per verification.md §Round 9 re-convergence",
+    "remediation": "fixed at round 9 re-convergence; final commit verified against full slice acceptance",
+    "_round": 9,
+    "_session_47_persona_dimension": "correctness"
+  }
+]
