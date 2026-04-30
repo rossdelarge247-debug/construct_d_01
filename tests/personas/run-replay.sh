@@ -93,15 +93,18 @@ for PR_DIR in "$GOLDEN_DIR"/*/; do
     printf 'PASS: differential new_count (0)\n'
   fi
 
-  # Persona drift signal — observation-only; emit warning if any
-  # persona file has evolved since seed-capture SHAs. Drift is expected
-  # when personas iterate; pairs with future quarterly cron live re-
-  # invocation per spec 72c §9.
+  # Observation-only: drift is expected as personas iterate; pairs with
+  # quarterly cron re-invocation per spec 72c §9.
   if jq -e '.personas_sha256' "$PRIOR_VERDICT" > /dev/null 2>&1; then
     for DIM in security architecture correctness style; do
       EXPECTED_SHA=$(jq -r ".personas_sha256[\"reviewer-$DIM\"] // \"\"" "$PRIOR_VERDICT")
       [ -n "$EXPECTED_SHA" ] || continue
-      ACTUAL_SHA=$(sha256sum "$REPO_ROOT/.claude/agents/reviewer-$DIM.md" | awk '{print $1}')
+      PERSONA_FILE="$REPO_ROOT/.claude/agents/reviewer-$DIM.md"
+      if [ ! -f "$PERSONA_FILE" ]; then
+        printf 'MISSING: reviewer-%s.md not found at %s\n' "$DIM" "$PERSONA_FILE"
+        continue
+      fi
+      ACTUAL_SHA=$(sha256sum "$PERSONA_FILE" | awk '{print $1}')
       if [ "$ACTUAL_SHA" != "$EXPECTED_SHA" ]; then
         printf 'DRIFT: reviewer-%s.md changed since seed capture (current %s vs seed %s)\n' "$DIM" "$ACTUAL_SHA" "$EXPECTED_SHA"
       fi
