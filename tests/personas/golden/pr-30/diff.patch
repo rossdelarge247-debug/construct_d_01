@@ -1,0 +1,11 @@
+# PR #30 — golden-replay diff anchor
+#
+# Merge commit (pinned): 792b73ef40dfad90b7db05c3d01d18559183e3ae
+# Byte-level diff:        git show 792b73ef40dfad90b7db05c3d01d18559183e3ae
+#
+# At v3b ship the replay is deterministic aggregator-only (see
+# README.md §"Replay assertions"); no diff-patch consumption required.
+# Live persona drift detection at v3c will replace this anchor with
+# the actual byte-level patch.
+#
+# Source PR: rossdelarge247-debug/construct_d_01#30

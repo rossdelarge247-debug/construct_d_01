@@ -1,0 +1,37 @@
+name: persona-fixtures (golden-PR replay)
+
+# Path-filtered trigger: replay runs only when persona prompts or the
+# orchestrator script change. Live re-invocation of personas against
+# the seed diff would require API budget per run + addresses persona-
+# prompt regression (orthogonal to aggregator-logic regression which
+# this workflow covers).
+
+on:
+  pull_request:
+    types: [opened, synchronize]
+    paths:
+      - '.claude/agents/reviewer-*.md'
+      - 'scripts/spawn-multi-reviewer.sh'
+      - 'scripts/derive-verdict.sh'
+      - 'tests/personas/**'
+  push:
+    branches: [main]
+    paths:
+      - '.claude/agents/reviewer-*.md'
+      - 'scripts/spawn-multi-reviewer.sh'
+      - 'scripts/derive-verdict.sh'
+      - 'tests/personas/**'
+
+permissions:
+  contents: read
+
+jobs:
+  replay:
+    name: golden-PR replay
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+
+      - name: Run golden-PR replay
+        run: tests/personas/run-replay.sh

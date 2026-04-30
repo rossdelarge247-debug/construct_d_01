@@ -156,4 +156,70 @@ Describe 'spawn-multi-reviewer.sh aggregate'
     The stderr should include 'directory not found'
   End
 
+  # These fixtures exercise the aggregator's downstream observability
+  # only; the upstream persona-side filtering per spec 72c §6 is a
+  # separate surface.
+
+  It 'annotates findings with was_in_prior + emits prior_findings_resolved (AC-3 verification 2)'
+    # Round-1 had 3 findings: correctness (still present), security (resolved),
+    # style (resolved). Round-2 envelopes: correctness re-flagged (persona
+    # judgement says still-applicable); security + style empty (resolved).
+    PRIOR='[
+      {"label":"issue","blocking":false,"category":"logic","evidence":"divide by zero in compute()","remediation":"guard input"},
+      {"label":"issue","blocking":true,"category":"security","evidence":"unsanitised user input","remediation":"sanitize"},
+      {"label":"nitpick","blocking":false,"category":"style","evidence":"trailing whitespace","remediation":"trim"}
+    ]'
+    printf '%s' "$PRIOR" > "$SHELLSPEC_TMPBASE/prior.json"
+    write_envelope correctness '{"specialist":"reviewer-correctness","summary":"still present","findings":[{"label":"issue","blocking":false,"category":"logic","evidence":"divide by zero in compute()","remediation":"guard input"}]}'
+    write_envelope security "$EMPTY_FINDINGS_SECURITY"
+    write_envelope architecture "$EMPTY_FINDINGS_ARCH"
+    write_envelope style "$EMPTY_FINDINGS_STYLE"
+    When call scripts/spawn-multi-reviewer.sh aggregate "$SHELLSPEC_TMPBASE" --differential --prior-findings "$SHELLSPEC_TMPBASE/prior.json"
+    The output should include '"differential": true'
+    The output should include '"was_in_prior": true'
+    The output should include '"prior_count": 3'
+    The output should include '"current_count": 1'
+    The output should include '"resolved_count": 2'
+    The output should include '"new_count": 0'
+    The status should be success
+  End
+
+  It 'flags net-new round-2 finding as was_in_prior false (AC-3 verification 3)'
+    # Round-1 had 0 security findings. Fix-up introduces a security issue.
+    # Only security specialist fires on round 2.
+    printf '[]' > "$SHELLSPEC_TMPBASE/prior.json"
+    write_envelope security '{"specialist":"reviewer-security","summary":"new regression","findings":[{"label":"issue","blocking":true,"category":"security","evidence":"unsanitised input boundary at parse()","remediation":"add validator"}]}'
+    write_envelope architecture "$EMPTY_FINDINGS_ARCH"
+    write_envelope correctness "$EMPTY_FINDINGS_CORRECT"
+    write_envelope style "$EMPTY_FINDINGS_STYLE"
+    When call scripts/spawn-multi-reviewer.sh aggregate "$SHELLSPEC_TMPBASE" --differential --prior-findings "$SHELLSPEC_TMPBASE/prior.json"
+    The output should include '"was_in_prior": false'
+    The output should include '"prior_count": 0'
+    The output should include '"current_count": 1'
+    The output should include '"new_count": 1'
+    The output should include '"resolved_count": 0'
+    The output should include '"prior_findings_resolved": []'
+    The status should be success
+  End
+
+  It 'rejects --differential without --prior-findings'
+    write_envelope correctness "$EMPTY_FINDINGS_CORRECT"
+    write_envelope security "$EMPTY_FINDINGS_SECURITY"
+    write_envelope architecture "$EMPTY_FINDINGS_ARCH"
+    write_envelope style "$EMPTY_FINDINGS_STYLE"
+    When call scripts/spawn-multi-reviewer.sh aggregate "$SHELLSPEC_TMPBASE" --differential
+    The status should equal 2
+    The stderr should include '--differential requires --prior-findings'
+  End
+
+  It 'rejects --prior-findings pointing at nonexistent file'
+    write_envelope correctness "$EMPTY_FINDINGS_CORRECT"
+    write_envelope security "$EMPTY_FINDINGS_SECURITY"
+    write_envelope architecture "$EMPTY_FINDINGS_ARCH"
+    write_envelope style "$EMPTY_FINDINGS_STYLE"
+    When call scripts/spawn-multi-reviewer.sh aggregate "$SHELLSPEC_TMPBASE" --differential --prior-findings /nonexistent/sm-prior-xyz.json
+    The status should equal 2
+    The stderr should include 'prior findings file not found'
+  End
+
 End
