@@ -115,7 +115,7 @@ jobs:
         # and the merge button would NOT be gated by the pipeline-crash
         # → failure rule: aggregate's `needs.brief.result == 'success'`
         # gate skips it entirely on brief failure, so brief must surface
-        # its own failure here. Mirrors the aggregate job's fallback.
+        # its own failure here.
         if: failure() && steps.secret-check.outputs.skip == 'false'
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -359,7 +359,13 @@ jobs:
             DEGRADED_BLOCK=""
           fi
 
-          SHADOW_BLOCK=$(printf '\n\n_Quorum at `k=1` (default per spec 72c §5). Shadow monitor: `k=2` would have been `%s`; `k=3` would have been `%s`._' "$SHADOW_K2" "$SHADOW_K3")
+          # Suppress shadow monitor on parse-failed path — SHADOW_K2/K3
+          # echo back "parse-failed" sentinel which carries no signal.
+          if [ "$VERDICT" = "parse-failed" ]; then
+            SHADOW_BLOCK=""
+          else
+            SHADOW_BLOCK=$(printf '\n\n_Quorum at `k=1` (default per spec 72c §5). Shadow monitor: `k=2` would have been `%s`; `k=3` would have been `%s`._' "$SHADOW_K2" "$SHADOW_K3")
+          fi
 
           SUMMARY=$(jq -r '.summary // ""' /tmp/persona-output.json)
           if [ -n "$SUMMARY" ]; then
@@ -386,7 +392,7 @@ jobs:
               end
           ' /tmp/persona-output.json)
 
-          FOOTER=$(printf '\n\n---\n_Auto-posted by [`auto-review.yml`](%s) on commit `%s`. 4 specialists fanned out under matrix strategy per spec 72c §3; verdict derived deterministically by `scripts/spawn-multi-reviewer.sh aggregate` per CLAUDE.md §"Verdict vocabulary"; labels follow [Conventional Comments](https://conventionalcomments.org/). Informational at v3b ship — does not gate the merge button._\n' \
+          FOOTER=$(printf '\n\n---\n_Auto-posted by [`auto-review.yml`](%s) on commit `%s`. 4 specialists fanned out under matrix strategy per spec 72c §3; verdict derived deterministically by `scripts/spawn-multi-reviewer.sh aggregate` per CLAUDE.md §"Verdict vocabulary"; labels follow [Conventional Comments](https://conventionalcomments.org/). `block` and `parse-failed` verdicts gate the merge button (per CLAUDE.md §"Hard controls" §"Check-run conclusion mapping"); `request-changes` and `nit-only` are advisory only at v3b ship._\n' \
             "$RUN_URL" "$HEAD_SHA")
 
           BODY=$(printf '%s\n\n## auto-review · multi-agent (4 specialists)\n\n%s — %s finding(s)%s%s%s%s%s' \
