@@ -17,12 +17,13 @@ This fixture pins the session-47 single-agent recursive baseline as the v3b mult
 
 ## Replay assertions (per `tests/personas/run-replay.sh`)
 
-At v3b ship, the replay is **deterministic aggregator-only**:
-1. Load `prior-findings.json` and partition the 14 findings across 4 synthetic specialist envelopes per the v3b spec 72c §4 dimension mapping (security/architecture/correctness/style).
-2. Invoke `scripts/spawn-multi-reviewer.sh aggregate <synthetic-envelopes-dir>` and assert: the aggregated verdict at `k=1` matches `prior-verdict.json.verdict`; finding count is exactly the input count (14); per-specialist `seen_by[]` overlap with `prior-findings.json` is ≥50% (i.e. the dimension partitioning is stable).
-3. Invoke `scripts/spawn-multi-reviewer.sh aggregate ... --differential --prior-findings prior-findings.json` and assert: `was_in_prior` is `true` for all 14 findings; `prior_findings_resolved` is `[]`; `token_metrics.resolved_count == 0`; `token_metrics.new_count == 0`.
+At v3b ship, the replay is **deterministic aggregator-only**: synthesise empty per-specialist envelopes representing the seed's final-round resolved state, invoke the orchestrator + assert the trajectory.
 
-This tests **aggregator stability against known inputs**, not persona-side drift. Persona drift detection (live re-invocation of specialists against `diff.patch`) ships at v3c per spec 72c §9 — it requires API budget per replay run + addresses a different failure mode (persona-prompt regression vs aggregator-logic regression).
+1. Synthesise 4 empty per-specialist envelopes (the seed's final-round state — all prior findings resolved).
+2. Invoke `scripts/spawn-multi-reviewer.sh aggregate <synthetic-envelopes-dir>` and assert: aggregated verdict at `k=1` matches `prior-verdict.json.verdict` (`approve` for PR #30); final-round finding count is exactly 0.
+3. Invoke `scripts/spawn-multi-reviewer.sh aggregate ... --differential --prior-findings prior-findings.json` and assert: `token_metrics.resolved_count == prior_findings_count` (the trajectory: every prior finding got resolved); `token_metrics.new_count == 0` (no net-new findings introduced after final round).
+
+This tests **aggregator stability + trajectory math against known inputs**, not persona-side drift. Persona drift detection (live re-invocation of specialists against `diff.patch`) ships at v3c per spec 72c §9 — it requires API budget per replay run + addresses a different failure mode (persona-prompt regression vs aggregator-logic regression). Persona-file SHA pinning + per-specialist `seen_by[]` overlap assertions ship at v3c alongside live re-invocation.
 
 ## Honest framing
 

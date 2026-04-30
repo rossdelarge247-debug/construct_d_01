@@ -160,7 +160,7 @@ DEDUPED_FINDINGS=$(printf '%s' "$ALL_FINDINGS" | jq -c '
 # 72c §6 is the upstream half; this block is the downstream
 # observability surface only.
 RESOLVED_FINDINGS='[]'
-DIFFERENTIAL_FIELDS_JQ='{}'
+DIFFERENTIAL_FIELDS_JSON='{}'
 if [ "$DIFFERENTIAL" = "true" ]; then
   PRIOR_FINDINGS=$(cat "$PRIOR_FINDINGS_PATH")
   if ! printf '%s' "$PRIOR_FINDINGS" | jq -e 'type == "array"' >/dev/null 2>&1; then
@@ -187,7 +187,7 @@ if [ "$DIFFERENTIAL" = "true" ]; then
   RESOLVED_COUNT=$(printf '%s' "$RESOLVED_FINDINGS" | jq 'length')
   NEW_COUNT=$(printf '%s' "$DEDUPED_FINDINGS" | jq '[.[] | select(.was_in_prior == false)] | length')
 
-  DIFFERENTIAL_FIELDS_JQ=$(jq -n \
+  DIFFERENTIAL_FIELDS_JSON=$(jq -n \
     --argjson resolved "$RESOLVED_FINDINGS" \
     --argjson prior_count "$PRIOR_COUNT" \
     --argjson current_count "$CURRENT_COUNT" \
@@ -241,7 +241,7 @@ jq -n \
   --arg shadow_k3 "$SHADOW_K3" \
   --argjson degraded "$DEGRADED" \
   --argjson inconclusive "$INCONCLUSIVE_JSON" \
-  --argjson differential "$DIFFERENTIAL_FIELDS_JQ" \
+  --argjson differential "$DIFFERENTIAL_FIELDS_JSON" \
   '{
     summary: "multi-agent aggregate (k=1 default)",
     findings: $findings,
