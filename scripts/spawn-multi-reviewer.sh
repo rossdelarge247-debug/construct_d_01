@@ -7,13 +7,18 @@
 # architecture,correctness,style}.json` (one per specialist; produced
 # upstream by the workflow's matrix-strategy `claude -p` invocations
 # already piped through `auto-review-parse.sh`). Dedupes findings
-# across specialists via SHA-256-equivalent hash over
-# `label|category|first-64-chars-of-evidence` (spec 72c §5 rule 2;
-# evidence chosen over summary because personas don't emit per-finding
-# summary per the established baseline);  preserves originating
-# specialists in `seen_by[]`; pipes the unified `{summary, findings[]}`
-# envelope through `derive-verdict.sh --multi k=N` for the live verdict
-# + shadow `would_have_been_k2` / `_k3` fields per spec 72c §5
+# across specialists by tuple-based jq `group_by([.label, .category,
+# (.evidence // "")[0:64]])` — equivalent to a SHA-256 hash over the
+# same fields per spec 72c §5 rule 2; the impl uses jq's tuple
+# group_by directly rather than computing a separate hash, so the
+# output equality classes are identical to the spec's hash-based
+# framing. Evidence chosen as the third tuple element (over summary)
+# because personas don't emit per-finding summary per the established
+# baseline; evidence is universally present and gives the strongest
+# substantive-equivalence signal. Preserves originating specialists
+# in `seen_by[]`; pipes the unified `{summary, findings[]}` envelope
+# through `derive-verdict.sh --multi k=N` for the live verdict +
+# shadow `would_have_been_k2` / `_k3` fields per spec 72c §5
 # session-54 amendment.
 #
 # Output: a single unified JSON envelope to stdout, suitable as a
