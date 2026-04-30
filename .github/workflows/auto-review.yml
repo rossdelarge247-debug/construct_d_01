@@ -256,7 +256,7 @@ jobs:
           printf '%s' "$AGGREGATE_JSON" > /tmp/persona-output.json
 
           VERDICT=$(printf '%s' "$AGGREGATE_JSON" | jq -r '.verdict')
-          SHADOW_K2=$(printf '%s' "$AGGREGATE_JSON" | jq -r '.would_have_been_k2')
+          SHADOW_K1=$(printf '%s' "$AGGREGATE_JSON" | jq -r '.would_have_been_k1')
           SHADOW_K3=$(printf '%s' "$AGGREGATE_JSON" | jq -r '.would_have_been_k3')
           DEGRADED=$(printf '%s' "$AGGREGATE_JSON" | jq -r '.degraded // false')
           INCONCLUSIVE=$(printf '%s' "$AGGREGATE_JSON" | jq -r '(.inconclusive_dimensions // []) | join(",")')
@@ -271,7 +271,7 @@ jobs:
 
           {
             echo "verdict=$VERDICT"
-            echo "shadow_k2=$SHADOW_K2"
+            echo "shadow_k1=$SHADOW_K1"
             echo "shadow_k3=$SHADOW_K3"
             echo "degraded=$DEGRADED"
             echo "inconclusive=$INCONCLUSIVE"
@@ -284,7 +284,7 @@ jobs:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           HEAD_SHA: ${{ github.event.pull_request.head.sha }}
           VERDICT: ${{ steps.aggregate.outputs.verdict }}
-          SHADOW_K2: ${{ steps.aggregate.outputs.shadow_k2 }}
+          SHADOW_K1: ${{ steps.aggregate.outputs.shadow_k1 }}
           SHADOW_K3: ${{ steps.aggregate.outputs.shadow_k3 }}
           DEGRADED: ${{ steps.aggregate.outputs.degraded }}
           INCONCLUSIVE: ${{ steps.aggregate.outputs.inconclusive }}
@@ -309,7 +309,7 @@ jobs:
           elif [ "$DEGRADED" = "true" ]; then
             TITLE="$VERDICT — $FINDINGS_COUNT finding(s) · degraded ($INCONCLUSIVE inconclusive)"
           else
-            TITLE="$VERDICT — $FINDINGS_COUNT finding(s) · k=1 (shadow k=2:$SHADOW_K2 k=3:$SHADOW_K3)"
+            TITLE="$VERDICT — $FINDINGS_COUNT finding(s) · k=2 (shadow k=1:$SHADOW_K1 k=3:$SHADOW_K3)"
           fi
 
           SUMMARY=$(cat /tmp/findings.json)
@@ -335,7 +335,7 @@ jobs:
           HEAD_SHA: ${{ github.event.pull_request.head.sha }}
           RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
           VERDICT: ${{ steps.aggregate.outputs.verdict }}
-          SHADOW_K2: ${{ steps.aggregate.outputs.shadow_k2 }}
+          SHADOW_K1: ${{ steps.aggregate.outputs.shadow_k1 }}
           SHADOW_K3: ${{ steps.aggregate.outputs.shadow_k3 }}
           DEGRADED: ${{ steps.aggregate.outputs.degraded }}
           INCONCLUSIVE: ${{ steps.aggregate.outputs.inconclusive }}
@@ -359,12 +359,12 @@ jobs:
             DEGRADED_BLOCK=""
           fi
 
-          # Suppress shadow monitor on parse-failed path — SHADOW_K2/K3
+          # Suppress shadow monitor on parse-failed path — SHADOW_K1/K3
           # echo back "parse-failed" sentinel which carries no signal.
           if [ "$VERDICT" = "parse-failed" ]; then
             SHADOW_BLOCK=""
           else
-            SHADOW_BLOCK=$(printf '\n\n_Quorum at `k=1` (default per spec 72c §5). Shadow monitor: `k=2` would have been `%s`; `k=3` would have been `%s`._' "$SHADOW_K2" "$SHADOW_K3")
+            SHADOW_BLOCK=$(printf '\n\n_Quorum at `k=2` (default per spec 72c §5). Shadow monitor: `k=1` would have been `%s`; `k=3` would have been `%s`._' "$SHADOW_K1" "$SHADOW_K3")
           fi
 
           SUMMARY=$(jq -r '.summary // ""' /tmp/persona-output.json)

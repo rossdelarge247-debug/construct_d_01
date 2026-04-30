@@ -268,7 +268,7 @@ Describe 'derive-verdict.sh'
     The status should be success
   End
 
-  It '--multi without k= argument defaults to k=2 (session-56 amendment): 1-specialist blocking finding does not meet quorum → approve'
+  It '--multi without k= argument defaults to k=2: 1-specialist blocking finding does not meet quorum → approve'
     Data
       #|{"summary": "x", "findings": [{"label": "issue", "blocking": true, "category": "security", "seen_by": ["reviewer-security"]}]}
     End
@@ -277,7 +277,7 @@ Describe 'derive-verdict.sh'
     The status should be success
   End
 
-  It '--multi without k= argument defaults to k=2 (session-56 amendment): deduped finding with seen_by length 2 satisfies quorum → block'
+  It '--multi without k= argument defaults to k=2: deduped finding with seen_by length 2 satisfies quorum → block'
     Data
       #|{"summary": "x", "findings": [{"label": "issue", "blocking": true, "category": "security", "seen_by": ["reviewer-security", "reviewer-correctness"]}]}
     End

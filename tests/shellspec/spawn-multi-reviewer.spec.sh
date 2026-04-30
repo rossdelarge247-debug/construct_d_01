@@ -41,7 +41,7 @@ Describe 'spawn-multi-reviewer.sh aggregate'
     write_envelope style "$EMPTY_FINDINGS_STYLE"
     When call scripts/spawn-multi-reviewer.sh aggregate "$SHELLSPEC_TMPBASE"
     The output should include '"verdict": "approve"'
-    The output should include '"would_have_been_k2": "approve"'
+    The output should include '"would_have_been_k1": "approve"'
     The output should include '"would_have_been_k3": "approve"'
     The output should not include '"degraded"'
     The status should be success
@@ -61,7 +61,7 @@ Describe 'spawn-multi-reviewer.sh aggregate'
     write_envelope style '{"specialist":"reviewer-style","summary":"nit","findings":[{"label":"nitpick","blocking":false,"category":"naming","evidence":"data: any","remediation":"rename"}]}'
     When call scripts/spawn-multi-reviewer.sh aggregate "$SHELLSPEC_TMPBASE"
     The output should include '"verdict": "block"'
-    The output should include '"would_have_been_k2": "approve"'
+    The output should include '"would_have_been_k1": "approve"'
     The output should include '"would_have_been_k3": "approve"'
     The status should be success
   End
@@ -80,7 +80,7 @@ Describe 'spawn-multi-reviewer.sh aggregate'
     write_envelope style "$EMPTY_FINDINGS_STYLE"
     When call scripts/spawn-multi-reviewer.sh aggregate "$SHELLSPEC_TMPBASE"
     The output should include '"verdict": "block"'
-    The output should include '"would_have_been_k2": "block"'
+    The output should include '"would_have_been_k1": "block"'
     The output should include '"would_have_been_k3": "approve"'
     The status should be success
     # Single deduped finding entry (not 2): identical evidence + label

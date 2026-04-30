@@ -19,7 +19,7 @@
 # in `seen_by[]`; pipes the unified `{summary, findings[]}` envelope
 # through `derive-verdict.sh --multi k=N` for the live verdict +
 # shadow `would_have_been_k1` / `_k3` fields per spec 72c §5
-# session-56 amendment (default k=2; shadow k=1 + k=3).
+# (k=2 quorum-of-half default; shadow k=1 + k=3 monitoring).
 #
 # Output: a single unified JSON envelope to stdout, suitable as a
 # drop-in replacement for the single-persona output that the existing
