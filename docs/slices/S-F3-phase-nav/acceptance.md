@@ -3,7 +3,7 @@
 **Slice:** S-F3-phase-nav
 **Spec ref:** `docs/workspace-spec/70-build-map-slices.md` L41-L46 (S-F3 slice card) · `docs/workspace-spec/68g-visual-anchors.md` L56-L59 (C-V6 dashboard horizontal stepper) · L96-L99 (C-V12 locked-section inline treatment) · `docs/workspace-spec/68f-open-decisions-register.md` L13-L17 (C-N1a contextual journey-map LOCKED) · L24-L30 (C-N1c unlock-when copy LOCKED) · L32-L33 (C-N1d locked-phase preview depth LOCKED) · `docs/workspace-spec/71-rebuild-strategy.md` §7 Phase C.1 (sequencing — order #3 after S-F1 + S-F7)
 **Phase(s):** Foundation (Phase C, Step 1) — used by every phase surface downstream (dashboard + every workspace document)
-**Status:** Drafted · pending user freeze
+**Status:** Approved · In implementation
 
 ---
 
@@ -105,5 +105,6 @@ The loveable floor is **two surfaces of the same 5-phase journey rendered from o
 | Date | Reviewer | Outcome | Notes |
 |---|---|---|---|
 | 2026-05-01 | User (informal) | Pre-AC scope locked | Scope: (1a) extend placeholder landing for visual smoke · (2i) single PR all 6 ACs · (3i) separate `<PhaseStepper>` + `<JourneyMapRail>` components. |
+| 2026-05-01 | User | **AC frozen** | Implementation may begin. Change requests roll into re-drafted AC + re-slicing, not mid-slice scope shifts. |
 
 **AC is the contract.** Change requests after freeze roll into re-drafting AC + re-slicing, not mid-slice scope shifts.

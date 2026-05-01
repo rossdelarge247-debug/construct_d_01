@@ -53,10 +53,11 @@ Used on phase chip ("PHASE N · X"), step numeral, demo-card details, page backg
 
 ## Dashboard anchors
 
-### 🟠 C-V6 · 5-phase horizontal stepper (dashboard)
+### 🟢 C-V6 · 5-phase horizontal stepper (dashboard)
 **Pattern:** Full-width pill bar at top of dashboard. Numbered phase badges (1–5), phase label, status sub-label ("In progress / Locked / Complete"). Black/filled current, outlined pending, outlined-dimmed locked. Related to C-V3 but distinct — dashboard version is always-visible nav, not a tour progress indicator.
 **Evidence:** Session 22 dashboard wires (3 states).
 **Target:** Pattern spec with C-V3 as a family. See 68f C-N5 for two-nav-surfaces parent.
+**Locked:** Session 59 / S-F3 — `docs/slices/S-F3-phase-nav/`. Component shipped at `src/components/phase-nav/PhaseStepper.tsx`. 3-state model (`'complete' | 'current' | 'locked'`) collapses C-V6 "outlined pending" into "locked" per C-N1a primacy; pending-vs-locked refinement deferred to first slice that needs it.
 
 ### 🟠 C-V7 · Task taxonomy chip system
 **Pattern:** Small pill chips on every task row tagging its nature:
@@ -93,10 +94,11 @@ Bottom of list: `+ Add a task` link (scope open — see 68f B-14).
 **Evidence:** Session 22 first-time dashboard wire.
 **Target:** Anchor component. Define slot model (icon + short phrase).
 
-### 🟠 C-V12 · Locked-section inline treatment
+### 🟢 C-V12 · Locked-section inline treatment
 **Pattern:** Section H2 with `🔒 LOCKED · Unlocks when {gate} is complete` inline hint (dimmed, small caps). All child cards and task rows dimmed. CTAs replaced with `Locked` outlined pills. Entire section remains visible but non-interactive.
 **Evidence:** Session 22 dashboard refined wire ("Disclosure & reconcile" and "Settle & finalise" sections).
 **Target:** Anchor pattern. Ties to 68a C-N2 (dimmed+tooltipped locked phases) and 68f C-N1c (unlock copy locked).
+**Locked:** Session 59 / S-F3 — `docs/slices/S-F3-phase-nav/`. Component shipped at `src/components/phase-nav/LockedSection.tsx`. Consumes `UNLOCK_WHEN` + `UNLOCK_WHEN_DASHBOARD` constants from `src/components/phase-nav/copy.ts` (verbatim per 68f C-N1c, byte-equality enforced by parity test). Children dimmed via `data-locked-children` wrapper; section root carries `aria-disabled="true"`.
 
 ### 🟢 C-V13 · Phase accent-tint card washes
 **Pattern:** Cards within each phase section carry a subtle background wash tinted toward the phase's accent (C-V1). Peach/rose for Preparation active cards, deeper pink for private-area cards, light blue for Settle cards, etc. Extends the phase colour system into UI surfaces beyond tour backgrounds.
