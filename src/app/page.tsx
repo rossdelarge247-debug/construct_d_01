@@ -48,7 +48,7 @@ export default function LandingPage() {
             />
             <LockedSection gate="reconcile" title="Reconcile your finances">
               <p className="text-[length:var(--ds-type-15-5)] text-[color:var(--ds-color-text-sub)]">
-                Once you and Mark share your pictures, you'll work through any differences here.
+                Once you and Mark share your pictures, you&apos;ll work through any differences here.
               </p>
             </LockedSection>
           </div>
