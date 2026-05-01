@@ -1,0 +1,15 @@
+name: coverage-threshold-ratchet
+on:
+  pull_request:
+  push:
+
+jobs:
+  ratchet:
+    name: Coverage threshold ratchet (F5c)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Run coverage-threshold ratchet
+        run: scripts/coverage-threshold-ratchet.sh origin/main
