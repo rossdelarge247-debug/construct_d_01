@@ -92,7 +92,7 @@ jobs:
             | scripts/auto-review-extract-prior.sh || true)
           if [ -n "${PRIOR_JSON:-}" ]; then
             PRIOR_HEAD_SHA=$(printf '%s' "$PRIOR_JSON" | jq -r '.head_sha')
-            if [[ "$PRIOR_HEAD_SHA" =~ ^[0-9a-f]{40}$ ]] && git cat-file -e "${PRIOR_HEAD_SHA}^{commit}" 2>/dev/null; then
+            if [[ "$PRIOR_HEAD_SHA" =~ ^[0-9a-f]{40,64}$ ]] && git cat-file -e "${PRIOR_HEAD_SHA}^{commit}" 2>/dev/null; then
               DIFFERENTIAL=true
               printf '%s' "$PRIOR_JSON" > /tmp/prior-findings.json
               git diff "$PRIOR_HEAD_SHA" "$HEAD_SHA" > /tmp/fix-up-diff.txt
