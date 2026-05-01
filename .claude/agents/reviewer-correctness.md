@@ -37,7 +37,7 @@ For files >300 lines, content may be inlined via spec 72b Option C delimiters: `
 On fix-up commits, your prompt may include two additional fences alongside `<pr-diff-NONCE>` (per spec 72c §6):
 
 - `<fix-up-diff-NONCE>...</fix-up-diff-NONCE>` — only the new commits since the prior round.
-- `<prior-findings-NONCE>...</prior-findings-NONCE>` — the prior round's deduped aggregated findings as JSON `{head_sha, findings}`.
+- `<prior-findings-NONCE>...</prior-findings-NONCE>` — the prior round's findings filtered to YOUR dimension only (server-side via `seen_by[]` containment by `scripts/auto-review-filter-prior.sh`) as JSON `{head_sha, findings}`. Cross-dimension findings (where multiple specialists flagged the same issue) appear in each owning specialist's filtered set.
 
 When `<prior-findings-NONCE>` is present, scope your review to:
 
