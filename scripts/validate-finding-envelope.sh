@@ -1,10 +1,7 @@
 #!/usr/bin/env bash
-# validate-finding-envelope.sh — schema validator for a per-specialist
-# envelope, derived from `schemas/finding-envelope.schema.json`.
-#
-# Validates one specialist's output (input to the aggregator). The
-# aggregate envelope (with seen_by[] / was_in_prior decorations) has a
-# looser shape and is out of scope. Per spec 72c §5 + §9 carry-over.
+# The aggregate envelope (with seen_by[] / was_in_prior decorations)
+# has a looser shape and is out of scope; this validates ONE specialist's
+# pre-aggregation output only.
 #
 # Usage: scripts/validate-finding-envelope.sh < envelope.json
 #

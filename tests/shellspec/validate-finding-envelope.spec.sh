@@ -1,6 +1,4 @@
 #!/bin/bash
-# validate-finding-envelope.sh contract — schema validator for per-specialist
-# envelopes per `schemas/finding-envelope.schema.json`. Spec 72c §5 + §9.
 
 Describe 'scripts/validate-finding-envelope.sh'
   SCRIPT='scripts/validate-finding-envelope.sh'
@@ -19,8 +17,14 @@ Describe 'scripts/validate-finding-envelope.sh'
       The status should equal 0
     End
 
-    It 'accepts all 4 specialist enum values'
+    It 'accepts the reviewer-architecture specialist value'
       Data <<< '{"specialist":"reviewer-architecture","summary":"x","findings":[]}'
+      When run "$SCRIPT"
+      The status should equal 0
+    End
+
+    It 'accepts the reviewer-correctness specialist value'
+      Data <<< '{"specialist":"reviewer-correctness","summary":"x","findings":[]}'
       When run "$SCRIPT"
       The status should equal 0
     End
@@ -114,7 +118,7 @@ Describe 'scripts/validate-finding-envelope.sh'
     End
 
     It 'accepts each Conventional Comments label value'
-      Data <<< '{"specialist":"reviewer-style","summary":"x","findings":[{"label":"praise","blocking":false,"category":"x","evidence":"y","remediation":"z"},{"label":"nitpick","blocking":false,"category":"x","evidence":"y","remediation":"z"},{"label":"suggestion","blocking":false,"category":"x","evidence":"y","remediation":"z"},{"label":"todo","blocking":true,"category":"x","evidence":"y","remediation":"z"},{"label":"question","blocking":false,"category":"x","evidence":"y","remediation":"z"},{"label":"thought","blocking":false,"category":"x","evidence":"y","remediation":"z"},{"label":"chore","blocking":false,"category":"x","evidence":"y","remediation":"z"},{"label":"note","blocking":false,"category":"x","evidence":"y","remediation":"z"}]}'
+      Data <<< '{"specialist":"reviewer-style","summary":"x","findings":[{"label":"praise","blocking":false,"category":"x","evidence":"y","remediation":"z"},{"label":"nitpick","blocking":false,"category":"x","evidence":"y","remediation":"z"},{"label":"suggestion","blocking":false,"category":"x","evidence":"y","remediation":"z"},{"label":"issue","blocking":true,"category":"x","evidence":"y","remediation":"z"},{"label":"todo","blocking":true,"category":"x","evidence":"y","remediation":"z"},{"label":"question","blocking":false,"category":"x","evidence":"y","remediation":"z"},{"label":"thought","blocking":false,"category":"x","evidence":"y","remediation":"z"},{"label":"chore","blocking":false,"category":"x","evidence":"y","remediation":"z"},{"label":"note","blocking":false,"category":"x","evidence":"y","remediation":"z"}]}'
       When run "$SCRIPT"
       The status should equal 0
     End
