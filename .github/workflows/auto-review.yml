@@ -210,7 +210,7 @@ jobs:
           DIM: ${{ matrix.dimension }}
         run: |
           set -euo pipefail
-          npx -y @anthropic-ai/claude-code -p --output-format=json \
+          npx -y @anthropic-ai/claude-code@2.1.126 -p --output-format=json \
             < "/tmp/briefs/${DIM}.txt" > "/tmp/raw-${DIM}.json"
 
           echo "::group::raw claude output (${DIM}; first 50 lines)"
