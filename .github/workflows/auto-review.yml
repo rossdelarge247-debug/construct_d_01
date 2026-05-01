@@ -119,7 +119,7 @@ jobs:
                 cat /tmp/fix-up-diff.txt
                 printf '</fix-up-diff-%s>\n\n' "$NONCE"
                 printf '<prior-findings-%s>\n' "$NONCE"
-                cat /tmp/prior-findings.json
+                scripts/auto-review-filter-prior.sh "$DIM" < /tmp/prior-findings.json
                 printf '</prior-findings-%s>\n\n' "$NONCE"
               fi
               if [ -n "$SLICE_AC" ] && [ -f "$SLICE_AC" ]; then
