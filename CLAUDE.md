@@ -119,6 +119,11 @@ docs/slices/S-INFRA-arch-smell-trigger/{acceptance,verification}.md — v3b S-7 
 docs/slices/S-INFRA-persona-suite-v2-multi-agent/acceptance.md — v3b S-8 setup (6 ACs; spec 72c contract; impl deferred to session 49+; PR #33 merged session 48)
 docs/engineering-phase-candidates.md                — Parked CLAUDE.md additions for Phase C kickoff (Karpathy coding conduct, engineering conventions, per-slice AC + test plan templates)
 
+Phase C foundation slices (shipped to main during rebuild)
+docs/slices/S-F1-design-tokens/{acceptance,verification,security,test-plan}.md  — Phase C.1 order #1; AC + impl session 29 (Apr 24); merged via session-35 wrap (PR #23, `92f77d7`); 65 `--ds-*` tokens + TS mirror + Button reskin + imagery convention + CSS↔TS parity test; 68g C-V1 + C-V13 locked 🟢
+docs/slices/S-F7-alpha-contracts-dev-mode/{acceptance,verification,security,test-plan}.md  — Phase C.1 order #2-α; shipped (PR #20); auth + store interfaces + dev-session + dev-store + scenario-loader
+docs/slices/S-F7-beta-dev-surface/{acceptance,verification,security}.md  — Phase C.1 order #2-β; scaffold on main (session-35 wrap PR #23); 7-AC impl PARKED at `claude/S-F7-beta-impl @ a3f67ec`, 8 ahead / 49 behind main (rigour-suite v3a+v3b+v3c landed in the gap); rebase planned session 60+
+
 Hook + CI enforcement (sessions 25 + 27)
 .claude/settings.json                               — Hook registrations (SessionStart · PostToolUse · PreToolUse)
 .claude/hooks/session-start.sh                      — Turn-0 branch state + read-discipline reminder (session 25)
