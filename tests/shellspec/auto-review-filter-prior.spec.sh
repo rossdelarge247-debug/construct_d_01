@@ -30,6 +30,7 @@ Describe 'scripts/auto-review-filter-prior.sh'
       Data <<< 'not json'
       When run "$SCRIPT" security
       The status should equal 2
+      The stderr should include 'must be a JSON object'
     End
   End
 

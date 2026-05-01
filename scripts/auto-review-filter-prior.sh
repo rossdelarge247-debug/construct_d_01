@@ -1,22 +1,18 @@
 #!/usr/bin/env bash
 # auto-review-filter-prior.sh — per-specialist prior-findings filter.
 #
-# Reads a `{head_sha, findings}` envelope from stdin (the prior round's
-# deduped aggregated findings extracted by `auto-review-extract-prior.sh`)
-# and emits the same envelope shape with `findings` filtered to entries
-# where `seen_by[]` contains the requested dimension.
-#
 # Per spec 72c §6: brief-job-side per-specialist filtering reduces
 # round-2+ input token cost on the `<prior-findings-NONCE>` fence by
 # scoping each specialist to findings within its own dimension. Findings
-# with multi-dimension `seen_by[]` (e.g. a security finding also flagged
-# by architecture) appear in both specialists' filtered sets, preserving
-# the cross-dimension dedup-key semantics established by the aggregator
-# (`scripts/spawn-multi-reviewer.sh` L141-156).
+# with multi-dimension `seen_by[]` appear in each owning specialist's
+# filtered set, preserving cross-dimension dedup semantics.
 #
 # Missing or non-array `seen_by` is treated as the empty set (graceful
-# legacy handling); that finding is excluded from every specialist's
-# filtered set.
+# legacy handling): the `(.seen_by | arrays) // []` formulation handles
+# null + non-array values uniformly across jq 1.6 + 1.7. A bare
+# `(.seen_by // [])` would not — `//` only fires on null/false, so a
+# string `seen_by` would fall through and `any(.[] == $dim)` would then
+# runtime-error on jq 1.6 (Cannot iterate over string).
 #
 # Usage: scripts/auto-review-filter-prior.sh <dimension> < prior-findings.json
 #   <dimension>    one of: security architecture correctness style
@@ -49,5 +45,5 @@ fi
 
 printf '%s' "$INPUT" | jq -c --arg dim "$DIM" '{
   head_sha: .head_sha,
-  findings: [.findings[] | select((.seen_by // []) | any(. == $dim))]
+  findings: [.findings[] | select(((.seen_by | arrays) // []) | any(. == $dim))]
 }'
