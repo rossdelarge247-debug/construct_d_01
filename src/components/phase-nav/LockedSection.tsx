@@ -9,6 +9,7 @@ interface LockedSectionProps {
   gate: GateName
   title: string
   children: ReactNode
+  renderCta?: () => ReactNode
   className?: string
 }
 
@@ -19,8 +20,23 @@ function getUnlockText(gate: GateName): string {
   return UNLOCK_WHEN[gate] ?? ''
 }
 
-export function LockedSection({ gate, title, children, className }: LockedSectionProps) {
+function LockedPill() {
+  return (
+    <span className="inline-flex items-center rounded-[var(--ds-radius-md)] border border-[color:var(--ds-color-border)] px-[var(--ds-space-12)] py-[var(--ds-space-6)] text-[length:var(--ds-type-11)] uppercase tracking-[var(--ds-letter-spacing-wide)] text-[color:var(--ds-color-text-sub)]">
+      Locked
+    </span>
+  )
+}
+
+export function LockedSection({
+  gate,
+  title,
+  children,
+  renderCta,
+  className,
+}: LockedSectionProps) {
   const hint = getUnlockText(gate)
+  const cta = renderCta ? renderCta() : <LockedPill />
   return (
     <section
       aria-disabled="true"
@@ -37,6 +53,7 @@ export function LockedSection({ gate, title, children, className }: LockedSectio
       <div data-locked-children className="opacity-50 pointer-events-none">
         {children}
       </div>
+      <div data-locked-cta className="flex">{cta}</div>
     </section>
   )
 }

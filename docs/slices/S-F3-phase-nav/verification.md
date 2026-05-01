@@ -12,9 +12,9 @@
 |---|---|---|
 | AC-1 | `<PhaseStepper>` (90L TSX) — full-width pill bar; numbered badges; current phase carries phase token; outlined-dimmed locked | `src/components/phase-nav/PhaseStepper.tsx`; 5/5 vitest cases pass at `tests/unit/components/phase-nav/PhaseStepper.test.tsx` |
 | AC-2 | `<JourneyMapRail>` (107L TSX) — vertical rail; current expanded; locked one-level dimmed preview + unlock-when hint | `src/components/phase-nav/JourneyMapRail.tsx`; 5/5 vitest cases pass at `tests/unit/components/phase-nav/JourneyMapRail.test.tsx` |
-| AC-3 | `<LockedSection>` (40L TSX) + `copy.ts` (16L TS) constants | `src/components/phase-nav/{LockedSection.tsx,copy.ts}`; 4/4 component cases pass; 7/7 copy parity-with-68f cases pass |
+| AC-3 | `<LockedSection>` (60L TSX with internal `LockedPill`) + `copy.ts` (16L TS) constants + `renderCta?` prop (default = `<LockedPill>`) | `src/components/phase-nav/{LockedSection.tsx,copy.ts}`; 6/6 component cases pass (header + dimmed wrapper + aria-disabled + dashboard variants + default-pill render + custom-renderCta override); 7/7 copy parity-with-spec cases pass |
 | AC-4 | `derivePhaseStatus()` + `buildPhasesData()` + `PHASES`/`PHASE_LABELS` constants in `state.ts` (32L TS) | `src/components/phase-nav/state.ts`; 11/11 vitest cases pass at `tests/unit/components/phase-nav/state.test.ts` |
-| AC-5 | All test commands pass | `npx vitest run` → 21 files / 132 tests pass · `npx tsc --noEmit` clean · `npm run lint` 0 errors / 34 warnings (32 pre-existing + 2 new `_currentPhase` underscore-prefix) · `NEXT_PUBLIC_DECOUPLE_AUTH_MODE=prod npm run build` succeeds |
+| AC-5 | All test commands pass | `npx vitest run` → 21 files / 134 tests pass · `npx tsc --noEmit` clean · `npm run lint` 0 errors / 34 warnings (32 pre-existing + 2 new `_currentPhase` underscore-prefix) · `NEXT_PUBLIC_DECOUPLE_AUTH_MODE=prod npm run build` succeeds |
 | AC-6 | All four slice docs populated; this verification.md is the final-state record | `docs/slices/S-F3-phase-nav/{acceptance,security,test-plan,verification}.md`; 68g register flips for C-V6 + C-V12 applied in this commit |
 
 ## Six-item DoD

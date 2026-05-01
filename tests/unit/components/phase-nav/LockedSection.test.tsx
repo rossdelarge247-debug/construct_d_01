@@ -54,4 +54,30 @@ describe('<LockedSection>', () => {
     const text2 = rec('Settle').closest('section')?.textContent
     expect(text2).toContain('Unlocks when reconciliation is complete')
   })
+
+  it('renders an outlined "Locked" pill via default renderCta (C-V12)', () => {
+    const { container } = render(
+      <LockedSection gate="settle" title="Settle">
+        <button>Real CTA</button>
+      </LockedSection>,
+    )
+    const cta = container.querySelector('[data-locked-cta]')
+    expect(cta).toBeTruthy()
+    expect(cta?.textContent).toContain('Locked')
+  })
+
+  it('uses custom renderCta when provided (host-supplied replacement)', () => {
+    const { container } = render(
+      <LockedSection
+        gate="settle"
+        title="Settle"
+        renderCta={() => <span>Custom replacement</span>}
+      >
+        <button>Real CTA</button>
+      </LockedSection>,
+    )
+    const cta = container.querySelector('[data-locked-cta]')
+    expect(cta?.textContent).toContain('Custom replacement')
+    expect(cta?.textContent).not.toContain('Locked')
+  })
 })
