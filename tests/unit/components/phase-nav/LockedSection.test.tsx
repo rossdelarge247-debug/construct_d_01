@@ -55,7 +55,7 @@ describe('<LockedSection>', () => {
     expect(text2).toContain('Unlocks when reconciliation is complete')
   })
 
-  it('renders an outlined "Locked" pill via default renderCta (C-V12)', () => {
+  it('renders an outlined "Locked" pill via default renderCta', () => {
     const { container } = render(
       <LockedSection gate="settle" title="Settle">
         <button>Real CTA</button>
