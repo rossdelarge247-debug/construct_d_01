@@ -65,6 +65,9 @@ jobs:
           HEAD_SHA: ${{ github.event.pull_request.head.sha }}
           PR_BODY: ${{ github.event.pull_request.body }}
           BRANCH: ${{ github.head_ref }}
+          REPO: ${{ github.repository }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           set -euo pipefail
           mkdir -p /tmp/briefs
@@ -74,6 +77,28 @@ jobs:
           git diff "$BASE_SHA" "$HEAD_SHA" > /tmp/pr-diff.txt
 
           SLICE_AC=$(scripts/auto-review-slice-resolve.sh "$BRANCH" "$PR_BODY")
+
+          # Author filter (`.user.login == "github-actions[bot]"`) prevents
+          # a malicious PR commenter from injecting a crafted prior-findings
+          # block into the trusted `<prior-findings-NONCE>` fence, bypassing
+          # the verdict-coercion guard (which only discards claims in PR
+          # body / diff comments). SHA hex-shape guard prevents argument-
+          # injection into git subprocesses below.
+          DIFFERENTIAL=false
+          PRIOR_HEAD_SHA=""
+          MARKER='<!-- auto-review-comment:multi-agent -->'
+          PRIOR_JSON=$(gh api "repos/${REPO}/issues/${PR_NUMBER}/comments?per_page=100" --paginate \
+            --jq ".[] | select(.user.login == \"github-actions[bot]\" and (.body | contains(\"${MARKER}\"))) | .body" \
+            | scripts/auto-review-extract-prior.sh || true)
+          if [ -n "${PRIOR_JSON:-}" ]; then
+            PRIOR_HEAD_SHA=$(printf '%s' "$PRIOR_JSON" | jq -r '.head_sha')
+            if [[ "$PRIOR_HEAD_SHA" =~ ^[0-9a-f]{40,64}$ ]] && git cat-file -e "${PRIOR_HEAD_SHA}^{commit}" 2>/dev/null; then
+              DIFFERENTIAL=true
+              printf '%s' "$PRIOR_JSON" > /tmp/prior-findings.json
+              git diff "$PRIOR_HEAD_SHA" "$HEAD_SHA" > /tmp/fix-up-diff.txt
+            fi
+          fi
+          echo "differential-mode: $DIFFERENTIAL (prior-head=${PRIOR_HEAD_SHA:-none})"
 
           # Compose one brief per dimension. Each persona file already
           # carries its own rubric + JSON output schema + verdict-coercion
@@ -89,6 +114,14 @@ jobs:
               printf '<pr-diff-%s>\n' "$NONCE"
               cat /tmp/pr-diff.txt
               printf '</pr-diff-%s>\n\n' "$NONCE"
+              if [ "$DIFFERENTIAL" = "true" ]; then
+                printf '<fix-up-diff-%s>\n' "$NONCE"
+                cat /tmp/fix-up-diff.txt
+                printf '</fix-up-diff-%s>\n\n' "$NONCE"
+                printf '<prior-findings-%s>\n' "$NONCE"
+                cat /tmp/prior-findings.json
+                printf '</prior-findings-%s>\n\n' "$NONCE"
+              fi
               if [ -n "$SLICE_AC" ] && [ -f "$SLICE_AC" ]; then
                 printf '<slice-ac-%s>\n' "$NONCE"
                 cat "$SLICE_AC"
@@ -395,8 +428,20 @@ jobs:
           FOOTER=$(printf '\n\n---\n_Auto-posted by [`auto-review.yml`](%s) on commit `%s`. 4 specialists fanned out under matrix strategy per spec 72c §3; verdict derived deterministically by `scripts/spawn-multi-reviewer.sh aggregate` per CLAUDE.md §"Verdict vocabulary"; labels follow [Conventional Comments](https://conventionalcomments.org/). `block` and `parse-failed` verdicts gate the merge button (per CLAUDE.md §"Hard controls" §"Check-run conclusion mapping"); `request-changes` and `nit-only` are advisory only at v3b ship._\n' \
             "$RUN_URL" "$HEAD_SHA")
 
-          BODY=$(printf '%s\n\n## auto-review · multi-agent (4 specialists)\n\n%s — %s finding(s)%s%s%s%s%s' \
-            "$MARKER" "$HEADLINE" "$FINDINGS_COUNT" "$DEGRADED_BLOCK" "$SUMMARY_BLOCK" "$TABLE" "$SHADOW_BLOCK" "$FOOTER")
+          # Anchored BEGIN/END markers keep awk extraction robust against
+          # `-->` substrings that may legitimately appear in finding
+          # evidence content.
+          if ! jq -e '.findings | type == "array"' /tmp/persona-output.json >/dev/null 2>&1; then
+            echo "::warning::aggregator emitted /tmp/persona-output.json without .findings array; persisting empty list" >&2
+          fi
+          PRIOR_FINDINGS_JSON=$(jq -nc \
+            --arg head_sha "$HEAD_SHA" \
+            --slurpfile env /tmp/persona-output.json \
+            '{head_sha: $head_sha, findings: ($env[0].findings // [])}')
+          PRIOR_FINDINGS_BLOCK=$(printf '\n\n<!-- BEGIN-prior-findings-json -->\n%s\n<!-- END-prior-findings-json -->' "$PRIOR_FINDINGS_JSON")
+
+          BODY=$(printf '%s\n\n## auto-review · multi-agent (4 specialists)\n\n%s — %s finding(s)%s%s%s%s%s%s' \
+            "$MARKER" "$HEADLINE" "$FINDINGS_COUNT" "$DEGRADED_BLOCK" "$SUMMARY_BLOCK" "$TABLE" "$SHADOW_BLOCK" "$FOOTER" "$PRIOR_FINDINGS_BLOCK")
 
           COMMENT_ID=$(gh api "repos/${REPO}/issues/${PR_NUMBER}/comments?per_page=100" --paginate \
             --jq ".[] | select(.body | contains(\"${MARKER}\")) | .id" \
