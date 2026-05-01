@@ -60,7 +60,7 @@ echo "preflight: spawning 4 specialists in parallel..." >&2
 for DIM in security architecture correctness style; do
   (
     set +e
-    npx -y @anthropic-ai/claude-code -p --output-format=json \
+    npx -y @anthropic-ai/claude-code@2.1.126 -p --output-format=json \
       < "$PREFLIGHT_DIR/briefs/${DIM}.txt" > "$PREFLIGHT_DIR/raw-${DIM}.json" 2>"$PREFLIGHT_DIR/raw-${DIM}.stderr"
     scripts/auto-review-parse.sh < "$PREFLIGHT_DIR/raw-${DIM}.json" > "$PREFLIGHT_DIR/envelopes/${DIM}.json" 2>>"$PREFLIGHT_DIR/raw-${DIM}.stderr"
   ) &
