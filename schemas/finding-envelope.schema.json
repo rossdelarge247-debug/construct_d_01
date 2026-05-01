@@ -1,0 +1,71 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://decouple.dev/schemas/finding-envelope.schema.json",
+  "title": "Finding envelope (per-specialist multi-agent review output)",
+  "description": "Output schema for one of the four reviewer specialist personas (reviewer-{security,architecture,correctness,style}). Validates ONE specialist's structured output before aggregation. Aggregator-side decoration fields (seen_by[], was_in_prior, summary tier) are out of scope; the aggregate envelope has its own (looser) shape per scripts/spawn-multi-reviewer.sh. Per spec 72c §5 + §9 carry-over.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["specialist", "summary", "findings"],
+  "properties": {
+    "specialist": {
+      "type": "string",
+      "enum": [
+        "reviewer-security",
+        "reviewer-architecture",
+        "reviewer-correctness",
+        "reviewer-style"
+      ]
+    },
+    "summary": {
+      "type": "string",
+      "minLength": 1
+    },
+    "findings": {
+      "type": "array",
+      "items": {"$ref": "#/$defs/finding"}
+    }
+  },
+  "$defs": {
+    "finding": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["label", "blocking", "category", "evidence", "remediation"],
+      "properties": {
+        "label": {
+          "type": "string",
+          "enum": [
+            "praise",
+            "nitpick",
+            "suggestion",
+            "issue",
+            "todo",
+            "question",
+            "thought",
+            "chore",
+            "note"
+          ],
+          "description": "Conventional Comments label per https://conventionalcomments.org/"
+        },
+        "blocking": {
+          "type": "boolean",
+          "description": "Whether this finding gates the merge button (true) or is advisory (false)"
+        },
+        "category": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Free-form sub-category. Personas use their dimension as default ('security' | 'architecture' | 'correctness' | 'style') but emit finer-grained sub-categories (e.g. 'edge-case', 'commenting') for granular dedup."
+        },
+        "evidence": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Quote from diff or AC, ≤2 lines. First 64 chars are part of the aggregator's dedup key per spec 72c §5 rule 2."
+        },
+        "remediation": {
+          "type": "string",
+          "minLength": 1,
+          "description": "One-sentence actionable suggestion."
+        }
+      }
+    }
+  }
+}
