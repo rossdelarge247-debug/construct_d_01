@@ -32,7 +32,7 @@ Describe 'auto-review-extract-prior.sh'
   End
 
   It 'emits the JSON envelope when comment has a valid prior-findings block'
-    BODY=$(printf '<!-- auto-review-comment:multi-agent -->\n## auto-review\n\n<!-- prior-findings-json:\n{"head_sha":"abc1234","findings":[{"label":"issue","blocking":true}]}\n-->\n')
+    BODY=$(printf '<!-- auto-review-comment:multi-agent -->\n## auto-review\n\n<!-- BEGIN-prior-findings-json -->\n{"head_sha":"abc1234","findings":[{"label":"issue","blocking":true}]}\n<!-- END-prior-findings-json -->\n')
     When run sh -c "printf '%s' '$BODY' | $EXTRACT_SCRIPT"
     The output should include '"head_sha":"abc1234"'
     The output should include '"findings"'
@@ -40,36 +40,47 @@ Describe 'auto-review-extract-prior.sh'
   End
 
   It 'emits empty when JSON block is missing head_sha'
-    BODY=$(printf '<!-- prior-findings-json:\n{"findings":[]}\n-->\n')
+    BODY=$(printf '<!-- BEGIN-prior-findings-json -->\n{"findings":[]}\n<!-- END-prior-findings-json -->\n')
     When run sh -c "printf '%s' '$BODY' | $EXTRACT_SCRIPT"
     The output should equal ''
     The status should be success
   End
 
   It 'emits empty when findings is not an array'
-    BODY=$(printf '<!-- prior-findings-json:\n{"head_sha":"abc","findings":"oops"}\n-->\n')
+    BODY=$(printf '<!-- BEGIN-prior-findings-json -->\n{"head_sha":"abc","findings":"oops"}\n<!-- END-prior-findings-json -->\n')
     When run sh -c "printf '%s' '$BODY' | $EXTRACT_SCRIPT"
     The output should equal ''
     The status should be success
   End
 
   It 'emits empty when JSON block is malformed'
-    BODY=$(printf '<!-- prior-findings-json:\nnot valid json\n-->\n')
+    BODY=$(printf '<!-- BEGIN-prior-findings-json -->\nnot valid json\n<!-- END-prior-findings-json -->\n')
     When run sh -c "printf '%s' '$BODY' | $EXTRACT_SCRIPT"
     The output should equal ''
     The status should be success
   End
 
-  It 'preserves JSON content even when it contains the marker substring (anchored-pattern guard)'
-    BODY=$(printf '<!-- prior-findings-json:\n{"head_sha":"x","findings":[{"evidence":"a finding quoting <!-- prior-findings-json: from a meta diff"}]}\n-->\n')
+  It 'preserves JSON content even when it contains the BEGIN marker substring (anchored-pattern guard)'
+    BODY=$(printf '<!-- BEGIN-prior-findings-json -->\n{"head_sha":"x","findings":[{"evidence":"a finding quoting <!-- BEGIN-prior-findings-json --> from a meta diff"}]}\n<!-- END-prior-findings-json -->\n')
     When run sh -c "printf '%s' '$BODY' | $EXTRACT_SCRIPT"
     The output should include 'meta diff'
     The output should include '"head_sha":"x"'
     The status should be success
   End
 
+  It 'preserves JSON content containing a bare --> on its own conceptual line (no early exit)'
+    # The closing marker is now `<!-- END-prior-findings-json -->`, not bare `-->`,
+    # so a finding's evidence containing `-->` (e.g. quoting an HTML-comment fragment
+    # in a diff) cannot terminate awk extraction prematurely.
+    BODY=$(printf '<!-- BEGIN-prior-findings-json -->\n{"head_sha":"y","findings":[{"evidence":"-->"}]}\n<!-- END-prior-findings-json -->\n')
+    When run sh -c "printf '%s' '$BODY' | $EXTRACT_SCRIPT"
+    The output should include '"head_sha":"y"'
+    The output should include '"-->"'
+    The status should be success
+  End
+
   It 'extracts only the first prior-findings block when multiple exist'
-    BODY=$(printf '<!-- prior-findings-json:\n{"head_sha":"first","findings":[]}\n-->\n<!-- prior-findings-json:\n{"head_sha":"second","findings":[]}\n-->\n')
+    BODY=$(printf '<!-- BEGIN-prior-findings-json -->\n{"head_sha":"first","findings":[]}\n<!-- END-prior-findings-json -->\n<!-- BEGIN-prior-findings-json -->\n{"head_sha":"second","findings":[]}\n<!-- END-prior-findings-json -->\n')
     When run sh -c "printf '%s' '$BODY' | $EXTRACT_SCRIPT"
     The output should include '"head_sha":"first"'
     The output should not include 'second'
