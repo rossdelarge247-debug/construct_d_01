@@ -78,15 +78,12 @@ jobs:
 
           SLICE_AC=$(scripts/auto-review-slice-resolve.sh "$BRANCH" "$PR_BODY")
 
-          # Differential-mode detection (spec 72c §6). Round-1 path: no
-          # prior bot-authored marker comment OR comment lacks the embedded
-          # JSON block → DIFFERENTIAL stays false; specialists see only
-          # `<pr-diff-NONCE>` (current behaviour). Author filter
-          # (`.user.login == "github-actions[bot]"`) prevents a malicious
-          # commenter from injecting a crafted prior-findings block —
-          # otherwise their payload would be fed verbatim into the trusted
-          # `<prior-findings-NONCE>` fence, bypassing the verdict-coercion
-          # guard which only discards claims in PR body / diff comments.
+          # Author filter (`.user.login == "github-actions[bot]"`) prevents
+          # a malicious PR commenter from injecting a crafted prior-findings
+          # block into the trusted `<prior-findings-NONCE>` fence, bypassing
+          # the verdict-coercion guard (which only discards claims in PR
+          # body / diff comments). SHA hex-shape guard prevents argument-
+          # injection into git subprocesses below.
           DIFFERENTIAL=false
           PRIOR_HEAD_SHA=""
           MARKER='<!-- auto-review-comment:multi-agent -->'
@@ -95,7 +92,7 @@ jobs:
             | scripts/auto-review-extract-prior.sh || true)
           if [ -n "${PRIOR_JSON:-}" ]; then
             PRIOR_HEAD_SHA=$(printf '%s' "$PRIOR_JSON" | jq -r '.head_sha')
-            if git cat-file -e "${PRIOR_HEAD_SHA}^{commit}" 2>/dev/null; then
+            if [[ "$PRIOR_HEAD_SHA" =~ ^[0-9a-f]{40}$ ]] && git cat-file -e "${PRIOR_HEAD_SHA}^{commit}" 2>/dev/null; then
               DIFFERENTIAL=true
               printf '%s' "$PRIOR_JSON" > /tmp/prior-findings.json
               git diff "$PRIOR_HEAD_SHA" "$HEAD_SHA" > /tmp/fix-up-diff.txt
@@ -431,13 +428,12 @@ jobs:
           FOOTER=$(printf '\n\n---\n_Auto-posted by [`auto-review.yml`](%s) on commit `%s`. 4 specialists fanned out under matrix strategy per spec 72c §3; verdict derived deterministically by `scripts/spawn-multi-reviewer.sh aggregate` per CLAUDE.md §"Verdict vocabulary"; labels follow [Conventional Comments](https://conventionalcomments.org/). `block` and `parse-failed` verdicts gate the merge button (per CLAUDE.md §"Hard controls" §"Check-run conclusion mapping"); `request-changes` and `nit-only` are advisory only at v3b ship._\n' \
             "$RUN_URL" "$HEAD_SHA")
 
-          # Persist the prior-findings envelope inside the marker comment
-          # so round N+1 can scope its review to this round's findings +
-          # the fix-up diff, per spec 72c §6 differential mode. `head_sha`
-          # records the reviewed commit; round N+1 computes fix-up diff =
-          # `git diff $head_sha $HEAD_SHA`. Markers are anchored
-          # BEGIN/END so awk extraction is robust against `-->` substrings
-          # that may legitimately appear in finding evidence content.
+          # Anchored BEGIN/END markers keep awk extraction robust against
+          # `-->` substrings that may legitimately appear in finding
+          # evidence content.
+          if ! jq -e '.findings | type == "array"' /tmp/persona-output.json >/dev/null 2>&1; then
+            echo "::warning::aggregator emitted /tmp/persona-output.json without .findings array; persisting empty list" >&2
+          fi
           PRIOR_FINDINGS_JSON=$(jq -nc \
             --arg head_sha "$HEAD_SHA" \
             --slurpfile env /tmp/persona-output.json \

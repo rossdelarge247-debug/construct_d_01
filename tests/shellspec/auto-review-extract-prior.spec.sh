@@ -4,8 +4,7 @@
 # differential review mode per spec 72c §6.
 
 Describe 'auto-review-extract-prior.sh'
-  # Capture absolute path before setup() cds into the temp repo (matches
-  # auto-review-slice-resolve.spec.sh + git-state-verifier.spec.sh pattern).
+  # Capture absolute path before setup() cds away from the project root.
   EXTRACT_SCRIPT="$PWD/scripts/auto-review-extract-prior.sh"
 
   setup() {
