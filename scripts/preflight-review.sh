@@ -16,12 +16,17 @@ if [ -z "${ANTHROPIC_API_KEY:-}" ]; then
   exit 0
 fi
 
-WORK="$(mktemp -d -t preflight.XXXXXX)"
-trap 'rm -rf "$WORK"' EXIT
-mkdir -p "$WORK/briefs" "$WORK/envelopes"
+command -v jq >/dev/null 2>&1 || { echo "preflight: jq is required; skipping" >&2; exit 0; }
 
-git diff "${BASE}...HEAD" -- > "$WORK/pr-diff.txt"
-if [ ! -s "$WORK/pr-diff.txt" ]; then
+PREFLIGHT_DIR="$(mktemp -d -t preflight.XXXXXX)"
+trap 'rm -rf "$PREFLIGHT_DIR"' EXIT
+mkdir -p "$PREFLIGHT_DIR/briefs" "$PREFLIGHT_DIR/envelopes"
+
+if ! git diff "${BASE}...HEAD" -- > "$PREFLIGHT_DIR/pr-diff.txt" 2>/dev/null; then
+  echo "preflight: cannot diff against ${BASE}; ensure remote is fetched" >&2
+  exit 0
+fi
+if [ ! -s "$PREFLIGHT_DIR/pr-diff.txt" ]; then
   echo "preflight: no diff between $BASE and HEAD; nothing to review" >&2
   exit 0
 fi
@@ -37,7 +42,7 @@ for DIM in security architecture correctness style; do
     echo "Your per-invocation nonce: $NONCE"
     echo
     printf '<pr-diff-%s>\n' "$NONCE"
-    cat "$WORK/pr-diff.txt"
+    cat "$PREFLIGHT_DIR/pr-diff.txt"
     printf '</pr-diff-%s>\n\n' "$NONCE"
     if [ -n "${SLICE_AC:-}" ] && [ -f "$SLICE_AC" ]; then
       printf '<slice-ac-%s>\n' "$NONCE"
@@ -47,7 +52,7 @@ for DIM in security architecture correctness style; do
     printf '<coding-conduct-%s>\n' "$NONCE"
     awk '/^## Coding conduct/,/^## Engineering conventions/' CLAUDE.md | head -n -1
     printf '</coding-conduct-%s>\n' "$NONCE"
-  } > "$WORK/briefs/${DIM}.txt"
+  } > "$PREFLIGHT_DIR/briefs/${DIM}.txt"
 done
 
 echo "preflight: spawning 4 specialists in parallel..." >&2
@@ -56,13 +61,16 @@ for DIM in security architecture correctness style; do
   (
     set +e
     npx -y @anthropic-ai/claude-code -p --output-format=json \
-      < "$WORK/briefs/${DIM}.txt" > "$WORK/raw-${DIM}.json" 2>"$WORK/raw-${DIM}.stderr"
-    scripts/auto-review-parse.sh < "$WORK/raw-${DIM}.json" > "$WORK/envelopes/${DIM}.json" 2>>"$WORK/raw-${DIM}.stderr"
+      < "$PREFLIGHT_DIR/briefs/${DIM}.txt" > "$PREFLIGHT_DIR/raw-${DIM}.json" 2>"$PREFLIGHT_DIR/raw-${DIM}.stderr"
+    scripts/auto-review-parse.sh < "$PREFLIGHT_DIR/raw-${DIM}.json" > "$PREFLIGHT_DIR/envelopes/${DIM}.json" 2>>"$PREFLIGHT_DIR/raw-${DIM}.stderr"
   ) &
 done
 wait
 
-AGGREGATE_JSON=$(scripts/spawn-multi-reviewer.sh aggregate "$WORK/envelopes")
+AGGREGATE_JSON=$(scripts/spawn-multi-reviewer.sh aggregate "$PREFLIGHT_DIR/envelopes") || {
+  echo "preflight: aggregator failed" >&2
+  exit 1
+}
 VERDICT=$(printf '%s' "$AGGREGATE_JSON" | jq -r '.verdict')
 FINDINGS_COUNT=$(printf '%s' "$AGGREGATE_JSON" | jq '.findings | length')
 
