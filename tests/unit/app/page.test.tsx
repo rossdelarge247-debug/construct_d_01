@@ -2,7 +2,7 @@ import { describe, it, expect } from 'vitest'
 import { render } from '@testing-library/react'
 import LandingPage from '@/app/page'
 
-describe('LandingPage (S-F3 demo surface)', () => {
+describe('LandingPage', () => {
   it('renders the Decouple heading', () => {
     const { getByText } = render(<LandingPage />)
     expect(getByText('Decouple')).toBeTruthy()

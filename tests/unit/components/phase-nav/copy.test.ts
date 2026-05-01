@@ -9,7 +9,7 @@ const specPath = resolve(
 )
 const spec = readFileSync(specPath, 'utf-8')
 
-describe('phase-nav copy — 68f C-N1c LOCKED parity (S-F3 AC-3)', () => {
+describe('phase-nav copy — unlock-when constants parity', () => {
   it('UNLOCK_WHEN.reconcile matches spec verbatim', () => {
     expect(spec).toContain(UNLOCK_WHEN.reconcile!)
   })

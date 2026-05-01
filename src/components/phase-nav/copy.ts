@@ -1,7 +1,7 @@
 import type { PhaseName } from './types'
 
-// Strings LOCKED in spec 68f C-N1c. Byte-equality enforced by the
-// parity test which reads the spec source at runtime.
+// Byte-equality with the spec source is enforced by the parity test
+// which reads the spec markdown at runtime.
 
 export const UNLOCK_WHEN: Partial<Record<PhaseName, string>> = {
   reconcile: 'Unlocks when you share your picture with Mark',

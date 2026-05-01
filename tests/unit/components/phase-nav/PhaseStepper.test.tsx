@@ -3,7 +3,7 @@ import { render } from '@testing-library/react'
 import { PhaseStepper } from '@/components/phase-nav/PhaseStepper'
 import { buildPhasesData } from '@/components/phase-nav/state'
 
-describe('<PhaseStepper> (S-F3 AC-1, C-V6)', () => {
+describe('<PhaseStepper>', () => {
   it('renders all 5 phases in spec-42 order', () => {
     const phases = buildPhasesData('build', ['start'])
     const { container } = render(<PhaseStepper currentPhase="build" phases={phases} />)

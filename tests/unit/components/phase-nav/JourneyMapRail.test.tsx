@@ -8,7 +8,7 @@ const sampleSubitems = [
   { label: 'Section 2: Your finances' },
 ]
 
-describe('<JourneyMapRail> (S-F3 AC-2, C-N1a + C-N1d)', () => {
+describe('<JourneyMapRail>', () => {
   it('renders all 5 phases vertically', () => {
     const phases = buildPhasesData('build', ['start'])
     const { container } = render(

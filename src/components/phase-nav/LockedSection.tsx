@@ -12,7 +12,7 @@ interface LockedSectionProps {
   className?: string
 }
 
-function unlockText(gate: GateName): string {
+function getUnlockText(gate: GateName): string {
   if (gate === 'preparation' || gate === 'reconciliation') {
     return UNLOCK_WHEN_DASHBOARD[gate]
   }
@@ -20,7 +20,7 @@ function unlockText(gate: GateName): string {
 }
 
 export function LockedSection({ gate, title, children, className }: LockedSectionProps) {
-  const hint = unlockText(gate)
+  const hint = getUnlockText(gate)
   return (
     <section
       aria-disabled="true"

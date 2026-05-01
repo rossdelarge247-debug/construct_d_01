@@ -7,7 +7,7 @@ import type {
   SubItem,
 } from '@/components/phase-nav/types'
 
-describe('phase-nav types (S-F3 AC-4)', () => {
+describe('phase-nav types', () => {
   it('PhaseName accepts valid 5-phase names', () => {
     const phases: PhaseName[] = ['start', 'build', 'reconcile', 'settle', 'finalise']
     expect(phases).toHaveLength(5)

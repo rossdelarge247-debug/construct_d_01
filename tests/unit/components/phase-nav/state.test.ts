@@ -6,7 +6,7 @@ import {
   buildPhasesData,
 } from '@/components/phase-nav/state'
 
-describe('phase-nav state — derivePhaseStatus (S-F3 AC-4)', () => {
+describe('phase-nav state — derivePhaseStatus', () => {
   it('returns "complete" for phases in completed array', () => {
     expect(derivePhaseStatus('start', 'build', ['start'])).toBe('complete')
   })

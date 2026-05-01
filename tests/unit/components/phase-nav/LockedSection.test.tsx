@@ -2,7 +2,7 @@ import { describe, it, expect } from 'vitest'
 import { render } from '@testing-library/react'
 import { LockedSection } from '@/components/phase-nav/LockedSection'
 
-describe('<LockedSection> (S-F3 AC-3, C-V12)', () => {
+describe('<LockedSection>', () => {
   it('renders the locked-section header with 🔒 emoji + unlock-when copy', () => {
     const { container } = render(
       <LockedSection gate="reconcile" title="Reconcile your finances">
