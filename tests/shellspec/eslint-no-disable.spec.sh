@@ -1,7 +1,6 @@
 #!/bin/bash
 # Tests for scripts/eslint-no-disable.sh — origin/main-anchored ratchet on
-# eslint-disable directive count per F5c (docs/slices/S-INFRA-rigour-v3a-
-# foundation/acceptance.md.review-v1.json L46).
+# eslint-disable directive count.
 
 Describe 'eslint-no-disable.sh'
   SCRIPT="$PWD/scripts/eslint-no-disable.sh"

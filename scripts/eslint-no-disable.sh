@@ -1,9 +1,7 @@
 #!/usr/bin/env bash
 # eslint-no-disable.sh — fail when the count of `eslint-disable` directives
 # at HEAD exceeds the count at the comparison ref. Origin/main-anchored
-# ratchet per F5c (docs/slices/S-INFRA-rigour-v3a-foundation/acceptance.md
-# .review-v1.json L46): "Ratchet check should compare against origin/main
-# HEAD threshold values, not a configurable file."
+# ratchet: counts can only go DOWN.
 #
 # Override: ship via CODEOWNERS admin-bypass.
 # Exit: 0 clean / 1 violations found / 2 usage error.

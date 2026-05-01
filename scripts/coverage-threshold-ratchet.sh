@@ -1,8 +1,6 @@
 #!/usr/bin/env bash
 # coverage-threshold-ratchet.sh — fail when any vitest coverage threshold
-# at HEAD is lower than at the comparison ref. Origin/main-anchored ratchet
-# per F5c (docs/slices/S-INFRA-rigour-v3a-foundation/acceptance.md.review-v1
-# .json L46). Coverage thresholds in vitest.config.ts can only go UP.
+# at HEAD is lower than at the comparison ref. Thresholds can only go UP.
 #
 # Threshold keys checked: lines, branches, functions, statements (the
 # vitest standard set). Absent threshold treated as 0 — removing a

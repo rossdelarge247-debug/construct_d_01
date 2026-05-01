@@ -1,6 +1,6 @@
 #!/bin/bash
 # Tests for scripts/coverage-threshold-ratchet.sh — origin/main-anchored
-# ratchet on vitest.config.ts coverage thresholds per F5c.
+# ratchet on vitest.config.ts coverage thresholds.
 
 Describe 'coverage-threshold-ratchet.sh'
   SCRIPT="$PWD/scripts/coverage-threshold-ratchet.sh"
