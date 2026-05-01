@@ -65,6 +65,9 @@ jobs:
           HEAD_SHA: ${{ github.event.pull_request.head.sha }}
           PR_BODY: ${{ github.event.pull_request.body }}
           BRANCH: ${{ github.head_ref }}
+          REPO: ${{ github.repository }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           set -euo pipefail
           mkdir -p /tmp/briefs
@@ -74,6 +77,34 @@ jobs:
           git diff "$BASE_SHA" "$HEAD_SHA" > /tmp/pr-diff.txt
 
           SLICE_AC=$(scripts/auto-review-slice-resolve.sh "$BRANCH" "$PR_BODY")
+
+          # Differential-mode detection (spec 72c §6). On rounds 2+, the
+          # prior aggregate-job posted a marker comment with an embedded
+          # `<!-- prior-findings-json: ... -->` block carrying
+          # `{head_sha, findings}`. Extract it; if present, compute the
+          # fix-up diff (PRIOR_HEAD..HEAD) and set DIFFERENTIAL=true so
+          # the per-specialist composition loop adds the fix-up + prior-
+          # findings fences. Round-1 path: no prior comment OR comment
+          # lacks the JSON block → DIFFERENTIAL stays false; specialists
+          # see only the original PR diff (current behaviour).
+          DIFFERENTIAL=false
+          PRIOR_HEAD_SHA=""
+          MARKER='<!-- auto-review-comment:multi-agent -->'
+          PRIOR_BODY=$(gh api "repos/${REPO}/issues/${PR_NUMBER}/comments?per_page=100" --paginate \
+            --jq ".[] | select(.body | contains(\"${MARKER}\")) | .body" \
+            | head -n 1 || true)
+          if [ -n "${PRIOR_BODY:-}" ]; then
+            PRIOR_JSON=$(printf '%s' "$PRIOR_BODY" | scripts/auto-review-extract-prior.sh || true)
+            if [ -n "${PRIOR_JSON:-}" ]; then
+              PRIOR_HEAD_SHA=$(printf '%s' "$PRIOR_JSON" | jq -r '.head_sha')
+              if git cat-file -e "${PRIOR_HEAD_SHA}^{commit}" 2>/dev/null; then
+                DIFFERENTIAL=true
+                printf '%s' "$PRIOR_JSON" > /tmp/prior-findings.json
+                git diff "$PRIOR_HEAD_SHA" "$HEAD_SHA" > /tmp/fix-up-diff.txt
+              fi
+            fi
+          fi
+          echo "differential-mode: $DIFFERENTIAL (prior-head=${PRIOR_HEAD_SHA:-none})"
 
           # Compose one brief per dimension. Each persona file already
           # carries its own rubric + JSON output schema + verdict-coercion
@@ -89,6 +120,14 @@ jobs:
               printf '<pr-diff-%s>\n' "$NONCE"
               cat /tmp/pr-diff.txt
               printf '</pr-diff-%s>\n\n' "$NONCE"
+              if [ "$DIFFERENTIAL" = "true" ]; then
+                printf '<fix-up-diff-%s>\n' "$NONCE"
+                cat /tmp/fix-up-diff.txt
+                printf '</fix-up-diff-%s>\n\n' "$NONCE"
+                printf '<prior-findings-%s>\n' "$NONCE"
+                cat /tmp/prior-findings.json
+                printf '</prior-findings-%s>\n\n' "$NONCE"
+              fi
               if [ -n "$SLICE_AC" ] && [ -f "$SLICE_AC" ]; then
                 printf '<slice-ac-%s>\n' "$NONCE"
                 cat "$SLICE_AC"
@@ -395,8 +434,21 @@ jobs:
           FOOTER=$(printf '\n\n---\n_Auto-posted by [`auto-review.yml`](%s) on commit `%s`. 4 specialists fanned out under matrix strategy per spec 72c §3; verdict derived deterministically by `scripts/spawn-multi-reviewer.sh aggregate` per CLAUDE.md §"Verdict vocabulary"; labels follow [Conventional Comments](https://conventionalcomments.org/). `block` and `parse-failed` verdicts gate the merge button (per CLAUDE.md §"Hard controls" §"Check-run conclusion mapping"); `request-changes` and `nit-only` are advisory only at v3b ship._\n' \
             "$RUN_URL" "$HEAD_SHA")
 
-          BODY=$(printf '%s\n\n## auto-review · multi-agent (4 specialists)\n\n%s — %s finding(s)%s%s%s%s%s' \
-            "$MARKER" "$HEADLINE" "$FINDINGS_COUNT" "$DEGRADED_BLOCK" "$SUMMARY_BLOCK" "$TABLE" "$SHADOW_BLOCK" "$FOOTER")
+          # Embed prior-findings JSON envelope as a hidden HTML-comment
+          # block so the next round's `brief` job can extract it via
+          # `scripts/auto-review-extract-prior.sh` and feed it as the
+          # `<prior-findings-NONCE>` fence to each specialist (spec 72c
+          # §6 differential review mode). `head_sha` records the commit
+          # this round reviewed; the next round computes fix-up diff =
+          # `git diff $head_sha $HEAD_SHA`.
+          PRIOR_FINDINGS_JSON=$(jq -nc \
+            --arg head_sha "$HEAD_SHA" \
+            --slurpfile env /tmp/persona-output.json \
+            '{head_sha: $head_sha, findings: ($env[0].findings // [])}')
+          PRIOR_FINDINGS_BLOCK=$(printf '\n\n<!-- prior-findings-json:\n%s\n-->' "$PRIOR_FINDINGS_JSON")
+
+          BODY=$(printf '%s\n\n## auto-review · multi-agent (4 specialists)\n\n%s — %s finding(s)%s%s%s%s%s%s' \
+            "$MARKER" "$HEADLINE" "$FINDINGS_COUNT" "$DEGRADED_BLOCK" "$SUMMARY_BLOCK" "$TABLE" "$SHADOW_BLOCK" "$FOOTER" "$PRIOR_FINDINGS_BLOCK")
 
           COMMENT_ID=$(gh api "repos/${REPO}/issues/${PR_NUMBER}/comments?per_page=100" --paginate \
             --jq ".[] | select(.body | contains(\"${MARKER}\")) | .id" \
