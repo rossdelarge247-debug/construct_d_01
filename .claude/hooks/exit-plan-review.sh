@@ -10,7 +10,8 @@
 #   3. Run scripts/git-state-verifier.sh against plan; record verifier output.
 #   4. Frame plan + verifier output in heredoc with nonce-fenced separators.
 #   5. Spawn fresh-context review subagent (PLUGGABLE: stub by default;
-#      `EXIT_PLAN_REVIEW_SPAWN=1` activates `claude -p` invocation).
+#      spawned by default when `claude` CLI is available;
+#      `EXIT_PLAN_REVIEW_SPAWN=0` opts out (degrades to stub-mode verdict).
 #   6. Block plan exit on architectural-severity findings (exit 2).
 
 set -uo pipefail
@@ -84,7 +85,7 @@ if [ "${EXIT_PLAN_REVIEW_DEBUG_FRAMING:-0}" = "1" ]; then
 fi
 
 # ── Step 5: spawn review subagent (pluggable).
-if [ "${EXIT_PLAN_REVIEW_SPAWN:-0}" = "1" ] && command -v claude >/dev/null 2>&1; then
+if [ "${EXIT_PLAN_REVIEW_SPAWN:-1}" != "0" ] && command -v claude >/dev/null 2>&1; then
   VERDICT=$(printf '%s' "$FRAMED" | claude -p --output-format text 2>/dev/null || echo '{"verdict":"block","severity":"architectural","findings":[{"category":"infra","evidence":"subagent invocation failed","remediation":"check claude CLI auth + retry"}]}')
 else
   # Stub mode: no real subagent. Verdict derives from git-state-verifier only.
