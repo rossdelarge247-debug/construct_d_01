@@ -23,7 +23,7 @@
 | # | Item | Status | Note |
 |---|---|---|---|
 | 1 | All ACs met with evidence | **PASS** | Five ACs; per-AC table above |
-| 2 | Tests written + passing | **PASS** | shellspec spec at `tests/shellspec/comment-review.spec.sh` (14 cases); manual smoke harness (15 cases) replays same envelope, all GREEN |
+| 2 | Tests written + passing | **PASS** | shellspec spec at `tests/shellspec/comment-review.spec.sh` (17 It-blocks); manual smoke harness (13 cases) replays the equivalent envelope, all GREEN |
 | 3 | Adversarial review done | **PASS** | Single-turn per spec 72b §"Decision criteria" verbatim row: *"<300 lines \| any \| Single-turn (status quo) \| Fits in one read-cap window; no orchestration overhead."* Auto-review (4 specialists · k=2 · differential mode + per-specialist filter) fired on PR open; merge gate cleared at ship time per CLAUDE.md §"Check-run conclusion mapping". Iteration detail recorded in the PR description, not here. |
 | 4 | Preview deploy verified in-browser | **N/A** | No UI surface; `src/` untouched. Preview-deploy rubric (spec 72a) dormant for this slice |
 | 5 | No regression in adjacent slices | **PASS** | `.claude/settings.json` registration is additive (extends existing PostToolUse:Write\|Edit hooks array); `line-count.sh` continues firing first per array order. CLAUDE.md edit is purely additive (+1 row + 1 paragraph). No tests deleted; no existing hook modified |
