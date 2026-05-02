@@ -188,6 +188,8 @@ These rules govern how Claude makes decisions and builds plans. Guardrails again
 
 **Pre-priority shipped-artifact verification.** Sibling to the spec-gate rule for the kickoff-omission failure mode. Before treating a kickoff priority labeled "first src/ slice", "build X from scratch", or any fresh-build framing as authorized, `grep -r "S-XX" docs/slices/` (or `ls docs/slices/`) and `git log --grep="<slice-name>"` for shipped-artifact evidence. Kickoffs are written before they ship; subsequent sessions ship the work; the next kickoff routinely omits the shipped status. Session 59 turn-0 surfaced S-F1 already shipped (session 29 via session-35 wrap) despite the kickoff treating it as next-up — a separate failure mode from spec-gate paraphrase (constraint above) since the kickoff didn't paraphrase a spec, it omitted a build-state fact.
 
+**Path options carry spec refs.** When offering A / B / C alternatives, each option must name which spec justifies it or conflicts with it. Prevents abstract-tradeoff reasoning from sneaking in.
+
 **Distrust your own summaries.** A summary compressed earlier in the session is navigation, not source. When a decision is load-bearing, go back to the spec itself — even if the summary "feels" right. Heavy context makes skim-recall tempting; resist it.
 
 **Read discipline.** Enforced by `.claude/hooks/read-cap.sh` (PreToolUse on Read): blocks full-file Reads of >400-line files without offset+limit, and blocks Reads that would push this turn's total past 300 lines. Deny messages quote the rule and suggest offset/limit or grep-first alternatives. Habits the hook doesn't catch — `grep` / `ls` / `wc -l` before committing to a Read, announcing expected combined size before a parallel batch — remain in you.
