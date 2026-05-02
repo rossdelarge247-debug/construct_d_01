@@ -204,6 +204,23 @@ wait "$VITEST_PID"
 RC=$?
 
 if [ "$RC" -ne 0 ]; then
+  # First-creation chicken-and-egg: test file exists (checked above) but
+  # the src module being Written does not yet exist on disk, so vitest
+  # cannot resolve the import. Distinct from real RED (assertion failure
+  # on existing module). Detect via module-resolution error patterns;
+  # only honoured for Write of a non-existent path so existing-file RED
+  # always blocks.
+  if [ "$TOOL_NAME" = "Write" ] && [ ! -f "$RELPATH" ] \
+     && grep -qE "(Failed to resolve import|Failed to load url|Cannot find module|MODULE_NOT_FOUND)" "$TMP_OUT"; then
+    {
+      echo "tdd-guard: module-not-found at first-creation for $RELPATH."
+      echo "  Test file exists; src does not. Allowing Write so first-"
+      echo "  creation can proceed. Re-run \`npx vitest run $TEST_FILE\`"
+      echo "  after the Write to confirm GREEN before the next Edit."
+    } >&2
+    exit 0
+  fi
+
   {
     echo "BLOCKED: tdd-guard — RED test for $RELPATH."
     echo
