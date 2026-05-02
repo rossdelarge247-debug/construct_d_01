@@ -22,7 +22,7 @@ Architecture mirrors `.claude/hooks/exit-plan-review.sh` (PreToolUse:ExitPlanMod
 
 ## Pre-flight notes
 
-- **Adversarial review budget (per spec 72b).** acceptance.md `<300L` ⇒ single review session per spec 72b §Use when. Live auto-review (4 specialists · k=2 · differential mode + per-specialist filter) fires on PR open.
+- **Adversarial review budget (per spec 72b).** acceptance.md `<300L` ⇒ Single-turn (status quo) per the spec 72b §"Decision criteria" table verbatim row: *"<300 lines | any | Single-turn (status quo) | Fits in one read-cap window; no orchestration overhead."* Live auto-review (4 specialists · k=2 · differential mode + per-specialist filter) fires on PR open.
 - **TDD exemption.** Hook + persona are bash-script + prompt-template (not src/.{ts,tsx}); tdd-guard.sh scope is `src/**.{ts,tsx}` per its glob — shellspec tests serve as the test surface and run via `tests/shellspec/comment-review.spec.sh`.
 - **Self-fire avoidance.** The hook MUST skip writes to its own persona file (`.claude/agents/reviewer-comment.md`) and to its own shellspec test (`tests/shellspec/comment-review.spec.sh`) — both contain anti-pattern strings as legitimate fixtures (the persona quotes catalogue examples; the spec passes flagged strings as Data inputs). Without the skip, registration would create a noise loop on the very files the slice ships. Skip-list is part of AC-2.
 - **CODEOWNERS.** Touches `.claude/**` + `tests/shellspec/**` + `CLAUDE.md` — admin-bypass merge expected per solo-operator pattern (CLAUDE.md negative constraint #25).
@@ -46,7 +46,7 @@ The loveable floor: a future Claude session running this hook gets a one-line `[
 
 ## AC-2 · `comment-review.sh` PostToolUse:Write|Edit hook
 
-- **Outcome:** A bash hook at `.claude/hooks/comment-review.sh` reads JSON tool input from stdin, exits 0 silently for non-`Write|Edit` tools, applies a path skip-list (`.claude/agents/**`, `.claude/subagent-prompts/**`, `tests/shellspec/**`, `tests/**/fixtures/**`, `*.lock`, `*.json`, `*.yaml`, `*.yml`, binary extensions), and runs the four-pattern stub-mode regex check on the new content (Write → `.tool_input.content`; Edit → `.tool_input.new_string`). On findings, emits a JSON object via `jq -n` with a `systemMessage` field describing each flagged match (file_path + first matched line + catalogue-item label) and exits 0. On no findings, exits 0 silently. Live LLM mode is a pluggable opt-in via `COMMENT_REVIEW_SPAWN=1` — when set, frames the persona prompt with a per-invocation nonce and pipes to `claude -p`; if `claude` is absent, falls back to stub mode without erroring.
+- **Outcome:** A bash hook at `.claude/hooks/comment-review.sh` reads JSON tool input from stdin, exits 0 silently for non-`Write|Edit` tools, normalises the file path to repo-relative (so the skip-list matches whether the agent passed an absolute or relative path), applies the skip-list (`.claude/agents/**`, `.claude/subagent-prompts/**`, `tests/shellspec/**`, `tests/**/fixtures/**`, `*.lock`, `*.json`, `*.yaml`, `*.yml`, binary extensions), and runs the four-pattern stub-mode regex check on the new content (Write → `.tool_input.content`; Edit → `.tool_input.new_string`). On findings, emits a JSON object via `jq -n` with a `systemMessage` field describing each flagged match (file_path + first matched line + catalogue-item label) and exits 0. On no findings, exits 0 silently. Live LLM mode is a pluggable opt-in via `COMMENT_REVIEW_SPAWN=1`, isolated in a dedicated `run_live_review` function (return code 0 = success path; non-zero = fall through to stub) so a mock `claude` binary on `PATH` can exercise the live path under shellspec without requiring an Anthropic API key. Framing uses `printf` concatenation (not heredoc) so author content containing a literal `EOF` line cannot terminate the envelope early. If `claude` is absent or the framed call fails, the hook falls through to stub mode without erroring.
 - **Verification:**
   1. `test -x .claude/hooks/comment-review.sh` succeeds (executable bit set).
   2. `tests/shellspec/comment-review.spec.sh` runs ≥6 cases, all pass: clean diff (no findings) · provenance hit · sibling-step hit · lineage hit · historical-count hit · skip-path early-exit · non-Write/Edit tool early-exit.
@@ -56,17 +56,18 @@ The loveable floor: a future Claude session running this hook gets a one-line `[
 
 ## AC-3 · `tests/shellspec/comment-review.spec.sh`
 
-- **Outcome:** Shellspec describes `scripts/.claude/hooks/comment-review.sh` (or path-as-existing) covering: happy-path clean diff, four anti-pattern detection cases (one per stub-mode regex), one path-filter skip case, one non-`Write|Edit` early-exit case. All 7 cases pass locally and in CI under `.github/workflows/shellspec.yml`.
+- **Outcome:** Shellspec describes `.claude/hooks/comment-review.sh` covering: 2 tool-name early-exits · 4 path-skip cases · 2 happy-path · 7 stub-mode anti-pattern detection cases · 2 live-mode cases (mock `claude` binary on `PATH` via `BeforeEach`/`AfterEach`, including a hostile-content regression with a literal `EOF` line). 17 It-blocks total. All cases pass locally and in CI under `.github/workflows/shellspec.yml`.
 - **Verification:**
-  1. `shellspec tests/shellspec/comment-review.spec.sh` reports `7/7` pass `0/7` fail in stub mode.
-  2. Each detection case asserts `.systemMessage` content includes the matched catalogue label (e.g. `provenance`, `sibling-step`, `lineage`, `historical-count`).
-  3. Skip-path case asserts hook exits 0 with no JSON emitted (silent skip).
-- **In scope:** Stub-mode-only test cases (live mode requires network + auth out of CI scope).
-- **Out of scope:** Live-mode integration test (deferred — same envelope as the existing pluggable pattern in `exit-plan-review.spec.sh`).
+  1. `grep -cE "^[[:space:]]*It '" tests/shellspec/comment-review.spec.sh` returns `17`; `shellspec tests/shellspec/comment-review.spec.sh` reports `17/17` pass `0/17` fail.
+  2. Each stub-mode detection case asserts `.systemMessage` content includes the matched catalogue label (e.g. `provenance`, `sibling-step`, `lineage`, `historical-count`).
+  3. Skip-path cases assert hook exits 0 with no JSON emitted (silent skip).
+  4. Live-mode case asserts `.systemMessage` includes the mock summary plus the `live` mode tag, exercising the `run_live_review` function with a mock binary that emits `{"summary":"mock-live-summary"}`.
+- **In scope:** Stub-mode test cases + live-mode mock-binary cases (no network + no API key required).
+- **Out of scope:** End-to-end live invocation against the real `claude` CLI (covered by manual dogfood + the pluggable env-var contract; no CI spend on real API calls).
 
 ## AC-4 · `.claude/settings.json` registration
 
-- **Outcome:** `comment-review.sh` is registered as a PostToolUse hook with `matcher: "Write|Edit"` alongside the existing `line-count.sh` registration in `.claude/settings.json`. Timeout matches `line-count.sh` (10s) for stub mode; live-mode timeout is internal to the hook (it falls back to stub on `claude -p` timeout).
+- **Outcome:** `comment-review.sh` is registered as a PostToolUse hook with `matcher: "Write|Edit"` alongside the existing `line-count.sh` registration in `.claude/settings.json`. Outer timeout 30s (live-mode `claude -p` budget; stub mode completes <50ms in practice). Live-mode call has its own internal `timeout 20 claude -p` cap inside `run_live_review` so the outer 30s is the safety ceiling, not the typical wait.
 - **Verification:**
   1. `jq '.hooks.PostToolUse[] | select(.matcher == "Write|Edit") | .hooks | length' .claude/settings.json` returns `2` (was `1` before the slice).
   2. `jq '.hooks.PostToolUse[] | select(.matcher == "Write|Edit") | .hooks | map(.command)' .claude/settings.json` lists both `.claude/hooks/line-count.sh` and `.claude/hooks/comment-review.sh`.

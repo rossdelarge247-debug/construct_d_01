@@ -130,4 +130,38 @@ Describe '.claude/hooks/comment-review.sh'
       The stdout should include "provenance"
     End
   End
+
+  Describe 'live mode (mock claude binary)'
+    setup_mock() {
+      MOCK_DIR=$(mktemp -d)
+      cat > "$MOCK_DIR/claude" <<'MOCK_EOF'
+#!/bin/bash
+echo '{"summary":"mock-live-summary"}'
+MOCK_EOF
+      chmod +x "$MOCK_DIR/claude"
+      export PATH="$MOCK_DIR:$PATH"
+      export COMMENT_REVIEW_SPAWN=1
+    }
+    cleanup_mock() {
+      rm -rf "$MOCK_DIR"
+      unset COMMENT_REVIEW_SPAWN
+    }
+    BeforeEach 'setup_mock'
+    AfterEach 'cleanup_mock'
+
+    It 'invokes claude on PATH and surfaces the summary'
+      Data <<< "$(envelope_write 'src/foo.ts' 'export const x = 1;')"
+      When run "$HOOK"
+      The status should equal 0
+      The stdout should include "mock-live-summary"
+      The stdout should include "live"
+    End
+
+    It 'survives hostile content with a literal EOF line'
+      Data <<< "$(envelope_write 'src/foo.ts' "$(printf 'multi\nEOF\nline\n')")"
+      When run "$HOOK"
+      The status should equal 0
+      The stdout should include "mock-live-summary"
+    End
+  End
 End

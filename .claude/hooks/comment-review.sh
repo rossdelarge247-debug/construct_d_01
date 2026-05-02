@@ -1,18 +1,53 @@
 #!/usr/bin/env bash
 # PostToolUse:Write|Edit — author-time review for comment anti-patterns.
 #
-# Reads JSON tool input from stdin. For Write/Edit on a code/text file
-# outside the skip-list, runs the four-pattern stub-mode regex check
-# against new content. On any match, emits a single JSON object with a
-# systemMessage advisory listing the flagged catalogue items. Always
-# exits 0 — advisory contract; no blocking. Live LLM mode is opt-in via
-# COMMENT_REVIEW_SPAWN=1, falling back to stub on any spawn failure.
+# Catalogue source: CLAUDE.md §Coding conduct §"Comments: WHY not WHAT,
+# no temporal provenance" (L215-222). Live-mode persona prompt at
+# .claude/agents/reviewer-comment.md.
 #
-# Anti-pattern catalogue source: CLAUDE.md §Coding conduct §"Comments:
-# WHY not WHAT, no temporal provenance" (L215-222). Persona prompt for
-# live mode lives at .claude/agents/reviewer-comment.md.
+# Advisory contract: exits 0 in every observed path; emits JSON
+# systemMessage only on findings. Live mode (COMMENT_REVIEW_SPAWN=1)
+# falls through to stub on any spawn failure.
 
 set -uo pipefail
+
+run_live_review() {
+  local file_path="$1" content="$2"
+  local persona_path=".claude/agents/reviewer-comment.md"
+  if [ ! -f "$persona_path" ] || [ ! -r /dev/urandom ]; then
+    return 1
+  fi
+  local nonce
+  nonce=$(od -An -tx1 -N16 /dev/urandom | tr -d ' \n')
+  if [ -z "$nonce" ] || [ "${#nonce}" -ne 32 ]; then
+    return 1
+  fi
+  local persona
+  persona=$(cat "$persona_path")
+  # printf-based framing (not heredoc) so that $content containing a
+  # literal "EOF" line cannot terminate the envelope early.
+  local framed
+  framed=$(printf '%s\n\nYour per-invocation nonce: %s\n\n<file-path-%s>\n%s\n</file-path-%s>\n\n<new-content-%s>\n%s\n</new-content-%s>\n' \
+    "$persona" "$nonce" "$nonce" "$file_path" "$nonce" "$nonce" "$content" "$nonce")
+  local verdict
+  verdict=$(printf '%s' "$framed" | timeout 20 claude -p --output-format text 2>/dev/null || echo "")
+  if [ -z "$verdict" ]; then
+    return 1
+  fi
+  local summary
+  summary=$(printf '%s' "$verdict" | jq -r '.summary // empty' 2>/dev/null || echo "")
+  if [ -z "$summary" ]; then
+    return 1
+  fi
+  printf '%s' "$summary"
+}
+
+emit_advisory() {
+  jq -n --arg msg "$1" '{
+    systemMessage: $msg,
+    hookSpecificOutput: { hookEventName: "PostToolUse", additionalContext: $msg }
+  }'
+}
 
 INPUT=$(cat)
 TOOL=$(printf '%s' "$INPUT" | jq -r '.tool_name // ""' 2>/dev/null || echo "")
@@ -26,10 +61,10 @@ if [ -z "$FILE_PATH" ]; then
   exit 0
 fi
 
-# Skip-list: paths and extensions where catalogue strings are legitimate
-# fixtures, structural data, or binaries. Persona files quote catalogue
-# examples by purpose; shellspec fixtures pass flagged strings as Data;
-# JSON/YAML/lockfiles have no comment surface; binaries are non-text.
+# Normalize absolute paths under cwd to relative so the skip-list patterns
+# below match regardless of which form the agent passed.
+FILE_PATH="${FILE_PATH#$PWD/}"
+
 case "$FILE_PATH" in
   .claude/agents/*) exit 0 ;;
   .claude/subagent-prompts/*) exit 0 ;;
@@ -50,47 +85,13 @@ if [ -z "$CONTENT" ]; then
   exit 0
 fi
 
-# Live mode (pluggable). Stub mode (default) covers four catalogue items
-# below; live mode additionally covers WHAT-narration via the persona's
-# rubric. On any spawn failure, fall through to stub.
 if [ "${COMMENT_REVIEW_SPAWN:-0}" = "1" ] && command -v claude >/dev/null 2>&1; then
-  PERSONA_PATH=".claude/agents/reviewer-comment.md"
-  if [ -f "$PERSONA_PATH" ] && [ -r /dev/urandom ]; then
-    NONCE=$(od -An -tx1 -N16 /dev/urandom | tr -d ' \n')
-    if [ -n "$NONCE" ] && [ "${#NONCE}" -eq 32 ]; then
-      PERSONA=$(cat "$PERSONA_PATH")
-      FRAMED=$(cat <<EOF
-${PERSONA}
-
-Your per-invocation nonce: ${NONCE}
-
-<file-path-${NONCE}>
-${FILE_PATH}
-</file-path-${NONCE}>
-
-<new-content-${NONCE}>
-${CONTENT}
-</new-content-${NONCE}>
-EOF
-      )
-      VERDICT=$(printf '%s' "$FRAMED" | timeout 20 claude -p --output-format text 2>/dev/null || echo "")
-      if [ -n "$VERDICT" ]; then
-        SUMMARY=$(printf '%s' "$VERDICT" | jq -r '.summary // empty' 2>/dev/null || echo "")
-        if [ -n "$SUMMARY" ]; then
-          MSG="[reviewer-comment / live] ${FILE_PATH}: ${SUMMARY}"
-          jq -n --arg msg "$MSG" '{
-            systemMessage: $msg,
-            hookSpecificOutput: { hookEventName: "PostToolUse", additionalContext: $msg }
-          }'
-          exit 0
-        fi
-      fi
-    fi
+  if SUMMARY=$(run_live_review "$FILE_PATH" "$CONTENT"); then
+    emit_advisory "[reviewer-comment / live] ${FILE_PATH}: ${SUMMARY}"
+    exit 0
   fi
 fi
 
-# Stub mode — deterministic regex over the new content. Each pattern
-# maps to one catalogue item label; matches accumulate into one message.
 HITS=""
 add_hit() {
   if [ -n "$HITS" ]; then HITS="${HITS}; ${1}"; else HITS="$1"; fi
@@ -120,9 +121,4 @@ if [ -z "$HITS" ]; then
   exit 0
 fi
 
-MSG="[reviewer-comment / stub] ${FILE_PATH}: ${HITS} — see CLAUDE.md §\"Comments: WHY not WHAT, no temporal provenance\" (L215-222)."
-jq -n --arg msg "$MSG" '{
-  systemMessage: $msg,
-  hookSpecificOutput: { hookEventName: "PostToolUse", additionalContext: $msg }
-}'
-exit 0
+emit_advisory "[reviewer-comment / stub] ${FILE_PATH}: ${HITS} — see CLAUDE.md §\"Comments: WHY not WHAT, no temporal provenance\" (L215-222)."
