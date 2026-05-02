@@ -20,7 +20,7 @@ describe('Design system tokens — globals.css ↔ tokens.ts parity (S-F1)', () 
     expect(missing).toEqual([])
   })
 
-  it('TOKEN_NAMES has 69 entries — S-F1 base (65) + S-F4 trust extensions (4)', () => {
+  it('TOKEN_NAMES has 69 entries', () => {
     expect(TOKEN_NAMES.length).toBe(69)
   })
 
@@ -33,7 +33,7 @@ describe('Design system tokens — globals.css ↔ tokens.ts parity (S-F1)', () 
     expect(TOKEN_NAMES).not.toContain('--ds-color-phase-start')
   })
 
-  it('trust LOCKED visuals present per 68f C-T1 (S-F4)', () => {
+  it('trust LOCKED visuals present', () => {
     expect(TOKEN_NAMES).toContain('--ds-color-trust-self-declared')
     expect(TOKEN_NAMES).toContain('--ds-color-trust-self-declared-soft')
     expect(TOKEN_NAMES).toContain('--ds-color-trust-bank-evidenced')

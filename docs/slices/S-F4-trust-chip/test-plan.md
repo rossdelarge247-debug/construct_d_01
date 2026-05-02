@@ -49,7 +49,7 @@ One or more tests per AC. Taxonomy + component + parity tests live in `tests/uni
   - `npx tsc --noEmit` → exit 0, no diagnostics.
   - `npm run lint` → 0 errors; pre-existing warnings allowed.
   - `NEXT_PUBLIC_DECOUPLE_AUTH_MODE=prod npm run build` → success; placeholder landing builds with new component.
-  - Preview deploy: opening landing page, `getComputedStyle(document.querySelector('[data-trust-chip-self-declared]')).getPropertyValue('background-color')` resolves to the trust-token value (`var(--ds-color-trust-self-declared-soft)`).
+  - Preview deploy: opening landing page, `getComputedStyle(document.querySelector('[data-trust-chip-level="self-declared"]')).getPropertyValue('background-color')` resolves to the trust-token value (`var(--ds-color-trust-self-declared-soft)`).
 - **Type:** integration (CI command harness) + manual (preview deploy spot-check)
 - **Automated:** four commands yes; preview spot-check no.
 - **Fixture:** repo at slice HEAD commit.

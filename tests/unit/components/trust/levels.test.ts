@@ -2,12 +2,12 @@ import { describe, it, expect } from 'vitest'
 import { TRUST_LEVELS, DEFAULT_LEVEL, humaniseLevel } from '@/components/trust/levels'
 import type { TrustLevel } from '@/components/trust/types'
 
-describe('Trust taxonomy — levels + helper (S-F4 AC-2)', () => {
-  it('TRUST_LEVELS has 6 entries per C-T2 LOCKED', () => {
+describe('Trust taxonomy — levels + helper', () => {
+  it('TRUST_LEVELS has 6 entries', () => {
     expect(TRUST_LEVELS).toHaveLength(6)
   })
 
-  it('TRUST_LEVELS ordering matches C-T2 verbatim', () => {
+  it('TRUST_LEVELS ordering matches the canonical sequence', () => {
     expect([...TRUST_LEVELS]).toEqual([
       'self-declared',
       'bank-evidenced',
@@ -18,7 +18,7 @@ describe('Trust taxonomy — levels + helper (S-F4 AC-2)', () => {
     ])
   })
 
-  it('DEFAULT_LEVEL is self-declared per C-T2 default rule', () => {
+  it('DEFAULT_LEVEL is self-declared', () => {
     expect(DEFAULT_LEVEL).toBe('self-declared')
   })
 

@@ -27,7 +27,7 @@ function defaultLabel(level: TrustLevel): string {
 }
 
 export function TrustChip({ level, sourceLabel }: TrustChipProps) {
-  const label = sourceLabel ?? defaultLabel(level)
+  const label = sourceLabel || defaultLabel(level)
   const className = `${SHARED_CLASSES} ${LEVEL_CLASSES[level]}`
   return (
     <span

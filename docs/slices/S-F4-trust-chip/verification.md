@@ -39,6 +39,12 @@ Plus 13-item security checklist exercised in `./security.md` — most N/A for fo
 | Mobile viewport (375×667) | Pending preview URL | Demo block uses `flex flex-wrap items-center gap-[var(--ds-space-8)]` — chips wrap on narrow viewports; spot-check at preview. |
 | Screen-reader | Covered | `aria-label="Trust: {humanised level} — {label}"` present on every chip; test asserts presence for each of 6 levels. |
 
+## In-scope additions noted post-review
+
+The following file movement was not declared in `acceptance.md` or this verification document at AC freeze. Recording here for the audit trail per criterion-2 exception (a) — incidental scaffolding for the new `tests/unit/components/trust/` hierarchy:
+
+- **Test rename:** `tests/unit/tokens.test.ts` → `tests/unit/styles/tokens.test.ts`. Reason: aligns with `tdd-guard.sh` deterministic test-path mapping (`src/styles/tokens.ts` → `tests/unit/styles/tokens.test.ts` per L102-L104). Without this rename, future edits to `src/styles/tokens.ts` would block on "test file missing for src/styles/tokens.ts". Git auto-detected the rename — history preserved.
+
 ## Auto-review verdict + findings
 
-*(Populated post-PR open + multi-agent review run.)*
+Round 1 verdict (k=2 quorum): 🟡 request-changes — 8 findings (1 blocking-but-quorum-demoted, 6 non-blocking issues, 1 nitpick). All actionable findings addressed in round 2; nitpick (rename should be separate chore commit) skipped with reasoning in PR comment.

@@ -5,8 +5,8 @@ import { resolve } from 'node:path'
 const specPath = resolve(process.cwd(), 'docs/workspace-spec/68f-open-decisions-register.md')
 const spec = readFileSync(specPath, 'utf-8')
 
-describe('S-F4 parity vs 68f C-T1 wire evidence (AC-3)', () => {
-  it('68f contains the C-T1 LOCKED resolution entry', () => {
+describe('Trust chip — parity vs spec wire evidence', () => {
+  it('spec contains the trust badge visual treatment LOCKED entry', () => {
     expect(spec).toContain('C-T1 · Trust badge visual treatment — LOCKED')
   })
 
