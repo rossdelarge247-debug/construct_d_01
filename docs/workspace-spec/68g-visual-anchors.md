@@ -111,6 +111,12 @@ Bottom of list: `+ Add a task` link (scope open — see 68f B-14).
 **Evidence:** Session 22 first-time dashboard (bank-connect card: `Est. time ~60s`).
 **Target:** Pattern spec. Lock format, typography, application rules (any step that has a knowable duration).
 
+### 🟠 C-T1 · Trust chip per-level visual treatment (4 OPEN levels)
+**Pattern:** Six trust levels per 68a C-T2 LOCKED ordering (self-declared → bank-evidenced → credit-verified → document-evidenced → both-party-agreed → court-sealed). Chip pattern locked via 68f C-T1 wire evidence: colour = taxonomy level, label = specific source. Two visual treatments LOCKED — amber chip for self-declared (default label `Estimated`); green chip for bank-evidenced (label = source name, e.g. `Verified from Barclays xxxx2323`). Four remaining levels (credit-verified / document-evidenced / both-party-agreed / court-sealed) render as neutral utility classes pending per-level visual extraction.
+**Evidence:** Session 22 spending-estimates → bank-evidenced upgrade wires (covers the 2 LOCKED levels).
+**Target:** Anchor per-level visual treatments for the 4 OPEN levels (colour + chip-style spec) during Phase C anchor design.
+**Partial:** Session 61 / S-F4 — `docs/slices/S-F4-trust-chip/`. Pattern + 6-level taxonomy + 2 LOCKED visual treatments shipped at `src/components/trust/TrustChip.tsx` consuming `--ds-color-trust-{self-declared,bank-evidenced}` (each + `-soft` variant). 4 OPEN levels render via neutral utility classes (`bg-neutral-100 text-neutral-600 border-neutral-300`) — reskin when per-level treatments anchor.
+
 ---
 
 ## Maintenance

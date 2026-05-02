@@ -129,6 +129,11 @@ export type TokenName =
   | '--ds-color-phase-settle-soft'
   | '--ds-color-phase-finalise'
   | '--ds-color-phase-finalise-soft'
+  // Colours · Trust levels
+  | '--ds-color-trust-self-declared'
+  | '--ds-color-trust-self-declared-soft'
+  | '--ds-color-trust-bank-evidenced'
+  | '--ds-color-trust-bank-evidenced-soft'
   // Colours · State
   | '--ds-color-danger'
   // Fonts
@@ -210,6 +215,10 @@ export const TOKEN_NAMES: ReadonlyArray<TokenName> = [
   '--ds-color-phase-settle-soft',
   '--ds-color-phase-finalise',
   '--ds-color-phase-finalise-soft',
+  '--ds-color-trust-self-declared',
+  '--ds-color-trust-self-declared-soft',
+  '--ds-color-trust-bank-evidenced',
+  '--ds-color-trust-bank-evidenced-soft',
   '--ds-color-danger',
   '--ds-font-sans',
   '--ds-font-serif',

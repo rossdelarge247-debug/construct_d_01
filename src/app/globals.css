@@ -135,6 +135,12 @@
   --ds-color-phase-finalise: #166534;
   --ds-color-phase-finalise-soft: #DCFCE7;
 
+  /* ─── Colours · Trust levels (4) — spec 68f C-T1 LOCKED visuals ─── */
+  --ds-color-trust-self-declared: #B45309;
+  --ds-color-trust-self-declared-soft: #FEF3C7;
+  --ds-color-trust-bank-evidenced: #15803D;
+  --ds-color-trust-bank-evidenced-soft: #F0FDF4;
+
   /* ─── Colours · State (1) ─── */
   --ds-color-danger: #FF3B30;
 
