@@ -20,8 +20,8 @@ describe('Design system tokens — globals.css ↔ tokens.ts parity (S-F1)', () 
     expect(missing).toEqual([])
   })
 
-  it('TOKEN_NAMES has 65 entries — locked count for S-F1', () => {
-    expect(TOKEN_NAMES.length).toBe(65)
+  it('TOKEN_NAMES has 69 entries', () => {
+    expect(TOKEN_NAMES.length).toBe(69)
   })
 
   it('phase colour quartet matches spec 68g C-V1', () => {
@@ -31,5 +31,12 @@ describe('Design system tokens — globals.css ↔ tokens.ts parity (S-F1)', () 
     expect(TOKEN_NAMES).toContain('--ds-color-phase-finalise')
     // Start phase implicit per spec 42 5-phase model + user direction
     expect(TOKEN_NAMES).not.toContain('--ds-color-phase-start')
+  })
+
+  it('trust LOCKED visuals present', () => {
+    expect(TOKEN_NAMES).toContain('--ds-color-trust-self-declared')
+    expect(TOKEN_NAMES).toContain('--ds-color-trust-self-declared-soft')
+    expect(TOKEN_NAMES).toContain('--ds-color-trust-bank-evidenced')
+    expect(TOKEN_NAMES).toContain('--ds-color-trust-bank-evidenced-soft')
   })
 })

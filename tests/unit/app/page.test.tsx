@@ -21,4 +21,12 @@ describe('LandingPage', () => {
     expect(container.querySelector('nav[aria-label="Journey map"]')).toBeTruthy()
     expect(container.querySelector('section[aria-disabled="true"]')).toBeTruthy()
   })
+
+  it('renders the S-F4 trust chip demo block with all 6 levels', () => {
+    const { container } = render(<LandingPage />)
+    const section = container.querySelector('[aria-label="Trust chip demo (S-F4)"]')
+    expect(section).toBeTruthy()
+    const chips = section?.querySelectorAll('[data-trust-chip-level]') ?? []
+    expect(chips.length).toBe(6)
+  })
 })

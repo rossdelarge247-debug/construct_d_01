@@ -5,6 +5,7 @@ import {
   LockedSection,
   buildPhasesData,
 } from '@/components/phase-nav'
+import { TrustChip, TRUST_LEVELS } from '@/components/trust'
 
 export const metadata: Metadata = {
   title: 'Decouple — rebuilding',
@@ -51,6 +52,31 @@ export default function LandingPage() {
                 Once you and Mark share your pictures, you&apos;ll work through any differences here.
               </p>
             </LockedSection>
+          </div>
+        </section>
+
+        <section
+          aria-label="Trust chip demo (S-F4)"
+          className="flex flex-col gap-[var(--ds-space-24)]"
+        >
+          <h2 className="text-[length:var(--ds-type-21)] font-medium text-[color:var(--ds-color-ink)]">
+            Trust chip demo (S-F4)
+          </h2>
+          <p className="text-[length:var(--ds-type-15-5)] text-[color:var(--ds-color-text-sub)]">
+            Six trust levels, two with locked visual treatment per 68f C-T1
+            (amber self-declared + green bank-evidenced); four pending Phase C
+            anchor extraction.
+          </p>
+          <div className="flex flex-wrap items-center gap-[var(--ds-space-8)]">
+            {TRUST_LEVELS.map((level) => (
+              <TrustChip
+                key={level}
+                level={level}
+                {...(level === 'bank-evidenced'
+                  ? { sourceLabel: 'Verified from Barclays xxxx2323' }
+                  : {})}
+              />
+            ))}
           </div>
         </section>
       </div>
