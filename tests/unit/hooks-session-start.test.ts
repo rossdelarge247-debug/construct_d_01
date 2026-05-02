@@ -187,7 +187,7 @@ describe("session-start.sh — suffix-orphan detection (AC-2)", () => {
   });
 });
 
-describe("session-start.sh — origin/HEAD set (AC-7 / CLAUDE.md candidate #14)", () => {
+describe("session-start.sh — origin/HEAD set", () => {
   const sessionId = "test-session-origin-head";
   let fixture: RepoFixture;
 
@@ -200,7 +200,7 @@ describe("session-start.sh — origin/HEAD set (AC-7 / CLAUDE.md candidate #14)"
     fixture?.cleanup();
   });
 
-  it("AC-7: sets origin/HEAD = main on invocation; idempotent across re-runs", () => {
+  it("sets origin/HEAD = main on invocation; idempotent across re-runs", () => {
     fixture = makeRepo({});
 
     expect(() => sh(`git symbolic-ref refs/remotes/origin/HEAD`, fixture.workdir)).toThrow();

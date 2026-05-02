@@ -65,7 +65,7 @@ describe('lib/store/scenario-loader — load + wipe + URL trigger', () => {
     'sarah-reconcile-in-progress',
     'sarah-settle',
     'sarah-finalise',
-  ])('S-F7-β AC-6: loadScenario("%s") loads cleanly + seeds session', async (name) => {
+  ])('loadScenario("%s") loads cleanly + seeds session', async (name) => {
     const { loadScenario, SCENARIO_NAMES } = await import('@/lib/store/scenario-loader');
     expect(SCENARIO_NAMES).toContain(name);
     await loadScenario(name);

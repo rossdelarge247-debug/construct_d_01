@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import Link from 'next/link'
 import { MODE } from '@/lib/auth'
 import { SCENARIO_META } from '@/lib/store/scenario-descriptions'
@@ -45,8 +45,11 @@ const buttonStyle: React.CSSProperties = {
 export default function ScenariosPage() {
   const [busy, setBusy] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)
+  const triggered = useRef(false)
 
   useEffect(() => {
+    if (triggered.current) return
+    triggered.current = true
     const params = new URLSearchParams(window.location.search)
     const loadName = params.get('load')
     if (!loadName) return

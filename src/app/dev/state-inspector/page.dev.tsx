@@ -4,7 +4,7 @@ import { useState } from 'react'
 import Link from 'next/link'
 import { MODE } from '@/lib/auth'
 
-const PREFIX = 'decouple:dev:'
+const DEV_KEY_PREFIX = 'decouple:dev:'
 
 interface Entry {
   key: string
@@ -79,7 +79,7 @@ function validate(text: string): string | null {
 function snapshot(): Entry[] {
   if (typeof window === 'undefined') return []
   const keys = Object.keys(window.localStorage)
-    .filter((k) => k.startsWith(PREFIX))
+    .filter((k) => k.startsWith(DEV_KEY_PREFIX))
     .sort()
   return keys.map((key) => {
     const raw = window.localStorage.getItem(key) ?? ''
@@ -138,14 +138,14 @@ export default function StateInspectorPage() {
         </Link>
         <h1 style={{ margin: '0.25rem 0 0', fontSize: '1.5rem' }}>State Inspector</h1>
         <p style={{ margin: '0.25rem 0 0', fontSize: '0.875rem', color: '#666' }}>
-          Every <span style={codeStyle}>{PREFIX}*</span> key in localStorage. Edit JSON inline.
+          Every <span style={codeStyle}>{DEV_KEY_PREFIX}*</span> key in localStorage. Edit JSON inline.
           Save is blocked while JSON is invalid.
         </p>
       </header>
 
       {entries.length === 0 && (
         <p style={{ color: '#666', fontSize: '0.875rem' }}>
-          No <span style={codeStyle}>{PREFIX}*</span> keys present. Pick a scenario from{' '}
+          No <span style={codeStyle}>{DEV_KEY_PREFIX}*</span> keys present. Pick a scenario from{' '}
           <Link href="/dev/scenarios" style={{ color: '#0066cc' }}>
             /dev/scenarios
           </Link>

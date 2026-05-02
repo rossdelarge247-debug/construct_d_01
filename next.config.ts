@@ -1,10 +1,8 @@
 import type { NextConfig } from "next";
 
-// Spec 72 §7 build-time exclusion: dev-only routes are named `*.dev.tsx`
-// and only treated as routes when MODE=dev. In prod builds Next.js skips
-// them entirely — no compiled chunks, no `decouple:dev:` literals, no
-// way for /dev/* to reach the production bundle even if a layout's
-// runtime notFound() guard regressed.
+// pageExtensions excludes *.dev.tsx from prod compilation: Next.js
+// skips them entirely (no chunks, no source maps). Layout's runtime
+// notFound() guard remains as defence-in-depth.
 const includeDevRoutes =
   process.env.NEXT_PUBLIC_DECOUPLE_AUTH_MODE !== 'prod';
 

@@ -29,8 +29,7 @@ const buttonStyle: React.CSSProperties = {
 }
 
 export default function ResetPage() {
-  // Runtime-built namespace prefix — same trick as env-banner so source
-  // maps don't preserve the `decouple:dev:` literal.
+  // Array join keeps the literal `decouple:dev:` out of source-map sourcesContent.
   const NS_PREFIX = `${['decouple', 'dev'].join(':')}:`
 
   const [busy, setBusy] = useState(false)
