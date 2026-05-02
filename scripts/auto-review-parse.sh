@@ -45,14 +45,29 @@ if [ -z "$RESULT" ]; then
   exit 0
 fi
 
+# Skipped for the '{}' sentinel — it would always fail validation by design.
+# The `|| printf …` form makes the assignment a tested context, so a non-zero
+# command-sub does not trigger `set -e` errexit; head -1 sanitises a multi-line
+# validator message to one line so the advisory respects the single-line invariant.
+validate_warn() {
+  local json="$1" err
+  [ "$json" = "{}" ] && return 0
+  err=$(printf '%s' "$json" | scripts/validate-finding-envelope.sh 2>&1 >/dev/null) \
+    || printf 'auto-review-parse: schema-invalid persona envelope (proceeding): %s\n' \
+       "$(printf '%s' "$err" | head -1)" >&2
+  return 0
+}
+
 # Step 3: try direct jq parse → fence-stripped jq parse → '{}'.
 # Both branches require non-empty parsed output to count as success;
 # otherwise fall through (handles the `'{}'` and trailing-fence edge
 # cases that `||` alone can't catch).
 if PERSONA_JSON=$(printf '%s' "$RESULT" | jq -c '.' 2>/dev/null) && [ -n "$PERSONA_JSON" ]; then
   echo "$PERSONA_JSON"
+  validate_warn "$PERSONA_JSON"
 elif PERSONA_JSON=$(printf '%s' "$RESULT" | grep -v '^[[:space:]]*```' | jq -c '.' 2>/dev/null) && [ -n "$PERSONA_JSON" ]; then
   echo "$PERSONA_JSON"
+  validate_warn "$PERSONA_JSON"
 else
   echo '{}'
 fi
