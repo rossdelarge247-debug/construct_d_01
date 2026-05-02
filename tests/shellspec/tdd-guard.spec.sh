@@ -207,8 +207,7 @@ EOF
   Describe 'fixture (8) — Write of non-existent src with assertion failure still blocks'
     It 'exits 2 when vitest fails without a module-resolve signal'
       cd "$SPEC_TMP" || return 1
-      # NB: src/lib/asserterr.ts intentionally does NOT exist; spec exercises
-      # the precise condition that distinguishes chicken-and-egg from real RED.
+      # NB: src/lib/asserterr.ts intentionally absent.
       : > tests/unit/lib/asserterr.test.ts
       make_stub_with_output "$SPEC_TMP/vitest-stub.sh" 1 \
         'AssertionError: expected 1 to equal 2'
