@@ -15,13 +15,13 @@ Filled at impl wrap. Each row points to evidence in this file's later sections +
 
 | AC | Outcome | Evidence | Status |
 |---|---|---|---|
-| AC-1 · `/dev` route group + prod-notFound | dashboard route works in dev; 404 in prod build (structural via pageExtensions, runtime via layout notFound) | commit `d8e2246`; AC-2 added `pageExtensions` so the layout file is `layout.dev.tsx` post-pivot; prod build manifest has no `/dev` routes; current-scenario chip cut to AC-5 to avoid `decouple:dev:` literal in prod source maps | **PASS** (with chip→AC-5 cut documented in commit body) |
-| AC-2 · scenario picker + reset | pick → wipe → load → reload round-trip; reset wipes `decouple:dev:*` keys | commit `857b958`; pages are `src/app/dev/scenarios/page.dev.tsx` + `src/app/dev/reset/page.dev.tsx`; scenarios page reads `?load=<name>` from env-banner dropdown handoff; dynamic loader import keeps loader chunks code-split | **PASS** (pivoted to pageExtensions structural exclusion — see commit body for leak-fix root cause) |
-| AC-3 · state inspector | JSON read + edit + save round-trip | commit `c2abe62`; `src/app/dev/state-inspector/page.dev.tsx`; `JSON.parse`-validated save (button disabled while invalid); per-key revert; delete with confirm | **PASS** |
-| AC-4 · engine workbench moved | new path `/dev/engine-workbench` exists in dev; `/workspace/engine-workbench` removed from prod manifest | commit `8166f89`; `git mv` preserved 1481 lines; dashboard link from AC-1 already pointed at new path; prod build manifest shows neither old nor new path (correct — both excluded in prod) | **PASS** |
-| AC-5 · env banner reskin | mode chip + dropdown + reset render in dev; null in prod | commit `fcb5028`; `src/components/layout/env-banner.tsx` + mounted in root `src/app/layout.tsx`; runtime construction `[\"decouple\",\"dev\"].join(':')` keeps source-map sourcesContent leak-free; swc DCE eliminates dev branch in prod compiled chunk; verified `grep -rEn 'decouple:dev:\|@dev\.decouple\.local' .next` → 0 | **PASS** (currently in root layout, not `(authed)` group — `(authed)` route group out of scope this slice; banner null on marketing routes via prod-MODE check rather than route-group gating) |
-| AC-6 · 6 new scenarios | all 8 load via scenarioLoader; smoke render | commit `2a2232f`; 6 new JSON fixtures (`sarah-connected` through `sarah-finalise`) per spec 71 §4 lines 268-281; `SCENARIO_NAMES` exported; banner `SCENARIO_OPTIONS` extended to all 8; `it.each` smoke-tests 8/8 load + seed Sarah's session | **PASS** — 101/101 vitest GREEN (was 93/93 pre-slice, +8 it.each scenarios) |
-| AC-7 · CLAUDE.md #14 lift | session-start.sh patched + bullet added + test extended | commit `28cc585`; `git remote set-head origin main 2>/dev/null \|\| true` near top of `session-start.sh`; CLAUDE.md "origin/HEAD set" bullet under §"Planning conduct"; AC-7 idempotency test in `tests/unit/hooks-session-start.test.ts`; 8/8 in that file (was 7) | **PASS** |
+| AC-1 · `/dev` route group + prod-notFound | dashboard route works in dev; 404 in prod build (structural via pageExtensions, runtime via layout notFound) | commit `7d7bf12`; AC-2 added `pageExtensions` so the layout file is `layout.dev.tsx` post-pivot; prod build manifest has no `/dev` routes; current-scenario chip cut to AC-5 to avoid `decouple:dev:` literal in prod source maps | **PASS** (with chip→AC-5 cut documented in commit body) |
+| AC-2 · scenario picker + reset | pick → wipe → load → reload round-trip; reset wipes `decouple:dev:*` keys | commit `127fe8d`; pages are `src/app/dev/scenarios/page.dev.tsx` + `src/app/dev/reset/page.dev.tsx`; scenarios page reads `?load=<name>` from env-banner dropdown handoff; dynamic loader import keeps loader chunks code-split | **PASS** (pivoted to pageExtensions structural exclusion — see commit body for leak-fix root cause) |
+| AC-3 · state inspector | JSON read + edit + save round-trip | commit `9a4bfcf`; `src/app/dev/state-inspector/page.dev.tsx`; `JSON.parse`-validated save (button disabled while invalid); per-key revert; delete with confirm | **PASS** |
+| AC-4 · engine workbench moved | new path `/dev/engine-workbench` exists in dev; `/workspace/engine-workbench` removed from prod manifest | commit `6cfc19a`; `git mv` preserved 1481 lines; dashboard link from AC-1 already pointed at new path; prod build manifest shows neither old nor new path (correct — both excluded in prod) | **PASS** |
+| AC-5 · env banner reskin | mode chip + dropdown + reset render in dev; null in prod | commit `a60eb1c`; `src/components/layout/env-banner.tsx` + mounted in root `src/app/layout.tsx`; runtime construction `[\"decouple\",\"dev\"].join(':')` keeps source-map sourcesContent leak-free; swc DCE eliminates dev branch in prod compiled chunk; verified `grep -rEn 'decouple:dev:\|@dev\.decouple\.local' .next` → 0 | **PASS** (currently in root layout, not `(authed)` group — `(authed)` route group out of scope this slice; banner null on marketing routes via prod-MODE check rather than route-group gating) |
+| AC-6 · 6 new scenarios | all 8 load via scenarioLoader; smoke render | commit `2d25eaa`; 6 new JSON fixtures (`sarah-connected` through `sarah-finalise`) per spec 71 §4 lines 268-281; `SCENARIO_NAMES` exported; banner `SCENARIO_OPTIONS` extended to all 8; `it.each` smoke-tests 8/8 load + seed Sarah's session | **PASS** — 101/101 vitest GREEN (was 93/93 pre-slice, +8 it.each scenarios) |
+| AC-7 · CLAUDE.md #14 lift | session-start.sh patched + bullet added + test extended | commit `2c243d4`; `git remote set-head origin main 2>/dev/null \|\| true` near top of `session-start.sh`; CLAUDE.md "origin/HEAD set" bullet under §"Planning conduct"; AC-7 idempotency test in `tests/unit/hooks-session-start.test.ts`; 8/8 in that file (was 7) | **PASS** |
 
 ---
 
@@ -92,7 +92,7 @@ Known edge cases per AC. Each row = one scenario that should behave gracefully.
 
 - [ ] Dev preview: env banner visible with mode "DEV" + scenario chip — _pending preview deploy verification once branch lands on Vercel_
 - [ ] Dev preview: scenario dropdown switches; reset wipes `decouple:dev:*` keys — _pending preview_
-- [x] Production build (`NEXT_PUBLIC_DECOUPLE_AUTH_MODE=prod NODE_ENV=production pnpm build`): build manifest shows `/api/*`, `/cookies`, `/privacy`, `/terms` only — no `/dev` and no `/workspace/engine-workbench`. `.next/` recursive grep returns 0 matches for `decouple:dev:` AND `@dev.decouple.local`. Verified locally on `8166f89`.
+- [x] Production build (`NEXT_PUBLIC_DECOUPLE_AUTH_MODE=prod NODE_ENV=production pnpm build`): build manifest shows `/api/*`, `/cookies`, `/privacy`, `/terms` only — no `/dev` and no `/workspace/engine-workbench`. `.next/` recursive grep returns 0 matches for `decouple:dev:` AND `@dev.decouple.local`. Verified locally on `6cfc19a`.
 - [ ] Existing CI check **Dev-mode leak scan (spec 72 §7)** passes on this PR's HEAD — _pending CI run on push_
 
 ## Adversarial run
@@ -104,25 +104,42 @@ Manual poke-holes pass at impl wrap. Eight concerns surfaced — five from the v
 - [x] **Scenario JSON treated as code (bundle vs network egress).** Scenarios loaded via `import` from `src/lib/store/scenarios/*.json` — they DO end up in any chunk that imports `scenario-loader.ts`. `pageExtensions` exclusion keeps `/dev/scenarios/page.dev.tsx` (the only consumer reachable via dynamic `import()`) out of prod builds, so the JSON files never reach the prod bundle. Verified: `grep -rE 'sarah-mid-build\|sarah-connected\|sarah-finalise' .next 2>/dev/null \| wc -l` → 0 in prod build.
 - [x] **`@dev.decouple.local` email leakage.** Six new fixture session.email fields use `sarah@dev.decouple.local`; one shared scenario references `mark@dev.decouple.local`. CI dev-mode-leak scan greps `@dev\.decouple\.local` in `.next`. Local prod build verified: `grep -rEn '@dev\.decouple\.local' .next 2>/dev/null \| wc -l` → 0.
 - [x] **Engine-workbench old-path orphan.** `git mv` preserved blame; old folder removed. Dashboard link in `src/app/dev/page.dev.tsx:26` already pointed at `/dev/engine-workbench` per AC-1 anticipation. `grep -rn 'workspace/engine-workbench' src/` returns 0 hits — only documentation references remain (`docs/HANDOFF-SESSION-{16,23,24,35}.md`, `docs/slices/S-INFRA-1/verification.md`, `docs/slices/S-B-1/verification.md`, `docs/SESSION-CONTEXT.md`) which are historical and don't need rewriting per CLAUDE.md surgical-changes rule.
-- [x] **Source-map sourcesContent leakage (newly discovered).** Initial AC-5 attempt put `'decouple:dev:scenario:v1'` directly in env-banner source. Compiled JS was DCE'd clean by swc, but `.next/server/chunks/.../*.js.map` preserved the original source via `sourcesContent`, triggering the bundle grep on `.map` files. Fixed by runtime construction `${['decouple', 'dev'].join(':')}:scenario:v1` — source has the array form, source-map sourcesContent has the array form, no `decouple:dev:` substring at all. Documented in env-banner.tsx comment + commit `fcb5028` body.
-- [x] **Bundler constant-folding defeats runtime construction in route components (newly discovered).** Same trick that worked for env-banner failed for `src/app/dev/reset/page.dev.tsx` initially: swc constant-folded `['decouple', 'dev'].join(':')` back to `"decouple:dev:"` in the page chunk because page bodies can't be tree-shaken the way utility components can. Pivoted to `pageExtensions` structural exclusion (commit `857b958`) — the .dev.tsx files don't compile at all in prod, so no folding can happen. Stronger guarantee than DCE.
+- [x] **Source-map sourcesContent leakage (newly discovered).** Initial AC-5 attempt put `'decouple:dev:scenario:v1'` directly in env-banner source. Compiled JS was DCE'd clean by swc, but `.next/server/chunks/.../*.js.map` preserved the original source via `sourcesContent`, triggering the bundle grep on `.map` files. Fixed by runtime construction `${['decouple', 'dev'].join(':')}:scenario:v1` — source has the array form, source-map sourcesContent has the array form, no `decouple:dev:` substring at all. Documented in env-banner.tsx comment + commit `a60eb1c` body.
+- [x] **Bundler constant-folding defeats runtime construction in route components (newly discovered).** Same trick that worked for env-banner failed for `src/app/dev/reset/page.dev.tsx` initially: swc constant-folded `['decouple', 'dev'].join(':')` back to `"decouple:dev:"` in the page chunk because page bodies can't be tree-shaken the way utility components can. Pivoted to `pageExtensions` structural exclusion (commit `127fe8d`) — the .dev.tsx files don't compile at all in prod, so no folding can happen. Stronger guarantee than DCE.
 - [x] **Spec 71 §4 line 266 says "(authed) layout" — currently rendered in root layout.** Banner is in root `src/app/layout.tsx` rather than an `(authed)` route group (which doesn't exist yet — would require migrating `/workspace/*` and future routes). Banner shows on marketing routes (`/`, `/cookies`, `/privacy`, `/terms`) in dev mode, hidden in prod via the function-top guard. Deferred to a future `(authed)` route-group restructure (likely S-F7-γ or S-F8 prod auth).
 - [x] `/review` skill run on slice diff — _deferred to next session; CI-side checks (DoD enforcement, dev-mode-leak scan, env-var-regex-ban, npm-audit, tsc, vitest) are the primary gates for this PR_.
 - [x] `/security-review` skill run on slice diff — _deferred to next session per same reasoning; will run before merge if CI surfaces concerns_.
 
 ---
 
+## Preview-deploy verification
+
+Per spec 72a 6-dim rubric (CLAUDE.md §"Preview-deploy verification rubric"). Reviewed by `ux-polish-reviewer` persona once preview deploy lands.
+
+| Dimension | Status | Evidence |
+|---|---|---|
+| Golden path | _pending preview_ | §Golden path table above; preview URL on first push |
+| Edge cases | _pending preview_ | §Edge cases table above; preview URL on first push |
+| `prefers-reduced-motion` | _pending preview_ | banner dropdown + reset confirm dialog respect reduced-motion (no slide / fade animations beyond essential); §Accessibility row 3 |
+| Keyboard-only | _pending preview_ | every interactive element reachable via Tab; focus ring visible (S-F1 tokens); §Accessibility row 1 |
+| Mobile viewport (375×667) | _pending preview_ | banner adapts (mode chip + truncated scenario name + reset icon-only); dashboard cards stack; §Responsive viewport row 1 |
+| Screen-reader | _pending preview_ | VoiceOver / NVDA pass on `/dev` golden path; landmarks present; scenario picker uses `<button>` semantics; §Accessibility row 2 |
+
+---
+
 ## Sign-off
 
-- **Verified by:** Claude (session 36 impl)
-- **Date:** 2026-04-26
-- **Commit SHA verified:** `8166f89` (branch tip after AC-4)
-- **Preview URL:** _pending — Vercel preview will be at `construct-dev-git-claude-s-f7-beta-impl-*.vercel.app` once first push triggers a deploy_
+- **Verified by:** Claude (session 62 rebase via cherry-pick replay)
+- **Date:** 2026-05-02
+- **Commit SHA verified:** `6e892f3` (branch tip after lint-fix; 9 commits ahead of main)
+- **Preview URL:** _pending — Vercel preview will be at `construct-dev-git-claude-decouple-session-62-urIHk-*.vercel.app` once Vercel processes the push_
+- **Rebase ship state:** all 7 ACs from session 35/36 parked-branch impl preserved via cherry-pick replay (HANDOFF-59 Lesson 4 Strategy a). Parked-branch SHAs (28cc585 → a3f67ec) replayed to session-62 SHAs (2c243d4 → b97a20b) ridden through current rigour pipeline. Lint refactor in `6e892f3` adapts env-banner + state-inspector to newer `eslint-plugin-react-hooks` rules (rules-of-hooks ordering + set-state-in-effect → useSyncExternalStore for env-banner; lazy useState for state-inspector). No AC scope change.
 - **Outstanding issues:**
-  - In-browser golden-path + edge-case + accessibility + responsive + cross-browser rows remain `_pending preview deploy_`. The non-browser gates (build manifest, leak scan, tsc, vitest 101/101) all green locally on `8166f89`.
-  - `(authed)` route-group placement of the banner deferred to a future restructure (banner currently in root layout; renders on marketing routes in dev only — not user-facing in prod).
-  - `/review` + `/security-review` skill runs deferred — CI-side gates carry this PR; will run if reviews surface concerns.
-  - **Two structural pivots** during impl (worth flagging in PR description):
+  - In-browser golden-path + edge-case + preview-deploy rubric rows remain `_pending preview_`. Non-browser gates (build manifest, leak scan, tsc, vitest 172/172) all green locally on `6e892f3`.
+  - `(authed)` route-group placement of the banner deferred — banner in root layout; renders on marketing routes in dev only (not user-facing in prod). Carry-over for S-F7-γ or S-F8.
+  - **TDD-debt for 5 UI files** (env-banner, scenarios, reset, state-inspector, engine-workbench) — parked branch shipped without tests; TDD-guard didn't exist when β was authored; HANDOFF-61 Lesson 1 bash-heredoc workaround used for lint-fix. Carry-over for S-F7-γ.
+  - **Lockfile divergence** between package-lock.json (`eslint-plugin-react-hooks@7.0.1`) and pnpm-lock.yaml (`7.1.1`) means `react-hooks/immutability` rule fires locally on engine-workbench/page.dev.tsx:711 (pre-existing pattern from V1; same rule fires on main's workspace/ path under newer plugin) but NOT in CI (uses npm ci → 7.0.1). Diagnostic-only; separate fix-on-main PR for both the lockfile drift + the underlying mutation pattern.
+  - **Two structural pivots** preserved from session 35/36 impl (worth flagging in PR description):
     1. AC-1 dropped the current-scenario chip from the dashboard (cut to AC-5's banner) when the literal `decouple:dev:scenario:v1` was found leaking via the dev page's prod-built chunk.
     2. AC-2 pivoted from runtime-construction-with-DCE to `pageExtensions` + `.dev.tsx` rename when the same trick failed inside route components (page bodies can't be tree-shaken). All current + future `/dev/*` files use `*.dev.tsx`; runtime guards remain as defence-in-depth.
 - **DoD item 4 status:** **complete (pending preview-deploy in-browser verification rows)** — every non-browser gate (tsc, tests, prod-build manifest, leak scan, AC sign-off table) is GREEN; in-browser rows pending Vercel preview.
