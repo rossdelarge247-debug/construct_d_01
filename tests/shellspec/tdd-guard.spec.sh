@@ -151,6 +151,79 @@ EOF
     End
   End
 
+  # Stub generator with output: writes a fake vitest at $1 that emits $3
+  # to stdout and exits with $2.
+  make_stub_with_output() {
+    cat > "$1" <<EOF
+#!/bin/bash
+cat <<'STUB_OUT'
+$3
+STUB_OUT
+exit $2
+EOF
+    chmod +x "$1"
+  }
+
+  Describe 'fixture (6) — first-creation chicken-and-egg auto-resolves'
+    It 'allows Write of non-existent src when vitest emits module-resolve error'
+      cd "$SPEC_TMP" || return 1
+      # NB: src/lib/newmod.ts intentionally does NOT exist on disk.
+      : > tests/unit/lib/newmod.test.ts
+      make_stub_with_output "$SPEC_TMP/vitest-stub.sh" 1 \
+        'Error: Failed to resolve import "./newmod" from tests/unit/lib/newmod.test.ts. Does the file exist?'
+      INPUT='{"tool_name":"Write","tool_input":{"file_path":"src/lib/newmod.ts"}}'
+      Data:expand
+        #|$INPUT
+      End
+      When call env TDD_GUARD_VITEST_CMD="$SPEC_TMP/vitest-stub.sh" \
+        TDD_GUARD_TIMEOUT=10 TDD_GUARD_WARN_AT=5 \
+        bash "$HOOK"
+      The status should be success
+      The stderr should include 'module-not-found at first-creation'
+      The stderr should not include 'BLOCKED'
+    End
+  End
+
+  Describe 'fixture (7) — Edit on existing src still blocks on RED'
+    It 'exits 2 even when vitest emits module-resolve error (Edit semantics demand existing file)'
+      cd "$SPEC_TMP" || return 1
+      : > src/lib/existing.ts
+      : > tests/unit/lib/existing.test.ts
+      make_stub_with_output "$SPEC_TMP/vitest-stub.sh" 1 \
+        'Error: Failed to resolve import "./existing" from tests/unit/lib/existing.test.ts.'
+      INPUT='{"tool_name":"Edit","tool_input":{"file_path":"src/lib/existing.ts"}}'
+      Data:expand
+        #|$INPUT
+      End
+      When call env TDD_GUARD_VITEST_CMD="$SPEC_TMP/vitest-stub.sh" \
+        TDD_GUARD_TIMEOUT=10 TDD_GUARD_WARN_AT=5 \
+        bash "$HOOK"
+      The status should equal 2
+      The stderr should include 'BLOCKED: tdd-guard'
+      The stderr should include 'RED test'
+    End
+  End
+
+  Describe 'fixture (8) — Write of non-existent src with assertion failure still blocks'
+    It 'exits 2 when vitest fails without a module-resolve signal'
+      cd "$SPEC_TMP" || return 1
+      # NB: src/lib/asserterr.ts intentionally absent.
+      : > tests/unit/lib/asserterr.test.ts
+      make_stub_with_output "$SPEC_TMP/vitest-stub.sh" 1 \
+        'AssertionError: expected 1 to equal 2'
+      INPUT='{"tool_name":"Write","tool_input":{"file_path":"src/lib/asserterr.ts"}}'
+      Data:expand
+        #|$INPUT
+      End
+      When call env TDD_GUARD_VITEST_CMD="$SPEC_TMP/vitest-stub.sh" \
+        TDD_GUARD_TIMEOUT=10 TDD_GUARD_WARN_AT=5 \
+        bash "$HOOK"
+      The status should equal 2
+      The stderr should include 'BLOCKED: tdd-guard'
+      The stderr should include 'RED test'
+    End
+  End
+
   Describe 'out-of-scope: non-src/ paths pass through silently'
     It 'exits 0 for docs/ paths regardless of test-file presence'
       cd "$SPEC_TMP" || return 1

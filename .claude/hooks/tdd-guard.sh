@@ -204,6 +204,18 @@ wait "$VITEST_PID"
 RC=$?
 
 if [ "$RC" -ne 0 ]; then
+  # The existing-file RED branch below must remain reachable for Edit and for Write to existing paths.
+  if [ "$TOOL_NAME" = "Write" ] && [ ! -f "$RELPATH" ] \
+     && grep -qE "(Failed to resolve import|Failed to load url|Cannot find module|MODULE_NOT_FOUND)" "$TMP_OUT"; then
+    {
+      echo "tdd-guard: module-not-found at first-creation for $RELPATH."
+      echo "  Test file exists; src does not. Allowing Write so first-"
+      echo "  creation can proceed. Re-run \`npx vitest run $TEST_FILE\`"
+      echo "  after the Write to confirm GREEN before the next Edit."
+    } >&2
+    exit 0
+  fi
+
   {
     echo "BLOCKED: tdd-guard — RED test for $RELPATH."
     echo
