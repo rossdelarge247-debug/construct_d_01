@@ -204,7 +204,7 @@ wait "$VITEST_PID"
 RC=$?
 
 if [ "$RC" -ne 0 ]; then
-  # Write-only auto-allow: the existing-file RED branch below must remain reachable for Edit and for Write to existing paths.
+  # The existing-file RED branch below must remain reachable for Edit and for Write to existing paths.
   if [ "$TOOL_NAME" = "Write" ] && [ ! -f "$RELPATH" ] \
      && grep -qE "(Failed to resolve import|Failed to load url|Cannot find module|MODULE_NOT_FOUND)" "$TMP_OUT"; then
     {
