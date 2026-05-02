@@ -13,10 +13,10 @@ Describe 'auto-review-parse.sh'
 
   It 'extracts plain JSON from .result field'
     Data
-      #|{"result":"{\"summary\":\"x\",\"findings\":[]}"}
+      #|{"result":"{\"specialist\":\"reviewer-style\",\"summary\":\"x\",\"findings\":[]}"}
     End
     When call scripts/auto-review-parse.sh
-    The output should equal '{"summary":"x","findings":[]}'
+    The output should equal '{"specialist":"reviewer-style","summary":"x","findings":[]}'
     The status should be success
   End
 
@@ -24,46 +24,46 @@ Describe 'auto-review-parse.sh'
     # Model quirk: claude sometimes wraps JSON in ```json...``` fences
     # despite output-format=json. The grep-strip handles this.
     Data
-      #|{"result":"```json\n{\"summary\":\"x\",\"findings\":[]}\n```"}
+      #|{"result":"```json\n{\"specialist\":\"reviewer-style\",\"summary\":\"x\",\"findings\":[]}\n```"}
     End
     When call scripts/auto-review-parse.sh
-    The output should equal '{"summary":"x","findings":[]}'
+    The output should equal '{"specialist":"reviewer-style","summary":"x","findings":[]}'
     The status should be success
   End
 
   It 'strips fences with leading whitespace'
     Data
-      #|{"result":"  ```json\n{\"a\":1}\n  ```"}
+      #|{"result":"  ```json\n{\"specialist\":\"reviewer-style\",\"summary\":\"x\",\"findings\":[]}\n  ```"}
     End
     When call scripts/auto-review-parse.sh
-    The output should equal '{"a":1}'
+    The output should equal '{"specialist":"reviewer-style","summary":"x","findings":[]}'
     The status should be success
   End
 
   It 'falls back to .text field when .result missing'
     Data
-      #|{"text":"{\"a\":1}"}
+      #|{"text":"{\"specialist\":\"reviewer-style\",\"summary\":\"x\",\"findings\":[]}"}
     End
     When call scripts/auto-review-parse.sh
-    The output should equal '{"a":1}'
+    The output should equal '{"specialist":"reviewer-style","summary":"x","findings":[]}'
     The status should be success
   End
 
   It 'falls back to .content field when both .result and .text missing'
     Data
-      #|{"content":"{\"a\":1}"}
+      #|{"content":"{\"specialist\":\"reviewer-style\",\"summary\":\"x\",\"findings\":[]}"}
     End
     When call scripts/auto-review-parse.sh
-    The output should equal '{"a":1}'
+    The output should equal '{"specialist":"reviewer-style","summary":"x","findings":[]}'
     The status should be success
   End
 
   It 'compacts pretty-printed JSON in .result via jq -c'
     Data
-      #|{"result":"{\n  \"summary\": \"x\",\n  \"findings\": []\n}"}
+      #|{"result":"{\n  \"specialist\": \"reviewer-style\",\n  \"summary\": \"x\",\n  \"findings\": []\n}"}
     End
     When call scripts/auto-review-parse.sh
-    The output should equal '{"summary":"x","findings":[]}'
+    The output should equal '{"specialist":"reviewer-style","summary":"x","findings":[]}'
     The status should be success
   End
 
