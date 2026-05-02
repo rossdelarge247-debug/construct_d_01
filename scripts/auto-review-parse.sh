@@ -45,14 +45,29 @@ if [ -z "$RESULT" ]; then
   exit 0
 fi
 
+# After a successful parse, schema-validate against the pre-aggregation
+# envelope contract (schemas/finding-envelope.schema.json). On invalid,
+# emit a stderr warning and still pass the JSON through — strict-mode
+# parse-failed cascade is deferred per acceptance.md §AC-1 §"Out of
+# scope". Skipped when the parser falls through to the '{}' sentinel
+# (which would always fail validation by design).
+validate_warn() {
+  local json="$1" err
+  [ "$json" = "{}" ] && return
+  err=$(printf '%s' "$json" | scripts/validate-finding-envelope.sh 2>&1 >/dev/null) \
+    || printf 'auto-review-parse: schema-invalid persona envelope (proceeding): %s\n' "$err" >&2
+}
+
 # Step 3: try direct jq parse → fence-stripped jq parse → '{}'.
 # Both branches require non-empty parsed output to count as success;
 # otherwise fall through (handles the `'{}'` and trailing-fence edge
 # cases that `||` alone can't catch).
 if PERSONA_JSON=$(printf '%s' "$RESULT" | jq -c '.' 2>/dev/null) && [ -n "$PERSONA_JSON" ]; then
   echo "$PERSONA_JSON"
+  validate_warn "$PERSONA_JSON"
 elif PERSONA_JSON=$(printf '%s' "$RESULT" | grep -v '^[[:space:]]*```' | jq -c '.' 2>/dev/null) && [ -n "$PERSONA_JSON" ]; then
   echo "$PERSONA_JSON"
+  validate_warn "$PERSONA_JSON"
 else
   echo '{}'
 fi

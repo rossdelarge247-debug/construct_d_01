@@ -134,4 +134,36 @@ Describe 'auto-review-parse.sh'
     The status should be success
   End
 
+  Describe 'schema validation (warn-on-invalid)'
+    It 'passes through valid envelope without stderr noise'
+      Data
+        #|{"result":"{\"specialist\":\"reviewer-style\",\"summary\":\"clean\",\"findings\":[]}"}
+      End
+      When call scripts/auto-review-parse.sh
+      The output should equal '{"specialist":"reviewer-style","summary":"clean","findings":[]}'
+      The status should be success
+      The stderr should equal ''
+    End
+
+    It 'warns to stderr when an envelope is missing a required key (summary)'
+      Data
+        #|{"result":"{\"specialist\":\"reviewer-style\",\"findings\":[]}"}
+      End
+      When call scripts/auto-review-parse.sh
+      The output should equal '{"specialist":"reviewer-style","findings":[]}'
+      The status should be success
+      The stderr should include 'auto-review-parse: schema-invalid'
+    End
+
+    It 'warns to stderr when an envelope carries an additional root-level property'
+      Data
+        #|{"result":"{\"specialist\":\"reviewer-style\",\"summary\":\"x\",\"findings\":[],\"bogus\":1}"}
+      End
+      When call scripts/auto-review-parse.sh
+      The output should equal '{"specialist":"reviewer-style","summary":"x","findings":[],"bogus":1}'
+      The status should be success
+      The stderr should include 'auto-review-parse: schema-invalid'
+    End
+  End
+
 End
