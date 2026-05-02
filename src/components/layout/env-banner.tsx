@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useSyncExternalStore } from 'react'
 import { MODE } from '@/lib/auth'
 
 const SCENARIO_OPTIONS = [
@@ -58,25 +58,28 @@ const buttonStyle: React.CSSProperties = {
   marginLeft: 'auto',
 }
 
-// Constructed at runtime from non-colon-joined parts so the dev-mode-leak
-// scan (spec 72 §7) doesn't match the literal in source maps even when
-// swc DCE has already stripped it from the compiled output.
 const NS = ['decouple', 'dev'].join(':')
 const SCENARIO_KEY = `${NS}:scenario:v1`
 const NS_PREFIX = `${NS}:`
 
+function subscribeToScenario() {
+  return () => {}
+}
+function getScenarioSnapshot(): string | null {
+  return localStorage.getItem(SCENARIO_KEY)
+}
+function getScenarioServerSnapshot(): string | null {
+  return null
+}
+
 export function EnvBanner() {
+  const scenario = useSyncExternalStore(
+    subscribeToScenario,
+    getScenarioSnapshot,
+    getScenarioServerSnapshot,
+  )
+
   if (MODE !== 'dev') return null
-
-  const [hydrated, setHydrated] = useState(false)
-  const [scenario, setScenario] = useState<string | null>(null)
-
-  useEffect(() => {
-    setScenario(localStorage.getItem(SCENARIO_KEY))
-    setHydrated(true)
-  }, [])
-
-  if (!hydrated) return null
 
   function handleScenarioChange(e: React.ChangeEvent<HTMLSelectElement>) {
     const next = e.target.value

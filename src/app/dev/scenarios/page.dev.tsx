@@ -43,14 +43,9 @@ const buttonStyle: React.CSSProperties = {
 }
 
 export default function ScenariosPage() {
-  if (MODE !== 'dev') return null
-
   const [busy, setBusy] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)
 
-  // Honour ?load=<name> from the env-banner dropdown handoff: confirm,
-  // load via the loader (dynamic import keeps loader code-split + outside
-  // the static prod page chunk), redirect to /dev.
   useEffect(() => {
     const params = new URLSearchParams(window.location.search)
     const loadName = params.get('load')
@@ -61,6 +56,8 @@ export default function ScenariosPage() {
     }
     void runLoad(loadName)
   }, [])
+
+  if (MODE !== 'dev') return null
 
   async function runLoad(name: string) {
     setBusy(name)

@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import Link from 'next/link'
 import { MODE } from '@/lib/auth'
 
@@ -94,17 +94,9 @@ function snapshot(): Entry[] {
 }
 
 export default function StateInspectorPage() {
+  const [entries, setEntries] = useState<Entry[]>(snapshot)
+
   if (MODE !== 'dev') return null
-
-  const [hydrated, setHydrated] = useState(false)
-  const [entries, setEntries] = useState<Entry[]>([])
-
-  useEffect(() => {
-    setEntries(snapshot())
-    setHydrated(true)
-  }, [])
-
-  if (!hydrated) return null
 
   function handleEdit(key: string, text: string) {
     setEntries((prev) =>

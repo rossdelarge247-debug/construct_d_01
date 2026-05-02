@@ -29,13 +29,13 @@ const buttonStyle: React.CSSProperties = {
 }
 
 export default function ResetPage() {
-  if (MODE !== 'dev') return null
-
   // Runtime-built namespace prefix — same trick as env-banner so source
   // maps don't preserve the `decouple:dev:` literal.
   const NS_PREFIX = `${['decouple', 'dev'].join(':')}:`
 
   const [busy, setBusy] = useState(false)
+
+  if (MODE !== 'dev') return null
 
   function handleConfirm() {
     setBusy(true)
