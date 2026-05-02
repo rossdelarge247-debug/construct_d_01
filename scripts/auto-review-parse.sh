@@ -45,16 +45,11 @@ if [ -z "$RESULT" ]; then
   exit 0
 fi
 
-# After a successful parse, schema-validate against the pre-aggregation
-# envelope contract (schemas/finding-envelope.schema.json). On invalid,
-# emit a stderr warning and still pass the JSON through — strict-mode
-# parse-failed cascade is deferred per acceptance.md §AC-1 §"Out of
-# scope". Skipped when the parser falls through to the '{}' sentinel
-# (which would always fail validation by design).
+# Skipped for the '{}' sentinel — it would always fail validation by design.
 validate_warn() {
   local json="$1" err
   [ "$json" = "{}" ] && return
-  err=$(printf '%s' "$json" | scripts/validate-finding-envelope.sh 2>&1 >/dev/null) \
+  err=$(printf '%s' "$json" | scripts/validate-finding-envelope.sh 2>&1 >/dev/null | head -1) \
     || printf 'auto-review-parse: schema-invalid persona envelope (proceeding): %s\n' "$err" >&2
 }
 
