@@ -20,6 +20,11 @@
             "type": "command",
             "command": ".claude/hooks/line-count.sh",
             "timeout": 10
+          },
+          {
+            "type": "command",
+            "command": ".claude/hooks/comment-review.sh",
+            "timeout": 30
           }
         ]
       }
