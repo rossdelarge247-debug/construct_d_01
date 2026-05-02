@@ -311,10 +311,10 @@ mcp__github__list_pull_requests state=open  base=main perPage=10             # e
 **Pre-flight Qs (ask user before any code):**
 
 1. **Priority for session 62?** Recommended P1 = **S-F7-β rebase via cherry-pick replay** (HANDOFF-59 Lesson 4 carry-over; src/ ship #3 toward AC-4 retain/drop; would unblock synthetic-deliberate-injection per-persona fixtures at 3/3). P2 = Queue-drain pick #2 from §"Review-flow completion" sub-cluster (commit-msg accuracy or doc-honesty subagent recommended). P3 = `COMMENT_REVIEW_SPAWN=1` opt-in trial (carry-over). P4 = TDD-guard RED-on-existing-src auto-allow extension. P5 = AC-2 hooks-checksums decision (user-only pick). User picks.
-2. **CODEOWNERS solo-operator pattern (#25).** Most session-61 candidates touch CODEOWNERS-protected paths. Admin-bypass merge expected; surface upfront.
+2. **CODEOWNERS solo-operator pattern (#25).** Most session-62 candidates touch CODEOWNERS-protected paths. Admin-bypass merge expected; surface upfront.
 3. **Pre-flight + local API key.** Pre-flight gated on local `ANTHROPIC_API_KEY` (skipped silently otherwise). Default (a) — do nothing — is fine; auto-review at PR open catches what matters. (b) provision key for local pre-flight + the new author-time live-mode WHY-vs-WHAT subagent (set both `ANTHROPIC_API_KEY` and `COMMENT_REVIEW_SPAWN=1`); (c) hybrid (key only for major PRs).
-4. **k=2 default + §Revisit trigger calibration.** n=14 calibration data through session 60 (mean ~1.7 rounds across sessions 56-60 — session-60 P5's 4-round count raises mean). Continues; flip-back-to-k=1 trigger only if first-3-src-slice false-negative rate >20% (currently 1/3 src/ slices shipped through pipeline).
-5. **AC-4 retain/drop dataset.** S-F3 (session 59) is data-point #1 (first src/ slice through full v3a+v3b+v3c rigour pipeline). Session-60 ships were infra not src/ so the count is unchanged. P1 (S-F4) brings the count to 2/3; P2 (S-F7-β rebase) would bring it to 3/3 and trigger spec 72c §7 first-3-src-slice gate. Synthetic-deliberate-injection per-persona fixtures STILL deferred until then.
+4. **k=2 default + §Revisit trigger calibration.** n=16 calibration data through session 61 (mean ~1.6 rounds across sessions 56-61, trending down). Continues; flip-back-to-k=1 trigger only if first-3-src-slice false-negative rate >20% (currently 2/3 src/ slices shipped through pipeline).
+5. **AC-4 retain/drop dataset.** S-F3 (session 59) + S-F4 (session 61) = 2/3 src/ slices shipped through full v3a+v3b+v3c rigour pipeline. P1 (S-F7-β rebase) brings the count to 3/3 and triggers spec 72c §7 first-3-src-slice gate. Synthetic-deliberate-injection per-persona fixtures STILL deferred until then.
 
 **Session discipline (hook-surfaced; restated):**
 
@@ -323,7 +323,7 @@ mcp__github__list_pull_requests state=open  base=main perPage=10             # e
 - **Pre-priority shipped-artifact verification** (CLAUDE.md §Planning conduct, codified session-60 wrap from HANDOFF-59 Lesson 3 + HANDOFF-60 §Lesson 4): grep `docs/slices/` and `git log --grep` for slice references before treating any priority as fresh-build. Kickoff omission of shipped state is empirically common.
 - Live gates: `auto-review.yml` (k=2 + differential mode + per-specialist filter LIVE) · `eslint-no-disable.yml` · `coverage-threshold.yml` · `pr-dod.yml` · `.github/CODEOWNERS` · `persona-fixtures.yml` · `pre-push` hook (opt-in) · `shellspec.yml` · **`comment-review.sh` PostToolUse advisory (LIVE post-PR-#76)** · **`tdd-guard.sh` first-creation auto-resolve (LIVE post-PR-#77)** · **`auto-review-parse.sh` schema validation warn+accept (LIVE post-PR-#78)**.
 - Long-prose Writes: skeleton + Edit-append for any prose Write >~100 lines (constraint #19).
-- **Comments anti-pattern catalogue** (PR #60): QUADRUPLE confirmed RECURRING (sessions 57+58+59+60). Stub-mode hook (PR #76) flags 4 of 5 catalogue items at write-time; live mode covers WHAT-narration. Mental rehearsal still helps for the WHAT class.
+- **Comments anti-pattern catalogue** (PR #60): QUINTUPLE confirmed RECURRING (sessions 57+58+59+60+61). Stub-mode hook (PR #76) flags 4 of 5 catalogue items at write-time; live mode covers WHAT-narration. Mental rehearsal still helps for the WHAT class.
 - **Verification.md is final-state** (constraint #27): assemble at slice ship, not running log.
 - **Don't freeze AC text more ambitious than impl budget** (constraint #28).
 - **Pre-priority spec-gate verification** (constraint #29 session 58): grep gating IF-clauses verbatim before treating priority as authorized.
