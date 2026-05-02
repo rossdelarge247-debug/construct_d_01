@@ -368,9 +368,6 @@ Canonical sources: `docs/HANDOFF-SESSION-55.md` §"v3c carry-overs" + spec 72c �
 - Multi-provider 3rd-agent reviewer (GPT/Gemini for cross-provider diversity; spec 72c §"Out of scope")
 - Stryker mutation testing on persona prompts
 
-**Other:**
-- Structured-findings JSON Schema validation (spec 72c §9)
-
 ## Visual direction
 
 **Canonical source:** the Claude AI Design tool outputs from session 22 wire batches. Exact visual treatment — colour system, typography, component design, screen layouts — to preserve and rebuild. Copy in the outputs is NOT final; visual treatment IS.
