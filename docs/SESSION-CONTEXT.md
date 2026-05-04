@@ -1,4 +1,4 @@
-# Session 61 Wrap Context Block (heading into session 62)
+# Session 62 Wrap Context Block (heading into session 63)
 
 ## Product positioning (preserve across sessions)
 
@@ -12,7 +12,7 @@ Spec 42 authoritative for positioning. Spec 68 suite (hub + 68a-e locked + 68f/g
 
 Next.js 16.2, React 19, TypeScript, Tailwind 4, Supabase, Claude AI, Vercel Pro. Single-branch-main workflow (spec 71 §7a Option 4): no `phase-c` integration, no cutover event. Slice work on short-lived feature branches → PR → main. Tink credentials in Vercel env. Stripe SDK pinned at `^22.1.0`.
 
-## What sessions 41-60 accomplished (rolling window)
+## What sessions 41-62 accomplished (rolling window)
 
 - **Sessions 41-46:** v3b S-1 through S-5 — 12/15 ACs landed via PRs #25-#27 across 6 sessions.
 - **Session 47:** v3b S-6 (PR #30 9-round live recursive auto-review; 14 findings; v3b 12/15 → 15/15). Auto-review.yml + 3 personas live.
@@ -108,33 +108,41 @@ docs/slices/S-INFRA-tdd-guard-first-creation/{acceptance,verification}.md — P4
 docs/slices/S-INFRA-parse-pipeline-schema-validation/{acceptance,verification}.md — P5 PR #78 slice docs
 ```
 
-## Session 62 priorities
+## Session 63 priorities
 
-> **Numbering:** session 61 shipped 2 substantive PRs + wrap C-pick — P1 S-F4 trust chip slice (#80, 2 rounds), Enhancement #1 plan-review default-flip (#81, 1 round), wrap (JSON Schema list-strike + HANDOFF-61 + SESSION-CONTEXT refresh). Mean 1.5 rounds. Queue-drain Path A · N=1 cadence validated (src/ slice + 1 enhancement + wrap C-pick = 3 deliverables landed cleanly within session). Session 62 priorities lifted from HANDOFF-SESSION-61 §"Next-session priority recommendations".
+> **Numbering:** session 62 shipped 1 substantive src/ slice PR — S-F7-β rebase via cherry-pick replay (#83, 2 rounds, squash-merged at `23a35a1`). Single-PR session — high-rigour iteration on cherry-pick replay through current pipeline. AC-4 retain/drop dataset NOW 3/3; spec 72c §7 first-3-src-slice gate CONFIRMED → synthetic-fixture work unblocked. Session 63 priorities lifted from HANDOFF-SESSION-62 §"Next-session priority recommendations".
 
-### P1 — S-F7-β rebase via cherry-pick replay (HANDOFF-59 Lesson 4 carry-over)
+### P1 — Synthetic-deliberate-injection per-persona fixtures (NOW UNBLOCKED at 3/3)
 
-Parked branch `claude/S-F7-beta-impl @ a3f67ec` now ~58 behind main post session-61 ships. Strategy (a): cherry-pick replay onto fresh branch from current main; re-apply 8 commits' INTENT through current rigour pipeline. Counts as **src/ slice ship #3** — would unblock spec 72c §7 first-3-src-slice gate (synthetic-deliberate-injection per-persona fixtures unblock at 3/3). Architectural-smell-trigger candidate (CLAUDE.md L226); isolate. M-L scope; dedicated session.
+Spec 72c §7 first-3-src-slice gate CONFIRMED at session-62 wrap (S-F3 + S-F4 + S-F7-β all caught issues main convo missed; 4-partition holds). Implementation: `tests/personas/synthetic/{security,architecture,correctness,style}.diff` per-persona fixtures with deliberate-injection. Catches per-persona regressions golden-replay can't isolate (e.g. a persona edit that subtly weakens security signal but doesn't change verdict-tier on the 4-PR seed). Both replays then run side-by-side. M (~200L).
 
-### P2 — Queue-drain pick #2: §"Review-flow completion" sub-cluster
+### P2 — Lockfile divergence fix (HANDOFF-62 Lesson 2)
 
-With Plan-review default-flip shipped at session 61, the cluster reduces to 2 items: during-work review subagents (5 sub-items: commit-msg accuracy, spec-quote enforcement, AskUserQuestion framing, periodic on-track audit, doc-honesty) + pair-programming PostToolUse hook with intent file + finding-response loop. Most empirically-promising sub-pick: **commit-msg accuracy subagent** (PreToolUse:Bash matcher on `git commit`; reviews commit-msg body for WHAT-narration / drift from diff) OR **doc-honesty subagent** (extends PR #76 reviewer-comment pattern; checks doc claims vs shipped state at write-time). User picks at session-62 turn 0. S-M.
+`package-lock.json` pins `eslint-plugin-react-hooks@7.0.1`; `pnpm-lock.yaml` pins `7.1.1`. CI uses npm ci → 7.0.1; local pnpm install → 7.1.1. Same plugin, different version: `react-hooks/immutability` rule fires locally on `engine-workbench/page.dev.tsx:711` but not in CI. S-INFRA-1 dual-lockfile divergence guard (CLAUDE.md L116) missed this. Re-sync the lockfiles + address the underlying mutation pattern with immutable update. S-M.
 
-### P3 — `COMMENT_REVIEW_SPAWN=1` opt-in trial (carry-over from session-61 P3, not shipped)
+### P3 — S-F7-γ untested-UI tests (HANDOFF-62 Lesson 5 carry-over)
 
-Provision local `ANTHROPIC_API_KEY` + opt-in for 1-2 src/ slices to measure live-mode WHAT-narration catch rate. Empirical hypothesis: live mode at write-time drops the ~3-per-PR commenting-category findings (quintuple-confirmed pattern across sessions 57+58+59+60+61) to ~0. XS-S — env-var setting + dogfood. Could ride alongside P1 or P2.
+Component tests for env-banner + scenarios + reset + state-inspector + engine-workbench. Closes the untested-UI debt from session-62 cherry-pick rebase. TDD-guard didn't exist when β was authored at session 35; bash-heredoc workaround used 5 times this session for lint-fix refactors of these untested files. Engine-workbench at 1481L is heavy; can split into multiple PRs. M-L.
 
-### P4 — TDD-guard auto-allow extension for RED-on-existing-src (HANDOFF-61 Lesson 1 follow-up)
+### P4 — Queue-drain pick #2 (carry-over from session-62 P2, not shipped)
 
-Extend `tdd-guard.sh` auto-allow to also cover "RED test newly-introduced in same diff as src edit". Detection signal: `git show HEAD:tests/...` doesn't contain the failing assertion before the current uncommitted state. Or simpler: `TDD_GUARD_REDGREEN_OVERRIDE=1` env hatch with explicit-intent semantics, mirroring `EXIT_PLAN_REVIEW_SPAWN`'s opt-out pattern. S — ~10-15L hook change + shellspec test cases. Could be a wrap C-pick alongside another priority.
+commit-msg accuracy subagent OR doc-honesty subagent. Reduces author-time anti-pattern catches before PR. SEXTUPLE-confirmed (sessions 57-62) commenting-category findings persist; live mitigation needed. S-M.
 
-### P5 — AC-2 hooks-checksums + control-change-label decision (HANDOFF-61 Lesson 3 follow-up)
+### P5 — TDD-guard auto-allow extension (carry-over from session-62 P4, not shipped)
 
-Decide (a) ship the missing AC-2 files per original v3a-foundation spec (`hooks-checksums.txt` + `control-change-label.yml` + `generate-hooks-checksums.sh` — none exist on disk despite CLAUDE.md L155-L158 + v3a acceptance describing them); or (b) update CLAUDE.md to remove references and acknowledge gate is documented-only. User-decision pick — should not be auto-decided.
+`TDD_GUARD_REDGREEN_OVERRIDE=1` env hatch + lint-fix-refactor case detection. Formalises the bash-heredoc escape used 5+ times this session. S — ~10-15L hook change + shellspec cases.
 
-### Synthetic-deliberate-injection per-persona fixtures (STILL GATED)
+### P6 — AC-2 hooks-checksums + control-change-label decision (carry-over from session-62 P5, not shipped)
 
-Spec 72c §7 precondition: "first-3-src-slice retain/drop confirms the 4-partition holds" — currently 2/3 (S-F3 from session 59 + S-F4 from session 61). P1 (S-F7-β rebase) would bring the count to 3/3 if completed. Stays deferred until then.
+User-decision: ship the missing files (`hooks-checksums.txt` + `control-change-label.yml` + `generate-hooks-checksums.sh`) OR remove CLAUDE.md references. Aspirational gate at L155-L158. XS.
+
+### P7 — `COMMENT_REVIEW_SPAWN=1` opt-in trial (carry-over from session-62 P3, not shipped)
+
+Provision local `ANTHROPIC_API_KEY` + opt-in for 1-2 src/ slices. Hypothesis: drops ~3-per-PR commenting-category findings (sextuple-confirmed) to ~0 at write-time. Note: doesn't catch cherry-pick imports per HANDOFF-62 Lesson 3 — write-time hooks don't fire on git cherry-pick. XS-S.
+
+### Synthetic-deliberate-injection gate CONFIRMED at session-62 wrap
+
+Per spec 72c §7 verbatim: "once first-3-src-slice retain/drop data confirms the 4-partition holds, add tests/personas/synthetic/{security,architecture,correctness,style}.diff per-persona fixtures with deliberate-injection per the original spec 72c §7 design." 3/3 src/ slices now shipped (S-F3 session 59 + S-F4 session 61 + S-F7-β session 62); 4-partition holds (every finding clusters into one of 4 categories cleanly); STATUS: CONFIRMED. P1 above is the implementation.
 
 ## Scope ceiling
 
@@ -181,13 +189,13 @@ Single-P0 session. S-F1 (or whichever priority you pick) is THE unblocking work.
 
 ## Branch
 
-### Branch state at session-61 wrap (verified live)
+### Branch state at session-62 wrap (verified live)
 
-- **Wrap branch:** `claude/decouple-session-61-R5p05` (sequential single-branch pattern continued; 8 sessions in a row 54→55→56→57→58→59→60→61 on this pattern).
-- **`main` tip:** `6ec971b` (PR #81 Enhancement #1 plan-review default-flip merge). Prior: `b9f745f` = PR #80 (S-F4 trust chip), `e4fe375` = session-60 wrap (PR #79).
-- **Open PRs at session-61 wrap:** wrap PR (this branch) opens after this commit. **No carry-over open PRs** — PR #80 + #81 both merged mid-session.
-- **Closed/merged this session:** PR #80 (S-F4 trust chip slice, 2 rounds) · PR #81 (Enhancement #1 plan-review default-flip, 1 round). Mean 1.5 rounds (within target).
-- **Parked:** `claude/S-F7-beta-impl` @ `a3f67ec` · 8 ahead · ~58 behind main · pushed. +5 commits drift accumulated session 61 (#80 + #81 + wrap). Resumption is session-62 P1 (HANDOFF-59 Lesson 4 carry-over).
+- **Wrap branch:** `claude/decouple-session-62-urIHk` (sequential single-branch pattern continued; 9 sessions in a row 54→55→56→57→58→59→60→61→62 on this pattern).
+- **`main` tip:** `23a35a1` (PR #83 squash-merge of S-F7-β rebase). Prior: `ae28d43` = session-61 wrap (PR #82).
+- **Open PRs at session-62 wrap:** wrap PR (this branch) opens after this commit. **No carry-over open PRs** — PR #83 merged mid-session.
+- **Closed/merged this session:** PR #83 only (S-F7-β rebase via cherry-pick replay; 2 rounds, within target). 14 commits squash-merged: 8 cherry-picks + 1 lint-fix + 1 verification.md refresh + 1 fix-up addressing 6 of 8 round-1 findings + 3 empty Vercel-retrigger commits.
+- **Parked:** `claude/S-F7-beta-impl` @ `a3f67ec` retired (replayed via cherry-pick into session-62 branch + merged). Origin branch may persist as historical record.
 - **Live rigour gates (post-session-61):**
   - `auto-review.yml` — multi-agent 4-specialist matrix at **k=2 default** + **differential mode LIVE** + **per-specialist prior-findings filter LIVE**.
   - `eslint-no-disable.yml` — count-based ratchet (HEAD vs origin/main).
@@ -203,7 +211,7 @@ Single-P0 session. S-F1 (or whichever priority you pick) is THE unblocking work.
   - **NEW post-session-61:** `exit-plan-review.sh` spawns by default (PR #81); `EXIT_PLAN_REVIEW_SPAWN=0` opts out (degrades to stub-mode verdict from `git-state-verifier.sh` only).
 - **AC-2 hooks-checksums + control-change-label mechanism is ASPIRATIONAL** (HANDOFF-61 Lesson 3): `.claude/hooks-checksums.txt`, `.github/workflows/control-change-label.yml`, `scripts/generate-hooks-checksums.sh` — none exist on disk despite CLAUDE.md L155-L158 + v3a-foundation acceptance.md describing them. P5 candidate for session 62 (user-decision pick).
 - **AC-2 acceptance-gate** + **AC-3 ux-polish-reviewer** still shipped + dormant until first src/ UI surface activates them.
-- **AC-4 retain/drop measurement** activates after first 3 src/ slices ship through full v3a+v3b+v3c rigour pipeline. **Currently 2/3** (S-F3 from session 59 + S-F4 from session 61). P1 (S-F7-β rebase) brings the count to 3/3 if completed.
+- **AC-4 retain/drop measurement** TRIGGERED at session-62 wrap. **3/3 src/ slices shipped** (S-F3 from session 59 + S-F4 from session 61 + S-F7-β from session 62). Verdict per HANDOFF-62 §Persona findings recorded: reviewer-style + reviewer-correctness STRONG retain · reviewer-security MODERATE retain · reviewer-architecture WEAK signal (carry-over: monitor 2-3 more slices before formal drop).
 
 ### v3c / v3b trajectory + remaining rigour work
 
@@ -229,11 +237,11 @@ Single-P0 session. S-F1 (or whichever priority you pick) is THE unblocking work.
 
 **Net: v3b shipped; v3c efficiency layer 4 PRs in (sessions 50-56); session 57 picks from the ranked queue above (P0-P3) with AC-3 persona-side wiring as the highest-ROI carry-over remaining.**
 
-### Next session (62) FIRST ACTIONS
+### Next session (63) FIRST ACTIONS
 
-1. **Turn-0 verification.** SessionStart hook surfaces live branch state. `mcp__github__list_pull_requests state=open base=main perPage=10` — expect empty post-wrap (PR #80 + #81 + session-61 wrap all merged at session 62 turn 0).
+1. **Turn-0 verification.** SessionStart hook surfaces live branch state. `mcp__github__list_pull_requests state=open base=main perPage=10` — expect empty post-wrap (PR #83 + session-62 wrap PR all merged at session 63 turn 0).
 2. **Verify branch state + working tree clean.** Resync if BEHIND > 0. Sequential single-branch pattern continues — `git fetch origin main && git remote prune origin && git checkout -B <branch> origin/main`.
-3. **Confirm priority with user.** Session 62 P1 recommended = **S-F7-β rebase via cherry-pick replay** (src/ ship #3 toward AC-4 retain/drop; would unblock synthetic-deliberate-injection per-persona fixtures at 3/3). P2 = Queue-drain pick #2 from §"Review-flow completion" sub-cluster (commit-msg accuracy or doc-honesty subagent recommended). P3 = `COMMENT_REVIEW_SPAWN=1` opt-in trial (carry-over). P4 = TDD-guard RED-on-existing-src auto-allow extension. P5 = AC-2 hooks-checksums decision (user-only). User picks.
+3. **Confirm priority with user.** Session 63 P1 recommended = **Synthetic-deliberate-injection per-persona fixtures** (NEWLY UNBLOCKED at 3/3 first-3-src-slice gate; spec 72c §7 condition CONFIRMED at session-62 wrap). P2 = Lockfile divergence fix (HANDOFF-62 Lesson 2; lockfile drift caught at session-62 lint pipeline). P3 = S-F7-γ untested-UI tests (HANDOFF-62 Lesson 5 follow-up; closes 5-file untested-UI debt from cherry-pick). P4-P7 = queue-drain carry-overs (commit-msg/doc-honesty subagent · TDD-guard auto-allow · AC-2 decision · COMMENT_REVIEW_SPAWN trial). User picks.
 4. **If P1 (S-F7-β rebase):** read `docs/HANDOFF-SESSION-59.md` §"Lesson 4" verbatim + `docs/slices/S-F7-beta-dev-surface/{acceptance,verification,security}.md` (sizes vary; grep first) + spec 71 §4 dev-mode pattern. ~150-200L combined; spread over 2 turns. The parked branch is now ~58 behind main; rebase via cherry-pick replay onto fresh branch from current main (Strategy (a) per HANDOFF-59 Lesson 4); re-apply 8 commits' INTENT through current rigour pipeline. Architectural-smell-trigger candidate; isolate from any fresh slice work. M-L.
 5. **If P2 (queue-drain pick #2):** read §"Review-flow completion" cluster description (only 2 items remain post session-61: during-work review subagents + pair-programming hook). Pick most-promising sub-item. **commit-msg accuracy subagent** (PreToolUse:Bash matcher on `git commit`; reviews commit-msg body for WHAT-narration / drift from diff) OR **doc-honesty subagent** (extends PR #76 reviewer-comment pattern; checks doc claims vs shipped state at write-time). S-M.
 6. **If P3 (live-mode opt-in):** export `ANTHROPIC_API_KEY` + set `COMMENT_REVIEW_SPAWN=1` in shell env before slice work. Live mode invokes `claude -p` per Write/Edit, framing the persona prompt with a per-invocation nonce; falls back to stub mode on any spawn failure. Measure: round-1 commenting-category findings on the next 1-2 PRs vs the session-61 baseline (~3-per-PR persistent quintuple-confirmation).
@@ -241,7 +249,7 @@ Single-P0 session. S-F1 (or whichever priority you pick) is THE unblocking work.
 8. **If P5 (AC-2 decision):** user-driven. Read CLAUDE.md L155-L158 + `docs/slices/S-INFRA-rigour-v3a-foundation/acceptance.md` AC-2 description. Decide ship-the-missing-files OR remove-references. Don't auto-decide.
 9. **Live rigour gates** — every commit dogfoods them. Multi-agent auto-review at **k=2 default + differential mode LIVE + per-specialist filter LIVE + TDD-guard LIVE (with first-creation auto-resolve as of PR #77) + parser schema validation LIVE (warn + accept as of PR #78) + author-time comment review LIVE (advisory as of PR #76) + plan-review default-spawn LIVE (as of PR #81)**. Expect 1-2 rounds per PR.
 10. **CODEOWNERS solo-operator pattern (#25)** — most session-62 candidates touch CODEOWNERS-protected paths; admin-bypass merge expected.
-11. **k=2 default + post-flip §Revisit triggers** — per spec 72c §5: n=16 calibration data through session 61 (mean ~1.6 rounds across sessions 56-61, trending down). Continues collecting.
+11. **k=2 default + post-flip §Revisit triggers** — per spec 72c §5: n=17 calibration data through session 62 (mean ~1.6 rounds across sessions 56-62, stable). Continues collecting.
 12. **Constraint #29 (session 58):** before treating a kickoff/SESSION-CONTEXT priority labeled "per spec X §Y" as authorized, grep that section's gating IF-clauses verbatim. Quote the gating, not the conclusion.
 13. **Pre-priority shipped-artifact verification (CLAUDE.md §Planning conduct, codified session-60 wrap):** before treating any "first src/ slice" or fresh-build priority as authorized, grep `docs/slices/` and `git log --grep` for shipped-artifact evidence. Kickoff omission of shipped state is empirically common.
 14. **Author-time WHY-vs-WHAT subagent (PR #76):** every Write/Edit fires `comment-review.sh` (PostToolUse). Stub mode flags 4 of 5 catalogue items via regex; live mode (opt-in) covers WHAT-narration. Advisory exit always; no work blocked. **Quintuple confirmation note (sessions 57+58+59+60+61):** stub mode misses describe/it test descriptions — live mode trial (P3) would address this gap.
