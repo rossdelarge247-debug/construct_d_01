@@ -3,7 +3,7 @@
 **Slice:** S-F2-document-shell
 **Spec ref:** `docs/workspace-spec/71-rebuild-strategy.md` L84 (folder + "three-column shell" verbatim) · L379 ("The shape every document renders into") · L385 (Phase C.1 exit criterion) · `docs/workspace-spec/68b-decisions-build.md` L9-L32 (B-D1..D7 LOCKED — document-not-dashboard + three-column slot definitions) · L82-L91 (B-T1 dashboard separation + B-T3 right-rail filter) · `docs/workspace-spec/68d-decisions-settle.md` L9-L25 (S-D1..D4 LOCKED — same shell across documents + state machine + autosave) · `docs/workspace-spec/68g-visual-anchors.md` (no C-V tag for document-shell — structural anchor not visual; spec 68b/d are authoritative)
 **Phase(s):** Foundation (Phase C.1, order #4) — three documents render through this shell (Sarah's Picture · Our Household Picture · Settlement Proposal)
-**Status:** Drafting · Awaiting freeze
+**Status:** Approved · In implementation
 
 ---
 
@@ -123,6 +123,6 @@ The loveable floor is **one component, four named slots, three responsive layout
 | Date | Reviewer | Outcome | Notes |
 |---|---|---|---|
 | 2026-05-04 | User (informal) | Pre-AC scope confirmed | P1 = S-F2; cohesive-product pivot. Drift surfaced: kickoff "components/(authed)/document-shell/" path wrong (route group not components folder; spec 71 L84 puts it under `components/anchors/` but shipped S-F3/S-F4 use concern folders → continue concern convention → `components/document-shell/`). Kickoff "dashboard scaffold" framing wrong (spec 68b B-D1 LOCKED: *"Sarah's Picture renders as a document, not a dashboard"*); shell hosts documents, dashboard sits above per B-T1. |
-| _pending_ | User | **AC frozen** | Implementation begins after this row. Change requests roll into re-drafted AC + re-slicing. |
+| 2026-05-04 | User | **AC frozen** | Implementation begins. Change requests roll into re-drafted AC + re-slicing, not mid-slice scope shifts. |
 
 **AC is the contract.** Change requests after freeze roll into re-drafting AC + re-slicing, not mid-slice scope shifts.
