@@ -1,0 +1,55 @@
+name: persona-synthetic-fixtures (deliberate-injection)
+
+# Per-persona regression detection: invokes each specialist via `claude -p`
+# against its own synthetic deliberate-injection fixture and asserts the
+# planted defect is flagged. Catches per-persona signal regressions that the
+# golden-PR replay (aggregator-only) cannot isolate — e.g., a persona prompt
+# edit that subtly weakens dimension catch-rate without flipping verdict-tier
+# on the 4-PR seed.
+#
+# Path-filtered trigger: runs only when persona prompts, the orchestrator
+# scripts, the parser, the synthetic fixtures, or the runner change.
+#
+# Skip-on-no-API-key: forks and contributors without secret access exit
+# neutrally (the runner handles the `ANTHROPIC_API_KEY` unset case
+# internally). The workflow still completes successfully in that case.
+
+on:
+  pull_request:
+    types: [opened, synchronize]
+    paths:
+      - '.claude/agents/reviewer-*.md'
+      - 'scripts/spawn-multi-reviewer.sh'
+      - 'scripts/derive-verdict.sh'
+      - 'scripts/auto-review-parse.sh'
+      - 'tests/personas/synthetic/**'
+      - 'tests/personas/run-synthetic.sh'
+      - 'tests/personas/match-synthetic.sh'
+      - '.github/workflows/persona-synthetic-fixtures.yml'
+  push:
+    branches: [main]
+    paths:
+      - '.claude/agents/reviewer-*.md'
+      - 'scripts/spawn-multi-reviewer.sh'
+      - 'scripts/derive-verdict.sh'
+      - 'scripts/auto-review-parse.sh'
+      - 'tests/personas/synthetic/**'
+      - 'tests/personas/run-synthetic.sh'
+      - 'tests/personas/match-synthetic.sh'
+      - '.github/workflows/persona-synthetic-fixtures.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  synthetic:
+    name: synthetic-deliberate-injection
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+
+      - name: Run synthetic-injection harness
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+        run: tests/personas/run-synthetic.sh

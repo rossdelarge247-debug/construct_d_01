@@ -1,0 +1,28 @@
+diff --git a/src/components/comments/CommentDisplay.tsx b/src/components/comments/CommentDisplay.tsx
+new file mode 100644
+index 0000000..a3c4f5d
+--- /dev/null
++++ b/src/components/comments/CommentDisplay.tsx
+@@ -0,0 +1,21 @@
++'use client';
++
++import { useEffect, useState } from 'react';
++
++type Comment = { id: string; authorName: string; body: string };
++
++export function CommentDisplay({ commentId }: { commentId: string }) {
++  const [comment, setComment] = useState<Comment | null>(null);
++
++  useEffect(() => {
++    fetch(`/api/comments/${commentId}`).then(r => r.json()).then(setComment);
++  }, [commentId]);
++
++  if (!comment) return null;
++
++  return (
++    <article>
++      <header>{comment.authorName}</header>
++      <div dangerouslySetInnerHTML={{ __html: comment.body }} />
++    </article>
++  );
++}

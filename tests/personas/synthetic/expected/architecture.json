@@ -1,0 +1,13 @@
+{
+  "dimension": "architecture",
+  "fixture_path": "tests/personas/synthetic/architecture.diff",
+  "planted_defect_summary": "UI component imports pg driver and executes SQL inline — mixed concerns, no test seam, effects not behind an interface (CLAUDE.md §Effects-behind-interfaces violation).",
+  "expected_finding": {
+    "label_in": ["issue", "suggestion", "todo"],
+    "blocking_in": [true, false],
+    "category_pattern": "(?i)(hidden-effect|scope-creep)",
+    "evidence_must_contain_any_of": ["Pool", "pg", "client.query", "UPDATE users", "UserStatusButton"],
+    "remediation_must_contain_any_of": ["interface", "seam", "boundary", "service", "API", "extract", "indirection", "repository", "behind", "layer"]
+  },
+  "min_findings_count": 1
+}
