@@ -29,4 +29,14 @@ describe('LandingPage', () => {
     const chips = section?.querySelectorAll('[data-trust-chip-level]') ?? []
     expect(chips.length).toBe(6)
   })
+
+  it('renders the document shell demo block with all 4 slot regions', () => {
+    const { container } = render(<LandingPage />)
+    const section = container.querySelector('[aria-label="Document shell demo (S-F2)"]')
+    expect(section).toBeTruthy()
+    expect(section?.querySelector('[data-shell-region="header"]')).toBeTruthy()
+    expect(section?.querySelector('[data-shell-region="leftRail"]')).toBeTruthy()
+    expect(section?.querySelector('[data-shell-region="body"]')).toBeTruthy()
+    expect(section?.querySelector('[data-shell-region="rightRail"]')).toBeTruthy()
+  })
 })

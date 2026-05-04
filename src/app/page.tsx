@@ -6,6 +6,7 @@ import {
   buildPhasesData,
 } from '@/components/phase-nav'
 import { TrustChip, TRUST_LEVELS } from '@/components/trust'
+import { DocumentShell } from '@/components/document-shell'
 
 export const metadata: Metadata = {
   title: 'Decouple — rebuilding',
@@ -77,6 +78,97 @@ export default function LandingPage() {
                   : {})}
               />
             ))}
+          </div>
+        </section>
+
+        <section
+          aria-label="Document shell demo (S-F2)"
+          className="flex flex-col gap-[var(--ds-space-24)]"
+        >
+          <h2 className="text-[length:var(--ds-type-21)] font-medium text-[color:var(--ds-color-ink)]">
+            Document shell demo (S-F2)
+          </h2>
+          <p className="text-[length:var(--ds-type-15-5)] text-[color:var(--ds-color-text-sub)]">
+            Three-column shell every document renders into (Sarah&apos;s
+            Picture, Our Household Picture, Settlement Proposal). Stub content
+            below; document slices ship the section bodies.
+          </p>
+
+          <PhaseStepper currentPhase="build" phases={phases} />
+
+          <div className="rounded border border-[color:var(--ds-color-divider)]">
+            <DocumentShell
+              title="Sarah&rsquo;s Picture"
+              state="draft"
+              autosaveStamp="Autosaved · 2 min ago"
+              bodyAs="section"
+              leftRail={
+                <div className="flex flex-col gap-3">
+                  <p className="text-xs uppercase tracking-wide text-neutral-500">
+                    In this document
+                  </p>
+                  <p className="text-sm font-semibold">25% complete</p>
+                  <ul className="flex flex-col gap-2 text-sm">
+                    <li>✓ The children</li>
+                    <li>! The home</li>
+                    <li>• Pensions</li>
+                    <li>○ Income</li>
+                  </ul>
+                </div>
+              }
+              body={
+                <div className="flex flex-col gap-3">
+                  <h3 className="text-base font-semibold">
+                    §1 · The children — Amelia (8), Jack (5)
+                  </h3>
+                  <p className="text-sm leading-relaxed">
+                    A structured record of what you own, owe, earn and spend,
+                    as of 4 May 2026. Based on 412 transactions across 12
+                    months from your connected accounts, plus items
+                    you&apos;ve added yourself.
+                  </p>
+                  <p className="text-sm leading-relaxed">
+                    Amelia and Jack are with you during the week, with Mark on
+                    alternate weekends and half of school holidays.
+                  </p>
+                  <div className="flex flex-wrap items-center gap-2 text-sm">
+                    <span>Child benefit</span>
+                    <TrustChip
+                      level="bank-evidenced"
+                      sourceLabel="Verified from Halifax"
+                    />
+                    <span className="ml-auto">£165.40 / month</span>
+                  </div>
+                </div>
+              }
+              rightRail={
+                <div className="flex flex-col gap-3">
+                  <div className="rounded border p-3">
+                    <p className="text-xs uppercase tracking-wide text-neutral-500">
+                      Snapshot
+                    </p>
+                    <p className="mt-1 text-sm">Net position · £142,300</p>
+                    <p className="text-sm">Assets · £218,500</p>
+                    <p className="text-sm">Debts · £76,200</p>
+                    <p className="text-sm">Monthly gap · -£420</p>
+                  </div>
+                  <div className="rounded border p-3">
+                    <p className="text-xs uppercase tracking-wide text-neutral-500">
+                      Data sources
+                    </p>
+                    <p className="mt-1 text-sm">Halifax · 1 day ago</p>
+                    <p className="text-sm">NHS Pensions · Pending</p>
+                  </div>
+                  <div className="rounded border p-3">
+                    <p className="text-xs uppercase tracking-wide text-neutral-500">
+                      Needs your attention
+                    </p>
+                    <p className="mt-1 text-sm">Upload SA302 (last tax year)</p>
+                    <p className="text-sm">Confirm Vanguard ISA balance</p>
+                  </div>
+                </div>
+              }
+            />
           </div>
         </section>
       </div>
