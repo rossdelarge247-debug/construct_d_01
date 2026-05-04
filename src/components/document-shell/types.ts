@@ -22,4 +22,9 @@ export interface DocumentShellProps {
   leftRail?: ReactNode
   body: ReactNode
   rightRail?: ReactNode
+  /**
+   * Element to render the body slot as. Defaults to `'main'`. Pass `'section'`
+   * when the consumer page already owns a `<main>` landmark to avoid nesting.
+   */
+  bodyAs?: 'main' | 'section'
 }

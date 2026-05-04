@@ -30,7 +30,7 @@ describe('LandingPage', () => {
     expect(chips.length).toBe(6)
   })
 
-  it('renders the S-F2 document shell demo block with all 4 slot regions', () => {
+  it('renders the document shell demo block with all 4 slot regions', () => {
     const { container } = render(<LandingPage />)
     const section = container.querySelector('[aria-label="Document shell demo (S-F2)"]')
     expect(section).toBeTruthy()

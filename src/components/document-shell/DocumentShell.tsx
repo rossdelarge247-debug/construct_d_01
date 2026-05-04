@@ -1,10 +1,11 @@
 'use client'
 
-import { useId, useState } from 'react'
+import { useEffect, useId, useRef, useState, type KeyboardEvent } from 'react'
 import type { DocumentShellProps } from './types'
 import { STATE_LABELS } from './types'
 
-const BODY_ID = 'document-shell-body'
+const FOCUSABLE_SELECTOR =
+  'a, button, [tabindex]:not([tabindex="-1"]), input, select, textarea'
 
 export function DocumentShell({
   title,
@@ -13,17 +14,59 @@ export function DocumentShell({
   leftRail,
   body,
   rightRail,
+  bodyAs = 'main',
 }: DocumentShellProps) {
   const [leftOpen, setLeftOpen] = useState(false)
   const [rightOpen, setRightOpen] = useState(false)
+  const bodyId = useId()
   const leftRailId = useId()
   const rightRailId = useId()
+  const leftRailRef = useRef<HTMLElement>(null)
+  const rightRailRef = useRef<HTMLElement>(null)
+  const leftToggleRef = useRef<HTMLButtonElement>(null)
+  const rightToggleRef = useRef<HTMLButtonElement>(null)
+
+  useEffect(() => {
+    if (leftOpen) {
+      leftRailRef.current
+        ?.querySelector<HTMLElement>(FOCUSABLE_SELECTOR)
+        ?.focus()
+    }
+  }, [leftOpen])
+
+  useEffect(() => {
+    if (rightOpen) {
+      rightRailRef.current
+        ?.querySelector<HTMLElement>(FOCUSABLE_SELECTOR)
+        ?.focus()
+    }
+  }, [rightOpen])
+
+  const handleLeftKeyDown = (e: KeyboardEvent<HTMLElement>) => {
+    if (e.key === 'Escape') {
+      setLeftOpen(false)
+      leftToggleRef.current?.focus()
+    }
+  }
+
+  const handleRightKeyDown = (e: KeyboardEvent<HTMLElement>) => {
+    if (e.key === 'Escape') {
+      setRightOpen(false)
+      rightToggleRef.current?.focus()
+    }
+  }
+
+  const bodyProps = {
+    id: bodyId,
+    'data-shell-region': 'body' as const,
+    className: 'min-w-0 p-4',
+  }
 
   return (
     <div className="document-shell flex flex-col">
       <a
         data-shell-skip-link
-        href={`#${BODY_ID}`}
+        href={`#${bodyId}`}
         className="sr-only focus:not-sr-only focus:absolute focus:top-2 focus:left-2 focus:z-50 focus:rounded focus:bg-white focus:px-3 focus:py-2 focus:shadow"
       >
         Skip to document content
@@ -45,6 +88,7 @@ export function DocumentShell({
         ) : null}
         {leftRail ? (
           <button
+            ref={leftToggleRef}
             type="button"
             data-shell-toggle="leftRail"
             aria-expanded={leftOpen}
@@ -60,30 +104,32 @@ export function DocumentShell({
       <div className="grid grid-cols-1 md:grid-cols-[1fr_280px] lg:grid-cols-[240px_1fr_280px]">
         {leftRail ? (
           <nav
+            ref={leftRailRef}
             id={leftRailId}
             data-shell-region="leftRail"
             data-state={leftOpen ? 'open' : 'closed'}
             aria-label="Document sections"
+            onKeyDown={handleLeftKeyDown}
             className="hidden border-r p-4 transition-[opacity,transform] data-[state=open]:block motion-reduce:transition-none lg:!block"
           >
             {leftRail}
           </nav>
         ) : null}
 
-        <main
-          id={BODY_ID}
-          data-shell-region="body"
-          className="min-w-0 p-4"
-        >
-          {body}
-        </main>
+        {bodyAs === 'section' ? (
+          <section {...bodyProps}>{body}</section>
+        ) : (
+          <main {...bodyProps}>{body}</main>
+        )}
 
         {rightRail ? (
           <aside
+            ref={rightRailRef}
             id={rightRailId}
             data-shell-region="rightRail"
             data-state={rightOpen ? 'open' : 'closed'}
             aria-label="Document context"
+            onKeyDown={handleRightKeyDown}
             className="hidden border-l p-4 transition-[opacity,transform] data-[state=open]:block motion-reduce:transition-none md:!block"
           >
             {rightRail}
@@ -93,6 +139,7 @@ export function DocumentShell({
 
       {rightRail ? (
         <button
+          ref={rightToggleRef}
           type="button"
           data-shell-toggle="rightRail"
           aria-expanded={rightOpen}

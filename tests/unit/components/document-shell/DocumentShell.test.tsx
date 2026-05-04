@@ -151,8 +151,10 @@ describe('<DocumentShell /> — keyboard nav + a11y + motion preference', () => 
     )
     const skipLink = container.querySelector('[data-shell-skip-link]')
     expect(skipLink?.tagName.toLowerCase()).toBe('a')
-    expect(skipLink?.getAttribute('href')).toBe('#document-shell-body')
-    expect(container.querySelector('#document-shell-body')).not.toBeNull()
+    const href = skipLink?.getAttribute('href')
+    expect(href).toMatch(/^#/)
+    const targetId = href?.slice(1)
+    expect(container.querySelector(`#${targetId}`)).not.toBeNull()
   })
 
   it('left rail uses a nav landmark with aria-label', () => {
@@ -163,9 +165,26 @@ describe('<DocumentShell /> — keyboard nav + a11y + motion preference', () => 
     expect(nav).not.toBeNull()
   })
 
-  it('body uses a main landmark', () => {
+  it('body uses a main landmark by default', () => {
     const { container } = render(<DocumentShell {...baseProps} />)
     expect(container.querySelector('main')).not.toBeNull()
+    expect(
+      container
+        .querySelector('[data-shell-region="body"]')
+        ?.tagName.toLowerCase(),
+    ).toBe('main')
+  })
+
+  it('respects bodyAs="section" override (no nested main when host owns it)', () => {
+    const { container } = render(
+      <DocumentShell {...baseProps} bodyAs="section" />,
+    )
+    expect(container.querySelector('main')).toBeNull()
+    expect(
+      container
+        .querySelector('[data-shell-region="body"]')
+        ?.tagName.toLowerCase(),
+    ).toBe('section')
   })
 
   it('right rail uses an aside landmark with aria-label', () => {
@@ -188,5 +207,63 @@ describe('<DocumentShell /> — keyboard nav + a11y + motion preference', () => 
     const rightRail = container.querySelector('[data-shell-region="rightRail"]')
     expect(leftRail?.className).toContain('motion-reduce:transition-none')
     expect(rightRail?.className).toContain('motion-reduce:transition-none')
+  })
+})
+
+describe('<DocumentShell /> — focus management on toggle', () => {
+  const focusableProps = {
+    ...baseProps,
+    leftRail: <a href="#left-first">left first</a>,
+    rightRail: <a href="#right-first">right first</a>,
+  }
+
+  it('moves focus to first focusable child of left rail when toggle opens', () => {
+    const { container } = render(<DocumentShell {...focusableProps} />)
+    const toggle = container.querySelector(
+      '[data-shell-toggle="leftRail"]',
+    ) as HTMLButtonElement
+    const firstLink = container.querySelector('a[href="#left-first"]')
+    fireEvent.click(toggle)
+    expect(document.activeElement).toBe(firstLink)
+  })
+
+  it('Escape on left rail closes it and returns focus to left toggle', () => {
+    const { container } = render(<DocumentShell {...focusableProps} />)
+    const toggle = container.querySelector(
+      '[data-shell-toggle="leftRail"]',
+    ) as HTMLButtonElement
+    fireEvent.click(toggle)
+    const rail = container.querySelector(
+      '[data-shell-region="leftRail"]',
+    ) as HTMLElement
+    fireEvent.keyDown(rail, { key: 'Escape' })
+    expect(rail.getAttribute('data-state')).toBe('closed')
+    expect(toggle.getAttribute('aria-expanded')).toBe('false')
+    expect(document.activeElement).toBe(toggle)
+  })
+
+  it('moves focus to first focusable child of right rail when toggle opens', () => {
+    const { container } = render(<DocumentShell {...focusableProps} />)
+    const toggle = container.querySelector(
+      '[data-shell-toggle="rightRail"]',
+    ) as HTMLButtonElement
+    const firstLink = container.querySelector('a[href="#right-first"]')
+    fireEvent.click(toggle)
+    expect(document.activeElement).toBe(firstLink)
+  })
+
+  it('Escape on right rail closes it and returns focus to right toggle', () => {
+    const { container } = render(<DocumentShell {...focusableProps} />)
+    const toggle = container.querySelector(
+      '[data-shell-toggle="rightRail"]',
+    ) as HTMLButtonElement
+    fireEvent.click(toggle)
+    const rail = container.querySelector(
+      '[data-shell-region="rightRail"]',
+    ) as HTMLElement
+    fireEvent.keyDown(rail, { key: 'Escape' })
+    expect(rail.getAttribute('data-state')).toBe('closed')
+    expect(toggle.getAttribute('aria-expanded')).toBe('false')
+    expect(document.activeElement).toBe(toggle)
   })
 })

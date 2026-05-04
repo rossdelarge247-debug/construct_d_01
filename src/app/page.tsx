@@ -21,7 +21,7 @@ export default function LandingPage() {
   ]
 
   return (
-    <div className="min-h-screen bg-[color:var(--ds-color-surface-canvas)] p-[var(--ds-space-32)]">
+    <main className="min-h-screen bg-[color:var(--ds-color-surface-canvas)] p-[var(--ds-space-32)]">
       <div className="mx-auto flex max-w-[var(--ds-layout-max-wide)] flex-col gap-[var(--ds-space-40)]">
         <header className="flex flex-col gap-[var(--ds-space-8)] text-center">
           <h1 className="text-[length:var(--ds-type-40)] font-semibold text-[color:var(--ds-color-ink)]">
@@ -94,11 +94,14 @@ export default function LandingPage() {
             below; document slices ship the section bodies.
           </p>
 
+          <PhaseStepper currentPhase="build" phases={phases} />
+
           <div className="rounded border border-[color:var(--ds-color-divider)]">
             <DocumentShell
               title="Sarah&rsquo;s Picture"
               state="draft"
               autosaveStamp="Autosaved · 2 min ago"
+              bodyAs="section"
               leftRail={
                 <div className="flex flex-col gap-3">
                   <p className="text-xs uppercase tracking-wide text-neutral-500">
@@ -169,6 +172,6 @@ export default function LandingPage() {
           </div>
         </section>
       </div>
-    </div>
+    </main>
   )
 }

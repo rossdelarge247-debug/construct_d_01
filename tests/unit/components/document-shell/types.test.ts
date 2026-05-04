@@ -3,7 +3,7 @@ import type { DocumentState } from '@/components/document-shell/types'
 import { STATE_LABELS } from '@/components/document-shell/types'
 
 describe('DocumentState type union', () => {
-  it('accepts the 5 document-state literal values', () => {
+  it('accepts every DocumentState literal value', () => {
     const valid: DocumentState[] = [
       'draft',
       'ready-to-send',
