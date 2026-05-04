@@ -1,15 +1,127 @@
 'use client'
 
+import { useSyncExternalStore } from 'react'
+import { MODE } from '@/lib/auth'
+
+const SCENARIO_OPTIONS = [
+  'cold-sarah',
+  'sarah-connected',
+  'sarah-mid-build',
+  'sarah-complete',
+  'sarah-shared-mark-invited',
+  'sarah-reconcile-in-progress',
+  'sarah-settle',
+  'sarah-finalise',
+] as const
+
+const wrapStyle: React.CSSProperties = {
+  display: 'flex',
+  alignItems: 'center',
+  gap: '0.75rem',
+  padding: '0.375rem 1rem',
+  fontSize: '0.75rem',
+  fontFamily: 'system-ui, -apple-system, sans-serif',
+  background: '#f0f7ff',
+  color: '#0066cc',
+  borderBottom: '1px solid #c5dffc',
+}
+
+const chipStyle: React.CSSProperties = {
+  display: 'inline-block',
+  padding: '0.125rem 0.5rem',
+  fontWeight: 600,
+  letterSpacing: '0.05em',
+  borderRadius: '4px',
+  background: '#0066cc',
+  color: '#fff',
+}
+
+const selectStyle: React.CSSProperties = {
+  padding: '0.125rem 0.375rem',
+  fontSize: '0.75rem',
+  fontFamily: 'inherit',
+  background: '#fff',
+  border: '1px solid #c5dffc',
+  borderRadius: '3px',
+  color: 'inherit',
+}
+
+const buttonStyle: React.CSSProperties = {
+  padding: '0.125rem 0.5rem',
+  fontSize: '0.75rem',
+  fontFamily: 'inherit',
+  background: '#fff',
+  border: '1px solid #c5dffc',
+  borderRadius: '3px',
+  color: 'inherit',
+  cursor: 'pointer',
+  marginLeft: 'auto',
+}
+
+const NS = ['decouple', 'dev'].join(':')
+const SCENARIO_KEY = `${NS}:scenario:v1`
+const NS_PREFIX = `${NS}:`
+
+function subscribeToScenario() {
+  return () => {}
+}
+function getScenarioSnapshot(): string | null {
+  return localStorage.getItem(SCENARIO_KEY)
+}
+function getScenarioServerSnapshot(): string | null {
+  return null
+}
+
 export function EnvBanner() {
-  const env = process.env.NEXT_PUBLIC_APP_ENV ?? process.env.NODE_ENV
+  const scenario = useSyncExternalStore(
+    subscribeToScenario,
+    getScenarioSnapshot,
+    getScenarioServerSnapshot,
+  )
 
-  if (env === 'production') return null
+  if (MODE !== 'dev') return null
 
-  const label = env === 'development' ? 'Development' : 'Staging'
+  function handleScenarioChange(e: React.ChangeEvent<HTMLSelectElement>) {
+    const next = e.target.value
+    if (!next) return
+    window.location.href = `/dev/scenarios?load=${encodeURIComponent(next)}`
+  }
+
+  function handleReset() {
+    if (!window.confirm('Wipe all dev workspace state and reload?')) return
+    Object.keys(window.localStorage)
+      .filter((k) => k.startsWith(NS_PREFIX))
+      .forEach((k) => window.localStorage.removeItem(k))
+    window.location.reload()
+  }
 
   return (
-    <div className="bg-depth px-2 py-1 text-center text-xs font-medium text-cream">
-      {label} environment
+    <div style={wrapStyle} role="region" aria-label="Dev mode banner">
+      <span style={chipStyle}>DEV</span>
+      <span>
+        scenario: <strong>{scenario ?? '(none)'}</strong>
+      </span>
+      <label style={{ display: 'flex', alignItems: 'center', gap: '0.375rem' }}>
+        <span>switch:</span>
+        <select
+          value={scenario ?? ''}
+          onChange={handleScenarioChange}
+          style={selectStyle}
+          aria-label="Switch dev scenario"
+        >
+          <option value="" disabled>
+            pick…
+          </option>
+          {SCENARIO_OPTIONS.map((name) => (
+            <option key={name} value={name}>
+              {name}
+            </option>
+          ))}
+        </select>
+      </label>
+      <button type="button" onClick={handleReset} style={buttonStyle}>
+        Reset
+      </button>
     </div>
   )
 }

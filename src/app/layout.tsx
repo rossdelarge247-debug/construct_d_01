@@ -1,6 +1,7 @@
 import type { Metadata } from 'next'
 import './globals.css'
 import { APP_NAME, APP_DESCRIPTION } from '@/constants'
+import { EnvBanner } from '@/components/layout/env-banner'
 
 export const metadata: Metadata = {
   title: APP_NAME,
@@ -20,6 +21,7 @@ export default function RootLayout({
         <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
       </head>
       <body className="min-h-full bg-off-white text-ink">
+        <EnvBanner />
         {children}
       </body>
     </html>
