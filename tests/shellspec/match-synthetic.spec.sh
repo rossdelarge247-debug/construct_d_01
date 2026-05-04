@@ -3,8 +3,8 @@
 # evaluator that decides whether a persona's envelope satisfies the
 # synthetic-injection expected-finding signature.
 #
-# Test contract: 1 PASS + 5 FAIL paths covering every predicate
-# (count, label, blocking, category, evidence, remediation), plus the
+# Coverage: PASS path (all predicates satisfied) + per-predicate FAIL
+# paths (count, label, blocking, category, evidence, remediation) +
 # missing-input-file precondition exit-2.
 
 Describe 'match-synthetic.sh'
@@ -16,10 +16,6 @@ Describe 'match-synthetic.sh'
     SPEC_TMP="$(mktemp -d -t match-synthetic-spec.XXXXXX)"
     cd "$SPEC_TMP" || return
 
-    # Canonical expected-signature: matches a security-dimension finding
-    # carrying a blocking issue with `category: "security"`, evidence
-    # mentioning `dangerouslySetInnerHTML`, remediation mentioning
-    # `sanitize` (case-insensitive).
     cat > expected.json <<'EOF'
 {
   "dimension": "security",
@@ -84,6 +80,27 @@ EOF
     {
       "label": "thought",
       "blocking": true,
+      "category": "security",
+      "evidence": "dangerouslySetInnerHTML",
+      "remediation": "sanitize"
+    }
+  ]
+}
+EOF
+    When call "$MATCH_SCRIPT" envelope.json expected.json
+    The stderr should include 'no finding matched'
+    The status should be failure
+  End
+
+  It 'FAILs when finding has wrong blocking value'
+    cat > envelope.json <<'EOF'
+{
+  "specialist": "reviewer-security",
+  "summary": "x",
+  "findings": [
+    {
+      "label": "issue",
+      "blocking": false,
       "category": "security",
       "evidence": "dangerouslySetInnerHTML",
       "remediation": "sanitize"
