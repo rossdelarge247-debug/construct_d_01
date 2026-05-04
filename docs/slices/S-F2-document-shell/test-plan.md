@@ -20,18 +20,21 @@ One or more tests per AC. Component tests live co-located at `src/components/doc
 - **Fixture:** in-test JSX literals
 - **Evidence at wrap:** vitest output for `DocumentShell.test.tsx`; preview-deploy screenshot of demo block on landing page.
 
-## T-2 · references AC-2 — Responsive contract at three breakpoints
+## T-2 · references AC-2 — Responsive contract (CSS-driven)
 
-- **Given:** `<DocumentShell ... />` rendered at three viewport widths simulated via `vi.stubGlobal('matchMedia', mockMatchMedia(width))` or an equivalent jsdom resize helper.
-- **When:** Render at 1280 (desktop), 800 (tablet), 375 (mobile).
+- **Given:** `<DocumentShell ... />` rendered once into a test container.
+- **When:** Inspect DOM markup + Tailwind class composition.
 - **Then:**
-  - 1280 — both rails inline; no toggle buttons in DOM.
-  - 800 — right rail inline; left-rail toggle button present with `aria-expanded="false"` + `aria-controls` referencing left-rail id; left rail not visible until toggle clicked.
-  - 375 — neither rail inline; both toggles present; both rails closed by default.
-  - Clicking a toggle flips `aria-expanded` to `"true"` and the rail becomes accessible to assistive tech (rendered or unhidden).
-- **Type:** unit (component render with viewport mock)
-- **Automated:** yes (vitest)
-- **Fixture:** in-test JSX + matchMedia mock
+  - Both toggle buttons present in DOM (always rendered).
+  - Left toggle carries `lg:hidden` class (CSS-hides at desktop ≥1024px).
+  - Right toggle carries `md:hidden` class (CSS-hides at tablet/desktop ≥768px).
+  - Each toggle has `aria-expanded="false"` (default closed state) + `aria-controls` referencing the rail's `id`.
+  - Each rail has `data-state="closed"` (default).
+  - Clicking a toggle flips `aria-expanded` to `"true"` and the rail's `data-state` to `"open"`.
+  - CSS responsive verification — visual smoke at preview-deploy at 1280 / 800 / 375 confirms toggles + rails hide/show at the right widths (jsdom doesn't compute media queries).
+- **Type:** unit (component render + DOM contract assertion) + manual (preview-deploy CSS verification)
+- **Automated:** DOM contract yes (vitest); CSS responsive no (manual preview)
+- **Fixture:** in-test JSX literals
 - **Evidence at wrap:** vitest output; preview-deploy screenshots at 1280 / 800 / 375.
 
 ## T-3 · references AC-3 — Keyboard navigation + a11y + prefers-reduced-motion
