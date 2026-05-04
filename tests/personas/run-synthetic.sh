@@ -15,7 +15,7 @@
 set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-REPO_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
+REPO_ROOT="$(cd "$SCRIPT_DIR/../.." && pwd)"
 SYNTHETIC_DIR="$SCRIPT_DIR/synthetic"
 EXPECTED_DIR="$SYNTHETIC_DIR/expected"
 PARSER="$REPO_ROOT/scripts/auto-review-parse.sh"
@@ -25,6 +25,10 @@ MATCHER="$SCRIPT_DIR/match-synthetic.sh"
 # between the two pins makes synthetic-injection signal incomparable to the
 # production review path; bump both together when upgrading.
 CLAUDE_CLI_VERSION="${CLAUDE_CLI_VERSION:-2.1.126}"
+if ! [[ "$CLAUDE_CLI_VERSION" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+  printf 'run-synthetic.sh: invalid CLAUDE_CLI_VERSION: %s (must be semver MAJOR.MINOR.PATCH)\n' "$CLAUDE_CLI_VERSION" >&2
+  exit 2
+fi
 
 # Skip-on-no-API-key: forks and contributors without secret access exit
 # neutrally rather than fail the workflow. The same skip-with-neutral

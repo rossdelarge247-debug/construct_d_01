@@ -29,10 +29,9 @@ if [ "$ACTUAL_COUNT" -lt "$MIN_COUNT" ]; then
   exit 1
 fi
 
-# Per-finding predicate evaluation. The matcher returns success if ANY
-# finding in the envelope satisfies ALL predicates declared in
-# expected.expected_finding. Predicates are encoded as a single jq
-# expression so they evaluate atomically.
+# ANY-of-ALL semantics: success if at least one finding satisfies every
+# predicate. Encoded as a single jq filter so the predicates evaluate
+# atomically against each candidate finding.
 MATCH_COUNT=$(printf '%s' "$ENVELOPE" | jq --argjson exp "$EXPECTED" '
   [.findings[] | select(
     (.label as $l | $exp.expected_finding.label_in | index($l) != null)

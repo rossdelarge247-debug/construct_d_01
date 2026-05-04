@@ -133,6 +133,8 @@ on:
       - 'scripts/auto-review-parse.sh'
       - 'tests/personas/synthetic/**'
       - 'tests/personas/run-synthetic.sh'
+      - 'tests/personas/match-synthetic.sh'
+      - '.github/workflows/persona-synthetic-fixtures.yml'
   push:
     branches: [main]
     paths: [<same as above>]

@@ -10,7 +10,7 @@ golden-PR replay (aggregator-only) cannot isolate.
 |---|---|---|---|
 | AC-1 | 4 unified-diff fixtures with planted defects | PASS | `tests/personas/synthetic/{security,architecture,correctness,style}.diff` exist; each parses as a unified diff (header + hunk markers + add lines). |
 | AC-2 | 4 expected-finding signature contracts | PASS | `tests/personas/synthetic/expected/{security,architecture,correctness,style}.json` exist; each parses as JSON with the required schema (dimension, fixture_path, planted_defect_summary, expected_finding{label_in, blocking_in, category_pattern, evidence_must_contain_any_of, remediation_must_contain_any_of}, min_findings_count). |
-| AC-3 | Live-invocation runner | PASS | `tests/personas/run-synthetic.sh` (~100L) + `tests/personas/match-synthetic.sh` (~60L). Both `bash -n` clean. Matcher smoke-tested with 3 stub envelopes (PASS / FAIL-evidence-missing / FAIL-empty) — all 3 cases produce the expected exit code + diagnostic. Runner skip-on-no-API-key tested: unset `ANTHROPIC_API_KEY` → exit 0 with `SKIP` diagnostic to stderr. |
+| AC-3 | Live-invocation runner | PASS | `tests/personas/run-synthetic.sh` (~100L) + `tests/personas/match-synthetic.sh` (~60L). Both `bash -n` clean. Matcher covered by `tests/shellspec/match-synthetic.spec.sh` — 8 cases: PASS-all-predicates + 5 per-predicate FAIL paths (count / label / category / evidence / remediation) + 2 missing-input-file precondition exit-2 cases. Runner skip-on-no-API-key tested: unset `ANTHROPIC_API_KEY` → exit 0 with `SKIP` diagnostic to stderr. Runner CLI-version semver guard: invalid value (e.g. non-semver) → exit 2 with diagnostic. |
 | AC-4 | CI workflow integration | PASS | `.github/workflows/persona-synthetic-fixtures.yml` (~55L) — path-filter trigger covers persona prompts, orchestrator scripts, parser, synthetic dir, runner, matcher, and the workflow file itself. Workflow lints clean (yaml syntax verified). On this PR opening, workflow runs: either passes (API key configured) or skip-with-neutral (forks). |
 | AC-5 | Documentation | PASS | `tests/personas/synthetic/README.md` (~92L) explains design rationale, file layout, runner mechanics, how-to-run, regression interpretation, CI integration, and how to add a new fixture. Slice docs at `docs/slices/S-INFRA-synthetic-fixtures/` (acceptance + security + this file). `CLAUDE.md` §Hard-controls §Not-yet-in-scope: synthetic-fixtures carry-over struck (now shipped). |
 
@@ -89,8 +89,8 @@ persona prompts) remain.
 
 - [x] `bash -n tests/personas/run-synthetic.sh` — clean
 - [x] `bash -n tests/personas/match-synthetic.sh` — clean
-- [x] Matcher smoke-tested with 3 stub envelopes (PASS / FAIL-evidence /
-  FAIL-empty)
+- [x] Matcher covered by `tests/shellspec/match-synthetic.spec.sh` (8 cases:
+  1 PASS-all-predicates + 5 per-predicate FAIL + 2 missing-input precondition)
 - [x] Runner skip-on-no-API-key: `unset ANTHROPIC_API_KEY; tests/personas/run-synthetic.sh`
   → exit 0 with skip diagnostic
 - [x] Each fixture parses as a unified diff (visual inspection; header +
@@ -140,7 +140,7 @@ spec 72c §9, not the 68f/g visual-anchor register.
 | # | DoD item | Status | Evidence |
 |---|---|---|---|
 | 1 | All AC met with evidence | ✅ | AC sign-off table above (5/5 PASS) |
-| 2 | Tests written + passing | ✅ | Matcher smoke-tested (3 stub-envelope cases); CI live-invocation gated on API key |
+| 2 | Tests written + passing | ✅ | Matcher covered by 8-case ShellSpec (`tests/shellspec/match-synthetic.spec.sh`); CI live-invocation gated on API key |
 | 3 | Adversarial review done | 🟡 | Manual considerations addressed in `security.md`; multi-agent auto-review pending PR open |
 | 4 | Preview deploy verified (UI) | N/A | No UI surface |
 | 5 | No regression in adjacent slices | ✅ | Golden replay unchanged; no `src/` touches; orchestrator scripts unmodified |
