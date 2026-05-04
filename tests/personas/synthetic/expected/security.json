@@ -1,0 +1,13 @@
+{
+  "dimension": "security",
+  "fixture_path": "tests/personas/synthetic/security.diff",
+  "planted_defect_summary": "Unsanitised dangerouslySetInnerHTML rendering server-fetched user-controlled comment.body — XSS via stored input.",
+  "expected_finding": {
+    "label_in": ["issue", "todo"],
+    "blocking_in": [true],
+    "category_pattern": "(?i)security",
+    "evidence_must_contain_any_of": ["dangerouslySetInnerHTML", "comment.body", "__html"],
+    "remediation_must_contain_any_of": ["sanitize", "DOMPurify", "escape", "encode", "strip"]
+  },
+  "min_findings_count": 1
+}

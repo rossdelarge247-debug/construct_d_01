@@ -70,6 +70,7 @@ case "$FILE_PATH" in
   .claude/subagent-prompts/*) exit 0 ;;
   tests/shellspec/*) exit 0 ;;
   tests/*/fixtures/*) exit 0 ;;
+  tests/personas/synthetic/*) exit 0 ;;
   *.lock|*.json|*.yaml|*.yml) exit 0 ;;
   *.png|*.jpg|*.jpeg|*.gif|*.webp|*.ico|*.svg) exit 0 ;;
   *.woff|*.woff2|*.ttf|*.otf|*.eot|*.pdf|*.zip|*.tar|*.gz|*.bz2) exit 0 ;;

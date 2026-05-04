@@ -1,0 +1,13 @@
+{
+  "dimension": "correctness",
+  "fixture_path": "tests/personas/synthetic/correctness.diff",
+  "planted_defect_summary": "Off-by-one in pagination loop bound: `i < cursor + pageSize - 1` drops the last item of every page; nextCursor calculation also uses the same incorrect offset.",
+  "expected_finding": {
+    "label_in": ["issue", "todo"],
+    "blocking_in": [true, false],
+    "category_pattern": "(?i)(edge-case|scope-creep|regression|spec-citation|ac-gap)",
+    "evidence_must_contain_any_of": ["pageSize - 1", "cursor + pageSize - 1", "i < cursor", "nextCursor"],
+    "remediation_must_contain_any_of": ["pageSize", "off-by-one", "bound", "<= ", "remove the -1", "drop the -1", "include the last", "page.length === pageSize", "inclusive", "exclusive", "fencepost"]
+  },
+  "min_findings_count": 1
+}

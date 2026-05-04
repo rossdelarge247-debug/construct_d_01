@@ -1,0 +1,13 @@
+{
+  "dimension": "style",
+  "fixture_path": "tests/personas/synthetic/style.diff",
+  "planted_defect_summary": "Doc comment narrates change-history with PR/round/session/ticket/slice provenance — exactly the rotting-lineage pattern flagged by CLAUDE.md §Comments-WHY-not-WHAT.",
+  "expected_finding": {
+    "label_in": ["issue"],
+    "blocking_in": [false],
+    "category_pattern": "(?i)(simplicity|naming|commenting)",
+    "evidence_must_contain_any_of": ["PR #142", "round 3", "session-44", "DCP-118", "S-FIN-2", "regression context", "Updated at"],
+    "remediation_must_contain_any_of": ["remove", "delete", "drop", "PR description", "WHY", "lineage", "provenance", "rot", "temporal"]
+  },
+  "min_findings_count": 1
+}

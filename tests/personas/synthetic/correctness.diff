@@ -1,0 +1,22 @@
+diff --git a/src/lib/pagination/cursor-paginate.ts b/src/lib/pagination/cursor-paginate.ts
+new file mode 100644
+index 0000000..c3d4e5f
+--- /dev/null
++++ b/src/lib/pagination/cursor-paginate.ts
+@@ -0,0 +1,17 @@
++export function paginateCursor<T>(
++  items: T[],
++  pageSize: number,
++  cursor: number = 0
++): { page: T[]; nextCursor: number | null } {
++  const page: T[] = [];
++  for (let i = cursor; i < cursor + pageSize - 1; i++) {
++    if (i >= items.length) break;
++    page.push(items[i]);
++  }
++  const nextCursor =
++    cursor + pageSize - 1 < items.length
++      ? cursor + pageSize - 1
++      : null;
++  return { page, nextCursor };
++}

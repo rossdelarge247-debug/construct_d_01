@@ -1,0 +1,19 @@
+diff --git a/src/lib/util/format-currency.ts b/src/lib/util/format-currency.ts
+new file mode 100644
+index 0000000..d4e5f6a
+--- /dev/null
++++ b/src/lib/util/format-currency.ts
+@@ -0,0 +1,16 @@
++/**
++ * Format an amount in pence as a GBP currency string.
++ *
++ * Updated at PR #142 round 3 to handle the negative-amount case
++ * raised by the reviewer in session-44; previously the minus sign
++ * was dropped. See ticket DCP-118 and slice S-FIN-2 AC-4 for the
++ * regression context.
++ */
++export function formatCurrency(pence: number): string {
++  const negative = pence < 0;
++  const abs = Math.abs(pence);
++  return `${negative ? '-' : ''}£${(abs / 100).toFixed(2)}`;
++}

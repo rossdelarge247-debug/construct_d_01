@@ -363,7 +363,6 @@ Canonical sources: `docs/HANDOFF-SESSION-55.md` §"v3c carry-overs" + spec 72c �
 - Pair-programming PostToolUse hook with intent file + finding-response loop
 
 **Drift / regression detection:**
-- Synthetic-deliberate-injection per-persona fixtures — deferred to v3c per spec 72c §7; gated on first-3-src-slice retain/drop confirming the 4-partition holds. Catches per-persona regressions that golden-replay alone can't isolate.
 - Live persona drift detection — quarterly cron re-invocation against golden seeds (recurring API budget; spec 72c §9)
 
 **External integrations:**
