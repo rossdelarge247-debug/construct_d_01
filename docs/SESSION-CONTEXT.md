@@ -1,4 +1,4 @@
-# Session 62 Wrap Context Block (heading into session 63)
+# Session 64 Wrap Context Block (heading into session 65)
 
 ## Product positioning (preserve across sessions)
 
@@ -12,7 +12,7 @@ Spec 42 authoritative for positioning. Spec 68 suite (hub + 68a-e locked + 68f/g
 
 Next.js 16.2, React 19, TypeScript, Tailwind 4, Supabase, Claude AI, Vercel Pro. Single-branch-main workflow (spec 71 §7a Option 4): no `phase-c` integration, no cutover event. Slice work on short-lived feature branches → PR → main. Tink credentials in Vercel env. Stripe SDK pinned at `^22.1.0`.
 
-## What sessions 41-62 accomplished (rolling window)
+## What sessions 41-64 accomplished (rolling window)
 
 - **Sessions 41-46:** v3b S-1 through S-5 — 12/15 ACs landed via PRs #25-#27 across 6 sessions.
 - **Session 47:** v3b S-6 (PR #30 9-round live recursive auto-review; 14 findings; v3b 12/15 → 15/15). Auto-review.yml + 3 personas live.
@@ -31,7 +31,8 @@ Next.js 16.2, React 19, TypeScript, Tailwind 4, Supabase, Claude AI, Vercel Pro.
 - **Session 60 (this wrap):** **3 substantive infra PRs merged** sequentially from `claude/decouple-session-60-TT3BF`. **PR #76** (P0) `S-INFRA-reviewer-comment` — author-time WHY-vs-WHAT subagent (PostToolUse hook + `.claude/agents/reviewer-comment.md` persona; stub mode covers 4 of 5 catalogue items via regex; live mode opt-in via `COMMENT_REVIEW_SPAWN=1`). 3 rounds. **PR #77** (P4) `S-INFRA-tdd-guard-first-creation` — tdd-guard distinguishes module-not-found-on-Write-of-non-existent-src from real RED; chicken-and-egg auto-resolves so the bash-heredoc workaround becomes optional. 3 rounds. **PR #78** (P5) `S-INFRA-parse-pipeline-schema-validation` — `auto-review-parse.sh` now schema-validates each persona envelope via `validate-finding-envelope.sh`, warn + accept on schema-invalidity (parse-failed cascade preserved exactly for the existing JSON-extraction failure modes). 4 rounds. n=3 calibration: mean 3.33 rounds. Lessons: anti-pattern self-application QUADRUPLE confirmed (session 57+58+59+60); fixture drift surfaced when bolting strict-mode onto pre-existing pipeline (P5 round 2); bare-assignment + `set -euo pipefail` + command-sub failure breaks errexit-suppression (P5 round 4 round-trip canonical lesson); P0 hook self-fire dogfood worked end-to-end including the round-2 absolute-path skip-list fix.
 - **Session 61 (this wrap):** **2 substantive PRs merged + wrap C-pick** sequentially from `claude/decouple-session-61-R5p05`. **PR #80** S-F4 trust chip slice (Phase C.1 order #5) — `<TrustChip>` + 6-level taxonomy + 2 LOCKED visual treatments + 4 OPEN levels rendered as neutral placeholders + 4 new `--ds-color-trust-*` tokens (S-F1 token-parity test extended 65→69) + landing-page demo + 5 new test files; 68g register C-T1 entry created (🟠 with annotation). 2 rounds (R1: 8 findings; R2: approve + 1 nitpick). **PR #81** Enhancement #1 plan-review subagent default-spawn flip — `EXIT_PLAN_REVIEW_SPAWN=0` opt-out replaces `=1` opt-in; CLAUDE.md §Hard controls gate row updated + §Not yet in scope item struck. 1 round (approve + 1 informational `note`). **Wrap PR** JSON Schema list-strike (shipped at PR #71 + PR #78; struck from §Not yet in scope §Other) + HANDOFF-61 + SESSION-CONTEXT refresh. Mean 1.5 rounds; queue-drain Path A · N=1 cadence validated. Lessons: TDD-guard chicken-and-egg variant for RED-on-existing-src (used `sed` via Bash workaround); anti-pattern self-application QUINTUPLE confirmed (sessions 57+58+59+60+61 — describe/it test descriptions are author-time stub-hook blindspot); AC-2 hooks-checksums + control-change-label mechanism is aspirational (3 expected files do not exist on disk).
 - **Session 62:** **1 substantive PR merged** sequentially from `claude/decouple-session-62-urIHk`. **PR #83** S-F7-β rebase via cherry-pick replay (HANDOFF-59 Lesson 4 Strategy a; parked branch `claude/S-F7-beta-impl @ a3f67ec` 8 ahead / 50 behind main replayed onto session-62 branch + ridden through current rigour pipeline). 14 commits squash-merged at `23a35a1`: 8 cherry-picks + 1 lint-fix + 1 verification.md refresh + 1 fix-up addressing 6 of 8 round-1 findings + 3 empty Vercel-retrigger commits. 2 rounds. AC-4 retain/drop dataset NOW 3/3 (S-F3 + S-F4 + S-F7-β) → **spec 72c §7 first-3-src-slice gate CONFIRMED** (every slice's findings cluster cleanly into the 4 categories with no catalogue gaps requiring a 5th specialist) → synthetic-deliberate-injection per-persona fixtures unblocked. Lessons: architectural-smell-trigger fired on cherry-picks (lint pipeline raised 13 errors; 12 mechanically fixable); lockfile divergence between `package-lock.json` (eslint-plugin-react-hooks@7.0.1) and `pnpm-lock.yaml` (7.1.1) surfaced rule drift on engine-workbench:711; sextuple-confirmed anti-pattern catalogue items 5/8 of round-1 findings (cherry-pick replays are write-time-hook gap); Vercel preview env-var scope matters (Preview ≠ Production); TDD-guard chicken-and-egg variant for lint-fix-on-existing-untested-src.
-- **Session 63 (this wrap):** **1 substantive PR merged** sequentially from `claude/decouple-session-63-S5DU6`. **PR #85** `S-INFRA-synthetic-fixtures` (`3b17be8`, admin-bypass squash-merge) — spec 72c §7 deferred-to-v3c synthetic-deliberate-injection per-persona fixtures deliverable. Surface: 4 unified-diff fixtures with planted defects (security XSS · architecture UI-DB coupling · correctness off-by-one · style PR/round provenance) + 4 expected-finding signature contracts + pure jq matcher (`tests/personas/match-synthetic.sh`) + orchestrating runner (`tests/personas/run-synthetic.sh`) + CI workflow (`.github/workflows/persona-synthetic-fixtures.yml`) + slice docs + comment-review hook skip-list extension + CLAUDE.md §"Not yet in scope" carry-over strike. **Live persona regression detection now operational** — every persona/orchestrator/synthetic-content change triggers 4× live `claude -p` invocations and asserts each persona flags its dimension's planted defect (4/4 PASS on round 2 + round 3). 3 rounds. R1: block — 6 valid findings, including a critical REPO_ROOT path bug (`$SCRIPT_DIR/..` → `tests/` rather than repo root; PARSER lookup failed precondition; the actual cause of the synthetic-deliberate-injection workflow's round-1 failure). R2: request-changes — 3 advisory non-blocking. R3: approve — 0 findings (all quorum levels concur). Mean 3 rounds slightly above ≤2-round target; each round addressed real findings rather than churn. Lessons: REPO_ROOT bug + missing ShellSpec gap + CLI-version command-injection were all author-time misses (live invocation surfaced them); category-pattern enum mismatch caught pre-PR via cross-check `grep '"category":' .claude/agents/reviewer-*.md` (would have been a round-1 finding otherwise); ANTHROPIC_API_KEY confirmed already configured at repo level (auto-review's 4 specialists ran successfully → key present; synthetic workflow inherits).
+- **Session 63:** **1 substantive PR merged** sequentially from `claude/decouple-session-63-S5DU6`. **PR #85** `S-INFRA-synthetic-fixtures` (`3b17be8`, admin-bypass squash-merge) — spec 72c §7 deferred-to-v3c synthetic-deliberate-injection per-persona fixtures deliverable. Surface: 4 unified-diff fixtures with planted defects (security XSS · architecture UI-DB coupling · correctness off-by-one · style PR/round provenance) + 4 expected-finding signature contracts + pure jq matcher (`tests/personas/match-synthetic.sh`) + orchestrating runner (`tests/personas/run-synthetic.sh`) + CI workflow (`.github/workflows/persona-synthetic-fixtures.yml`) + slice docs + comment-review hook skip-list extension + CLAUDE.md §"Not yet in scope" carry-over strike. **Live persona regression detection now operational** — every persona/orchestrator/synthetic-content change triggers 4× live `claude -p` invocations and asserts each persona flags its dimension's planted defect (4/4 PASS on round 2 + round 3). 3 rounds. R1: block — 6 valid findings, including a critical REPO_ROOT path bug. R2: request-changes — 3 advisory non-blocking. R3: approve. Lessons: REPO_ROOT bug + missing ShellSpec gap + CLI-version command-injection were all author-time misses; category-pattern enum mismatch caught pre-PR via cross-check.
+- **Session 64 (this wrap):** **1 substantive PR merged** sequentially from `claude/decouple-session-64-fN1u5`. **PR #87** `S-F2-document-shell` (`765f3b0`, admin-bypass squash-merge) — Phase C.1 order #4 foundation slice; three-column shell every workspace document renders into per spec 68b B-D1..D4 + spec 68d S-D1. Surface: `src/components/document-shell/{DocumentShell.tsx, types.ts, index.ts}` (~190L) + 3 test files with 28 unit tests + landing-page demo extension on `src/app/page.tsx` with Sarah's-Picture-shaped stub content + slice docs at `docs/slices/S-F2-document-shell/`. Implements 68b B-D1..D4 + B-T1 + B-T3 + 68d S-D1 + S-D2 + S-D4. 3 rounds. R1: block — 9 findings (2 blocking on focus-management ac-gap + page-wrapper scope-creep architecture; 7 advisory). R2: approve — 2 advisory (drop index.test.ts nitpick, userEvent vs fireEvent suggestion). R3: approve — same 2 advisory after doc-only verification.md finalisation. **First reviewer-architecture catch** in 5 src+infra slices: page-wrapper `<main>` → `<div>` was unscoped mutation; round 2 added `bodyAs?: 'main' | 'section'` prop (default `'main'`), demo passes `'section'`, page outer `<main>` restored. Lessons: architecture's first formal retain catch validated; pre-priority spec-quote check caught two kickoff drifts (path + framing) before AC freeze; TDD-guard chicken-and-egg recurred on lint-fix variant + new-tests-coupling (sed/awk/heredoc escape); auto-review k=2 quorum interprets two specialists with separate blocking findings as block; Constraint #27 hook flagged round-by-round narrative in verification.md.
 
 ## Current state
 
@@ -49,7 +50,7 @@ Next.js 16.2, React 19, TypeScript, Tailwind 4, Supabase, Claude AI, Vercel Pro.
 - **v3b FULLY SHIPPED — 15/15 + S-8 atomic ship across 3 PRs.** PRs #25-#27 + #30 + #32 + #33 (sessions 41-48) for the 15 ACs; **PR #54 session-54** for v3b S-8 design + AC-1 partial + AC-2; **PR #56 session-55** for AC-1 v6 fan-out + AC-5 `slice-reviewer.md` retirement (auto-review.yml flipped to 4-specialist matrix-strategy fan-out); **PR #57 session-55** for AC-3 differential mode + AC-4 golden-PR replay + DoD-13 4 fresh-context persona reviews + verification.md final population. Multi-agent suite is the live review path on main.
 - **v3c shipped — sessions 50+51+52+53 batch landed + session-54 spec amendment + session-55 multi-agent ship.** Sessions 50-52 batch (PRs #36-#42 + #44-#47 + #49 + #50). Session 53 PR #52 P0b-structural (CODEOWNERS migration; pre-commit-verify deprecation; arch-smell qualitative reframing). Session 54 PR #54 spec 72c amendments per /ultrareview prior-art audit application. Session 55 PR #56 + #57 closed v3b S-8 atomically. **v3c efficiency layer remaining for session 56+:** k=2 default flip (highest single-lever); anti-pattern catalogue; verification.md final-state convention; AC-3 persona-side prompt-input wiring; live persona drift detection; multi-provider 3rd-agent reviewer; Stryker mutation testing; etc. (see HANDOFF-SESSION-55 §"v3c carry-overs" for full list).
 
-### Built (on main as of `6ec971b`; session-61 ships #80 S-F4 trust chip + #81 plan-review default-flip on main; session-61 wrap PR pending; session-60 infra PRs #76/#77/#78 + session-59 S-F3 phase nav + session-56-58 v3c efficiency layer all on main; S-F1 + S-F7-α already on main pre-rigour-suite)
+### Built (on main as of `765f3b0`; session 64 ships #87 S-F2 document-shell on main; session-63 #85 S-INFRA-synthetic-fixtures + session-62 #83 S-F7-β rebase + session-61 #80 S-F4 trust chip + #81 plan-review default-flip + session-60 infra PRs #76/#77/#78 + session-59 #74 S-F3 phase nav + session-56-58 v3c efficiency layer + S-F1 + S-F7-α all on main)
 
 ```
 src/lib/auth/{dev-auth-gate,dev-session,index,types}.ts          — S-F7-α (PR #20)
@@ -110,41 +111,37 @@ docs/slices/S-INFRA-tdd-guard-first-creation/{acceptance,verification}.md — P4
 docs/slices/S-INFRA-parse-pipeline-schema-validation/{acceptance,verification}.md — P5 PR #78 slice docs
 ```
 
-## Session 64 priorities
+## Session 65 priorities
 
-> **Pivot framing:** session 63 shipped the last major rigour-pivot v3c structural deliverable (synthetic-deliberate-injection per-persona fixtures, PR #85). Live persona regression detection now operational. The rigour pipeline is structurally complete; remaining v3c carry-overs are queue-drain enhancements (P5/P6/P7 scale: XS-S). User explicitly raised at session 63 close: *"how many more sessions before hitting the point where we have something cohesive for me to see?"* — Vercel preview currently shows a design-system primitives demo grid, not a product flow. Session 64 priorities pivot to user-facing slices that build toward a cohesive entry-point, with rigour queue-drain interleaved as small-cap picks.
+> **Pivot framing:** session 64 shipped S-F2 document-shell (PR #87 merged at `765f3b0`; first cohesive primitive integrating PhaseStepper + TrustChip + Sarah's-Picture-shaped stub content under the three-column shell). The connective tissue is now in place; phase routes are navigable. Session 65 P1 = S-M1 marketing rewrite — public landing replacing the placeholder + demo grid. P1 + S-F2 together = first cohesive Vercel preview. Reviewer-architecture's first formal retain catch validated on PR #87 (page-wrapper scope-creep / `bodyAs` prop solution); session 65 (S-M1) is the second formal trigger for the retain/drop verdict.
 
-### P1 — S-F2 document-shell (highest-leverage cohesive-product slice)
+### P1 — S-M1 marketing rewrite (highest-leverage cohesive-product slice)
 
-Three-column dashboard scaffold per spec 71 §3 L84 (`document-shell/` under `components/(authed)/`). Connective tissue that makes phase routes navigable — without it, S-F3 phase-nav + S-F4 trust-chip + S-F5 coach-card etc are stranded primitives. Required for any cohesive end-to-end view. M-L (~400-600L: shell layout · slot definitions · responsive behaviour · keyboard navigation · prefers-reduced-motion · component tests · landing-page demo extension).
+Public landing page replacing the "Decouple — under active rebuild" placeholder + S-F1/S-F3/S-F4/S-F2 demo grid at `src/app/page.tsx`. Spec 71 §3 L314 + spec 42 positioning verbatim (5-phase journey · "complete settlement workspace" framing · NOT "financial disclosure tool"). The marketing surface is the user's first touch; landing the rewrite alongside the shipped S-F2 shell gives the first cohesive Vercel preview surface. M.
 
-### P2 — S-M1 marketing rewrite (paired with P1)
+### P2 — TDD-guard auto-allow extension (carry-over from session 64 P2, not shipped)
 
-Public landing page replacing the "Decouple — under active rebuild" placeholder at `src/app/page.tsx`. Spec 71 §3 L314 + spec 42 positioning. The marketing surface is the user's first touch; P1 + P2 together give the first cohesive Vercel preview surface. Could fit in same session as P1 if scope tight; otherwise session 65. M.
+`TDD_GUARD_REDGREEN_OVERRIDE=1` env hatch + lint-fix-refactor case detection. Sextuple-confirmed bash-heredoc/sed/awk escape across sessions 61-64. Formalises the workaround into an audited env flag instead of ad-hoc bash workarounds. Wrap C-pick candidate. S — ~10-15L hook change + shellspec cases.
 
-### P3 — TDD-guard auto-allow extension (carry-over from session 63 kickoff P5, not shipped)
-
-`TDD_GUARD_REDGREEN_OVERRIDE=1` env hatch + lint-fix-refactor case detection. Formalises the bash-heredoc escape used multiple times across recent sessions for lint-fixes on existing untested src. S — ~10-15L hook change + shellspec cases. Wrap C-pick candidate.
-
-### P4 — Lockfile divergence fix (carry-over from session 63 kickoff P2, not shipped)
+### P3 — Lockfile divergence fix (carry-over from session 64 P3, not shipped)
 
 `package-lock.json` pins `eslint-plugin-react-hooks@7.0.1`; `pnpm-lock.yaml` pins `7.1.1`. CI uses npm ci → 7.0.1; local pnpm install → 7.1.1. Investigation-heavy — S-INFRA-1 dual-lockfile divergence guard didn't catch the version drift; figure out why + repair. S-M.
 
-### P5 — AC-2 hooks-checksums + control-change-label decision (carry-over from session 63 kickoff P6, not shipped)
+### P4 — AC-2 hooks-checksums + control-change-label decision (carry-over from session 64 P4, not shipped)
 
 User-decision: ship the missing files (`hooks-checksums.txt` + `control-change-label.yml` + `generate-hooks-checksums.sh`) OR remove CLAUDE.md references. The mechanism remains aspirational across multiple sessions. XS.
 
-### P6 — `COMMENT_REVIEW_SPAWN=1` opt-in trial (carry-over from session 63 kickoff P7, not shipped)
+### P5 — `COMMENT_REVIEW_SPAWN=1` opt-in trial (carry-over from session 64 P5, not shipped)
 
-Provision local `ANTHROPIC_API_KEY` (already configured at repo level for CI) + opt-in for 1-2 src/ slices. Hypothesis: drops ~3-per-PR commenting-category findings (sextuple-confirmed) to ~0 at write-time. XS-S.
+Provision local `ANTHROPIC_API_KEY` (already configured at repo level for CI) + opt-in for 1-2 src/ slices. Hypothesis: drops sextuple-confirmed ~3-per-PR commenting findings to ~0; also distinguishes HANDOFF-doc lineage (allowed) from verification.md provenance (forbidden) — would suppress the false positives session 64 surfaced on stub-mode HANDOFF writes. XS-S.
 
-### P7 — S-F7-γ untested-UI tests (carry-over from session 63 kickoff P3, not shipped)
+### P6 — S-F7-γ untested-UI tests (carry-over from session 64 P6, not shipped)
 
 Component tests for env-banner + scenarios + reset + state-inspector + engine-workbench. Closes the untested-UI debt from S-F7-β cherry-pick rebase. Engine-workbench at 1481L is heavy; can split into multiple PRs. M-L. Could be deferred until a relevant src/ touch motivates the visit.
 
-### Cohesive-product trajectory (rough estimate)
+### Cohesive-product trajectory (re-cadenced post-S-F2 ship)
 
-Conversation at session 63 close framed the path: 3 sessions to first cohesive entry-point (P1 + P2 + first pre-signup screen); 6-8 sessions to a user-testable Build phase end-to-end; 12-15 sessions to all 5 phases minimally populated; 20+ sessions to production-grade. Cadence assumption: ~1 substantive src/ slice per session (sessions 51-62 empirics).
+Session 64 advanced the trajectory by shipping the connective tissue (S-F2 = the document-shell primitive every workspace document renders into). Updated estimates: **2 sessions to first cohesive entry-point** (P1 lands → real landing → first pre-signup screen path); 5-7 sessions to a user-testable Build phase end-to-end; 11-14 sessions to all 5 phases minimally populated; 19+ sessions to production-grade. Cadence assumption: ~1 substantive src/ slice per session (sessions 51-64 empirics).
 
 ### Synthetic-deliberate-injection gate SHIPPED
 
@@ -195,12 +192,12 @@ Single-P0 session. S-F1 (or whichever priority you pick) is THE unblocking work.
 
 ## Branch
 
-### Branch state at session-63 wrap (verified live)
+### Branch state at session-64 wrap (verified live)
 
-- **Wrap branch:** `claude/decouple-session-63-S5DU6` (sequential single-branch pattern continued; 10 sessions in a row 54→55→56→57→58→59→60→61→62→63 on this pattern).
-- **`main` tip:** `3b17be8` (PR #85 admin-bypass squash-merge of S-INFRA-synthetic-fixtures). Prior: `d25a9ae` = session-62 wrap (PR #84). Prior: `23a35a1` = PR #83 S-F7-β rebase.
-- **Open PRs at session-63 wrap:** wrap PR (this branch) opens after this commit. **No carry-over open PRs** — PR #85 merged mid-session via admin-bypass per Constraint #25 (CODEOWNERS solo-operator).
-- **Closed/merged this session:** PR #85 only (S-INFRA-synthetic-fixtures; 3 rounds: R1 block · R2 request-changes · R3 approve at all quorum levels). 17 files · +846 / -1 net at first push; 22L net additional fixes over R2+R3.
+- **Wrap branch:** `claude/decouple-session-64-fN1u5` (sequential single-branch pattern continued; 11 sessions in a row 54→55→56→57→58→59→60→61→62→63→64 on this pattern).
+- **`main` tip:** `765f3b0` (PR #87 admin-bypass squash-merge of S-F2-document-shell). Prior: `7662b53` = session-63 wrap (PR #86). Prior: `3b17be8` = PR #85 S-INFRA-synthetic-fixtures.
+- **Open PRs at session-64 wrap:** wrap PR (this branch) opens after this commit. **No carry-over open PRs** — PR #87 merged mid-session via admin-bypass per Constraint #25 (CODEOWNERS solo-operator).
+- **Closed/merged this session:** PR #87 only (S-F2-document-shell; 3 rounds: R1 block · R2 approve · R3 approve on doc-only verification.md finalisation). 10 files · +485 / -13 net at merge.
 - **Live rigour gates (post-session-63):**
   - `auto-review.yml` — multi-agent 4-specialist matrix at **k=2 default** + **differential mode LIVE** + **per-specialist prior-findings filter LIVE**.
   - **NEW post-session-63:** `persona-synthetic-fixtures.yml` — path-filtered live `claude -p` invocation per specialist against deliberate-injection fixtures; asserts each persona flags its dimension's planted defect (4/4 PASS gate). Skip-on-no-API-key.
@@ -217,7 +214,7 @@ Single-P0 session. S-F1 (or whichever priority you pick) is THE unblocking work.
   - `exit-plan-review.sh` — spawns by default; `EXIT_PLAN_REVIEW_SPAWN=0` opts out.
 - **AC-2 hooks-checksums + control-change-label mechanism is ASPIRATIONAL** (HANDOFF-61 Lesson 3): `.claude/hooks-checksums.txt`, `.github/workflows/control-change-label.yml`, `scripts/generate-hooks-checksums.sh` — none exist on disk despite CLAUDE.md L155-L158 + v3a-foundation acceptance.md describing them. P5 candidate for session 62 (user-decision pick).
 - **AC-2 acceptance-gate** + **AC-3 ux-polish-reviewer** still shipped + dormant until first src/ UI surface activates them.
-- **AC-4 retain/drop measurement** TRIGGERED at session-62 wrap (3/3). Verdict: reviewer-style + reviewer-correctness STRONG retain · reviewer-security MODERATE retain · reviewer-architecture WEAK signal (monitor 2-3 more slices before formal drop verdict). Session 63 PR #85 reinforced the verdict: reviewer-correctness flagged the critical REPO_ROOT bug (1 architectural finding, 2 ac-gap findings); reviewer-style flagged the comment anti-pattern; reviewer-security flagged the CLI-version command-injection. reviewer-architecture stayed quiet (no architectural finding) — pattern continues.
+- **AC-4 retain/drop measurement** TRIGGERED at session-62 wrap (3/3); cumulative through session 64: reviewer-style 5/5 STRONG retain · reviewer-correctness 5/5 STRONG retain · reviewer-security 2/5 MODERATE retain · reviewer-architecture 1/5 — **FIRST CATCH on PR #87** (page-wrapper scope-creep / `bodyAs` prop solution). Per CLAUDE.md retention criteria ("at least one issue per 2-3 slices"): 1/5 below threshold but the catch is significant. Session 65 (S-M1) is the second formal trigger — if architect catches there, retain (2/6 ≈ 1-per-3 cadence meets bar); if silent, formal drop verdict justified.
 
 ### v3c / v3b trajectory + remaining rigour work
 
@@ -243,24 +240,23 @@ Single-P0 session. S-F1 (or whichever priority you pick) is THE unblocking work.
 
 **Net: v3b shipped; v3c efficiency layer 4 PRs in (sessions 50-56); session 57 picks from the ranked queue above (P0-P3) with AC-3 persona-side wiring as the highest-ROI carry-over remaining.**
 
-### Next session (64) FIRST ACTIONS
+### Next session (65) FIRST ACTIONS
 
-1. **Turn-0 verification.** SessionStart hook surfaces live branch state. List closed + open PRs; confirm PR #85 + session-63 wrap PR merged + no carry-over open.
+1. **Turn-0 verification.** SessionStart hook surfaces live branch state. List closed + open PRs; confirm PR #87 + session-64 wrap PR merged + no carry-over open.
 2. **Verify branch state + working tree clean.** Resync if BEHIND > 0. Sequential single-branch pattern continues — `git fetch origin main && git remote prune origin && git checkout -B <branch> origin/main`.
-3. **Confirm priority with user.** Session 64 P1 recommended = **S-F2 document-shell** (highest-leverage cohesive-product slice; three-column dashboard scaffold per spec 71 §3 L84). P2 = **S-M1 marketing rewrite** (paired with P1; replaces the placeholder landing). P3-P7 = rigour queue-drain (TDD-guard env hatch · lockfile divergence fix · AC-2 hooks-checksums decision · COMMENT_REVIEW_SPAWN trial · S-F7-γ untested-UI tests). User picks; the cohesive-product trajectory note in §"Session 64 priorities" is non-binding.
-4. **If P1 (S-F2 document-shell):** read spec 71 §3 verbatim for the `components/(authed)/document-shell/` placement. spec 68a-e for phase-shell expectations. spec 68g visual-anchor register for any C-V* anchors that bind to shell layout. Existing surface to integrate with: `src/components/phase-nav/` (PhaseStepper · JourneyMapRail · LockedSection from S-F3) + `src/components/trust/` (TrustChip from S-F4). M-L. Three-column shell · slot definitions · responsive behaviour · keyboard navigation · prefers-reduced-motion · component tests · landing-page demo extension.
-5. **If P2 (S-M1 marketing rewrite):** read spec 71 §3 L314 + spec 42 positioning verbatim (5-phase journey · "complete settlement workspace" framing · NOT "financial disclosure tool"). Replace `src/app/page.tsx` placeholder. May want to depend on P1's shell pieces or stand alone with marketing-specific layout. M.
-6. **If P3 (TDD-guard env hatch):** edit `.claude/hooks/tdd-guard.sh` to detect `TDD_GUARD_REDGREEN_OVERRIDE=1` env hatch + lint-fix-refactor case. Add shellspec cases. S — ~10-15L hook change + 2-3 fixture cases. Wrap C-pick candidate.
-7. **If P4 (lockfile divergence fix):** investigate why S-INFRA-1 dual-lockfile divergence guard didn't catch the eslint-plugin-react-hooks 7.0.1-vs-7.1.1 drift. Re-sync the lockfiles + address engine-workbench:711 mutation pattern with immutable update. S-M; investigation-heavy.
-8. **If P5 (AC-2 decision):** user-driven. Read CLAUDE.md L155-L158 + `docs/slices/S-INFRA-rigour-v3a-foundation/acceptance.md` AC-2 description. Decide ship-the-missing-files OR remove-references. Don't auto-decide.
-9. **If P6 (COMMENT_REVIEW_SPAWN trial):** export `ANTHROPIC_API_KEY` + set `COMMENT_REVIEW_SPAWN=1` in shell env before slice work. Live mode invokes `claude -p` per Write/Edit. Measure: round-1 commenting-category findings on the next 1-2 PRs vs the sextuple-confirmed ~3-per-PR baseline.
-10. **If P7 (S-F7-γ untested-UI tests):** component tests for env-banner + scenarios + reset + state-inspector + engine-workbench. Engine-workbench at 1481L is heavy; can split. M-L.
-11. **Live rigour gates** — every commit dogfoods them. Multi-agent auto-review at **k=2 default + differential mode + per-specialist filter + TDD-guard first-creation auto-resolve + parser schema validation + author-time comment review + plan-review default-spawn + synthetic-deliberate-injection per-persona regression detection (NEW post-session-63)**. Expect 1-2 rounds per PR.
-12. **CODEOWNERS solo-operator pattern (#25)** — most candidates touch CODEOWNERS-protected paths; admin-bypass merge expected.
-13. **k=2 default + post-flip §Revisit triggers** — per spec 72c §5: n=18 calibration data through session 63 (mean ~1.7 rounds across sessions 56-63; session-63 PR #85 was 3 rounds — slightly above target but each round addressed real findings). Continues collecting.
-14. **Constraint #29 (pre-priority spec-gate verification):** before treating a kickoff/SESSION-CONTEXT priority labeled "per spec X §Y" as authorized, grep that section's gating IF-clauses verbatim. Session 63 P1 honoured this — grepped spec 72c §7 L141 verbatim before authoring synthetic-fixtures.
-15. **Pre-priority shipped-artifact verification:** before treating any "first src/ slice" or fresh-build priority as authorized, grep `docs/slices/` and `git log --grep` for shipped-artifact evidence.
-16. **Synthetic-deliberate-injection workflow** — operates on every persona/orchestrator/synthetic-content change. Skip-on-no-API-key (forks unaffected). If a persona prompt is edited and the workflow fails, the diagnostic identifies which dimension's signature didn't match — either the persona weakened OR a signature predicate needs widening.
+3. **Confirm priority with user.** Session 65 P1 recommended = **S-M1 marketing rewrite** (highest-leverage cohesive-product slice; replaces placeholder landing + demo grid). P2 = **TDD-guard auto-allow extension** (sextuple-confirmed bash escape; formalise into env hatch). P3-P6 = rigour queue-drain (lockfile divergence fix · AC-2 hooks-checksums decision · COMMENT_REVIEW_SPAWN trial · S-F7-γ untested-UI tests). User picks.
+4. **If P1 (S-M1 marketing rewrite):** read spec 71 §3 L314 + spec 42 positioning verbatim (5-phase journey · "complete settlement workspace" framing · NOT "financial disclosure tool") · spec 73 copy patterns if relevant. Replace `src/app/page.tsx` placeholder + S-F1/S-F3/S-F4/S-F2 demo grid. May depend on S-F2 shell pieces or stand alone with marketing-specific layout. M.
+5. **If P2 (TDD-guard env hatch):** edit `.claude/hooks/tdd-guard.sh` to detect `TDD_GUARD_REDGREEN_OVERRIDE=1` env hatch + lint-fix-refactor case. Add shellspec cases. S — ~10-15L hook change + 2-3 fixture cases. Wrap C-pick candidate.
+6. **If P3 (lockfile divergence fix):** investigate why S-INFRA-1 dual-lockfile divergence guard didn't catch the eslint-plugin-react-hooks 7.0.1-vs-7.1.1 drift. Re-sync the lockfiles + address engine-workbench:711 mutation pattern with immutable update. S-M; investigation-heavy.
+7. **If P4 (AC-2 decision):** user-driven. Read CLAUDE.md L155-L158 + `docs/slices/S-INFRA-rigour-v3a-foundation/acceptance.md` AC-2 description. Decide ship-the-missing-files OR remove-references. Don't auto-decide.
+8. **If P5 (COMMENT_REVIEW_SPAWN trial):** export `ANTHROPIC_API_KEY` + set `COMMENT_REVIEW_SPAWN=1` in shell env before slice work. Live mode invokes `claude -p` per Write/Edit. Measure: round-1 commenting-category findings on the next 1-2 PRs vs the sextuple-confirmed ~3-per-PR baseline. Also test whether live mode distinguishes HANDOFF-doc lineage (allowed) from verification.md provenance (forbidden) — would suppress the session-64 false positives.
+9. **If P6 (S-F7-γ untested-UI tests):** component tests for env-banner + scenarios + reset + state-inspector + engine-workbench. Engine-workbench at 1481L is heavy; can split. M-L.
+10. **Live rigour gates** — every commit dogfoods them. Multi-agent auto-review at **k=2 default + differential mode + per-specialist filter + TDD-guard first-creation auto-resolve + parser schema validation + author-time comment review + plan-review default-spawn + synthetic-deliberate-injection per-persona regression detection**. Expect 1-2 rounds per PR.
+11. **CODEOWNERS solo-operator pattern (#25)** — most candidates touch CODEOWNERS-protected paths; admin-bypass merge expected.
+12. **k=2 default + post-flip §Revisit triggers** — per spec 72c §5: n=19 calibration data through session 64 (mean ~1.7 rounds across sessions 56-64; PR #87 was 3 rounds, addressing real findings each round). Continues collecting.
+13. **Constraint #29 (pre-priority spec-gate verification):** before treating a kickoff/SESSION-CONTEXT priority labeled "per spec X §Y" as authorized, grep that section's gating IF-clauses verbatim. Session 64 honoured this for S-F2 — caught two kickoff drifts (path + framing) before AC freeze.
+14. **Pre-priority shipped-artifact verification:** before treating any "first src/ slice" or fresh-build priority as authorized, grep `docs/slices/` and `git log --grep` for shipped-artifact evidence.
+15. **Reviewer-architecture retain/drop second formal trigger** — session 65 (S-M1) is the second slice in the trigger window. PR #87 surfaced the first real architectural catch (1/5 cumulative). If architect catches on S-M1, retain (2/6 ≈ 1-per-3); if silent, formal drop verdict justified.
 
 ## Key files
 
@@ -312,25 +308,26 @@ CLAUDE.md                                                         — §Hard con
 
 **Net state at session-57 wrap:** **rigour-suite v3b programme canonically complete + v3c efficiency layer substantially advanced.** Session 57 shipped 3 PRs: P0 differential-mode token-cost loop (PR #63 — closes spec 72c §6 brief-job side; FIRST FIRED in the wild on PR #65 round 2); P1 F5c origin/main-anchored ratchet for ESLint count + coverage thresholds (PR #64 — admin-bypass override on Path A; doc cleanup deferred to session 58 P2); P2 pre-flight self-review with `/preflight` slash command + opt-in pre-push hook (PR #65 — author-time review compounding with k=2 default + anti-pattern catalogue). **Session 58 lead pick = synthetic-deliberate-injection per-persona fixtures** (deferred from session 57 P3 per budget call). See §"Session 58 priorities" for the ranked roadmap and HANDOFF-SESSION-57 §"v3c carry-overs (still pending after session 57)" for the full deferred list.
 
-## Session 64 pre-flight
+## Session 65 pre-flight
 
 **Verify (do this first, before any plan):**
 
 ```
 git fetch origin
 git status                                                                   # confirm clean tree
-git rev-parse --short HEAD origin/main                                       # expected: post-session-63-wrap merge
-mcp__github__list_pull_requests state=closed base=main perPage=10            # confirm PR #85 + session-63 wrap PR all merged
+git rev-parse --short HEAD origin/main                                       # expected: post-session-64-wrap merge
+mcp__github__list_pull_requests state=closed base=main perPage=10            # confirm PR #87 + session-64 wrap PR all merged
 mcp__github__list_pull_requests state=open  base=main perPage=10             # expect empty post-wrap
 ```
 
 **Pre-flight Qs (ask user before any code):**
 
-1. **Priority for session 64?** Recommended P1 = **S-F2 document-shell** (highest-leverage cohesive-product slice; three-column dashboard scaffold per spec 71 §3 L84). P2 = **S-M1 marketing rewrite** (replaces placeholder landing). P3-P7 = rigour queue-drain (TDD-guard env hatch · lockfile divergence fix · AC-2 hooks-checksums decision · COMMENT_REVIEW_SPAWN trial · S-F7-γ untested-UI tests). User picks; the cohesive-product framing came up at session 63 close ("how many sessions until we have something cohesive").
-2. **CODEOWNERS solo-operator pattern (#25).** Src/ slices touch `src/components/**` + `tests/**` + `docs/slices/**` (all CODEOWNERS-protected); admin-bypass merge expected. P3-P7 rigour picks also touch CODEOWNERS paths.
-3. **Pre-flight + local API key.** `ANTHROPIC_API_KEY` configured at repo level (CI auto-review + synthetic-fixtures workflows both run live). Local provisioning still optional — (a) do nothing (CI catches what matters), (b) export `ANTHROPIC_API_KEY` + `COMMENT_REVIEW_SPAWN=1` for author-time live-mode subagent, (c) hybrid.
-4. **k=2 default + §Revisit trigger calibration.** n=18 calibration data through session 63 (mean ~1.7 rounds across sessions 56-63, slightly up due to session-63 PR #85 3-round outlier). Continues; flip-back-to-k=1 trigger only if first-3-src-slice false-negative rate >20% (3/3 src/ slices shipped clean through pipeline).
-5. **Cohesive-product trajectory.** Vercel preview at session-63 wrap shows the design-system primitives demo grid only. Estimates per session-63 close: 3 sessions to first cohesive entry-point (P1 + P2 + first pre-signup screen); 6-8 sessions to user-testable Build phase; 12-15 sessions to all 5 phases minimally populated; 20+ to production-grade.
+1. **Priority for session 65?** Recommended P1 = **S-M1 marketing rewrite** (highest-leverage cohesive-product slice; replaces placeholder landing + S-F1/S-F3/S-F4/S-F2 demo grid; pairs with shipped S-F2 for first cohesive Vercel preview). P2 = **TDD-guard auto-allow extension** (sextuple-confirmed bash escape; formalise into env hatch). P3-P6 = rigour queue-drain (lockfile divergence fix · AC-2 hooks-checksums decision · COMMENT_REVIEW_SPAWN trial · S-F7-γ untested-UI tests). User picks.
+2. **CODEOWNERS solo-operator pattern (#25).** Src/ slices touch `src/components/**` + `src/app/**` + `tests/**` + `docs/slices/**` (all CODEOWNERS-protected); admin-bypass merge expected. P2-P6 rigour picks also touch CODEOWNERS paths.
+3. **Pre-flight + local API key.** `ANTHROPIC_API_KEY` configured at repo level (CI auto-review + synthetic-fixtures workflows both run live). Local provisioning still optional — (a) do nothing (CI catches what matters), (b) export `ANTHROPIC_API_KEY` + `COMMENT_REVIEW_SPAWN=1` for author-time live-mode subagent, (c) hybrid. P5 candidate explicitly tests live-mode value.
+4. **k=2 default + §Revisit trigger calibration.** n=19 calibration data through session 64 (mean ~1.7 rounds across sessions 56-64; PR #87 was 3 rounds, real findings each round). Continues; flip-back-to-k=1 trigger only if first-3-src-slice false-negative rate >20%.
+5. **Reviewer-architecture retain/drop second formal trigger.** PR #87 was the first formal trigger and surfaced the first real architectural catch in 5 slices (page-wrapper scope-creep / `bodyAs` prop solution; 1/5 cumulative). Session 65 (S-M1) is the second trigger. If architect catches → retain (2/6 ≈ 1-per-3 cadence meets the bar). If silent → formal drop verdict justified at 1/6.
+6. **Cohesive-product trajectory.** Vercel preview at session-64 wrap shows the document-shell rendered with stub Sarah's-Picture-shaped content. P1 (S-M1) + shipped S-F2 = first cohesive Vercel preview. Estimates re-cadenced post-S-F2: 2 sessions to first cohesive entry-point; 5-7 to user-testable Build; 11-14 to all 5 phases; 19+ to production-grade.
 
 **Session discipline (hook-surfaced; restated):**
 
