@@ -13,15 +13,15 @@ type RowState = 'agreed' | 'evidence' | 'gap' | 'ask'
 
 interface PensionRow {
   name: string
-  v: string
+  amount: string
   state: RowState
 }
 
 const PENSION_ROWS: ReadonlyArray<PensionRow> = [
-  { name: 'Aviva workplace pension', v: '£82,400', state: 'agreed' },
-  { name: 'NHS pension (10y)', v: '£41,200', state: 'evidence' },
-  { name: 'Nest auto-enrol', v: '£24,600', state: 'gap' },
-  { name: 'Old Standard Life', v: '—', state: 'ask' },
+  { name: 'Aviva workplace pension', amount: '£82,400', state: 'agreed' },
+  { name: 'NHS pension (10y)', amount: '£41,200', state: 'evidence' },
+  { name: 'Nest auto-enrol', amount: '£24,600', state: 'gap' },
+  { name: 'Old Standard Life', amount: '—', state: 'ask' },
 ]
 
 const STATE_LABELS: Record<RowState, string> = {
@@ -170,7 +170,7 @@ export function HeroProductForward({ id = 'hero' }: { id?: string } = {}) {
                   {r.name}
                 </span>
                 <span className="mono" style={{ fontSize: 10.5, color: INK }}>
-                  {r.v}
+                  {r.amount}
                 </span>
                 <span
                   style={{

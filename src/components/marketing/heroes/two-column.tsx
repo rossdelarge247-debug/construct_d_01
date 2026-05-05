@@ -23,22 +23,22 @@ const MARK_ACCENT: SideAccent = {
 }
 
 interface SideRow {
-  k: string
-  v: string
+  label: string
+  amount: string
 }
 
 const SARAH_ROWS: ReadonlyArray<SideRow> = [
-  { k: 'Family home', v: '£510,000' },
-  { k: 'Joint savings', v: '£42,000' },
-  { k: 'Aviva pension', v: '£82,400' },
-  { k: 'Estimated debts', v: '£7,200' },
+  { label: 'Family home', amount: '£510,000' },
+  { label: 'Joint savings', amount: '£42,000' },
+  { label: 'Aviva pension', amount: '£82,400' },
+  { label: 'Estimated debts', amount: '£7,200' },
 ]
 
 const MARK_ROWS: ReadonlyArray<SideRow> = [
-  { k: 'Family home', v: '£485,000' },
-  { k: 'Joint savings', v: '£42,000' },
-  { k: 'Aviva pension', v: '—' },
-  { k: 'Estimated debts', v: '£11,400' },
+  { label: 'Family home', amount: '£485,000' },
+  { label: 'Joint savings', amount: '£42,000' },
+  { label: 'Aviva pension', amount: '—' },
+  { label: 'Estimated debts', amount: '£11,400' },
 ]
 
 interface ReconciliationTag {
@@ -58,10 +58,10 @@ interface SideProps {
   label: string
   accent: SideAccent
   items: ReadonlyArray<SideRow>
-  you?: boolean
+  isYours?: boolean
 }
 
-function Side({ label, accent, items, you = false }: SideProps) {
+function Side({ label, accent, items, isYours = false }: SideProps) {
   return (
     <div
       style={{
@@ -70,8 +70,8 @@ function Side({ label, accent, items, you = false }: SideProps) {
         display: 'flex',
         flexDirection: 'column',
         gap: 10,
-        background: you ? '#FFFFFF' : SIDE_NEUTRAL_BG,
-        borderRight: you ? `1px solid ${LINE}` : 'none',
+        background: isYours ? '#FFFFFF' : SIDE_NEUTRAL_BG,
+        borderRight: isYours ? `1px solid ${LINE}` : 'none',
       }}
     >
       <div
@@ -94,28 +94,28 @@ function Side({ label, accent, items, you = false }: SideProps) {
             textTransform: 'uppercase',
           }}
         >
-          {you ? 'Yours' : 'Theirs'}
+          {isYours ? 'Yours' : 'Theirs'}
         </span>
       </div>
       {items.map((it) => (
         <div
-          key={it.k}
+          key={it.label}
           style={{
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'space-between',
             padding: '7px 9px',
-            background: you ? CANVAS : '#FFFFFF',
+            background: isYours ? CANVAS : '#FFFFFF',
             border: `1px solid ${LINE}`,
             borderRadius: 6,
           }}
         >
-          <span style={{ fontSize: 9.5, color: INK }}>{it.k}</span>
+          <span style={{ fontSize: 9.5, color: INK }}>{it.label}</span>
           <span
             className="mono"
             style={{ fontSize: 9.5, color: INK, fontWeight: 500 }}
           >
-            {it.v}
+            {it.amount}
           </span>
         </div>
       ))}
@@ -185,7 +185,7 @@ export function HeroTwoColumn({ id = 'hero' }: { id?: string } = {}) {
             marginTop: 4,
           }}
         >
-          <Side label="Sarah" accent={SARAH_ACCENT} items={SARAH_ROWS} you />
+          <Side label="Sarah" accent={SARAH_ACCENT} items={SARAH_ROWS} isYours />
           <Side label="Mark" accent={MARK_ACCENT} items={MARK_ROWS} />
         </div>
       </div>
