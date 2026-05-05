@@ -14,10 +14,10 @@ const LINE = 'var(--ds-color-border)'
 const CANVAS = 'var(--ds-color-surface-canvas)'
 
 const AREAS: ReadonlyArray<readonly [string, string, string]> = [
-  ['§1', 'Finances', '#4338CA'],
-  ['§2', 'Children', '#9D174D'],
-  ['§3', 'Housing', '#0369A1'],
-  ['§4', 'Future needs', '#166534'],
+  ['§1', 'Finances', 'var(--ds-color-phase-build)'],
+  ['§2', 'Children', 'var(--ds-color-phase-reconcile)'],
+  ['§3', 'Housing', 'var(--ds-color-phase-settle)'],
+  ['§4', 'Future needs', 'var(--ds-color-phase-finalise)'],
 ]
 
 interface OrbitCard {
@@ -34,7 +34,7 @@ interface OrbitCard {
 const ORBIT_CARDS: ReadonlyArray<OrbitCard> = [
   {
     label: 'Area 01',
-    accent: '#4338CA',
+    accent: 'var(--ds-color-phase-build)',
     x: -30,
     y: 20,
     rot: -5,
@@ -48,7 +48,7 @@ const ORBIT_CARDS: ReadonlyArray<OrbitCard> = [
   },
   {
     label: 'Area 02',
-    accent: '#9D174D',
+    accent: 'var(--ds-color-phase-reconcile)',
     x: 310,
     y: 0,
     rot: 4,
@@ -62,7 +62,7 @@ const ORBIT_CARDS: ReadonlyArray<OrbitCard> = [
   },
   {
     label: 'Area 03',
-    accent: '#0369A1',
+    accent: 'var(--ds-color-phase-settle)',
     x: -12,
     y: 340,
     rot: 3,
@@ -76,7 +76,7 @@ const ORBIT_CARDS: ReadonlyArray<OrbitCard> = [
   },
   {
     label: 'Area 04',
-    accent: '#166534',
+    accent: 'var(--ds-color-phase-finalise)',
     x: 300,
     y: 360,
     rot: -3,
@@ -106,7 +106,7 @@ function HeroComposition() {
           transform: 'translateX(-50%)',
           width: 220,
           height: 460,
-          background: '#FFFFFF',
+          background: 'var(--ds-color-surface-panel)',
           border: `1px solid ${LINE}`,
           borderRadius: 12,
           boxShadow:
@@ -203,7 +203,7 @@ function HeroComposition() {
           <div
             className="rounded-xl"
             style={{
-              background: '#FFFFFF',
+              background: 'var(--ds-color-surface-panel)',
               border: `1px solid ${LINE}`,
               boxShadow:
                 '0 12px 28px rgba(26, 26, 26, 0.06), 0 2px 6px rgba(26, 26, 26, 0.04)',

@@ -15,7 +15,7 @@ export function Wordmark({ size = 18 }: WordmarkProps) {
       >
         <div
           className="absolute inset-0 rounded-full"
-          style={{ background: '#111' }}
+          style={{ background: 'var(--ds-color-ink)' }}
         />
         <div
           className="absolute rounded-full"
@@ -34,7 +34,7 @@ export function Wordmark({ size = 18 }: WordmarkProps) {
             top: '12%',
             width: '10%',
             height: '76%',
-            background: '#111',
+            background: 'var(--ds-color-ink)',
           }}
         />
       </div>
@@ -43,7 +43,7 @@ export function Wordmark({ size = 18 }: WordmarkProps) {
           fontSize: size,
           letterSpacing: '-0.01em',
           fontWeight: 600,
-          color: '#111',
+          color: 'var(--ds-color-ink)',
         }}
       >
         decouple

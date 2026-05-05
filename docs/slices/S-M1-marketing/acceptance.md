@@ -36,7 +36,7 @@ The design canvas includes 9 hero variants in `hero-explore/`. This slice ships 
 12. `Wordmark` — Decouple wordmark with letterform construction
 13. `SectionHead` — section h2 with optional eyebrow
 14. `PlaceholderTag` — annotation badge ("EDITORIAL · not a literal screenshot")
-15. `Icons` module — 11 inline SVG icons (ArrowRight, ArrowDown, Plus, Shield, Lock, Check, Coins, Children, Home, Compass, ArrowUpRight) via shared `Ic` factory
+15. `Icons` module — 11 inline SVG icons (ArrowRight, ArrowDown, Plus, Shield, Lock, Check, Coins, ChildrenIcon, Home, Compass, ArrowUpRight) via shared `Ic` factory; `ChildrenIcon` carries the explicit suffix to disambiguate from `React.Children`
 
 **Placeholder route:**
 16. `src/app/start/page.tsx` — NEW route returning a 404-styled "Pre-signup interview opens soon" page; CTAs from landing link here. Blocks signup flow until S-O1 ships.
