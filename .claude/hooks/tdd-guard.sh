@@ -204,6 +204,18 @@ wait "$VITEST_PID"
 RC=$?
 
 if [ "$RC" -ne 0 ]; then
+  # Degraded-runner detection: vitest binary missing → graceful skip.
+  # When node_modules is empty (e.g. fresh checkout, post-clean state),
+  # `npx vitest` exits 127 with "vitest: not found" / "command not
+  # found" in stderr. Treat as runner-unavailable, not RED.
+  if [ "$RC" -eq 127 ] || grep -qE "(vitest: (not found|command not found)|: vitest: not found|command not found: vitest)" "$TMP_OUT"; then
+    {
+      echo "tdd-guard: vitest not installed; skipping for $RELPATH."
+      echo "  Run \`npm install\` to enable RED/GREEN gating."
+    } >&2
+    exit 0
+  fi
+
   # The existing-file RED branch below must remain reachable for Edit and for Write to existing paths.
   if [ "$TOOL_NAME" = "Write" ] && [ ! -f "$RELPATH" ] \
      && grep -qE "(Failed to resolve import|Failed to load url|Cannot find module|MODULE_NOT_FOUND)" "$TMP_OUT"; then
@@ -212,6 +224,21 @@ if [ "$RC" -ne 0 ]; then
       echo "  Test file exists; src does not. Allowing Write so first-"
       echo "  creation can proceed. Re-run \`npx vitest run $TEST_FILE\`"
       echo "  after the Write to confirm GREEN before the next Edit."
+    } >&2
+    exit 0
+  fi
+
+  # Env hatch: TDD_GUARD_REDGREEN_OVERRIDE=1 allows RED to pass.
+  # Use cases: lint-fix-refactor (purely cosmetic edits over multiple
+  # files where assertions transiently de-pin) + mid-rename atomic
+  # patterns (multi-symbol rewrites that transit a RED state between
+  # sequential Edits). Only the literal value "1" bypasses; all other
+  # values (0, "yes", unset) keep the gate active.
+  if [ "${TDD_GUARD_REDGREEN_OVERRIDE:-}" = "1" ]; then
+    {
+      echo "tdd-guard: TDD_GUARD_REDGREEN_OVERRIDE=1 set; allowing RED test for $RELPATH."
+      echo "  Bypass for lint-fix-refactor / mid-rename atomic patterns."
+      echo "  Re-run \`npx vitest run $TEST_FILE\` after to confirm GREEN."
     } >&2
     exit 0
   fi
@@ -229,8 +256,9 @@ if [ "$RC" -ne 0 ]; then
     echo "Actionable alternatives:"
     echo "  - Run \`npx vitest run $TEST_FILE\` interactively + fix the failure."
     echo "  - If the assertion is wrong (not the impl), update the test."
-    echo "  - DOD7_OVERRIDE-style env override is NOT provided for tdd-guard;"
-    echo "    bypass requires explicit allowlist entry under 'control-change'."
+    echo "  - Set \`TDD_GUARD_REDGREEN_OVERRIDE=1\` to bypass for lint-fix-refactor"
+    echo "    or mid-rename atomic patterns (advisory; only the literal value '1' bypasses)."
+    echo "  - Or add path-glob to docs/tdd-exemption-allowlist.txt under 'control-change'."
   } >&2
   exit 2
 fi
