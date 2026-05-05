@@ -351,9 +351,9 @@ After three `src/` slices, the third slice's HANDOFF renders an explicit retain-
 
 ### Rollback procedure (per G19)
 
-Per `docs/slices/S-INFRA-rigour-v3a-foundation/acceptance.md` L201:
+If rigour infrastructure causes operational pain post-merge, rollback is: (a) revert the merge commit on `main` via `git revert -m 1 <merge-sha>` in a new PR carrying the `control-change` label; (b) the hook scripts under `.claude/hooks/` (e.g. `tdd-first-every-commit.sh`, `tdd-guard.sh`, `exit-plan-review.sh`, `comment-review.sh`) remain on disk locally but become inert because their `.claude/settings.json` registration is reverted; (c) the revert PR documents WHY in body so a follow-up can address the root cause. **No `--no-verify` bypass needed** — harness-level hooks don't intercept `git revert` of unregistered settings.
 
-> if v3a infrastructure causes operational pain post-merge, rollback is: (a) revert merge commit on main via `git revert -m 1 <merge-sha>` in a new PR carrying the `control-change` label; (b) `.claude/hooks/{pre-commit-verify,tdd-first-every-commit,exit-plan-review}.sh` remain on disk locally but become inert because their `settings.json` registration is reverted; (c) `hooks-checksums.txt` is reverted; (d) the revert PR documents WHY in body so v3a-2 can address the root cause. **No `--no-verify` bypass needed** — harness-level hooks don't intercept `git revert` of unregistered settings.
+The `control-change` label remains the gate for control-plane changes (hook scripts, persona files, CI workflow files, eslint config, CODEOWNERS). The v3a-era hooks-checksums + control-change-label.yml file-integrity mechanism described in earlier rigour docs has been decommissioned via P0b-structural; the label itself is enforced via branch-protection + reviewer discipline rather than a workflow check.
 
 ### Not yet in scope (v3b / v3c carry-over)
 
