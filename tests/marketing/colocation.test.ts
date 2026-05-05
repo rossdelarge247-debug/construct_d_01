@@ -58,7 +58,7 @@ describe('marketing import-boundary contract', () => {
     const marketingPrefix = join(srcDir, 'components/marketing')
     const offenders: string[] = []
     const importPattern =
-      /from\s+['"](?:@\/components\/marketing\/(?:atoms|sections)\/[^'"\s]+|\.\.?\/[^'"\s]*marketing\/(?:atoms|sections)\/[^'"\s]+)['"]/g
+      /from\s+['"](?:@\/components\/marketing\/(?:atoms|sections)\/[^'"\s]+|\.\.?\/[^'"\s]*marketing\/(?:atoms|sections)\/[^'"\s]+)['"]/
 
     for (const file of walk(srcDir)) {
       if (file.startsWith(marketingPrefix)) continue
