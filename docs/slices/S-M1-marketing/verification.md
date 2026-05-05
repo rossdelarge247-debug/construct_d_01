@@ -4,9 +4,11 @@ Final-state record. Round-by-round multi-agent audit detail lives in PR descript
 
 ## Status
 
-**Slice ship state (in-scope phases 1-6 + 8):** ✅ MET — page composition + `/start` HTTP 404 + utility classes shipped across PR #90 (phase 1-3 atoms/sections/HeroEditorial), PR #92 (AC-8 token alignment), PR #93 (phase 4-5 page composition + next/font + utility classes), and the current PR (phase 6 `/start` + phase 8 verification).
+**Slice ship state (in-scope phases 1-6 + 8):** ✅ MET — page composition + `/start` HTTP 404 + utility classes shipped across PR #90 (phase 1-3 atoms/sections/HeroEditorial), PR #92 (AC-8 token alignment), PR #93 (phase 4-5 page composition + next/font + utility classes), and PR #94 (phase 6 `/start` + phase 8 verification). **AC-9 sub-fault:** the 6-dim verification table is 5/6 met; the mobile-viewport row observed-fail at 375×667 visual check, deferred to S-M1.0b.
 
 **S-M1.0a follow-up scope (phase 7):** ⏳ deferred — 8 remaining hero variants (Declarative · Typographic · ProductForward · OutcomeLed · TwoColumn · Empathetic · Atmospheric · Diagrammatic) + `src/app/dev/heroes/page.tsx` comparison gallery. AC-2 acceptance text formally re-scoped to in-scope = 1 of 9; AC-3 owns the dev gallery and remains deferred. Map shape (`HERO_VARIANTS` in `src/components/marketing/heroes/index.ts`) is forward-extensible — additional keys land without breaking existing consumers.
+
+**S-M1.0b follow-up scope (responsive design pass):** ⏳ deferred — production landing renders desktop-only; observed-fail at 375×667 visual check on horizontal scroll + Hero column clipping + PictureBand grid clipping. Root cause: design canvas (`docs/design-source/marketing-landing/`) authors the landing desktop-only — bundled JSX has zero Tailwind responsive class hits (`sm:` / `md:` / `lg:` count = 0); the canvas `.mobile-frame` element is a desktop-canvas mockup (a phone-shape illustration alongside the desktop landing), not a responsive instance. Per CLAUDE.md "Source-of-truth precedence" (design canvas wins for visual + section structure), responsive impl without a mobile canvas is implementation-led design with rework risk. S-M1.0b sequence: commission a mobile design canvas → translate to breakpoints → close AC-9 mobile-viewport row.
 
 ## Phase status
 
@@ -19,7 +21,7 @@ Final-state record. Round-by-round multi-agent audit detail lives in PR descript
 | 5 | AC-8 | `src/app/layout.tsx` next/font + `src/app/globals.css` utility classes + `var(--ds-color-*)` token alignment | ✅ shipped | next/font self-hosts Inter + Source Serif 4 + JetBrains Mono; ~85L utility classes; AC-8 token alignment from PR #92 |
 | 6 | AC-4 | `src/app/start/page.tsx` (notFound()) + `src/app/start/not-found.tsx` (HTTP 404 native) | ✅ shipped | 5 tests across 2 files; production build emits `/start` as static `○` route (prerendered 404) |
 | 7 | AC-3 (8 remaining variants + dev gallery) | 8 hero variants + `src/app/dev/heroes/page.tsx` | ⏳ deferred to S-M1.0a | Map shape extensible; pending follow-up slice |
-| 8 | AC-9 + AC-10 | `## Preview-deploy verification` table + `tests/marketing/colocation.test.ts` | ✅ shipped (5/6 dims pre-PR; mobile viewport pending Vercel preview) | This file populated; colocation test asserts directory shape + import-boundary contract |
+| 8 | AC-9 + AC-10 | `## Preview-deploy verification` table + `tests/marketing/colocation.test.ts` | ⏳ partial — 5/6 dims met; mobile-viewport row observed-fail at 375×667 → S-M1.0b | This file populated; colocation test asserts directory shape + import-boundary contract |
 
 ## Acceptance criteria status (per `acceptance.md`)
 
@@ -33,7 +35,7 @@ Final-state record. Round-by-round multi-agent audit detail lives in PR descript
 | AC-6 (forbidden framing) | ✅ MET | `grep -rni "financial disclosure tool\|better.*Form E\|disclosure platform" src/components/marketing/ src/app/page.tsx src/app/start/` returns 0 matches |
 | AC-7 (landmark + a11y) | ✅ MET | Skip-link first child of body (`href="#main"`); single `<main id="main">`; sections carry `aria-labelledby` to their h2 ids; single h1 per page; `prefers-reduced-motion` disables `.sec-in` animations |
 | AC-8 (visual treatment) | ✅ MET | Color values come from `var(--ds-color-*)` S-F1 tokens; 3 retained literals (`#F5F3EE` warm-stone, `#3F3F3F` italic quote, `#D6D3CC` separator dots) have no clean token match; AC-8 fix landed at PR #92; utility classes use tokens for ink/surface-panel/border/text-sub |
-| AC-9 (preview-deploy 6-dim verification) | ⏳ in-progress (5/6 dims pre-PR; mobile viewport pending Vercel preview at PR open) | See `## Preview-deploy verification` below |
+| AC-9 (preview-deploy 6-dim verification) | ⏳ 5/6 dims met; mobile-viewport row observed-fail at 375×667 → deferred to S-M1.0b | Golden path / edge cases / `prefers-reduced-motion` / keyboard-only / screen-reader ✅ verified pre-PR; mobile-viewport ⏳ observed-fail at 375×667 (3 defects: horizontal scroll; Hero column clipping; PictureBand grid clipping) — root cause: desktop-only design canvas; full evidence + root-cause finding in the `## Preview-deploy verification` table |
 | AC-10 (marketing colocation + import boundary) | ✅ MET | `tests/marketing/colocation.test.ts` asserts atoms/sections/heroes live under `src/components/marketing/` AND that no file outside that tree imports from internal paths (only via the marketing index) |
 
 ## Aggregate test commands
@@ -57,7 +59,7 @@ Per spec 72a six-dimension rubric.
 | **Edge cases** | ✅ verified pre-PR via tests + build | `/start` is the documented edge case (HTTP 404 placeholder); `notFound()` trips at render-time and Next.js emits the segment-level not-found. Production build prerenders `/start` as static `○`. `tests/unit/app/start/page.test.tsx` + `not-found.test.tsx` cover the route contract. |
 | **`prefers-reduced-motion`** | ✅ verified pre-PR via globals.css | `@media (prefers-reduced-motion: reduce)` in globals.css disables `.sec-in` animations (`animation: none !important; opacity: 1; transform: none;`). Verifiable in-browser via DevTools emulation; the CSS rule is the source of truth. |
 | **Keyboard-only** | ✅ verified pre-PR via composition + tests | Skip-link first child of body (Tab focuses it; `:focus` translates Y to 0). All interactive surfaces use `<a>` / `<Link>` / `<button>` semantics — no synthetic onClick on non-interactive elements. `*:focus-visible` (defined in pre-existing globals.css) provides the focus ring. |
-| **Mobile viewport (375×667)** | ⏳ pending Vercel preview verification | The remaining dimension. Sections use `max-width` containers + responsive padding from the design canvas, and the production build emits responsive output, but the contract requires an in-browser check at 375×667 (no horizontal scroll, no clipped content, no overlap). This step is not automatable from CI; AC-9 is in-progress until the user verifies it on the PR-open Vercel preview. |
+| **Mobile viewport (375×667)** | ⏳ observed-fail at 375×667 visual check → deferred to S-M1.0b | Visual check at `construct-dev.vercel.app/` at 375×667 in DevTools surfaced 3 defects: (1) horizontal scroll present; (2) Hero H1 + text column clipped at right edge (the desktop two-column layout doesn't stack — Hero text spills beyond the 375px viewport); (3) PictureBand 4-card grid clipped at right edge (cards continue off-screen rather than stacking). The acceptance contract required "header collapses or stacks per design; hero columns stack; nav items remain reachable; no horizontal scroll" — none met. **Root cause:** design canvas authors the landing desktop-only — bundled JSX has zero Tailwind responsive class hits (`sm:` / `md:` / `lg:` count = 0); the canvas `.mobile-frame` is a desktop-canvas mockup (a phone-shape illustration), not a responsive instance. Per CLAUDE.md "Source-of-truth precedence", responsive impl without a mobile canvas is implementation-led design with rework risk. AC-9 closure → S-M1.0b (mobile canvas first, then translate to breakpoints). |
 | **Screen-reader** | ✅ verified pre-PR via composition | Skip-link `<a href="#main">`; `<main id="main">` landmark; `<header>` / `<footer>` landmarks; sections carry `aria-labelledby` to their h2; single h1 per page (HeroEditorial); the `<Link>` "Back to home" on `/start` 404 is the focusable exit. The composition is screen-reader-friendly by structure; in-browser VoiceOver / NVDA pass at PR-open Vercel preview confirms reading order. |
 
 ## Security checklist (spec 72 §11)
@@ -84,8 +86,9 @@ Net: 5 PASS · 8 N/A with reasoning · 0 FAIL.
 
 ## Sign-off
 
-- Slice ships at this PR's merge.
+- Slice ships in-scope phases 1-6 + 8 at this PR's merge; AC-9 5/6 dims met; mobile-viewport row → S-M1.0b.
 - S-M1.0a follow-up slice tracks the 8 remaining hero variants + `/dev/heroes` gallery.
+- S-M1.0b follow-up slice tracks the responsive design pass — closes AC-9 mobile-viewport row. Mobile canvas required first per CLAUDE.md "Source-of-truth precedence", then implementation.
 - 68f/g entries: none open against S-M1.
 
 ## Status footer
@@ -93,4 +96,5 @@ Net: 5 PASS · 8 N/A with reasoning · 0 FAIL.
 - Originated PR #90 (phase 1-3)
 - AC-8 token alignment + slice-doc reconciliation: PR #92
 - Phase 4-5 composition + next/font + utility classes: PR #93
-- Phase 6 `/start` + phase 8 verification + AC-2 re-scope + security checklist: current PR
+- Phase 6 `/start` + phase 8 verification + AC-2 re-scope + security checklist: PR #94
+- AC-9 mobile-viewport observed-fail honest-framing + S-M1.0b queued: current PR (session 67)

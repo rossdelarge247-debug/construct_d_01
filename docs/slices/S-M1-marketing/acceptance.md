@@ -138,3 +138,5 @@ Design tokens (`landing/01_tokens.jsx`) reconcile against S-F1 `--ds-color-*`: 1
 **Created:** session 65 (2026-05-04)
 **Branch:** `claude/decouple-session-65-lT8VM`
 **Author:** Claude (under user direction)
+
+**Session 67 — AC-9 sub-amendment (no AC text change).** Mobile-viewport row in the AC-9 6-dim table observed-fail at 375×667 visual check (`construct-dev.vercel.app/`). Per CLAUDE.md "Source-of-truth precedence", design canvas authors the landing desktop-only (bundled JSX has zero Tailwind responsive class hits; `.mobile-frame` element is a desktop-canvas mockup, not a responsive instance). AC-9 closure → S-M1.0b follow-up slice (mobile canvas first, then implementation). AC-9 contract text unchanged — slice ships partial (5/6 dims met) per honest framing. See `verification.md` `## Preview-deploy verification` table for observed defects.
