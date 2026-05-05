@@ -1,4 +1,4 @@
-# Session 68 Wrap Context Block (heading into session 69)
+# Session 69 Wrap Context Block (heading into session 70)
 
 ## Product positioning (preserve across sessions)
 
@@ -12,7 +12,9 @@ Spec 42 authoritative for positioning. Spec 68 suite (hub + 68a-e locked + 68f/g
 
 Next.js 16.2, React 19, TypeScript, Tailwind 4, Supabase, Claude AI, Vercel Pro. Single-branch-main workflow (spec 71 §7a Option 4): no `phase-c` integration, no cutover event. Slice work on short-lived feature branches → PR → main. Tink credentials in Vercel env. Stripe SDK pinned at `^22.1.0`.
 
-## What sessions 41-68 accomplished (rolling window)
+## What sessions 41-69 accomplished (rolling window)
+
+> **Session 69 (this wrap):** **2 substantive PRs merged sequentially from `claude/resume-decouple-session-69-uWwQ3` + P4 decision-doc + wrap PR.** **PR #106** (P0-alt, `99a77f9` -> squash `d8c0bec`) -- `SELECTED_HERO_VARIANT='declarative'` -> `'typographic'`; production hero on `/` is now HeroTypographic; ~3L src + 4 test pin updates flipped atomically via Bash python escape. 1 round (clean approve, 0 findings). **PR #107** (P1, `90dbdc2` -> squash `4c82dcc`) -- `applyCategoryOverrides<T>` pure helper extracted from `src/app/dev/engine-workbench/page.dev.tsx`; both `handleGroupCategoryOverride` + `handleCategoryOverride` refactored to use immutable `Array.map()` substitution; `**/*.dev.tsx` `react-hooks/immutability` eslint exclusion dropped. 5 new unit tests at `tests/unit/app/dev/engine-workbench/page.dev.test.tsx`; 324/324 vitest pass; 0 lint errors. 1 round (clean approve, 4 findings -- 1 `issue` verified moot via grep across all 6 `*.dev.tsx` files; 1 `note` on dropped-rationale-now-moot; 2 `praise`). **P2 SKIPPED (path 3):** lockfile-divergence CI guard scaffolded (script + 7 shellspec cases + workflow); local script run surfaced 60+ existing transitive divergences (mostly `@typescript-eslint/*`, `@supabase/*`, `@tailwindcss/*` minor/patch drift) invalidating the kickoff's clean-baseline assumption; user chose path-3 (skip in favour of P4 impl in a future session); WIP at `ecaebfe` reverted via `git revert --no-edit` in this session's wrap PR. **P4 + wrap PR (TBD #):** candidate #10 (lockfile policy) promoted to v2-backlog `#74b` with sized impl path (drop `pnpm-lock.yaml`, standardise on npm). **n=2 calibration:** mean **1.0 rounds** (well under spec 72c §1 ≤2 target). Lessons: path-3 deferral is the right answer to post-WIP scope-mismatch (revert via `git revert`, not force-push); comment-review provenance hook caught 2/2 author-time references; TDD-guard correctly forces test coverage on dev-tooling refactors (pure-helper extraction is the consistent pattern).
 
 > **Session 68 (this wrap):** **5 substantive PRs merged sequentially from `claude/decouple-session-68-PSNET`, resolving four multi-session carry-overs + applying production visual lift.** **PR #100** (P0-alt, `69fd0d8`) — `SELECTED_HERO_VARIANT='editorial' → 'declarative'`; production hero on `/` is now HeroDeclarative; ~3L src + 4 test assertions flipped atomically via Bash python escape (per session-67 Lesson 1 mid-rename pattern). 1 round (clean approve). **PR #101** (P1, `a262897`) — `S-INFRA-tdd-guard-runner-states` slice: extends `.claude/hooks/tdd-guard.sh` (v3b AC-6) with DEGRADED runner detection (vitest binary missing → graceful skip with `npm install` note) + `TDD_GUARD_REDGREEN_OVERRIDE=1` env hatch (literal-1 only; advisory bypass for lint-fix-refactor + mid-rename atomic patterns). 3 new shellspec fixtures. Resolves septuple-confirmed turn-0 friction carry-over. 1 round (clean approve, 1 thought). **PR #102** (P2, `3e7266d`) — `S-INFRA-react-hooks-71-sync` slice: bump `eslint-plugin-react-hooks` 7.0.1 → 7.1.1 to align both lockfiles + scoped `**/*.dev.tsx` eslint override turning off the new `react-hooks/immutability` rule (intentional in-place mutations in `src/app/dev/engine-workbench/page.dev.tsx` workbench). Resolves 4-session lockfile-divergence carry-over. 2 rounds (request-changes 2 → addressed comment WHAT-restating + path-glob mention → clean approve). **PR #103** (P3, `321a475`) — strike stale `hooks-checksums.txt` + `pre-commit-verify.sh` references in CLAUDE.md L356 rollback procedure (mechanism was decommissioned in P0b-structural; references missed at the time). Resolves 6-session aspirational carry-over (kickoff framing was wrong: L155-L158 → actual ref at L356; ship-files path was always unavailable). Doc-only PR, 4 lines. 1 round (clean approve, 0 findings). **PR #104** (P4, `d902cec`) — `S-INFRA-comment-review-lineage-skip` slice: extend `.claude/hooks/comment-review.sh` skip-list with `docs/HANDOFF-SESSION-*.md` + `docs/SESSION-CONTEXT.md` (lineage-purpose docs where session-N references are the file's reason for existing). Resolves recurring stub-mode false-positive. Pivot from kickoff path A (live-mode trial) to path B (entry-point skip-list extension). 2 new shellspec fixtures. 2 rounds (clean approve nitpick on line-number citation → addressed → clean approve). **3 slices closed on main:** S-INFRA-tdd-guard-runner-states · S-INFRA-react-hooks-71-sync · S-INFRA-comment-review-lineage-skip. **n=5 calibration:** mean **1.4 rounds** (well under spec 72c §1 ≤2 target). Lessons: kickoff carry-over framings can be wrong on multiple axes (P3 location + path mismatch); transitive version bumps reveal hidden regressions (P2 7.1.x react-hooks/immutability); pivoting from kickoff path A to path B is fine when path B is durable (P4); line-number citations rot — prefer section-name citations; reviewer-architecture retain bar drifting (2/10 = 0.20; below ≈ 1-per-3 cadence; watchlist active).
 
@@ -58,7 +60,7 @@ Next.js 16.2, React 19, TypeScript, Tailwind 4, Supabase, Claude AI, Vercel Pro.
 - **v3b FULLY SHIPPED — 15/15 + S-8 atomic ship across 3 PRs.** Multi-agent suite is the live review path on main.
 - **v3c shipped — sessions 50+51+52+53 batch landed + session-54 spec amendment + session-55 multi-agent ship.**
 
-### Built (on main as of `d902cec`; **session 68 ships 3 new infra slices + production hero swap + 4 carry-overs resolved** via PRs #100 (hero swap to `'declarative'`), #101 (`S-INFRA-tdd-guard-runner-states`), #102 (`S-INFRA-react-hooks-71-sync`), #103 (CLAUDE.md L356 stale-ref strike), #104 (`S-INFRA-comment-review-lineage-skip`). Cohesive Vercel preview LIVE at `construct-dev.vercel.app` rendering HeroDeclarative on `/`. Session 67 closed S-M1.0a (9 hero variants + dev gallery; PR #97 P1a + PR #98 P1b) + applied PR #96 honest-framing on S-M1 AC-9 → S-M1.0b queued. Session 66 S-M1 marketing landing + Session-64 #87 S-F2 + session-63 #85 synthetic-fixtures + session-62 #83 S-F7-β + session-61 #80 S-F4 + #81 plan-review default-flip + session-60 infra PRs + session-59 #74 S-F3 phase nav + session-56-58 v3c efficiency layer + S-F1 + S-F7-α all on main)
+### Built (on main as of `4c82dcc`; **session 69 ships production hero variant rotation (`'declarative'` -> `'typographic'`) + dev workbench mutation refactor (immutable + lint exclusion drop) + v2-backlog `#74b` (single-lockfile policy decision)** via PR #106 (hero swap) + PR #107 (workbench immutable refactor) + wrap PR (P4 + revert of P2 WIP). P2 SKIPPED in session 69 (path 3) after WIP surfaced 60+ existing transitive divergences invalidating the kickoff's clean-baseline assumption. Session 68 shipped 3 new infra slices + 4 multi-session carry-overs resolved via PRs #100-#104. Cohesive Vercel preview LIVE at `construct-dev.vercel.app` rendering HeroTypographic on `/`. Session 67 closed S-M1.0a (9 hero variants + dev gallery; PR #97 P1a + PR #98 P1b) + applied PR #96 honest-framing on S-M1 AC-9 → S-M1.0b queued. Session 66 S-M1 marketing landing + Session-64 #87 S-F2 + session-63 #85 synthetic-fixtures + session-62 #83 S-F7-β + session-61 #80 S-F4 + #81 plan-review default-flip + session-60 infra PRs + session-59 #74 S-F3 phase nav + session-56-58 v3c efficiency layer + S-F1 + S-F7-α all on main)
 
 ```
 src/components/marketing/heroes/{editorial,declarative,typographic,atmospheric,diagrammatic,product-forward,outcome-led,two-column,empathetic,index}.tsx — 9 hero variants + barrel (S-M1 + S-M1.0a; PRs #90/#92-#94 + #97 + #98)
@@ -85,31 +87,31 @@ docs/v2/v2-backlog.md                                             — backlog (#
 - `claude/S-F7-beta-impl` shipped via session 62 PR #83 cherry-pick replay.
 - **S-M1.0b** (responsive design pass for marketing landing) — QUEUED. Mobile design canvas required first per CLAUDE.md "Source-of-truth precedence". Session-68 P0 candidate.
 
-## Session 69 priorities
+## Session 70 priorities
 
-### P0 — S-M1.0b commission decision (no immediate code) — XS decision + S-M-L impl when canvas ships
+### P0 -- S-M1.0b commission decision (no immediate code) -- XS decision + S-M-L impl when canvas ships
 
-Same as session-68 P0; deferred when user couldn't access Claude AI Design to upload mobile canvas. Either user produces a mobile canvas (Claude AI Design wire batch → committed to `docs/design-source/marketing-landing/{slug}/`), or the slice stays parked. Branches once canvas is in: (a) translate canvas → breakpoints across 5 marketing components ~300-500L; (b) optional /dev/heroes responsive +400-600L. Alternative if mobile canvas not ready: another hero variant swap (XS ~3L; current is `'declarative'`; 7 of 8 newly-shipped variants remain unused).
+Unchanged from session-69 P0; still gated on a mobile design canvas in `docs/design-source/marketing-landing/{slug}/`. Branches once canvas is in: (a) translate canvas -> breakpoints across 5 marketing components ~300-500L; (b) optional /dev/heroes responsive +400-600L.
 
-### P1 — Dev workbench mutation refactor (out-of-scope of session-68 P2; new) — M (~30-50L)
+### P1 -- v2-backlog `#74b` impl: drop `pnpm-lock.yaml`, standardise on npm -- M (~50-100L)
 
-Refactor in-place mutations in `src/app/dev/engine-workbench/page.dev.tsx` at L687-688 (correction-save loop) + L711-712 (single-correction handler) to immutable state updates. Currently `classification.autoCategory = newCategory` mutates a captured ref then `setCsvResult({ ...csvResult })` shallow-clones the parent — the underlying `classifications[]` element references are shared so the mutation has already taken effect. Proper fix: build a new `classifications` array with the mutated entry replaced + propagate through parent state. Lands the immutable pattern + lets us remove the `**/*.dev.tsx` `react-hooks/immutability` eslint exclusion shipped in session-68 P2.
+Sized impl path lives in v2-backlog `#74b` (promoted at session-69 wrap from HANDOFF-32 candidate #10 "deferred indefinitely"). Steps: `git rm pnpm-lock.yaml` + audit `package.json` scripts / `.github/workflows/*.yml` / `vercel.json` / repo `packageManager` field for pnpm refs + add CI gate (workflow or pre-commit) that fails if `pnpm-lock.yaml` reappears + update CLAUDE.md §"Stack" to remove dual-lockfile reference + verify Vercel preview build remains clean. Risk: pnpm-using devs must switch to `npm install`. Trigger: ship at next divergence regression, or proactively in a quiet session.
 
-### P2 — Lockfile divergence CI guard (out-of-scope of session-68 P2; new) — M (~50-100L)
+### P2 -- Hero variant rotation (XS ~3L)
 
-Workflow that diffs `package-lock.json` vs `pnpm-lock.yaml` for shared-package version drift. Catches the next P2-style transitive divergence at PR-time rather than 4-sessions-later carry-over time. Out-of-scope of the session-68 P2 sync; carried forward.
+Edit `src/components/marketing/heroes/index.ts`: `SELECTED_HERO_VARIANT='typographic'` -> one of the remaining 6 unused (`atmospheric` · `diagrammatic` · `product-forward` · `outcome-led` · `two-column` · `empathetic`), or back to `editorial` / `declarative`. Visual lift; 1-line const change + 4 test pin updates flipped atomically via Bash python escape (per session-67 Lesson 1).
 
-### P3 — `COMMENT_REVIEW_SPAWN=1` opt-in trial (downgraded from kickoff carry-over) — XS-S
+### P3 -- `COMMENT_REVIEW_SPAWN=1` opt-in trial (downgraded carry-over) -- XS-S
 
-Path A (live-mode trial; required local `ANTHROPIC_API_KEY` provision) remains available but no longer the highest-recurrence carry-over — session-68 P4 path B (skip-list extension) resolved the specific HANDOFF + SESSION-CONTEXT false-positive structurally. Live-mode trial useful for catch-rate testing against production code, but lower priority now.
+Path A (live-mode trial; required local `ANTHROPIC_API_KEY` provision) remains available. Lower priority post session-68 P4 path B + session-69 stub-mode 2/2 catch rate validation. Useful when shipping prose-heavy code (next session likely if S-M1.0b moves).
 
-### P4 — Single-lockfile policy decision (CLAUDE.md candidate #10 backlog promotion) — XS decision + L impl if shipped
+### P4 -- Reviewer-architecture retain/drop verdict resolution
 
-Move CLAUDE.md candidate #10 from "deferred indefinitely" to either (a) explicit backlog item with sized impl path, or (b) explicit "won't fix" decision with rationale. The 4-session lockfile-divergence carry-over (session-68 P2) shows the divergence keeps recurring; eventually the policy decision needs making.
+If session-69 wrap PR returned 0 substantive architecture catches, the formal drop trigger fires (cumulative 2/12 = 0.167, well below ≈ 1-per-3 = 0.33 retain bar). Verdict + persona-file removal lands this session if dropped (control-change label per CLAUDE.md §"Hard controls"). If wrap PR DID surface a substantive catch, watchlist persists; reset count and re-evaluate after next 3 PRs.
 
-### P5 — Reviewer-architecture watchlist (escalated from observational; retain bar drifting)
+### P5 -- (observational) Reviewer-security drift
 
-Cumulative through session 68: 2/10 catches = 0.20 — below ≈ 1-per-3 cadence retain bar (need ≈ 0.33). Three more session-69 slices with 0 architecture catches = formal drop trigger per CLAUDE.md "Persona retain/drop metric". Monitor first 3 src+infra PRs of session 69.
+Cumulative 5/10 = 0.5 (still above ≈ 1-per-3 retain bar but trending toward ≈ 1-per-2 cadence). No action; monitor first 3 src/infra PRs of session 70 for trend signal.
 
 ### Cohesive-product trajectory (post-session-68 shipments)
 
@@ -172,18 +174,18 @@ Single-P0 session. Don't add adjacent slice work; don't refactor; don't reskin. 
 
 ## Branch
 
-### Branch state at session-68 wrap (verified live)
+### Branch state at session-69 wrap (verified live)
 
-- **Wrap branch:** `claude/decouple-session-68-PSNET` (sequential single-branch pattern continues; 15 sessions in a row 54→…→68 on this pattern).
-- **`main` tip:** `d902cec` (post-PR-#104 merge — comment-review lineage skip).
-- **Open PRs at session-68 wrap:** wrap PR opens after this commit. None other open at wrap.
-- **Closed/merged this session:** PR #100 (P0-alt, `69fd0d8`); PR #101 (P1, `a262897`); PR #102 (P2, `3e7266d`); PR #103 (P3, `321a475`); PR #104 (P4, `d902cec`).
+- **Wrap branch:** `claude/resume-decouple-session-69-uWwQ3` (sequential single-branch pattern continues; 16 sessions in a row 54→…→69 on this pattern).
+- **`main` tip pre-wrap:** `4c82dcc` (post-PR-#107 merge — dev workbench mutations -> immutable + `**/*.dev.tsx` lint exclusion drop).
+- **Open PRs at session-69 wrap:** wrap PR opens after this commit. None other open at wrap.
+- **Closed/merged this session:** PR #106 (P0-alt, `99a77f9` -> squash `d8c0bec`); PR #107 (P1, `90dbdc2` -> squash `4c82dcc`). **WIP reverted in-session:** `ecaebfe` (P2 scaffolding) -- reverted in this wrap PR via `git revert --no-edit`.
 - **Live rigour gates** unchanged from session 67 ship state plus three additions: TDD-guard now distinguishes 4 runner states (GREEN / RED / DEGRADED / OVERRIDE) per session-68 P1; eslint config has scoped `**/*.dev.tsx` `react-hooks/immutability` exclusion per session-68 P2; comment-review hook skips `docs/HANDOFF-SESSION-*.md` + `docs/SESSION-CONTEXT.md` per session-68 P4.
 - **AC-2 hooks-checksums carry-over RESOLVED** via PR #103 (mechanism was already decommissioned in P0b-structural; stale CLAUDE.md L356 reference struck).
 - **AC-3 ux-polish-reviewer** still dormant (session-68 PRs were all infra/hooks/lockfile; no UI surface change triggered formal review window).
 - **AC-4 retain/drop measurement** cumulative through session 68: reviewer-correctness 11/10 STRONG retain · reviewer-style 13+/10 STRONG retain · reviewer-security 5/10 MODERATE retain · reviewer-architecture 2/10 = 0.20 (drifting below ≈ 1-per-3 = 0.33 retain bar; **watchlist active** — 3 more clean-approve slices triggers formal drop). Cohesive-product cohort 10 src+infra slices through.
 
-### Next session (69) FIRST ACTIONS
+### Next session (70) FIRST ACTIONS
 
 1. **Turn-0 verification.** SessionStart hook surfaces live branch state. Wrap PR for session 68 (whatever number GitHub assigns) should be merged at session-69 start; verify against live source.
 2. **Verify branch state + working tree clean.** Resync if BEHIND > 0. Sequential single-branch pattern continues — `git fetch origin main && git remote prune origin && git checkout -B <branch> origin/main`.
