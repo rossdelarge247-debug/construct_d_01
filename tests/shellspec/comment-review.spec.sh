@@ -62,6 +62,20 @@ Describe '.claude/hooks/comment-review.sh'
       The status should equal 0
       The stdout should equal ""
     End
+
+    It 'exits 0 silently for docs/HANDOFF-SESSION-*.md (lineage-purpose doc)'
+      Data <<< "$(envelope_write 'docs/HANDOFF-SESSION-67.md' 'session 67 P1a round 2: 5 findings addressed')"
+      When run "$HOOK"
+      The status should equal 0
+      The stdout should equal ""
+    End
+
+    It 'exits 0 silently for docs/SESSION-CONTEXT.md (rolling-window narrative)'
+      Data <<< "$(envelope_write 'docs/SESSION-CONTEXT.md' 'session 67 wrap: PR #98 merged at 59a39b4')"
+      When run "$HOOK"
+      The status should equal 0
+      The stdout should equal ""
+    End
   End
 
   Describe 'happy path — no anti-pattern'
