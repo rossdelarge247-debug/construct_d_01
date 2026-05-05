@@ -1,4 +1,4 @@
-# Session 65 Wrap Context Block (heading into session 66)
+# Session 66 Wrap Context Block (heading into session 67)
 
 ## Product positioning (preserve across sessions)
 
@@ -12,9 +12,11 @@ Spec 42 authoritative for positioning. Spec 68 suite (hub + 68a-e locked + 68f/g
 
 Next.js 16.2, React 19, TypeScript, Tailwind 4, Supabase, Claude AI, Vercel Pro. Single-branch-main workflow (spec 71 §7a Option 4): no `phase-c` integration, no cutover event. Slice work on short-lived feature branches → PR → main. Tink credentials in Vercel env. Stripe SDK pinned at `^22.1.0`.
 
-## What sessions 41-65 accomplished (rolling window)
+## What sessions 41-66 accomplished (rolling window)
 
-> **Session 65 (partial S-M1 ship; on branch, not yet merged):** PR #89 cherry-pick + slug restructure brought the user's Claude AI Design canvas (`Decouple.zip` + `Landing Page - Standalone.html`) to `docs/design-source/marketing-landing/`. Slice docs (`docs/slices/S-M1-marketing/{acceptance,security,test-plan}.md`) drafted with 10 AC + audit reconciliation against the design's 9 page modules + 13-item security walk + 12-test plan. Phase 1 atoms shipped: `src/components/marketing/atoms/{icons,wordmark,eyebrow,section-head,placeholder-tag,cta-primary,trust-band,index}.tsx` + 8 test files (48 tests). Phase 2 sections shipped: `src/components/marketing/sections/{header,picture-band,journey,footer-minimal}.tsx` + 4 test files (16 tests). Phase 3 hero shipped: `src/components/marketing/heroes/{editorial,index}.tsx` + 2 test files (9 tests). 73 tests passing across 14 files. Phases 4-8 (page composition · layout/globals edits · `/start` placeholder · 8 remaining hero variants · `/dev/heroes` gallery · verification.md final-state) deferred to session 66 — Vercel preview still shows the prior placeholder until P1 wires it up.
+> **Session 66 (this wrap):** **3 substantive PRs merged sequentially from `claude/decouple-session-66-i8x4J`, completing the S-M1 marketing landing slice on main.** **PR #92** (P0, `6e4292a`) — 5 sub-items in one commit: `auto-review.yml` workflow hardening (`paths-ignore: ['docs/design-source/**']` on the `pull_request` trigger + `:(exclude)docs/design-source` pathspec on both `git diff` invocations in `brief-compose` — handles the 2.1MB design-source HTML that crashed PR #90's auto-review parsers, empirically validated by clean parse on PR #91 + this session's 3 PRs); AC-8 token-deviation fix replacing 32 hex literals with `var(--ds-color-*)` refs across 4 marketing files (3 literals retained where no clean S-F1 token match); slice-doc reconciliation (`security.md` HTTP 200→404; `acceptance.md` ChildrenIcon clarification); test additions extending editorial signature with §1-§4 prefixes + Area 01-04 orbit-card labels + 3-signal trust band + cta-primary/eyebrow fragility tightening. **PR #93** (P1, `3e05aa8`) — S-M1 phases 4-5: `src/app/page.tsx` rewritten as marketing composition (skip-link + Header + main(Hero + PictureBand + Journey) + FooterMinimal); `src/app/layout.tsx` migrated to `next/font/google` for Source Serif 4 + JetBrains Mono + Inter (3 vestigial `<link>` tags removed; `--font-sans/-heading/-body` wired to `var(--font-inter)`); ~85L marketing utility classes appended to `globals.css` verbatim from design canvas (`docs/design-source/marketing-landing/landing-source-bundled.html` L14-109). PR-DoD CI required PR-body literal `verification.md` path (no brace expansion). **PR #94** (P2 + P3, `6440afd`) — S-M1 phase 6 (`/start` HTTP 404 placeholder via `notFound()` from `next/navigation` + segment-level `not-found.tsx` with placeholder copy + `<Link href="/">` back-home — production build prerenders `/start` as static `○` route) and phase 8 (verification.md final-state with phase status + 10-AC sign-off + 6-dim spec 72a preview-deploy table + 13-row spec 72 §11 security checklist + AC-2 formal re-scope to in-scope=HeroEditorial; AC-10 colocation + import-boundary contract test that caught a real coupling violation in `src/app/page.tsx`, fixed by adding `src/components/marketing/index.ts` barrel). 3 rounds (block → request-changes → approve); 7 substantive findings addressed (2 blocking + 5 advisory). **First cohesive Vercel preview ACHIEVED on main** — `construct-dev.vercel.app` now renders the marketing landing on `/`. n=3 calibration: mean 1.7 rounds across the 3 PRs (matches spec 72c §1 ≤2 target). Lessons: PR-DoD literal-regex requirement; regex `/g` with `.test()` in loops has `lastIndex` statefulness bug (real correctness catch); AC text scope must be honest before claiming met (verification cannot widen AC outcome — Constraint #28 in action); adversarial-review tests catch real coupling (the new import-boundary test caught `page.tsx` violation immediately on first run); mobile-viewport verification genuinely not automatable from CI (AC-9 honest framing as in-progress wins over fake-met). Reviewer-architecture cumulative now 2/6 (≈ 1-per-3 cadence holds retain bar); reviewer-correctness STRONG retain compounded (4 substantive catches on PR #94 alone); reviewer-security MODERATE+ retain bumped (first formal security catch on a marketing slice — 13-item checklist gap). PR #91 (session-65 follow-up) merged at session-66 turn-0; PR #89 closed as superseded.
+
+> **Session 65 (partial S-M1 ship):** PR #89 cherry-pick + slug restructure brought the user's Claude AI Design canvas (`Decouple.zip` + `Landing Page - Standalone.html`) to `docs/design-source/marketing-landing/`. Slice docs (`docs/slices/S-M1-marketing/{acceptance,security,test-plan}.md`) drafted with 10 AC + audit reconciliation against the design's 9 page modules + 13-item security walk + 12-test plan. Phase 1 atoms shipped + Phase 2 sections shipped + Phase 3 HeroEditorial shipped (16 files, 73 tests passing across 14 files). Phases 4-8 deferred to session 66 — Vercel preview still showed the prior placeholder until session 66 P1 wired it up.
 
 - **Sessions 41-46:** v3b S-1 through S-5 — 12/15 ACs landed via PRs #25-#27 across 6 sessions.
 - **Session 47:** v3b S-6 (PR #30 9-round live recursive auto-review; 14 findings; v3b 12/15 → 15/15). Auto-review.yml + 3 personas live.
@@ -52,7 +54,7 @@ Next.js 16.2, React 19, TypeScript, Tailwind 4, Supabase, Claude AI, Vercel Pro.
 - **v3b FULLY SHIPPED — 15/15 + S-8 atomic ship across 3 PRs.** PRs #25-#27 + #30 + #32 + #33 (sessions 41-48) for the 15 ACs; **PR #54 session-54** for v3b S-8 design + AC-1 partial + AC-2; **PR #56 session-55** for AC-1 v6 fan-out + AC-5 `slice-reviewer.md` retirement (auto-review.yml flipped to 4-specialist matrix-strategy fan-out); **PR #57 session-55** for AC-3 differential mode + AC-4 golden-PR replay + DoD-13 4 fresh-context persona reviews + verification.md final population. Multi-agent suite is the live review path on main.
 - **v3c shipped — sessions 50+51+52+53 batch landed + session-54 spec amendment + session-55 multi-agent ship.** Sessions 50-52 batch (PRs #36-#42 + #44-#47 + #49 + #50). Session 53 PR #52 P0b-structural (CODEOWNERS migration; pre-commit-verify deprecation; arch-smell qualitative reframing). Session 54 PR #54 spec 72c amendments per /ultrareview prior-art audit application. Session 55 PR #56 + #57 closed v3b S-8 atomically. **v3c efficiency layer remaining for session 56+:** k=2 default flip (highest single-lever); anti-pattern catalogue; verification.md final-state convention; AC-3 persona-side prompt-input wiring; live persona drift detection; multi-provider 3rd-agent reviewer; Stryker mutation testing; etc. (see HANDOFF-SESSION-55 §"v3c carry-overs" for full list).
 
-### Built (on main as of `765f3b0`; session 64 ships #87 S-F2 document-shell on main; session-63 #85 S-INFRA-synthetic-fixtures + session-62 #83 S-F7-β rebase + session-61 #80 S-F4 trust chip + #81 plan-review default-flip + session-60 infra PRs #76/#77/#78 + session-59 #74 S-F3 phase nav + session-56-58 v3c efficiency layer + S-F1 + S-F7-α all on main)
+### Built (on main as of `6440afd`; **session 66 ships S-M1 marketing landing slice fully on main** via PR #92 P0 hardening + PR #93 P1 page composition / next/font / utility classes + PR #94 P2+P3 `/start` HTTP 404 + verification.md final-state. Cohesive Vercel preview LIVE at `construct-dev.vercel.app`. Session-64 #87 S-F2 document-shell + session-63 #85 S-INFRA-synthetic-fixtures + session-62 #83 S-F7-β rebase + session-61 #80 S-F4 trust chip + #81 plan-review default-flip + session-60 infra PRs #76/#77/#78 + session-59 #74 S-F3 phase nav + session-56-58 v3c efficiency layer + S-F1 + S-F7-α all on main)
 
 ```
 src/lib/auth/{dev-auth-gate,dev-session,index,types}.ts          — S-F7-α (PR #20)
@@ -113,63 +115,39 @@ docs/slices/S-INFRA-tdd-guard-first-creation/{acceptance,verification}.md — P4
 docs/slices/S-INFRA-parse-pipeline-schema-validation/{acceptance,verification}.md — P5 PR #78 slice docs
 ```
 
-## Session 66 priorities
+## Session 67 priorities
 
-> **Pivot framing:** session 65 incorporated the user's Claude AI Design canvas at `docs/design-source/marketing-landing/` (PR #89 cherry-pick + slug restructure) and shipped **partial S-M1**: slice docs (10 AC + audit reconciliation + security T0-Public + 12-test plan) + atoms (icons + 6 components + barrel; 48 tests) + sections (header + picture + journey + footer-minimal; 16 tests) + HeroEditorial (production default; translates `landing/04_hero.jsx` including the editorial composition with central document spine + 4 orbiting cards) + heroes/index.ts (`SELECTED_HERO_VARIANT` + extensible `HERO_VARIANTS` map). 73 tests passing across 14 files. **Phases 4-8 deferred to session 66** — without them the Vercel preview still renders the prior placeholder + foundation-slice demo grid. Path B (all-in-one) was over-ambitious for one session; honest landing is partial-ship + clear deferral table. **Auto-review on PR #90 hit `parse-failed` (rigour malfunction; design-source 2.1MB single-line file crashed specialist invocations) → admin-bypass merge per Constraint #25 → retroactive `Agent`-tool review surfaced AC-8 token deviations + slice-doc contradiction + test-under-asserts → captured as P0 below.**
+### P0 — AC-9 mobile-viewport closure (XS)
+S-M1 ships with AC-9 in-progress (5/6 dims pre-PR verified; mobile viewport pending). Open the Vercel preview at 375×667; verify no horizontal scroll / clipped content / overlap; update `docs/slices/S-M1-marketing/verification.md` AC-9 row from in-progress → ✅ MET with observed result. Closes the open AC on a freshly-shipped slice. ~5L admin.
 
-### P0 — Retroactive review carry-overs + auto-review diagnostic (must precede phase 4-5)
+### P1 — S-M1.0a (8 remaining hero variants + `/dev/heroes` gallery) — L (~700L)
+Path-B follow-up. Translate `/tmp/decouple-design/hero-explore/heroes_a.jsx` (302L) + `heroes_b.jsx` (334L) — over read-cap; do in 3 turns of reads. Add `HeroDeclarative` · `HeroTypographic` · `HeroProductForward` · `HeroOutcomeLed` · `HeroTwoColumn` · `HeroEmpathetic` · `HeroAtmospheric` · `HeroDiagrammatic` to `src/components/marketing/heroes/`; extend `HERO_VARIANTS` map (1 → 9 keys); add per-variant smoke tests (signature element each). Add `src/app/dev/heroes/page.tsx` rendering all 9 stacked. Closes AC-3 + completes AC-2 amended scope (in-scope at S-M1.0a = all 9). Mounts under `EnvBanner` (dev-only marker; spec 72 §9 lockdown deferred to S-F7 follow-up).
 
-Surfaced post-merge by retroactive `Agent`-tool review against the src/-only diff. ~75L total across four pieces:
+### P2 — TDD-guard auto-allow extension (carry-over from session 64 P2; reaffirmed session 66) — S (~10-20L)
+Septuple-confirmed bash-heredoc/sed/awk escape across sessions 61-66. `TDD_GUARD_REDGREEN_OVERRIDE=1` env hatch + lint-fix-refactor case detection. Would also cover degraded runner state (vitest unavailable when node_modules empty — recurred at session-65 + session-66 turn-0).
 
-1. **Auto-review reproducibility check** (~5 min, no code): open a tiny test PR (e.g. P5 TDD-guard env hatch ~10L) on a fresh branch and observe whether `auto-review.yml` parses cleanly. If yes: confirms hypothesis (the design-source 2.1MB single-line file caused the parse-failed verdict on PR #90). If no: deeper diagnosis needed — check `gh run view` logs for specialist-job stderr + spec 72c §3 envelope schema validation + recent persona prompt changes.
-2. **Path-ignore in auto-review.yml** (~10L control-change): if reproducibility check confirms the design-source-as-cause hypothesis, add `paths-ignore: ['docs/design-source/**']` to `auto-review.yml` (and symmetrically to `persona-synthetic-fixtures.yml` if it touches the same diff context). Future `docs/design-source/` PRs won't run auto-review (acceptable — design source is design-time, not src/).
-3. **AC-8 token-deviation fix (~30L)** — replace hardcoded hex literals with `var(--ds-color-*)` references where S-F1 tokens already exist:
-   - `src/components/marketing/sections/journey.tsx` `PHASE` const: build/reconcile/settle/finalise hexes → `--ds-color-phase-{build,reconcile,settle,finalise}` + `-soft` variants. `start` has no S-F1 token; marketing-scoped inline OK per AC-8.
-   - `src/components/marketing/heroes/editorial.tsx` `AREAS` (L17-22) + `ORBIT_CARDS[*].accent` (L33-90): same 4 phase hexes → tokens.
-   - `src/components/marketing/atoms/trust-band.tsx` Check colour `#166534` (= `--ds-color-phase-finalise`) + dot-separator `#D6D3CC` (decide: marketing-scoped inline keeps SOFT/WARM convention vs token).
-   - `src/components/marketing/atoms/wordmark.tsx` `#111` × 3 places. Note this is DARKER than `--ds-color-ink` (`#1A1A1A`) — decide whether `#111` is intentional brand-mark shade (document with comment) vs token drift (replace with `var(--ds-color-ink)`).
-4. **Slice-doc reconciliation (~10L)** — `docs/slices/S-M1-marketing/security.md` §8 update HTTP 200 → HTTP 404 to match AC-4 (the mid-session AC-4 revision wasn't propagated). `acceptance.md` §15 add `Children → ChildrenIcon (renamed to avoid React.Children collision)` clarification.
-5. **Test additions (~30L)** — `tests/unit/components/marketing/heroes/editorial.test.tsx`: extend "central document spine" assertion to include §1/§2/§3/§4 prefixes + 4 distinct orbit-card DOM nodes (consider `data-orbit-card="true"` marker for stable querying); extend "trust band signals" to include all 3 signals (read-only + free-until-signup) not just FCA-regulated. Optional fragility-tightening per correctness `suggestion`: switch `cta-primary.test.tsx` `.style.background` → `.style.backgroundColor`; tighten `eyebrow.test.tsx` to `expect(node.style.color).toBe('')`.
+### P3 — Lockfile divergence fix (carry-over from session 64 P3) — S-M
+`eslint-plugin-react-hooks@7.0.1` (npm) vs `7.1.1` (pnpm); investigate why S-INFRA-1 dual-lockfile guard didn't catch + repair. Persisted unresolved across 3 sessions.
 
-### P1 — S-M1 phases 4-5 (page composition + layout/globals edits)
+### P4 — AC-2 hooks-checksums + control-change-label decision (carry-over from session 64 P4) — XS decision + S-M impl
+Aspirational across 5 sessions: `.claude/hooks-checksums.txt` + `.github/workflows/control-change-label.yml` + `scripts/generate-hooks-checksums.sh` referenced in CLAUDE.md L155-L158 do NOT exist on disk. Decide: ship the missing files OR strike CLAUDE.md references.
 
-The wiring that makes the partial work visible. Replace `src/app/page.tsx` with the marketing landing composition (Header → HeroEditorial → PictureBand → Journey → FooterMinimal). Add `next/font/google` Source_Serif_4 + JetBrains_Mono to `src/app/layout.tsx` (Inter pre-existing). Append marketing utility classes (`.serif`, `.mono`, `.tabular`, `.label-xs`, `.kbd`, `.cta-primary`, `.sec-in*`, `.skip`, `.placeholder-stripe`, `.hairline`) to `src/app/globals.css`. Remove the now-vestigial `<link rel="preconnect">` lines from `layout.tsx` (next/font self-hosts). M-L (~500L code + tests). **Note:** correctness `suggestion` flagged that header `NAV_ITEMS` includes `#compare` + `#pricing` anchors which won't resolve until S-M1.1/.2 ship; phase 4 wiring decision: accept dead anchors + document under spec 72a 'Edge cases', OR temporarily render those 2 nav items as muted placeholders, OR ship 2 nav items at phase 4 and restore to 4 when S-M1.1 lands.
+### P5 — `COMMENT_REVIEW_SPAWN=1` opt-in trial (carry-over from session 64 P5) — XS-S
+Provision local `ANTHROPIC_API_KEY`; opt-in for 1-2 src/ slices. Hypothesis: live mode distinguishes HANDOFF-doc lineage (allowed) from `verification.md` provenance (forbidden) — would suppress the false positive that fired on `SESSION-CONTEXT.md` "Session N" headers (recurred 4 times this session) and `HANDOFF-SESSION-N.md` lineage.
 
-### P2 — S-M1 phase 6 (`/start` placeholder)
+### P6 — Reviewer-architecture watchlist continues (observational)
+Cumulative 2/6 catches; retain bar met (≈ 1-per-3 cadence). Monitor next 3 src/ slices for sustained signal. No action required unless silent across the next 3 src/ slice triggers.
 
-`src/app/start/page.tsx` calls `notFound()` from `next/navigation`; `src/app/start/not-found.tsx` carries "Pre-signup interview opens soon" + brief explainer + back-link. HTTP 404 native per AC-4 revision. CTAs from landing now route here. S (~80L).
+### Cohesive-product trajectory (re-cadenced post-S-M1 ship)
 
-### P3 — S-M1 phase 8 (`verification.md` final-state)
-
-Final-state evidence per AC + spec 72a 6-dim preview-deploy table. Required for slice DoD #1; gates the S-M1 PR squash-merge. S-M (~100L).
-
-### P4 — S-M1.0a (8 remaining hero variants + `/dev/heroes` gallery)
-
-Translate `hero-explore/heroes_a.jsx` (Declarative · Typographic · ProductForward · OutcomeLed) + `heroes_b.jsx` (TwoColumn · Empathetic · Atmospheric · Diagrammatic) into TS components colocated under `src/components/marketing/heroes/`. Extend `HERO_VARIANTS` map (forward-extensible by design). Add `src/app/dev/heroes/page.tsx` rendering all 9 variants stacked under the EnvBanner. L (~700L code + tests).
-
-### P5 — TDD-guard auto-allow extension (carry-over from session 64 P2)
-
-`TDD_GUARD_REDGREEN_OVERRIDE=1` env hatch + lint-fix-refactor case detection. Session 65 hit a related blocker (vitest unavailable until `npm install` ran first; TDD-guard couldn't determine RED/GREEN). Could include "test-runner-degraded" fallback in same change. S (~10-20L).
-
-### P6 — Lockfile divergence fix (carry-over from session 64 P3)
-
-`package-lock.json` 7.0.1 vs `pnpm-lock.yaml` 7.1.1 for eslint-plugin-react-hooks. Investigate why S-INFRA-1 dual-lockfile guard didn't catch + repair. S-M; investigation-heavy.
-
-### P7 — AC-2 hooks-checksums + control-change-label decision (carry-over from session 64 P4)
-
-User-decision: ship the missing files OR strike `CLAUDE.md` L155-L158 references. Aspirational across multiple sessions. XS.
-
-### P8 — `COMMENT_REVIEW_SPAWN=1` opt-in trial (carry-over from session 64 P5)
-
-Provision local `ANTHROPIC_API_KEY` + opt-in for 1-2 src/ slices. Hypothesis: live mode distinguishes HANDOFF-doc lineage (allowed) from verification.md provenance (forbidden) — would suppress the false positive that fired on `HANDOFF-SESSION-65.md` "Session 65" header. XS-S.
-
-### Cohesive-product trajectory (re-cadenced post-session-65 partial ship)
-
-Session 65 built the foundation (atoms + sections + HeroEditorial) but didn't wire it onto `src/app/page.tsx`. Phases 4-5 (P1 above) are what stand between the branch and "first cohesive Vercel preview". Updated estimates: **1 session to first cohesive entry-point** (P1 lands → real landing visible at `construct-dev.vercel.app`); 4-6 sessions to user-testable Build phase end-to-end; 10-13 sessions to all 5 phases minimally populated; 18+ sessions to production-grade. Cadence assumption: ~1 substantive src/ slice per session (sessions 51-65 empirics; session 65 was a partial-ship outlier driven by L+ scope being mis-estimated as M).
+- ✅ **First cohesive Vercel preview SHIPPED** (session 66 — `/` renders the marketing landing)
+- 4-5 sessions to user-testable Build phase end-to-end (S-B0 entry → bank-connect flow → first artefact)
+- 9-12 sessions to all 5 phases minimally populated
+- 17+ sessions to production-grade
 
 ### Synthetic-deliberate-injection gate UNCHANGED
+Live persona regression detection operational (PR #85, session 63). Every persona/orchestrator/synthetic-content change triggers 4× live `claude -p` invocations and asserts each persona flags its dimension's planted defect (4/4 PASS).
 
-Per spec 72c §7 first-3-src-slice gate (CONFIRMED at session-62 wrap). Implementation shipped session 63 PR #85: `tests/personas/synthetic/{security,architecture,correctness,style}.diff` per-persona fixtures + expected-finding signature contracts + pure jq matcher + orchestrating runner + CI workflow. Live persona regression detection operational; 4/4 personas flag their planted defects. Workflow path-filtered + skip-on-no-API-key.
 
 ## Scope ceiling
 
@@ -216,16 +194,17 @@ Single-P0 session. S-F1 (or whichever priority you pick) is THE unblocking work.
 
 ## Branch
 
-### Branch state at session-65 wrap (verified live)
+### Branch state at session-66 wrap (verified live)
 
-- **Wrap branch:** `claude/decouple-session-65-lT8VM` (sequential single-branch pattern continued; 12 sessions in a row 54→55→56→57→58→59→60→61→62→63→64→65 on this pattern).
-- **`main` tip:** `9c751f0` (unchanged from session-64 wrap — S-M1 partial work stays on the session branch; PR opens at session-65 wrap).
-- **Open PRs at session-65 wrap:** session-65 wrap PR opens after this commit (carries 6 commits: PR #89 cherry-pick + slug restructure + S-M1 slice docs + atoms + sections + HeroEditorial + handoff). PR #89 (`rossdelarge247-debug-patch-2`) remains open — superseded by session-65 branch's slug restructure; safe to close once session-65's PR squash-merges.
-- **Closed/merged this session:** none — all session-65 work is on the session branch.
-- **Live rigour gates** unchanged from session-64. Multi-agent auto-review at **k=2 default + differential mode + per-specialist filter + TDD-guard (recurred this session — required `npm install` before unblocking) + parser schema validation + author-time comment review (1 false-positive on HANDOFF "Session 65" lineage; live mode would distinguish) + plan-review default-spawn + synthetic-deliberate-injection per-persona regression detection**.
-- **AC-2 hooks-checksums + control-change-label mechanism is ASPIRATIONAL** (sessions 61-65 unresolved; P7 carry-over).
-- **AC-2 acceptance-gate** + **AC-3 ux-polish-reviewer** still shipped + dormant. **AC-3 ux-polish-reviewer first formal trigger window opens whenever S-M1 PR opens** (the slice has substantive UI surface — first src/ UI surface activates the persona).
-- **AC-4 retain/drop measurement** cumulative through session 65: reviewer-style 5/5 STRONG retain · reviewer-correctness 5/5 STRONG retain · reviewer-security 2/5 MODERATE retain · reviewer-architecture 1/5 — FIRST CATCH on PR #87 (page-wrapper scope-creep / `bodyAs` prop solution). **No new auto-review fired this session** (no PR opened); cumulative trigger count unchanged. Wrap PR (this session) and S-M1 final PR (session 66) are the next two formal triggers — if architect catches on either, retain at 2/6 or 2/7 (≈ 1-per-3 cadence meets bar); if silent on both, formal drop verdict justified at 1/6 or 1/7.
+- **Wrap branch:** `claude/decouple-session-66-i8x4J` (sequential single-branch pattern continues; 13 sessions in a row 54→…→66 on this pattern).
+- **`main` tip:** `6440afd` (post-PR-#94 merge — S-M1 ships fully).
+- **Open PRs at session-66 wrap:** wrap PR opens after this commit. None other open at wrap.
+- **Closed/merged this session:** PR #91 (session-65 follow-up wrap docs, `bae0751`); PR #92 (P0 hardening + AC-8 + slice-doc + tests, `6e4292a`); PR #93 (P1 page composition + next/font + utility classes, `3e05aa8`); PR #94 (P2+P3 `/start` + verification.md final-state, `6440afd`); PR #89 closed as superseded.
+- **Live rigour gates** updated this session: `auto-review.yml` gains `paths-ignore: ['docs/design-source/**']` + `:(exclude)docs/design-source` pathspec on both `git diff` invocations in `brief-compose` (handles design-source-bundled PRs without crashing parsers — empirically validated by clean parse on PR #91 + 3 session PRs vs PR #90's parse-failed). All other gates unchanged.
+- **AC-2 hooks-checksums + control-change-label mechanism is ASPIRATIONAL** (sessions 61-66 unresolved; P4 carry-over).
+- **AC-2 acceptance-gate** + **AC-3 ux-polish-reviewer** still shipped + dormant. **AC-3 ux-polish-reviewer first formal trigger window** is the S-M1.0a PR (next src/ UI surface).
+- **AC-4 retain/drop measurement** cumulative through session 66: reviewer-correctness 8/6 STRONG retain · reviewer-style 8+/6 STRONG retain · reviewer-security 3/6 MODERATE+ retain (FIRST MARKETING-SLICE CATCH on PR #94 round 1: 13-item §11 checklist gap) · reviewer-architecture 2/6 (PR #87 page-wrapper + PR #90 retroactive AC-8 token bypass — meets ≈ 1-per-3 cadence retain bar). Cohesive-product cohort 6 src/ slices through.
+
 
 ### v3c / v3b trajectory + remaining rigour work
 
@@ -251,23 +230,23 @@ Single-P0 session. S-F1 (or whichever priority you pick) is THE unblocking work.
 
 **Net: v3b shipped; v3c efficiency layer 4 PRs in (sessions 50-56); session 57 picks from the ranked queue above (P0-P3) with AC-3 persona-side wiring as the highest-ROI carry-over remaining.**
 
-### Next session (66) FIRST ACTIONS
+### Next session (67) FIRST ACTIONS
 
-1. **Turn-0 verification.** SessionStart hook surfaces live branch state. Session-65 wrap PR (whatever number GitHub assigns) should be merged at session 66 start; verify against live source. PR #89 (`rossdelarge247-debug-patch-2`) should be closed (superseded). If session-65 wrap PR didn't squash-merge, decide whether to merge first or branch from `claude/decouple-session-65-lT8VM` HEAD to continue session 66 work in-place.
+1. **Turn-0 verification.** SessionStart hook surfaces live branch state. Wrap PR for session 66 (whatever number GitHub assigns) should be merged at session 67 start; verify against live source. If not yet merged, decide whether to merge first or branch from session-66 wrap branch HEAD.
 2. **Verify branch state + working tree clean.** Resync if BEHIND > 0. Sequential single-branch pattern continues — `git fetch origin main && git remote prune origin && git checkout -B <branch> origin/main`.
-3. **Run `npm install` if `node_modules/` is empty.** Session 65 hit this on first impl write — vitest unavailable → TDD-guard couldn't determine RED/GREEN → all writes blocked until `npm install` ran. Front-load this before any code.
-4. **Confirm priority with user.** Session 66 P1 recommended = **S-M1 phase 4-5** (page composition + layout fonts + globals.css utility classes). After this lands, the Vercel preview shows the cohesive landing. P2-P8 = continued S-M1 completion + carry-overs. User picks.
-5. **If P1 (S-M1 phases 4-5):** read `landing/00_app.jsx` for the composition order (small, ~50L offset+limit). Replace `src/app/page.tsx` with the composition: `<Header />` + `<HeroEditorial />` (or `HERO_VARIANTS[SELECTED_HERO_VARIANT]`) + `<PictureBand />` + `<Journey />` + `<FooterMinimal />`. Add fonts to `layout.tsx` via `next/font/google` (`Source_Serif_4` + `JetBrains_Mono`); remove the now-vestigial `<link rel="preconnect">` lines. Append marketing CSS classes to `globals.css`. RED test for `src/app/page.tsx` content + composition; bash heredoc/sed escape for `layout.tsx` + `globals.css` if TDD-guard blocks (carry-over from session 65 atoms phase). M-L (~500L).
-6. **If P2 (S-M1 phase 6):** new `src/app/start/page.tsx` calls `notFound()` from `next/navigation`; new `src/app/start/not-found.tsx` carries the placeholder copy ("Pre-signup interview opens soon" + brief explainer + back-link to `/`). Tests use vitest mock of `next/navigation`. S (~80L).
-7. **If P3 (S-M1 phase 8):** `verification.md` final-state evidence per AC + spec 72a 6-dim preview-deploy table populated post Vercel preview. Required for slice DoD #1; gates S-M1 squash-merge to main. S-M (~100L).
-8. **If P4 (S-M1.0a — 8 hero variants + `/dev/heroes` gallery):** read `hero-explore/heroes_a.jsx` (302L) + `heroes_b.jsx` (334L) — over the read-cap; do in 3 turns of reads. Translate each variant to TS; extend `HERO_VARIANTS` map. Add `src/app/dev/heroes/page.tsx` rendering all 9 stacked. L (~700L).
-9. **If P5-P8 (carry-overs):** rigour queue-drain. P5 TDD-guard env hatch · P6 lockfile divergence · P7 AC-2 hooks-checksums decision · P8 COMMENT_REVIEW_SPAWN trial.
-10. **Live rigour gates** — every commit dogfoods them. Multi-agent auto-review at **k=2 default + differential mode + per-specialist filter + TDD-guard + parser schema validation + author-time comment review + plan-review default-spawn + synthetic-deliberate-injection per-persona regression detection**. Expect 1-2 rounds per PR.
-11. **CODEOWNERS solo-operator pattern (#25)** — most candidates touch CODEOWNERS-protected paths; admin-bypass merge expected.
-12. **Reviewer-architecture retain/drop trigger window** — wrap PR + S-M1 final PR are the next two formal triggers (cumulative 1/5 currently). If architect catches a real architectural concern on either, retain at 2/6 or 2/7 (≈ 1-per-3 cadence meets bar); if silent on both, formal drop verdict justified.
-13. **Constraint #29 (pre-priority spec-gate verification):** before treating a kickoff/SESSION-CONTEXT priority labeled "per spec X §Y" as authorized, grep that section's gating IF-clauses verbatim. Session 65 honoured this for S-M1 — distrusted kickoff's "spec 71 §3 L314" cite (actually in §5 historical table) and "spec 42 §3 positioning" cite (spec 42 has no §3); used the spec content as the source-of-truth, not the kickoff's section labels.
-14. **Pre-priority shipped-artifact verification:** before treating any "first src/ slice" or fresh-build priority as authorized, grep `docs/slices/` and `git log --grep` for shipped-artifact evidence.
-15. **Source-of-truth precedence rule emerging from session 65:** when the user's Claude AI Design canvas (committed at `docs/design-source/{slug}/`) conflicts with the spec, the design canvas wins for visual treatment + section structure; the spec stays as positioning copy backstop only. Surface this to the user at AC-freeze time so it's an explicit decision not silent drift.
+3. **Run `npm install` if `node_modules/` is empty.** Sessions 65 + 66 each hit this on first impl write — vitest unavailable → TDD-guard couldn't determine RED/GREEN → all writes blocked until `npm install` ran. Front-load this before any code.
+4. **AC-9 mobile-viewport closure first.** Open the Vercel preview at 375×667 (production: `construct-dev.vercel.app`); verify no horizontal scroll / clipped content / overlap; update `docs/slices/S-M1-marketing/verification.md` AC-9 row from in-progress → ✅ MET with the observed result. ~5L admin. Closes the open AC on the just-shipped slice.
+5. **Confirm priority with user.** P1 recommended = **S-M1.0a — 8 remaining hero variants + `/dev/heroes` gallery** (path-B follow-up; ~700L). P2-P5 = carry-overs. User picks.
+6. **If P1 (S-M1.0a):** read `/tmp/decouple-design/hero-explore/heroes_a.jsx` (302L) + `heroes_b.jsx` (334L) — over read-cap; do in 3 turns of reads. Translate each variant to TS; extend `HERO_VARIANTS` map; add per-variant smoke tests. Add `src/app/dev/heroes/page.tsx` rendering all 9 stacked. Bash heredoc/sed escape for layout if TDD-guard blocks (septuple-confirmed workaround). After this lands, AC-2 amended (in-scope = 9) and AC-3 both MET; S-M1.0a ships and S-M1 slice closes fully.
+7. **If P2-P5 (carry-overs):** rigour queue-drain. P2 TDD-guard env hatch · P3 lockfile divergence · P4 AC-2 hooks-checksums decision · P5 COMMENT_REVIEW_SPAWN trial.
+8. **Live rigour gates** — every commit dogfoods them. Multi-agent auto-review at **k=2 default + differential mode + per-specialist filter + TDD-guard + parser schema validation + author-time comment review + plan-review default-spawn + synthetic-deliberate-injection per-persona regression detection + design-source path-ignore + design-source diff-exclude (NEW session 66)**. Expect 1-2 rounds per PR.
+9. **CODEOWNERS solo-operator pattern (#25)** — most candidates touch CODEOWNERS-protected paths; admin-bypass merge expected.
+10. **Reviewer-architecture retain/drop trigger window** — cumulative 2/6; meets ≈ 1-per-3 cadence retain bar. S-M1.0a is the next formal trigger window. No drop verdict justified at current cadence.
+11. **Constraint #29 (pre-priority spec-gate verification):** before treating any "per spec X §Y" priority as authorized, grep that section's gating IF-clauses verbatim.
+12. **Pre-priority shipped-artifact verification:** before treating "first src/ slice" or fresh-build framing as authorized, `ls docs/slices/` and `git log --grep` for shipped-artifact evidence.
+13. **PR-DoD literal-regex requirement (NEW session 66):** when authoring multi-doc PR bodies that touch `src/`, repeat the canonical `docs/slices/S-XX/verification.md` path as a literal string (not brace-expanded `{a,s,t,v}.md`) — `pr-dod.yml` greps for the literal regex `docs/slices/S-[A-Za-z0-9-]+/verification\.md` and brace expansion fails the match.
+14. **Source-of-truth precedence rule** — when the user's Claude AI Design canvas (committed at `docs/design-source/{slug}/`) conflicts with the spec, the design canvas wins for visual treatment + section structure; the spec stays as positioning copy backstop only.
+
 
 ## Key files
 
@@ -319,42 +298,41 @@ CLAUDE.md                                                         — §Hard con
 
 **Net state at session-57 wrap:** **rigour-suite v3b programme canonically complete + v3c efficiency layer substantially advanced.** Session 57 shipped 3 PRs: P0 differential-mode token-cost loop (PR #63 — closes spec 72c §6 brief-job side; FIRST FIRED in the wild on PR #65 round 2); P1 F5c origin/main-anchored ratchet for ESLint count + coverage thresholds (PR #64 — admin-bypass override on Path A; doc cleanup deferred to session 58 P2); P2 pre-flight self-review with `/preflight` slash command + opt-in pre-push hook (PR #65 — author-time review compounding with k=2 default + anti-pattern catalogue). **Session 58 lead pick = synthetic-deliberate-injection per-persona fixtures** (deferred from session 57 P3 per budget call). See §"Session 58 priorities" for the ranked roadmap and HANDOFF-SESSION-57 §"v3c carry-overs (still pending after session 57)" for the full deferred list.
 
-## Session 65 pre-flight
+## Session 67 pre-flight
 
 **Verify (do this first, before any plan):**
 
 ```
 git fetch origin
 git status                                                                   # confirm clean tree
-git rev-parse --short HEAD origin/main                                       # expected: post-session-64-wrap merge
-mcp__github__list_pull_requests state=closed base=main perPage=10            # confirm PR #87 + session-64 wrap PR all merged
+git rev-parse --short HEAD origin/main                                       # expected: post-session-66-wrap merge
+mcp__github__list_pull_requests state=closed base=main perPage=10            # confirm session-66 PRs all merged
 mcp__github__list_pull_requests state=open  base=main perPage=10             # expect empty post-wrap
+ls node_modules/.bin/vitest                                                  # expect file; if absent, npm install before any src/ write
 ```
 
 **Pre-flight Qs (ask user before any code):**
 
-1. **Priority for session 65?** Recommended P1 = **S-M1 marketing rewrite** (highest-leverage cohesive-product slice; replaces placeholder landing + S-F1/S-F3/S-F4/S-F2 demo grid; pairs with shipped S-F2 for first cohesive Vercel preview). P2 = **TDD-guard auto-allow extension** (sextuple-confirmed bash escape; formalise into env hatch). P3-P6 = rigour queue-drain (lockfile divergence fix · AC-2 hooks-checksums decision · COMMENT_REVIEW_SPAWN trial · S-F7-γ untested-UI tests). User picks.
-2. **CODEOWNERS solo-operator pattern (#25).** Src/ slices touch `src/components/**` + `src/app/**` + `tests/**` + `docs/slices/**` (all CODEOWNERS-protected); admin-bypass merge expected. P2-P6 rigour picks also touch CODEOWNERS paths.
-3. **Pre-flight + local API key.** `ANTHROPIC_API_KEY` configured at repo level (CI auto-review + synthetic-fixtures workflows both run live). Local provisioning still optional — (a) do nothing (CI catches what matters), (b) export `ANTHROPIC_API_KEY` + `COMMENT_REVIEW_SPAWN=1` for author-time live-mode subagent, (c) hybrid. P5 candidate explicitly tests live-mode value.
-4. **k=2 default + §Revisit trigger calibration.** n=19 calibration data through session 64 (mean ~1.7 rounds across sessions 56-64; PR #87 was 3 rounds, real findings each round). Continues; flip-back-to-k=1 trigger only if first-3-src-slice false-negative rate >20%.
-5. **Reviewer-architecture retain/drop second formal trigger.** PR #87 was the first formal trigger and surfaced the first real architectural catch in 5 slices (page-wrapper scope-creep / `bodyAs` prop solution; 1/5 cumulative). Session 65 (S-M1) is the second trigger. If architect catches → retain (2/6 ≈ 1-per-3 cadence meets the bar). If silent → formal drop verdict justified at 1/6.
-6. **Cohesive-product trajectory.** Vercel preview at session-64 wrap shows the document-shell rendered with stub Sarah's-Picture-shaped content. P1 (S-M1) + shipped S-F2 = first cohesive Vercel preview. Estimates re-cadenced post-S-F2: 2 sessions to first cohesive entry-point; 5-7 to user-testable Build; 11-14 to all 5 phases; 19+ to production-grade.
+1. **Priority for session 67?** Recommended P0 = **AC-9 mobile-viewport closure** (~5L admin to verify Vercel preview at 375×667 + update verification.md). P1 = **S-M1.0a — 8 hero variants + `/dev/heroes` gallery** (~700L; closes AC-3 + AC-2 amended scope). P2-P5 = carry-overs (TDD-guard env hatch · lockfile divergence · hooks-checksums decision · COMMENT_REVIEW_SPAWN trial). User picks.
+2. **CODEOWNERS solo-operator pattern (#25).** S-M1.0a touches `src/components/marketing/heroes/**` + `src/app/dev/heroes/**` + `tests/**` + `docs/slices/**` (all CODEOWNERS-protected); admin-bypass merge expected.
+3. **k=2 default + §Revisit trigger calibration.** n=23 calibration data through session 66 (mean ~1.7 rounds; PR #94 was 3 rounds with substantive findings each round). Continues; flip-back-to-k=1 trigger only if first-3-src-slice false-negative rate >20%.
+4. **Reviewer-architecture retain/drop trigger window.** Cumulative 2/6 (PR #87 + PR #90 retroactive); meets ≈ 1-per-3 cadence. S-M1.0a is the next formal trigger; if architect catches → 3/7. If silent across the next 3 src/ slice triggers → re-evaluate.
+5. **Reviewer-security upgrade signal.** PR #94 round 1 was the first formal security catch on a marketing slice (13-item §11 checklist gap in verification.md). Cumulative 3/6 MODERATE+. Next 3 src/ slices = whether MODERATE+ becomes STRONG.
+6. **Cohesive-product trajectory now ACHIEVED on main.** `construct-dev.vercel.app` renders the marketing landing on `/`. Session 67 onwards builds out the journey end-to-end (Build phase entry first; spec 68b B-T1..D4). Estimates re-cadenced post-S-M1: 4-5 sessions to user-testable Build; 9-12 to all 5 phases minimally populated; 17+ to production-grade.
 
 **Session discipline (hook-surfaced; restated):**
 
 - Honour Planning conduct from turn 1. SessionStart hook surfaces live branch state — use it; distrust kickoff memory.
-- **Quote, don't paraphrase, when invoking a spec.** Sessions 57 + 58 had kickoff paraphrases shipping or attempting work against unmet preconditions. Constraint #29 + CLAUDE.md §Planning conduct §"Pre-priority spec-gate verification" codify this.
-- **Pre-priority shipped-artifact verification** (CLAUDE.md §Planning conduct, codified session-60 wrap from HANDOFF-59 Lesson 3 + HANDOFF-60 §Lesson 4): grep `docs/slices/` and `git log --grep` for slice references before treating any priority as fresh-build. Kickoff omission of shipped state is empirically common.
-- Live gates: `auto-review.yml` (k=2 + differential mode + per-specialist filter LIVE) · `eslint-no-disable.yml` · `coverage-threshold.yml` · `pr-dod.yml` · `.github/CODEOWNERS` · `persona-fixtures.yml` · `pre-push` hook (opt-in) · `shellspec.yml` · **`comment-review.sh` PostToolUse advisory (LIVE post-PR-#76)** · **`tdd-guard.sh` first-creation auto-resolve (LIVE post-PR-#77)** · **`auto-review-parse.sh` schema validation warn+accept (LIVE post-PR-#78)**.
-- Long-prose Writes: skeleton + Edit-append for any prose Write >~100 lines (constraint #19).
-- **Comments anti-pattern catalogue** (PR #60): QUINTUPLE confirmed RECURRING (sessions 57+58+59+60+61). Stub-mode hook (PR #76) flags 4 of 5 catalogue items at write-time; live mode covers WHAT-narration. Mental rehearsal still helps for the WHAT class.
+- **Quote, don't paraphrase, when invoking a spec.** Constraint #29 codified.
+- **Pre-priority shipped-artifact verification.** `ls docs/slices/` + `git log --grep` before treating fresh-build framing as authorized.
+- Live gates: `auto-review.yml` (k=2 + differential mode + per-specialist filter + design-source path-ignore + diff-exclude LIVE post-PR-#92) · `eslint-no-disable.yml` · `coverage-threshold.yml` · `pr-dod.yml` (literal-regex requirement; brace expansion fails) · `.github/CODEOWNERS` · `persona-fixtures.yml` · `pre-push` hook (opt-in) · `shellspec.yml` · `comment-review.sh` PostToolUse advisory · `tdd-guard.sh` first-creation auto-resolve · `auto-review-parse.sh` schema validation warn+accept.
+- **Comments anti-pattern catalogue:** stub-mode hook flags 4 of 5 catalogue items at write-time; live mode would cover WHAT-narration. Note: `SESSION-CONTEXT.md` + `HANDOFF-SESSION-N.md` + `acceptance.md`'s deferred-S-M1.0a refs are FALSE POSITIVES (lineage IS the doc's purpose for SESSION-CONTEXT/HANDOFF; AC-deferred refs in slice docs ARE legitimate provenance for cross-slice references). Strip session-N refs from non-HANDOFF/non-SESSION-CONTEXT docs.
 - **Verification.md is final-state** (constraint #27): assemble at slice ship, not running log.
-- **Don't freeze AC text more ambitious than impl budget** (constraint #28).
-- **Pre-priority spec-gate verification** (constraint #29 session 58): grep gating IF-clauses verbatim before treating priority as authorized.
+- **Don't freeze AC text more ambitious than impl budget** (constraint #28). Reaffirmed session 66 with S-M1 AC-2 amendment to formally split in-scope (1 hero) vs deferred (8 hero + gallery → S-M1.0a).
+- **Pre-priority spec-gate verification** (constraint #29): grep gating IF-clauses verbatim.
 - Auto-review iteration stop-signal: at k=2 + differential mode + per-specialist filter, expect 1-2 rounds per PR. Hard-cap at 4 rounds.
 - **Dogfood discipline:** every commit passes the gates. No `--no-verify` unless explicit user authorisation.
 - **Architectural-smell-trigger:** qualitative judgement per CLAUDE.md.
-- **Verdict vocabulary:** Conventional Comments labels + `(blocking)`. Personas emit findings; orchestrator derives verdict via `scripts/derive-verdict.sh --multi k=2` (default).
-- **AC-4 retain/drop** activates after first 3 src/ slices ship through the full rigour pipeline. Currently 1/3.
-- **TDD-guard first-creation auto-resolve** (PR #77): for new src module, write the test first via Write tool, then write the src file via Write tool — the hook now exits 0 with informational stderr when vitest emits a module-resolve error against a non-existent target. Bash-heredoc workaround still works as the manual escape.
-- **Bare-assignment + `set -euo pipefail` pitfall** (HANDOFF-60 Lesson 3): in shell scripts, `err=$(failing-cmd); rc=$?` aborts under errexit even with pipefail because the assignment line is not a tested context. Use `err=$(cmd) || handler` form (where the `||` makes it tested) when capturing potentially-failing command-sub output under `set -e`.
+- **Verdict vocabulary:** Conventional Comments labels + `(blocking)`. Personas emit findings; orchestrator derives verdict via `scripts/derive-verdict.sh --multi k=2`.
+- **PR-DoD literal-regex requirement (session 66 lesson):** PR bodies must literal-cite `docs/slices/S-XX/verification.md` (no brace expansion). Edits to PR body retrigger via `pull_request: edited`; no push needed.
+- **Regex `/g` + `.test()` in loops is unsafe** (session 66 lesson): `lastIndex` statefulness causes false negatives. Drop `/g` for boolean existence checks.
