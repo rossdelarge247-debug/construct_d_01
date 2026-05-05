@@ -262,10 +262,10 @@ function HeroComposition() {
   )
 }
 
-export function HeroEditorial() {
+export function HeroEditorial({ id = 'hero' }: { id?: string } = {}) {
   return (
     <section
-      id="hero"
+      id={id}
       aria-labelledby="hero-h"
       data-marketing-section="hero"
       className="relative"

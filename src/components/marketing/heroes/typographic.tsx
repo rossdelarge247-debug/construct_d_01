@@ -4,10 +4,10 @@ const INK = 'var(--ds-color-ink)'
 const SUB = 'var(--ds-color-text-sub)'
 const ITALIC_ACCENT = '#3F3F3F'
 
-export function HeroTypographic() {
+export function HeroTypographic({ id = 'hero' }: { id?: string } = {}) {
   return (
     <section
-      id="hero"
+      id={id}
       aria-labelledby="hero-typographic-h1"
       className="sec-in sec-in-1"
       style={{ background: 'var(--ds-color-surface-canvas)' }}

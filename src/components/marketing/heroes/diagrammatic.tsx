@@ -8,49 +8,49 @@ const ITALIC_ACCENT = '#3F3F3F'
 const START_SOFT = '#F5F3EE'
 
 interface Phase {
-  n: string
-  k: string
+  num: string
+  label: string
   ink: string
   soft: string
   subtitle: string
 }
 
 const PHASES: ReadonlyArray<Phase> = [
-  { n: '1', k: 'Start', ink: INK, soft: START_SOFT, subtitle: 'Free orientation' },
+  { num: '1', label: 'Start', ink: INK, soft: START_SOFT, subtitle: 'Free orientation' },
   {
-    n: '2',
-    k: 'Build',
+    num: '2',
+    label: 'Build',
     ink: 'var(--ds-color-phase-build)',
     soft: 'var(--ds-color-phase-build-soft)',
     subtitle: "Sarah's Picture",
   },
   {
-    n: '3',
-    k: 'Reconcile',
+    num: '3',
+    label: 'Reconcile',
     ink: 'var(--ds-color-phase-reconcile)',
     soft: 'var(--ds-color-phase-reconcile-soft)',
     subtitle: 'Household Picture',
   },
   {
-    n: '4',
-    k: 'Settle',
+    num: '4',
+    label: 'Settle',
     ink: 'var(--ds-color-phase-settle)',
     soft: 'var(--ds-color-phase-settle-soft)',
     subtitle: 'Settlement Proposal',
   },
   {
-    n: '5',
-    k: 'Finalise',
+    num: '5',
+    label: 'Finalise',
     ink: 'var(--ds-color-phase-finalise)',
     soft: 'var(--ds-color-phase-finalise-soft)',
     subtitle: 'Court-ready package',
   },
 ]
 
-export function HeroDiagrammatic() {
+export function HeroDiagrammatic({ id = 'hero' }: { id?: string } = {}) {
   return (
     <section
-      id="hero"
+      id={id}
       aria-labelledby="hero-diagrammatic-h1"
       className="sec-in sec-in-1"
     >
@@ -108,7 +108,7 @@ export function HeroDiagrammatic() {
             }}
           >
             {PHASES.map((p) => (
-              <div key={p.k} style={{ position: 'relative' }}>
+              <div key={p.label} style={{ position: 'relative' }}>
                 <div
                   style={{
                     width: 38,
@@ -127,7 +127,7 @@ export function HeroDiagrammatic() {
                     zIndex: 2,
                   }}
                 >
-                  {p.n}
+                  {p.num}
                 </div>
                 <div style={{ marginTop: 14, paddingRight: 12 }}>
                   <div
@@ -139,7 +139,7 @@ export function HeroDiagrammatic() {
                       color: p.ink,
                     }}
                   >
-                    {p.k}
+                    {p.label}
                   </div>
                   <div
                     className="serif italic"

@@ -8,7 +8,7 @@ import {
 
 interface GalleryEntry {
   slug: string
-  Component: () => React.JSX.Element
+  Component: (props?: { id?: string }) => React.JSX.Element
   designTitle: string
 }
 
@@ -69,7 +69,7 @@ export default function HeroGalleryPage() {
               {designTitle}
             </span>
           </h2>
-          <Component />
+          <Component id={`hero-${slug}`} />
         </section>
       ))}
     </main>

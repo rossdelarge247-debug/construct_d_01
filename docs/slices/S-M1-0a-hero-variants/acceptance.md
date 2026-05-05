@@ -14,7 +14,7 @@ Follow-up slice to S-M1 (the marketing landing). S-M1 shipped HeroEditorial as p
 
 ## Acceptance criteria
 
-**AC-1 · 8 hero variant components.** Each variant exists at `src/components/marketing/heroes/<slug>.tsx` as a default-exported function component, renders without throwing under jsdom, and contains its variant-distinguishing signature element (per-variant: declarative big serif H1; typographic centered H1; product-forward UI fragment; outcome-led consent-order doc; two-column reconciliation table; empathetic testimonial card; atmospheric dark backdrop; diagrammatic 5-phase pill diagram).
+**AC-1 · 8 hero variant components.** Each variant exists at `src/components/marketing/heroes/<slug>.tsx` as a named-exported function component (with optional `id?: string` prop, default `'hero'`, allowing the dev gallery to pass unique section IDs while preserving the production landing's hardcoded `id="hero"` contract), renders without throwing under jsdom, and contains its variant-distinguishing signature element (per-variant: declarative big serif H1; typographic centered H1; product-forward UI fragment; outcome-led consent-order doc; two-column reconciliation table; empathetic testimonial card; atmospheric dark backdrop; diagrammatic 5-phase pill diagram).
 
 **AC-2 · 8 per-variant smoke tests.** Each variant has a sibling test at `tests/unit/components/marketing/heroes/<slug>.test.tsx` asserting: eyebrow + H1 + subhead text verbatim; primary CTA reachable; signature visual element present; section landmark contract (`id="hero"` + `aria-labelledby` pointing to the hero's H1).
 

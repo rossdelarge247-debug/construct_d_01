@@ -14,10 +14,10 @@ const BACKDROP_GRADIENT =
   'radial-gradient(circle at 30% 70%, rgba(45,80,140,0.22), transparent 55%), ' +
   'radial-gradient(circle at 80% 80%, rgba(160,80,120,0.16), transparent 60%)'
 
-export function HeroAtmospheric() {
+export function HeroAtmospheric({ id = 'hero' }: { id?: string } = {}) {
   return (
     <section
-      id="hero"
+      id={id}
       aria-labelledby="hero-atmospheric-h1"
       className="sec-in sec-in-1"
       style={{ background: DARK_SURFACE, position: 'relative', overflow: 'hidden' }}
