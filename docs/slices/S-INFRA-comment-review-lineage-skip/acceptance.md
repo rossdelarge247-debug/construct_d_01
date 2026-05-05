@@ -10,8 +10,9 @@ reason for existing (rolling-window narrative tracking).
 
 ## Why
 
-CLAUDE.md L215-222 catalogues comment anti-patterns explicitly scoped
-to "persistent comments or test descriptions":
+CLAUDE.md §"Comments: WHY not WHAT, no temporal provenance" catalogues
+comment anti-patterns explicitly scoped to "persistent comments or
+test descriptions":
 
 > - **PR / session / slice provenance** in persistent comments or
 >   test descriptions ("PR #56 round 7", "session-56 amendment",

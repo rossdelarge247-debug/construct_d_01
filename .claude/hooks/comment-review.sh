@@ -73,11 +73,11 @@ case "$FILE_PATH" in
   tests/personas/synthetic/*) exit 0 ;;
   # Lineage-purpose docs: session-N / PR-# / round-N references are
   # the file's reason for existing (rolling-window narrative tracking,
-  # not in-code provenance). The catalogue at CLAUDE.md L215-222 is
-  # explicit that "PR / session / slice provenance" is forbidden in
-  # *persistent comments or test descriptions* — these markdown docs
-  # are neither. Skip to suppress the recurring stub-mode false
-  # positive at write-time.
+  # not in-code provenance). The catalogue at CLAUDE.md §"Comments:
+  # WHY not WHAT" is explicit that "PR / session / slice provenance"
+  # is forbidden in *persistent comments or test descriptions* — these
+  # markdown docs are neither. Skip to suppress the recurring stub-mode
+  # false positive at write-time.
   docs/HANDOFF-SESSION-*.md) exit 0 ;;
   docs/SESSION-CONTEXT.md) exit 0 ;;
   *.lock|*.json|*.yaml|*.yml) exit 0 ;;
