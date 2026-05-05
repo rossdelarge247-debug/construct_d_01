@@ -7,11 +7,11 @@ const LINE = 'var(--ds-color-border)'
 const PANEL = 'var(--ds-color-surface-panel)'
 
 const PHASE = {
-  start: { ink: '#1A1A1A', soft: '#F5F3EE', num: '#78716C' },
-  build: { ink: '#4338CA', soft: '#EEF2FF', num: '#4338CA' },
-  reconcile: { ink: '#9D174D', soft: '#FCE7F3', num: '#9D174D' },
-  settle: { ink: '#0369A1', soft: '#E0F2FE', num: '#0369A1' },
-  finalise: { ink: '#166534', soft: '#DCFCE7', num: '#166534' },
+  start: { ink: 'var(--ds-color-ink)', soft: '#F5F3EE', num: 'var(--ds-color-text-muted)' },
+  build: { ink: 'var(--ds-color-phase-build)', soft: 'var(--ds-color-phase-build-soft)', num: 'var(--ds-color-phase-build)' },
+  reconcile: { ink: 'var(--ds-color-phase-reconcile)', soft: 'var(--ds-color-phase-reconcile-soft)', num: 'var(--ds-color-phase-reconcile)' },
+  settle: { ink: 'var(--ds-color-phase-settle)', soft: 'var(--ds-color-phase-settle-soft)', num: 'var(--ds-color-phase-settle)' },
+  finalise: { ink: 'var(--ds-color-phase-finalise)', soft: 'var(--ds-color-phase-finalise-soft)', num: 'var(--ds-color-phase-finalise)' },
 } as const
 
 interface PhaseCard {
@@ -119,7 +119,7 @@ export function Journey() {
                   <span
                     className="inline-flex items-center gap-2 rounded-full"
                     style={{
-                      background: '#FFFFFF',
+                      background: 'var(--ds-color-surface-panel)',
                       padding: '3px 10px 3px 4px',
                       border: `1px solid ${LINE}`,
                     }}
@@ -131,7 +131,7 @@ export function Journey() {
                         height: 18,
                         borderRadius: 99,
                         background: p.accent.num,
-                        color: '#FFFFFF',
+                        color: 'var(--ds-color-surface-panel)',
                         fontSize: 10.5,
                         fontWeight: 700,
                       }}

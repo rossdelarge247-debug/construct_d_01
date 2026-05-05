@@ -40,7 +40,7 @@ export function TrustBand() {
         className="flex items-center gap-2"
         style={{ color: INK, fontWeight: 500 }}
       >
-        <Check size={13} sw={2.1} style={{ color: '#166534' }} />
+        <Check size={13} sw={2.1} style={{ color: 'var(--ds-color-phase-finalise)' }} />
         Free until you choose to sign up
       </span>
     </div>

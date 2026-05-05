@@ -38,6 +38,6 @@ describe('marketing/atoms/CTAPrimary', () => {
   it('inverse variant flips background to white and text to ink', () => {
     const { container } = render(<CTAPrimary inverse />)
     const a = container.querySelector('a') as HTMLElement
-    expect(a.style.background).toMatch(/^(rgb\(255,\s*255,\s*255\)|#fff(fff)?)$/i)
+    expect(a.style.backgroundColor).toMatch(/^(rgb\(255,\s*255,\s*255\)|#fff(fff)?)$/i)
   })
 })

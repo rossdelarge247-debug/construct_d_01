@@ -27,6 +27,8 @@ name: auto-review (multi-agent · 4 specialists)
 on:
   pull_request:
     types: [opened, synchronize]
+    paths-ignore:
+      - 'docs/design-source/**'
 
 permissions:
   contents: read
@@ -73,8 +75,11 @@ jobs:
           mkdir -p /tmp/briefs
 
           # Diff (file under review for each persona; spec 72b Option C
-          # inline-file pattern when >300L).
-          git diff "$BASE_SHA" "$HEAD_SHA" > /tmp/pr-diff.txt
+          # inline-file pattern when >300L). Exclude docs/design-source/**
+          # — large standalone HTML / zip artefacts crash specialist parsers
+          # without contributing reviewable code (the design canvas is
+          # consulted at slice AC-freeze, not per-PR diff review).
+          git diff "$BASE_SHA" "$HEAD_SHA" -- . ':(exclude)docs/design-source' > /tmp/pr-diff.txt
 
           SLICE_AC=$(scripts/auto-review-slice-resolve.sh "$BRANCH" "$PR_BODY")
 
@@ -95,7 +100,7 @@ jobs:
             if [[ "$PRIOR_HEAD_SHA" =~ ^[0-9a-f]{40,64}$ ]] && git cat-file -e "${PRIOR_HEAD_SHA}^{commit}" 2>/dev/null; then
               DIFFERENTIAL=true
               printf '%s' "$PRIOR_JSON" > /tmp/prior-findings.json
-              git diff "$PRIOR_HEAD_SHA" "$HEAD_SHA" > /tmp/fix-up-diff.txt
+              git diff "$PRIOR_HEAD_SHA" "$HEAD_SHA" -- . ':(exclude)docs/design-source' > /tmp/fix-up-diff.txt
             fi
           fi
           echo "differential-mode: $DIFFERENTIAL (prior-head=${PRIOR_HEAD_SHA:-none})"

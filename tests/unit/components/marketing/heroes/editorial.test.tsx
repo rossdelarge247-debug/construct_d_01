@@ -30,6 +30,8 @@ describe('marketing/heroes/HeroEditorial', () => {
     expect(
       screen.getByText('FCA-regulated bank connection via TrueLayer')
     ).toBeDefined()
+    expect(screen.getByText("Read-only · we can't move money")).toBeDefined()
+    expect(screen.getByText('Free until you choose to sign up')).toBeDefined()
   })
 
   it('renders the editorial composition signature: central document spine with the four §-numbered areas', () => {
@@ -37,10 +39,14 @@ describe('marketing/heroes/HeroEditorial', () => {
     // Signature element: the "central document spine" with the §-prefixed area labels.
     expect(container.textContent).toContain('The Settlement')
     for (const area of ['Finances', 'Children', 'Housing', 'Future needs']) {
-      // present at least once in the composition
       expect(container.textContent).toContain(area)
     }
-    // EDITORIAL annotation
+    for (const prefix of ['§1', '§2', '§3', '§4']) {
+      expect(container.textContent).toContain(prefix)
+    }
+    for (const label of ['Area 01', 'Area 02', 'Area 03', 'Area 04']) {
+      expect(container.textContent).toContain(label)
+    }
     expect(
       screen.getByText('EDITORIAL · not a literal screenshot')
     ).toBeDefined()

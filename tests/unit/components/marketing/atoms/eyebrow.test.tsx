@@ -19,6 +19,6 @@ describe('marketing/atoms/Eyebrow', () => {
   it('omits color when prop absent', () => {
     const { container } = render(<Eyebrow>plain</Eyebrow>)
     const node = container.firstChild as HTMLElement
-    expect(node.getAttribute('style')).toBeNull()
+    expect(node.style.color).toBe('')
   })
 })

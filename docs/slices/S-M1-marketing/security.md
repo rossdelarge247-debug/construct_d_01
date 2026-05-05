@@ -51,7 +51,7 @@ The `<link rel="preconnect" href="https://fonts.googleapis.com" />` lines in `la
 
 ## 8. Error handling
 
-- [x] N/A · reason: **No new user-facing error surface.** Components render deterministically from static props; no async data fetch, no API error path, no form validation. `/start` page renders a static "Pre-signup interview opens soon" message — not a 404 by HTTP status (returns 200) but is the placeholder before S-O1 ships the real route. Missing `SELECTED_HERO_VARIANT` is caught at compile time by the named-export contract.
+- [x] N/A · reason: **No new user-facing error surface.** Components render deterministically from static props; no async data fetch, no API error path, no form validation. `/start` page calls `notFound()` from `next/navigation` and renders the segment-level `not-found.tsx` placeholder ("Pre-signup interview opens soon") at HTTP 404 per AC-4 — honest signposting that the route is not yet built. Missing `SELECTED_HERO_VARIANT` is caught at compile time by the named-export contract.
 
 ## 9. Dev/prod boundary
 
