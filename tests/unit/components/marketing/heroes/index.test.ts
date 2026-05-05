@@ -29,8 +29,8 @@ describe('marketing/heroes barrel', () => {
     expect(typeof HeroEmpathetic).toBe('function')
   })
 
-  it('exports SELECTED_HERO_VARIANT with default value "declarative"', () => {
-    expect(SELECTED_HERO_VARIANT).toBe('declarative')
+  it('exports SELECTED_HERO_VARIANT with default value "typographic"', () => {
+    expect(SELECTED_HERO_VARIANT).toBe('typographic')
   })
 
   it('HERO_VARIANTS map registers HeroEditorial under "editorial"', () => {
@@ -62,7 +62,7 @@ describe('marketing/heroes barrel', () => {
     expect(keys).toContain('empathetic')
   })
 
-  it('HERO_VARIANTS[SELECTED_HERO_VARIANT] resolves to HeroDeclarative', () => {
-    expect(HERO_VARIANTS[SELECTED_HERO_VARIANT]).toBe(HeroDeclarative)
+  it('HERO_VARIANTS[SELECTED_HERO_VARIANT] resolves to HeroTypographic', () => {
+    expect(HERO_VARIANTS[SELECTED_HERO_VARIANT]).toBe(HeroTypographic)
   })
 })
