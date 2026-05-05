@@ -190,6 +190,16 @@ interface NtropyComparisonResult {
 
 // ═══ UI ═══
 
+export function applyCategoryOverrides<T extends { autoCategory: string; confidence: number }>(
+  items: T[],
+  indicesToUpdate: ReadonlySet<number>,
+  newCategory: T['autoCategory'],
+): T[] {
+  return items.map((c, i) =>
+    indicesToUpdate.has(i) ? { ...c, autoCategory: newCategory, confidence: 1.0 } : c
+  )
+}
+
 type TabId = 'classifications' | 'incomes' | 'questions' | 'ntropy' | 'rules'
 
 export default function EngineWorkbenchPage() {
@@ -673,6 +683,7 @@ export default function EngineWorkbenchPage() {
   // Apply a category to all items in a payee group
   const handleGroupCategoryOverride = useCallback((group: PayeeGroup, newCategory: DetectedPayment['likely_category']) => {
     if (!activeResult) return
+    const indicesToUpdate = new Set<number>()
     for (const c of group.items) {
       const globalIdx = activeResult.classifications.indexOf(c)
       if (globalIdx >= 0) {
@@ -684,12 +695,13 @@ export default function EngineWorkbenchPage() {
           amount: c.amount,
           timestamp: new Date().toISOString(),
         })
-        c.autoCategory = newCategory
-        c.confidence = 1.0
+        indicesToUpdate.add(globalIdx)
       }
     }
-    if (csvResult) setCsvResult({ ...csvResult })
-    else if (result) setResult({ ...result })
+    if (indicesToUpdate.size === 0) return
+    const updatedClassifications = applyCategoryOverrides(activeResult.classifications, indicesToUpdate, newCategory)
+    if (csvResult) setCsvResult({ ...csvResult, classifications: updatedClassifications })
+    else if (result) setResult({ ...result, classifications: updatedClassifications })
   }, [activeResult, csvResult, result])
 
   const handleCategoryOverride = useCallback((index: number, newCategory: DetectedPayment['likely_category']) => {
@@ -697,7 +709,6 @@ export default function EngineWorkbenchPage() {
     const classification = activeResult.classifications[index]
     if (!classification || classification.autoCategory === newCategory) return
 
-    // Save correction to persistent store
     addCorrection({
       normalisedPayee: normaliseDescription(classification.payee),
       rawDescription: classification.payee,
@@ -707,15 +718,9 @@ export default function EngineWorkbenchPage() {
       timestamp: new Date().toISOString(),
     })
 
-    // Update in-place for immediate visual feedback
-    classification.autoCategory = newCategory
-    classification.confidence = 1.0
-    // Force re-render
-    if (csvResult) {
-      setCsvResult({ ...csvResult })
-    } else if (result) {
-      setResult({ ...result })
-    }
+    const updatedClassifications = applyCategoryOverrides(activeResult.classifications, new Set([index]), newCategory)
+    if (csvResult) setCsvResult({ ...csvResult, classifications: updatedClassifications })
+    else if (result) setResult({ ...result, classifications: updatedClassifications })
   }, [activeResult, csvResult, result])
 
   return (
