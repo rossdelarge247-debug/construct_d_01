@@ -127,6 +127,7 @@ These emerged from the V2 desk research as important but have no wireframes or s
 | 72 | Stripe billing integration | Sprint 0 decisions | Low (V1.5) | Paywall at workspace entry. Test mode only currently. |
 | 73 | Error retry on AI failure | HANDOFF | Medium | Currently no retry — user sees error and must manually retry. Add automatic retry with backoff. |
 | 74 | Streaming AI responses | HANDOFF | Low | Progressive reveal of results during processing. Nice-to-have, not critical. |
+| 74a | Feature flag SDK selection + integration | S-M1.0a hero variant decision | Medium | Currently `SELECTED_HERO_VARIANT` const in `src/components/marketing/heroes/index.ts` is the only mechanism for hero rotation (compile-time swap). Needs spec for: per-environment swap (Vercel env var per branch); per-visitor A/B test (e.g. Hero02 Declarative vs Hero01 Editorial conversion lift); phased rollout for new sections / heroes / phase entry points; remote kill-switch for broken UI. Candidates: PostHog (consolidates with #71 analytics if both ship), GrowthBook (open-source self-hosted), LaunchDarkly (commercial), Vercel Edge Config (lightweight, no SDK overhead). Spec to be written before integration; trigger = first need for runtime variant swap. |
 
 ---
 
@@ -177,9 +178,9 @@ Not V2 scope but captured for completeness. These depend on V2 data.
 | Specced and ready to build | 32 |
 | Designed/discussed, needs detailed spec | 12 |
 | Identified in research, not yet designed | 20 |
-| Infrastructure/technical | 10 |
+| Infrastructure/technical | 11 |
 | Future enhancements (post V2 launch) | 14 |
 | Phase 2 and 3 (Resolve + Formalise) | 10 |
-| **Total** | **98** |
+| **Total** | **99** |
 
 Of these, the **build sequence** (items 1–32) is the immediate focus. Items 33–44 should be designed and specced as we build. Items 45–64 are enhancements that improve quality but aren't blockers for V2's core flow.
