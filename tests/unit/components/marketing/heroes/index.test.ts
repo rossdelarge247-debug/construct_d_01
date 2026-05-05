@@ -7,6 +7,10 @@ import {
   HeroTypographic,
   HeroAtmospheric,
   HeroDiagrammatic,
+  HeroProductForward,
+  HeroOutcomeLed,
+  HeroTwoColumn,
+  HeroEmpathetic,
 } from '@/components/marketing/heroes'
 
 describe('marketing/heroes barrel', () => {
@@ -19,6 +23,10 @@ describe('marketing/heroes barrel', () => {
     expect(typeof HeroTypographic).toBe('function')
     expect(typeof HeroAtmospheric).toBe('function')
     expect(typeof HeroDiagrammatic).toBe('function')
+    expect(typeof HeroProductForward).toBe('function')
+    expect(typeof HeroOutcomeLed).toBe('function')
+    expect(typeof HeroTwoColumn).toBe('function')
+    expect(typeof HeroEmpathetic).toBe('function')
   })
 
   it('exports SELECTED_HERO_VARIANT with default value "editorial"', () => {
@@ -35,6 +43,10 @@ describe('marketing/heroes barrel', () => {
     expect(HERO_VARIANTS.typographic).toBe(HeroTypographic)
     expect(HERO_VARIANTS.atmospheric).toBe(HeroAtmospheric)
     expect(HERO_VARIANTS.diagrammatic).toBe(HeroDiagrammatic)
+    expect(HERO_VARIANTS['product-forward']).toBe(HeroProductForward)
+    expect(HERO_VARIANTS['outcome-led']).toBe(HeroOutcomeLed)
+    expect(HERO_VARIANTS['two-column']).toBe(HeroTwoColumn)
+    expect(HERO_VARIANTS.empathetic).toBe(HeroEmpathetic)
   })
 
   it('HERO_VARIANTS contains the keys for all currently registered variants', () => {
@@ -44,6 +56,10 @@ describe('marketing/heroes barrel', () => {
     expect(keys).toContain('typographic')
     expect(keys).toContain('atmospheric')
     expect(keys).toContain('diagrammatic')
+    expect(keys).toContain('product-forward')
+    expect(keys).toContain('outcome-led')
+    expect(keys).toContain('two-column')
+    expect(keys).toContain('empathetic')
   })
 
   it('HERO_VARIANTS[SELECTED_HERO_VARIANT] resolves to HeroEditorial', () => {
