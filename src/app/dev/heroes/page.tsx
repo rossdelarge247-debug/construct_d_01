@@ -3,6 +3,10 @@ import {
   HeroDeclarative,
   HeroDiagrammatic,
   HeroEditorial,
+  HeroEmpathetic,
+  HeroOutcomeLed,
+  HeroProductForward,
+  HeroTwoColumn,
   HeroTypographic,
 } from '@/components/marketing/heroes'
 
@@ -37,6 +41,26 @@ const GALLERY: ReadonlyArray<GalleryEntry> = [
     slug: 'diagrammatic',
     Component: HeroDiagrammatic,
     designTitle: 'Diagrammatic · journey-as-system illustration',
+  },
+  {
+    slug: 'product-forward',
+    Component: HeroProductForward,
+    designTitle: 'Product-forward · real UI fragment in the hero',
+  },
+  {
+    slug: 'outcome-led',
+    Component: HeroOutcomeLed,
+    designTitle: 'Outcome-led · the court-sealed agreement as anchor',
+  },
+  {
+    slug: 'two-column',
+    Component: HeroTwoColumn,
+    designTitle: 'Two-column · "his and hers" picture metaphor',
+  },
+  {
+    slug: 'empathetic',
+    Component: HeroEmpathetic,
+    designTitle: 'Empathetic / human · testimonial-led, real voice',
   },
 ]
 

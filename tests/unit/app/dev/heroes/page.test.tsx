@@ -19,6 +19,10 @@ describe('app/dev/heroes/page (gallery)', () => {
       'Typographic · let the headline carry it',
       'Atmospheric · soft orb, dark background, ambient',
       'Diagrammatic · journey-as-system illustration',
+      'Product-forward · real UI fragment in the hero',
+      'Outcome-led · the court-sealed agreement as anchor',
+      'Two-column · "his and hers" picture metaphor',
+      'Empathetic / human · testimonial-led, real voice',
     ]) {
       expect(screen.getByText(subtitle)).toBeDefined()
     }
