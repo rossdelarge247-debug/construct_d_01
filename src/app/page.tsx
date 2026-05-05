@@ -1,8 +1,11 @@
-import { Header } from '@/components/marketing/sections/header'
-import { HERO_VARIANTS, SELECTED_HERO_VARIANT } from '@/components/marketing/heroes'
-import { PictureBand } from '@/components/marketing/sections/picture-band'
-import { Journey } from '@/components/marketing/sections/journey'
-import { FooterMinimal } from '@/components/marketing/sections/footer-minimal'
+import {
+  Header,
+  HERO_VARIANTS,
+  SELECTED_HERO_VARIANT,
+  PictureBand,
+  Journey,
+  FooterMinimal,
+} from '@/components/marketing'
 
 export default function MarketingLanding() {
   const Hero = HERO_VARIANTS[SELECTED_HERO_VARIANT]
