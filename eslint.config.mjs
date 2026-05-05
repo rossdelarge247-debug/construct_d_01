@@ -36,18 +36,6 @@ const eslintConfig = defineConfig([
       "max-lines-per-function": ["error", { max: 80 }],
     },
   },
-  // The `.dev.tsx` suffix marks workbench / scratch surfaces — engineering
-  // tools that use intentional shortcuts (in-place state mutation for
-  // immediate visual feedback) which trip react-hooks/immutability, a
-  // rule oriented at production code. The suffix is the contract;
-  // current files all live under src/app/dev/ but the glob is suffix-
-  // anchored to keep the convention portable.
-  {
-    files: ["**/*.dev.tsx"],
-    rules: {
-      "react-hooks/immutability": "off",
-    },
-  },
 ]);
 
 export default eslintConfig;
