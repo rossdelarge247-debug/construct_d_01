@@ -224,6 +224,69 @@ EOF
     End
   End
 
+  Describe 'fixture (9) — degraded-runner state passes through with note'
+    It 'exits 0 when vitest stub exits 127 (binary not found)'
+      cd "$SPEC_TMP" || return 1
+      : > src/lib/foo.ts
+      : > tests/unit/lib/foo.test.ts
+      cat > "$SPEC_TMP/vitest-stub.sh" <<'EOF'
+#!/bin/bash
+echo "sh: 1: vitest: not found" >&2
+exit 127
+EOF
+      chmod +x "$SPEC_TMP/vitest-stub.sh"
+      INPUT='{"tool_name":"Edit","tool_input":{"file_path":"src/lib/foo.ts"}}'
+      Data:expand
+        #|$INPUT
+      End
+      When call env TDD_GUARD_VITEST_CMD="$SPEC_TMP/vitest-stub.sh" \
+        TDD_GUARD_TIMEOUT=10 TDD_GUARD_WARN_AT=5 \
+        bash "$HOOK"
+      The status should be success
+      The stderr should include 'vitest not installed'
+      The stderr should not include 'BLOCKED'
+    End
+  End
+
+  Describe 'fixture (10) — TDD_GUARD_REDGREEN_OVERRIDE=1 allows RED'
+    It 'exits 0 when override env var is set, even with RED test'
+      cd "$SPEC_TMP" || return 1
+      : > src/lib/foo.ts
+      : > tests/unit/lib/foo.test.ts
+      make_stub "$SPEC_TMP/vitest-stub.sh" 1
+      INPUT='{"tool_name":"Edit","tool_input":{"file_path":"src/lib/foo.ts"}}'
+      Data:expand
+        #|$INPUT
+      End
+      When call env TDD_GUARD_VITEST_CMD="$SPEC_TMP/vitest-stub.sh" \
+        TDD_GUARD_TIMEOUT=10 TDD_GUARD_WARN_AT=5 \
+        TDD_GUARD_REDGREEN_OVERRIDE=1 \
+        bash "$HOOK"
+      The status should be success
+      The stderr should include 'TDD_GUARD_REDGREEN_OVERRIDE=1'
+      The stderr should not include 'BLOCKED'
+    End
+  End
+
+  Describe 'fixture (11) — TDD_GUARD_REDGREEN_OVERRIDE=0 still blocks RED'
+    It 'exits 2 when override is set to non-1 value (defensive: only "1" bypasses)'
+      cd "$SPEC_TMP" || return 1
+      : > src/lib/foo.ts
+      : > tests/unit/lib/foo.test.ts
+      make_stub "$SPEC_TMP/vitest-stub.sh" 1
+      INPUT='{"tool_name":"Edit","tool_input":{"file_path":"src/lib/foo.ts"}}'
+      Data:expand
+        #|$INPUT
+      End
+      When call env TDD_GUARD_VITEST_CMD="$SPEC_TMP/vitest-stub.sh" \
+        TDD_GUARD_TIMEOUT=10 TDD_GUARD_WARN_AT=5 \
+        TDD_GUARD_REDGREEN_OVERRIDE=0 \
+        bash "$HOOK"
+      The status should equal 2
+      The stderr should include 'BLOCKED: tdd-guard'
+    End
+  End
+
   Describe 'out-of-scope: non-src/ paths pass through silently'
     It 'exits 0 for docs/ paths regardless of test-file presence'
       cd "$SPEC_TMP" || return 1
