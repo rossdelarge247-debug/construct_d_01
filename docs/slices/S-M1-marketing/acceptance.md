@@ -89,9 +89,9 @@ Design tokens (`landing/01_tokens.jsx`) reconcile against S-F1 `--ds-color-*`: 1
 
 *Evidence:* `src/app/dev/heroes/page.test.tsx` — assertion that all 9 variant labels render + 9 distinct hero sections render; assertion that the `EnvBanner` ancestor is present.
 
-**AC-4 · `/start` placeholder route.** `src/app/start/page.tsx` exists. It renders the copy "Pre-signup interview opens soon" + a brief explainer + a "← Back to home" link. Returns HTTP 200 (not 404) since the route exists; semantically signals "interim placeholder" via heading + body copy. CTAs from the landing's hero + footer link to `/start`.
+**AC-4 · `/start` placeholder route (HTTP 404 by design).** `src/app/start/page.tsx` exists and calls `notFound()` from `next/navigation` immediately on render. `src/app/start/not-found.tsx` is the segment's custom 404 page and renders the copy "Pre-signup interview opens soon" + a brief explainer paragraph + a "← Back to home" link with `href="/"`. Returns HTTP 404 — honest signposting that the route is not yet built; CTAs from the landing's hero + footer link to `/start`.
 
-*Evidence:* `src/app/start/page.test.tsx` — copy assertion + back-link presence; `src/app/page.test.tsx` — assertion that the primary CTA's `href` resolves to `/start`.
+*Evidence:* `src/app/start/page.test.tsx` — assertion that the page calls `notFound()` (use vitest mock of `next/navigation`); `src/app/start/not-found.test.tsx` — copy assertion + back-link presence; `src/app/page.test.tsx` — assertion that the primary CTA's `href` resolves to `/start`.
 
 **AC-5 · Required content (positive assertions).** The following load-bearing copy is present verbatim on the landing as DOM text content:
 - Page `<title>`: `Decouple — the complete picture` (from `Metadata.title`)

@@ -45,15 +45,17 @@ One or more tests per AC. Component tests live colocated under `src/components/m
 - **Fixture:** none
 - **Evidence at wrap:** vitest output + preview-deploy URL screenshot of `/dev/heroes`.
 
-## T-4 · references AC-4 — `/start` placeholder route
+## T-4 · references AC-4 — `/start` placeholder route (HTTP 404 native)
 
-- **Given:** `src/app/start/page.tsx` rendered into a test container.
-- **When:** Render via vitest.
-- **Then:** The copy "Pre-signup interview opens soon" is present; a brief explainer paragraph is present; a "← Back to home" link with `href="/"` is present. Page response status is 200 (semantic placeholder, not HTTP 404).
-- **Type:** unit (DOM content)
-- **Automated:** yes
+- **Given:** `src/app/start/page.tsx` and `src/app/start/not-found.tsx` exist.
+- **When:** Two sub-tests:
+  - **page.tsx behaviour:** mock `notFound` from `next/navigation`; render `<StartPage />`; assert `notFound` was called exactly once.
+  - **not-found.tsx content:** render `<StartNotFound />` directly; assert "Pre-signup interview opens soon" copy is present, brief explainer paragraph is present, "← Back to home" link with `href="/"` is present.
+- **Then:** Page triggers Next.js's 404 path; not-found segment renders the placeholder copy. HTTP response status at runtime is 404 (verified at preview deploy, not in jsdom).
+- **Type:** unit (mocked `notFound` + DOM content) + manual (preview-deploy 404 status confirmation)
+- **Automated:** mock + content assertions yes; HTTP status manual at preview.
 - **Fixture:** none
-- **Evidence at wrap:** vitest output + preview-deploy URL screenshot of `/start`.
+- **Evidence at wrap:** vitest output + preview-deploy `/start` response status capture.
 
 ## T-5 · references AC-5 — Required content (positive assertions)
 
