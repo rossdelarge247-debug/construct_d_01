@@ -34,7 +34,7 @@
   --color-slate-50: #F8FAFC;
 
   /* ═══ Typography ═══ */
-  --font-sans: 'Inter', system-ui, -apple-system, sans-serif;
+  --font-sans: var(--font-inter), 'Inter', system-ui, -apple-system, sans-serif;
 
   /* ═══ Shadows ═══ */
   --shadow-card: 0 1px 3px rgba(0, 0, 0, 0.08);
@@ -88,8 +88,8 @@
   --color-ink-light: #6B6560;
   --color-ink-faint: #A39E99;
   --color-surface: #FEFDFB;
-  --font-heading: 'Inter', system-ui, -apple-system, sans-serif;
-  --font-body: 'Inter', system-ui, -apple-system, sans-serif;
+  --font-heading: var(--font-inter), 'Inter', system-ui, -apple-system, sans-serif;
+  --font-body: var(--font-inter), 'Inter', system-ui, -apple-system, sans-serif;
   --shadow-md: 0 3px 12px rgba(45, 41, 38, 0.08);
   --shadow-lg: 0 8px 24px rgba(45, 41, 38, 0.12);
   --radius-sm-legacy: 8px;
@@ -392,4 +392,111 @@ h1, h2, h3, h4 {
     transition-duration: 0.01ms !important;
     animation-duration: 0.01ms !important;
   }
+}
+
+/* === Marketing landing utility classes (S-M1) === */
+
+.serif {
+  font-family: var(--font-source-serif), Georgia, serif;
+}
+
+.mono {
+  font-family: var(--font-jetbrains-mono), ui-monospace, Menlo, monospace;
+}
+
+.tabular {
+  font-variant-numeric: tabular-nums;
+}
+
+.label-xs {
+  font-size: 10.5px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  font-weight: 600;
+}
+
+.hairline {
+  border: 1px solid var(--ds-color-border);
+}
+
+.skip {
+  position: fixed;
+  left: 12px;
+  top: 12px;
+  z-index: 100;
+  padding: 8px 14px;
+  background: var(--ds-color-ink);
+  color: var(--ds-color-surface-panel);
+  border-radius: 6px;
+  font-size: 13px;
+  font-weight: 500;
+  text-decoration: none;
+  transform: translateY(-200%);
+  transition: transform 200ms;
+}
+
+.skip:focus {
+  transform: translateY(0);
+}
+
+@keyframes secIn {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.sec-in {
+  animation: secIn 320ms cubic-bezier(0.2, 0.7, 0.2, 1) both;
+}
+
+.sec-in-1 { animation-delay: 0ms; }
+.sec-in-2 { animation-delay: 80ms; }
+.sec-in-3 { animation-delay: 160ms; }
+.sec-in-4 { animation-delay: 240ms; }
+
+@media (prefers-reduced-motion: reduce) {
+  .sec-in {
+    animation: none !important;
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.cta-primary {
+  transition: transform 160ms ease-out, box-shadow 160ms ease-out, background 160ms;
+}
+
+.cta-primary:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 8px 22px rgba(26, 26, 26, 0.18);
+}
+
+.placeholder-stripe {
+  background-image: repeating-linear-gradient(
+    135deg,
+    transparent 0 11px,
+    rgba(0, 0, 0, 0.04) 11px 12px
+  );
+}
+
+.kbd {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 20px;
+  height: 20px;
+  padding: 0 5px;
+  background: var(--ds-color-surface-panel);
+  border: 1px solid var(--ds-color-border);
+  border-bottom-width: 2px;
+  border-radius: 4px;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--ds-color-text-sub);
+  font-family: var(--font-jetbrains-mono), ui-monospace, Menlo, monospace;
 }
