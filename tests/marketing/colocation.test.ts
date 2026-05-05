@@ -1,10 +1,10 @@
 import { describe, it, expect } from 'vitest'
-import { existsSync } from 'node:fs'
-import { join } from 'node:path'
+import { existsSync, readdirSync, readFileSync, statSync } from 'node:fs'
+import { join, relative } from 'node:path'
 
 const root = process.cwd()
 
-describe('marketing colocation contract (AC-10)', () => {
+describe('marketing colocation contract', () => {
   it('atoms live at src/components/marketing/atoms/', () => {
     const atoms = [
       'cta-primary',
@@ -36,5 +36,41 @@ describe('marketing colocation contract (AC-10)', () => {
     expect(
       existsSync(join(root, 'src/components/marketing/heroes/index.ts'))
     ).toBe(true)
+  })
+})
+
+describe('marketing import-boundary contract', () => {
+  function walk(dir: string, files: string[] = []): string[] {
+    for (const entry of readdirSync(dir)) {
+      const full = join(dir, entry)
+      if (statSync(full).isDirectory()) {
+        if (entry === 'node_modules' || entry === '.next') continue
+        walk(full, files)
+      } else if (entry.endsWith('.ts') || entry.endsWith('.tsx')) {
+        files.push(full)
+      }
+    }
+    return files
+  }
+
+  it('no file outside src/components/marketing/ imports from marketing/atoms/* or marketing/sections/* private paths', () => {
+    const srcDir = join(root, 'src')
+    const marketingPrefix = join(srcDir, 'components/marketing')
+    const offenders: string[] = []
+    const importPattern =
+      /from\s+['"](?:@\/components\/marketing\/(?:atoms|sections)\/[^'"\s]+|\.\.?\/[^'"\s]*marketing\/(?:atoms|sections)\/[^'"\s]+)['"]/g
+
+    for (const file of walk(srcDir)) {
+      if (file.startsWith(marketingPrefix)) continue
+      const body = readFileSync(file, 'utf8')
+      if (importPattern.test(body)) {
+        offenders.push(relative(root, file))
+      }
+    }
+
+    expect(
+      offenders,
+      `Files outside src/components/marketing/ are reaching into atoms/* or sections/* private paths: ${offenders.join(', ')}`
+    ).toEqual([])
   })
 })
