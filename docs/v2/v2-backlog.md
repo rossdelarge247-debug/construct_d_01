@@ -128,6 +128,7 @@ These emerged from the V2 desk research as important but have no wireframes or s
 | 73 | Error retry on AI failure | HANDOFF | Medium | Currently no retry — user sees error and must manually retry. Add automatic retry with backoff. |
 | 74 | Streaming AI responses | HANDOFF | Low | Progressive reveal of results during processing. Nice-to-have, not critical. |
 | 74a | Feature flag SDK selection + integration | S-M1.0a hero variant decision | Medium | Currently `SELECTED_HERO_VARIANT` const in `src/components/marketing/heroes/index.ts` is the only mechanism for hero rotation (compile-time swap). Needs spec for: per-environment swap (Vercel env var per branch); per-visitor A/B test (e.g. Hero02 Declarative vs Hero01 Editorial conversion lift); phased rollout for new sections / heroes / phase entry points; remote kill-switch for broken UI. Candidates: PostHog (consolidates with #71 analytics if both ship), GrowthBook (open-source self-hosted), LaunchDarkly (commercial), Vercel Edge Config (lightweight, no SDK overhead). Spec to be written before integration; trigger = first need for runtime variant swap. |
+| 74b | Single-lockfile policy: drop `pnpm-lock.yaml`, standardise on npm | HANDOFF-32 candidate #10 (lockfile policy) — promoted from "deferred indefinitely" | Medium | Repo carries both `package-lock.json` and `pnpm-lock.yaml`; npm and pnpm resolve transitive deps differently and drift accumulates as periodic CI/Vercel regressions (Stripe SDK type-narrow patched in S-INFRA-1; eslint-plugin-react-hooks 7.0.1 → 7.1.1 patched in S-INFRA-react-hooks-71-sync). **Decision (option a):** drop `pnpm-lock.yaml`; standardise on npm. Vercel + CI both default to npm; no tooling migration needed. **Sized impl path (~50-100L, single slice):** (1) `git rm pnpm-lock.yaml`; (2) audit `package.json` scripts for any `pnpm` invocations; (3) audit `.github/workflows/*.yml` for pnpm refs; (4) check for `vercel.json` or repo-level `packageManager` field that hints pnpm; (5) add a CI gate (workflow or pre-commit) that fails if `pnpm-lock.yaml` reappears; (6) update CLAUDE.md §Stack to remove dual-lockfile reference; (7) verify Vercel preview build remains clean. **Risk:** developers who use pnpm locally need to switch to `npm install` (an inadvertent `pnpm install` would regenerate `pnpm-lock.yaml`; the new CI gate is the safety net). **Trigger:** ship at next divergence regression, or proactively in a quiet session. Until shipped, dual-lockfile guard discipline (Constraint #20) remains in force; manual re-alignment per `S-INFRA-react-hooks-71-sync` is the interim pattern. |
 
 ---
 
@@ -178,9 +179,9 @@ Not V2 scope but captured for completeness. These depend on V2 data.
 | Specced and ready to build | 32 |
 | Designed/discussed, needs detailed spec | 12 |
 | Identified in research, not yet designed | 20 |
-| Infrastructure/technical | 11 |
+| Infrastructure/technical | 12 |
 | Future enhancements (post V2 launch) | 14 |
 | Phase 2 and 3 (Resolve + Formalise) | 10 |
-| **Total** | **99** |
+| **Total** | **100** |
 
 Of these, the **build sequence** (items 1–32) is the immediate focus. Items 33–44 should be designed and specced as we build. Items 45–64 are enhancements that improve quality but aren't blockers for V2's core flow.
