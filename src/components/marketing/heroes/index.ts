@@ -18,7 +18,7 @@ import { HeroOutcomeLed } from './outcome-led'
 import { HeroTwoColumn } from './two-column'
 import { HeroEmpathetic } from './empathetic'
 
-export const SELECTED_HERO_VARIANT = 'declarative' as const
+export const SELECTED_HERO_VARIANT = 'typographic' as const
 
 export const HERO_VARIANTS = {
   editorial: HeroEditorial,
