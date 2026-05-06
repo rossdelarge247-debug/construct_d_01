@@ -45,17 +45,17 @@ Describe 'scripts/auto-review-filter-prior.sh'
 
     It 'excludes a finding whose seen_by does not contain the dimension'
       Data <<< '{"head_sha":"abc","findings":[{"label":"issue","blocking":true,"category":"security","evidence":"sql","seen_by":["security"]}]}'
-      When run "$SCRIPT" architecture
+      When run "$SCRIPT" style
       The status should equal 0
       The output should include '"findings":[]'
       The output should include '"head_sha":"abc"'
     End
 
     It 'includes a cross-dimension finding (multi-element seen_by) for each owning dimension'
-      Data <<< '{"head_sha":"abc","findings":[{"label":"issue","blocking":true,"category":"architecture","evidence":"global","seen_by":["architecture","correctness"]}]}'
+      Data <<< '{"head_sha":"abc","findings":[{"label":"issue","blocking":true,"category":"security","evidence":"global","seen_by":["security","correctness"]}]}'
       When run "$SCRIPT" correctness
       The status should equal 0
-      The output should include '"seen_by":["architecture","correctness"]'
+      The output should include '"seen_by":["security","correctness"]'
     End
 
     It 'excludes findings with absent seen_by (graceful legacy handling)'
@@ -81,7 +81,7 @@ Describe 'scripts/auto-review-filter-prior.sh'
     End
 
     It 'returns each surviving finding when multiple findings match the dimension'
-      Data <<< '{"head_sha":"abc","findings":[{"label":"issue","blocking":true,"category":"security","evidence":"a","seen_by":["security"]},{"label":"nitpick","blocking":false,"category":"style","evidence":"b","seen_by":["style"]},{"label":"issue","blocking":true,"category":"security","evidence":"c","seen_by":["security","architecture"]}]}'
+      Data <<< '{"head_sha":"abc","findings":[{"label":"issue","blocking":true,"category":"security","evidence":"a","seen_by":["security"]},{"label":"nitpick","blocking":false,"category":"style","evidence":"b","seen_by":["style"]},{"label":"issue","blocking":true,"category":"security","evidence":"c","seen_by":["security","correctness"]}]}'
       When run "$SCRIPT" security
       The status should equal 0
       The output should include '"evidence":"a"'

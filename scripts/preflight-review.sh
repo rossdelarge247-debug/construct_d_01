@@ -34,7 +34,7 @@ fi
 BRANCH=$(git rev-parse --abbrev-ref HEAD)
 SLICE_AC=$(scripts/auto-review-slice-resolve.sh "$BRANCH" "" 2>/dev/null || true)
 
-for DIM in security architecture correctness style; do
+for DIM in security correctness style; do
   NONCE=$(openssl rand -hex 16)
   {
     cat ".claude/agents/reviewer-${DIM}.md"
@@ -55,9 +55,9 @@ for DIM in security architecture correctness style; do
   } > "$PREFLIGHT_DIR/briefs/${DIM}.txt"
 done
 
-echo "preflight: spawning 4 specialists in parallel..." >&2
+echo "preflight: spawning 3 specialists in parallel..." >&2
 
-for DIM in security architecture correctness style; do
+for DIM in security correctness style; do
   (
     set +e
     npx -y @anthropic-ai/claude-code@2.1.126 -p --output-format=json \
@@ -80,7 +80,7 @@ case "$VERDICT" in
   nit-only)        echo "preflight verdict: nit-only ($FINDINGS_COUNT finding(s))" ;;
   request-changes) echo "preflight verdict: request-changes ($FINDINGS_COUNT finding(s); informational at v3b ship)" ;;
   block)           echo "preflight verdict: block ($FINDINGS_COUNT finding(s); merge gate)" ;;
-  parse-failed)    echo "preflight verdict: parse-failed (all 4 specialists unparseable; merge gate)" ;;
+  parse-failed)    echo "preflight verdict: parse-failed (all 3 specialists unparseable; merge gate)" ;;
   *)               echo "preflight verdict: $VERDICT" ;;
 esac
 

@@ -2,7 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://decouple.dev/schemas/finding-envelope.schema.json",
   "title": "Finding envelope (per-specialist multi-agent review output)",
-  "description": "Output schema for one of the four reviewer specialist personas (reviewer-{security,architecture,correctness,style}). Validates ONE specialist's structured output before aggregation. Aggregator-side decoration fields (seen_by[], was_in_prior, summary tier) are out of scope; the aggregate envelope has its own (looser) shape per scripts/spawn-multi-reviewer.sh. Per spec 72c §5 + §9 carry-over.",
+  "description": "Output schema for one of the three reviewer specialist personas (reviewer-{security,correctness,style}). Validates ONE specialist's structured output before aggregation. Aggregator-side decoration fields (seen_by[], was_in_prior, summary tier) are out of scope; the aggregate envelope has its own (looser) shape per scripts/spawn-multi-reviewer.sh. Per spec 72c §5 + §9 carry-over.",
   "type": "object",
   "additionalProperties": false,
   "required": ["specialist", "summary", "findings"],
@@ -11,7 +11,6 @@
       "type": "string",
       "enum": [
         "reviewer-security",
-        "reviewer-architecture",
         "reviewer-correctness",
         "reviewer-style"
       ]
@@ -53,7 +52,7 @@
         "category": {
           "type": "string",
           "minLength": 1,
-          "description": "Free-form sub-category. Personas use their dimension as default ('security' | 'architecture' | 'correctness' | 'style') but emit finer-grained sub-categories (e.g. 'edge-case', 'commenting') for granular dedup."
+          "description": "Free-form sub-category. Personas use their dimension as default ('security' | 'correctness' | 'style') but emit finer-grained sub-categories (e.g. 'edge-case', 'commenting') for granular dedup."
         },
         "evidence": {
           "type": "string",
