@@ -22,12 +22,10 @@ distinct failure mode.
 tests/personas/synthetic/
 ├── README.md                            (this file)
 ├── security.diff                        (planted XSS defect)
-├── architecture.diff                    (planted mixed-concerns / no-seam defect)
 ├── correctness.diff                     (planted off-by-one defect)
 ├── style.diff                           (planted PR/round provenance comment)
 └── expected/
     ├── security.json                    (expected-finding signature)
-    ├── architecture.json
     ├── correctness.json
     └── style.json
 ```

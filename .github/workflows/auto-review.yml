@@ -1,8 +1,8 @@
-name: auto-review (multi-agent · 4 specialists)
+name: auto-review (multi-agent · 3 specialists)
 
 # Per docs/slices/S-INFRA-persona-suite-v2-multi-agent/acceptance.md AC-1:
-# orchestrator fans out to 4 specialist subagents in parallel (matrix
-# strategy across `security · architecture · correctness · style` per
+# orchestrator fans out to 3 specialist subagents in parallel (matrix
+# strategy across `security · correctness · style` per
 # spec 72c §3-§4), collects per-specialist envelopes, aggregates via
 # `scripts/spawn-multi-reviewer.sh aggregate` (k=1 default + shadow
 # k=2/k=3 monitor per spec 72c §5), posts a unified check-run +
@@ -17,7 +17,7 @@ name: auto-review (multi-agent · 4 specialists)
 # This workflow is mostly informational at v3b ship — `approve` →
 # `success`, `request-changes`/`nit-only` → `neutral` (advisory only).
 # Two failure modes gate the merge button: `block` verdict → `failure`;
-# `parse-failed` (all 4 specialist outputs unparseable) → `failure`;
+# `parse-failed` (all 3 specialist outputs unparseable) → `failure`;
 # pipeline-crash (`if: failure()` fallback) → `failure`.
 # Skip on missing `ANTHROPIC_API_KEY` stays `neutral` so fork PRs
 # aren't gated by a secret they can't access.
@@ -109,7 +109,7 @@ jobs:
           # carries its own rubric + JSON output schema + verdict-coercion
           # guard (per AC-2). Brief shape mirrors the prior single-agent
           # composition: persona body + nonce + fenced inputs.
-          for DIM in security architecture correctness style; do
+          for DIM in security correctness style; do
             NONCE=$(openssl rand -hex 16)
             {
               cat ".claude/agents/reviewer-${DIM}.md"
@@ -164,14 +164,14 @@ jobs:
         run: |
           set -euo pipefail
           jq -n \
-            --arg name 'auto-review (multi-agent · 4 specialists)' \
+            --arg name 'auto-review (multi-agent · 3 specialists)' \
             --arg head_sha "$HEAD_SHA" \
             --arg run_url "$RUN_URL" \
             '{name: $name, head_sha: $head_sha, status: "completed", conclusion: "failure", output: {title: "Review pipeline crashed in brief-compose — see workflow log", summary: ("auto-review.yml `brief` job failed before composing per-specialist prompts (slice-resolve, awk range, openssl, persona-file read, or artifact upload). Inspect the workflow log: " + $run_url + " — re-run the workflow to retry; if the cause was transient the next run will succeed and supersede this failure check.")}}' \
           | gh api "repos/${{ github.repository }}/check-runs" --method POST --input -
 
           MARKER='<!-- auto-review-comment:multi-agent -->'
-          BODY=$(printf '%s\n\n## auto-review · multi-agent (4 specialists)\n\n**Verdict:** 💥 pipeline-crashed — review did not produce a verdict\n\nThe `brief` job failed before composing per-specialist prompts (slice-resolve, awk range, openssl, persona-file read, or artifact upload). Common causes: missing persona file, malformed `CLAUDE.md` range pattern, runner network issue.\n\nInspect the [workflow log](%s) on commit `%s` for the actual error.\n\n---\n_Auto-posted by `auto-review.yml` (brief-job fallback). Pipeline-crash promotes to `failure` (the merge button is gated until the workflow re-runs successfully). Re-running the workflow is the escape hatch._\n' "$MARKER" "$RUN_URL" "$HEAD_SHA")
+          BODY=$(printf '%s\n\n## auto-review · multi-agent (3 specialists)\n\n**Verdict:** 💥 pipeline-crashed — review did not produce a verdict\n\nThe `brief` job failed before composing per-specialist prompts (slice-resolve, awk range, openssl, persona-file read, or artifact upload). Common causes: missing persona file, malformed `CLAUDE.md` range pattern, runner network issue.\n\nInspect the [workflow log](%s) on commit `%s` for the actual error.\n\n---\n_Auto-posted by `auto-review.yml` (brief-job fallback). Pipeline-crash promotes to `failure` (the merge button is gated until the workflow re-runs successfully). Re-running the workflow is the escape hatch._\n' "$MARKER" "$RUN_URL" "$HEAD_SHA")
           COMMENT_ID=$(gh api "repos/${REPO}/issues/${PR_NUMBER}/comments?per_page=100" --paginate \
             --jq ".[] | select(.body | contains(\"${MARKER}\")) | .id" \
             | head -n 1 || true)
@@ -189,14 +189,14 @@ jobs:
     # Explicit `needs.brief.result == 'success'` matches aggregate's
     # gate. An explicit `if:` replaces the implicit `success()` check;
     # without the result check, a brief-job crash AFTER secret-check sets
-    # skip=false would still start 4 specialists wastefully.
+    # skip=false would still start 3 specialists wastefully.
     if: needs.brief.result == 'success' && needs.brief.outputs.skip == 'false'
     runs-on: ubuntu-latest
     timeout-minutes: 10
     strategy:
       fail-fast: false
       matrix:
-        dimension: [security, architecture, correctness, style]
+        dimension: [security, correctness, style]
     steps:
       - uses: actions/checkout@v4
         with:
@@ -276,7 +276,7 @@ jobs:
           # `inconclusive` and degrades gracefully; all-missing →
           # `parse-failed`.
           mkdir -p /tmp/envelopes
-          for DIM in security architecture correctness style; do
+          for DIM in security correctness style; do
             SRC="/tmp/envelope-artifacts/auto-review-envelope-${DIM}/${DIM}.json"
             if [ -f "$SRC" ]; then
               mv "$SRC" "/tmp/envelopes/${DIM}.json"
@@ -331,7 +331,7 @@ jobs:
           set -euo pipefail
           # Verdict → conclusion mapping per CLAUDE.md §"Verdict
           # vocabulary" §"Check-run conclusion mapping". parse-failed
-          # promotes to failure (all 4 specialists unparseable means no
+          # promotes to failure (all 3 specialists unparseable means no
           # review actually happened); unknown-verdict default fails
           # closed.
           case "$VERDICT" in
@@ -343,7 +343,7 @@ jobs:
           esac
 
           if [ "$VERDICT" = "parse-failed" ]; then
-            TITLE="all 4 specialist outputs unparseable — see workflow log"
+            TITLE="all 3 specialist outputs unparseable — see workflow log"
           elif [ "$DEGRADED" = "true" ]; then
             TITLE="$VERDICT — $FINDINGS_COUNT finding(s) · degraded ($INCONCLUSIVE inconclusive)"
           else
@@ -352,7 +352,7 @@ jobs:
 
           SUMMARY=$(cat /tmp/findings.json)
           jq -n \
-            --arg name 'auto-review (multi-agent · 4 specialists)' \
+            --arg name 'auto-review (multi-agent · 3 specialists)' \
             --arg head_sha "$HEAD_SHA" \
             --arg conclusion "$CONCLUSION" \
             --arg title "$TITLE" \
@@ -387,7 +387,7 @@ jobs:
             nit-only)        HEADLINE='**Verdict:** 💬 nit-only (informational at v3b ship)' ;;
             request-changes) HEADLINE='**Verdict:** 🟡 request-changes (informational at v3b ship)' ;;
             block)           HEADLINE='**Verdict:** 🛑 block' ;;
-            parse-failed)    HEADLINE='**Verdict:** ⚠️ parse-failed — all 4 specialist outputs unparseable' ;;
+            parse-failed)    HEADLINE='**Verdict:** ⚠️ parse-failed — all 3 specialist outputs unparseable' ;;
             *)               HEADLINE="**Verdict:** \`$VERDICT\`" ;;
           esac
 
@@ -430,7 +430,7 @@ jobs:
               end
           ' /tmp/persona-output.json)
 
-          FOOTER=$(printf '\n\n---\n_Auto-posted by [`auto-review.yml`](%s) on commit `%s`. 4 specialists fanned out under matrix strategy per spec 72c §3; verdict derived deterministically by `scripts/spawn-multi-reviewer.sh aggregate` per CLAUDE.md §"Verdict vocabulary"; labels follow [Conventional Comments](https://conventionalcomments.org/). `block` and `parse-failed` verdicts gate the merge button (per CLAUDE.md §"Hard controls" §"Check-run conclusion mapping"); `request-changes` and `nit-only` are advisory only at v3b ship._\n' \
+          FOOTER=$(printf '\n\n---\n_Auto-posted by [`auto-review.yml`](%s) on commit `%s`. 3 specialists fanned out under matrix strategy per spec 72c §3; verdict derived deterministically by `scripts/spawn-multi-reviewer.sh aggregate` per CLAUDE.md §"Verdict vocabulary"; labels follow [Conventional Comments](https://conventionalcomments.org/). `block` and `parse-failed` verdicts gate the merge button (per CLAUDE.md §"Hard controls" §"Check-run conclusion mapping"); `request-changes` and `nit-only` are advisory only at v3b ship._\n' \
             "$RUN_URL" "$HEAD_SHA")
 
           # Anchored BEGIN/END markers keep awk extraction robust against
@@ -445,7 +445,7 @@ jobs:
             '{head_sha: $head_sha, findings: ($env[0].findings // [])}')
           PRIOR_FINDINGS_BLOCK=$(printf '\n\n<!-- BEGIN-prior-findings-json -->\n%s\n<!-- END-prior-findings-json -->' "$PRIOR_FINDINGS_JSON")
 
-          BODY=$(printf '%s\n\n## auto-review · multi-agent (4 specialists)\n\n%s — %s finding(s)%s%s%s%s%s%s' \
+          BODY=$(printf '%s\n\n## auto-review · multi-agent (3 specialists)\n\n%s — %s finding(s)%s%s%s%s%s%s' \
             "$MARKER" "$HEADLINE" "$FINDINGS_COUNT" "$DEGRADED_BLOCK" "$SUMMARY_BLOCK" "$TABLE" "$SHADOW_BLOCK" "$FOOTER" "$PRIOR_FINDINGS_BLOCK")
 
           COMMENT_ID=$(gh api "repos/${REPO}/issues/${PR_NUMBER}/comments?per_page=100" --paginate \
@@ -470,13 +470,13 @@ jobs:
         run: |
           set -euo pipefail
           jq -n \
-            --arg name 'auto-review (multi-agent · 4 specialists)' \
+            --arg name 'auto-review (multi-agent · 3 specialists)' \
             --arg head_sha "$HEAD_SHA" \
             '{name: $name, head_sha: $head_sha, status: "completed", conclusion: "neutral", output: {title: "Skipped — ANTHROPIC_API_KEY not configured", summary: "Set ANTHROPIC_API_KEY as a repo secret to enable auto-review per docs/slices/S-INFRA-persona-suite-v2-multi-agent/acceptance.md AC-1."}}' \
           | gh api "repos/${{ github.repository }}/check-runs" --method POST --input -
 
           MARKER='<!-- auto-review-comment:multi-agent -->'
-          BODY=$(printf '%s\n\n## auto-review · multi-agent (4 specialists)\n\n**Verdict:** ⏭️ skipped — `ANTHROPIC_API_KEY` not configured\n\nSet `ANTHROPIC_API_KEY` as a repo secret to enable auto-review per `docs/slices/S-INFRA-persona-suite-v2-multi-agent/acceptance.md` AC-1.\n\n---\n_Auto-posted by `auto-review.yml`. Informational._\n' "$MARKER")
+          BODY=$(printf '%s\n\n## auto-review · multi-agent (3 specialists)\n\n**Verdict:** ⏭️ skipped — `ANTHROPIC_API_KEY` not configured\n\nSet `ANTHROPIC_API_KEY` as a repo secret to enable auto-review per `docs/slices/S-INFRA-persona-suite-v2-multi-agent/acceptance.md` AC-1.\n\n---\n_Auto-posted by `auto-review.yml`. Informational._\n' "$MARKER")
           COMMENT_ID=$(gh api "repos/${REPO}/issues/${PR_NUMBER}/comments?per_page=100" --paginate \
             --jq ".[] | select(.body | contains(\"${MARKER}\")) | .id" \
             | head -n 1 || true)
@@ -501,14 +501,14 @@ jobs:
         run: |
           set -euo pipefail
           jq -n \
-            --arg name 'auto-review (multi-agent · 4 specialists)' \
+            --arg name 'auto-review (multi-agent · 3 specialists)' \
             --arg head_sha "$HEAD_SHA" \
             --arg run_url "$RUN_URL" \
-            '{name: $name, head_sha: $head_sha, status: "completed", conclusion: "failure", output: {title: "Review pipeline crashed — see workflow log", summary: ("auto-review.yml failed before posting a verdict (artifact upload/download, claude invocation, jq parse, or gh api). Inspect the workflow log: " + $run_url + " — common causes: API outage, malformed persona output, runner network issue, all 4 specialists timing out. Re-run the workflow to retry; if the cause was transient the next run will succeed and supersede this failure check.")}}' \
+            '{name: $name, head_sha: $head_sha, status: "completed", conclusion: "failure", output: {title: "Review pipeline crashed — see workflow log", summary: ("auto-review.yml failed before posting a verdict (artifact upload/download, claude invocation, jq parse, or gh api). Inspect the workflow log: " + $run_url + " — common causes: API outage, malformed persona output, runner network issue, all 3 specialists timing out. Re-run the workflow to retry; if the cause was transient the next run will succeed and supersede this failure check.")}}' \
           | gh api "repos/${{ github.repository }}/check-runs" --method POST --input -
 
           MARKER='<!-- auto-review-comment:multi-agent -->'
-          BODY=$(printf '%s\n\n## auto-review · multi-agent (4 specialists)\n\n**Verdict:** 💥 pipeline-crashed — review did not produce a verdict\n\nThe auto-review workflow failed before posting a verdict (artifact upload/download, `claude` invocation, jq parse, or `gh api`). Common causes: API outage, malformed persona output, runner network issue, all 4 specialists timing out.\n\nInspect the [workflow log](%s) on commit `%s` for the actual error.\n\n---\n_Auto-posted by `auto-review.yml`. Pipeline-crash promotes to `failure` (the merge button is gated until the workflow re-runs successfully). Re-running the workflow is the escape hatch._\n' "$MARKER" "$RUN_URL" "$HEAD_SHA")
+          BODY=$(printf '%s\n\n## auto-review · multi-agent (3 specialists)\n\n**Verdict:** 💥 pipeline-crashed — review did not produce a verdict\n\nThe auto-review workflow failed before posting a verdict (artifact upload/download, `claude` invocation, jq parse, or `gh api`). Common causes: API outage, malformed persona output, runner network issue, all 3 specialists timing out.\n\nInspect the [workflow log](%s) on commit `%s` for the actual error.\n\n---\n_Auto-posted by `auto-review.yml`. Pipeline-crash promotes to `failure` (the merge button is gated until the workflow re-runs successfully). Re-running the workflow is the escape hatch._\n' "$MARKER" "$RUN_URL" "$HEAD_SHA")
           COMMENT_ID=$(gh api "repos/${REPO}/issues/${PR_NUMBER}/comments?per_page=100" --paginate \
             --jq ".[] | select(.body | contains(\"${MARKER}\")) | .id" \
             | head -n 1 || true)

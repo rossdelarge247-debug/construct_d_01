@@ -3,7 +3,7 @@
 **Slice:** S-INFRA-persona-suite-v2-multi-agent
 **Spec ref:** `docs/workspace-spec/72c-multi-agent-review-framework.md` (this slice's impl spec; session-54-amended for §3-§5-§7-§9-§10 alignment with prior-art audit findings); references session-47 9-round single-agent recursive baseline at `docs/slices/S-INFRA-rigour-v3b-subagent-suite/verification.md` §"Round 1" through §"Round 9"
 **Phase(s):** Infra (rigour-pivot programme; v3b S-8 — last substantive piece of v3b)
-**Status:** Re-draft (session 54). Supersedes the session-48 draft. Realigned to /ultrareview 4-partition + majority-vote `k`-quorum default + golden-PR replay primary per spec 72c session-54 amendment.
+**Status:** Re-draft (session 54). Supersedes the session-48 draft. Realigned to /ultrareview 4-partition + majority-vote `k`-quorum default + golden-PR replay primary per spec 72c session-54 amendment. Session-70 amendment: live partition reduced from 4 to 3 specialists (`reviewer-architecture` dropped per CLAUDE.md §"Persona retain/drop metric" formal drop trigger; AC text below remains as-shipped reference for the 4-specialist v3b ship since the slice is historical, with the session-70 reduction tracked in spec 72c §4 + §8 + §10 + this §Status header).
 
 ---
 

@@ -30,13 +30,11 @@ Describe 'spawn-multi-reviewer.sh aggregate'
 
   # Empty / clean-output mocks per specialist
   EMPTY_FINDINGS_SECURITY='{"specialist":"reviewer-security","summary":"clean","findings":[]}'
-  EMPTY_FINDINGS_ARCH='{"specialist":"reviewer-architecture","summary":"clean","findings":[]}'
   EMPTY_FINDINGS_CORRECT='{"specialist":"reviewer-correctness","summary":"clean","findings":[]}'
   EMPTY_FINDINGS_STYLE='{"specialist":"reviewer-style","summary":"clean","findings":[]}'
 
-  It 'returns approve for all-clean envelopes (4 specialists, 0 findings)'
+  It 'returns approve for all-clean envelopes (3 specialists, 0 findings)'
     write_envelope security "$EMPTY_FINDINGS_SECURITY"
-    write_envelope architecture "$EMPTY_FINDINGS_ARCH"
     write_envelope correctness "$EMPTY_FINDINGS_CORRECT"
     write_envelope style "$EMPTY_FINDINGS_STYLE"
     When call scripts/spawn-multi-reviewer.sh aggregate "$SHELLSPEC_TMPBASE"
@@ -56,9 +54,11 @@ Describe 'spawn-multi-reviewer.sh aggregate'
     # Per-finding schema: {label, blocking, category, evidence, remediation}
     # — no per-finding summary (top-level summary is the persona's review
     # summary; evidence is the dedup hash field per spec 72c §5 rule 2).
+    # Hidden-state finding sits on reviewer-correctness: correctness
+    # absorbs criterion 7 hidden-effects + architectural-severity
+    # logic facets per the 3-specialist partition.
     write_envelope security "$EMPTY_FINDINGS_SECURITY"
-    write_envelope architecture '{"specialist":"reviewer-architecture","summary":"hidden state","findings":[{"label":"issue","blocking":true,"category":"hidden-effect","evidence":"const T = Date.now()","remediation":"inject Clock interface"}]}'
-    write_envelope correctness '{"specialist":"reviewer-correctness","summary":"sub","findings":[{"label":"suggestion","blocking":false,"category":"spec-citation","evidence":"per spec X","remediation":"quote it"}]}'
+    write_envelope correctness '{"specialist":"reviewer-correctness","summary":"hidden state + spec","findings":[{"label":"issue","blocking":true,"category":"hidden-effect","evidence":"const T = Date.now()","remediation":"inject Clock interface"},{"label":"suggestion","blocking":false,"category":"spec-citation","evidence":"per spec X","remediation":"quote it"}]}'
     write_envelope style '{"specialist":"reviewer-style","summary":"nit","findings":[{"label":"nitpick","blocking":false,"category":"naming","evidence":"data: any","remediation":"rename"}]}'
     When call scripts/spawn-multi-reviewer.sh aggregate "$SHELLSPEC_TMPBASE"
     The output should include '"verdict": "approve"'
@@ -73,11 +73,11 @@ Describe 'spawn-multi-reviewer.sh aggregate'
     # votes toward the verdict tier. Hash field is evidence (not summary)
     # per spec 72c §5 rule 2 — personas don't emit per-finding summary.
     # With 2 specialists flagging the same blocking finding, at k=2
-    # BLOCKING_VOTES=2 ≥ 2 → block stays. At k=3, 2 < 3 → falls to
-    # approve (action tier excludes blocking).
+    # BLOCKING_VOTES=2 ≥ 2 → block stays. At k=3 (now unanimity at 3
+    # specialists post session-70), 2 < 3 → falls to approve (action
+    # tier excludes blocking).
     write_envelope security '{"specialist":"reviewer-security","summary":"x","findings":[{"label":"issue","blocking":true,"category":"security","evidence":"req.query.id","remediation":"validate at boundary"}]}'
     write_envelope correctness '{"specialist":"reviewer-correctness","summary":"x","findings":[{"label":"issue","blocking":true,"category":"security","evidence":"req.query.id","remediation":"validate at boundary"}]}'
-    write_envelope architecture "$EMPTY_FINDINGS_ARCH"
     write_envelope style "$EMPTY_FINDINGS_STYLE"
     When call scripts/spawn-multi-reviewer.sh aggregate "$SHELLSPEC_TMPBASE"
     The output should include '"verdict": "block"'
@@ -99,7 +99,6 @@ Describe 'spawn-multi-reviewer.sh aggregate'
     # NO fallback to single-agent recursive (slice-reviewer.md retired
     # per AC-5).
     write_envelope security "$EMPTY_FINDINGS_SECURITY"
-    write_envelope architecture "$EMPTY_FINDINGS_ARCH"
     write_envelope style "$EMPTY_FINDINGS_STYLE"
     # correctness.json deliberately missing
     When call scripts/spawn-multi-reviewer.sh aggregate "$SHELLSPEC_TMPBASE"
@@ -119,7 +118,6 @@ Describe 'spawn-multi-reviewer.sh aggregate'
     The output should include '"would_have_been_k3": "parse-failed"'
     The output should include '"degraded": true'
     The output should include '"security"'
-    The output should include '"architecture"'
     The output should include '"correctness"'
     The output should include '"style"'
     The status should be success
@@ -130,7 +128,6 @@ Describe 'spawn-multi-reviewer.sh aggregate'
     # unparseable; aggregate must treat that as a missing/inconclusive
     # envelope rather than an approve. Same path for non-JSON garbage.
     write_envelope security '{}'
-    write_envelope architecture "$EMPTY_FINDINGS_ARCH"
     write_envelope correctness 'not valid json'
     write_envelope style "$EMPTY_FINDINGS_STYLE"
     When call scripts/spawn-multi-reviewer.sh aggregate "$SHELLSPEC_TMPBASE"
@@ -175,7 +172,6 @@ Describe 'spawn-multi-reviewer.sh aggregate'
     printf '%s' "$PRIOR" > "$SHELLSPEC_TMPBASE/prior.json"
     write_envelope correctness '{"specialist":"reviewer-correctness","summary":"still present","findings":[{"label":"issue","blocking":false,"category":"logic","evidence":"divide by zero in compute()","remediation":"guard input"}]}'
     write_envelope security "$EMPTY_FINDINGS_SECURITY"
-    write_envelope architecture "$EMPTY_FINDINGS_ARCH"
     write_envelope style "$EMPTY_FINDINGS_STYLE"
     When call scripts/spawn-multi-reviewer.sh aggregate "$SHELLSPEC_TMPBASE" --differential --prior-findings "$SHELLSPEC_TMPBASE/prior.json"
     The output should include '"differential": true'
@@ -192,7 +188,6 @@ Describe 'spawn-multi-reviewer.sh aggregate'
     # Only security specialist fires on round 2.
     printf '[]' > "$SHELLSPEC_TMPBASE/prior.json"
     write_envelope security '{"specialist":"reviewer-security","summary":"new regression","findings":[{"label":"issue","blocking":true,"category":"security","evidence":"unsanitised input boundary at parse()","remediation":"add validator"}]}'
-    write_envelope architecture "$EMPTY_FINDINGS_ARCH"
     write_envelope correctness "$EMPTY_FINDINGS_CORRECT"
     write_envelope style "$EMPTY_FINDINGS_STYLE"
     When call scripts/spawn-multi-reviewer.sh aggregate "$SHELLSPEC_TMPBASE" --differential --prior-findings "$SHELLSPEC_TMPBASE/prior.json"
@@ -208,7 +203,6 @@ Describe 'spawn-multi-reviewer.sh aggregate'
   It 'rejects --differential without --prior-findings'
     write_envelope correctness "$EMPTY_FINDINGS_CORRECT"
     write_envelope security "$EMPTY_FINDINGS_SECURITY"
-    write_envelope architecture "$EMPTY_FINDINGS_ARCH"
     write_envelope style "$EMPTY_FINDINGS_STYLE"
     When call scripts/spawn-multi-reviewer.sh aggregate "$SHELLSPEC_TMPBASE" --differential
     The status should equal 2
@@ -218,7 +212,6 @@ Describe 'spawn-multi-reviewer.sh aggregate'
   It 'rejects --prior-findings pointing at nonexistent file'
     write_envelope correctness "$EMPTY_FINDINGS_CORRECT"
     write_envelope security "$EMPTY_FINDINGS_SECURITY"
-    write_envelope architecture "$EMPTY_FINDINGS_ARCH"
     write_envelope style "$EMPTY_FINDINGS_STYLE"
     When call scripts/spawn-multi-reviewer.sh aggregate "$SHELLSPEC_TMPBASE" --differential --prior-findings /nonexistent/sm-prior-xyz.json
     The status should equal 2
