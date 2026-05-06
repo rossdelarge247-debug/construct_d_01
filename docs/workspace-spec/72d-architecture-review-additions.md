@@ -53,6 +53,12 @@ The three are complementary, not redundant. C is judgement-driven (an LLM-spawne
 - Hard automated mock-count enforcement (judgement-only at V1; revisit if the qualitative signal proves unreliable across the first 5 src/ slices).
 - Property-based fuzz coverage of seam swaps (carry-over per spec 72c §9 Stryker mutation testing).
 
+**Shipped (Session 72 P1).** D contract operationalised. Touch points:
+
+- CLAUDE.md §"Engineering conventions" — new named convention `**Test-pain audit (per spec 72d §3).**` (positioned adjacent to `**Architectural-smell trigger**` — early-warning during TDD vs late-warning during multi-round patch-iteration).
+- CLAUDE.md DoD-2 — extends to cross-reference the test-pain audit.
+- `.github/PULL_REQUEST_TEMPLATE.md` DoD-2 checkbox — extends to cross-reference the test-pain audit.
+
 ## §4 — B contract: fitness functions
 
 **Source rule.** Spec 71 §4 §"Switch mechanism" verbatim:

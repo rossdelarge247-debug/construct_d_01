@@ -19,7 +19,7 @@
 **Required for any PR that touches `src/`.** Check each item; add evidence link or explain deferral.
 
 - [ ] **AC met with evidence** — link `docs/slices/S-XX/verification.md` showing each acceptance criterion satisfied. *(CI will fail without this reference on src/ PRs.)*
-- [ ] **Tests written + passing** — unit + integration + visual as applicable
+- [ ] **Tests written + passing** — unit + integration + visual as applicable; test-pain audit per spec 72d §3 cleared (>2 mock setups per unit test triggered architectural step-back if surfaced)
 - [ ] **Adversarial review done** — concerns addressed or explicitly deferred with reasoning (paste output or link)
 - [ ] **Preview deploy verified in-browser** (UI only) — golden path + edge cases + `prefers-reduced-motion`
 - [ ] **No regression in adjacent slices** — smoke check + automated tests across affected surfaces
