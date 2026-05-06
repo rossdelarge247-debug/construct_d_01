@@ -60,7 +60,7 @@ Next.js 16.2, React 19, TypeScript, Tailwind 4, Supabase, Claude AI, Vercel Pro.
 - **v3b FULLY SHIPPED — 15/15 + S-8 atomic ship across 3 PRs.** Multi-agent suite is the live review path on main.
 - **v3c shipped — sessions 50+51+52+53 batch landed + session-54 spec amendment + session-55 multi-agent ship.**
 
-### Built (on main as of `4c82dcc`; **session 69 ships production hero variant rotation (`'declarative'` -> `'typographic'`) + dev workbench mutation refactor (immutable + lint exclusion drop) + v2-backlog `#74b` (single-lockfile policy decision)** via PR #106 (hero swap) + PR #107 (workbench immutable refactor) + wrap PR (P4 + revert of P2 WIP). P2 SKIPPED in session 69 (path 3) after WIP surfaced 60+ existing transitive divergences invalidating the kickoff's clean-baseline assumption. Session 68 shipped 3 new infra slices + 4 multi-session carry-overs resolved via PRs #100-#104. Cohesive Vercel preview LIVE at `construct-dev.vercel.app` rendering HeroTypographic on `/`. Session 67 closed S-M1.0a (9 hero variants + dev gallery; PR #97 P1a + PR #98 P1b) + applied PR #96 honest-framing on S-M1 AC-9 → S-M1.0b queued. Session 66 S-M1 marketing landing + Session-64 #87 S-F2 + session-63 #85 synthetic-fixtures + session-62 #83 S-F7-β + session-61 #80 S-F4 + #81 plan-review default-flip + session-60 infra PRs + session-59 #74 S-F3 phase nav + session-56-58 v3c efficiency layer + S-F1 + S-F7-α all on main)
+### Built (on main as of `b784005`; **session 69 ships production hero variant rotation (`'declarative'` -> `'typographic'`) + dev workbench mutation refactor (immutable + lint exclusion drop) + v2-backlog `#74b` (single-lockfile policy decision)** via PR #106 (hero swap) + PR #107 (workbench immutable refactor) + wrap PR (P4 + revert of P2 WIP). P2 SKIPPED in session 69 (path 3) after WIP surfaced 60+ existing transitive divergences invalidating the kickoff's clean-baseline assumption. Session 68 shipped 3 new infra slices + 4 multi-session carry-overs resolved via PRs #100-#104. Cohesive Vercel preview LIVE at `construct-dev.vercel.app` rendering HeroTypographic on `/`. Session 67 closed S-M1.0a (9 hero variants + dev gallery; PR #97 P1a + PR #98 P1b) + applied PR #96 honest-framing on S-M1 AC-9 → S-M1.0b queued. Session 66 S-M1 marketing landing + Session-64 #87 S-F2 + session-63 #85 synthetic-fixtures + session-62 #83 S-F7-β + session-61 #80 S-F4 + #81 plan-review default-flip + session-60 infra PRs + session-59 #74 S-F3 phase nav + session-56-58 v3c efficiency layer + S-F1 + S-F7-α all on main)
 
 ```
 src/components/marketing/heroes/{editorial,declarative,typographic,atmospheric,diagrammatic,product-forward,outcome-led,two-column,empathetic,index}.tsx — 9 hero variants + barrel (S-M1 + S-M1.0a; PRs #90/#92-#94 + #97 + #98)
@@ -89,38 +89,42 @@ docs/v2/v2-backlog.md                                             — backlog (#
 
 ## Session 70 priorities
 
-### P0 -- S-M1.0b commission decision (no immediate code) -- XS decision + S-M-L impl when canvas ships
+### P0 -- AI plan generation spec (logic) -- S-M (~100-200L new spec doc)
 
-Unchanged from session-69 P0; still gated on a mobile design canvas in `docs/design-source/marketing-landing/{slug}/`. Branches once canvas is in: (a) translate canvas -> breakpoints across 5 marketing components ~300-500L; (b) optional /dev/heroes responsive +400-600L.
+The single highest-leverage artefact identified by the session-69 design-input audit. Drafts the prompt + structured-output schema (per CLAUDE.md Anthropic SDK rules: `output_config.format`, `additionalProperties: false`) + answer→plan pipeline (deterministic rules + LLM composition). Inputs: 12 `preSignupState` fields from spec 65 §"Data captured" + spec 65 §"O7 -- Your plan" describing the desired output shape. Output: new spec under `docs/workspace-spec/` (number TBD; likely 74). Unblocks the substantive value of the entire pre-signup interview (O7 of S-O1) -- canvas alone won't unblock building it.
 
-### P1 -- v2-backlog `#74b` impl: drop `pnpm-lock.yaml`, standardise on npm -- M (~50-100L)
+### P1 -- Spec 57 ↔ 65 sign-up reconciliation (logic) -- XS (~50-100L doc)
 
-Sized impl path lives in v2-backlog `#74b` (promoted at session-69 wrap from HANDOFF-32 candidate #10 "deferred indefinitely"). Steps: `git rm pnpm-lock.yaml` + audit `package.json` scripts / `.github/workflows/*.yml` / `vercel.json` / repo `packageManager` field for pnpm refs + add CI gate (workflow or pre-commit) that fails if `pnpm-lock.yaml` reappears + update CLAUDE.md §"Stack" to remove dual-lockfile reference + verify Vercel preview build remains clean. Risk: pnpm-using devs must switch to `npm install`. Trigger: ship at next divergence regression, or proactively in a quiet session.
+Spec 65 L4-5 explicitly supersedes parts of 57 + 58. Document which sign-up screens from spec 57 (§1.2 Sign up · §1.2a Magic-link sent · §1.3 Sign in · §1.4/1.4a Invitation landing) survive into the post-pivot architecture. Post-signup orientation (57 §2.1-2.5) is mostly absorbed by spec 65 + welcome tour. Output: short reconciliation doc.
 
-### P2 -- Hero variant rotation (XS ~3L)
+### P2 -- Respondent state machine spec (logic) -- S (~100-150L)
 
-Edit `src/components/marketing/heroes/index.ts`: `SELECTED_HERO_VARIANT='typographic'` -> one of the remaining 6 unused (`atmospheric` · `diagrammatic` · `product-forward` · `outcome-led` · `two-column` · `empathetic`), or back to `editorial` / `declarative`. Visual lift; 1-line const change + 4 test pin updates flipped atomically via Bash python escape (per session-67 Lesson 1).
+IS1-IS6 + IS-Plan + 14-day link-expiry rules per spec 67 Gap 7 (RESOLVED conceptually; detailed wireframes deferred). Defines state transitions for Mark's (invited respondent) journey. No canvas needed -- pure logic. Output: new spec under `docs/workspace-spec/`.
 
-### P3 -- `COMMENT_REVIEW_SPAWN=1` opt-in trial (downgraded carry-over) -- XS-S
+### P3 -- Thin V1 specs: settings / notifications / account profile (logic) -- XS-S each
 
-Path A (live-mode trial; required local `ANTHROPIC_API_KEY` provision) remains available. Lower priority post session-68 P4 path B + session-69 stub-mode 2/2 catch rate validation. Useful when shipping prose-heavy code (next session likely if S-M1.0b moves).
+Per the audit, these surfaces are NOT SPECCED. Three short specs (~50-100L each) defining V1 minimum behaviour. Settings = email-change + delete-account; Notifications = email-only delivery; Account profile = read-only. Defers billing surface to V1.5 per v2-backlog #72.
 
-### P4 -- Reviewer-architecture retain/drop verdict resolution
+### P4 -- Mobile canvas integration (S-M1.0b) -- gated on user
 
-If session-69 wrap PR returned 0 substantive architecture catches, the formal drop trigger fires (cumulative 2/12 = 0.167, well below ≈ 1-per-3 = 0.33 retain bar). Verdict + persona-file removal lands this session if dropped (control-change label per CLAUDE.md §"Hard controls"). If wrap PR DID surface a substantive catch, watchlist persists; reset count and re-evaluate after next 3 PRs.
+Still gated on user producing mobile canvas in `docs/design-source/marketing-landing/{slug}/`. When canvas lands, ~300-500L breakpoint translation across 5 marketing components (Header, HeroTypographic, PictureBand, Journey, FooterMinimal).
 
-### P5 -- (observational) Reviewer-security drift
+### P5 -- Pre-signup interview canvases (S-O1 build) -- gated on user + P0
 
-Cumulative 5/10 = 0.5 (still above ≈ 1-per-3 retain bar but trending toward ≈ 1-per-2 cadence). No action; monitor first 3 src/infra PRs of session 70 for trend signal.
+Gated on user producing canvas at `docs/design-source/pre-signup-interview/{slug}/` AND on P0 (AI plan spec) for O7 specifically. When both ready, S-O1 becomes buildable end-to-end.
 
-### Cohesive-product trajectory (post-session-68 shipments)
+### Cohesive-product trajectory (post-session-69)
 
-- ✅ **First cohesive Vercel preview** SHIPPED (session 66 — `/` renders marketing landing)
-- ✅ **9 hero variants + dev gallery** SHIPPED (session 67 — `/dev/heroes`)
-- ✅ **Production hero rotation** SHIPPED (session 68 — `'editorial'` → `'declarative'` on `/`)
-- ✅ **TDD-guard runner-states + lockfile sync + comment-review skip-list + CLAUDE.md cleanup** SHIPPED (session 68 — 3 new infra slices + 1 doc PR)
-- ⏳ **Mobile-responsive marketing landing** — S-M1.0b queued; needs mobile canvas
-- 4-5 sessions to user-testable Build phase end-to-end (S-B0 entry → bank-connect flow → first artefact)
+- ✅ First cohesive Vercel preview SHIPPED (session 66 -- `/` renders marketing landing)
+- ✅ 9 hero variants + dev gallery SHIPPED (session 67 -- `/dev/heroes`)
+- ✅ Production hero rotation SHIPPED (session 68 + 69 -- `'declarative'` then `'typographic'`)
+- ✅ TDD-guard runner-states + lockfile sync + comment-review skip-list + workbench immutable refactor + lockfile policy decision SHIPPED (sessions 68-69)
+- ✅ Design-input audit doc SHIPPED (session 69 ext)
+- ⏳ AI plan generation spec -- session 70 P0
+- ⏳ Spec 57 ↔ 65 reconciliation + respondent state machine -- session 70 P1+P2
+- ⏳ Mobile-responsive marketing landing -- gated on mobile canvas
+- ⏳ Pre-signup interview build -- gated on canvas + AI plan spec
+- 4-5 sessions to user-testable Build phase end-to-end
 - 9-12 sessions to all 5 phases minimally populated
 - 17+ sessions to production-grade
 
@@ -177,9 +181,9 @@ Single-P0 session. Don't add adjacent slice work; don't refactor; don't reskin. 
 ### Branch state at session-69 wrap (verified live)
 
 - **Wrap branch:** `claude/resume-decouple-session-69-uWwQ3` (sequential single-branch pattern continues; 16 sessions in a row 54→…→69 on this pattern).
-- **`main` tip pre-wrap:** `4c82dcc` (post-PR-#107 merge — dev workbench mutations -> immutable + `**/*.dev.tsx` lint exclusion drop).
+- **`main` tip:** `b784005` (post-PR-#109 merge -- design-input audit doc).
 - **Open PRs at session-69 wrap:** wrap PR opens after this commit. None other open at wrap.
-- **Closed/merged this session:** PR #106 (P0-alt, `99a77f9` -> squash `d8c0bec`); PR #107 (P1, `90dbdc2` -> squash `4c82dcc`). **WIP reverted in-session:** `ecaebfe` (P2 scaffolding) -- reverted in this wrap PR via `git revert --no-edit`.
+- **Closed/merged this session:** PR #106 (P0-alt) squash `d8c0bec`; PR #107 (P1) squash `4c82dcc`; PR #108 (wrap) squash `79e822a`; PR #109 (design-input audit ext) squash `b784005`. **WIP reverted in-session:** `ecaebfe` (P2 scaffolding) reverted in PR #108 via `git revert --no-edit`.
 - **Live rigour gates** unchanged from session 68 ship state. Session-68 P2's `**/*.dev.tsx` `react-hooks/immutability` eslint exclusion was DROPPED in session-69 PR #107 (workbench mutations refactored to immutable; exclusion no longer needed). TDD-guard 4 runner states (GREEN / RED / DEGRADED / OVERRIDE) + comment-review HANDOFF + SESSION-CONTEXT skip-list both unchanged from session 68.
 - **AC-2 hooks-checksums carry-over RESOLVED** via PR #103 (mechanism was already decommissioned in P0b-structural; stale CLAUDE.md L356 reference struck).
 - **AC-3 ux-polish-reviewer** still dormant (session-68 PRs were all infra/hooks/lockfile; no UI surface change triggered formal review window).

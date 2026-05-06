@@ -68,3 +68,40 @@ Carry-overs into session 70:
 - **WIP reverted in-session:** `ecaebfe` (P2 scaffolding) reverted in wrap PR
 - **Open PRs at wrap:** this wrap PR (TBD #)
 - **Live rigour gates** unchanged from session 68 ship state
+
+---
+
+## Session 69 extension (post-wrap)
+
+After PR #108 merged at session-69 wrap, user surfaced two facts:
+1. Mobile canvas (for S-M1.0b) blocked on tech issues -- couldn't be produced this session.
+2. Wanted to "construct the free plan interview journey" instead.
+
+Pivot trace:
+- Confirmed pre-signup interview = spec 65 LOCKED + Build Map S-O1.
+- Surfaced 2 blockers: no design canvas at `docs/design-source/pre-signup-interview/`; AI plan generation logic (the substantive O7 output) has no spec yet (per 70-build-map-start.md L99-100).
+- Three-path framing offered: A wait for canvas; B logic-first foundation (S-O1.0a -- testable kernel without UI canvas); C v0 with placeholder UI accepting rework risk.
+- User chose: park entirely until canvas + AI plan spec ready. Pivot to design-input audit.
+
+**Audit doc shipped via PR #109** (squash `b784005`) -- `docs/design-input-audit.md` (~271L). Single inventory of every user-facing screen flow in Decouple v1 with current spec status, canvas status, slice status, and gaps. Aggregate scorecard (32 flow rows) + 11 detailed sections (A pre-paywall through K account/settings/notifications/billing) + spec-coverage summary + canvas-gaps priority list + recommended 3-batch design-input sequence. Source specs scanned: 17, 28, 42, 44, 56, 57, 58, 59, 60, 65, 67, 68 hub + 68a-e + 68f/g, 70 (Build Map suite), 73. Header + structural depth, not full body for the 1000+L specs (67 + 60 + 59).
+
+Strategic recommendation closed the extension: hybrid 3-phase approach for design-input completion, with logic-spec gaps and canvas gaps treated as different problems wanting different tools.
+
+- **Phase 1** (logic spec sessions with assistant; 2-4 sessions) -- AI plan generation spec; spec 57 ↔ 65 sign-up reconciliation; respondent state machine; thin V1 specs for settings/notifications/account-profile.
+- **Phase 2** (Claude AI Design canvases by user, ongoing) -- mobile responsive; sign-up batch; pre-signup interview O1-O8; bank-connect mid-flow; hub state variants.
+- **Phase 3** (`/dev/proto/*` prototype sub-dir for COMPLEX patterns only) -- per-section confirmation pattern; AI coach; share+reconcile flow. Static surfaces stay canvas-first.
+
+**Highest-leverage next session (P0 for session 70):** AI plan generation spec. Single artefact (~100-200L spec doc) unblocks the substantive value of the entire pre-signup interview (O7 of S-O1).
+
+**Lessons added:**
+
+### Lesson 4 -- Two-tool problem framing for design-input gaps
+
+Logic spec gaps and canvas gaps want different tools. Trying to use one tool for both wastes time:
+- Logic gaps (AI plan, respondent state machine, sign-up reconciliation, settings/notifications) -> session-with-assistant; pure writing.
+- Canvas gaps -> Claude AI Design (the established tool per CLAUDE.md §"Visual direction").
+- Don't mock every screen first in a design tool -- months-long bet that only pays off if patterns are well-understood. Half of Decouple's patterns (per-section confirm, AI coach, share+reconcile) aren't.
+
+### Lesson 5 -- `/dev/proto/*` prototype sub-dir for complex patterns
+
+Repo already has `/dev/heroes`, `/dev/engine-workbench`, `/dev/scenarios` -- the dev-route convention is established. Extend to `/dev/proto/*` for prototyping COMPLEX interactive patterns where canvas-first risks rework (e.g., 8-section confirmation pattern: drawing 8 things before knowing which feels right). Built with S-F1 design tokens + placeholder copy. Not throwaway -- feedback-gathering tools that inform canonical canvas. **Don't prototype simple surfaces** (sign-up form, magic-link sent, settings) -- canvas-first is faster.
