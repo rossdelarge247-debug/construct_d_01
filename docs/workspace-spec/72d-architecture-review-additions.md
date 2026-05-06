@@ -105,6 +105,12 @@ Failure → workflow `failure` → merge gate per CODEOWNERS branch protection. 
 - Performance fitness functions (Lighthouse CI · bundle-size budgets — Phase C+ once user-facing surfaces ship).
 - Spec-citation fitness functions (regex-on-spec-references — too noisy; deferred indefinitely).
 
+**Shipped (Session 72 P2).** B contract operationalised. Touch points:
+
+- `eslint.config.mjs` — four new flat-config blocks. Rules 1+2 (one combined block: `src/lib/bank/**` + `src/lib/ai/**` don't import `@/components/**`). Rule 3 (`src/app/**` + `src/components/**` don't import `@supabase/*`). Rule 4 (only `src/lib/auth/index.ts` may read `NEXT_PUBLIC_DECOUPLE_AUTH_MODE`) — global `no-restricted-syntax` rule + per-file carve-out for `src/lib/auth/index.ts`.
+- `package.json` — adds `madge` devDep + `madge:circular` npm script holding the TypeScript flags (`--ts-config tsconfig.json --extensions ts,tsx`); spec contract said `npx madge --circular src/lib` verbatim, but the bare invocation processes 0 TypeScript files without the flags.
+- `.github/workflows/fitness-functions.yml` — new workflow on `pull_request` (branches: main) + `push` (main). Two steps: `npm run lint` (rules 1-4) + `npm run madge:circular` (rule 5). Failure → workflow `failure` → merge gate per CODEOWNERS branch protection.
+
 ## §5 — C contract: plan-architect persona
 
 **Source pattern.** Spec 72c §4 L69 verbatim:
