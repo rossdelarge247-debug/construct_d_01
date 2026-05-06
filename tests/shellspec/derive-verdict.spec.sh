@@ -231,7 +231,7 @@ Describe 'derive-verdict.sh'
 
   It '--multi k=2 returns request-changes when 2 specialists emit non-blocking action via separate findings'
     Data
-      #|{"summary": "x", "findings": [{"label": "issue", "blocking": false, "category": "regression", "seen_by": ["reviewer-correctness"]}, {"label": "suggestion", "blocking": false, "category": "scope-creep", "seen_by": ["reviewer-architecture"]}]}
+      #|{"summary": "x", "findings": [{"label": "issue", "blocking": false, "category": "regression", "seen_by": ["reviewer-correctness"]}, {"label": "suggestion", "blocking": false, "category": "scope-creep", "seen_by": ["reviewer-style"]}]}
     End
     When call scripts/derive-verdict.sh --multi k=2
     The output should equal 'request-changes'
@@ -288,7 +288,7 @@ Describe 'derive-verdict.sh'
 
   It '--multi k=2 sums votes across findings (3 findings × 1 specialist each = 3 votes; ≥ k_changes=2)'
     Data
-      #|{"summary": "x", "findings": [{"label": "issue", "blocking": false, "seen_by": ["reviewer-correctness"]}, {"label": "suggestion", "blocking": false, "seen_by": ["reviewer-architecture"]}, {"label": "todo", "blocking": false, "seen_by": ["reviewer-style"]}]}
+      #|{"summary": "x", "findings": [{"label": "issue", "blocking": false, "seen_by": ["reviewer-correctness"]}, {"label": "suggestion", "blocking": false, "seen_by": ["reviewer-security"]}, {"label": "todo", "blocking": false, "seen_by": ["reviewer-style"]}]}
     End
     When call scripts/derive-verdict.sh --multi k=2
     The output should equal 'request-changes'
