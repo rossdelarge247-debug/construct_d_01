@@ -55,11 +55,11 @@ The three are complementary, not redundant. C is judgement-driven (an LLM-spawne
 
 ## §4 — B contract: fitness functions
 
-**Source rule.** Spec 71 §4 L236 verbatim:
+**Source rule.** Spec 71 §4 §"Switch mechanism" verbatim:
 
 > *"All slice code consumes `import { getSession, getAuthGate, getStore } from '@/lib/auth'` (or `'@/lib/store'`). Never touches Supabase directly, never touches the env var directly. ESLint rule enforces (spec 72 §7)."*
 
-Spec 71 §4 L174-176 verbatim:
+Spec 71 §4 lead-in (before §"Three abstractions") verbatim:
 
 > *"Dev mode is a first-class implementation behind a real interface, not a special case sprinkled through the code. Same domain code paths run in dev and prod; only the implementation behind the interface swaps. Hexagonal-architecture style. Boundary enforcement is multi-layered per spec 72 §7."*
 
@@ -71,8 +71,8 @@ Spec 71 §4's "ESLint rule enforces" claim is a forward-reference. Spec 72d oper
 |---|---|---|---|
 | 1 | `src/lib/bank/**` does NOT import from `src/components/**` (domain doesn't depend on UI) | ESLint `no-restricted-imports` | Spec 71 §4 + general hexagonal principle |
 | 2 | `src/lib/ai/**` does NOT import from `src/components/**` (same) | ESLint `no-restricted-imports` | Spec 71 §4 + general hexagonal principle |
-| 3 | Slice code (`src/app/**`, `src/components/**`) does NOT import `@supabase/*` directly — must go via `@/lib/auth` or `@/lib/store` | ESLint `no-restricted-imports` | Spec 71 §4 L236 verbatim |
-| 4 | No file other than `src/lib/auth/index.ts` reads `process.env.NEXT_PUBLIC_DECOUPLE_AUTH_MODE` directly | ESLint custom rule (regex on `process.env.NEXT_PUBLIC_DECOUPLE_AUTH_MODE`) | Spec 71 §4 L214-228 |
+| 3 | Slice code (`src/app/**`, `src/components/**`) does NOT import `@supabase/*` directly — must go via `@/lib/auth` or `@/lib/store` | ESLint `no-restricted-imports` | Spec 71 §4 §"Switch mechanism" verbatim |
+| 4 | No file other than `src/lib/auth/index.ts` reads `process.env.NEXT_PUBLIC_DECOUPLE_AUTH_MODE` directly | ESLint custom rule (regex on `process.env.NEXT_PUBLIC_DECOUPLE_AUTH_MODE`) | Spec 71 §4 §"Switch mechanism" |
 | 5 | No circular dependencies in `src/lib/**` (`madge --circular`) | `madge` | General hygiene; spec 71 §4 implies a clean DAG |
 
 Rules 1-4 are **layer rules** (who-may-import-whom). Rule 5 is a **shape rule** (no cycles). All five are runnable assertions on every PR; failure mode is fail-loud with a useful exit message naming the violating file + the broken invariant.
@@ -169,7 +169,7 @@ Ship order: **D → B → C**.
 | 2 | B fitness functions | Mechanical floor. Encodes spec 71 §4 invariants as runnable assertions. Independent of D — runs on every PR regardless of how the slice was tested. |
 | 3 | C plan-architect persona | Highest cost per spawn. Benefits from B+D already running — the persona doesn't redundantly check what fitness functions enforce mechanically; it checks higher-order architectural questions B + D can't (seam design, coupling forecasts). |
 
-Each ship is a separate PR with paired-spec amendment per Constraint #33: this spec's §Status footer gains a "shipped at <SHA>" line in the same PR as the impl files. P1 (D) updates CLAUDE.md §"Engineering conventions" + spec 72d §3 §Status. P2 (B) lands ESLint config + CI workflow + spec 72d §4 §Status. P3 (C) lands the persona file + hook extension + spec 72d §5 §Status.
+Each ship is a separate PR with paired-spec amendment per the **paired-spec invariant** (Constraint #33 in `docs/SESSION-CONTEXT.md` §"Negative constraints" — *"spec amendments claiming impl facts must update impl files in same PR"*): this spec's §Status footer gains a "shipped at <SHA>" line in the same PR as the impl files. P1 (D) updates CLAUDE.md §"Engineering conventions" + spec 72d §3 §Status. P2 (B) lands ESLint config + CI workflow + spec 72d §4 §Status. P3 (C) lands the persona file + hook extension + spec 72d §5 §Status.
 
 ## §7 — Out of scope at programme V1
 
@@ -200,7 +200,7 @@ Each ship is a separate PR with paired-spec amendment per Constraint #33: this s
 
 ## §Status
 
-**Session 72** — spec landed. Three contracts (D test-pain gate · B fitness functions · C plan-architect persona) freeze. Implementation ships separately per the sequencing in §6: P1 D · P2 B · P3 C, each in its own PR with paired §Status footer amendment per Constraint #33.
+**Session 72** — spec landed. Three contracts (D test-pain gate · B fitness functions · C plan-architect persona) freeze. Implementation ships separately per the sequencing in §6: P1 D · P2 B · P3 C, each in its own PR with paired §Status footer amendment per the paired-spec invariant (Constraint #33; defined inline in §6).
 
 Cross-references updated in same-PR companions:
 - CLAUDE.md §"Key files" — adds `docs/workspace-spec/72d-architecture-review-additions.md` entry under the spec 72-suite cluster.
