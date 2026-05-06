@@ -47,7 +47,7 @@ for PR_DIR in "$GOLDEN_DIR"/*/; do
   PRIOR_TMP=$(mktemp)
   trap 'rm -rf "$ENVELOPES_DIR" "$PRIOR_TMP"' EXIT
 
-  for DIM in security architecture correctness style; do
+  for DIM in security correctness style; do
     jq -n --arg spec "reviewer-$DIM" '
       {specialist: $spec, summary: "final round replay", findings: []}
     ' > "$ENVELOPES_DIR/$DIM.json"
@@ -94,7 +94,7 @@ for PR_DIR in "$GOLDEN_DIR"/*/; do
   fi
 
   if jq -e '.personas_sha256' "$PRIOR_VERDICT" > /dev/null 2>&1; then
-    for DIM in security architecture correctness style; do
+    for DIM in security correctness style; do
       EXPECTED_SHA=$(jq -r ".personas_sha256[\"reviewer-$DIM\"] // \"\"" "$PRIOR_VERDICT")
       [ -n "$EXPECTED_SHA" ] || continue
       PERSONA_FILE="$REPO_ROOT/.claude/agents/reviewer-$DIM.md"

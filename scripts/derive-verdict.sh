@@ -7,8 +7,8 @@
 #
 #   1. SINGLE MODE (default; no flags) — input is a single persona's
 #      output shape `{summary, findings[]}` (acceptance-gate / ux-polish-
-#      reviewer / individual reviewer-{security,architecture,correctness,
-#      style} envelope). Each finding contributes 1 toward its tier;
+#      reviewer / individual reviewer-{security,correctness,style}
+#      envelope). Each finding contributes 1 toward its tier;
 #      verdict tier fires on first count > 0.
 #
 #   2. MULTI MODE (--multi k=N flag) — input is the orchestrator's

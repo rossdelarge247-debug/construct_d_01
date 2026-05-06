@@ -4,7 +4,7 @@
 # Subcommand: `aggregate <envelopes-dir>`
 #
 # Reads per-specialist envelope JSONs from `<envelopes-dir>/{security,
-# architecture,correctness,style}.json` (one per specialist; produced
+# correctness,style}.json` (one per specialist; produced
 # upstream by the workflow's matrix-strategy `claude -p` invocations
 # already piped through `auto-review-parse.sh`). Dedupes findings
 # across specialists by tuple-based jq `group_by([.label, .category,
@@ -40,7 +40,7 @@
 # Failure modes:
 #   - Specialist's envelope file missing OR file empty → that dimension marked `inconclusive`.
 #   - Specialist's envelope file non-JSON or wrong shape (no `findings` array) → `inconclusive`.
-#   - All four specialists inconclusive → verdict = `parse-failed` (sentinel; no specialist signal at all).
+#   - All three specialists inconclusive → verdict = `parse-failed` (sentinel; no specialist signal at all).
 #   - Otherwise: aggregate the present specialists' findings; verdict computed via
 #     `derive-verdict.sh --multi k=2`; degraded flag surfaces in output for
 #     downstream visibility.
@@ -51,7 +51,7 @@
 
 set -euo pipefail
 
-readonly DIMENSIONS=(security architecture correctness style)
+readonly DIMENSIONS=(security correctness style)
 
 usage() {
   cat <<EOF >&2
@@ -133,7 +133,7 @@ done
 
 # Dedup hash field is `evidence` (not `summary`) — personas don't emit
 # per-finding summary per the established baseline (reviewer-{security,
-# architecture,correctness,style}.md / acceptance-gate.md /
+# correctness,style}.md / acceptance-gate.md /
 # ux-polish-reviewer.md output schemas); evidence
 # is universally present and is a quoted-from-diff fragment that gives
 # the strongest substantive-equivalence signal. Spec 72c §5 rule 2.

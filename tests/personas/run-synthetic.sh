@@ -2,7 +2,7 @@
 # run-synthetic.sh — synthetic-deliberate-injection per-persona regression
 # detection.
 #
-# For each dimension {security, architecture, correctness, style}: composes a
+# For each dimension {security, correctness, style}: composes a
 # brief from the persona file + per-invocation nonce + the synthetic .diff;
 # invokes `claude -p --output-format=json`; parses the raw output via
 # `scripts/auto-review-parse.sh`; runs `match-synthetic.sh` against the
@@ -48,7 +48,7 @@ trap 'rm -rf "$WORKDIR"' EXIT
 FAIL=0
 TOTAL=0
 
-for DIM in security architecture correctness style; do
+for DIM in security correctness style; do
   TOTAL=$((TOTAL + 1))
   printf '\n=== Synthetic [%s] ===\n' "$DIM"
 
