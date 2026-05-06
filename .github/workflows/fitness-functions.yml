@@ -1,0 +1,34 @@
+# Fitness functions — runnable assertions for spec 71 §4 §"Switch mechanism"
+# hexagonal invariants. Operationalises spec 72d §4. ESLint rules 1-4 ride on
+# `npm run lint`; rule 5 (no circular deps in src/lib) runs via `madge`.
+#
+# Failure → workflow `failure` → merge gate per CODEOWNERS branch protection.
+# Per Neal Ford et al., *Building Evolutionary Architectures*: fitness
+# functions encode architectural rules as automated tests that fire on every
+# change, providing a mechanical floor independent of LLM-driven review.
+
+name: fitness-functions
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+
+jobs:
+  fitness-functions:
+    name: Fitness functions (spec 72d §4)
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+      - run: npm ci
+      - name: ESLint rules 1-4 (no-restricted-imports + no-restricted-syntax)
+        run: npm run lint
+      - name: Madge rule 5 (no circular dependencies in src/lib)
+        run: npm run madge:circular
