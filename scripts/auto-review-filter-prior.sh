@@ -15,7 +15,7 @@
 # runtime-error on jq 1.6 (Cannot iterate over string).
 #
 # Usage: scripts/auto-review-filter-prior.sh <dimension> < prior-findings.json
-#   <dimension>    one of: security architecture correctness style
+#   <dimension>    one of: security correctness style
 #
 # Exit: 0 on success; 2 on usage error or invalid input shape.
 
@@ -28,9 +28,9 @@ fi
 
 DIM="$1"
 case "$DIM" in
-  security|architecture|correctness|style) ;;
+  security|correctness|style) ;;
   *)
-    printf '%s: invalid dimension: %s (expected one of: security architecture correctness style)\n' "$0" "$DIM" >&2
+    printf '%s: invalid dimension: %s (expected one of: security correctness style)\n' "$0" "$DIM" >&2
     exit 2
     ;;
 esac
