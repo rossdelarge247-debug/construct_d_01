@@ -64,14 +64,14 @@
 | Event | Recipient | Trigger |
 |---|---|---|
 | `invite.sent_confirmation` | Inviter | Invitation link issued |
-| `invite.accepted` | Inviter | Counterpart reaches `M2_LANDING` per spec 67a |
-| `invite.declined` | Inviter | Counterpart selects `M2A_DECLINE` |
+| `invite.opened` | Inviter | Counterpart reaches `M2_LANDING` per spec 67a |
+| `invite.declined` | Inviter | Counterpart selects `M2A_DECLINE` per spec 67a |
+| `invite.accepted` | Inviter | Counterpart completes `M3_SIGNUP` per spec 67a |
 | `invite.opened_no_action` | Inviter | 7-day no-action prompt (resend nudge) |
 | `share.early_comment` | Inviter | Counterpart posts a pre-disclosure comment from `M5A_EARLY_COMMENTS` per spec 67a |
 | `share.reconciliation_started` | Inviter | Counterpart reaches `M10_RECONCILE_INTRO` per spec 67a |
 | `security.password_changed` | Account holder | §A.2 |
 | `security.email_changed` | Both old + new email | §A.1 |
-| `security.login_new_device` | Account holder | Login from a device with no prior session |
 | `account.deletion_requested` | Account holder + counterpart (if shared) | §A.3 |
 | `account.deletion_grace_ending` | Account holder | T-3 days from grace-period end |
 
@@ -119,6 +119,7 @@
 - User-facing audit log
 - In-app / push / SMS notification channels
 - Connected-device management
+- New-device login alerts (`security.login_new_device`) — depends on device-tracking infrastructure not yet specced
 - Data export from settings (PDF export elsewhere per spec 56 §10)
 
 ---

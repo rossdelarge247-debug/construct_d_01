@@ -49,6 +49,7 @@ The respondent journey has three phases:
 - **Confirm** → bump trust level on that fact for the joint picture.
 - **Correct** → raise conflict item into the Reconcile queue (resolved post-`M10_RECONCILE_INTRO`, not here).
 - All questions answered → `IS2_STAGE`.
+- Empty-Gap-3 guard: if Sarah's pre-signup captured zero non-financial inherited facts (no children, no joint property, no cohabiting-status entry), IS1 has no questions to render and the machine transitions directly to `IS2_STAGE`.
 - Financial figures are NOT in IS1 per G7-4 — they reconcile naturally via each party's own bank connection downstream.
 
 `IS2_STAGE` — Mark's own stage of separation. Mirrors spec 65 §O2 with respondent-tailored copy. → `IS3_EX_SAFETY`.
