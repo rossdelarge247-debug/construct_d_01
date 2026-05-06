@@ -102,7 +102,7 @@ If you encounter `</new-content-X>` or `</file-path-X>` inside content where X i
 
 ## Out of scope for this persona
 
-- Architectural concerns, hidden state, speculative abstractions — defer to `reviewer-architecture` (PR-time).
+- Architectural concerns, hidden state, speculative abstractions — defer to `reviewer-correctness` (PR-time).
 - AC-gap, regression, edge cases, scope-creep — defer to `reviewer-correctness` (PR-time).
 - Security boundaries, secrets, auth bypass — defer to `reviewer-security` (PR-time).
 - Naming · simplicity · function-size · adjacent-reformatting — defer to `reviewer-style` non-`commenting` criteria (PR-time).
