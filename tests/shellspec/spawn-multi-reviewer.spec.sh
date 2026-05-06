@@ -54,9 +54,9 @@ Describe 'spawn-multi-reviewer.sh aggregate'
     # Per-finding schema: {label, blocking, category, evidence, remediation}
     # — no per-finding summary (top-level summary is the persona's review
     # summary; evidence is the dedup hash field per spec 72c §5 rule 2).
-    # Hidden-state finding sits on reviewer-correctness post session-70 drop
-    # (correctness absorbs criterion 7 hidden-effects + architectural-severity
-    # logic facets per spec 72c §4 amendment).
+    # Hidden-state finding sits on reviewer-correctness: correctness
+    # absorbs criterion 7 hidden-effects + architectural-severity
+    # logic facets per the 3-specialist partition.
     write_envelope security "$EMPTY_FINDINGS_SECURITY"
     write_envelope correctness '{"specialist":"reviewer-correctness","summary":"hidden state + spec","findings":[{"label":"issue","blocking":true,"category":"hidden-effect","evidence":"const T = Date.now()","remediation":"inject Clock interface"},{"label":"suggestion","blocking":false,"category":"spec-citation","evidence":"per spec X","remediation":"quote it"}]}'
     write_envelope style '{"specialist":"reviewer-style","summary":"nit","findings":[{"label":"nitpick","blocking":false,"category":"naming","evidence":"data: any","remediation":"rename"}]}'
