@@ -944,10 +944,11 @@ Full resolution text in 68f. Summary:
 
 5. **AI plan output for Mark (G7-5)** — **full parallel to Sarah's O7**, with tone and framing adapted for the respondent role. Not a shrunk version; same substance, context-adapted.
 
-**Note on journey-outline step 2:** the IS1 description above ("inherited context with correction buttons; corrections → dispute items") is superseded by G7-4's ask-and-confirm pattern. Update when the detailed Mark-journey wireframes are produced in Phase C.
+**Note on journey-outline step 2:** the IS1 description above ("inherited context with correction buttons; corrections → dispute items") is superseded by G7-4's ask-and-confirm pattern. State machine for IS1-IS6 + IS-Plan now landed in spec 67a; see that spec for canonical state names + transitions + gating conditions. Detailed wireframes still deferred to Phase C build work.
 
 ### Downstream work
 
+- State machine for IS1-IS6 + IS-Plan + M1-M10 landed in spec 67a (logic-only).
 - Detailed wireframes for the respondent journey (IS1-IS6 + IS-Plan + Moment-1-Mark variant) — deferred to Phase C build work.
 - Spec 68 already absorbs the profiling framing; Gap 7 is now resolved and fed into the Build Map.
 
