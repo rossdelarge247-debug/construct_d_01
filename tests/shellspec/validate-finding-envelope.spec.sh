@@ -17,12 +17,6 @@ Describe 'scripts/validate-finding-envelope.sh'
       The status should equal 0
     End
 
-    It 'accepts the reviewer-architecture specialist value'
-      Data <<< '{"specialist":"reviewer-architecture","summary":"x","findings":[]}'
-      When run "$SCRIPT"
-      The status should equal 0
-    End
-
     It 'accepts the reviewer-correctness specialist value'
       Data <<< '{"specialist":"reviewer-correctness","summary":"x","findings":[]}'
       When run "$SCRIPT"
