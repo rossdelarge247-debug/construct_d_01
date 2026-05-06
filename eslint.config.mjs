@@ -72,12 +72,24 @@ const eslintConfig = defineConfig([
   {
     // Rule 4: only src/lib/auth/index.ts reads the env var that picks the
     // auth/store implementation. Spec 71 §4 §"Switch mechanism" verbatim.
+    // Three selectors close the bypass surface: dot access, bracket access,
+    // and destructuring from process.env.
     files: ["src/**/*.{ts,tsx,js,jsx}"],
     rules: {
-      "no-restricted-syntax": ["error", {
-        selector: "MemberExpression[object.object.name='process'][object.property.name='env'][property.name='NEXT_PUBLIC_DECOUPLE_AUTH_MODE']",
-        message: "Spec 72d §4 rule 4 (operationalising spec 71 §4 §'Switch mechanism'): only src/lib/auth/index.ts reads NEXT_PUBLIC_DECOUPLE_AUTH_MODE. Consumers go via getSession / getAuthGate / getStore from @/lib/auth.",
-      }],
+      "no-restricted-syntax": ["error",
+        {
+          selector: "MemberExpression[object.object.name='process'][object.property.name='env'][property.name='NEXT_PUBLIC_DECOUPLE_AUTH_MODE']",
+          message: "Spec 72d §4 rule 4 (operationalising spec 71 §4 §'Switch mechanism'): only src/lib/auth/index.ts reads NEXT_PUBLIC_DECOUPLE_AUTH_MODE (dot access). Consumers go via getSession / getAuthGate / getStore from @/lib/auth.",
+        },
+        {
+          selector: "MemberExpression[computed=true][object.object.name='process'][object.property.name='env'][property.value='NEXT_PUBLIC_DECOUPLE_AUTH_MODE']",
+          message: "Spec 72d §4 rule 4 (operationalising spec 71 §4 §'Switch mechanism'): only src/lib/auth/index.ts reads NEXT_PUBLIC_DECOUPLE_AUTH_MODE (bracket access). Consumers go via getSession / getAuthGate / getStore from @/lib/auth.",
+        },
+        {
+          selector: "VariableDeclarator[init.object.name='process'][init.property.name='env'] ObjectPattern Property[key.name='NEXT_PUBLIC_DECOUPLE_AUTH_MODE']",
+          message: "Spec 72d §4 rule 4 (operationalising spec 71 §4 §'Switch mechanism'): only src/lib/auth/index.ts reads NEXT_PUBLIC_DECOUPLE_AUTH_MODE (destructuring). Consumers go via getSession / getAuthGate / getStore from @/lib/auth.",
+        },
+      ],
     },
   },
   {

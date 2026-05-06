@@ -109,7 +109,12 @@ Failure → workflow `failure` → merge gate per CODEOWNERS branch protection. 
 
 - `eslint.config.mjs` — four new flat-config blocks. Rules 1+2 (one combined block: `src/lib/bank/**` + `src/lib/ai/**` don't import `@/components/**`). Rule 3 (`src/app/**` + `src/components/**` don't import `@supabase/*`). Rule 4 (only `src/lib/auth/index.ts` may read `NEXT_PUBLIC_DECOUPLE_AUTH_MODE`) — global `no-restricted-syntax` rule + per-file carve-out for `src/lib/auth/index.ts`.
 - `package.json` — adds `madge` devDep + `madge:circular` npm script holding the TypeScript flags (`--ts-config tsconfig.json --extensions ts,tsx`); spec contract said `npx madge --circular src/lib` verbatim, but the bare invocation processes 0 TypeScript files without the flags.
-- `.github/workflows/fitness-functions.yml` — new workflow on `pull_request` (branches: main) + `push` (main). Two steps: `npm run lint` (rules 1-4) + `npm run madge:circular` (rule 5). Failure → workflow `failure` → merge gate per CODEOWNERS branch protection.
+- `.github/workflows/fitness-functions.yml` — new workflow on `pull_request` (branches: main) + `push` (main). Two steps: `npm run lint` (rules 1-4) + `npm run madge:circular` (rule 5). Failure → workflow `failure` → merge gate per CODEOWNERS branch protection. Job-level `permissions: contents: read` block enforces principle of least privilege.
+
+**Known V1 limitations (deferred):**
+
+- Rule 4 carve-out scope. The per-file override `{ files: ["src/lib/auth/index.ts"], rules: { "no-restricted-syntax": "off" } }` disables the entire `no-restricted-syntax` rule family for that file, not just the `NEXT_PUBLIC_DECOUPLE_AUTH_MODE` selectors. Acceptable at V1 because no other `no-restricted-syntax` rule exists in `eslint.config.mjs`; the canonical fix (inline `eslint-disable-next-line` comment at the env-var read site in `src/lib/auth/index.ts`) is deferred to keep this PR scoped to no-src/-touch. Re-evaluate if/when another `no-restricted-syntax` rule is added that should apply to `src/lib/auth/index.ts`.
+- GitHub Actions pinned to mutable tags (`@v4`) rather than full-length commit SHAs. Matches the dominant pattern across 6 of 7 existing workflows (`ci.yml`, `gitleaks.yml`, `shellspec.yml`, `eslint-no-disable.yml`, etc.); pinning only the new workflow creates inconsistency without addressing the broader supply-chain surface. Cross-cutting SHA-pinning across all workflows is tracked as a separate concern.
 
 ## §5 — C contract: plan-architect persona
 
