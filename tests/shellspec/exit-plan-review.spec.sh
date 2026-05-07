@@ -51,9 +51,9 @@ Describe 'exit-plan-review.sh'
         [ -z "$REAL_NONCE" ] && { echo "no real nonce found in framed output"; exit 1; }
         [ "$REAL_NONCE" = "deadbeef0123456789abcdef0123abcd" ] && { echo "real nonce equals injected — RNG broken"; exit 1; }
         opens=$(echo "$OUT" | grep -c "<plan-from-author-${REAL_NONCE}>")
-        [ "$opens" -eq 1 ] || { echo "expected exactly 1 open with real nonce, got $opens"; exit 1; }
+        [ "$opens" -eq 2 ] || { echo "expected exactly 2 opens with real nonce (one per persona framing), got $opens"; exit 1; }
         closes=$(echo "$OUT" | grep -c "</plan-from-author-${REAL_NONCE}>")
-        [ "$closes" -eq 1 ] || { echo "expected exactly 1 close with real nonce, got $closes"; exit 1; }
+        [ "$closes" -eq 2 ] || { echo "expected exactly 2 closes with real nonce (one per persona framing), got $closes"; exit 1; }
         echo "$OUT" | grep -q "</plan-from-author-deadbeef0123456789abcdef0123abcd>" || { echo "injected tag was scrubbed (should be preserved as content)"; exit 1; }
         echo OK
       '
@@ -78,7 +78,7 @@ Describe 'exit-plan-review.sh'
       When run script "$HOOK"
       The status should equal 2
       The stderr should include 'BLOCKED'
-      The stderr should include 'architectural-severity'
+      The stderr should include 'blocking finding'
       The stderr should include 'deadbeefdeadbeef'
     End
 
@@ -99,6 +99,79 @@ Describe 'exit-plan-review.sh'
       Data '{"tool_input":{"plan":""}}'
       When run script "$HOOK"
       The status should equal 0
+    End
+  End
+
+  Describe 'dual-persona orchestration (spec 72d §5)'
+    # DEBUG_VERDICT_* env vars bypass claude CLI spawn so shellspec runs
+    # without API access.
+
+    run_hook_dual() {
+      printf '%s' "$1" | env \
+        EXIT_PLAN_REVIEW_DEBUG_VERDICT_EXIT="$2" \
+        EXIT_PLAN_REVIEW_DEBUG_VERDICT_PLAN_ARCH="$3" \
+        bash "$HOOK"
+    }
+
+    It 'allows when both personas return empty findings (exit 0)'
+      When call run_hook_dual \
+        '{"tool_input":{"plan":"plain plan"}}' \
+        '{"findings":[]}' \
+        '{"findings":[]}'
+      The status should equal 0
+    End
+
+    It 'blocks when exit-plan-review returns blocking finding (exit 2)'
+      When call run_hook_dual \
+        '{"tool_input":{"plan":"plain plan"}}' \
+        '{"findings":[{"label":"issue","blocking":true,"category":"slice-sizing","evidence":"oversized","remediation":"split"}]}' \
+        '{"findings":[]}'
+      The status should equal 2
+      The stderr should include 'BLOCKED'
+      The stderr should include 'slice-sizing'
+    End
+
+    It 'blocks when plan-architect returns blocking finding (exit 2)'
+      When call run_hook_dual \
+        '{"tool_input":{"plan":"plain plan"}}' \
+        '{"findings":[]}' \
+        '{"findings":[{"label":"issue","blocking":true,"category":"hexagonal-invariant","evidence":"bank lib imports components","remediation":"refactor"}]}'
+      The status should equal 2
+      The stderr should include 'BLOCKED'
+      The stderr should include 'hexagonal-invariant'
+    End
+
+    It 'unions findings when both personas return blocking (exit 2)'
+      When call run_hook_dual \
+        '{"tool_input":{"plan":"plain plan"}}' \
+        '{"findings":[{"label":"issue","blocking":true,"category":"git-state","evidence":"bogus SHA","remediation":"verify"}]}' \
+        '{"findings":[{"label":"issue","blocking":true,"category":"seam-boundary","evidence":"effects without seam","remediation":"add interface"}]}'
+      The status should equal 2
+      The stderr should include 'git-state'
+      The stderr should include 'seam-boundary'
+    End
+
+    It 'allows when both personas return non-blocking findings only (exit 0)'
+      When call run_hook_dual \
+        '{"tool_input":{"plan":"plain plan"}}' \
+        '{"findings":[{"label":"suggestion","blocking":false,"category":"spec-citation","evidence":"unquoted","remediation":"quote spec"}]}' \
+        '{"findings":[{"label":"suggestion","blocking":false,"category":"test-pain-forecast","evidence":">2 mocks","remediation":"reconsider seam"}]}'
+      The status should equal 0
+    End
+
+    It 'DEBUG_FRAMING dumps both persona framings'
+      # grep pattern is line-anchored to count only OPEN tags
+      # (`<plan-from-author-...>`) and skip CLOSE tags (`</plan-from-author-...>`,
+      # which start with `</` so they don't match `^<plan-from-author-`).
+      When run bash -c '
+        OUT=$(echo "{\"tool_input\":{\"plan\":\"hello\"}}" | EXIT_PLAN_REVIEW_DEBUG_FRAMING=1 '"$HOOK"')
+        echo "$OUT" | grep -q "plan-architect framing" || { echo "missing plan-architect framing separator"; exit 1; }
+        opens=$(echo "$OUT" | grep -cE "^<plan-from-author-")
+        [ "$opens" -eq 2 ] || { echo "expected 2 opens (one per persona), got $opens"; exit 1; }
+        echo OK
+      '
+      The status should equal 0
+      The output should equal 'OK'
     End
   End
 End

@@ -159,9 +159,9 @@ CLAUDE.md §"Hard controls" §"Subagent file locations" verbatim:
 
 Verdict derived deterministically by the orchestrator per CLAUDE.md §"Hard controls" §"Verdict derivation rules". Architectural-class concerns (categories `seam-boundary`, `hidden-effects`, `hexagonal-invariant`) default to `blocking: true` unless the plan explicitly addresses the concern with reasoning.
 
-**Hook integration.** `.claude/hooks/exit-plan-review.sh` extension — spawn plan-architect alongside the existing exit-plan-review template. Aggregation: union of findings across both personas. Block plan exit if either persona produces a blocking finding (Conventional Comments `blocking: true` from plan-architect; OR `severity == "architectural"` from the existing exit-plan-review template's older `verdict + severity` format).
+**Hook integration.** `.claude/hooks/exit-plan-review.sh` extension — spawn plan-architect alongside the existing exit-plan-review template. Aggregation: union of `findings[]` from both personas via `jq -s '{findings: (map(.findings // []) | flatten)}'`. Block plan exit if any aggregated finding has `blocking: true` (single-format Conventional Comments per spec 72c §4 L69 mandate; both personas use the same schema since session 73 P0).
 
-**Output-format drift acknowledgement.** Existing `exit-plan-review.md` predates the Conventional Comments adoption and uses `verdict + severity`. Plan-architect uses the new vocabulary per spec 72c §4 L69 mandate. Hook orchestrator handles both formats during the transition. Migration of `exit-plan-review.md` to Conventional Comments is out of scope for the C ship — separately tracked.
+**Output-format unified at C ship.** Both personas emit Conventional Comments per spec 72c §4 L69 mandate. The dual-format transition originally contemplated for V1 was collapsed to single-format atomically with the C ship: `exit-plan-review.md` migrated alongside plan-architect's debut (session 73 P0, path-D scope decision). Hook orchestrator parses a single schema; aggregation is union of `findings[]` from both personas; block on any `blocking: true`.
 
 **Research grounding.**
 
@@ -174,7 +174,8 @@ Verdict derived deterministically by the orchestrator per CLAUDE.md §"Hard cont
 
 - Multi-provider (non-Anthropic) plan-architect specialist (cross-provider diversity carry-over; spec 72c §9).
 - Mid-implementation pair-programming hook (PostToolUse on `Edit`/`Write` — too noisy at V1; revisit if the plan-time gate misses architectural defects that emerge mid-impl).
-- Migrating `exit-plan-review.md` to Conventional Comments (separate tracker; not gated on C ship).
+
+**Shipped (Session 73 P0).** `.claude/agents/plan-architect.md` (NEW; ~100L) + `.claude/hooks/exit-plan-review.sh` extension (dual-template loading; `frame_prompt()` helper; spawn-or-stub block; `jq -s` union aggregator; `[.findings[] | select(.blocking == true)] | length` blocking gate) + `.claude/subagent-prompts/exit-plan-review.md` migration to Conventional Comments (atomic with C ship per session-73 path-D scope decision; previously carved out at L177 above) + `tests/shellspec/exit-plan-review.spec.sh` extension (dual-persona orchestration coverage via `EXIT_PLAN_REVIEW_DEBUG_VERDICT_EXIT` + `EXIT_PLAN_REVIEW_DEBUG_VERDICT_PLAN_ARCH` env-var injection) + `CLAUDE.md` §"Hard controls" gates table row update (Plan-time-review row extended with `plan-architect.md` file path + spec 72d §5 reference). The originally-planned dual-format orchestrator was collapsed to single-format atomically with the C ship.
 
 ## §6 — Sequencing
 
