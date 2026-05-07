@@ -51,9 +51,9 @@ Describe 'exit-plan-review.sh'
         [ -z "$REAL_NONCE" ] && { echo "no real nonce found in framed output"; exit 1; }
         [ "$REAL_NONCE" = "deadbeef0123456789abcdef0123abcd" ] && { echo "real nonce equals injected — RNG broken"; exit 1; }
         opens=$(echo "$OUT" | grep -c "<plan-from-author-${REAL_NONCE}>")
-        [ "$opens" -eq 1 ] || { echo "expected exactly 1 open with real nonce, got $opens"; exit 1; }
+        [ "$opens" -eq 2 ] || { echo "expected exactly 2 opens with real nonce (one per persona framing), got $opens"; exit 1; }
         closes=$(echo "$OUT" | grep -c "</plan-from-author-${REAL_NONCE}>")
-        [ "$closes" -eq 1 ] || { echo "expected exactly 1 close with real nonce, got $closes"; exit 1; }
+        [ "$closes" -eq 2 ] || { echo "expected exactly 2 closes with real nonce (one per persona framing), got $closes"; exit 1; }
         echo "$OUT" | grep -q "</plan-from-author-deadbeef0123456789abcdef0123abcd>" || { echo "injected tag was scrubbed (should be preserved as content)"; exit 1; }
         echo OK
       '
@@ -103,9 +103,8 @@ Describe 'exit-plan-review.sh'
   End
 
   Describe 'dual-persona orchestration (spec 72d §5)'
-    # DEBUG_VERDICT_* env vars inject canned per-persona verdicts to bypass
-    # spawn — covers the orchestration logic (union aggregator + blocking
-    # gate) without requiring claude CLI in the test environment.
+    # DEBUG_VERDICT_* env vars bypass claude CLI spawn so shellspec runs
+    # without API access.
 
     run_hook_dual() {
       printf '%s' "$1" | env \

@@ -57,9 +57,7 @@ VERIFIER_OUT=$(printf '%s' "$PLAN_CONTENT" | scripts/git-state-verifier.sh 2>&1)
 VERIFIER_RC=$?
 
 # ── Step 4: frame prompts for both personas. Heredoc + parameter
-# expansion (NOT sed/awk on plan content) per L52(b). Both personas
-# receive the same plan content + verifier output framed with the same
-# per-invocation nonce.
+# expansion (NOT sed/awk on plan content) per L52(b).
 EXIT_TEMPLATE_PATH=".claude/subagent-prompts/exit-plan-review.md"
 PLAN_ARCH_TEMPLATE_PATH=".claude/agents/plan-architect.md"
 if [ ! -f "$EXIT_TEMPLATE_PATH" ]; then
@@ -130,9 +128,9 @@ AGGREGATED=$(jq -s '{findings: (map(.findings // []) | flatten)}' \
   <(printf '%s' "$PLAN_ARCH_VERDICT") \
   2>/dev/null || echo '{"findings":[{"label":"issue","blocking":true,"category":"infra","evidence":"verdict aggregation parse failure","remediation":"check persona output JSON schema"}]}')
 
-ANY_BLOCKING=$(printf '%s' "$AGGREGATED" | jq -r '[.findings[] | select(.blocking == true)] | length' 2>/dev/null || echo "1")
+BLOCKING_COUNT=$(printf '%s' "$AGGREGATED" | jq -r '[.findings[] | select(.blocking == true)] | length' 2>/dev/null || echo "1")
 
-if [ "$ANY_BLOCKING" -gt 0 ]; then
+if [ "$BLOCKING_COUNT" -gt 0 ]; then
   {
     echo
     echo "BLOCKED: exit-plan-review.sh — plan-review personas returned blocking findings."

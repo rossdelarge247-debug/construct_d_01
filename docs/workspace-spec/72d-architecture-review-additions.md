@@ -159,7 +159,7 @@ CLAUDE.md §"Hard controls" §"Subagent file locations" verbatim:
 
 Verdict derived deterministically by the orchestrator per CLAUDE.md §"Hard controls" §"Verdict derivation rules". Architectural-class concerns (categories `seam-boundary`, `hidden-effects`, `hexagonal-invariant`) default to `blocking: true` unless the plan explicitly addresses the concern with reasoning.
 
-**Hook integration.** `.claude/hooks/exit-plan-review.sh` extension — spawn plan-architect alongside the existing exit-plan-review template. Aggregation: union of `findings[]` from both personas via `jq -s '{findings: (map(.findings // []) | add)}'`. Block plan exit if any aggregated finding has `blocking: true` (single-format Conventional Comments per spec 72c §4 L69 mandate; both personas use the same schema since session 73 P0).
+**Hook integration.** `.claude/hooks/exit-plan-review.sh` extension — spawn plan-architect alongside the existing exit-plan-review template. Aggregation: union of `findings[]` from both personas via `jq -s '{findings: (map(.findings // []) | flatten)}'`. Block plan exit if any aggregated finding has `blocking: true` (single-format Conventional Comments per spec 72c §4 L69 mandate; both personas use the same schema since session 73 P0).
 
 **Output-format unified at C ship.** Both personas emit Conventional Comments per spec 72c §4 L69 mandate. The dual-format transition originally contemplated for V1 was collapsed to single-format atomically with the C ship: `exit-plan-review.md` migrated alongside plan-architect's debut (session 73 P0, path-D scope decision). Hook orchestrator parses a single schema; aggregation is union of `findings[]` from both personas; block on any `blocking: true`.
 
