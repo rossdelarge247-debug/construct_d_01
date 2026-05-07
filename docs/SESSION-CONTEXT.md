@@ -31,7 +31,7 @@ Session 71: spec 67a respondent state machine + spec 75 account administration V
 - Spec 72-suite engineering rigour: 72 (security DoD) · 72a (preview-deploy rubric) · 72b (adversarial review budget) · 72c (multi-agent review framework, 3 specialists post session-70) · **72d (architecture review additions B+C+D, session 72)**.
 - Spec 73 copy patterns.
 - Hard controls: CODEOWNERS · ESLint no-disable ratchet · coverage threshold ratchet · **dual-persona plan-time review (`.claude/subagent-prompts/exit-plan-review.md` + NEW `.claude/agents/plan-architect.md`; both Conventional Comments single-format post session-73 atomic migration)** · slice-verification PR-DoD · 3-specialist auto-review at k=2 default · synthetic-deliberate-injection gate (3 personas) · author-time comment review · D test-pain gate (CLAUDE.md DoD-2 sub-check) + B fitness functions (.github/workflows/fitness-functions.yml).
-- Persona retain/drop verdicts: reviewer-correctness STRONG retain (22/10); reviewer-style STRONG retain (14+/10); reviewer-security STRONG-candidate (7/10, +2 first-time catches in session 72); reviewer-architecture DROPPED (session 70).
+- Persona retain/drop verdicts: reviewer-correctness STRONG retain (24/10); reviewer-style STRONG retain (17/10); reviewer-security STRONG-candidate (7/10); reviewer-architecture DROPPED (session 70); plan-architect NEW (session 73, no findings yet).
 
 ### Built (on main as of `b0d2966`; session 73 ships P0 via PR #121 — closes B+C+D programme)
 
