@@ -108,8 +108,9 @@ fi
 # section's purpose). Match `^## §?Status` until the next `^## ` heading
 # or EOF; lines inside that span are not subject to the regex catches.
 SCAN_CONTENT=$(printf '%s' "$CONTENT" | awk '
-  /^## §?Status/ { in_status = 1; next }
-  /^## / && in_status { in_status = 0 }
+  /^```/ { fence = !fence }
+  /^## §?Status/ && !fence { in_status = 1; next }
+  /^## / && !fence && in_status { in_status = 0 }
   !in_status { print }
 ')
 

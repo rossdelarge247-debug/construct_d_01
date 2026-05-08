@@ -158,7 +158,7 @@ Describe '.claude/hooks/comment-review.sh'
       The stdout should include "emoji"
     End
 
-    It 'scans .claude/agents/ persona files (skip-list removed)'
+    It 'scans .claude/agents/ persona files for anti-patterns'
       Data <<< "$(envelope_write '.claude/agents/foo.md' '// Inherited from correctness rubric, see PR #99 round 2')"
       When run "$HOOK"
       The status should equal 0

@@ -86,8 +86,14 @@ printf -- '- PR status for branch: check via GitHub MCP (`mcp__github__list_pull
 # --- Step 7: Emoji scan over persistent wrap prose ---
 printf '\n## Emoji scan (persistent prose — system prompt rule)\n\n'
 EMOJI_HITS=""
-for f in "docs/HANDOFF-SESSION-${SESSION_N:-X}.md" docs/SESSION-CONTEXT.md; do
-  [ -f "$f" ] || continue
+HANDOFF_TARGET=""
+if [ -n "${SESSION_N:-}" ] && [ -f "docs/HANDOFF-SESSION-${SESSION_N}.md" ]; then
+  HANDOFF_TARGET="docs/HANDOFF-SESSION-${SESSION_N}.md"
+else
+  HANDOFF_TARGET=$(ls docs/HANDOFF-SESSION-*.md 2>/dev/null | sort | tail -1)
+fi
+for f in "$HANDOFF_TARGET" docs/SESSION-CONTEXT.md; do
+  [ -n "$f" ] && [ -f "$f" ] || continue
   HIT=$(grep -onE '✅|❌|🟢|🔴|🟡|🚀|⚠️|✨|🎉|⏳|🔵' "$f" 2>/dev/null | head -3)
   if [ -n "$HIT" ]; then
     EMOJI_HITS="${EMOJI_HITS}  ${f}:\n${HIT}\n"

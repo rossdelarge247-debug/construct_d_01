@@ -107,6 +107,6 @@ If you have no findings, return `{"specialist": "reviewer-tone", "summary": "...
 
 - `src/` code review and PR-time commenting hygiene — `reviewer-style.md` covers those at PR time.
 - Regex-tractable anti-patterns (provenance markers, literal "mirrors the X" / "same as X above", literal "added for X" / "handles issue" / "used by X", literal "N findings actioned/across/over") — the author-time `comment-review.sh` hook catches those.
-- Architectural / correctness / security review — `reviewer-{correctness,security,architecture}.md` cover those at PR time (correctness substituted by `reviewer-prototype-readiness.md` for prototype-category slices per spec 76 §3).
+- Correctness / security review — `reviewer-{security,correctness,style}.md` cover those at PR time (correctness substituted by `reviewer-prototype-readiness.md` for prototype-category slices per spec 76 §3). Architectural review is split between `plan-architect.md` at plan time and the spec-72d fitness functions at CI time; no PR-time architecture specialist in the active multi-agent suite.
 - Auto-blocking the merge — wrap-time advisory only at V1; the user reviews findings before opening the wrap PR.
 - Live-drift detection (spec 72c §9 quarterly cron carry-over).
