@@ -309,7 +309,7 @@ EOF
     End
   End
 
-  Describe 'spec 76 §2 — prototype-mode path-default skip (F-PA3)'
+  Describe 'spec 76 §2 — prototype-mode path-default skip'
     It 'exits 0 for src/app/dev/proto/<literal-slug>/page.tsx (skip)'
       cd "$SPEC_TMP" || return 1
       mkdir -p src/app/dev/proto/foo

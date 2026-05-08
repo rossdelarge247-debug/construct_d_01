@@ -300,13 +300,15 @@ jobs:
       - name: Aggregate envelopes + derive verdict
         id: aggregate
         if: needs.brief.outputs.skip == 'false'
+        env:
+          DIMENSIONS_JSON: ${{ needs.brief.outputs.dimensions }}
         run: |
           set -euo pipefail
           # Missing envelope files → aggregator marks that dimension
           # `inconclusive` and degrades gracefully; all-missing →
           # `parse-failed`.
           mkdir -p /tmp/envelopes
-          for DIM in $(printf '%s' '${{ needs.brief.outputs.dimensions }}' | jq -r '.[]'); do
+          for DIM in $(printf '%s' "$DIMENSIONS_JSON" | jq -r '.[]'); do
             SRC="/tmp/envelope-artifacts/auto-review-envelope-${DIM}/${DIM}.json"
             if [ -f "$SRC" ]; then
               mv "$SRC" "/tmp/envelopes/${DIM}.json"
