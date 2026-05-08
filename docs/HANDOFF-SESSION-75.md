@@ -92,3 +92,33 @@
 - Live-mode opt-in for `comment-review.sh` (constraint #39 mitigation) — would have caught this session's (F-PA3) anti-pattern at author-time pre-commit.
 
 See `docs/SESSION-CONTEXT.md` §"Session 76 priorities" for refreshed Phase 3 sequence + alternative ordering.
+
+## Post-wrap P1 — tone-discipline tooling (PR #127, squash `aa58dbe`)
+
+After the original wrap (PR #126), user flagged that "our prompting is drifting from long-standing conventions." Fresh-context audit subagent catalogued 5 drift patterns across persistent prose surfaces:
+
+1. Session-N / PR-#N / F-XX provenance in persistent prose (6+ instances; spec 76 §Lineage / §7 / §8 + the (F-PA3) test description from PR #125's own post-PR catch).
+2. Sibling-step refs broader than the existing regex catches *"mirrors X"*, *"Identical semantics to Y"*.
+3. Hardcoded historical counts (*"9-finding tax"*, *"3 implementing files post-spec-76"*).
+4. Emoji `✅` in HANDOFF-75 prose (no exemption; system-prompt rule).
+5. Code-lineage prose in persona rubrics (*"Inherited from X because Y"*).
+
+**What shipped (PR #127 — 2 commits + 3 fixup commits, ~250L authored):**
+
+- `comment-review.sh` extended with §Status pre-filter (fence-aware), F-XX finding-ID regex, emoji regex; skip-list adjusted to remove `.claude/agents/*` and `.claude/subagent-prompts/*` (persona files now scanned at author-time); cite by §-name not line number.
+- `wrap-check.sh` augmented with emoji scan over current HANDOFF + opt-in `reviewer-tone.md` spawn block (`WRAP_TONE_REVIEW_SPAWN=1`).
+- NEW `.claude/agents/reviewer-tone.md` persona (~110L; criteria 1-5: sibling-step refs · lineage · historical counts · emoji · §Status footer exemption).
+- Cleanup of audit-flagged drift in spec 76 + reviewer-prototype-readiness.md (provenance + sibling-step + hardcoded count + lineage rewrites).
+- CLAUDE.md §"Hard controls" §"Gates this slice ships" updated to reflect new skip-list + §Status awareness; cite by §-name.
+- Shellspec extended (24 → 25 examples) to cover the new fixtures (§Status pre-filter, persona file scan, F-XX detection, emoji detection, subagent-prompts coverage).
+
+**Plan-time review trail:** Path-C manual spawn caught 2 blocking spec-citation findings (CLAUDE.md L215-222 → L220-227 line-range; truncated quote tails). Both addressed in actual artifacts via §-name citations.
+
+**Post-PR auto-review trail:** 5 → 3 → 0 findings across 3 differential rounds. Categories: commenting (test-description provenance, WHAT-narration), regression (retired-architecture cite, subagent-prompts coverage gap), edge-case (SESSION_N fallback, awk fence-awareness), security (defensive nonced-prompt — acknowledged intentional). All actionable findings resolved.
+
+**Lessons:**
+
+- The author-time hook fired on my own work-in-progress fixes multiple times (e.g. when I added "session-70" to remove an architecture reference, the hook caught the new provenance immediately). The dogfood loop is real.
+- Skip-list audit was overdue — `.claude/agents/*` + `.claude/subagent-prompts/*` exclusion was the reason persona-file drift accumulated session over session.
+- §-name citations are sturdier than line numbers (15+ files in the codebase still carry rotted L215-222 refs; deferred sweep for a future generic cleanup pass).
+- Constraint #39 dogfooded in real-time: every commit message + prose change in this PR was scrutinised against the very rule the PR amended.

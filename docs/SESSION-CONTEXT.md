@@ -10,7 +10,7 @@ Next.js 16 + React 19 + Tailwind 4. Vercel preview deploys per branch; productio
 
 ## What sessions 41-75 accomplished (rolling window)
 
-> **Session 75 (this wrap):** **1 substantive PR merged.** **PR #125** (P0, squash `9346963`) — `docs/workspace-spec/76-prototype-mode-rigour.md` NEW (canonical per-category gate-behaviour matrix in §3); CLAUDE.md NEW §"Slice categories" pointer + 13→14 base-count reconciliation across L136 + L255 + PR template; `.claude/agents/reviewer-prototype-readiness.md` NEW persona (UI/UX integration lens — interaction patterns · accessibility · state coverage · copy clarity · motion + `prefers-reduced-motion` · mobile viewport · AC-gap inherited from correctness rubric); wiring atomic per #38: `vitest.config.ts` `coverage.exclude` for literal-slug prototype paths · `.claude/hooks/tdd-guard.sh` path-default-skip block with `[slug]` regex disambiguation · 3 new shellspec fixtures (12-14: skip / enforce / enforce) · `auto-review.yml` brief-job category-detection emitting `dimensions` JSON output consumed by specialist matrix + aggregator via `fromJSON()` · PR template DoD-14 short-form rendering note · `S-PROTO-hub/acceptance.md` `**Category:** production` override (calibration cohort row 1 keeps production rigour). 9 files / +360/-9. **Path-C manual plan-time review** (harness still lacks plan-mode toggle): plan-architect 4 findings (1 issue + 1 suggestion + 1 question + 1 note; F-PA3 `[slug]` regex was a real technical catch) · exit-plan-review 4 (3 suggestions + 1 nitpick; F-EPR2 truncated quote + F-EPR3 13/14 drift + F-EPR4 file-existence equivocation all real catches). 2 user decisions surfaced via `AskUserQuestion`: F-PA1 substitute pattern · F-EPR3 reconcile in same PR. **Post-PR auto-review** caught 2 advisory findings on `4bc93d7` (style/commenting: dropped (F-PA3) suffix from shellspec describe — the very anti-pattern being amended in CLAUDE.md L215-222; security/note: defensive env-var pattern for aggregator step), both fixed in `69b6dd7`; second auto-review run approve 0 findings. Single fixup → green. **n=44 PRs cumulative; mean rolling stable.** New constraint #39: sweep your own diff for the anti-pattern you're amending. **Calibration cohort row 1 still locked at S-PROTO-hub** — this slice is infra+spec, not src/, so doesn't enter the cohort.
+> **Session 75 (this wrap):** **2 substantive PRs merged.** **PR #125** (P0, squash `9346963`) — `docs/workspace-spec/76-prototype-mode-rigour.md` NEW (canonical per-category gate-behaviour matrix in §3); CLAUDE.md NEW §"Slice categories" pointer + 13→14 base-count reconciliation across L136 + L255 + PR template; `.claude/agents/reviewer-prototype-readiness.md` NEW persona (UI/UX integration lens — interaction patterns · accessibility · state coverage · copy clarity · motion + `prefers-reduced-motion` · mobile viewport · AC-gap inherited from correctness rubric); wiring atomic per #38: `vitest.config.ts` `coverage.exclude` for literal-slug prototype paths · `.claude/hooks/tdd-guard.sh` path-default-skip block with `[slug]` regex disambiguation · 3 new shellspec fixtures (12-14: skip / enforce / enforce) · `auto-review.yml` brief-job category-detection emitting `dimensions` JSON output consumed by specialist matrix + aggregator via `fromJSON()` · PR template DoD-14 short-form rendering note · `S-PROTO-hub/acceptance.md` `**Category:** production` override (calibration cohort row 1 keeps production rigour). 9 files / +360/-9. **PR #127** (P1 post-wrap, squash `aa58dbe`) — tone-discipline tooling and audit-flagged drift cleanup. Audit subagent surfaced 5 drift patterns across spec 76 + reviewer-prototype-readiness.md + HANDOFF-75 (provenance markers, sibling-step refs, hardcoded counts, lineage prose, emoji); rebuild + author NEW `.claude/agents/reviewer-tone.md` persona (~110L; opt-in /wrap spawn via `WRAP_TONE_REVIEW_SPAWN=1`); extend `comment-review.sh` with §Status pre-filter (fence-aware), F-XX finding-ID + emoji regex, skip-list adjustment (persona files now scanned), §-name citation discipline; augment `wrap-check.sh` with emoji scan + reviewer-tone spawn block; cleanup of audit findings; CLAUDE.md §"Hard controls" reflects new gates. Round-by-round: plan-time review caught 2 blocking spec-citation findings (line-range off by 5; truncated quotes); post-PR auto-review surfaced 5 → 3 → 0 findings across 3 differential rounds (commenting / regression / edge-case categories). **n=46 PRs cumulative; mean rolling stable.** New constraint #39 (sweep your own diff for the anti-pattern you're amending) captured + dogfooded in PR #127 itself. **Calibration cohort row 1 still locked at S-PROTO-hub** — neither PR was a src/ slice.
 >
 > **Session 74:** **2 substantive PRs merged.** **PR #122** (session-73 wrap with mid-PR Vercel-unblock fix bundled, squash `0497e7f`) — Vercel build was failing on stale `pnpm-lock.yaml` (last touched session 58, missing `madge@^8.0.0` from PR #119); fix: deleted lockfile + pinned `packageManager: "npm@10.9.7"` + addressed only outstanding auto-review advisory (stale persona-retain scores in §"Locked"). **PR #123** (Phase 3 P0, squash `b9d9467`) — `S-PROTO-hub` slice: 61-row TS+Zod design-uncertainty registry × 11 sections at `/dev/proto`; hub renderer + dynamic stub-route + 4 reusable components; 71 tests across 9 files. TDD-first across 5 steps. **Option A architectural pivot** dropped `.dev.tsx` infix so user's Vercel-preview-driven workflow can verify visually; trade-off: hub URL publicly addressable (T0 metadata, pre-launch). **Path-C plan-time review** (manual persona-spawn): plan-architect 0 findings · exit-plan-review 4 all addressed pre-impl. **Post-PR auto-review** caught 9 findings on `d06da0a` (1 blocking-by-security: stale `.dev.tsx` claim in security.md item 9; 3 ac-gaps; 2 commenting; 2 nitpicks; 1 regression-doc) — all resolved in `20a94ca`; aggregate flipped `neutral` → `success`. **n=43 PRs cumulative.** New constraints #37 (`.dev.tsx` invisibility on Vercel-preview-only workflows) + #38 (slice-doc drift after refactor). **Calibration cohort row 1 of 3 entered.**
 >
@@ -24,6 +24,101 @@ Session 70: spec 74 AI plan generation + spec 65a sign-up reconciliation logic s
 
 Session 71: spec 67a respondent state machine + spec 75 account administration V1 minimum landed (closing the final 2 of 4 audit gaps from session 69's design-input audit; logic-spec phase complete). 3-specialist suite drift cleanup PR #115 tightened enforcement across 12 files.
 
+## Session 76 kickoff prompt (paste-ready)
+
+Drop this entire fenced block into the message that opens session 76. Living artifact — refresh at each wrap. Future improvement: extend `.claude/hooks/wrap-check.sh` to template-generate this block from §"Session N+1 priorities" + §"Locked" + §"Negative constraints".
+
+```text
+Kick off session 76 — Phase 3 P1 = S-PROTO-pre-signup-interview, first
+prototype slice exercising spec 76 category=prototype gates.
+
+# Branch + state
+- New branch: claude/decouple-session-76-<5char-hash>  (harness-assigned)
+- Base: latest main. Should include:
+    PR #128 (session-75 wrap-update) on top of:
+    PR #127 (session 75 P1 tone-discipline tooling, squash aa58dbe)
+    PR #126 (session 75 wrap, squash f58699a)
+    PR #125 (session 75 P0 spec 76, squash 9346963)
+- Confirm via session-start hook: HEAD vs origin/main; ahead/behind 0/0.
+
+# Read first
+1. CLAUDE.md — always. Note NEW §"Slice categories" (session 75 P0) and
+   the §"Hard controls" §"Gates this slice ships" entry reflecting
+   `comment-review.sh` §Status awareness + persona-file scanning + emoji
+   regex (session 75 P1).
+2. docs/SESSION-CONTEXT.md — §"Session 76 priorities" + §"Phase 3
+   sequence" + §"Locked (through session 75)".
+3. docs/HANDOFF-SESSION-75.md — original retro AND §"Post-wrap P1"
+   section. Note constraint #39.
+4. (Read when relevant): docs/workspace-spec/76-prototype-mode-rigour.md
+   §1-§5; docs/workspace-spec/65-pre-signup-interview-reconciled.md
+   (8 screens); .claude/agents/reviewer-tone.md (NEW persona, /wrap-only).
+
+# P0 — S-PROTO-pre-signup-interview (Phase 3 P1)
+
+First slice to exercise category=prototype path-default + reviewer-
+prototype-readiness persona + (if WRAP_TONE_REVIEW_SPAWN=1) reviewer-tone
+at /wrap.
+
+Per per-prototype 4-step loop:
+  1. Dialogue — what we're trying to learn / what's uncertain about the
+     pre-signup interview AS interaction (not as spec'd logic).
+  2. Canvas prompts — generate Claude AI Design prompts; user creates
+     canvas at docs/design-source/pre-signup-interview/<slug>/.
+  3. Absorb — wait for canvas output (likely session 77+).
+  4. Construct — build at src/app/dev/proto/pre-signup-interview/page.tsx
+     (literal-slug → category=prototype default).
+
+Verify at session-76 start: ls docs/design-source/pre-signup-interview/.
+If empty, this session targets steps 1-2 only.
+
+# Alternatives if canvas not tractable yet
+
+- S-PROTO-section-confirm (P2) — less canvas-novel; UI-only state-machine.
+- F-PA2 deferred matrix-consistency fitness function (spec 76 §8).
+- /audit-tone skill (escape-hatch persona invocation; not yet shipped).
+
+# Plan-time review
+
+Path-C manual persona-spawn (harness still lacks plan-mode toggle).
+Spawn plan-architect + exit-plan-review in parallel via Agent tool against
+/tmp framed plan. Address blocking findings + non-blocking suggestions.
+
+# Tone-discipline reminders (from session 75 P1)
+
+- comment-review.sh now scans .claude/agents/* + .claude/subagent-prompts/*
+  AND respects §Status footer exemption (fence-aware). Author-time hits
+  on persona files / spec body sections are real catches; address before
+  commit.
+- §-name citations preferred over line numbers (e.g. CLAUDE.md §"Coding
+  conduct" §"Comments: WHY not WHAT, no temporal provenance"). Line
+  numbers rot.
+- WRAP_TONE_REVIEW_SPAWN=1 at /wrap if you want LLM-judgement on
+  sibling-step / lineage / hardcoded-count anti-patterns the regex misses.
+- Constraint #39: when amending CLAUDE.md anti-pattern rules OR
+  introducing new test descriptions in a PR, grep your own diff for
+  instances of the rule being amended.
+
+# Selected constraints (full list in SESSION-CONTEXT §"Negative constraints")
+
+- #29 Pre-priority spec-gate verification.
+- #37 .dev.tsx invisibility on Vercel-preview-only workflow → use page.tsx.
+- #38 Slice-doc drift — sweep all docs in same commit.
+- #39 Sweep your own diff for the anti-pattern you're amending.
+- Spec 71 §7a single-branch-main: each piece of work to main via PR.
+- CLAUDE.md "Quote, don't paraphrase" + "Verify before planning".
+
+# Calibration cohort
+
+S-PROTO-pre-signup-interview is row 2 of 3 per spec 72c §9. Active
+personas at PR-time for category=prototype: security · prototype-
+readiness · style (correctness substituted out per spec 76 §3).
+Plan-architect at plan-time. /wrap may add reviewer-tone if opted in.
+
+Start with: confirm priorities + check canvas presence + Path-C plan-
+time review once plan drafted.
+```
+
 ## Current state
 
 ### Locked (through session 75)
@@ -34,11 +129,12 @@ Session 71: spec 67a respondent state machine + spec 75 account administration V
 - Spec 71 rebuild strategy + §4 hexagonal reference shape (S-F7 dev/prod abstraction pattern).
 - Spec 72-suite engineering rigour: 72 (security DoD) · 72a (preview-deploy rubric) · 72b (adversarial review budget) · 72c (multi-agent review framework, 3 specialists post session-70) · 72d (architecture review additions B+C+D, session 72).
 - **Spec 76 prototype-mode rigour (session 75 P0; PR #125; `9346963`).** Slice-category metadata (`production` · `prototype` · `infrastructure`); per-category gate-behaviour matrix; `reviewer-prototype-readiness` substitutes `reviewer-correctness` for prototype slices; DoD-14 short-form (items 1, 8, 12, 14); test-pain threshold raises >2 → >5 for prototype paths; vitest coverage.exclude + tdd-guard skip + auto-review.yml category-aware specialist routing operational.
+- **Tone-discipline tooling (session 75 P1; PR #127; `aa58dbe`).** NEW `.claude/agents/reviewer-tone.md` persona (opt-in /wrap spawn via `WRAP_TONE_REVIEW_SPAWN=1`); `comment-review.sh` extended with §Status pre-filter (fence-aware), F-XX finding-ID + emoji regex, persona-files no-longer-skipped; `wrap-check.sh` emoji-scan + reviewer-tone spawn block; §-name citation discipline (cite `CLAUDE.md §"Coding conduct" §"Comments…"` rather than line numbers).
 - Spec 73 copy patterns.
 - Hard controls: CODEOWNERS · ESLint no-disable ratchet · coverage threshold ratchet · dual-persona plan-time review (`exit-plan-review.md` + `plan-architect.md`; both Conventional Comments single-format) · slice-verification PR-DoD · 3-specialist auto-review at k=2 default · synthetic-deliberate-injection gate (3 personas) · author-time comment review · D test-pain gate (CLAUDE.md DoD-2 sub-check; category-aware threshold per spec 76 §3) + B fitness functions (.github/workflows/fitness-functions.yml).
 - Persona retain/drop verdicts: reviewer-correctness STRONG retain (24/10) · reviewer-style STRONG retain (17/10) · reviewer-security STRONG-candidate (7/10) · reviewer-architecture DROPPED (session 70) · plan-architect NEW (session 73; gathered F-PA3 real catch session 75 plan-time) · **reviewer-prototype-readiness NEW (session 75; fires from first category=prototype slice forward — P1 pre-signup-interview onwards)**.
 
-### Built (on main as of `9346963`; session 75 P0 ships spec 76 prototype-mode rigour)
+### Built (on main as of `aa58dbe`; session 75 P0 spec 76 + P1 tone-discipline tooling)
 
 - Hero rotation production (session 68+69).
 - 9 hero variants + dev gallery (session 67).
@@ -162,7 +258,7 @@ Sequential single-branch pattern across sessions 54→75 (22 sessions in a row).
 ### Branch state at session-75 wrap (verified live)
 
 - **Wrap branch:** `claude/decouple-session-75-ZRcSX` (session-22-in-a-row of the sequential single-branch pattern).
-- **`main` tip:** `9346963` (post-PR-#125 merge — spec 76 prototype-mode rigour ship). Wrap PR opens after this commit.
+- **`main` tip:** `aa58dbe` (post-PR-#127 merge — tone-discipline tooling + audit-flagged drift cleanup). Wrap-update PR opens after this commit.
 - **Closed/merged this session:** PR #125 (P0 ship spec 76 + amendments + wiring + sweep) squash `9346963`.
 - **Live rigour gates:** 3-specialist suite (security · correctness · style) + Fitness functions workflow + dual-persona plan-time review + **NEW category-aware specialist routing in `auto-review.yml`** (substitute prototype-readiness for correctness when slice resolves to `category: prototype`). All gates pass clean against current src/ at wrap.
 - **Persona retain/drop measurement** cumulative through session 75: reviewer-correctness **24/10 STRONG retain** (no new findings session 75 — first run inconclusive; second run 0 findings on a control-plane PR is appropriate-silence) · reviewer-style **18/10 STRONG retain** (+1 session 75 — F-PA3 suffix in shellspec describe; real CLAUDE.md L215-222 anti-pattern catch in the very PR amending the rule) · reviewer-security **7/10 STRONG-candidate** (+1 session 75 advisory note re aggregator env-var defense; future-proofing not current vulnerability — debatable whether it counts as a catch) · reviewer-architecture **DROPPED** session 70 · plan-architect **gathered F-PA3 real catch session 75** (`[slug]` parametric-route disambiguation) · reviewer-prototype-readiness **NEW** session 75 (no findings yet — fires from session 76 P1 onwards).
