@@ -21,12 +21,12 @@
 
 8. **Committed** `4bc93d7` (9 files, +360/-9). Pushed to `origin/claude/decouple-session-75-ZRcSX`. Opened PR #125 with full Path-C plan-time review trail in body.
 
-9. **Post-PR auto-review** (3-specialist multi-agent) verdict: ✅ approve, 0 blocking, 2 advisory findings:
+9. **Post-PR auto-review** (3-specialist multi-agent) verdict: approve, 0 blocking, 2 advisory findings:
    - `style/commenting`: dropped `(F-PA3)` session-scoped suffix from shellspec Describe block (CLAUDE.md L215-222 anti-pattern — the very rule being amended in this PR).
    - `security/note`: defensive env-var pattern for aggregator step (mirrors brief job's `env: DIMENSIONS_JSON` mapping; future-proof against GitHub Actions script-injection vector if dimensions source ever widens).
    - First run hit `degraded mode` (correctness specialist inconclusive — likely transient LLM JSON malformation); second run after fixup all 3 specialists clean.
 
-10. **Fixup commit** `69b6dd7` addressed both findings. Re-run auto-review verdict: ✅ approve, 0 findings. All 22 checks green. Squash-merged as `9346963`.
+10. **Fixup commit** `69b6dd7` addressed both findings. Re-run auto-review verdict: approve, 0 findings. All 22 checks green. Squash-merged as `9346963`.
 
 11. **Resync** branch `claude/decouple-session-75-ZRcSX` from post-merge `origin/main`. Wrap follows.
 

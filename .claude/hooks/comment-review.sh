@@ -1,9 +1,9 @@
 #!/usr/bin/env bash
 # PostToolUse:Write|Edit — author-time review for comment anti-patterns.
 #
-# Catalogue source: CLAUDE.md §Coding conduct §"Comments: WHY not WHAT,
-# no temporal provenance" (L215-222). Live-mode persona prompt at
-# .claude/agents/reviewer-comment.md.
+# Catalogue source: CLAUDE.md §"Coding conduct" §"Comments: WHY not WHAT,
+# no temporal provenance" (cite by section name; line numbers rot).
+# Live-mode persona prompt at .claude/agents/reviewer-comment.md.
 #
 # Advisory contract: exits 0 in every observed path; emits JSON
 # systemMessage only on findings. Live mode (COMMENT_REVIEW_SPAWN=1)
@@ -66,18 +66,19 @@ fi
 FILE_PATH="${FILE_PATH#$PWD/}"
 
 case "$FILE_PATH" in
-  .claude/agents/*) exit 0 ;;
-  .claude/subagent-prompts/*) exit 0 ;;
+  # Hook scripts contain anti-pattern regex literals as their source;
+  # skip them to avoid the script self-flagging on its own emoji /
+  # provenance / sibling-step regex characters.
+  .claude/hooks/*.sh) exit 0 ;;
   tests/shellspec/*) exit 0 ;;
   tests/*/fixtures/*) exit 0 ;;
   tests/personas/synthetic/*) exit 0 ;;
   # Lineage-purpose docs: session-N / PR-# / round-N references are
   # the file's reason for existing (rolling-window narrative tracking,
-  # not in-code provenance). The catalogue at CLAUDE.md §"Comments:
-  # WHY not WHAT" is explicit that "PR / session / slice provenance"
-  # is forbidden in *persistent comments or test descriptions* — these
-  # markdown docs are neither. Skip to suppress the recurring stub-mode
-  # false positive at write-time.
+  # not in-code provenance). The source rubric is explicit that "PR /
+  # session / slice provenance" is forbidden in persistent comments
+  # or test descriptions — these markdown docs are neither. Skip to
+  # suppress the recurring stub-mode false positive at write-time.
   docs/HANDOFF-SESSION-*.md) exit 0 ;;
   docs/SESSION-CONTEXT.md) exit 0 ;;
   *.lock|*.json|*.yaml|*.yml) exit 0 ;;
@@ -102,33 +103,53 @@ if [ "${COMMENT_REVIEW_SPAWN:-0}" = "1" ] && command -v claude >/dev/null 2>&1; 
   fi
 fi
 
+# Strip §Status footer block(s) before regex scanning. The source rubric
+# exempts spec §Status footers from the lineage rule (lineage IS the
+# section's purpose). Match `^## §?Status` until the next `^## ` heading
+# or EOF; lines inside that span are not subject to the regex catches.
+SCAN_CONTENT=$(printf '%s' "$CONTENT" | awk '
+  /^## §?Status/ { in_status = 1; next }
+  /^## / && in_status { in_status = 0 }
+  !in_status { print }
+')
+
 HITS=""
 add_hit() {
   if [ -n "$HITS" ]; then HITS="${HITS}; ${1}"; else HITS="$1"; fi
 }
 
-if printf '%s' "$CONTENT" | grep -qiE '(PR[[:space:]]*#[0-9]+|session[-[:space:]][0-9]+|slice[[:space:]]+S-[A-Za-z0-9-]+|round[[:space:]]+[0-9]+)'; then
-  MATCH=$(printf '%s' "$CONTENT" | grep -iEo '(PR[[:space:]]*#[0-9]+|session[-[:space:]][0-9]+|slice[[:space:]]+S-[A-Za-z0-9-]+|round[[:space:]]+[0-9]+)' | head -1)
+if printf '%s' "$SCAN_CONTENT" | grep -qiE '(PR[[:space:]]*#[0-9]+|session[-[:space:]][0-9]+|slice[[:space:]]+S-[A-Za-z0-9-]+|round[[:space:]]+[0-9]+)'; then
+  MATCH=$(printf '%s' "$SCAN_CONTENT" | grep -iEo '(PR[[:space:]]*#[0-9]+|session[-[:space:]][0-9]+|slice[[:space:]]+S-[A-Za-z0-9-]+|round[[:space:]]+[0-9]+)' | head -1)
   add_hit "provenance — \"${MATCH}\""
 fi
 
-if printf '%s' "$CONTENT" | grep -qiE '(mirrors[[:space:]]+the[[:space:]]+|same[[:space:]]+as[[:space:]]+\w+[[:space:]]+(above|below)|see[[:space:]]+(above|below))'; then
-  MATCH=$(printf '%s' "$CONTENT" | grep -iEo '(mirrors[[:space:]]+the[[:space:]]+\w+|same[[:space:]]+as[[:space:]]+\w+[[:space:]]+(above|below)|see[[:space:]]+(above|below))' | head -1)
+if printf '%s' "$SCAN_CONTENT" | grep -qE '\bF-[A-Z]+[0-9]+\b'; then
+  MATCH=$(printf '%s' "$SCAN_CONTENT" | grep -Eo '\bF-[A-Z]+[0-9]+\b' | head -1)
+  add_hit "finding-id — \"${MATCH}\""
+fi
+
+if printf '%s' "$SCAN_CONTENT" | grep -qiE '(mirrors[[:space:]]+the[[:space:]]+|same[[:space:]]+as[[:space:]]+\w+[[:space:]]+(above|below)|see[[:space:]]+(above|below))'; then
+  MATCH=$(printf '%s' "$SCAN_CONTENT" | grep -iEo '(mirrors[[:space:]]+the[[:space:]]+\w+|same[[:space:]]+as[[:space:]]+\w+[[:space:]]+(above|below)|see[[:space:]]+(above|below))' | head -1)
   add_hit "sibling-step — \"${MATCH}\""
 fi
 
-if printf '%s' "$CONTENT" | grep -qiE '(added[[:space:]]+for[[:space:]]+|handles[[:space:]]+issue|used[[:space:]]+by[[:space:]]+|fix[[:space:]]+for[[:space:]]+)'; then
-  MATCH=$(printf '%s' "$CONTENT" | grep -iEo '(added[[:space:]]+for[[:space:]]+\w+|handles[[:space:]]+issue[[:space:]]*#?[0-9]*|used[[:space:]]+by[[:space:]]+\w+|fix[[:space:]]+for[[:space:]]+\w+)' | head -1)
+if printf '%s' "$SCAN_CONTENT" | grep -qiE '(added[[:space:]]+for[[:space:]]+|handles[[:space:]]+issue|used[[:space:]]+by[[:space:]]+|fix[[:space:]]+for[[:space:]]+)'; then
+  MATCH=$(printf '%s' "$SCAN_CONTENT" | grep -iEo '(added[[:space:]]+for[[:space:]]+\w+|handles[[:space:]]+issue[[:space:]]*#?[0-9]*|used[[:space:]]+by[[:space:]]+\w+|fix[[:space:]]+for[[:space:]]+\w+)' | head -1)
   add_hit "lineage — \"${MATCH}\""
 fi
 
-if printf '%s' "$CONTENT" | grep -qiE '\b[0-9]+[[:space:]]+findings?[[:space:]]+(action|across|over)'; then
-  MATCH=$(printf '%s' "$CONTENT" | grep -iEo '[0-9]+[[:space:]]+findings?[[:space:]]+(action(ed)?|across|over)[[:space:]]*\w*' | head -1)
+if printf '%s' "$SCAN_CONTENT" | grep -qiE '\b[0-9]+[[:space:]]+findings?[[:space:]]+(action|across|over)'; then
+  MATCH=$(printf '%s' "$SCAN_CONTENT" | grep -iEo '[0-9]+[[:space:]]+findings?[[:space:]]+(action(ed)?|across|over)[[:space:]]*\w*' | head -1)
   add_hit "historical-count — \"${MATCH}\""
+fi
+
+if printf '%s' "$SCAN_CONTENT" | grep -qE '✅|❌|🟢|🔴|🟡|🚀|⚠️|✨|🎉|⏳|🔵'; then
+  MATCH=$(printf '%s' "$SCAN_CONTENT" | grep -oE '✅|❌|🟢|🔴|🟡|🚀|⚠️|✨|🎉|⏳|🔵' | head -1)
+  add_hit "emoji — \"${MATCH}\""
 fi
 
 if [ -z "$HITS" ]; then
   exit 0
 fi
 
-emit_advisory "[reviewer-comment / stub] ${FILE_PATH}: ${HITS} — see CLAUDE.md §\"Comments: WHY not WHAT, no temporal provenance\" (L215-222)."
+emit_advisory "[reviewer-comment / stub] ${FILE_PATH}: ${HITS} — see CLAUDE.md §\"Coding conduct\" §\"Comments: WHY not WHAT, no temporal provenance\"."

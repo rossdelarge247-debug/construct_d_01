@@ -35,8 +35,8 @@ Describe '.claude/hooks/comment-review.sh'
   End
 
   Describe 'path skip-list'
-    It 'exits 0 silently for .claude/agents/ writes'
-      Data <<< "$(envelope_write '.claude/agents/some-persona.md' 'PR #56 round 7 example')"
+    It 'exits 0 silently for .claude/hooks/*.sh (script self-skip — anti-pattern regex literals as source)'
+      Data <<< "$(envelope_write '.claude/hooks/foo.sh' '# emoji regex source: ✅|❌|🟢')"
       When run "$HOOK"
       The status should equal 0
       The stdout should equal ""
@@ -142,6 +142,53 @@ Describe '.claude/hooks/comment-review.sh'
       When run "$HOOK"
       The status should equal 0
       The stdout should include "provenance"
+    End
+
+    It 'flags F-XX finding-id provenance'
+      Data <<< "$(envelope_write 'src/foo.ts' '// added per F-PA3 plan-time finding')"
+      When run "$HOOK"
+      The status should equal 0
+      The stdout should include "finding-id"
+    End
+
+    It 'flags emoji status markers in persistent prose'
+      Data <<< "$(envelope_write 'docs/workspace-spec/77-something.md' 'Verdict: ✅ approve, all green.')"
+      When run "$HOOK"
+      The status should equal 0
+      The stdout should include "emoji"
+    End
+
+    It 'scans .claude/agents/ persona files (skip-list removed)'
+      Data <<< "$(envelope_write '.claude/agents/foo.md' '// Inherited from correctness rubric, see PR #99 round 2')"
+      When run "$HOOK"
+      The status should equal 0
+      The stdout should include "provenance"
+    End
+
+    It 'suppresses regex hits inside §Status footer block'
+      Data <<< "$(envelope_write 'docs/workspace-spec/77-something.md' '## §Status
+
+Shipped session 75; PR #125; verdict ✅ approve.
+
+## Some other section
+
+Clean prose with no anti-patterns here.')"
+      When run "$HOOK"
+      The status should equal 0
+      The stdout should equal ""
+    End
+
+    It 'still fires when emoji is outside §Status block in the same file'
+      Data <<< "$(envelope_write 'docs/workspace-spec/77-something.md' '## §Status
+
+Shipped session 75 — clean lineage location.
+
+## Body section
+
+Verdict: ✅ approve — emoji outside §Status, this should fire.')"
+      When run "$HOOK"
+      The status should equal 0
+      The stdout should include "emoji"
     End
   End
 

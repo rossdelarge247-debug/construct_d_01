@@ -83,6 +83,52 @@ fi
 # --- Step 6: PR status ---
 printf -- '- PR status for branch: check via GitHub MCP (`mcp__github__list_pull_requests` head=%s) or gh CLI. Hook cannot call MCP tools directly.\n' "$BRANCH"
 
+# --- Step 7: Emoji scan over persistent wrap prose ---
+printf '\n## Emoji scan (persistent prose — system prompt rule)\n\n'
+EMOJI_HITS=""
+for f in "docs/HANDOFF-SESSION-${SESSION_N:-X}.md" docs/SESSION-CONTEXT.md; do
+  [ -f "$f" ] || continue
+  HIT=$(grep -onE '✅|❌|🟢|🔴|🟡|🚀|⚠️|✨|🎉|⏳|🔵' "$f" 2>/dev/null | head -3)
+  if [ -n "$HIT" ]; then
+    EMOJI_HITS="${EMOJI_HITS}  ${f}:\n${HIT}\n"
+  fi
+done
+if [ -z "$EMOJI_HITS" ]; then
+  printf -- '- [x] No emoji detected in HANDOFF / SESSION-CONTEXT.\n'
+else
+  printf -- '- [ ] Emoji detected — drop or replace with prose:\n'
+  printf '%b' "$EMOJI_HITS" | sed 's/^/      /'
+fi
+
+# --- Step 8: Tone review (opt-in via WRAP_TONE_REVIEW_SPAWN=1) ---
+if [ "${WRAP_TONE_REVIEW_SPAWN:-0}" = "1" ] && command -v claude >/dev/null 2>&1 && [ -f ".claude/agents/reviewer-tone.md" ]; then
+  printf '\n## Tone review (`reviewer-tone.md`)\n\n'
+  WRAP_DIFF=$(git diff origin/main...HEAD -- 'docs/workspace-spec/**.md' '.claude/agents/**.md' '.claude/subagent-prompts/**.md' 'docs/slices/**.md' 'docs/HANDOFF-SESSION-*.md' 'docs/SESSION-CONTEXT.md' 2>/dev/null)
+  if [ -z "$WRAP_DIFF" ]; then
+    printf -- '- [skip] No prose surface changes against origin/main.\n'
+  else
+    NONCE=$(od -An -tx1 -N16 /dev/urandom 2>/dev/null | tr -d ' \n')
+    if [ -n "$NONCE" ] && [ "${#NONCE}" -eq 32 ]; then
+      PERSONA=$(cat .claude/agents/reviewer-tone.md)
+      RUBRIC=$(awk '/^\*\*Comments: WHY not WHAT, no temporal provenance\.\*\*/,/^## /' CLAUDE.md | head -n -1)
+      FRAMED=$(printf '%s\n\nYour per-invocation nonce: %s\n\n<wrap-diff-%s>\n%s\n</wrap-diff-%s>\n\n<rubric-%s>\n%s\n</rubric-%s>\n' \
+        "$PERSONA" "$NONCE" "$NONCE" "$WRAP_DIFF" "$NONCE" "$NONCE" "$RUBRIC" "$NONCE")
+      VERDICT=$(printf '%s' "$FRAMED" | timeout 60 claude -p --output-format text 2>/dev/null || echo "")
+      if [ -n "$VERDICT" ]; then
+        SUMMARY=$(printf '%s' "$VERDICT" | jq -r '.summary // "no summary"' 2>/dev/null || echo "parse error")
+        FCOUNT=$(printf '%s' "$VERDICT" | jq -r '(.findings // []) | length' 2>/dev/null || echo "?")
+        printf -- '- summary: %s\n' "$SUMMARY"
+        printf -- '- findings: %s\n' "$FCOUNT"
+        if [ "$FCOUNT" != "0" ] && [ "$FCOUNT" != "?" ]; then
+          printf '%s' "$VERDICT" | jq -r '(.findings // [])[] | "  - [" + .label + " / " + .category + "] " + .evidence + " — " + .remediation' 2>/dev/null
+        fi
+      else
+        printf -- '- [error] Subagent invocation failed or timed out.\n'
+      fi
+    fi
+  fi
+fi
+
 printf '\n## Full wrap-protocol (CLAUDE.md §"Wrapping up a session")\n'
 printf '\n'
 printf '  1. Commit + push all uncommitted work\n'
