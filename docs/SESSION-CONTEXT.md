@@ -1,4 +1,4 @@
-# Session 76 Wrap Context Block (heading into session 77)
+# Session 77 Pre-flight Context Block (carrying session 76 wrap delta)
 
 ## Session 76 wrap delta — read this first
 
@@ -175,7 +175,7 @@ time review once plan drafted.
 
 | Phase | Goal | Status |
 |---|---|---|
-| **1 · Logic gaps** | Spec-writing | ✅ COMPLETE sessions 70-71 |
+| **1 · Logic gaps** | Spec-writing | Done COMPLETE sessions 70-71 |
 | **2 · Claude AI Design canvases** | Canonical visual source | ▶️ IN PROGRESS — mobile-screens-v2 shipped session 74; pre-signup-interview · bank-connect mid-flow · hub-state-variants pending |
 | **3 · `/dev/proto/*` prototypes** | High-uncertainty interaction patterns | ▶️ IN PROGRESS — `S-PROTO-hub` shipped session 74; **prototype-mode rigour spec shipped session 75 (PR #125)**; P1 prototype slice next |
 
@@ -193,8 +193,8 @@ Phase 2 (canvas) and Phase 3 (prototype) feed each other per prototype — not s
 
 | Order | Slice | Notes |
 |---|---|---|
-| ✅ Done | `S-PROTO-hub` | Phase 3 inception (session 74 PR #123). Calibration cohort row 1 (locked production rigour via override). |
-| ✅ Done | **Prototype-mode rigour spec** | **session 75 P0 (PR #125; `9346963`).** Path B (slice-category metadata) + reviewer-prototype-readiness persona + atomic wiring. |
+| Done Done | `S-PROTO-hub` | Phase 3 inception (session 74 PR #123). Calibration cohort row 1 (locked production rigour via override). |
+| Done Done | **Prototype-mode rigour spec** | **session 75 P0 (PR #125; `9346963`).** Path B (slice-category metadata) + reviewer-prototype-readiness persona + atomic wiring. |
 | **P1 (NEXT)** | `S-PROTO-pre-signup-interview` | 8 screens, real spec 74 AI plan integration. **First slice to exercise `category: prototype` path-default + reviewer-prototype-readiness.** Per per-prototype 4-step loop: session 76 = step 1 (dialogue) + step 2 (canvas-prompts); steps 3-4 land session 77+ once canvas absorbed. **Blocked on Claude AI Design canvas creation** (no `docs/design-source/pre-signup-interview/` yet at session-75 wrap — verified). |
 | **P2** | `S-PROTO-section-confirm` | Per-section confirmation pattern (8 sections × multi-state). Less canvas-novel than pre-signup-interview; could potentially run in parallel if user wants src/ slice work session 76. |
 | **P3** | `S-PROTO-ai-coach` | Settle phase coach interaction. |
@@ -208,7 +208,7 @@ Spec 72c §9 retain/drop measurement window. Cohort entries (UNCHANGED — sessi
 
 | Slice | Status | Persona findings (issue main missed) |
 |---|---|---|
-| 1 · `S-PROTO-hub` | ✅ shipped session 74 | reviewer-security 1 (Y) · reviewer-correctness 4 (Y) · reviewer-style 4 (Y) · plan-architect 0 (ambiguous — pure-data slice) |
+| 1 · `S-PROTO-hub` | Done shipped session 74 | reviewer-security 1 (Y) · reviewer-correctness 4 (Y) · reviewer-style 4 (Y) · plan-architect 0 (ambiguous — pure-data slice) |
 | 2 · `S-PROTO-pre-signup-interview` | ⏳ session 76+ P1 | TBD; first slice to also exercise reviewer-prototype-readiness |
 | 3 · `S-PROTO-section-confirm` | ⏳ session 76+ P2 | TBD |
 
@@ -220,23 +220,23 @@ After 3 src/ slices, retain/drop verdicts re-evaluated. Plan-architect specifica
 
 ### Cohesive-product trajectory (post-session-75)
 
-- ✅ First cohesive Vercel preview SHIPPED (session 66)
-- ✅ 9 hero variants + dev gallery SHIPPED (session 67)
-- ✅ Production hero rotation SHIPPED (session 68 + 69)
-- ✅ Design-input audit doc SHIPPED (session 69 ext)
-- ✅ AI plan generation spec LOCKED (session 70)
-- ✅ Sign-up + orientation reconciliation LOCKED (session 70)
-- ✅ Multi-agent suite reduced 4 → 3 specialists (session 70)
-- ✅ Respondent state machine spec LOCKED (session 71)
-- ✅ Account administration V1 spec LOCKED (session 71)
-- ✅ Logic-spec phase COMPLETE (4/4 audit gaps closed)
-- ✅ 3-specialist suite drift cleanup SHIPPED (session 71)
-- ✅ Spec 72d B+C+D contracts LOCKED (session 72 P0)
-- ✅ D test-pain gate SHIPPED (session 72 P1)
-- ✅ B fitness functions SHIPPED (session 72 P2)
-- ✅ C plan-architect persona SHIPPED (session 73 P0)
-- ✅ `S-PROTO-hub` Phase 3 P0 SHIPPED (session 74; calibration cohort row 1)
-- ✅ **Spec 76 prototype-mode rigour SHIPPED (session 75 P0; PR #125)** — slice-category metadata + reviewer-prototype-readiness persona + atomic wiring
+- Done First cohesive Vercel preview SHIPPED (session 66)
+- Done 9 hero variants + dev gallery SHIPPED (session 67)
+- Done Production hero rotation SHIPPED (session 68 + 69)
+- Done Design-input audit doc SHIPPED (session 69 ext)
+- Done AI plan generation spec LOCKED (session 70)
+- Done Sign-up + orientation reconciliation LOCKED (session 70)
+- Done Multi-agent suite reduced 4 → 3 specialists (session 70)
+- Done Respondent state machine spec LOCKED (session 71)
+- Done Account administration V1 spec LOCKED (session 71)
+- Done Logic-spec phase COMPLETE (4/4 audit gaps closed)
+- Done 3-specialist suite drift cleanup SHIPPED (session 71)
+- Done Spec 72d B+C+D contracts LOCKED (session 72 P0)
+- Done D test-pain gate SHIPPED (session 72 P1)
+- Done B fitness functions SHIPPED (session 72 P2)
+- Done C plan-architect persona SHIPPED (session 73 P0)
+- Done `S-PROTO-hub` Phase 3 P0 SHIPPED (session 74; calibration cohort row 1)
+- Done **Spec 76 prototype-mode rigour SHIPPED (session 75 P0; PR #125)** — slice-category metadata + reviewer-prototype-readiness persona + atomic wiring
 - ⏳ `S-PROTO-pre-signup-interview` (P1) — gated on Claude AI Design canvas
 - ⏳ Mobile-responsive marketing landing — gated on mobile canvas
 - 4-5 sessions to user-testable Build phase end-to-end (post-C)
@@ -327,12 +327,12 @@ docs/slices/S-PROTO-hub/acceptance.md                          — **Category:**
 
 | Programme | Status | Sessions | Key artefacts on main |
 |---|---|---|---|
-| **v3a-foundation** | ✅ SHIPPED | 33-41 (PR #24) | `verify-slice.sh`, `tdd-first-every-commit`, plan-time gate |
-| **v3b subagent suite** | ✅ SHIPPED + REDUCED | 41-48 + 54-55 + 70 + 71 | Multi-agent suite live on main; 3 specialist personas + acceptance-gate + ux-polish-reviewer + reviewer-comment |
-| **v3c efficiency layer** | ✅ MOSTLY SHIPPED | 50-58 + 60 + 70 + 71 | k=2 default, anti-pattern catalogue, differential mode, per-specialist filter, schema validation, author-time comment review, plan-review default-spawn, synthetic-deliberate-injection per-persona fixtures |
+| **v3a-foundation** | Done SHIPPED | 33-41 (PR #24) | `verify-slice.sh`, `tdd-first-every-commit`, plan-time gate |
+| **v3b subagent suite** | Done SHIPPED + REDUCED | 41-48 + 54-55 + 70 + 71 | Multi-agent suite live on main; 3 specialist personas + acceptance-gate + ux-polish-reviewer + reviewer-comment |
+| **v3c efficiency layer** | Done MOSTLY SHIPPED | 50-58 + 60 + 70 + 71 | k=2 default, anti-pattern catalogue, differential mode, per-specialist filter, schema validation, author-time comment review, plan-review default-spawn, synthetic-deliberate-injection per-persona fixtures |
 | **v3c carry-overs** | 🔵 OUT OF SCOPE | — | Stryker mutation · property-based fuzz · multi-provider 3rd reviewer · live persona drift cron |
-| **B+C+D pre-impl rigour** | ✅ **3/3 SHIPPED** (sessions 72+73) | 72-73 | D test-pain gate · B fitness functions · C plan-architect persona |
-| **Prototype-mode rigour (spec 76)** | ✅ **SHIPPED** (session 75) | 75 | Slice-category metadata + reviewer-prototype-readiness persona + atomic wiring (vitest, tdd-guard, auto-review.yml category routing, PR template). PR #125. |
+| **B+C+D pre-impl rigour** | Done **3/3 SHIPPED** (sessions 72+73) | 72-73 | D test-pain gate · B fitness functions · C plan-architect persona |
+| **Prototype-mode rigour (spec 76)** | Done **SHIPPED** (session 75) | 75 | Slice-category metadata + reviewer-prototype-readiness persona + atomic wiring (vitest, tdd-guard, auto-review.yml category routing, PR template). PR #125. |
 
 **Net state at session-75 wrap:** logic-spec phase COMPLETE; B+C+D pre-impl rigour stack 3/3 OPERATIONAL; **prototype-mode rigour spec 76 OPERATIONAL** (calibration begins at first category=prototype slice ship — P1 pre-signup-interview).
 
