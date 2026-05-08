@@ -1,0 +1,42 @@
+.scope {
+  --proto-bg-cream: #faf9f5;
+  --proto-bg-soft-purple: #F3EEFE;
+  --proto-bg-soft-pink: #FCE7F3;
+  --proto-bg-page-fade: #F5F5F4;
+  --proto-bg-soft-lavender: #F5F1F8;
+  --proto-accent-purple: #7C3AED;
+  --proto-accent-pink: #BE185D;
+}
+
+.expressive {
+  background: linear-gradient(180deg, var(--proto-bg-soft-purple) 0%, var(--proto-bg-soft-pink) 55%, var(--proto-bg-page-fade) 100%);
+  min-height: 100vh;
+}
+
+.standalone {
+  background: var(--proto-bg-cream);
+  min-height: 100vh;
+}
+
+.toggle {
+  position: fixed;
+  top: 12px;
+  right: 12px;
+  font: 12px/1.2 -apple-system, BlinkMacSystemFont, 'Inter', sans-serif;
+  color: #1A1A1A;
+  background: rgba(255, 255, 255, 0.85);
+  border: 1px solid #E5E3DC;
+  border-radius: 999px;
+  padding: 6px 12px;
+  cursor: pointer;
+  z-index: 100;
+}
+
+.toggle:focus-visible {
+  outline: 2px solid var(--proto-accent-purple);
+  outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .expressive, .standalone { transition: none; }
+}
