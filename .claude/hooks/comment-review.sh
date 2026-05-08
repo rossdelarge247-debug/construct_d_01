@@ -103,10 +103,11 @@ if [ "${COMMENT_REVIEW_SPAWN:-0}" = "1" ] && command -v claude >/dev/null 2>&1; 
   fi
 fi
 
-# Strip §Status footer block(s) before regex scanning. The source rubric
-# exempts spec §Status footers from the lineage rule (lineage IS the
-# section's purpose). Match `^## §?Status` until the next `^## ` heading
-# or EOF; lines inside that span are not subject to the regex catches.
+# The source rubric exempts spec §Status footers from the lineage rule
+# (lineage IS the section's purpose). Match `^## §?Status` until the next
+# `^## ` heading or EOF; lines inside that span are not subject to the
+# regex catches. Fence-aware so example §Status headers shown inside
+# triple-backtick blocks don't trigger suppression.
 SCAN_CONTENT=$(printf '%s' "$CONTENT" | awk '
   /^```/ { fence = !fence }
   /^## §?Status/ && !fence { in_status = 1; next }

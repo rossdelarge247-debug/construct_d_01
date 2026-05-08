@@ -165,6 +165,13 @@ Describe '.claude/hooks/comment-review.sh'
       The stdout should include "provenance"
     End
 
+    It 'scans .claude/subagent-prompts/ files for anti-patterns'
+      Data <<< "$(envelope_write '.claude/subagent-prompts/bar.md' '// PR #200 fixup; was added for the wrap flow')"
+      When run "$HOOK"
+      The status should equal 0
+      The stdout should include "provenance"
+    End
+
     It 'suppresses regex hits inside §Status footer block'
       status_only_content=$(printf '## §Status\n\nShipped session 75; PR #125; verdict ✅ approve.\n\n## Some other section\n\nClean prose with no anti-patterns here.')
       Data <<< "$(envelope_write 'docs/workspace-spec/77-something.md' "$status_only_content")"
