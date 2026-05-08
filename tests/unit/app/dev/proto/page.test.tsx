@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { render, screen } from '@testing-library/react';
-import ProtoHubPage from '@/app/dev/proto/page.dev.tsx';
+import ProtoHubPage from '@/app/dev/proto/page';
 
 describe('ProtoHubPage', () => {
   it('renders main h1 heading', () => {

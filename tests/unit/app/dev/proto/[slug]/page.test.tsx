@@ -1,6 +1,6 @@
 import { describe, it, expect, vi } from 'vitest';
 import { render, screen } from '@testing-library/react';
-import StubPage from '@/app/dev/proto/[slug]/page.dev.tsx';
+import StubPage from '@/app/dev/proto/[slug]/page';
 
 vi.mock('next/navigation', () => ({
   notFound: () => {
