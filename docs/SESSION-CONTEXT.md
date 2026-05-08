@@ -90,6 +90,24 @@ Phase 3 prototypes ARE src/ slices for plan-architect catch-rate measurement per
 
 `S-F7-beta unpark` (auth + persistence dev-mode abstraction) · `S-O1` (primary onboarding) · `S-M1.0b` (mobile marketing landing) — moved to Phase-3-mature-then-build. Patterns get de-risked in `/dev/proto/*` first; canonical canvases drawn in Claude AI Design after; real-product slices ship last. Reduces risk of throwaway Phase C work.
 
+### Carry-over for session 75 — prototype-mode rigour spec
+
+**Parked from session 74 PR #123 dialogue.** Insight: the rigour stack is calibrated for production code; running prototype slices through the full stack (test-pain audit · DoD-13 security · 100% rule · coverage ratchet · `reviewer-correctness`) over-rigours them. Prototypes have different goals (prove SHAPE · spoof functionality · fast feedback) and should keep UI/UX rigour tight (preview-deploy 6-dim · token compliance · style review) while relaxing code-rigour gates.
+
+**Recommended approach (Path B per dialogue):** slice-category metadata. Each slice's `acceptance.md` declares `category: production | prototype | infrastructure`; rigour gates read this and apply per-category behaviour. New `reviewer-prototype-readiness` persona replaces `correctness` for prototype slices.
+
+**What ships at session 75:**
+
+- New spec `docs/workspace-spec/76-prototype-mode-rigour.md` (~150L) — formal gate-behaviour matrix per category
+- CLAUDE.md amendment: §"Slice categories" defining production / prototype / infrastructure + gate behaviour
+- New `.claude/agents/reviewer-prototype-readiness.md` (~100L) — replaces `correctness` for `category: prototype` slices in `auto-review.yml`
+- Path-glob default mapping: files in `src/app/dev/proto/<slug>/**` (where slug ≠ `hub`) auto-default to `prototype`
+- TDD-guard + coverage-ratchet path-glob exemptions for prototype paths
+
+**Rationale:** rigour is a tool calibrated to risk. Production carries user-impact risk → tight gates. Prototypes carry "wasted effort if wrong" risk → tight on UI/UX, loose on code-rigour. Without the change, session 75's first prototype slice (`S-PROTO-pre-signup-interview` per Phase 3 sequence P1) accumulates the same friction S-PROTO-hub did — most of S-PROTO-hub's 9 auto-review findings were doc-vs-impl mismatches in the slice docs (security.md item 9 stale claim · AC-7 mock description · AC-4 wording) rather than real defects in the implementation.
+
+**Sizing:** ~250-400L authored across 3-4 files; spec-grade work; one session.
+
 ### Cohesive-product trajectory (post-session-72)
 
 - ✅ First cohesive Vercel preview SHIPPED (session 66)
