@@ -42,6 +42,7 @@ jobs:
     timeout-minutes: 5
     outputs:
       skip: ${{ steps.secret-check.outputs.skip }}
+      dimensions: ${{ steps.compose.outputs.dimensions }}
     steps:
       - name: Check ANTHROPIC_API_KEY presence
         id: secret-check
@@ -61,6 +62,7 @@ jobs:
           fetch-depth: 0
 
       - name: Compose per-specialist briefs (diff + slice AC + coding-conduct)
+        id: compose
         if: steps.secret-check.outputs.skip == 'false'
         env:
           BASE_SHA: ${{ github.event.pull_request.base.sha }}
@@ -82,6 +84,34 @@ jobs:
           git diff "$BASE_SHA" "$HEAD_SHA" -- . ':(exclude)docs/design-source' > /tmp/pr-diff.txt
 
           SLICE_AC=$(scripts/auto-review-slice-resolve.sh "$BRANCH" "$PR_BODY")
+
+          # Spec 76 §2 slice-category detection (dual-resolution: explicit
+          # acceptance.md override > path default). Determines specialist
+          # dimensions per spec 76 §3 substitute pattern: prototype slices
+          # swap reviewer-correctness for reviewer-prototype-readiness.
+          CATEGORY="production"
+          OVERRIDE=""
+          if [ -n "$SLICE_AC" ] && [ -f "$SLICE_AC" ]; then
+            OVERRIDE=$(grep -E '^\*\*Category:\*\*[[:space:]]+(prototype|production|infrastructure)$' "$SLICE_AC" | head -1 || true)
+            if [ -n "$OVERRIDE" ]; then
+              CATEGORY=$(printf '%s' "$OVERRIDE" | sed -E 's/^\*\*Category:\*\*[[:space:]]+//; s/[[:space:]]*$//')
+            fi
+          fi
+          if [ -z "$OVERRIDE" ]; then
+            # Path-default: any diff entry under literal-slug prototype path.
+            PROTO_HIT=$(git diff --name-only "$BASE_SHA" "$HEAD_SHA" 2>/dev/null \
+              | grep -E '^src/app/dev/proto/[^/[]+/.+\.(ts|tsx)$' | head -1 || true)
+            if [ -n "$PROTO_HIT" ]; then
+              CATEGORY="prototype"
+            fi
+          fi
+          case "$CATEGORY" in
+            prototype) DIMS_JSON='["security","prototype-readiness","style"]' ;;
+            *)         DIMS_JSON='["security","correctness","style"]' ;;
+          esac
+          echo "Resolved slice category: $CATEGORY"
+          echo "Specialist dimensions: $DIMS_JSON"
+          echo "dimensions=$DIMS_JSON" >> "$GITHUB_OUTPUT"
 
           # Author filter (`.user.login == "github-actions[bot]"`) prevents
           # a malicious PR commenter from injecting a crafted prior-findings
@@ -109,7 +139,7 @@ jobs:
           # carries its own rubric + JSON output schema + verdict-coercion
           # guard (per AC-2). Brief shape mirrors the prior single-agent
           # composition: persona body + nonce + fenced inputs.
-          for DIM in security correctness style; do
+          for DIM in $(printf '%s' "$DIMS_JSON" | jq -r '.[]'); do
             NONCE=$(openssl rand -hex 16)
             {
               cat ".claude/agents/reviewer-${DIM}.md"
@@ -196,7 +226,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        dimension: [security, correctness, style]
+        dimension: ${{ fromJSON(needs.brief.outputs.dimensions) }}
     steps:
       - uses: actions/checkout@v4
         with:
@@ -270,13 +300,15 @@ jobs:
       - name: Aggregate envelopes + derive verdict
         id: aggregate
         if: needs.brief.outputs.skip == 'false'
+        env:
+          DIMENSIONS_JSON: ${{ needs.brief.outputs.dimensions }}
         run: |
           set -euo pipefail
           # Missing envelope files → aggregator marks that dimension
           # `inconclusive` and degrades gracefully; all-missing →
           # `parse-failed`.
           mkdir -p /tmp/envelopes
-          for DIM in security correctness style; do
+          for DIM in $(printf '%s' "$DIMENSIONS_JSON" | jq -r '.[]'); do
             SRC="/tmp/envelope-artifacts/auto-review-envelope-${DIM}/${DIM}.json"
             if [ -f "$SRC" ]; then
               mv "$SRC" "/tmp/envelopes/${DIM}.json"

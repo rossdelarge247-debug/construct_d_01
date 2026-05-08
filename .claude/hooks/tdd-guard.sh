@@ -76,6 +76,16 @@ case "$RELPATH" in
   *) exit 0 ;;
 esac
 
+# Spec 76 §2 prototype-mode rigour path-default skip.
+# Match src/app/dev/proto/<literal-slug>/<...>.{ts,tsx} where <literal-slug>
+# is a directory whose name does NOT begin with `[` (Next.js parametric
+# route convention). Hub bare files (src/app/dev/proto/page.tsx) and
+# parametric routes (src/app/dev/proto/[slug]/...) intentionally fall
+# through to production rigour.
+if [[ "$RELPATH" =~ ^src/app/dev/proto/[^/[]+/.+\.(ts|tsx)$ ]]; then
+  exit 0
+fi
+
 # Allowlist filter: reuse v3a AC-5 file (path-glob match).
 ALLOWLIST_FILE="docs/tdd-exemption-allowlist.txt"
 if [ -f "$ALLOWLIST_FILE" ]; then
