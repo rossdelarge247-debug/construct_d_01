@@ -70,7 +70,7 @@ Phase 2 (canvas) and Phase 3 (prototype) feed each other per prototype — not s
 
 | Order | Slice | Notes |
 |---|---|---|
-| **P0** | `S-PROTO-hub` | All-in-one: TS+Zod registry (~25-35 rows enumerating every site flow) + hub renderer + stub routes for every entry. Living dashboard of design uncertainty + site state — durable record so work doesn't get lost between sessions. NEXT. |
+| **P0** | `S-PROTO-hub` | All-in-one: TS+Zod registry (~61 rows × 11 sections enumerating every site flow) + hub renderer + stub routes for every entry. Living dashboard of design uncertainty + site state — durable record so work doesn't get lost between sessions. NEXT. |
 | **P1** | `S-PROTO-pre-signup-interview` | 8 screens, real spec 74 AI plan integration. After P0. |
 | **P2** | `S-PROTO-section-confirm` | Per-section confirmation pattern (8 sections × multi-state). After P1. |
 | **P3** | `S-PROTO-ai-coach` | Settle phase coach interaction. After P2. |
