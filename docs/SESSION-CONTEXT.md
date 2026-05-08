@@ -24,6 +24,101 @@ Session 70: spec 74 AI plan generation + spec 65a sign-up reconciliation logic s
 
 Session 71: spec 67a respondent state machine + spec 75 account administration V1 minimum landed (closing the final 2 of 4 audit gaps from session 69's design-input audit; logic-spec phase complete). 3-specialist suite drift cleanup PR #115 tightened enforcement across 12 files.
 
+## Session 76 kickoff prompt (paste-ready)
+
+Drop this entire fenced block into the message that opens session 76. Living artifact — refresh at each wrap. Future improvement: extend `.claude/hooks/wrap-check.sh` to template-generate this block from §"Session N+1 priorities" + §"Locked" + §"Negative constraints".
+
+```text
+Kick off session 76 — Phase 3 P1 = S-PROTO-pre-signup-interview, first
+prototype slice exercising spec 76 category=prototype gates.
+
+# Branch + state
+- New branch: claude/decouple-session-76-<5char-hash>  (harness-assigned)
+- Base: latest main. Should include:
+    PR #128 (session-75 wrap-update) on top of:
+    PR #127 (session 75 P1 tone-discipline tooling, squash aa58dbe)
+    PR #126 (session 75 wrap, squash f58699a)
+    PR #125 (session 75 P0 spec 76, squash 9346963)
+- Confirm via session-start hook: HEAD vs origin/main; ahead/behind 0/0.
+
+# Read first
+1. CLAUDE.md — always. Note NEW §"Slice categories" (session 75 P0) and
+   the §"Hard controls" §"Gates this slice ships" entry reflecting
+   `comment-review.sh` §Status awareness + persona-file scanning + emoji
+   regex (session 75 P1).
+2. docs/SESSION-CONTEXT.md — §"Session 76 priorities" + §"Phase 3
+   sequence" + §"Locked (through session 75)".
+3. docs/HANDOFF-SESSION-75.md — original retro AND §"Post-wrap P1"
+   section. Note constraint #39.
+4. (Read when relevant): docs/workspace-spec/76-prototype-mode-rigour.md
+   §1-§5; docs/workspace-spec/65-pre-signup-interview-reconciled.md
+   (8 screens); .claude/agents/reviewer-tone.md (NEW persona, /wrap-only).
+
+# P0 — S-PROTO-pre-signup-interview (Phase 3 P1)
+
+First slice to exercise category=prototype path-default + reviewer-
+prototype-readiness persona + (if WRAP_TONE_REVIEW_SPAWN=1) reviewer-tone
+at /wrap.
+
+Per per-prototype 4-step loop:
+  1. Dialogue — what we're trying to learn / what's uncertain about the
+     pre-signup interview AS interaction (not as spec'd logic).
+  2. Canvas prompts — generate Claude AI Design prompts; user creates
+     canvas at docs/design-source/pre-signup-interview/<slug>/.
+  3. Absorb — wait for canvas output (likely session 77+).
+  4. Construct — build at src/app/dev/proto/pre-signup-interview/page.tsx
+     (literal-slug → category=prototype default).
+
+Verify at session-76 start: ls docs/design-source/pre-signup-interview/.
+If empty, this session targets steps 1-2 only.
+
+# Alternatives if canvas not tractable yet
+
+- S-PROTO-section-confirm (P2) — less canvas-novel; UI-only state-machine.
+- F-PA2 deferred matrix-consistency fitness function (spec 76 §8).
+- /audit-tone skill (escape-hatch persona invocation; not yet shipped).
+
+# Plan-time review
+
+Path-C manual persona-spawn (harness still lacks plan-mode toggle).
+Spawn plan-architect + exit-plan-review in parallel via Agent tool against
+/tmp framed plan. Address blocking findings + non-blocking suggestions.
+
+# Tone-discipline reminders (from session 75 P1)
+
+- comment-review.sh now scans .claude/agents/* + .claude/subagent-prompts/*
+  AND respects §Status footer exemption (fence-aware). Author-time hits
+  on persona files / spec body sections are real catches; address before
+  commit.
+- §-name citations preferred over line numbers (e.g. CLAUDE.md §"Coding
+  conduct" §"Comments: WHY not WHAT, no temporal provenance"). Line
+  numbers rot.
+- WRAP_TONE_REVIEW_SPAWN=1 at /wrap if you want LLM-judgement on
+  sibling-step / lineage / hardcoded-count anti-patterns the regex misses.
+- Constraint #39: when amending CLAUDE.md anti-pattern rules OR
+  introducing new test descriptions in a PR, grep your own diff for
+  instances of the rule being amended.
+
+# Selected constraints (full list in SESSION-CONTEXT §"Negative constraints")
+
+- #29 Pre-priority spec-gate verification.
+- #37 .dev.tsx invisibility on Vercel-preview-only workflow → use page.tsx.
+- #38 Slice-doc drift — sweep all docs in same commit.
+- #39 Sweep your own diff for the anti-pattern you're amending.
+- Spec 71 §7a single-branch-main: each piece of work to main via PR.
+- CLAUDE.md "Quote, don't paraphrase" + "Verify before planning".
+
+# Calibration cohort
+
+S-PROTO-pre-signup-interview is row 2 of 3 per spec 72c §9. Active
+personas at PR-time for category=prototype: security · prototype-
+readiness · style (correctness substituted out per spec 76 §3).
+Plan-architect at plan-time. /wrap may add reviewer-tone if opted in.
+
+Start with: confirm priorities + check canvas presence + Path-C plan-
+time review once plan drafted.
+```
+
 ## Current state
 
 ### Locked (through session 75)
