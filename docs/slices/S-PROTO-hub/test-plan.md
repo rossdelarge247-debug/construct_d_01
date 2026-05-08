@@ -38,7 +38,7 @@ All ≤1. Well under threshold.
 ## Test files
 
 ```
-src/app/dev/proto/
+tests/unit/app/dev/proto/
   registry.test.ts                — registry data integrity + 100% rule
   registry-schema.test.ts         — Zod schema unit tests
   _components/

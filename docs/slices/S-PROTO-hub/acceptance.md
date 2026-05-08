@@ -22,8 +22,8 @@
 
 - Registry at `src/app/dev/proto/registry.ts` enumerating 61 site flows × 11 sections
 - Zod schema at `src/app/dev/proto/registry-schema.ts` for compile + runtime validation
-- Hub renderer at `src/app/dev/proto/page.dev.tsx` (dev-mode-only via `.dev.tsx` infix per existing `/dev/*` convention)
-- Stub-route renderer at `src/app/dev/proto/[slug]/page.dev.tsx` for status > `not-started` entries
+- Hub renderer at `src/app/dev/proto/page.tsx` (matches `/dev/heroes` pattern — compiles in production bundles, accessible on Vercel preview / production. Option A rename applied because user's workflow is Vercel-preview-driven; no local terminal for `npm run dev`.)
+- Stub-route renderer at `src/app/dev/proto/[slug]/page.tsx` for status > `not-started` entries
 - Components at `src/app/dev/proto/_components/`: StatusBadge · ConfidenceBadge · FlowRow · SectionHeader
 - Vitest tests covering registry-Zod-validation + each component render + each page render
 
@@ -98,13 +98,13 @@ Zod schema validates this at runtime; `z.infer` provides the TS type.
 
 ### AC-3 · Hub page renders all 61 rows under 11 section headers
 
-`src/app/dev/proto/page.dev.tsx` renders the registry on a single dev-mode page. Section headers group rows in the order in AC-1. Each row displays: id · title · status badge · confidence badge · owner · tags · top open question · last-touched session.
+`src/app/dev/proto/page.tsx` renders the registry on a single dev-mode page. Section headers group rows in the order in AC-1. Each row displays: id · title · status badge · confidence badge · owner · tags · top open question · last-touched session.
 
-`.dev.tsx` infix excludes from production bundles per existing `src/app/dev/{scenarios,state-inspector,reset,engine-workbench}/page.dev.tsx` convention.
+Compiles in production bundles (no `.dev.tsx` infix; Option A); matches `/dev/heroes` pattern. Hub accessible at `/dev/proto` on preview + production deploys.
 
 ### AC-4 · Stub-route renders for status > `not-started` entries with hybrid content
 
-`src/app/dev/proto/[slug]/page.dev.tsx` is a dynamic route:
+`src/app/dev/proto/[slug]/page.tsx` is a dynamic route:
 
 - Slug matches a registry row whose status ≠ `not-started` → stub page with: title + status badge + confidence badge + ALL open questions (full list) + clickable links to spec/canvas/prototype/slice (whichever fields populated)
 - Slug doesn't match any row → 404 via Next.js `notFound()`
