@@ -308,4 +308,52 @@ EOF
       The status should be success
     End
   End
+
+  Describe 'spec 76 §2 — prototype-mode path-default skip (F-PA3)'
+    It 'exits 0 for src/app/dev/proto/<literal-slug>/page.tsx (skip)'
+      cd "$SPEC_TMP" || return 1
+      mkdir -p src/app/dev/proto/foo
+      : > src/app/dev/proto/foo/page.tsx
+      # Stub that would FAIL if invoked — proves prototype-skip short-circuits.
+      make_stub "$SPEC_TMP/vitest-stub.sh" 1
+      INPUT='{"tool_name":"Edit","tool_input":{"file_path":"src/app/dev/proto/foo/page.tsx"}}'
+      Data:expand
+        #|$INPUT
+      End
+      When call env TDD_GUARD_VITEST_CMD="$SPEC_TMP/vitest-stub.sh" \
+        TDD_GUARD_TIMEOUT=10 TDD_GUARD_WARN_AT=5 \
+        bash "$HOOK"
+      The status should be success
+    End
+
+    It 'enforces (status 2 missing-test) for src/app/dev/proto/[slug]/page.tsx (parametric route)'
+      cd "$SPEC_TMP" || return 1
+      mkdir -p 'src/app/dev/proto/[slug]'
+      : > 'src/app/dev/proto/[slug]/page.tsx'
+      INPUT='{"tool_name":"Write","tool_input":{"file_path":"src/app/dev/proto/[slug]/page.tsx"}}'
+      Data:expand
+        #|$INPUT
+      End
+      When call env TDD_GUARD_VITEST_CMD=/bin/false \
+        TDD_GUARD_TIMEOUT=10 TDD_GUARD_WARN_AT=5 \
+        bash "$HOOK"
+      The status should equal 2
+      The stderr should include 'test file missing'
+    End
+
+    It 'enforces (status 2 missing-test) for src/app/dev/proto/page.tsx (hub itself)'
+      cd "$SPEC_TMP" || return 1
+      mkdir -p src/app/dev/proto
+      : > src/app/dev/proto/page.tsx
+      INPUT='{"tool_name":"Write","tool_input":{"file_path":"src/app/dev/proto/page.tsx"}}'
+      Data:expand
+        #|$INPUT
+      End
+      When call env TDD_GUARD_VITEST_CMD=/bin/false \
+        TDD_GUARD_TIMEOUT=10 TDD_GUARD_WARN_AT=5 \
+        bash "$HOOK"
+      The status should equal 2
+      The stderr should include 'test file missing'
+    End
+  End
 End

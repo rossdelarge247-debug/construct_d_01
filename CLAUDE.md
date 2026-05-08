@@ -133,7 +133,7 @@ Hook + CI enforcement (sessions 25 + 27)
 .claude/hooks/wrap-check.sh                         — /wrap helper: wrap-protocol checklist (session 27 P0.3)
 .claude/commands/wrap.md                            — /wrap slash command (invokes wrap-check.sh)
 .github/workflows/pr-dod.yml                        — CI: src/ PRs must reference docs/slices/S-*/verification.md (session 27 P0.4)
-.github/PULL_REQUEST_TEMPLATE.md                    — 6-item DoD + 13-item security checklist on every PR (session 27 P0.4)
+.github/PULL_REQUEST_TEMPLATE.md                    — 6-item DoD + 14-item security checklist on every PR (session 27 P0.4; base count reconciled session 75 — spec 72 §11 always had 14 boxes)
 
 Stable libraries (preserve across rebuild — Re-use per Build Map)
 src/lib/bank/tink-client.ts                         — Tink API client
@@ -252,9 +252,30 @@ Spec §Status footers ARE the right place for lineage tracking (lineage IS the s
 5. No regression in adjacent slices (smoke check + automated tests across the slice's affected surfaces)
 6. Slice's open 68f/g entries resolved or explicitly deferred with reasoning in slice wrap
 
-Plus the 13-item security checklist in spec 72 §11. No exceptions. A partially-done slice is not shipped; it's re-scoped and re-planned.
+Plus the 14-item security checklist in spec 72 §11 (short-form for `category: prototype` slices — see §"Slice categories" + spec 76 §5). No exceptions for `production` or `infrastructure` categories. A partially-done slice is not shipped; it's re-scoped and re-planned.
 
 Enforcement: `.github/PULL_REQUEST_TEMPLATE.md` reproduces this checklist; `.github/workflows/pr-dod.yml` fails any PR that touches `src/` without a `docs/slices/S-*/verification.md` reference in the body (escape hatch: `no-slice-required` label for truly trivial src/ touches).
+
+## Slice categories
+
+Every slice carries a category — `production` · `prototype` · `infrastructure` — that determines which gates fire with what calibration. Canonical mechanism + per-category gate-behaviour matrix in `docs/workspace-spec/76-prototype-mode-rigour.md` §3. This section is the always-loaded summary.
+
+**Defaults by path:**
+
+- `src/app/dev/proto/<literal-slug>/**` where `<literal-slug>` is a directory whose name does NOT begin with `[` → `prototype`
+- `.claude/**` · `.github/**` · `scripts/**` · `*.config.*` · `CODEOWNERS` → `infrastructure`
+- All other `src/**` → `production`
+- `src/app/dev/proto/page.tsx` (the registry hub itself) and `src/app/dev/proto/[slug]/**` (parametric stub-routes) default to `production`; only literal-slug subroutes default to `prototype`.
+
+**Override** (when path-default is wrong for a slice's primary surface): a line `**Category:** prototype | production | infrastructure` immediately after the slice's `# S-XX-NAME` title in `docs/slices/S-XX/acceptance.md`. Detection regex: `^\*\*Category:\*\*[[:space:]]+(prototype|production|infrastructure)$`. Override takes precedence over path default. Hub case: `S-PROTO-hub` declares `**Category:** production` because it's calibration cohort row 1 and runs full production rigour despite living under `src/app/dev/proto/`.
+
+**Per-category behaviour summary** (full matrix in spec 76 §3):
+
+- `production` — all gates at production calibration. Default for the bulk of `src/**` work.
+- `prototype` — UI/UX rigour preserved (preview-deploy 6-dim runs in full · `reviewer-prototype-readiness` post-PR persona **substitutes** `reviewer-correctness`); code rigour relaxed (TDD-guard skips · coverage excludes · test-pain audit threshold raises from >2 to >5 mocks · DoD-14 short-form to items 1, 8, 12, 14 only). Used for `/dev/proto/*` static-data dev-mode UI; T0 metadata only.
+- `infrastructure` — full production-grade rigour for control-plane changes (hooks · workflows · ESLint config · persona files); the surface that gates the rest of the rig.
+
+**Sweep discipline (spec 76 §6).** Constraint #38 applies recursively: any amendment to spec 76 §3 matrix that changes a per-category rule MUST sweep all implementing files in the same PR (`vitest.config.ts` · `.claude/hooks/tdd-guard.sh` · `.github/workflows/auto-review.yml` · `.github/PULL_REQUEST_TEMPLATE.md` · any slice's overriding `acceptance.md`).
 
 ## Hard controls (in development)
 

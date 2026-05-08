@@ -28,6 +28,13 @@ export default defineConfig({
       reporter: ['text', 'lcov'],
       reportsDirectory: './coverage',
       include: ['src/**/*.{ts,tsx}'],
+      // Spec 76 §3 prototype-mode rigour: exclude category=prototype paths
+      // (literal-slug subroutes under src/app/dev/proto/<slug>/ where <slug>
+      // first char is alphanumeric/underscore/hyphen — matches Next.js
+      // segment naming, explicitly excludes parametric routes like [slug]/).
+      // Hub itself (proto/page.tsx) + parametric stub-route (proto/[slug]/)
+      // remain in coverage corpus per spec 76 §1 hub override.
+      exclude: ['src/app/dev/proto/[a-zA-Z0-9_-]*/**'],
     },
   },
   resolve: {

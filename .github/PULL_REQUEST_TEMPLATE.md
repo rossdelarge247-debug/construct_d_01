@@ -19,17 +19,17 @@
 **Required for any PR that touches `src/`.** Check each item; add evidence link or explain deferral.
 
 - [ ] **AC met with evidence** — link `docs/slices/S-XX/verification.md` showing each acceptance criterion satisfied. *(CI will fail without this reference on src/ PRs.)*
-- [ ] **Tests written + passing** — unit + integration + visual as applicable; test-pain audit per spec 72d §3 cleared (>2 mock setups per unit test triggered architectural step-back if surfaced)
+- [ ] **Tests written + passing** — unit + integration + visual as applicable; test-pain audit per spec 72d §3 cleared (>2 mock setups per unit test triggered architectural step-back if surfaced; threshold raises to >5 for `category: prototype` slices per spec 76 §3)
 - [ ] **Adversarial review done** — concerns addressed or explicitly deferred with reasoning (paste output or link)
 - [ ] **Preview deploy verified in-browser** (UI only) — golden path + edge cases + `prefers-reduced-motion`
 - [ ] **No regression in adjacent slices** — smoke check + automated tests across affected surfaces
 - [ ] **Slice's open 68f/g entries resolved** or explicitly deferred with reasoning in slice wrap
 
-## Security DoD (spec 72 §11 — 13 items)
+## Security DoD (spec 72 §11 — 14 items)
 
-**Required for any PR that touches `src/`.** See `docs/workspace-spec/72-engineering-security.md` §11.
+**Required for any PR that touches `src/`.** See `docs/workspace-spec/72-engineering-security.md` §11. For `category: prototype` slices (spec 76 §1), short-form applies: items 1, 8, 12, 14 only — remaining items render as `N/A — category: prototype, see spec 76 §5` in the slice's `security.md`.
 
-- [ ] 13-item per-slice security checklist walked — paste the filled checklist or link to the slice's `security.md`.
+- [ ] 14-item per-slice security checklist walked — paste the filled checklist or link to the slice's `security.md`. (Prototype slices: short-form per spec 76 §5.)
 
 ## Test plan
 

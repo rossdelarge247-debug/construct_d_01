@@ -1,5 +1,7 @@
 # S-PROTO-hub · Phase 3 prototype-area hub slice
 
+**Category:** production
+
 **Status:** Open · drafted: session 74
 
 **Phase:** 3 (per `docs/SESSION-CONTEXT.md` §"Session 74 priorities" §"Phase 3 sequence" P0)
