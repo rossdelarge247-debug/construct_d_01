@@ -46,25 +46,49 @@ Session 71: spec 67a respondent state machine + spec 75 account administration V
 
 ## Session 74 priorities
 
-**B+C+D programme COMPLETE (session 73 P0 closed C).** The rigour stack is now operational. **The next cohort to fire is the first 3 src/ slices** — calibration moment per spec 72c §9.
+### Plan-of-record: 3-phase post-audit programme (restored session 74)
 
-### P0 — First src/ slice post-B+C+D = calibration moment
+Per the post-audit decision: three phases address two distinct gap categories — logic gaps don't need canvas, canvas gaps need visual design, complex interaction patterns need prototypes.
 
-Spec 72c §9 trigger: *"expansion path tracked if cumulative correctness criterion-7 catch-rate falls below retain bar in first 3 src/ slices post-B+C+D"*. Session 74's first src/ slice is the start of that 3-slice cohort. Plan-architect persona (NEW session 73) participates from slice 1.
+| Phase | Goal | Status |
+|---|---|---|
+| **1 · Logic gaps** | Spec-writing, no canvas needed | ✅ COMPLETE sessions 70-71 (specs 65a · 67a · 74 · 75 closed all 4 audit gaps from session-69 design-input audit) |
+| **2 · Claude AI Design canvases** | Canonical visual source per CLAUDE.md §"Visual direction" | ▶️ IN PROGRESS (canvases at `docs/design-source/{slug}/`; mobile-screens-v2 shipped session 74) |
+| **3 · `/dev/proto/*` prototypes** | High-uncertainty interaction patterns where shape uncertainty makes static canvas risky | ⏳ STARTING SESSION 74 |
 
-Candidates (priority order, dependent on canvas state at session start):
+### Per-prototype workflow (4-step loop)
 
-- **S-F7-beta unpark.** Rebase from `a3f67ec` against current main (8 ahead / 49+ behind per session 35 archive). Once landed: persistence + auth abstraction in dev mode goes live. Touches `src/lib/store/`, `src/lib/auth/`. Depends on no canvas — can ship anytime.
-- **S-O1** if pre-signup canvas appears at `docs/design-source/pre-signup-interview/{slug}/`.
-- **S-M1.0b** if mobile canvas appears at `docs/design-source/marketing-landing/{slug}/`.
+Each Phase 3 prototype slice runs through:
+1. **Dialogue** — what we're trying to learn / what's uncertain
+2. **Canvas prompt(s)** — generate Claude AI Design prompts where static canvas helps before motion (layout, visual treatment, static states)
+3. **Absorb** — wait for canvas output, incorporate as input
+4. **Construct** — build clickable prototype to test what canvas can't show
 
-### P1+ — Backlog from `docs/v2/v2-backlog.md` + cohesive-product trajectory
+Phase 2 (canvas) and Phase 3 (prototype) feed each other per prototype — not strictly sequential.
 
-With logic-spec phase COMPLETE + B+C+D rigour stack OPERATIONAL, gating constraints on src/ work are mostly resolved. Phase C build slices unblock as canvas appears.
+### Phase 3 sequence
 
-### Validation watch — first 3 src/ slices
+| Order | Slice | Notes |
+|---|---|---|
+| **P0** | `S-PROTO-hub` | All-in-one: TS+Zod registry (~25-35 rows enumerating every site flow) + hub renderer + stub routes for every entry. Living dashboard of design uncertainty + site state — durable record so work doesn't get lost between sessions. NEXT. |
+| **P1** | `S-PROTO-pre-signup-interview` | 8 screens, real spec 74 AI plan integration. After P0. |
+| **P2** | `S-PROTO-section-confirm` | Per-section confirmation pattern (8 sections × multi-state). After P1. |
+| **P3** | `S-PROTO-ai-coach` | Settle phase coach interaction. After P2. |
+| **P4** | `S-PROTO-share-flow` | Sarah/Mark joint reconciliation. After P3. |
 
-Each src/ slice's HANDOFF gains a `## Persona findings recorded` section per active persona (4 active: reviewer-correctness, reviewer-style, reviewer-security, plan-architect). After 3 src/ slices, retain/drop verdicts re-evaluated per spec 72c §9. If correctness criterion-7 catch-rate falls below retain bar, the spec 72c §9 expansion path fires (re-introduce dedicated post-PR architecture specialist).
+Static surfaces (sign-up form, magic-link sent, settings) NOT prototyped — canvas-first is fine. Per-prototype scope honours: *"Don't prototype everything. Static surfaces are fine as canvas-first."*
+
+### Hub registry schema (S-PROTO-hub deliverable)
+
+`src/app/dev/proto/registry.ts` — TS array with Zod schema validation. Per-row fields: `id` · `title` · `section` · `status` (🔴 not started / 🟠 spec only / 🟡 canvas drafted / 🟢 prototype built / ✅ shipped) · `confidence` (🔥 high / 🟡 medium / ❓ low / ⚠️ low-blocked) · `owner` (user / claude / both) · `tags[]` (free-form: `blocks-launch`, `ai-dependent`, `multi-actor`, `mobile-priority`, `legal-review-pending`, `high-uncertainty`, `safeguarding`, …) · `openQuestions[]` (≤5) · `lastTouched` (session # + date) · `links` (spec / canvas / prototype / slice). `phase` field deliberately dropped — section header captures product-flow phase, status captures post-audit phase.
+
+### Calibration moment carries over
+
+Phase 3 prototypes ARE src/ slices for plan-architect catch-rate measurement per spec 72c §9: *"expansion path tracked if cumulative correctness criterion-7 catch-rate falls below retain bar in first 3 src/ slices post-B+C+D"*. First 3 src/ slices post-B+C+D = `S-PROTO-hub` + `S-PROTO-pre-signup-interview` + `S-PROTO-section-confirm`. Each HANDOFF records `## Persona findings recorded` per active persona (4 active: reviewer-correctness, reviewer-style, reviewer-security, plan-architect). After slice 3, retain/drop verdicts re-evaluated; if catch-rate < retain bar, expansion path fires.
+
+### Phase C real-product slices deferred
+
+`S-F7-beta unpark` (auth + persistence dev-mode abstraction) · `S-O1` (primary onboarding) · `S-M1.0b` (mobile marketing landing) — moved to Phase-3-mature-then-build. Patterns get de-risked in `/dev/proto/*` first; canonical canvases drawn in Claude AI Design after; real-product slices ship last. Reduces risk of throwaway Phase C work.
 
 ### Cohesive-product trajectory (post-session-72)
 
@@ -138,9 +162,9 @@ Sequential single-branch pattern across sessions 54→73 (20 sessions in a row).
 1. **Turn-0 verification.** SessionStart hook surfaces live branch state. Wrap PR for session 73 should be merged at session-74 start; verify against live source.
 2. **Verify branch state + working tree clean.** Resync if BEHIND > 0. Sequential single-branch pattern continues — `git fetch origin main && git remote prune origin && git checkout -B <branch> origin/main`.
 3. **Run `npm install` if `node_modules/` is empty.** TDD-guard DEGRADED detection emits a graceful skip note when vitest is absent. Madge installed in PR #119; verify `node_modules/.bin/madge` exists.
-4. **Confirm priority with user.** P0 = **First src/ slice post-B+C+D = calibration moment** (S-F7-beta unpark OR canvas-gated S-O1 / S-M1.0b). P1+ = backlog from `docs/v2/v2-backlog.md`.
-5. **If S-F7-beta unpark:** `git fetch origin claude/S-F7-beta-impl` and check current state vs `a3f67ec` (8 ahead / 49+ behind main per session 35 archive). Plan rebase strategy. Pre-flight read: `docs/slices/S-F7-beta-dev-surface/{acceptance,verification,security}.md`.
-6. **If canvas-gated:** check `docs/design-source/marketing-landing/` + `docs/design-source/pre-signup-interview/` for new canvas slug subfolders; if present, S-O1 / S-M1.0b unblock. Otherwise, default to S-F7-beta unpark.
+4. **Confirm priority with user.** P0 = `S-PROTO-hub` (Phase 3 prototype-area hub slice — TS+Zod registry + hub renderer + stub routes for every site flow, all-in-one). P1+ = Phase 3 sequence per §"Session 74 priorities" (pre-signup-interview · section-confirm · ai-coach · share-flow).
+5. **Per-prototype workflow** (after hub ships): each prototype = dialogue → canvas-prompt-if-needed → absorb canvas output → construct clickable prototype. Static surfaces NOT prototyped — canvas-first only.
+6. **Phase C real-product slices DEFERRED** until Phase 3 patterns mature: `S-F7-beta unpark` (parked at `claude/S-F7-beta-impl @ a3f67ec`) · `S-O1` (primary onboarding) · `S-M1.0b` (mobile marketing landing). Don't open these as P0 candidates — patterns get de-risked in `/dev/proto/*` first; canonical canvases drawn from prototype findings; real-product slices ship last.
 7. **CODEOWNERS solo-operator pattern (#25)** — src/ PRs may need admin-bypass merge if no other reviewers available.
 8. **Constraint #29 (pre-priority spec-gate verification):** before treating any "per spec X §Y" priority as authorized, grep that section's gating IF-clauses verbatim.
 9. **Constraint #31 (pre-priority carry-over framing verification):** before treating S-F7-beta as "still parked", grep live state and confirm kickoff framing matches reality.
