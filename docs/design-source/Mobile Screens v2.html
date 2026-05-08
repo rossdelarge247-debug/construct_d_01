@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Decouple — Mobile + Desktop pairs (v2)</title>
+<meta name="ext-resource-dependency" content="https://cdn.tailwindcss.com"/>
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Source+Serif+Pro:wght@400;600&display=swap" rel="stylesheet">
+<script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+<style>
+  html, body, #root { height: 100%; margin: 0; }
+  body { font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif; background: #F5F5F4; color: #1A1A1A; -webkit-font-smoothing: antialiased; }
+</style>
+</head>
+<body>
+<div id="root"></div>
+
+<template id="__bundler_thumbnail">
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+    <rect width="100" height="100" fill="#1A1A1A"/>
+    <rect x="14" y="22" width="46" height="56" rx="3" fill="none" stroke="#F5F5F4" stroke-width="2"/>
+    <rect x="64" y="32" width="22" height="36" rx="3" fill="none" stroke="#6D5BD0" stroke-width="2"/>
+    <text x="50" y="92" text-anchor="middle" font-family="Inter, sans-serif" font-size="9" font-weight="600" fill="#F5F5F4">D · v2</text>
+  </svg>
+</template>
+
+<script type="text/babel" data-presets="react" src="ios-frame.jsx"></script>
+<script type="text/babel" data-presets="react" src="design-canvas.jsx"></script>
+<script type="text/babel" data-presets="react" src="mobile/screens.jsx"></script>
+<script type="text/babel" data-presets="react" src="mobile/ai-desktop-style.jsx"></script>
+<script type="text/babel" data-presets="react" src="mobile/screens-v2.jsx"></script>
+<script type="text/babel" data-presets="react" src="mobile/forms.jsx"></script>
+<script type="text/babel" data-presets="react" src="mobile/public-extras.jsx"></script>
+<script type="text/babel" data-presets="react" src="mobile/ai-variants.jsx"></script>
+
+<script type="text/babel" data-presets="react">
+const PhoneFrame = window.IOSDevice;
+const Canvas = window.DesignCanvas;
+const CanvasSection = window.DCSection;
+const Artboard = window.DCArtboard;
+
+/* ---------- phone artboard ---------- */
+const FRAME_W = 402, FRAME_H = 874, STATUS_PAD = 56, PHONE_PAD = 28;
+const PHONE_ART_W = FRAME_W + PHONE_PAD * 2;   // 458
+const PHONE_ART_H = FRAME_H + PHONE_PAD * 2;   // 930
+
+function Phone({ children }) {
+  return (
+    <PhoneFrame width={FRAME_W} height={FRAME_H}>
+      <div style={{paddingTop: STATUS_PAD, height:"100%", boxSizing:"border-box"}}>
+        <div style={{height: FRAME_H - STATUS_PAD, overflow:"hidden"}}>{children}</div>
+      </div>
+    </PhoneFrame>
+  );
+}
+function PhoneStage({ children }) {
+  return (
+    <div style={{
+      width: PHONE_ART_W, height: PHONE_ART_H,
+      background: "linear-gradient(180deg, #FAFAF7 0%, #F0EEE7 100%)",
+      display: "flex", alignItems: "center", justifyContent: "center"
+    }}>
+      <Phone>{children}</Phone>
+    </div>
+  );
+}
+
+/* ---------- desktop artboard via iframe ---------- */
+/* Desktop full-fidelity is 1440x900. Scale to fit a comfortable reading width
+   that pairs visually with the 458px phone (which is ~44% the desktop width).
+   We use 0.62 scale → 893×558, plus padding for breathing room. */
+const DESK_NATIVE_W = 1440, DESK_NATIVE_H = 900;
+const DESK_SCALE = 0.62;
+const DESK_PAD = 28;
+const DESK_INNER_W = DESK_NATIVE_W * DESK_SCALE;   // 892.8
+const DESK_INNER_H = DESK_NATIVE_H * DESK_SCALE;   // 558
+const DESK_ART_W = Math.round(DESK_INNER_W) + DESK_PAD * 2;  // 949
+const DESK_ART_H = Math.round(DESK_INNER_H) + DESK_PAD * 2;  // 614
+
+function DesktopStage({ src, label }) {
+  return (
+    <div style={{
+      width: DESK_ART_W, height: DESK_ART_H,
+      background: "linear-gradient(180deg, #FAFAF7 0%, #F0EEE7 100%)",
+      display: "flex", alignItems: "center", justifyContent: "center",
+      position: "relative"
+    }}>
+      <div style={{
+        width: Math.round(DESK_INNER_W), height: Math.round(DESK_INNER_H),
+        borderRadius: 10, overflow: "hidden",
+        boxShadow: "0 12px 30px rgba(0,0,0,0.10), 0 2px 6px rgba(0,0,0,0.06)",
+        background: "#fff", border: "1px solid #EAECEF"
+      }}>
+        <iframe
+          src={src}
+          style={{
+            width: DESK_NATIVE_W, height: DESK_NATIVE_H,
+            border: "none",
+            transform: `scale(${DESK_SCALE})`, transformOrigin: "top left",
+            display: "block"
+          }}
+          loading="lazy"
+        />
+      </div>
+      {label && (
+        <div style={{
+          position: "absolute", left: 12, top: 10,
+          fontSize: 10, letterSpacing: "0.08em", textTransform: "uppercase",
+          fontWeight: 700, color: "#9AA0A6"
+        }}>{label}</div>
+      )}
+    </div>
+  );
+}
+
+/* placeholder desktop card — for screens we don't have a desktop file yet */
+function DesktopPlaceholder({ title, sub, lines = 6 }) {
+  return (
+    <div style={{
+      width: DESK_ART_W, height: DESK_ART_H,
+      background: "linear-gradient(180deg, #FAFAF7 0%, #F0EEE7 100%)",
+      display: "flex", alignItems: "center", justifyContent: "center"
+    }}>
+      <div style={{
+        width: Math.round(DESK_INNER_W), height: Math.round(DESK_INNER_H),
+        borderRadius: 10, background: "#FFFFFF", border: "1px dashed #E4DEFD",
+        padding: "32px 36px", boxSizing: "border-box",
+        display: "flex", flexDirection: "column", gap: 14
+      }}>
+        <div style={{display:"flex",alignItems:"center",gap:10}}>
+          <div style={{width:24,height:24,borderRadius:999,background:"#6D5BD0",display:"flex",alignItems:"center",justifyContent:"center",color:"#fff",fontSize:12,fontWeight:700}}>D</div>
+          <div style={{fontSize:11,letterSpacing:"0.08em",textTransform:"uppercase",fontWeight:700,color:"#9AA0A6"}}>Desktop · placeholder</div>
+        </div>
+        <div style={{fontFamily:"'Source Serif Pro', Georgia, serif",fontSize:24,fontWeight:600,letterSpacing:"-0.02em",color:"#1A1A1A"}}>{title}</div>
+        {sub && <div style={{fontSize:13,color:"#5F6368",lineHeight:1.5}}>{sub}</div>}
+        <div style={{display:"flex",flexDirection:"column",gap:8,marginTop:6}}>
+          {Array.from({length:lines}).map((_,i)=>(
+            <div key={i} style={{height:8,borderRadius:4,background:"#F0EDE2",width:`${85-i*5}%`}}/>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/* ---------- pair artboard ---------- */
+/* Each "row" is two artboards side-by-side at the same logical row.
+   Design canvas already lays artboards left-to-right within a section; we just
+   keep the order: desktop first (big), phone second (small). */
+
+function App() {
+  return (
+    <Canvas
+      title="Decouple — Mobile · paired with desktop"
+      subtitle="Each row: live-rendered desktop on the left, the matched phone view on the right. AI integration uses the desktop's purple brand on both."
+    >
+      {/* ============ Public ============ */}
+      <CanvasSection id="public" title="Public · marketing & onboarding">
+        <Artboard id="d-landing" label="01 · Desktop · Marketing landing" width={DESK_ART_W} height={DESK_ART_H}>
+          <DesktopStage src="Landing Page.html" label="Landing Page.html"/>
+        </Artboard>
+        <Artboard id="m-landing" label="01 · Mobile · Marketing landing" width={PHONE_ART_W} height={PHONE_ART_H}>
+          <PhoneStage><window.M_Landing/></PhoneStage>
+        </Artboard>
+
+        <Artboard id="d-how" label="02 · Desktop · How it works" width={DESK_ART_W} height={DESK_ART_H}>
+          <DesktopStage src="Desktop · How it works.html" label="Desktop · How it works.html"/>
+        </Artboard>
+        <Artboard id="m-how" label="02 · Mobile · How it works" width={PHONE_ART_W} height={PHONE_ART_H}>
+          <PhoneStage><window.M_HowItWorks/></PhoneStage>
+        </Artboard>
+
+        <Artboard id="d-pricing" label="03 · Desktop · Pricing" width={DESK_ART_W} height={DESK_ART_H}>
+          <DesktopStage src="Desktop · Pricing.html" label="Desktop · Pricing.html"/>
+        </Artboard>
+        <Artboard id="m-pricing" label="03 · Mobile · Pricing" width={PHONE_ART_W} height={PHONE_ART_H}>
+          <PhoneStage><window.M_Pricing/></PhoneStage>
+        </Artboard>
+
+        <Artboard id="d-faq" label="04 · Desktop · FAQ & Trust" width={DESK_ART_W} height={DESK_ART_H}>
+          <DesktopStage src="Desktop · FAQ + Trust.html" label="Desktop · FAQ + Trust.html"/>
+        </Artboard>
+        <Artboard id="m-faq" label="04 · Mobile · FAQ & Trust" width={PHONE_ART_W} height={PHONE_ART_H}>
+          <PhoneStage><window.M_FAQ/></PhoneStage>
+        </Artboard>
+
+        <Artboard id="d-signin" label="05 · Desktop · Sign-in / Sign-up" width={DESK_ART_W} height={DESK_ART_H}>
+          <DesktopStage src="Desktop · Sign in.html" label="Desktop · Sign in.html"/>
+        </Artboard>
+        <Artboard id="m-signin" label="05 · Mobile · Sign in" width={PHONE_ART_W} height={PHONE_ART_H}>
+          <PhoneStage><window.M_SignIn/></PhoneStage>
+        </Artboard>
+        <Artboard id="m-signup" label="05b · Mobile · Sign up" width={PHONE_ART_W} height={PHONE_ART_H}>
+          <PhoneStage><window.M_SignUp/></PhoneStage>
+        </Artboard>
+      </CanvasSection>
+
+      {/* ============ Logged-in core ============ */}
+      <CanvasSection id="loggedin" title="Logged in · paired flow">
+        <Artboard id="d-dash" label="06 · Desktop · Dashboard (Day 7)" width={DESK_ART_W} height={DESK_ART_H}>
+          <DesktopStage src="Post-connect Dashboard.html" label="Post-connect Dashboard.html"/>
+        </Artboard>
+        <Artboard id="m-dash" label="06 · Mobile · Dashboard (Day 7)" width={PHONE_ART_W} height={PHONE_ART_H}>
+          <PhoneStage><window.M_Dashboard_v2/></PhoneStage>
+        </Artboard>
+
+        <Artboard id="d-todos" label="07 · Desktop · To-do panel" width={DESK_ART_W} height={DESK_ART_H}>
+          <DesktopStage src="Section To-do Panel.html" label="Section To-do Panel.html"/>
+        </Artboard>
+        <Artboard id="m-todos" label="07 · Mobile · To-do" width={PHONE_ART_W} height={PHONE_ART_H}>
+          <PhoneStage><window.M_Todos_v2/></PhoneStage>
+        </Artboard>
+
+        <Artboard id="d-picture" label="08 · Desktop · Your Picture" width={DESK_ART_W} height={DESK_ART_H}>
+          <DesktopStage src="Your Picture v2.html" label="Your Picture v2.html"/>
+        </Artboard>
+        <Artboard id="m-picture" label="08 · Mobile · Your Picture · Private" width={PHONE_ART_W} height={PHONE_ART_H}>
+          <PhoneStage><window.M_YourPicture_v2/></PhoneStage>
+        </Artboard>
+
+        <Artboard id="d-reconcile" label="09 · Desktop · Reconciliation" width={DESK_ART_W} height={DESK_ART_H}>
+          <DesktopStage src="Reconciliation.html" label="Reconciliation.html"/>
+        </Artboard>
+        <Artboard id="m-reconcile" label="09 · Mobile · Reconcile · contested" width={PHONE_ART_W} height={PHONE_ART_H}>
+          <PhoneStage><window.M_Reconcile_v2/></PhoneStage>
+        </Artboard>
+
+        <Artboard id="d-redline" label="10 · Desktop · Settlement redline" width={DESK_ART_W} height={DESK_ART_H}>
+          <DesktopStage src="Settlement - Redline.html" label="Settlement - Redline.html"/>
+        </Artboard>
+        <Artboard id="m-redline" label="10 · Mobile · Mark's redline" width={PHONE_ART_W} height={PHONE_ART_H}>
+          <PhoneStage><window.M_Redline_v2/></PhoneStage>
+        </Artboard>
+
+        <Artboard id="d-preflight" label="11 · Desktop · Settlement pre-flight" width={DESK_ART_W} height={DESK_ART_H}>
+          <DesktopStage src="Settlement - Pre-flight.html" label="Settlement - Pre-flight.html"/>
+        </Artboard>
+        <Artboard id="m-preflight" label="11 · Mobile · Pre-flight advisory" width={PHONE_ART_W} height={PHONE_ART_H}>
+          <PhoneStage><window.M_Preflight_v2/></PhoneStage>
+        </Artboard>
+      </CanvasSection>
+
+      {/* ============ Bank-statement reconciliation forms ============ */}
+      <CanvasSection id="forms" title="Prepare phase · transaction forms (mobile)">
+        <Artboard id="m-form-cat" label="12 · Categorise (joint life insurance?)" width={PHONE_ART_W} height={PHONE_ART_H}>
+          <PhoneStage><window.M_Form_Categorise/></PhoneStage>
+        </Artboard>
+        <Artboard id="m-form-rec" label="13 · Confirm recurring (Octopus DD)" width={PHONE_ART_W} height={PHONE_ART_H}>
+          <PhoneStage><window.M_Form_ConfirmRecurring/></PhoneStage>
+        </Artboard>
+        <Artboard id="m-form-man" label="14 · Manual entry (cash to Mark)" width={PHONE_ART_W} height={PHONE_ART_H}>
+          <PhoneStage><window.M_Form_ManualEntry/></PhoneStage>
+        </Artboard>
+        <Artboard id="m-form-dup" label="15 · Resolve duplicate (transfer)" width={PHONE_ART_W} height={PHONE_ART_H}>
+          <PhoneStage><window.M_Form_Duplicate/></PhoneStage>
+        </Artboard>
+        <Artboard id="m-form-split" label="16 · Split (John Lewis: gift + coat)" width={PHONE_ART_W} height={PHONE_ART_H}>
+          <PhoneStage><window.M_Form_Split/></PhoneStage>
+        </Artboard>
+        <Artboard id="m-form-bal" label="17 · Balance check (vs statement PDF)" width={PHONE_ART_W} height={PHONE_ART_H}>
+          <PhoneStage><window.M_Form_BalanceCheck/></PhoneStage>
+        </Artboard>
+      </CanvasSection>
+
+      {/* ============ Reference: kept Variation B ============ */}
+      <CanvasSection id="ref-b" title="Reference · old variation B (amber margin card · archived)">
+        <Artboard id="m-dash-b" label="ref · Dashboard · variation B" width={PHONE_ART_W} height={PHONE_ART_H}>
+          <PhoneStage><window.M_Dashboard_vB/></PhoneStage>
+        </Artboard>
+        <Artboard id="m-reconcile-b" label="ref · Reconcile · variation B" width={PHONE_ART_W} height={PHONE_ART_H}>
+          <PhoneStage><window.M_Reconcile_vB/></PhoneStage>
+        </Artboard>
+        <Artboard id="m-redline-b" label="ref · Redline · variation B" width={PHONE_ART_W} height={PHONE_ART_H}>
+          <PhoneStage><window.M_Redline_vB/></PhoneStage>
+        </Artboard>
+      </CanvasSection>
+    </Canvas>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById('root')).render(<App/>);
+</script>
+</body>
+</html>
