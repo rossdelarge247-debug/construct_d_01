@@ -1,6 +1,6 @@
 import type { Confidence } from '../registry-schema';
 
-const META: Record<Confidence, { emoji: string; label: string }> = {
+const CONFIDENCE_DISPLAY: Record<Confidence, { emoji: string; label: string }> = {
   high: { emoji: '🔥', label: 'high' },
   medium: { emoji: '🟡', label: 'medium' },
   low: { emoji: '❓', label: 'low' },
@@ -8,7 +8,7 @@ const META: Record<Confidence, { emoji: string; label: string }> = {
 };
 
 export function ConfidenceBadge({ confidence }: { confidence: Confidence }) {
-  const { emoji, label } = META[confidence];
+  const { emoji, label } = CONFIDENCE_DISPLAY[confidence];
   return (
     <span
       aria-label={`Confidence: ${label}`}

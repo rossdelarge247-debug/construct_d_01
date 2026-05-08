@@ -4,7 +4,7 @@ import { registryRowSchema } from '@/app/dev/proto/registry-schema';
 import type { Section } from '@/app/dev/proto/registry-schema';
 
 describe('registry data', () => {
-  describe('100% rule (acceptance.md AC-6)', () => {
+  describe('section counts total 61', () => {
     it('contains exactly 61 rows', () => {
       expect(registry).toHaveLength(61);
     });
@@ -41,7 +41,7 @@ describe('registry data', () => {
     });
   });
 
-  describe('schema conformance (AC-2)', () => {
+  describe('schema conformance', () => {
     it('every row passes registryRowSchema.parse', () => {
       for (const row of registry) {
         expect(() => registryRowSchema.parse(row), `row id=${row.id}`).not.toThrow();

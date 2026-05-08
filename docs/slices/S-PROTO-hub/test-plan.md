@@ -30,8 +30,8 @@ Threshold: >2 mocks per unit test = pain signal → step back, reconsider seams.
 | FlowRow render | 0 | Pure render with sample row prop |
 | SectionHeader render | 0 | Pure render with sample title |
 | Hub page render | 0 | Imports registry as static module |
-| Stub-route sample render | 1 | `useParams` from `next/navigation` |
-| Stub-route 404 (unknown slug) | 1 | Same `useParams` mock; assert `notFound()` called |
+| Stub-route sample render | 1 | `notFound` from `next/navigation` mocked to throw |
+| Stub-route 404 (unknown slug) | 1 | Same `notFound` mock; assert thrown signal |
 
 All ≤1. Well under threshold.
 

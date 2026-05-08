@@ -1,6 +1,6 @@
 import type { Status } from '../registry-schema';
 
-const META: Record<Status, { emoji: string; label: string }> = {
+const STATUS_DISPLAY: Record<Status, { emoji: string; label: string }> = {
   'not-started': { emoji: '🔴', label: 'not started' },
   'spec-only': { emoji: '🟠', label: 'spec only' },
   'canvas-drafted': { emoji: '🟡', label: 'canvas drafted' },
@@ -9,7 +9,7 @@ const META: Record<Status, { emoji: string; label: string }> = {
 };
 
 export function StatusBadge({ status }: { status: Status }) {
-  const { emoji, label } = META[status];
+  const { emoji, label } = STATUS_DISPLAY[status];
   return (
     <span
       aria-label={`Status: ${label}`}

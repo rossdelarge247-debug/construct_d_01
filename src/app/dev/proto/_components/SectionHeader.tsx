@@ -23,7 +23,6 @@ export function SectionHeader({ section, count }: { section: Section; count: num
         fontSize: 'var(--ds-type-21)',
         fontFamily: 'var(--ds-font-serif)',
         color: 'var(--ds-color-ink)',
-        margin: 0,
       }}
     >
       <span>{title}</span>

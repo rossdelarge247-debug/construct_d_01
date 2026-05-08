@@ -2,7 +2,7 @@ import { describe, it, expect } from 'vitest';
 import { readFileSync, readdirSync } from 'node:fs';
 import { join } from 'node:path';
 
-describe('AC-5: S-F1 design-token compliance for proto _components', () => {
+describe('components use only --ds-* tokens (no hex / rgb / inline px)', () => {
   const componentDir = join(process.cwd(), 'src/app/dev/proto/_components');
   const files = readdirSync(componentDir).filter((f) => f.endsWith('.tsx'));
 

@@ -106,7 +106,7 @@ Compiles in production bundles (no `.dev.tsx` infix; Option A); matches `/dev/he
 
 `src/app/dev/proto/[slug]/page.tsx` is a dynamic route:
 
-- Slug matches a registry row whose status ≠ `not-started` → stub page with: title + status badge + confidence badge + ALL open questions (full list) + clickable links to spec/canvas/prototype/slice (whichever fields populated)
+- Slug matches a registry row whose status ≠ `not-started` → stub page with: title + status badge + confidence badge + ALL open questions (full list) + displayed paths to spec/canvas/prototype/slice (whichever fields populated; rendered as `<code>` text for reference — values are internal repo paths, not navigable as web URLs)
 - Slug doesn't match any row → 404 via Next.js `notFound()`
 
 Zero design content (no marketing copy, no UI mockups, no fake screen shells).
@@ -137,8 +137,8 @@ Per CLAUDE.md §"Engineering conventions" §"100% rule".
 | FlowRow render | 0 |
 | SectionHeader render | 0 |
 | Hub page render | 0 |
-| Stub-route sample render | 1 (`useParams`) |
-| Stub-route 404 | 1 (`useParams`) |
+| Stub-route sample render | 1 (`notFound`) |
+| Stub-route 404 | 1 (`notFound`) |
 
 All ≤1. Under spec 72d §3 >2-mock pain threshold.
 

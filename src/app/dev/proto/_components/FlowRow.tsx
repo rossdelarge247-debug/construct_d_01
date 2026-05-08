@@ -32,6 +32,15 @@ export function FlowRow({ row }: { row: RegistryRow }) {
             row.title
           )}
         </h3>
+        <code
+          style={{
+            fontSize: 'var(--ds-type-11)',
+            color: 'var(--ds-color-text-muted)',
+            fontFamily: 'var(--ds-font-mono)',
+          }}
+        >
+          {row.id}
+        </code>
         <StatusBadge status={row.status} />
         <ConfidenceBadge confidence={row.confidence} />
       </header>

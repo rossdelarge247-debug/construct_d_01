@@ -22,6 +22,11 @@ describe('FlowRow', () => {
     expect(screen.getByText('Sample row')).toBeInTheDocument();
   });
 
+  it('renders row id as visible text', () => {
+    render(<FlowRow row={sampleRow} />);
+    expect(screen.getByText('sample-row')).toBeInTheDocument();
+  });
+
   it('renders top open question with Q: prefix', () => {
     render(<FlowRow row={sampleRow} />);
     expect(screen.getByText(/Q:.*What is this/)).toBeInTheDocument();
