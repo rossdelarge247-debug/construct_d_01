@@ -1,4 +1,26 @@
-# Session 75 Wrap Context Block (heading into session 76)
+# Session 76 Wrap Context Block (heading into session 77)
+
+## Session 76 wrap delta — read this first
+
+Session 76 shipped `S-PROTO-pre-signup-interview` — 8-screen clickable prototype at `/dev/proto/pre-signup-interview`, expressive bg primary + `?bg=standalone` toggle, plan-time review path-C exercised (plan-architect + exit-plan-review parallel, verdict approve-with-revisions, all addressed). Branch `claude/proto-presignup-interview-Okucr` at `3fda716`, 5 ahead of `main`, working tree clean.
+
+**Shipped at structural fidelity only — not canvas fidelity.** The user pushed back at preview: prototype looks more basic than the three canvas exports they uploaded. Honest cause + corrective protocol in `docs/HANDOFF-SESSION-76.md`. Short version: specs were never read in session (citations built on CLAUDE.md summaries); canvases were never decoded (5MB bundled HTML treated as colour-palette source via grep, not visual-treatment authority); plan-time reviewers ratified the flawed framing because their rubric doesn't check source-artefact actual reads.
+
+**Next-session priorities (in order):**
+
+- **P0 · Ship the rigour-v3d slice before any prototype refactor.** `docs/slices/S-INFRA-rigour-v3d-canvas-decode-and-spec-quote-gates/acceptance.md` is scoped at skeletal level; full authoring (literal spec quotes per the rule the slice itself enforces) is the first task. Six controls: `decode-bundler-canvas.sh` script · `canvas-decode.yml` CI gate · `spec-citation-quote.sh` PostToolUse hook · `spec-citation-quote.yml` CI mirror · spec 72d §5 Q6 amendment · CLAUDE.md §"Pre-priority canvas-fidelity verification" amendment. AC-8 dogfooding: slice's own docs must pass its own gates before it ships.
+
+- **P1 · Refactor `S-PROTO-pre-signup-interview` against decoded canvases + literal spec re-reads.** Only after P0 ships. Decode the three canvases at `docs/design-source/pre-signup-interview/` via the new script. Read spec 65 + spec 42 + spec 76 in full (offset+limit batches). Discuss screens / questions / missing screens with user **before any src/ write**. Refactor each component to match canvas treatment (RadioCard ring, ScreenShell type weights + spacing, PlanSection card style, JourneyTimeline visual anchor).
+
+**Process change for session 77 onwards (corrective protocol):**
+
+Before any slice that involves spec-driven content or canvas-driven visual fidelity:
+1. Open every cited spec in full (offset+limit; budget 600-1000L of spec-content reads per slice). Quote the literal sentence at each citation point in acceptance.md — not paraphrase.
+2. For bundled-HTML canvases: run `scripts/decode-bundler-canvas.sh` (lands in P0); read decoded form; treat as authoritative for visual treatment.
+3. Pre-construction discussion turn: confirm screens / questions / microcopy / layout intent with user before any src/ touches. Per-screen explicit sign-off.
+4. Plan-time review gets Q6 source-artefact verification (lands in P0).
+
+
 
 ## Product positioning (preserve across sessions)
 
