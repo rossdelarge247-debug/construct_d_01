@@ -24,7 +24,7 @@ Review the diff against each of these. Stay within your dimension — security c
 
 7. **Mobile viewport (`category: mobile-viewport`).** Renders at 375×667 (spec 72a) without horizontal overflow; hit-targets ≥44×44px on touch; bottom-of-screen thumb-zone interactions reachable one-handed; text legible without zoom; sticky elements don't obscure content. Default `issue`, `blocking: false` unless the prototype is specifically a mobile-first slice (then `blocking: true`).
 
-8. **AC-gap (`category: ac-gap`).** Each AC's `Verification` field describes observable behaviour or a test that confirms it. If the diff omits behaviour mandated by an in-scope AC, flag with label `issue` — `blocking: true` if the omitted behaviour is load-bearing for the AC's `Outcome` claim; `suggestion` (blocking: false) for non-load-bearing AC-gaps. Inherited from correctness rubric criterion 8 because correctness is substituted out for prototype category; without this, prototype slices would have no AC-gap surface at PR review.
+8. **AC-gap (`category: ac-gap`).** Each AC's `Verification` field describes observable behaviour or a test that confirms it. If the diff omits behaviour mandated by an in-scope AC, flag with label `issue` — `blocking: true` if the omitted behaviour is load-bearing for the AC's `Outcome` claim; `suggestion` (blocking: false) for non-load-bearing AC-gaps. Prototype slices need an AC-gap check at PR review; this criterion provides it (the substitute pattern in spec 76 §3 routes correctness's AC-gap surface to this persona).
 
 ## Per-invocation context (constructed by the orchestrator)
 
@@ -40,7 +40,7 @@ For files >300 lines, content may be inlined via spec 72b Option C delimiters: `
 
 ## Differential mode (rounds 2+)
 
-Identical semantics to `reviewer-correctness` §"Differential mode" (per spec 72c §6): if `<fix-up-diff-NONCE>` and `<prior-findings-NONCE>` are present, scope review to walking prior findings + new findings introduced by the fix-up only. Round-1 path (no prior round): review full `<pr-diff-NONCE>`.
+Per spec 72c §6 differential review: if `<fix-up-diff-NONCE>` and `<prior-findings-NONCE>` are present, scope review to walking prior findings + new findings introduced by the fix-up only. Round-1 path (no prior round): review full `<pr-diff-NONCE>`.
 
 ## Belt-and-braces against prompt injection
 

@@ -4,7 +4,7 @@
 
 **Adjacent specs:** spec 72 (engineering security DoD) · spec 72a (preview-deploy rubric) · spec 72b (adversarial review budget) · spec 72c (multi-agent review framework) · spec 72d (architecture review additions) · CLAUDE.md §"Slice categories" + §"Engineering conventions" §"Test-pain audit" + §"Hard controls" §"Verdict vocabulary".
 
-**Lineage.** Phase-3 prototype slices (`/dev/proto/*` per `docs/SESSION-CONTEXT.md` §"Phase 3 sequence") run static-data dev-mode UI for high-uncertainty interaction patterns. Calibration cohort row 1 (`S-PROTO-hub`, session 74; PR #123) shipped under production-calibrated rigour and paid a 9-finding post-PR auto-review tax — most findings were doc-vs-impl mismatches not real defects (per `docs/HANDOFF-SESSION-74.md` §"What could improve"). Production gates over-rigour prototype slices because the production calibration optimises for: T1+ data, multi-actor surfaces, persistent state, real auth. Prototype slices have none of those. Spec 76 introduces slice-category metadata so gate behaviour is category-aware: tight UI/UX rigour (loveable matters even more for prototypes; users see them on previews) but relaxed code rigour (TDD-guard, coverage, test-pain threshold, DoD-14 security checklist).
+**Lineage.** Phase-3 prototype slices (`/dev/proto/*` per `docs/SESSION-CONTEXT.md` §"Phase 3 sequence") run static-data dev-mode UI for high-uncertainty interaction patterns. The first prototype-area slice shipped under production-calibrated rigour produced a high post-PR finding count dominated by doc-vs-impl mismatches rather than real defects. Production gates over-rigour prototype slices because the production calibration optimises for T1+ data, multi-actor surfaces, persistent state, and real auth — none of which prototype slices carry. Spec 76 introduces slice-category metadata so gate behaviour is category-aware: tight UI/UX rigour (loveable matters even more for prototypes; users see them on previews) but relaxed code rigour (TDD-guard, coverage, test-pain threshold, DoD-14 security checklist).
 
 ## §1 — Three slice categories
 
@@ -62,7 +62,7 @@ CLAUDE.md §"Slice categories" carries a 1-paragraph summary + pointer to this s
 
 **Lens.** UI/UX integration of the prototype as a clickable artefact: interaction patterns, accessibility (keyboard nav, screen-reader cues, focus management), copy clarity, error/empty/loading/disabled states, motion handling (`prefers-reduced-motion`), mobile viewport behaviour, hit-target sizes. NOT: production logic correctness, hidden-effects analysis, architectural-severity (deferred for prototype category per §3 substitute pattern).
 
-**Out of scope at V1:** synthetic-deliberate-injection fixture (spec 72c §7 first-3-slice gate); live-drift detection (spec 72c §9 carry-over); auto-blocking PR-merge (informational at V1, mirrors `acceptance-gate.md` deferral pattern). Persona retain/drop measurement starts at first prototype slice that ships under category=prototype (P1 = `S-PROTO-pre-signup-interview`).
+**Out of scope at V1:** synthetic-deliberate-injection fixture (spec 72c §7 first-3-slice gate); live-drift detection (spec 72c §9 carry-over); auto-blocking PR-merge (informational at V1; deferred until persona catch-rate is calibrated). Persona retain/drop measurement starts at first prototype slice that ships under category=prototype.
 
 ## §5 — DoD-14 security checklist short-form for prototypes
 
@@ -85,15 +85,15 @@ This constraint applies recursively to spec 76 itself: any future amendment to t
 
 ## §7 — Why "Path B" (slice-category metadata) over alternatives
 
-- **Path A: path-globs alone (no metadata).** Rejected per session-74 dialogue: too implicit. Authors need a way to override the path-default when a slice's primary surface contradicts the mapping (the hub case). Path-globs alone provide no override mechanism.
+- **Path A: path-globs alone (no metadata).** Rejected because authors need a way to override the path-default when a slice's primary surface contradicts the mapping (the hub case). Path-globs alone provide no override mechanism.
 - **Path B: slice-category metadata** (this spec). Path-default + explicit acceptance.md override. Two-tier resolution gives sensible defaults (low boilerplate for the common case) plus an escape hatch (override for the exceptional case). Detection cost is low: regex grep against acceptance.md OR path classification, whichever applies.
-- **Path C: full spec-grade framework** (e.g. category schema with frontmatter validation, per-gate plugin registry, CI-enforced category coherence checks). Rejected per session-74 dialogue: over-engineered for current scale (one prototype shipped; 4 more planned). Revisit if the prototype-cohort grows past ~10 slices and matrix complexity grows.
+- **Path C: full spec-grade framework** (e.g. category schema with frontmatter validation, per-gate plugin registry, CI-enforced category coherence checks). Rejected as over-engineered for the current cohort scale. Revisit if matrix complexity or cohort size grows past ~10 enforcement points / slices.
 
 ## §8 — Out of scope (deferred)
 
-- **Matrix-consistency fitness function** (per `plan-architect` finding F-PA2, session 75 plan-time review): a shellspec or CI assertion that parses the §3 matrix and verifies each enforcement file's behaviour aligns with the canonical row. **Deferred** — current scale (3 implementing files post-spec-76) is small enough to sweep manually per §6; recursive #38 covers the discipline gap. Revisit when the matrix grows past 5 enforcement touch-points OR after the first observed drift between matrix and implementation. Tracking entry: `docs/SESSION-CONTEXT.md` §"Negative constraints" or future SESSION-CONTEXT register.
+- **Matrix-consistency fitness function**: a shellspec or CI assertion that parses the §3 matrix and verifies each enforcement file's behaviour aligns with the canonical row. **Deferred** — the current implementation surface is sweepable manually per §6; recursive #38 covers the discipline gap. Revisit when the matrix grows past 5 enforcement touch-points OR after the first observed drift between matrix and implementation.
 - **Synthetic-deliberate-injection fixture for `reviewer-prototype-readiness`** (spec 72c §7): defer until the first prototype slice ships under category=prototype to gather signal on what defects the persona should reliably catch.
-- **Auto-blocking merge on prototype-readiness verdict**: informational at V1 (mirrors `acceptance-gate.md` deferral pattern in CLAUDE.md §"Hard controls").
+- **Auto-blocking merge on prototype-readiness verdict**: informational at V1; deferred until persona catch-rate is calibrated.
 - **Live-drift detection for `reviewer-prototype-readiness`** (spec 72c §9 quarterly cron carry-over).
 
 ## §Status

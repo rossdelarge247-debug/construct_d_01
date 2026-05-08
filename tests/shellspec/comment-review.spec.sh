@@ -35,8 +35,8 @@ Describe '.claude/hooks/comment-review.sh'
   End
 
   Describe 'path skip-list'
-    It 'exits 0 silently for .claude/agents/ writes'
-      Data <<< "$(envelope_write '.claude/agents/some-persona.md' 'PR #56 round 7 example')"
+    It 'exits 0 silently for .claude/hooks/*.sh (script self-skip — anti-pattern regex literals as source)'
+      Data <<< "$(envelope_write '.claude/hooks/foo.sh' '# emoji regex source: ✅|❌|🟢')"
       When run "$HOOK"
       The status should equal 0
       The stdout should equal ""
@@ -142,6 +142,50 @@ Describe '.claude/hooks/comment-review.sh'
       When run "$HOOK"
       The status should equal 0
       The stdout should include "provenance"
+    End
+
+    It 'flags F-XX finding-id provenance'
+      Data <<< "$(envelope_write 'src/foo.ts' '// added per F-PA3 plan-time finding')"
+      When run "$HOOK"
+      The status should equal 0
+      The stdout should include "finding-id"
+    End
+
+    It 'flags emoji status markers in persistent prose'
+      Data <<< "$(envelope_write 'docs/workspace-spec/77-something.md' 'Verdict: ✅ approve, all green.')"
+      When run "$HOOK"
+      The status should equal 0
+      The stdout should include "emoji"
+    End
+
+    It 'scans .claude/agents/ persona files for anti-patterns'
+      Data <<< "$(envelope_write '.claude/agents/foo.md' '// Inherited from correctness rubric, see PR #99 round 2')"
+      When run "$HOOK"
+      The status should equal 0
+      The stdout should include "provenance"
+    End
+
+    It 'scans .claude/subagent-prompts/ files for anti-patterns'
+      Data <<< "$(envelope_write '.claude/subagent-prompts/bar.md' '// PR #200 fixup; was added for the wrap flow')"
+      When run "$HOOK"
+      The status should equal 0
+      The stdout should include "provenance"
+    End
+
+    It 'suppresses regex hits inside §Status footer block'
+      status_only_content=$(printf '## §Status\n\nShipped session 75; PR #125; verdict ✅ approve.\n\n## Some other section\n\nClean prose with no anti-patterns here.')
+      Data <<< "$(envelope_write 'docs/workspace-spec/77-something.md' "$status_only_content")"
+      When run "$HOOK"
+      The status should equal 0
+      The stdout should equal ""
+    End
+
+    It 'still fires when emoji is outside §Status block in the same file'
+      mixed_content=$(printf '## §Status\n\nShipped session 75 — clean lineage location.\n\n## Body section\n\nVerdict: ✅ approve — emoji outside §Status, this should fire.')
+      Data <<< "$(envelope_write 'docs/workspace-spec/77-something.md' "$mixed_content")"
+      When run "$HOOK"
+      The status should equal 0
+      The stdout should include "emoji"
     End
   End
 
