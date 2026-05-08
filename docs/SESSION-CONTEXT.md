@@ -1,4 +1,4 @@
-# Session 73 Wrap Context Block (heading into session 74)
+# Session 74 Wrap Context Block (heading into session 75)
 
 ## Product positioning (preserve across sessions)
 
@@ -8,9 +8,11 @@ Decouple is the **complete settlement workspace for separating couples** — fin
 
 Next.js 16 + React 19 + Tailwind 4. Vercel preview deploys per branch; production at `construct-dev.vercel.app`. Anthropic SDK + Tink (bank data). Supabase for auth + storage (post-Phase-C). TypeScript strict.
 
-## What sessions 41-73 accomplished (rolling window)
+## What sessions 41-74 accomplished (rolling window)
 
-> **Session 73 (this wrap):** **1 substantive PR merged from `claude/decouple-session-73-xgvsb`.** **PR #121** (P0 ship C, squash `b0d2966`) — closes the B+C+D pre-impl rigour programme. Six touch points (~280L authored): NEW `.claude/agents/plan-architect.md` 102L (5-question rubric per spec 72d §5 verbatim: seams · hidden effects · coupling · test-pain forecast · hexagonal-invariant respect; Conventional Comments output; default-blocking categories `seam-boundary` + `hidden-effects` + `hexagonal-invariant`); migrated `.claude/subagent-prompts/exit-plan-review.md` from `verdict + severity` to Conventional Comments (5 categories: `planning-conduct`, `coding-conduct`, `slice-sizing`, `spec-citation`, `git-state`); extended `.claude/hooks/exit-plan-review.sh` for dual-template loading + `frame_prompt()` helper + spawn-or-stub block per persona + `jq -s` union aggregator + `BLOCKING_COUNT` gate + `EXIT_PLAN_REVIEW_DEBUG_VERDICT_*` env-var injection paths; spec 72d §5 atomic-migration amendment (collapsed L177 carve-out into single-format ship) + §Shipped marker; NEW shellspec Describe block "dual-persona orchestration" + 5 cases via `run_hook_dual()` helper + `DEBUG_FRAMING`-counts-both test; CLAUDE.md plan-time-review row extension (file path + AC + spec ref). 2 rounds (r1: 5 advisory findings — 3 style commenting/naming + 2 correctness spec-citation/edge-case; r1 fix-up cleared all + a real shellspec regression where `fake-nonce-injection` test had hardcoded count=1 that became 2 with dual-framing). **n=42 PRs cumulative; mean 1.68 rolling stable.** Atomic-migration scope decision validated — single-format hook simpler than dual-format-during-transition. No new constraints; #36 remains highest.
+> **Session 74 (this wrap):** **2 substantive PRs merged.** **PR #122** (session-73 wrap with mid-PR Vercel-unblock fix bundled, squash `0497e7f`) — Vercel build was failing on stale `pnpm-lock.yaml` (last touched session 58, missing `madge@^8.0.0` from PR #119); fix: deleted lockfile + pinned `packageManager: "npm@10.9.7"` + addressed only outstanding auto-review advisory (stale persona-retain scores in §"Locked"). **PR #123** (Phase 3 P0, squash `b9d9467`) — `S-PROTO-hub` slice: 61-row TS+Zod design-uncertainty registry × 11 sections at `/dev/proto`; hub renderer + dynamic stub-route + 4 reusable components (StatusBadge · ConfidenceBadge · SectionHeader · FlowRow); 71 tests across 9 files (max 1 mock per test). TDD-first across 5 steps. **Option A architectural pivot mid-session** — dropped `.dev.tsx` infix (matches `/dev/heroes` pattern) so user's Vercel-preview-driven workflow can verify visually; trade-off: hub URL publicly addressable (T0 metadata, pre-launch). **Path-C plan-time review** (manual persona-spawn since harness lacks plan-mode toggle): plan-architect 0 findings · exit-plan-review 4 (3 suggestions + 1 nitpick) all addressed pre-impl. **Post-PR auto-review** caught 9 findings on `d06da0a` (1 blocking-by-security: stale `.dev.tsx` claim in security.md item 9; 3 ac-gaps; 2 commenting; 2 nitpicks; 1 regression-doc) — all resolved in `20a94ca`; aggregate flipped `neutral` → `success`. **n=43 PRs cumulative; mean rolling stable.** New constraints #37 (`.dev.tsx` invisibility on Vercel-preview-only workflows) + #38 (slice-doc drift after refactor). **Calibration cohort row 1 of 3 entered.** Parking-lot for session 75: prototype-mode rigour spec (slice-category metadata; relax code-rigour gates for prototype slices, keep UI/UX rigour tight).
+>
+> **Session 73 (previous wrap):** **1 substantive PR merged from `claude/decouple-session-73-xgvsb`.** **PR #121** (P0 ship C, squash `b0d2966`) — closes the B+C+D pre-impl rigour programme. Six touch points (~280L authored): NEW `.claude/agents/plan-architect.md` 102L (5-question rubric per spec 72d §5 verbatim: seams · hidden effects · coupling · test-pain forecast · hexagonal-invariant respect; Conventional Comments output; default-blocking categories `seam-boundary` + `hidden-effects` + `hexagonal-invariant`); migrated `.claude/subagent-prompts/exit-plan-review.md` from `verdict + severity` to Conventional Comments (5 categories: `planning-conduct`, `coding-conduct`, `slice-sizing`, `spec-citation`, `git-state`); extended `.claude/hooks/exit-plan-review.sh` for dual-template loading + `frame_prompt()` helper + spawn-or-stub block per persona + `jq -s` union aggregator + `BLOCKING_COUNT` gate + `EXIT_PLAN_REVIEW_DEBUG_VERDICT_*` env-var injection paths; spec 72d §5 atomic-migration amendment (collapsed L177 carve-out into single-format ship) + §Shipped marker; NEW shellspec Describe block "dual-persona orchestration" + 5 cases via `run_hook_dual()` helper + `DEBUG_FRAMING`-counts-both test; CLAUDE.md plan-time-review row extension (file path + AC + spec ref). 2 rounds (r1: 5 advisory findings — 3 style commenting/naming + 2 correctness spec-citation/edge-case; r1 fix-up cleared all + a real shellspec regression where `fake-nonce-injection` test had hardcoded count=1 that became 2 with dual-framing). **n=42 PRs cumulative; mean 1.68 rolling stable.** Atomic-migration scope decision validated — single-format hook simpler than dual-format-during-transition. No new constraints; #36 remains highest.
 
 > **Session 72:** **3 substantive PRs merged sequentially from `claude/resume-decouple-session-72-5t7bZ`.** **PR #117** (P0 spec, squash `b0ca62e`) — new `docs/workspace-spec/72d-architecture-review-additions.md` (~209L) contracting 3 pre-implementation rigour additions (B fitness functions · C plan-architect persona · D test-pain gate) at three lifecycle stages, addressing the architecture-review gap acknowledged after session-70's `reviewer-architecture` drop; cross-refs to CLAUDE.md §"Key files" + 72c §9 first-bullet. 2 rounds clean. **PR #118** (P1 ship D, squash `cfca1a1`) — D test-pain gate operationalised: CLAUDE.md §"Engineering conventions" gains the `**Test-pain audit (per spec 72d §3).**` named convention + DoD-2 cross-ref; PR template DoD-2 carries the same cross-ref; spec 72d §3 §"Shipped" marker landed. 2 rounds (1 persistent advisory). **PR #119** (P2 ship B, squash `f6f751b`) — B fitness functions operationalised: 5 rules (domain ↛ UI ×2, slice ↛ supabase, env-var single-reader ×3 selectors closing dot/bracket/destructuring bypass, no circular deps in src/lib via madge) + new `.github/workflows/fitness-functions.yml` workflow with `permissions: contents: read` block + madge devDep + `madge:circular` npm script + spec 72d §4 §"Shipped" marker. 2 rounds (2 persistent advisory re-flags of documented V1 limitations). **n=41 PRs cumulative; mean 1.68 rolling.** Constraint #34 vindicated again on P2 (lockfile mechanical churn ~1500L from `npm install madge` wasn't in kickoff sizing model). New constraints #35 (lockfile churn) + #36 (AST-selector triplet) added. **B+D shipped; C plan-architect persona deferred to session 73 P0** per session-churn budget.
 
@@ -22,7 +24,7 @@ Session 71: spec 67a respondent state machine + spec 75 account administration V
 
 ## Current state
 
-### Locked (through session 73)
+### Locked (through session 74)
 
 - Spec 42 positioning (5-phase amended session 22).
 - Spec 60 share-reconciliation; spec 65 pre-signup interview; spec 65a sign-up reconciliation; spec 67 post-signup-profiling-progress; spec 67a respondent state machine; spec 74 AI plan generation; spec 75 account administration V1.
@@ -33,7 +35,7 @@ Session 71: spec 67a respondent state machine + spec 75 account administration V
 - Hard controls: CODEOWNERS · ESLint no-disable ratchet · coverage threshold ratchet · **dual-persona plan-time review (`.claude/subagent-prompts/exit-plan-review.md` + NEW `.claude/agents/plan-architect.md`; both Conventional Comments single-format post session-73 atomic migration)** · slice-verification PR-DoD · 3-specialist auto-review at k=2 default · synthetic-deliberate-injection gate (3 personas) · author-time comment review · D test-pain gate (CLAUDE.md DoD-2 sub-check) + B fitness functions (.github/workflows/fitness-functions.yml).
 - Persona retain/drop verdicts: reviewer-correctness STRONG retain (24/10); reviewer-style STRONG retain (17/10); reviewer-security STRONG-candidate (7/10); reviewer-architecture DROPPED (session 70); plan-architect NEW (session 73, no findings yet).
 
-### Built (on main as of `b0d2966`; session 73 ships P0 via PR #121 — closes B+C+D programme)
+### Built (on main as of `b9d9467`; session 74 ships Phase 3 P0 via PR #123 — first src/ slice post-B+C+D)
 
 - Hero rotation production (session 68+69).
 - 9 hero variants + dev gallery (session 67).
@@ -43,18 +45,17 @@ Session 71: spec 67a respondent state machine + spec 75 account administration V
 - **D test-pain gate operationalised in CLAUDE.md §"Engineering conventions" + DoD-2 + PR template (session 72 P1; PR #118).**
 - **B fitness functions (5 rules) operational in eslint.config.mjs + new fitness-functions.yml workflow (session 72 P2; PR #119).**
 - **C plan-architect persona operational in `.claude/agents/plan-architect.md` + extended `.claude/hooks/exit-plan-review.sh` dual-spawn (session 73 P0; PR #121). Atomic Conventional Comments migration of existing `exit-plan-review.md` shipped same PR. B+C+D rigour stack 3/3 OPERATIONAL.**
+- **`S-PROTO-hub` Phase 3 P0 — first src/ slice post-B+C+D — design-uncertainty registry hub at `src/app/dev/proto/` (session 74; PR #123). 61 rows × 11 sections; TS+Zod schema; 4 components; hub page + dynamic stub-route; 71 tests; calibration cohort row 1 of 3 entered.**
 
-## Session 74 priorities
+## Session 75 priorities
 
-### Plan-of-record: 3-phase post-audit programme (restored session 74)
-
-Per the post-audit decision: three phases address two distinct gap categories — logic gaps don't need canvas, canvas gaps need visual design, complex interaction patterns need prototypes.
+### Plan-of-record: 3-phase post-audit programme (continuing from session 74)
 
 | Phase | Goal | Status |
 |---|---|---|
-| **1 · Logic gaps** | Spec-writing, no canvas needed | ✅ COMPLETE sessions 70-71 (specs 65a · 67a · 74 · 75 closed all 4 audit gaps from session-69 design-input audit) |
-| **2 · Claude AI Design canvases** | Canonical visual source per CLAUDE.md §"Visual direction" | ▶️ IN PROGRESS (canvases at `docs/design-source/{slug}/`; mobile-screens-v2 shipped session 74) |
-| **3 · `/dev/proto/*` prototypes** | High-uncertainty interaction patterns where shape uncertainty makes static canvas risky | ⏳ STARTING SESSION 74 |
+| **1 · Logic gaps** | Spec-writing | ✅ COMPLETE sessions 70-71 |
+| **2 · Claude AI Design canvases** | Canonical visual source | ▶️ IN PROGRESS — mobile-screens-v2 shipped session 74; pre-signup-interview · bank-connect mid-flow · hub-state-variants pending |
+| **3 · `/dev/proto/*` prototypes** | High-uncertainty interaction patterns | ▶️ IN PROGRESS — `S-PROTO-hub` shipped session 74 (PR #123); P1 prototype slice next |
 
 ### Per-prototype workflow (4-step loop)
 
@@ -66,47 +67,42 @@ Each Phase 3 prototype slice runs through:
 
 Phase 2 (canvas) and Phase 3 (prototype) feed each other per prototype — not strictly sequential.
 
-### Phase 3 sequence
+### Phase 3 sequence (refreshed)
 
 | Order | Slice | Notes |
 |---|---|---|
-| **P0** | `S-PROTO-hub` | All-in-one: TS+Zod registry (~61 rows × 11 sections enumerating every site flow) + hub renderer + stub routes for every entry. Living dashboard of design uncertainty + site state — durable record so work doesn't get lost between sessions. NEXT. |
+| ✅ Done | `S-PROTO-hub` | Phase 3 inception (session 74 PR #123). 61 rows × 11 sections registry; hub + stub-route + 4 components; 71 tests. |
+| **P0 (NEW)** | **Prototype-mode rigour spec** | FIRM — decided session 74 to ship BEFORE first prototype slice; avoids `S-PROTO-pre-signup-interview` paying same friction tax S-PROTO-hub did. See §"P0 — Prototype-mode rigour spec" below. |
 | **P1** | `S-PROTO-pre-signup-interview` | 8 screens, real spec 74 AI plan integration. After P0. |
-| **P2** | `S-PROTO-section-confirm` | Per-section confirmation pattern (8 sections × multi-state). After P1. |
-| **P3** | `S-PROTO-ai-coach` | Settle phase coach interaction. After P2. |
-| **P4** | `S-PROTO-share-flow` | Sarah/Mark joint reconciliation. After P3. |
+| **P2** | `S-PROTO-section-confirm` | Per-section confirmation pattern (8 sections × multi-state). |
+| **P3** | `S-PROTO-ai-coach` | Settle phase coach interaction. |
+| **P4** | `S-PROTO-share-flow` | Sarah/Mark joint reconciliation. |
 
 Static surfaces (sign-up form, magic-link sent, settings) NOT prototyped — canvas-first is fine. Per-prototype scope honours: *"Don't prototype everything. Static surfaces are fine as canvas-first."*
 
-### Hub registry schema (S-PROTO-hub deliverable)
+### Hub registry schema (shipped session 74)
 
-`src/app/dev/proto/registry.ts` — TS array with Zod schema validation. Per-row fields: `id` · `title` · `section` · `status` (🔴 not started / 🟠 spec only / 🟡 canvas drafted / 🟢 prototype built / ✅ shipped) · `confidence` (🔥 high / 🟡 medium / ❓ low / ⚠️ low-blocked) · `owner` (user / claude / both) · `tags[]` (free-form: `blocks-launch`, `ai-dependent`, `multi-actor`, `mobile-priority`, `legal-review-pending`, `high-uncertainty`, `safeguarding`, …) · `openQuestions[]` (≤5) · `lastTouched` (session # + date) · `links` (spec / canvas / prototype / slice). `phase` field deliberately dropped — section header captures product-flow phase, status captures post-audit phase.
+`src/app/dev/proto/registry.ts` — 61 rows × 11 sections. Per-row fields: `id` · `title` · `section` · `status` · `confidence` · `owner` · `tags[]` · `openQuestions[]` (≤5) · `lastTouched` · `links` (spec / canvas / prototype / slice). Each future prototype slice updates the row matching its target flow on ship — registry IS the durable record of design uncertainty across sessions.
 
-### Calibration moment carries over
+### Calibration cohort (3 src/ slices)
 
-Phase 3 prototypes ARE src/ slices for plan-architect catch-rate measurement per spec 72c §9: *"expansion path tracked if cumulative correctness criterion-7 catch-rate falls below retain bar in first 3 src/ slices post-B+C+D"*. First 3 src/ slices post-B+C+D = `S-PROTO-hub` + `S-PROTO-pre-signup-interview` + `S-PROTO-section-confirm`. Each HANDOFF records `## Persona findings recorded` per active persona (4 active: reviewer-correctness, reviewer-style, reviewer-security, plan-architect). After slice 3, retain/drop verdicts re-evaluated; if catch-rate < retain bar, expansion path fires.
+Spec 72c §9 retain/drop measurement window. Cohort entries:
+
+| Slice | Status | Persona findings (issue main missed) |
+|---|---|---|
+| 1 · `S-PROTO-hub` | ✅ shipped session 74 | reviewer-security 1 (Y) · reviewer-correctness 4 (Y) · reviewer-style 4 (Y) · plan-architect 0 (ambiguous — pure-data slice) |
+| 2 · `S-PROTO-pre-signup-interview` | ⏳ session 75 P1 | TBD |
+| 3 · `S-PROTO-section-confirm` | ⏳ session 76+ P2 | TBD |
+
+After 3 src/ slices, retain/drop verdicts re-evaluated. Plan-architect specifically: slice 1's 0 findings is ambiguous data (pure-data + pure-UI surface; no architectural seams to catch); slices 2-3 have richer behaviour and will give better signal. If criterion-7 catch-rate < retain bar, spec 72c §9 expansion path fires.
 
 ### Phase C real-product slices deferred
 
 `S-F7-beta unpark` (auth + persistence dev-mode abstraction) · `S-O1` (primary onboarding) · `S-M1.0b` (mobile marketing landing) — moved to Phase-3-mature-then-build. Patterns get de-risked in `/dev/proto/*` first; canonical canvases drawn in Claude AI Design after; real-product slices ship last. Reduces risk of throwaway Phase C work.
 
-### Carry-over for session 75 — prototype-mode rigour spec
+### P0 — Prototype-mode rigour spec (FIRM, decided session 74)
 
-**Parked from session 74 PR #123 dialogue.** Insight: the rigour stack is calibrated for production code; running prototype slices through the full stack (test-pain audit · DoD-13 security · 100% rule · coverage ratchet · `reviewer-correctness`) over-rigours them. Prototypes have different goals (prove SHAPE · spoof functionality · fast feedback) and should keep UI/UX rigour tight (preview-deploy 6-dim · token compliance · style review) while relaxing code-rigour gates.
-
-**Recommended approach (Path B per dialogue):** slice-category metadata. Each slice's `acceptance.md` declares `category: production | prototype | infrastructure`; rigour gates read this and apply per-category behaviour. New `reviewer-prototype-readiness` persona replaces `correctness` for prototype slices.
-
-**What ships at session 75:**
-
-- New spec `docs/workspace-spec/76-prototype-mode-rigour.md` (~150L) — formal gate-behaviour matrix per category
-- CLAUDE.md amendment: §"Slice categories" defining production / prototype / infrastructure + gate behaviour
-- New `.claude/agents/reviewer-prototype-readiness.md` (~100L) — replaces `correctness` for `category: prototype` slices in `auto-review.yml`
-- Path-glob default mapping: files in `src/app/dev/proto/<slug>/**` (where slug ≠ `hub`) auto-default to `prototype`
-- TDD-guard + coverage-ratchet path-glob exemptions for prototype paths
-
-**Rationale:** rigour is a tool calibrated to risk. Production carries user-impact risk → tight gates. Prototypes carry "wasted effort if wrong" risk → tight on UI/UX, loose on code-rigour. Without the change, session 75's first prototype slice (`S-PROTO-pre-signup-interview` per Phase 3 sequence P1) accumulates the same friction S-PROTO-hub did — most of S-PROTO-hub's 9 auto-review findings were doc-vs-impl mismatches in the slice docs (security.md item 9 stale claim · AC-7 mock description · AC-4 wording) rather than real defects in the implementation.
-
-**Sizing:** ~250-400L authored across 3-4 files; spec-grade work; one session.
+(Detail in §"Phase 3 sequence" P0 row above. Decided session 74 to ship BEFORE first prototype slice; renumbered S-PROTO-pre-signup-interview to P1. Rationale: of S-PROTO-hub's 9 post-PR auto-review findings, most were doc-vs-impl mismatches not real defects — symptoms of running prototype slices through production-calibrated gates. Path B (slice-category metadata) approach. Estimated ~250-400L; one session.)
 
 ### Cohesive-product trajectory (post-session-72)
 
@@ -165,7 +161,7 @@ Constraints accumulated across sessions, anchored in HANDOFF retros:
 
 Sequential single-branch pattern across sessions 54→73 (20 sessions in a row). Each session uses `claude/(resume-)decouple-session-{N}-{harness suffix}` across all P-PRs + wrap. After each squash-merge, GitHub auto-deletes head branch; resync via `git fetch origin main && git remote prune origin && git checkout -B <branch> origin/main`.
 
-### Branch state at session-73 wrap (verified live)
+### Branch state at session-74 wrap (verified live)
 
 - **Wrap branch:** `claude/decouple-session-73-xgvsb` (session-20-in-a-row of the sequential single-branch pattern).
 - **`main` tip:** `b0d2966` (post-PR-#121 merge — C plan-architect persona ship).
@@ -175,7 +171,7 @@ Sequential single-branch pattern across sessions 54→73 (20 sessions in a row).
 - **Persona retain/drop measurement** cumulative through session 73: reviewer-correctness **24/10 STRONG retain** (+2 new findings session 73) · reviewer-style **17/10 STRONG retain** (+3 new findings session 73 — commenting WHAT-narration ×2 + naming nit) · reviewer-security 7/10 STRONG-candidate (no new findings session 73 — control-plane PR) · reviewer-architecture **DROPPED** session 70 · plan-architect **NEW** session 73 (no findings yet — fires from session 74 first src/ slice).
 - **Architecture-review gap closure status** — **B+C+D 3/3 SHIPPED** (D session 72 PR #118; B session 72 PR #119; C session 73 PR #121). Full B+C+D pre-impl rigour stack is operational. First src/ slice post-stack is the calibration moment (spec 72c §9 watch).
 
-### Next session (74) FIRST ACTIONS
+### Next session (75) FIRST ACTIONS
 
 1. **Turn-0 verification.** SessionStart hook surfaces live branch state. Wrap PR for session 73 should be merged at session-74 start; verify against live source.
 2. **Verify branch state + working tree clean.** Resync if BEHIND > 0. Sequential single-branch pattern continues — `git fetch origin main && git remote prune origin && git checkout -B <branch> origin/main`.
@@ -225,7 +221,7 @@ CLAUDE.md                                                      — §"Hard contr
 
 **Net state at session-73 wrap:** logic-spec phase COMPLETE (sessions 70+71); B+C+D pre-impl rigour stack 3/3 OPERATIONAL (sessions 72+73); first src/ slice post-stack is the calibration moment per spec 72c §9 (criterion-7 catch-rate watch across first 3 src/ slices).
 
-## Session 74 pre-flight
+## Session 75 pre-flight
 
 **Verify (do this first, before any plan):**
 
