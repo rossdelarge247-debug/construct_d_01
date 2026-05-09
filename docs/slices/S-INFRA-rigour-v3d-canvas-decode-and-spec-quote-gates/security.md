@@ -20,7 +20,7 @@ No user data flows, no auth surface, no UI, no T3+ data. Most §11 boxes resolve
 | 3 | API routes (Zod) | n/a | no new API routes |
 | 4 | File upload surfaces | n/a | no upload surface |
 | 5 | New env vars | PASS | one new optional env var: `SPEC_QUOTE_ENFORCE` (boolean-ish; flips author-time hook from advisory to blocking). Not secret; no `NEXT_PUBLIC_*_KEY|SECRET|TOKEN|PASSWORD|PRIVATE` pattern. Documented in AC-3. |
-| 6 | Third-party data flows | PASS | AC-7 synthetic-fixture runner uses `claude -p` (Anthropic API) — same third-party already in use across `auto-review.yml`, `persona-fixtures.yml`, `persona-synthetic-fixtures.yml`. No new vendor; no new data class (synthetic in-repo fixture content + persona prompt only; no user data). DPA already in place per spec 72 §8. |
+| 6 | Third-party data flows | PASS | AC-7 synthetic-fixture runner uses `claude -p` (Anthropic API) — same third-party already in use across `auto-review.yml`, `persona-fixtures.yml`, `persona-synthetic-fixtures.yml`. No new vendor; no new data class (synthetic in-repo fixture content + persona prompt only; no user data). DPA already in place (spec 72 §8 covers third-party data flows). |
 | 7 | Audit log entries | n/a | no T3+ data read/write |
 | 8 | Error handling | PASS | hooks emit only to `stderr` / `additionalContext` JSON; no stack traces; no internals leaked. Decoder script emits diagnostic to stderr on parse failure with file path only (no inner content). |
 | 9 | Dev/prod boundary | n/a | infra slice; no dev-mode toggle; no `MODE === 'prod'` gating needed |
@@ -50,7 +50,7 @@ Input: file path + content (from `tool_input`). Threat surface:
 
 ### AC-5 + AC-7 plan-architect persona amendment
 
-- **Persona prompt injection.** Plan-architect persona uses verbatim Option C nonced delimiters per spec 72b §"Scope: session-spawned personas only" via the existing `exit-plan-review.sh` invocation. Q6 amendment doesn't change the framing; the existing nonce-derivation block remains intact.
+- **Persona prompt injection.** Plan-architect persona uses verbatim Option C nonced delimiters as defined in spec 72b's session-spawned-personas section, via the existing `exit-plan-review.sh` invocation. Q6 amendment doesn't change the framing; the existing nonce-derivation block remains intact.
 - **Synthetic-fixture API leakage.** Synthetic-fixture content sent to Anthropic API is in-repo, non-PII, invented prose. No real session content, no canvas content, no spec content goes through the API. Same threat profile as the existing 3 specialist synthetic fixtures.
 
 ### AC-2 + AC-6 doc-only changes

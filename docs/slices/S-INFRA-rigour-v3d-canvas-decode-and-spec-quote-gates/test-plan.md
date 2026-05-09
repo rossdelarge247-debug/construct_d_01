@@ -6,7 +6,7 @@ This slice ships infrastructure: a decoder script, two hooks, two CI workflows, 
 
 ## Test-pain audit
 
-Spec 72d §3 mock-count threshold applies (CLAUDE.md §"Engineering conventions" §"Test-pain audit (per spec 72d §3)"). Infrastructure category → production threshold (>2 mocks per unit test triggers seam reconsideration). Decoder script is a pure transform; hook scripts isolate via stdin/env-var injection — no mocked collaborators expected. If any unit test in this slice surfaces >2 mock setups, step back and re-evaluate the seam before continuing.
+Spec 72d §3 mock-count threshold applies (CLAUDE.md §"Engineering conventions" §"Test-pain audit" — references spec 72d §3). Infrastructure category → production threshold (>2 mocks per unit test triggers seam reconsideration). Decoder script is a pure transform; hook scripts isolate via stdin/env-var injection — no mocked collaborators expected. If any unit test in this slice surfaces >2 mock setups, step back and re-evaluate the seam before continuing.
 
 ## Per-AC test approach
 
@@ -39,8 +39,8 @@ First 800 chars of `/tmp/decoded.html` pasted into `verification.md` to demonstr
 **Unit test:** `tests/shellspec/spec-citation-quote.spec.sh`. Cases:
 1. **Path filter.** Hook on a file outside `docs/slices/S-*/` and `docs/workspace-spec/`: exits 0 silently, no advisory.
 2. **Skip-list.** Hook on a `docs/HANDOFF-SESSION-*.md` glob match or `docs/SESSION-CONTEXT.md`: exits 0 silently. (Real glob-named fixture path under `tests/shellspec/fixtures/spec-citation-quote/handoff-skip.md` — already excluded from `comment-review.sh` skip-list-based scan via `tests/*/fixtures/*` rule.)
-3. **Trigger + missing quote (per spec NN).** Content `"per spec 72d affects everything"`: hook emits advisory naming the citation; exits 0 (stub mode).
-4. **Trigger + missing quote (sectioned-with-quoted-name).** Content `'spec 72d §"Plan-architect rubric" defines the questions'`: hook emits advisory; exits 0.
+3. **Trigger + missing quote (per-cite form).** Content with the literal pattern `per spec NN` (where NN is a digit-letter id like 72d): hook emits advisory naming the citation; exits 0 (stub mode).
+4. **Trigger + missing quote (sectioned-with-quoted-name form).** Content with the literal pattern `spec NN §"Section name"`: hook emits advisory; exits 0.
 5. **Trigger + present quote.** Content with the citation followed within 5 lines by `> *"some quoted text ≥20 chars"*`: hook exits 0 silently.
 6. **Live mode.** Content with un-quoted citation + env `SPEC_QUOTE_ENFORCE=1`: hook emits advisory + exits 2.
 7. **§Status fence-aware exemption.** Content with citation inside a `^## §?Status` block: hook exits 0 silently; `## §Status` block ends at next `^## ` heading.

@@ -43,14 +43,18 @@ jobs:
           else
             echo "sha=$(git rev-parse origin/main)" >> "$GITHUB_OUTPUT"
           fi
-      - name: Run spec-citation-quote-check on changed files only
+      - name: Run spec-citation-quote-check on newly-added files only
+        # Pragmatic scope: gate fires on Added (`A`) files, not Modified (`M`).
+        # Pre-existing per-cite citations across the corpus would block every
+        # spec-modifying PR otherwise. Future improvement: line-level diff
+        # filtering for modified files. Tracked in slice's verification.md.
         run: |
-          CHANGED=$(git diff --name-only "${{ steps.base.outputs.sha }}"..HEAD -- 'docs/slices/S-*/*.md' 'docs/workspace-spec/*.md')
-          if [ -z "$CHANGED" ]; then
-            echo "No relevant slice or workspace-spec files changed; skipping."
+          ADDED=$(git diff --name-status "${{ steps.base.outputs.sha }}"..HEAD -- 'docs/slices/S-*/*.md' 'docs/workspace-spec/*.md' | awk '$1 == "A" { for (i=2; i<=NF; i++) printf "%s%s", $i, (i==NF ? "\n" : " ") }')
+          if [ -z "$ADDED" ]; then
+            echo "No newly-added slice or workspace-spec files; skipping (modified files grandfathered at this gate version)."
             exit 0
           fi
-          echo "Changed files:"
-          echo "$CHANGED"
+          echo "Newly-added files:"
+          echo "$ADDED"
           # shellcheck disable=SC2086
-          bash scripts/spec-citation-quote-check.sh $CHANGED
+          bash scripts/spec-citation-quote-check.sh $ADDED

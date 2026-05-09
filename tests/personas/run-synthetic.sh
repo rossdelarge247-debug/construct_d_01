@@ -48,12 +48,22 @@ trap 'rm -rf "$WORKDIR"' EXIT
 FAIL=0
 TOTAL=0
 
-for DIM in security correctness style; do
+for DIM in security correctness style plan-architect; do
   TOTAL=$((TOTAL + 1))
   printf '\n=== Synthetic [%s] ===\n' "$DIM"
 
-  PERSONA_FILE="$REPO_ROOT/.claude/agents/reviewer-${DIM}.md"
-  FIXTURE="$SYNTHETIC_DIR/${DIM}.diff"
+  # Plan-architect is a plan-time persona reviewing plan-text rather than
+  # PR-time specialist reviewing diff content; persona file path + fixture
+  # extension + envelope-fence tag differ from the specialist suite.
+  if [ "$DIM" = "plan-architect" ]; then
+    PERSONA_FILE="$REPO_ROOT/.claude/agents/plan-architect.md"
+    FIXTURE="$SYNTHETIC_DIR/${DIM}.plan"
+    FENCE_TAG="plan-from-author"
+  else
+    PERSONA_FILE="$REPO_ROOT/.claude/agents/reviewer-${DIM}.md"
+    FIXTURE="$SYNTHETIC_DIR/${DIM}.diff"
+    FENCE_TAG="pr-diff"
+  fi
   EXPECTED="$EXPECTED_DIR/${DIM}.json"
   BRIEF="$WORKDIR/brief-${DIM}.txt"
   RAW="$WORKDIR/raw-${DIM}.json"
@@ -70,15 +80,15 @@ for DIM in security correctness style; do
 
   NONCE=$(openssl rand -hex 16 2>/dev/null || head -c 32 /dev/urandom | xxd -p)
 
-  # Compose synthetic brief: persona body + nonce + fenced .diff. No slice-AC
-  # or coding-conduct fences — synthetic context evaluates the diff against
-  # the persona's own rubric in isolation, without external anchoring.
+  # Compose synthetic brief: persona body + nonce + fenced fixture content.
+  # Specialist fixtures use <pr-diff-NONCE>; plan-architect uses
+  # <plan-from-author-NONCE> matching the framing exit-plan-review.sh produces.
   {
     cat "$PERSONA_FILE"
     printf '\nYour per-invocation nonce: %s\n\n' "$NONCE"
-    printf '<pr-diff-%s>\n' "$NONCE"
+    printf '<%s-%s>\n' "$FENCE_TAG" "$NONCE"
     cat "$FIXTURE"
-    printf '</pr-diff-%s>\n' "$NONCE"
+    printf '</%s-%s>\n' "$FENCE_TAG" "$NONCE"
   } > "$BRIEF"
 
   printf 'run-synthetic.sh [%s]: invoking claude -p (CLI %s)...\n' "$DIM" "$CLAUDE_CLI_VERSION"

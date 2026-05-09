@@ -135,13 +135,14 @@ CLAUDE.md §"Hard controls" §"Subagent file locations" verbatim:
 | `exit-plan-review.md` (existing) | Git-state assertions · slice-sizing · simplicity-first · spec-citation discipline | `docs/slices/S-INFRA-rigour-v3a-foundation/acceptance.md` AC-7 |
 | `plan-architect.md` (new) | Architectural seams · effects boundaries · coupling forecasts · test-pain forecast · hexagonal-invariant respect | This spec §5 |
 
-**Plan-architect rubric.** The persona reviews the proposed plan against five questions:
+**Plan-architect rubric.** The persona reviews the proposed plan against six questions:
 
 1. **What seams will this code need?** Where do effects (storage, network, time, randomness) live? Are they behind swappable interfaces, or imported directly into pure logic?
 2. **What hides effects?** Are there hidden state stores, module-level mutable globals, implicit ordering dependencies, or non-explicit IO?
 3. **What coupling will we regret?** Does the plan have domain code (`src/lib/**`) depending on UI (`src/components/**`)? Does it bypass `@/lib/auth` or `@/lib/store` to touch infra directly?
 4. **What's the test-pain forecast?** Reading the plan, will the unit tests need >2 mock setups? If yes, the seam is wrong before any code is written (D contract triggered at plan time).
 5. **Does the plan respect spec 71 §4 invariants?** Specifically B contract rules 1-5; if the plan implies a violation, reject at plan-mode-exit.
+6. **What source artefacts has the plan verified?** Are cited specs backed by literal quotes (not paraphrases or summary-recall)? For canvas-driven slices, are the canvases decoded to readable form before any visual-treatment claim? For "matches X" claims, is X visible as a recent Read in the session transcript? Default `blocking: true`.
 
 **Output format.** Strict JSON per CLAUDE.md §"Hard controls" §"Verdict vocabulary" (Conventional Comments labels + `blocking` boolean):
 

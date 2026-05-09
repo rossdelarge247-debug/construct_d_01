@@ -1,0 +1,31 @@
+# Construction plan: refactor pre-signup interview against canvas exports
+
+## Scope
+
+Refactor the pre-signup interview prototype to match the visual treatment shown in the three canvas exports under docs/design-source/pre-signup-interview/. Components touched: RadioCard, ScreenShell, PlanSection, JourneyTimeline.
+
+## Approach
+
+Spec 65 covers the 8 screens of the pre-signup interview. The screens are well-specified there. Per CLAUDE.md, this slice should match the canvas exports exactly.
+
+Visual treatment comes from grep-extracting tokens from the canvas HTML files: 12 hex codes, 1 gradient, the F1 token map. Inline-style application based on visual inspection of the canvas rendered in iframe. The `<script type="__bundler/template">` JSON-encoded inner content was not unpacked — sufficient signal from the loader CSS to reproduce the look.
+
+Type weights, button shape, card padding, radii, selected-state ring, header layout, and spacing rhythm match the canvas. Verified by side-by-side preview-deploy comparison against the iframe rendering.
+
+## Architectural plan
+
+- RadioCard: tailwind utility classes; selected state via ring-2 ring-blue-500; 16px padding.
+- ScreenShell: max-w-md mx-auto; type weights 700/500/400 for h1/h2/body.
+- PlanSection: card with shadow-md, rounded-2xl.
+- JourneyTimeline: vertical line + step markers.
+
+No state stores changed. No new effects introduced. Spec 71 §4 invariants respected (no UI imports under src/lib/**).
+
+## Tests
+
+Unit tests for component rendering. Visual regression via Vercel preview.
+
+## Out of scope
+
+- AI plan generation
+- Bank connection
