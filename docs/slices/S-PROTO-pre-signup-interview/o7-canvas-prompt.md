@@ -1,9 +1,11 @@
-# O7 "Your plan" — canvas prompt
+# O7 "Your plan" — canvas prompt (v2 — re-issue with inlined React)
 
 **Slice:** `S-PROTO-pre-signup-interview` · category=prototype.
 **Screen:** O7 (AI-generated plan output) per `docs/workspace-spec/65-pre-signup-interview-reconciled.md` §"O7 — Your plan (AI generated output)".
 **Audience for canvas tool:** Claude AI Design.
-**Style inheritance:** locked style canvas at `docs/design-source/pre-signup-interview/<locked-style-canvas>.html` — extend, don't replace. Type scale, colour ramp, header chrome, spacing, button treatment, motion vocabulary all carry forward.
+**Style inheritance:** locked O1 canvases at `docs/design-source/pre-signup-interview/o1-stage-router-expressive.html` (primary — full state matrix + animation spec + accessibility notes) and `o1-stage-router-standalone.html` (alt-bg variant). The O1 canon footer reads verbatim: *"O2–O6 reuse this shell with the calmer EXPRESSIVE_BG (lilac → cream, no magenta stop) — the hero treatment is reserved for entry & exit screens."* O7 is the **exit** screen and inherits the full `EXPRESSIVE_HERO` 3-stop gradient. Type scale, colour ramp, header chrome, radio-card pattern, button treatment, motion vocabulary, accessibility checklist all carry forward.
+
+**Why v2 re-issue:** the v1 canvas (committed at `docs/design-source/pre-signup-interview/o7-your-plan-expressive.html`) shipped with React in **external `<script type="text/babel" src="…uuid…">` references** that the bundler did not inline. The decoded HTML carries CSS only — no JSX, no layout. Per `scripts/decode-bundler-canvas.sh` and the canvas-decode-check CI gate, decoded sibling presence is required for any `acceptance.md`-cited canvas; the v1 decoded sibling exists but is unusable for refactor reference. v2 must inline all React.
 
 ---
 
@@ -80,6 +82,20 @@ Show one treatment per decision, not all three:
 
 ---
 
+## Bundling requirement (v2 — fixes the v1 failure mode)
+
+The v1 canvas exported with React mounted via external `<script type="text/babel" src="https://api.claude.com/.../sandbox-bundler-canvas/<uuid>.js"></script>` references. Those URLs are auth-gated; the bundled HTML decodes to inert CSS only. v2 must produce a **single self-contained file** with all React inlined:
+
+- All JSX in `<script type="text/babel">…</script>` blocks **inside** the single HTML file.
+- `<script src="https://unpkg.com/react@…"></script>` for the React runtime is fine — the runtime CDN is public and stable. **Do NOT** use `<script src="…sandbox-bundler-canvas…">` for component code.
+- After export, the file must render correctly when opened directly with `file://` (no network beyond public unpkg/jsdelivr).
+
+The o1 canvas at `o1-stage-router-expressive.html` is the bundling reference: ~3MB, all React inlined under `<script type="text/babel">`, decodes cleanly via `scripts/decode-bundler-canvas.sh` to a readable `decoded/o1-stage-router-expressive.html` that carries the full layout. v2 of o7 must match that pattern.
+
+---
+
 ## Output expectation
 
-A single self-contained canvas exporting to standalone HTML, mobile-first 375×667 with desktop adaptation. At minimum the **ready state** (full plan rendered). If easy, also include a **generating state** (the moment after submitting O6, before the plan resolves) — this is where the "warm hand" feel is tested most.
+A single self-contained canvas exporting to standalone HTML, mobile-first 375×667 with desktop adaptation, **all React inlined** per §"Bundling requirement". At minimum the **ready state** (full plan rendered). If easy, also include a **generating state** (the moment after submitting O6, before the plan resolves) — this is where the "warm hand" feel is tested most.
+
+Final check before submitting: open the exported HTML in a browser with network disabled after first load. If the layout disappears, the canvas re-introduced the v1 failure mode and is not acceptable.
