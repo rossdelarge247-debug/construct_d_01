@@ -19,6 +19,7 @@ on:
     types: [opened, synchronize]
     paths:
       - '.claude/agents/reviewer-*.md'
+      - '.claude/agents/plan-architect.md'
       - 'scripts/spawn-multi-reviewer.sh'
       - 'scripts/derive-verdict.sh'
       - 'scripts/auto-review-parse.sh'
@@ -30,6 +31,7 @@ on:
     branches: [main]
     paths:
       - '.claude/agents/reviewer-*.md'
+      - '.claude/agents/plan-architect.md'
       - 'scripts/spawn-multi-reviewer.sh'
       - 'scripts/derive-verdict.sh'
       - 'scripts/auto-review-parse.sh'
