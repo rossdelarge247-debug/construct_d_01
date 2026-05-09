@@ -1,6 +1,6 @@
 # S-PROTO-pre-signup-interview · verification
 
-Final-state evidence record per CLAUDE.md §"Engineering conventions" §"Definition of Done" item 1. Filled at slice ship; round-by-round multi-agent audit detail belongs in HANDOFF or PR description, not here.
+Final-state evidence record per CLAUDE.md §Engineering conventions §Definition of Done item 1. Filled at slice ship; round-by-round multi-agent audit detail belongs in HANDOFF or PR description, not here.
 
 **Slice ship status:** Awaiting fill-in.
 
@@ -16,7 +16,7 @@ Final-state evidence record per CLAUDE.md §"Engineering conventions" §"Definit
 | AC-6 · Mobile-first 375x667 + desktop adaptation | Preview-deploy mobile viewport dim screenshots · 768/1280 acceptable rendering | Pending |
 | AC-7 · Preview-deploy 6-dim verification | Section below populated | Pending |
 
-## Preview-deploy verification (per spec 72a)
+## Preview-deploy verification (spec 72a)
 
 | Dimension | Status | Evidence |
 |---|---|---|
@@ -27,7 +27,7 @@ Final-state evidence record per CLAUDE.md §"Engineering conventions" §"Definit
 | Mobile viewport 375x667 | Pending | iPhone SE preset screenshots · thumb-zone CTA reachability |
 | Screen reader (basic) | Pending | VoiceOver announcement trace on first 2 screens + O7 |
 
-## Design tokens (from `acceptance.md` §"Design tokens absorbed from canvas")
+## Design tokens (from `acceptance.md` §Design tokens absorbed from canvas)
 
 ### Reused from S-F1 (verification: import grep)
 
@@ -47,11 +47,11 @@ Expected: hex literals appear ONLY in CSS-variable definitions at the top of the
 
 ## Architectural deferrals
 
-(None recorded yet. Populate at slice ship if test-pain audit per spec 72d §3 surfaces a seam that doesn't get extracted.)
+(None recorded yet. Populate at slice ship if test-pain audit (spec 72d §3) surfaces a seam that doesn't get extracted.)
 
 ## Loveability decisions committed
 
-(O7 canvas's chosen treatment per `o7-canvas-prompt.md` §"Three loveability decisions". Recorded at slice ship.)
+(O7 canvas's chosen treatment per `o7-canvas-prompt.md` §Three loveability decisions. Recorded at slice ship.)
 
 | Decision | Choice | Rationale |
 |---|---|---|

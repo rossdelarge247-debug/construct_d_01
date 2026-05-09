@@ -1,6 +1,6 @@
 # S-PROTO-pre-signup-interview · security
 
-Per spec 72 §11 14-item per-slice security checklist, applied as **prototype short-form** per spec 76 §3 (items 1, 8, 12, 14 only required; remaining items listed for completeness but marked N/A · prototype short-form unless otherwise stated).
+Spec 72 §11 14-item per-slice security checklist, applied as **prototype short-form** (spec 76 §3) (items 1, 8, 12, 14 only required; remaining items listed for completeness but marked N/A · prototype short-form unless otherwise stated).
 
 | # | Item | Status | Notes |
 |---|---|---|---|
@@ -27,4 +27,4 @@ Item 9 carries accepted-risk status under Option A per S-PROTO-hub precedent. Ri
 
 Items 8 + 12 to be completed pre-PR (verified during preview-deploy + adversarial review).
 
-Item 13 marked N/A · prototype short-form per spec 76 §3 (still verified on the prototype's actual diff at PR time — no new deps planned).
+Item 13 marked N/A · prototype short-form (spec 76 §3) (still verified on the prototype's actual diff at PR time — no new deps planned).

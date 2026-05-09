@@ -8,12 +8,12 @@ Authoring. First prototype slice under spec 76 §3 category=prototype calibratio
 ## Pre-flight
 - Slice category = prototype per path-default (`src/app/dev/proto/pre-signup-interview/**`); no override needed but `**Category:** prototype` declared explicitly above for reader clarity.
 - Spec 76 §3 gate calibration applies: DoD-14 short-form (items 1, 8, 12, 14 only) · TDD-guard skips · test-pain audit threshold raises to >5 mocks · preview-deploy 6-dim runs in full · `reviewer-prototype-readiness` substitutes `reviewer-correctness` post-PR.
-- Adversarial budget: this slice's `acceptance.md` <300L → single-sub-spawn per spec 72b §1; no partition needed.
+- Adversarial budget: this slice's `acceptance.md` <300L → single-sub-spawn (spec 72b §1); no partition needed.
 - Path-C plan-time-review: harness lacks plan-mode toggle on Opus 4.7; spawn `plan-architect` + `exit-plan-review` manually via `Agent` tool against `/tmp` framed plan before any `src/` touches.
 
 ## Authorisation
-- Spec 65 §"The 8 screens" — O1 stage router · O2 living arrangement · O3 children · O4 ex-partner relationship · O5 employment · O6 partner finance + priorities + worries · O7 your plan · O8 next steps.
-- Spec 65 §"O7 — Your plan (AI generated output)" — 7 sub-elements (situation summary · journey timeline · what needs to happen · conventional path · how Decouple helps · personalised notes · links + CTA).
+- Spec 65 §The 8 screens — O1 stage router · O2 living arrangement · O3 children · O4 ex-partner relationship · O5 employment · O6 partner finance + priorities + worries · O7 your plan · O8 next steps.
+- Spec 65 §O7 — Your plan (AI generated output) — 7 sub-elements (situation summary · journey timeline · what needs to happen · conventional path · how Decouple helps · personalised notes · links + CTA).
 - Spec 76 §3 prototype-mode gate calibration.
 - S-PROTO-hub §AC-4 stub-route precedent (status > `not-started` rows render hybrid content).
 - User-instructed bg treatment: expressive bg primary across the prototype, with a dev toggle to standalone bg.
@@ -29,10 +29,10 @@ Authoring. First prototype slice under spec 76 §3 category=prototype calibratio
 - Reuse of `src/styles/tokens.ts` (S-F1) tokens for ink/text/border/surface/phase colours; prototype-local CSS variables for expressive-only additions.
 
 ### Out of scope
-- Real auth / real backend / real LLM call (prototype is static-data only per spec 76 §3 prototype category).
+- Real auth / real backend / real LLM call (prototype is static-data only (spec 76 §3) prototype category).
 - Promotion of expressive-only colours to global F1 tokens (prototype validates first; promotion is a separate slice if expressive becomes the production direction).
 - Form-validation rigour (prototype accepts any input; production-grade validation is post-prototype).
-- Test coverage on prototype components (per spec 76 §3: TDD-guard skips, coverage excludes for `/dev/proto/<literal>/**`).
+- Test coverage on prototype components (spec 76 §3: TDD-guard skips, coverage excludes for `/dev/proto/<literal>/**`).
 
 ## Design tokens absorbed from canvas
 
@@ -64,17 +64,17 @@ Authoring. First prototype slice under spec 76 §3 category=prototype calibratio
 ## Acceptance criteria
 
 ### AC-1 · Eight-screen flow renders end-to-end
-`/dev/proto/pre-signup-interview` mounts an 8-screen flow corresponding to spec 65 §"The 8 screens": O1 → O8. Each screen renders one decision (CLAUDE.md §Product rules "One thing at a time"). Forward navigation enabled by valid input; back navigation always available. State persists across screens within the session (page refresh resets — by design for prototype).
+`/dev/proto/pre-signup-interview` mounts an 8-screen flow corresponding to spec 65 §The 8 screens: O1 → O8. Each screen renders one decision (CLAUDE.md §Product rules "One thing at a time"). Forward navigation enabled by valid input; back navigation always available. State persists across screens within the session (page refresh resets — by design for prototype).
 
 ### AC-2 · Expressive bg primary; standalone toggle present
 Expressive gradient renders as default page background. Dev-only toggle (top-right corner of viewport, visible in `/dev/proto/*` routes only) flips to standalone cream bg. Toggle state persists via URL query param `?bg=standalone` (no param = expressive). Round-trip preserves bg state when navigating between screens. Both treatments preserve WCAG AA text contrast on body copy.
 
 ### AC-3 · Design tokens reused from S-F1; local extensions scoped
-All ink/text/border/surface colours consume `tokens.color.*` from `src/styles/tokens.ts`. Prototype-local CSS variables for expressive-only colours scoped to the page component. No global token additions in this slice. Mapping table in this slice's `verification.md` §"Design tokens" matches the table above.
+All ink/text/border/surface colours consume `tokens.color.*` from `src/styles/tokens.ts`. Prototype-local CSS variables for expressive-only colours scoped to the page component. No global token additions in this slice. Mapping table in this slice's `verification.md` §Design tokens matches the table above.
 
 ### AC-4 · Visual fidelity to canvas exports
 - **O1 stage router** mobile-first layout matches `o1-stage-router-expressive.html`: header with progress affordance · primary question · 3 stage options as radio-cards · primary CTA in thumb-zone.
-- **O7 your plan** renders the 7 sub-elements per spec 65 in order, mobile-first, matching the visual vibe of `o7-your-plan-expressive.html`. Three loveability decisions per `o7-canvas-prompt.md` §"Three loveability decisions" committed (canvas's chosen treatment carries forward; if canvas is ambiguous, fallback choice recorded in `verification.md`).
+- **O7 your plan** renders the 7 sub-elements (spec 65) in order, mobile-first, matching the visual vibe of `o7-your-plan-expressive.html`. Three loveability decisions per `o7-canvas-prompt.md` §Three loveability decisions committed (canvas's chosen treatment carries forward; if canvas is ambiguous, fallback choice recorded in `verification.md`).
 - **O2-O6, O8** inherit O1's form-screen pattern with screen-specific content.
 
 ### AC-5 · Microcopy compliance with product positioning
@@ -87,8 +87,8 @@ All ink/text/border/surface colours consume `tokens.color.*` from `src/styles/to
 ### AC-6 · Mobile-first 375×667 + desktop adaptation
 Primary viewport 375×667 (iPhone SE) — single column, thumb-zone CTAs, no horizontal scroll. Desktop centers content with comfortable max-width inheriting `tokens.layout.maxNarrow` (760px). Acceptable rendering at 768 (tablet) and 1280 (desktop) viewports.
 
-### AC-7 · Preview-deploy 6-dim verification (per spec 72a)
-`verification.md` §"Preview-deploy verification" populated for all six dimensions per spec 72a §"Six dimensions":
+### AC-7 · Preview-deploy 6-dim verification (spec 72a)
+`verification.md` §Preview-deploy verification populated for all six dimensions (spec 72a §Six dimensions):
 - Golden path (O1 → O8 happy path)
 - Edge cases (back-nav from O7 · refresh on O5 · toggle expressive↔standalone mid-flow)
 - `prefers-reduced-motion` (no flashy transitions on a sensitive moment)
@@ -102,19 +102,19 @@ Primary viewport 375×667 (iPhone SE) — single column, thumb-zone CTAs, no hor
 
 2. **Toggle propagation.** URL query-param `?bg=standalone` parsed in the page component; passed to a `<BackgroundShell>` wrapper that applies the chosen bg class. Toggle button updates the URL via `router.replace` to preserve back-nav.
 
-3. **O7 plan templating.** A pure function `buildPlanFromAnswers(answers): PlanContent` lives at `src/app/dev/proto/pre-signup-interview/lib/build-plan.ts` (or co-located). Pure logic, no side effects (CLAUDE.md §"Coding conduct" §"Effects behind interfaces"). Inputs: typed `Answers` record from the store. Output: typed `PlanContent` with the 7 sub-elements populated.
+3. **O7 plan templating.** A pure function `buildPlanFromAnswers(answers): PlanContent` lives at `src/app/dev/proto/pre-signup-interview/lib/build-plan.ts` (or co-located). Pure logic, no side effects (CLAUDE.md §Coding conduct §Effects behind interfaces). Inputs: typed `Answers` record from the store. Output: typed `PlanContent` with the 7 sub-elements populated.
 
 4. **Screen modularity.** Each screen is a small component under `src/app/dev/proto/pre-signup-interview/screens/o{N}.tsx` exporting a default render-fn. Page component switches by current step.
 
 ## Spec citations
-- Spec 65 §"The 8 screens" — screen inventory + content scope
-- Spec 65 §"O7 — Your plan (AI generated output)" — 7 sub-elements
+- Spec 65 §The 8 screens — screen inventory + content scope
+- Spec 65 §O7 — Your plan (AI generated output) — 7 sub-elements
 - Spec 76 §3 — prototype-category gate calibration
 - Spec 71 §4 — dev-mode pattern (lib/dev/* path; no real auth/store)
 - Spec 72a — 6-dimension preview-deploy rubric
-- CLAUDE.md §"Product positioning" — no "financial disclosure tool" framing
-- CLAUDE.md §"Product rules" — "warm hand on a cold day", "one thing at a time", agency-preserving language
-- CLAUDE.md §"Coding conduct" §"Effects behind interfaces" — `buildPlanFromAnswers` pure logic seam
+- CLAUDE.md §Product positioning — no "financial disclosure tool" framing
+- CLAUDE.md §Product rules — "warm hand on a cold day", "one thing at a time", agency-preserving language
+- CLAUDE.md §Coding conduct §Effects behind interfaces — `buildPlanFromAnswers` pure logic seam
 
 ## Status footer
 - 2026-05-08: slice authored; canvas prompts (O7) shipped at `o7-canvas-prompt.md`; canvases absorbed (3 files, design tokens digested above); construction begins next turn after Path-C plan-time review.
