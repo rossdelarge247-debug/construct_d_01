@@ -1,0 +1,37 @@
+name: canvas-decode (CI gate)
+
+# Per docs/slices/S-INFRA-rigour-v3d-canvas-decode-and-spec-quote-gates/acceptance.md AC-2.
+# Slice acceptance.md files that cite a `docs/design-source/<slug>/<file>.html`
+# must ship the decoded sibling OR carry an explicit waiver line in the slice's
+# verification.md. Files absent from the tree are skipped.
+
+on:
+  pull_request:
+    types: [opened, synchronize]
+    paths:
+      - 'docs/slices/S-*/acceptance.md'
+      - 'docs/slices/S-*/verification.md'
+      - 'docs/design-source/**'
+      - 'scripts/canvas-decode-check.sh'
+      - '.github/workflows/canvas-decode.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'docs/slices/S-*/acceptance.md'
+      - 'docs/slices/S-*/verification.md'
+      - 'docs/design-source/**'
+      - 'scripts/canvas-decode-check.sh'
+      - '.github/workflows/canvas-decode.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    name: canvas-decode-check
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+      - name: Run canvas-decode-check
+        run: bash scripts/canvas-decode-check.sh
