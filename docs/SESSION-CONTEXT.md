@@ -1,24 +1,28 @@
-# Session 77 Pre-flight Context Block (carrying session 76 wrap delta)
+# Session 78 Pre-flight Context Block (carrying session 77 wrap delta)
 
-## Session 76 wrap delta — read this first
+## Session 77 wrap delta — read this first
 
-Session 76 shipped `S-PROTO-pre-signup-interview` — 8-screen clickable prototype at `/dev/proto/pre-signup-interview`, expressive bg primary + `?bg=standalone` toggle, plan-time review path-C exercised (plan-architect + exit-plan-review parallel, verdict approve-with-revisions, all addressed). Branch `claude/proto-presignup-interview-Okucr` at `3fda716`, 5 ahead of `main`, working tree clean.
+Session 77 shipped **`S-INFRA-rigour-v3d-canvas-decode-and-spec-quote-gates`** as PR #129 (squash `af919fb` to main). Six controls operationalising the corrective discipline scoped after the session-76 prototype regression: bundled-HTML canvas decoder script · canvas-decode merge-time CI gate · spec-citation-quote PostToolUse author-time hook · spec-citation-quote merge-time CI mirror with fuzzy quote-matching · plan-architect Q6 source-artefact-verification rubric extension · AC-8 self-application proof (slice's own docs pass the rule the slice ships).
 
-**Shipped at structural fidelity only — not canvas fidelity.** The user pushed back at preview: prototype looks more basic than the three canvas exports they uploaded. Honest cause + corrective protocol in `docs/HANDOFF-SESSION-76.md`. Short version: specs were never read in session (citations built on CLAUDE.md summaries); canvases were never decoded (5MB bundled HTML treated as colour-palette source via grep, not visual-treatment authority); plan-time reviewers ratified the flawed framing because their rubric doesn't check source-artefact actual reads.
+25 files / +1586 / -37 / 4 shellspec specs / 38 examples / 0 failures. Round-1 auto-review: 9 non-blocking findings; round-2 patch addressed 8 (commenting hygiene · adversarial-path waiver-grep escape · AC-doc drift · security.md realpath claim correction); F5 deferred-with-reasoning (✅→Done substitutions came from cherry-picked `fc8272b` wrap-check fix not this slice's authoring). Round-2 verdict: `approve` with shadow-monitor confirming `k=1 = nit-only` and `k=3 = approve` — deferral robust.
+
+**P1 (next session) is now unblocked.** The rigour-v3d gates are live on main; prototype-refactor work must decode canvases first and quote spec citations literally — both enforced automatically.
 
 **Next-session priorities (in order):**
 
-- **P0 · Ship the rigour-v3d slice before any prototype refactor.** `docs/slices/S-INFRA-rigour-v3d-canvas-decode-and-spec-quote-gates/acceptance.md` is scoped at skeletal level; full authoring (literal spec quotes per the rule the slice itself enforces) is the first task. Six controls: `decode-bundler-canvas.sh` script · `canvas-decode.yml` CI gate · `spec-citation-quote.sh` PostToolUse hook · `spec-citation-quote.yml` CI mirror · spec 72d §5 Q6 amendment · CLAUDE.md §"Pre-priority canvas-fidelity verification" amendment. AC-8 dogfooding: slice's own docs must pass its own gates before it ships.
+- **P1 · Refactor `S-PROTO-pre-signup-interview` against decoded canvases + literal spec re-reads.** Branch: `claude/proto-presignup-interview-Okucr` (resync from main first — main has rigour-v3d gates that affect this branch's CI). Decode the three canvases at `docs/design-source/pre-signup-interview/` via `scripts/decode-bundler-canvas.sh`; decoded siblings ship under `decoded/`. Read spec 65 + spec 42 §"Phase 1" + spec 76 §3 + §6 in full (offset+limit batches). Discuss screens / questions / missing screens with user **before any src/ write** — per-screen explicit sign-off. Refactor each component to match canvas treatment (RadioCard ring, ScreenShell type weights + spacing, PlanSection card style, JourneyTimeline visual anchor).
 
-- **P1 · Refactor `S-PROTO-pre-signup-interview` against decoded canvases + literal spec re-reads.** Only after P0 ships. Decode the three canvases at `docs/design-source/pre-signup-interview/` via the new script. Read spec 65 + spec 42 + spec 76 in full (offset+limit batches). Discuss screens / questions / missing screens with user **before any src/ write**. Refactor each component to match canvas treatment (RadioCard ring, ScreenShell type weights + spacing, PlanSection card style, JourneyTimeline visual anchor).
+- **P2 (alternative if P1 blocks on canvas absorption):** F-PA2 deferred matrix-consistency fitness function from spec 76 §8 — verify the per-category gate-behaviour matrix matches the implementing files' behaviour at each amendment.
 
-**Process change for session 77 onwards (corrective protocol):**
+- **P3 (control-plane follow-up):** ship `.claude/settings.json` registration entry for the spec-citation-quote hook under a `control-change`-labelled PR. Hook is executable + tested but harness-registered only after this PR. AC-3 of rigour-v3d explicitly deferred this.
 
-Before any slice that involves spec-driven content or canvas-driven visual fidelity:
-1. Open every cited spec in full (offset+limit; budget 600-1000L of spec-content reads per slice). Quote the literal sentence at each citation point in acceptance.md — not paraphrase.
-2. For bundled-HTML canvases: run `scripts/decode-bundler-canvas.sh` (lands in P0); read decoded form; treat as authoritative for visual treatment.
-3. Pre-construction discussion turn: confirm screens / questions / microcopy / layout intent with user before any src/ touches. Per-screen explicit sign-off.
-4. Plan-time review gets Q6 source-artefact verification (lands in P0).
+**Process change for session 78 onwards (corrective protocol now automated):**
+
+The session-76 corrective protocol is now operationalised in CI + hooks:
+1. Spec citations: author-time `spec-citation-quote.sh` hook flags missing-quote citations on `docs/slices/**` + `docs/workspace-spec/**` writes; merge-time CI mirror additionally fuzzy-matches quotes against cited spec content. Fabricated quotes fail at merge.
+2. Bundled-HTML canvases: `canvas-decode-check` merge-time gate requires decoded sibling OR explicit `verification.md` waiver line per `<slug>/<file>.html` referenced in slice acceptance docs.
+3. Pre-construction discussion turn: still a discipline (not automatable) — confirm screens / questions / microcopy / layout intent with user before any src/ touches.
+4. Plan-time review Q6 source-artefact verification: plan-architect rubric extended; synthetic-deliberate-injection fixture validates persona catches the planted defect class.
 
 
 
@@ -209,8 +213,8 @@ Spec 72c §9 retain/drop measurement window. Cohort entries (UNCHANGED — sessi
 | Slice | Status | Persona findings (issue main missed) |
 |---|---|---|
 | 1 · `S-PROTO-hub` | Done shipped session 74 | reviewer-security 1 (Y) · reviewer-correctness 4 (Y) · reviewer-style 4 (Y) · plan-architect 0 (ambiguous — pure-data slice) |
-| 2 · `S-PROTO-pre-signup-interview` | ⏳ session 76+ P1 | TBD; first slice to also exercise reviewer-prototype-readiness |
-| 3 · `S-PROTO-section-confirm` | ⏳ session 76+ P2 | TBD |
+| 2 · `S-PROTO-pre-signup-interview` | session 78+ P1 (in flight) | TBD; first slice to also exercise reviewer-prototype-readiness |
+| 3 · `S-PROTO-section-confirm` | session 78+ P2 (in flight) | TBD |
 
 After 3 src/ slices, retain/drop verdicts re-evaluated. Plan-architect specifically: row 1's 0 findings is ambiguous data; rows 2-3 expected to give richer behaviour. **Reviewer-prototype-readiness retain/drop measurement** starts at first prototype slice (P1) — informational at V1 (mirrors `acceptance-gate.md` deferral pattern).
 
@@ -237,8 +241,9 @@ After 3 src/ slices, retain/drop verdicts re-evaluated. Plan-architect specifica
 - Done C plan-architect persona SHIPPED (session 73 P0)
 - Done `S-PROTO-hub` Phase 3 P0 SHIPPED (session 74; calibration cohort row 1)
 - Done **Spec 76 prototype-mode rigour SHIPPED (session 75 P0; PR #125)** — slice-category metadata + reviewer-prototype-readiness persona + atomic wiring
-- ⏳ `S-PROTO-pre-signup-interview` (P1) — gated on Claude AI Design canvas
-- ⏳ Mobile-responsive marketing landing — gated on mobile canvas
+- Done **`S-INFRA-rigour-v3d` SHIPPED (session 77 P0; PR #129)** — canvas decoder + canvas-decode CI gate + spec-citation-quote author-time hook + CI mirror + plan-architect Q6 + AC-8 self-application proof
+- `S-PROTO-pre-signup-interview` (P1) — gated on Claude AI Design canvas (canvases on prototype branch)
+- Mobile-responsive marketing landing — gated on mobile canvas (in flight)
 - 4-5 sessions to user-testable Build phase end-to-end (post-C)
 - 9-12 sessions to all 5 phases minimally populated
 - 17+ sessions to production-grade
@@ -277,21 +282,21 @@ Session capacity limits per CLAUDE.md §"Track your progress actively": soft-not
 
 Sequential single-branch pattern across sessions 54→75 (22 sessions in a row). Each session uses `claude/(resume-)decouple-session-{N}-{harness suffix}` across all P-PRs + wrap. After each squash-merge, GitHub auto-deletes head branch; resync via `git fetch origin main && git remote prune origin && git checkout -B <branch> origin/main`.
 
-### Branch state at session-75 wrap (verified live)
+### Branch state at session-77 wrap (verified live)
 
-- **Wrap branch:** `claude/decouple-session-75-ZRcSX` (session-22-in-a-row of the sequential single-branch pattern).
-- **`main` tip:** `aa58dbe` (post-PR-#127 merge — tone-discipline tooling + audit-flagged drift cleanup). Wrap-update PR opens after this commit.
-- **Closed/merged this session:** PR #125 (P0 ship spec 76 + amendments + wiring + sweep) squash `9346963`.
+- **Wrap branch:** `claude/rigour-v3d-canvas-spec-gates-YEA6r` (single-purpose slice branch; harness-named).
+- **`main` tip:** `af919fb` (post-PR-#129 merge — rigour-v3d six-controls bundle).
+- **Closed/merged this session:** PR #129 (P0 ship rigour-v3d) squash `af919fb`.
 - **Live rigour gates:** 3-specialist suite (security · correctness · style) + Fitness functions workflow + dual-persona plan-time review + **NEW category-aware specialist routing in `auto-review.yml`** (substitute prototype-readiness for correctness when slice resolves to `category: prototype`). All gates pass clean against current src/ at wrap.
 - **Persona retain/drop measurement** cumulative through session 75: reviewer-correctness **24/10 STRONG retain** (no new findings session 75 — first run inconclusive; second run 0 findings on a control-plane PR is appropriate-silence) · reviewer-style **18/10 STRONG retain** (+1 session 75 — F-PA3 suffix in shellspec describe; real CLAUDE.md L215-222 anti-pattern catch in the very PR amending the rule) · reviewer-security **7/10 STRONG-candidate** (+1 session 75 advisory note re aggregator env-var defense; future-proofing not current vulnerability — debatable whether it counts as a catch) · reviewer-architecture **DROPPED** session 70 · plan-architect **gathered F-PA3 real catch session 75** (`[slug]` parametric-route disambiguation) · reviewer-prototype-readiness **NEW** session 75 (no findings yet — fires from session 76 P1 onwards).
 - **Architecture-review gap closure status** — **B+C+D 3/3 SHIPPED + spec 76 SHIPPED.** Full pre-impl rigour stack + category-aware post-PR rigour both operational.
 
-### Next session (76) FIRST ACTIONS
+### Next session (78) FIRST ACTIONS
 
-1. **Turn-0 verification.** SessionStart hook surfaces live branch state. Wrap PR for session 75 should be merged at session-76 start; verify against live source.
-2. **Verify branch state + working tree clean.** Resync if BEHIND > 0.
+1. **Turn-0 verification.** SessionStart hook surfaces live branch state. Confirm `main` tip = `af919fb` (rigour-v3d landed). Confirm prototype branch `claude/proto-presignup-interview-Okucr` exists on origin (session 76 work paused there).
+2. **Resync prototype branch from main.** `git fetch origin main && git checkout claude/proto-presignup-interview-Okucr && git rebase origin/main` (or merge if rebase surfaces conflicts touching the rigour-v3d gate files).
 3. **Run `npm install` if `node_modules/` is empty.**
-4. **Confirm priority with user.** Default P0 = `S-PROTO-pre-signup-interview` step 1 (dialogue) + step 2 (canvas-prompts). User may redirect to alternative work if canvas creation isn't tractable yet (e.g. `S-PROTO-section-confirm` P2 less canvas-dependent; OR tackle deferred F-PA2 matrix-consistency fitness function from spec 76 §8; OR live-mode opt-in for `comment-review.sh` per constraint #39).
+4. **Confirm priority with user.** Default P1 = `S-PROTO-pre-signup-interview` step 3 (absorb canvases) + step 4 (construct against decoded). User may redirect to P2 (F-PA2 fitness function) or P3 (settings.json registration of spec-citation-quote hook under `control-change` label).
 5. **Per-prototype workflow** (4-step loop): each prototype = dialogue → canvas-prompt-if-needed → absorb canvas output → construct clickable prototype.
 6. **Phase C real-product slices DEFERRED** until Phase 3 patterns mature.
 7. **CODEOWNERS solo-operator pattern (#25)** — src/ PRs may need admin-bypass merge.
