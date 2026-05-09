@@ -1,28 +1,31 @@
-# Session 78 Pre-flight Context Block (carrying session 77 wrap delta)
+# Session 79 Pre-flight Context Block (carrying session 78 wrap delta)
 
-## Session 77 wrap delta — read this first
+## Session 78 wrap delta — read this first
 
-Session 77 shipped **`S-INFRA-rigour-v3d-canvas-decode-and-spec-quote-gates`** as PR #129 (squash `af919fb` to main). Six controls operationalising the corrective discipline scoped after the session-76 prototype regression: bundled-HTML canvas decoder script · canvas-decode merge-time CI gate · spec-citation-quote PostToolUse author-time hook · spec-citation-quote merge-time CI mirror with fuzzy quote-matching · plan-architect Q6 source-artefact-verification rubric extension · AC-8 self-application proof (slice's own docs pass the rule the slice ships).
+Session 78 was a **canvas-coverage diagnostic** — pivoted from straight P1 refactor when canvas investigation revealed only o1 carries inlined React. The o7-your-plan canvas (committed session 76) shipped with external `<script type="text/babel" src="…sandbox-bundler-canvas/<uuid>.js">` references that don't survive export → decoded HTML is inert CSS only. O8 was never canvassed. Session 79 unblocks the refactor by having the user re-generate the missing canvases first.
 
-25 files / +1586 / -37 / 4 shellspec specs / 38 examples / 0 failures. Round-1 auto-review: 9 non-blocking findings; round-2 patch addressed 8 (commenting hygiene · adversarial-path waiver-grep escape · AC-doc drift · security.md realpath claim correction); F5 deferred-with-reasoning (✅→Done substitutions came from cherry-picked `fc8272b` wrap-check fix not this slice's authoring). Round-2 verdict: `approve` with shadow-monitor confirming `k=1 = nit-only` and `k=3 = approve` — deferral robust.
+**Delivered session 78:**
 
-**P1 (next session) is now unblocked.** The rigour-v3d gates are live on main; prototype-refactor work must decode canvases first and quote spec citations literally — both enforced automatically.
+- Branch sync: merged origin/main into `claude/proto-presignup-interview-Okucr` (rigour-v3d gates inherited via merge `13d3691`; this branch's CI now enforces canvas-decode-check + spec-citation-quote).
+- 3 canvases decoded via `scripts/decode-bundler-canvas.sh`. Committed `88b99d6`. Decoded siblings: o1-expressive 1295L (full React layout) · o1-standalone 1272L (full React layout) · o7-expressive 922L (CSS only — broken; external src refs).
+- O1 canon investigated from decoded sibling: 5-state matrix (default · hover · selected · focus · mobile) + annotations panel + animation spec + accessibility checklist. Two backgrounds — `EXPRESSIVE_HERO` (3-stop, entry/exit) and `EXPRESSIVE_BG` (calmer, O2-O6). Canon footer locks: *"O2–O6 reuse this shell with the calmer EXPRESSIVE_BG (lilac → cream, no magenta stop) — the hero treatment is reserved for entry & exit screens."*
+- Spec 65 §"O1-O8" 8-screen flow read; 8-screen logic captured.
+- 2 canvas prompts authored at `docs/slices/S-PROTO-pre-signup-interview/`. Committed `d833ce5`:
+  - `o7-canvas-prompt.md` (v2 re-issue — explicit inline-React directive, references working o1 bundling pattern)
+  - `o8-canvas-prompt.md` (NEW — exit twin of O1, single radio with 4 next-action options, three loveability decisions on option weighting / plan-recall framing / empty-state default)
+- Both prompts embed the same bundling-requirement section: all React inlined in `<script type="text/babel">`; runtime CDN OK; no sandbox-bundler-canvas src refs; export must survive offline reload.
 
-**Next-session priorities (in order):**
+**Session 79 priorities (in order):**
 
-- **P1 · Refactor `S-PROTO-pre-signup-interview` against decoded canvases + literal spec re-reads.** Branch: `claude/proto-presignup-interview-Okucr` (resync from main first — main has rigour-v3d gates that affect this branch's CI). Decode the three canvases at `docs/design-source/pre-signup-interview/` via `scripts/decode-bundler-canvas.sh`; decoded siblings ship under `decoded/`. Read spec 65 + spec 42 §"Phase 1" + spec 76 §3 + §6 in full (offset+limit batches). Discuss screens / questions / missing screens with user **before any src/ write** — per-screen explicit sign-off. Refactor each component to match canvas treatment (RadioCard ring, ScreenShell type weights + spacing, PlanSection card style, JourneyTimeline visual anchor).
+- **P1 · User generates O7-v2 + O8 canvases** via Claude AI Design using the prompts at `docs/slices/S-PROTO-pre-signup-interview/o7-canvas-prompt.md` + `o8-canvas-prompt.md`. Upload outputs to `docs/design-source/pre-signup-interview/` (suggested filenames: `o7-your-plan-expressive-v2.html`, `o8-whats-next-expressive.html`).
+- **P2 · Decode + verify** via `scripts/decode-bundler-canvas.sh`. Decoded siblings must carry full layout (≈1000+ lines of JSX-bearing HTML), not CSS only. If still broken, iterate on the prompt — o1 canvases are the bundling reference.
+- **P3 · Resume P1 refactor** — refactor `src/app/dev/proto/pre-signup-interview/` to match decoded canvases (o1 + o7-v2 + o8). Per-screen sign-off before any src/ write. RadioCard ring + ScreenShell type weights + spacing + JourneyTimeline visual anchor + radio-card pattern inherited from o1 canon.
+- **P4 (decision point at session 79 start)** — O2-O6 either canon-derived from o1 (per its footer locking the calmer EXPRESSIVE_BG inheritance) OR additional canvas prompts requested. Discuss before P3.
 
-- **P2 (alternative if P1 blocks on canvas absorption):** F-PA2 deferred matrix-consistency fitness function from spec 76 §8 — verify the per-category gate-behaviour matrix matches the implementing files' behaviour at each amendment.
+**Process notes for session 79:**
 
-- **P3 (control-plane follow-up):** ship `.claude/settings.json` registration entry for the spec-citation-quote hook under a `control-change`-labelled PR. Hook is executable + tested but harness-registered only after this PR. AC-3 of rigour-v3d explicitly deferred this.
-
-**Process change for session 78 onwards (corrective protocol now automated):**
-
-The session-76 corrective protocol is now operationalised in CI + hooks:
-1. Spec citations: author-time `spec-citation-quote.sh` hook flags missing-quote citations on `docs/slices/**` + `docs/workspace-spec/**` writes; merge-time CI mirror additionally fuzzy-matches quotes against cited spec content. Fabricated quotes fail at merge.
-2. Bundled-HTML canvases: `canvas-decode-check` merge-time gate requires decoded sibling OR explicit `verification.md` waiver line per `<slug>/<file>.html` referenced in slice acceptance docs.
-3. Pre-construction discussion turn: still a discipline (not automatable) — confirm screens / questions / microcopy / layout intent with user before any src/ touches.
-4. Plan-time review Q6 source-artefact verification: plan-architect rubric extended; synthetic-deliberate-injection fixture validates persona catches the planted defect class.
+- Rigour-v3d gates active on this branch's CI. Cite specs literally (`spec-citation-quote.sh` author-time + CI mirror); decode any bundled-HTML canvas before refactor cites it in `acceptance.md` (`canvas-decode-check` CI).
+- The O7 v1 → v2 re-issue shows bundling failure is canvas-output-dependent — not all canvases inline React. Always verify decoded sibling carries JSX (≈1000+ lines), not CSS only (≈900L of styles + class names but no layout).
 
 
 
