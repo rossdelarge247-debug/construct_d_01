@@ -2,7 +2,6 @@
 # .claude/hooks/spec-citation-quote.sh — PostToolUse:Write|Edit author-time
 # advisory + opt-in enforcement for spec-citation quote discipline.
 #
-# Per docs/slices/S-INFRA-rigour-v3d-canvas-decode-and-spec-quote-gates/acceptance.md AC-3.
 # Catches `per spec NN` and `spec NN §"..."` claim citations that lack a
 # literal-text quote within 5 lines after the citation. Runs against
 # slice docs (`docs/slices/S-*/*.md`) and workspace specs (`docs/workspace-spec/*.md`).

@@ -1,14 +1,9 @@
 #!/usr/bin/env bash
 # scripts/spec-citation-patterns.sh — shared catalogue for the spec-citation gates.
 #
-# Sourced by:
-#   - .claude/hooks/spec-citation-quote.sh (AC-3, author-time advisory)
-#   - scripts/spec-citation-quote-check.sh (AC-4, merge-time CI)
-#
-# Per docs/slices/S-INFRA-rigour-v3d-canvas-decode-and-spec-quote-gates/acceptance.md
-# §"Architectural seams" 2: drift between author-time + merge-time would suppress
-# real findings at one layer or fire false positives at the other. Sourcing the
-# regex from this single file is the single point of truth.
+# Drift between author-time hook and merge-time CI mirror would suppress real
+# findings at one layer or fire false positives at the other. Sourcing the regex
+# from this single file is the single point of truth.
 
 # Citation trigger forms (claim, not doc-pointer):
 #   - `per spec NN[a]` / `Per spec NN[a]`             — per-cite (any optional letter suffix: 72c, 72d, etc.)

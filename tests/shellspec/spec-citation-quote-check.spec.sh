@@ -1,6 +1,5 @@
 #!/bin/bash
 # Tests for scripts/spec-citation-quote-check.sh — AC-4 CI mirror.
-# Per docs/slices/S-INFRA-rigour-v3d-canvas-decode-and-spec-quote-gates/test-plan.md AC-4.
 
 Describe 'scripts/spec-citation-quote-check.sh'
 

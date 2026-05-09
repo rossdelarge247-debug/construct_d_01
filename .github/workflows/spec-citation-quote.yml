@@ -1,6 +1,5 @@
 name: spec-citation-quote (CI mirror)
 
-# Per docs/slices/S-INFRA-rigour-v3d-canvas-decode-and-spec-quote-gates/acceptance.md AC-4.
 # Author-time advisory at .claude/hooks/spec-citation-quote.sh runs at write/edit
 # time; this workflow is the merge-time gate that additionally fuzzy-matches
 # the local quoted text against the cited spec file. Fabricated quotes fail here.

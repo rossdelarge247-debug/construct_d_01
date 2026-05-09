@@ -39,7 +39,13 @@ for acceptance in $SLICE_GLOB; do
 
     [ -f "$BASE_DIR/$decoded" ] && continue
 
-    if [ -f "$verification" ] && grep -qE "^- canvas-decode-waiver: ${ref} — " "$verification"; then
+    # Fixed-string match against waiver line — `awk index` avoids treating
+    # literal dots in the ref path as ERE wildcards (real adversarial-path
+    # concern: `file.html` ref would match `fileXhtml` in a regex check).
+    if [ -f "$verification" ] && \
+       awk -v prefix="- canvas-decode-waiver: ${ref} — " '
+         index($0, prefix) == 1 { found = 1; exit }
+         END { exit !found }' "$verification"; then
       continue
     fi
 

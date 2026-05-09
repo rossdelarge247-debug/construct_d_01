@@ -2,7 +2,6 @@
 # scripts/decode-bundler-canvas.sh — decode a bundled-HTML canvas export
 # to its readable inner HTML+CSS form.
 #
-# Per docs/slices/S-INFRA-rigour-v3d-canvas-decode-and-spec-quote-gates/acceptance.md AC-1.
 # A bundled-HTML canvas (~5MB) wraps the real inner doc as a JSON-encoded
 # string inside `<script type="__bundler/template">"<!DOCTYPE html>..."</script>`.
 # Without decoding, grep-on-canvas reads the loader-shell CSS instead of the
@@ -74,7 +73,6 @@ if [ -z "$TEMPLATE" ]; then
   exit 1
 fi
 
-# `jq -r .` on a JSON-encoded string returns the unescaped content.
 if ! DECODED=$(printf '%s' "$TEMPLATE" | jq -r . 2>/dev/null); then
   printf 'decode-bundler-canvas: failed to JSON-parse __bundler/template content\n' >&2
   exit 1

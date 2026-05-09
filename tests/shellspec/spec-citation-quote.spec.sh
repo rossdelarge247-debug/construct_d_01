@@ -1,6 +1,5 @@
 #!/bin/bash
 # Tests for .claude/hooks/spec-citation-quote.sh — PostToolUse spec-citation gate.
-# Per docs/slices/S-INFRA-rigour-v3d-canvas-decode-and-spec-quote-gates/test-plan.md AC-3.
 #
 # Hook receives `tool_input` JSON via stdin; emits advisory `systemMessage`
 # (or exits 2 in enforce mode); always parseable by the harness.

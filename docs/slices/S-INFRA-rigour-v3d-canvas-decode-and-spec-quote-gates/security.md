@@ -36,9 +36,9 @@ No user data flows, no auth surface, no UI, no T3+ data. Most §11 boxes resolve
 
 Input: bundled-HTML file path (or stdin via `-`). Output: readable HTML+CSS to sibling `decoded/<file>.html` (or stdout). Threat surface:
 
-- **Path traversal.** Decoder accepts arbitrary input path; output path is computed as `dirname(input)/decoded/basename(input)`. Validated via shellspec test that an input path containing `..` resolves to its real-path before composing the output path.
-- **Inner-doc injection.** The bundled-HTML inner doc is JSON-encoded; the decoder JSON-parses then writes to disk. The decoded output is written to a `decoded/` sibling, never overwriting the original; decoder fails-loud if output path already exists unless `--force` is passed.
-- **Resource exhaustion.** Bundled-HTML inputs are ≤6MB in current usage (5MB observed). Decoder reads input via `fs.readFileSync`; for a malicious 1GB input, Node would OOM. Acceptable risk for an author-time tool invoked on author-trusted repo content; not a CI-runner attack vector since the CI gate (AC-2) doesn't invoke the decoder, only requires its output sibling.
+- **Path traversal.** Decoder accepts arbitrary input path; output path is computed as `dirname(input)/decoded/basename(input)` relative to the input. The decoder is an author-time tool invoked on author-trusted repo content — not a multi-tenant or untrusted-input boundary. Output writes are explicitly under the input's own sibling directory (intentional locality); a path containing `..` produces output co-located with the resolved input, not at a globally-attacker-chosen location.
+- **Inner-doc injection.** The bundled-HTML inner doc is JSON-encoded; the decoder JSON-parses (`jq -r .`) then writes to disk. The decoded output is written to a `decoded/` sibling, never overwriting the original; decoder fails-loud if output path already exists unless `--force` is passed.
+- **Resource exhaustion.** Bundled-HTML inputs are ≤6MB in current usage (5MB observed). Decoder reads input into a shell variable via `cat`; for a malicious 1GB input, the shell process would OOM. Acceptable risk for an author-time tool on author-trusted repo content; not a CI-runner attack vector since the CI gate (AC-2) doesn't invoke the decoder, only requires its output sibling.
 
 ### AC-3 + AC-4 hook + CI mirror
 

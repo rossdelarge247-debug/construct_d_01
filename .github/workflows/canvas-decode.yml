@@ -1,6 +1,5 @@
 name: canvas-decode (CI gate)
 
-# Per docs/slices/S-INFRA-rigour-v3d-canvas-decode-and-spec-quote-gates/acceptance.md AC-2.
 # Slice acceptance.md files that cite a `docs/design-source/<slug>/<file>.html`
 # must ship the decoded sibling OR carry an explicit waiver line in the slice's
 # verification.md. Files absent from the tree are skipped.

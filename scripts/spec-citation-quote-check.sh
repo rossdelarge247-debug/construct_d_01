@@ -1,7 +1,6 @@
 #!/usr/bin/env bash
 # scripts/spec-citation-quote-check.sh — AC-4 merge-time CI mirror.
 #
-# Per docs/slices/S-INFRA-rigour-v3d-canvas-decode-and-spec-quote-gates/acceptance.md AC-4.
 # Stricter than the AC-3 author-time hook: additionally fuzzy-matches the
 # local quoted text against the cited spec file's content. Catches
 # fabricated quotes (the failure mode behind the prototype-canvas regression).

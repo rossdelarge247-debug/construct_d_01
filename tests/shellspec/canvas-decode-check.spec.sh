@@ -1,6 +1,5 @@
 #!/bin/bash
 # Tests for scripts/canvas-decode-check.sh — AC-2 CI gate.
-# Per docs/slices/S-INFRA-rigour-v3d-canvas-decode-and-spec-quote-gates/test-plan.md AC-2.
 
 Describe 'scripts/canvas-decode-check.sh'
 

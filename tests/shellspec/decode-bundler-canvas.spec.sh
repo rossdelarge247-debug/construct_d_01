@@ -1,6 +1,5 @@
 #!/bin/bash
 # Tests for scripts/decode-bundler-canvas.sh — bundled-HTML canvas decoder.
-# Per docs/slices/S-INFRA-rigour-v3d-canvas-decode-and-spec-quote-gates/test-plan.md AC-1.
 #
 # The decoder is a pure transform: input file path or stdin → output to
 # sibling decoded/ dir or stdout. Tests cover the trigger forms, error
