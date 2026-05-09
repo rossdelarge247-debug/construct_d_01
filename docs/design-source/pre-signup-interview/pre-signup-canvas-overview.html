@@ -1,0 +1,559 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Decouple — Pre-signup Interview · Canvas (O2–O8)</title>
+<link href="https://cdnjs.cloudflare.com/ajax/libs/tailwindcss/2.2.19/tailwind.min.css" rel="stylesheet">
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Source+Serif+Pro:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500;1,600&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+<style>
+  html, body { margin: 0; padding: 0; }
+  body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    color: #1A1A1A;
+    -webkit-font-smoothing: antialiased;
+    font-feature-settings: "ss01","cv11";
+  }
+  .serif { font-family: 'Source Serif Pro', Georgia, serif; }
+  .mono  { font-family: 'JetBrains Mono', ui-monospace, Menlo, monospace; }
+  .label-xs { font-size: 10.5px; letter-spacing: 0.14em; text-transform: uppercase; font-weight: 600; }
+  .tabular { font-variant-numeric: tabular-nums; }
+  .plate { background: #F5F5F4; border: 1px solid #E5E3DC; border-radius: 14px; }
+  *:focus-visible { outline: 2px solid #1A1A1A; outline-offset: 2px; border-radius: 4px; }
+
+  /* desktop chrome — a soft browser-window plate around scaled mobile */
+  .desk {
+    background:
+      radial-gradient(ellipse at top, #EFE7F8 0%, transparent 60%),
+      linear-gradient(180deg, #F5F1F8 0%, #EFEEE9 100%);
+    border-radius: 12px;
+    border: 1px solid #E5E3DC;
+    overflow: hidden;
+  }
+  .desk-bar {
+    display: flex; align-items: center; gap: 8px;
+    padding: 10px 14px;
+    background: #FFFFFF;
+    border-bottom: 1px solid #E5E3DC;
+  }
+  .desk-dot { width: 10px; height: 10px; border-radius: 999px; background: #E5E3DC; }
+  .desk-url {
+    flex: 1; text-align: center; font-family: 'JetBrains Mono', monospace;
+    font-size: 11px; color: #78716C; padding: 4px 10px;
+    background: #F5F5F4; border-radius: 999px; max-width: 420px; margin: 0 auto;
+  }
+
+  /* archive cards */
+  .arc-card {
+    background: #FFFFFF; border: 1px solid #E5E3DC; border-radius: 14px;
+    padding: 22px; height: 100%;
+  }
+  .arc-card h3 {
+    font-family: 'Source Serif Pro', Georgia, serif;
+    font-size: 17px; font-weight: 600; letter-spacing: -0.01em; color: #1A1A1A;
+    margin: 0 0 4px 0;
+  }
+  .arc-card .arc-eyebrow {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10.5px; letter-spacing: 0.14em; text-transform: uppercase;
+    color: #7C3AED; font-weight: 600; margin-bottom: 10px;
+  }
+  .arc-card .arc-resolved {
+    display: inline-block;
+    background: #1A1A1A; color: #FFFFFF;
+    padding: 4px 9px; border-radius: 6px;
+    font-family: 'JetBrains Mono', monospace; font-size: 10.5px; letter-spacing: 0.06em;
+    font-weight: 500; margin-bottom: 12px;
+  }
+  .arc-card dl { margin: 0; font-size: 13px; line-height: 1.55; color: #57534E; }
+  .arc-card dt {
+    font-family: 'JetBrains Mono', monospace; font-size: 10px; letter-spacing: 0.08em;
+    text-transform: uppercase; color: #78716C; font-weight: 600; margin-top: 11px;
+  }
+  .arc-card dd { margin: 2px 0 0 0; }
+  .arc-card .arc-arch {
+    margin-top: 14px; padding-top: 12px; border-top: 1px dashed #E5E3DC;
+    font-size: 12px; color: #78716C;
+  }
+
+  /* placeholder for O8 */
+  .o8-placeholder {
+    width: 100%; height: 100%;
+    background: repeating-linear-gradient(135deg, #FAFAF7 0 12px, #F2EEE8 12px 24px);
+    border: 1.5px dashed #BFB8AD;
+    border-radius: 14px;
+    display: flex; align-items: center; justify-content: center;
+    flex-direction: column; gap: 14px;
+    padding: 40px;
+    text-align: center;
+  }
+
+  .iframe-clean {
+    border: none; background: #FFFFFF; border-radius: 10px; display: block;
+  }
+</style>
+</head>
+<body>
+
+<template id="__bundler_thumbnail">
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 400">
+    <defs>
+      <linearGradient id="cnvBg" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0%" stop-color="#F3EEFE"/>
+        <stop offset="100%" stop-color="#FAF6F0"/>
+      </linearGradient>
+    </defs>
+    <rect width="400" height="400" fill="url(#cnvBg)"/>
+    <g transform="translate(60 80)">
+      <rect x="0"   y="0"   width="80" height="120" rx="10" fill="#FFFFFF" stroke="#E5E3DC"/>
+      <rect x="100" y="0"   width="80" height="120" rx="10" fill="#FFFFFF" stroke="#E5E3DC"/>
+      <rect x="200" y="0"   width="80" height="120" rx="10" fill="#FFFFFF" stroke="#1A1A1A" stroke-width="2"/>
+      <rect x="0"   y="140" width="80" height="120" rx="10" fill="#FFFFFF" stroke="#E5E3DC"/>
+      <rect x="100" y="140" width="80" height="120" rx="10" fill="#FFFFFF" stroke="#E5E3DC"/>
+      <rect x="200" y="140" width="80" height="120" rx="10" fill="#7C3AED" opacity="0.2" stroke="#7C3AED" stroke-dasharray="3 3"/>
+    </g>
+  </svg>
+</template>
+
+<div id="root"></div>
+
+<!-- Frame modules — each registers window.oN with full mobile-frame React components -->
+<script type="text/babel" src="o2-frames.jsx"></script>
+<script type="text/babel" src="o3-frames.jsx"></script>
+<script type="text/babel" src="o4-frames.jsx"></script>
+<script type="text/babel" src="o5-frames.jsx"></script>
+<script type="text/babel" src="o6-frames.jsx"></script>
+<script type="text/babel" src="o8-frames.jsx"></script>
+
+<!-- Design canvas component (lives at project root) -->
+<script type="text/babel" src="../design-canvas.jsx"></script>
+
+<script type="text/babel" data-presets="react">
+const { useState, useEffect } = React;
+
+/* =========================================================================
+   PRE-SIGNUP CANVAS — O2 → O8
+   Aggregates the resolved interview screens, their desktop / scaled-up
+   counterparts, an O8 placeholder, and the archived locked decisions.
+   This file is the export-ready handoff for Claude Code:
+   one canvas, every screen, every locked call, in source-of-truth form.
+   ========================================================================= */
+
+const INK = "#1A1A1A";
+const SUB = "#57534E";
+const MUTE = "#78716C";
+const LINE = "#E5E3DC";
+const VIOLET = "#7C3AED";
+const MAGENTA = "#BE185D";
+
+/* -- centred wrapper for the mobile frames inside artboards -- */
+function MobileWell({ children, scale = 1, bg }) {
+  const wellBg = bg ?? "linear-gradient(180deg, #EFE7F8 0%, #F5F1F8 60%, #EFEEE9 100%)";
+  return (
+    <div style={{
+      width: "100%", height: "100%",
+      background: wellBg,
+      display: "flex", alignItems: "center", justifyContent: "center",
+      padding: 16, overflow: "hidden"
+    }}>
+      <div style={{ transform: `scale(${scale})`, transformOrigin: "center center" }}>
+        {children}
+      </div>
+    </div>
+  );
+}
+
+/* -- desktop browser-chrome wrapper that hosts a centred mobile frame at scale -- */
+function DesktopShowcase({ url, children, scale = 1.6 }) {
+  return (
+    <div className="desk" style={{ width: "100%", height: "100%", display: "flex", flexDirection: "column" }}>
+      <div className="desk-bar">
+        <span className="desk-dot"/>
+        <span className="desk-dot"/>
+        <span className="desk-dot"/>
+        <div className="desk-url">{url}</div>
+        <span style={{ width: 30 }} aria-hidden="true"/>
+      </div>
+      <div style={{
+        flex: 1,
+        display: "flex", alignItems: "center", justifyContent: "center",
+        padding: 24,
+        background:
+          "radial-gradient(ellipse at 30% 20%, rgba(124,58,237,0.10) 0%, transparent 50%)," +
+          "linear-gradient(180deg, #F5F1F8 0%, #EFEEE9 100%)",
+        overflow: "hidden"
+      }}>
+        <div style={{ transform: `scale(${scale})`, transformOrigin: "center center" }}>
+          {children}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/* -- O7 fallback tile — the plan-output screen lives in its own page; we
+      render a small "open" tile so the canvas stays performant -- */
+function O7Tile({ desktop = false }) {
+  return (
+    <div style={{
+      width: "100%", height: "100%",
+      background: "linear-gradient(180deg, #F3EEFE 0%, #FAF6F0 60%, #F5F5F4 100%)",
+      borderRadius: desktop ? 12 : 0,
+      padding: desktop ? 40 : 24,
+      display: "flex", flexDirection: "column", justifyContent: "center", alignItems: "center",
+      textAlign: "center", gap: 14
+    }}>
+      <div className="label-xs" style={{ color: VIOLET }}>O7 · Your plan</div>
+      <h3 className="serif" style={{
+        fontSize: desktop ? 36 : 22, fontWeight: 600, lineHeight: 1.1, letterSpacing: "-0.02em",
+        margin: 0, color: INK
+      }}>
+        Plan output — <span className="italic" style={{ fontWeight: 400, color: MAGENTA }}>opens in its own canvas</span>
+      </h3>
+      <p style={{ fontSize: desktop ? 14 : 12, color: SUB, lineHeight: 1.55, maxWidth: 360, margin: 0 }}>
+        The personalised plan is rendered on a dedicated workbook to keep this canvas light.
+        Click through to the source file for the full live screen.
+      </p>
+      <a href="Pre-signup O7 Your Plan - Expressive.html" target="_blank" rel="noopener"
+         className="mono"
+         style={{
+           background: INK, color: "#FFFFFF",
+           padding: desktop ? "12px 22px" : "10px 16px",
+           borderRadius: 999, fontSize: desktop ? 13 : 11,
+           fontWeight: 600, letterSpacing: "0.04em",
+           textDecoration: "none", display: "inline-flex", alignItems: "center", gap: 8
+         }}>
+        Open O7 workbook →
+      </a>
+    </div>
+  );
+}
+
+/* -- O8 placeholder per the brief: "I'm not happy with that yet" -- */
+function O8Placeholder({ desktop = false }) {
+  return (
+    <div className="o8-placeholder">
+      <div className="mono" style={{
+        background: "#1A1A1A", color: "#FFFFFF",
+        padding: "5px 11px", borderRadius: 6, fontSize: 11, letterSpacing: "0.06em"
+      }}>
+        O8 · WHAT'S NEXT
+      </div>
+      <h3 className="serif" style={{
+        fontSize: desktop ? 32 : 22, fontWeight: 600,
+        margin: 0, color: INK, letterSpacing: "-0.02em", lineHeight: 1.1
+      }}>
+        Placeholder — not happy yet
+      </h3>
+      <p style={{
+        fontSize: desktop ? 14 : 12.5, color: SUB, lineHeight: 1.55,
+        maxWidth: 380, margin: 0
+      }}>
+        The post-plan "what's next" screen is parked. The four-route shape
+        (continue / capture email / external / support) is provisionally
+        modelled in <span className="mono" style={{ color: INK }}>o8-frames.jsx</span>,
+        but the loveable-call combo isn't locked. Treat this slot as TBD —
+        do not lift copy or layout from the existing draft into the build.
+      </p>
+      <div className="mono" style={{ fontSize: 10.5, color: MUTE, letterSpacing: "0.08em" }}>
+        STATUS: open · OWNER: Sarah · NEXT: re-think framing before any build
+      </div>
+    </div>
+  );
+}
+
+/* =========================================================================
+   ARCHIVE — locked decisions per screen
+   Mirrors what's in the workbooks; this is the canvas-side source of truth.
+   ========================================================================= */
+const ARCHIVE = [
+  {
+    id: "o2",
+    eyebrow: "O2 · Your situation",
+    title: "Four sub-questions, one page",
+    resolved: "A1 · B1 · C1",
+    rows: [
+      { dt: "A1 — Layout",       dd: "Four cards stacked, one sub-question per card." },
+      { dt: "B1 — Children Yes", dd: "Inline reveal: count chips appear under \u201CYes\u201D." },
+      { dt: "C1 — Continue",     dd: "Gated; \u201Cx of 4 answered\u201D caption above the disabled CTA." }
+    ],
+    archived: "A2 paired cards · A3 single tall card · B2 always-visible · B3 bottom-sheet · C2 progress · C3 always-enabled"
+  },
+  {
+    id: "o3",
+    eyebrow: "O3 · Your ex & safety",
+    title: "Equal weight, silent flag",
+    resolved: "A1 · B1 · C2",
+    rows: [
+      { dt: "A1 — Safety option", dd: "Sits in the same vertical list, same paper-white tile, same selected state." },
+      { dt: "B1 — Privacy preamble", dd: "Two-line caption: \u201Csome people read these screens with a partner nearby.\u201D" },
+      { dt: "C2 — Privacy optional", dd: "Continue unlocks after the relationship answer; privacy can be skipped." },
+      { dt: "Silent flag",         dd: "_safetyFlag = true if relationship === safety OR devicePrivate === notsure. No modal, no banner." }
+    ],
+    archived: "A2 outlined · A3 promoted card · B2 inline-help · B3 footer-microcopy · C1 both-required · C3 always-on"
+  },
+  {
+    id: "o4",
+    eyebrow: "O4 · Employment",
+    title: "Plain language, no preselect",
+    resolved: "A1 · B2 · C3",
+    rows: [
+      { dt: "A1 — Caption below", dd: "Helper sits below each option, not as a tooltip or popover." },
+      { dt: "B2 — Plain wording", dd: "\u201CHow do you make money?\u201D not \u201CEmployment status\u201D — softens the ask." },
+      { dt: "C3 — \u201CNo\u201D emphasised", dd: "Empty state nudges \u201CNo, just the basics\u201D as the larger row to set the right baseline." }
+    ],
+    archived: "A2 ?-popover · A3 reveal-on-select · B1 verbatim · B3 two-questions · C1 blank-slate · C2 \u201CNo\u201D-preselected"
+  },
+  {
+    id: "o5",
+    eyebrow: "O5 · Partner finances",
+    title: "One tall card, neutral framing",
+    resolved: "A3 · B1 · C2",
+    rows: [
+      { dt: "A3 — One tall card", dd: "All four options in a single hairline-divided card; reads as a single ask, not a quiz." },
+      { dt: "B1 — Neutral framing", dd: "\u201CHow much do you know about \u2026\u201D — owns the gap without judgement." },
+      { dt: "C2 — Enabled after answer", dd: "Continue unlocks after one selection; no progress dots." }
+    ],
+    archived: "A1 stacked · A2 paired · B2 \u201Cdo you suspect\u201D · B3 micro-explainer · C1 disabled-until · C3 always-on"
+  },
+  {
+    id: "o6",
+    eyebrow: "O6 · What matters",
+    title: "Stacked cards, calm hint, acknowledging",
+    resolved: "A1 · B3 · C2",
+    rows: [
+      { dt: "A1 — Stacked cards",   dd: "Priorities and worries each get their own card — same shape as O2." },
+      { dt: "B3 — Calm hint",       dd: "\u201CPick what matters most. There's no wrong answer.\u201D — single soft line above the chips." },
+      { dt: "C2 — Acknowledging",   dd: "CTA copy adapts to count answered; the screen recognises the user's input on its way out." }
+    ],
+    archived: "A2 single grid · A3 split-cols · B1 strict · B2 example-led · C1 fixed-cta · C3 numbered"
+  },
+  {
+    id: "o7",
+    eyebrow: "O7 · Your plan",
+    title: "AI plan output — long-form",
+    resolved: "Output screen · own workbook",
+    rows: [
+      { dt: "Shape",     dd: "Long-form plan render: priorities echoed back, suggested next moves, what we still need." },
+      { dt: "Tone",      dd: "Recognising, not selling. The plan reads like a brief, not a pitch." },
+      { dt: "Continue",  dd: "Single primary CTA \u2192 O8. Secondary \u201Csave & exit\u201D for users who want to think." }
+    ],
+    archived: "Variants live in o7-page.jsx + o7-plan-page.jsx — not condensed into A/B/C combos here."
+  },
+  {
+    id: "o8",
+    eyebrow: "O8 · What's next",
+    title: "PLACEHOLDER — open",
+    resolved: "TBD",
+    rows: [
+      { dt: "Status",  dd: "Not locked. \u201CI'm not happy with that yet\u201D — re-think framing before any build." },
+      { dt: "Shape",   dd: "Provisionally a four-route picker (continue / capture email / external / support) but combo isn't settled." },
+      { dt: "Action",  dd: "Don't lift copy or layout from the existing draft into the build pipeline." }
+    ],
+    archived: "Existing draft sits in o8-frames.jsx but is NOT canonical."
+  }
+];
+
+/* =========================================================================
+   APP
+   ========================================================================= */
+function App() {
+  const [ready, setReady] = useState(false);
+
+  // Frame modules load asynchronously via Babel; wait until they all register
+  useEffect(() => {
+    let tries = 0;
+    const tick = () => {
+      const ok =
+        window.o2 && window.o3 && window.o4 && window.o5 && window.o6 && window.o8 &&
+        window.DesignCanvas;
+      if (ok) { setReady(true); return; }
+      tries += 1;
+      if (tries > 60) { setReady(true); return; } // bail after ~3s; render what we have
+      setTimeout(tick, 50);
+    };
+    tick();
+  }, []);
+
+  if (!ready) {
+    return (
+      <div style={{
+        minHeight: "100vh",
+        background: "#F0EEE9",
+        display: "flex", alignItems: "center", justifyContent: "center",
+        fontFamily: "JetBrains Mono, monospace", fontSize: 12, color: "#78716C",
+        letterSpacing: "0.08em"
+      }}>
+        loading frames …
+      </div>
+    );
+  }
+
+  const O2 = window.o2;
+  const O3 = window.o3;
+  const O4 = window.o4;
+  const O5 = window.o5;
+  const O6 = window.o6;
+  const O8 = window.o8;
+
+  /* === Mobile resolved frames per screen ===
+     Each module exports a static A/B/C function that renders the full mobile
+     shell with that treatment. We pick the function whose treatment is the
+     resolved one for that screen — close enough for at-a-glance review on a
+     canvas. The interactive composed frame still lives on each workbook. */
+  const mobileResolved = [
+    { id: "o2",  label: "O2 · Your situation · A1",   render: () => <O2.A1 footerVariant="C1" answered={4} childCountVisible={true} /> },
+    { id: "o3",  label: "O3 · Ex & safety · A1",      render: () => <O3.A1 /> },
+    { id: "o4",  label: "O4 · Employment · A1",       render: () => <O4.A1 /> },
+    { id: "o5",  label: "O5 · Partner finances · A3", render: () => <O5.A3 /> },
+    { id: "o6",  label: "O6 · What matters · A1",     render: () => <O6.A1 /> },
+    { id: "o7",  label: "O7 · Your plan",             render: () => <O7Tile /> },
+    { id: "o8",  label: "O8 · Placeholder",           render: () => <O8Placeholder /> }
+  ];
+
+  const desktopUrls = {
+    o2: "decouple.app/start/situation",
+    o3: "decouple.app/start/ex-and-safety",
+    o4: "decouple.app/start/employment",
+    o5: "decouple.app/start/partner-finances",
+    o6: "decouple.app/start/what-matters",
+    o7: "decouple.app/start/your-plan",
+    o8: "decouple.app/start/whats-next"
+  };
+
+  return (
+    <DesignCanvas>
+
+      {/* ──────────────────────────────────────────────────────────────────
+          TITLE NOTE
+          ────────────────────────────────────────────────────────────── */}
+      <DCSection id="header"
+                 title="Pre-signup Interview · Canvas"
+                 subtitle="O2 → O8 · resolved mobile frames + desktop scaled equivalents · decisions archive · export-ready for Claude Code">
+        <DCArtboard id="brief" label="Brief" width={920} height={260}>
+          <div style={{
+            width: "100%", height: "100%",
+            background: "#FFFFFF",
+            padding: 32,
+            display: "flex", flexDirection: "column", justifyContent: "center", gap: 14
+          }}>
+            <div className="label-xs" style={{ color: VIOLET }}>Decouple · Pre-signup interview · Canvas</div>
+            <h2 className="serif" style={{ fontSize: 30, fontWeight: 600, letterSpacing: "-0.02em", lineHeight: 1.1, margin: 0 }}>
+              Seven screens, two treatments — <span className="italic" style={{ color: MAGENTA, fontWeight: 400 }}>one source of truth</span>
+            </h2>
+            <p style={{ fontSize: 14, color: SUB, lineHeight: 1.55, margin: 0, maxWidth: 760 }}>
+              <strong>Mobile resolved</strong> shows each screen at the locked treatment combo (A·B·C).
+              <strong> Desktop scaled</strong> shows the same frame at 1.6× inside browser chrome — the
+              "scaled-up equivalent" for showroom and dev review. <strong> O8 is a placeholder</strong> by
+              brief — not yet locked. <strong> Archive</strong> below is the per-screen decisions log.
+              Bundle of this file ships standalone for Claude Code to ingest and decode.
+            </p>
+          </div>
+        </DCArtboard>
+      </DCSection>
+
+      {/* ──────────────────────────────────────────────────────────────────
+          MOBILE RESOLVED · O2 → O8
+          ────────────────────────────────────────────────────────────── */}
+      <DCSection id="mobile-resolved"
+                 title="Mobile · resolved"
+                 subtitle="Each screen at its locked A·B·C combo · 375 × 760 device frame">
+        {mobileResolved.map((s) => (
+          <DCArtboard key={s.id} id={`m-${s.id}`} label={s.label} width={420} height={820}>
+            <MobileWell>{s.render()}</MobileWell>
+          </DCArtboard>
+        ))}
+      </DCSection>
+
+      {/* ──────────────────────────────────────────────────────────────────
+          DESKTOP / SCALED-UP · O2 → O8
+          ────────────────────────────────────────────────────────────── */}
+      <DCSection id="desktop-scaled"
+                 title="Desktop · scaled-up equivalents"
+                 subtitle="Same frame, 1.6× inside browser chrome · for dev showroom and review">
+        {mobileResolved.map((s) => (
+          <DCArtboard key={`d-${s.id}`} id={`d-${s.id}`} label={`${s.label} · desktop`} width={1100} height={1300}>
+            {s.id === "o7" ? (
+              <O7Tile desktop={true}/>
+            ) : s.id === "o8" ? (
+              <O8Placeholder desktop={true}/>
+            ) : (
+              <DesktopShowcase url={desktopUrls[s.id]} scale={1.55}>
+                {s.render()}
+              </DesktopShowcase>
+            )}
+          </DCArtboard>
+        ))}
+      </DCSection>
+
+      {/* ──────────────────────────────────────────────────────────────────
+          ARCHIVED DECISIONS
+          ────────────────────────────────────────────────────────────── */}
+      <DCSection id="archive"
+                 title="Archive · locked decisions"
+                 subtitle="Per-screen source of truth · resolved combo, rationale, archived alternates">
+        {ARCHIVE.map((a) => (
+          <DCArtboard key={`arc-${a.id}`} id={`arc-${a.id}`} label={`Archive · ${a.eyebrow}`} width={460} height={520}>
+            <div className="arc-card">
+              <div className="arc-eyebrow">{a.eyebrow}</div>
+              <h3>{a.title}</h3>
+              <div className="arc-resolved">RESOLVED · {a.resolved}</div>
+              <dl>
+                {a.rows.map((r, i) => (
+                  <React.Fragment key={i}>
+                    <dt>{r.dt}</dt>
+                    <dd>{r.dd}</dd>
+                  </React.Fragment>
+                ))}
+              </dl>
+              <div className="arc-arch">
+                <span className="mono" style={{ color: MUTE, fontSize: 10, letterSpacing: "0.06em", textTransform: "uppercase" }}>Archived</span>
+                <div style={{ marginTop: 4 }}>{a.archived}</div>
+              </div>
+            </div>
+          </DCArtboard>
+        ))}
+      </DCSection>
+
+      {/* ──────────────────────────────────────────────────────────────────
+          HANDOFF NOTES — for Claude Code
+          ────────────────────────────────────────────────────────────── */}
+      <DCSection id="handoff"
+                 title="Handoff · for Claude Code"
+                 subtitle="What to ingest, what to skip, where the source of truth lives">
+        <DCArtboard id="handoff-card" label="Read me first" width={920} height={500}>
+          <div style={{
+            width: "100%", height: "100%",
+            background: "#FFFFFF", padding: 32,
+            display: "flex", flexDirection: "column", gap: 14
+          }}>
+            <div className="label-xs" style={{ color: MAGENTA }}>Handoff · build wave</div>
+            <h3 className="serif" style={{ fontSize: 24, fontWeight: 600, margin: 0, letterSpacing: "-0.02em" }}>
+              How to read this canvas
+            </h3>
+            <ol style={{ margin: 0, paddingLeft: 22, fontSize: 13.5, color: SUB, lineHeight: 1.65 }}>
+              <li><strong style={{ color: INK }}>Mobile · resolved</strong> is the canonical primary. Each artboard's frame matches the locked A·B·C combo named in the archive. The <span className="mono" style={{ color: INK }}>oN-frames.jsx</span> module is the implementation.</li>
+              <li><strong style={{ color: INK }}>Desktop · scaled-up</strong> is the same frame at 1.6× inside browser chrome — used for showroom and review. There is no separate desktop layout yet; the mobile frame is the source.</li>
+              <li><strong style={{ color: INK }}>Archive</strong> is the decisions log. Build only what's listed under <em>Resolved</em>; everything in <em>Archived</em> has been considered and cut.</li>
+              <li><strong style={{ color: INK }}>O7 · Your plan</strong> lives in its own workbook (<span className="mono" style={{ color: INK }}>Pre-signup O7 Your Plan - Expressive.html</span>) — too long to inline here. Treat it as canonical.</li>
+              <li><strong style={{ color: INK }}>O8 · What's next</strong> is a <em>placeholder</em>. Do <strong>not</strong> build from the existing draft; wait for the next pass.</li>
+              <li><strong style={{ color: INK }}>Style canon</strong> is inherited from O1: Inter + Source Serif Pro + JetBrains Mono · ink-on-ink selected state · paper-white card · violet eyebrow · magenta italic accents · expressive lilac → cream background.</li>
+              <li><strong style={{ color: INK }}>State shape</strong>: <span className="mono" style={{ color: INK }}>preSignup.{`{situation, exAndSafety, employment, partnerFinances, whatMatters, plan}`}</span>. <span className="mono" style={{ color: INK }}>_safetyFlag</span> is set silently in O3.</li>
+            </ol>
+          </div>
+        </DCArtboard>
+      </DCSection>
+
+    </DesignCanvas>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById("root")).render(<App/>);
+</script>
+</body>
+</html>

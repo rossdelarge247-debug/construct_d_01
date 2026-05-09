@@ -1,0 +1,504 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Decouple — Pre-signup interview · O3 your ex &amp; safety (Expressive)</title>
+<link href="https://cdnjs.cloudflare.com/ajax/libs/tailwindcss/2.2.19/tailwind.min.css" rel="stylesheet">
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Source+Serif+Pro:ital,wght@0,400;0,600;0,700;1,400;1,600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+<style>
+  html, body { margin: 0; padding: 0; }
+  body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    background: #F5F1F8;
+    color: #1A1A1A;
+    -webkit-font-smoothing: antialiased;
+    font-feature-settings: "ss01","cv11";
+  }
+  .serif { font-family: 'Source Serif Pro', Georgia, serif; }
+  .mono  { font-family: 'JetBrains Mono', ui-monospace, Menlo, monospace; }
+  .label-xs { font-size: 10.5px; letter-spacing: 0.14em; text-transform: uppercase; font-weight: 600; }
+  .tabular { font-variant-numeric: tabular-nums; }
+  *:focus-visible { outline: 2px solid #1A1A1A; outline-offset: 2px; border-radius: 4px; }
+  .plate { background: #F5F5F4; border: 1px solid #E5E3DC; border-radius: 14px; }
+</style>
+</head>
+<body>
+<template id="__bundler_thumbnail">
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 400">
+    <defs>
+      <linearGradient id="thumbBg" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0%" stop-color="#F3EEFE"/>
+        <stop offset="100%" stop-color="#FAF6F0"/>
+      </linearGradient>
+    </defs>
+    <rect width="400" height="400" fill="url(#thumbBg)"/>
+    <g transform="translate(110 110)">
+      <rect x="0" y="0"   width="180" height="22" rx="6" fill="#FFFFFF" stroke="#E5E3DC"/>
+      <rect x="0" y="32"  width="180" height="22" rx="6" fill="#1A1A1A"/>
+      <rect x="0" y="64"  width="180" height="22" rx="6" fill="#FFFFFF" stroke="#E5E3DC"/>
+      <rect x="0" y="96"  width="180" height="22" rx="6" fill="#FFFFFF" stroke="#E5E3DC"/>
+      <rect x="0" y="148" width="180" height="14" rx="7" fill="#1A1A1A"/>
+    </g>
+  </svg>
+</template>
+<div id="root"></div>
+
+<script type="text/babel" src="o3-frames.jsx"></script>
+<script type="text/babel" data-presets="react">
+const { useState } = React;
+const { INK, SUB, MUTE, LINE, VIOLET, MAGENTA } = window.o3;
+
+/* ============== INTERACTIVE RESOLVED FRAME — A1 + B1 + C2 ==============
+   Re-built here (rather than reusing the static A1/B1/C2 exports from the
+   variants file) so all three decisions compose into a single live screen
+   with real state. */
+
+const EXPRESSIVE_BG = "linear-gradient(180deg, #F3EEFE 0%, #FAF6F0 320px, #F5F5F4 600px)";
+
+const REL_OPTIONS = [
+  { key: "amicable",  primary: "Amicable",      detail: "we want to sort this out together", flagsSafety: false },
+  { key: "difficult", primary: "Difficult",     detail: "but manageable",                     flagsSafety: false },
+  { key: "highconf",  primary: "High conflict", detail: "communication is very hard",         flagsSafety: false },
+  { key: "safety",    primary: "I have safety concerns", detail: null,                        flagsSafety: true  }
+];
+
+function Arrow({ size = 13, sw = 1.8, dir = "right" }) {
+  const r = { right: 0, left: 180, down: 90, up: 270 }[dir] || 0;
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={sw} strokeLinecap="round" strokeLinejoin="round" style={{ transform: `rotate(${r}deg)` }}>
+      <line x1="5" y1="12" x2="19" y2="12" />
+      <polyline points="12 5 19 12 12 19" />
+    </svg>
+  );
+}
+
+function StepRail({ current = 3, total = 8 }) {
+  return (
+    <div className="flex items-center gap-2.5"
+         role="progressbar" aria-valuenow={current} aria-valuemin={1} aria-valuemax={total}
+         aria-label={`Step ${current} of ${total}`}>
+      <span className="label-xs" style={{ color: MUTE, fontSize: 9.5 }}>Step {current} / {total}</span>
+      <div className="relative rounded-full overflow-hidden" style={{ width: 96, height: 3, background: "#E5E3DC" }}>
+        <div className="absolute rounded-full" style={{ top: 0, bottom: 0, left: 0, width: `${(current / total) * 100}%`, background: INK }} />
+      </div>
+    </div>
+  );
+}
+
+function RelRow({ opt, selected, onSelect }) {
+  return (
+    <button type="button" aria-pressed={selected} onClick={onSelect}
+            style={{
+              display: "flex", alignItems: "center", gap: 12,
+              width: "100%",
+              background: selected ? INK : "#FFFFFF",
+              border: `1px solid ${selected ? INK : LINE}`,
+              borderRadius: 14,
+              padding: "14px 14px",
+              textAlign: "left",
+              cursor: "pointer",
+              transition: "background 120ms ease-out, border-color 120ms ease-out"
+            }}>
+      <span style={{
+        flex: "none",
+        width: 18, height: 18, borderRadius: 999,
+        border: `1.5px solid ${selected ? "#FFFFFF" : "#C9C5BD"}`,
+        background: selected ? INK : "#FFFFFF",
+        display: "inline-flex", alignItems: "center", justifyContent: "center"
+      }}>
+        {selected && (<span style={{ width: 8, height: 8, borderRadius: 999, background: "#FFFFFF" }} />)}
+      </span>
+      <span style={{ flex: 1, lineHeight: 1.25 }}>
+        <span style={{ display: "block", fontSize: 14, fontWeight: 600, color: selected ? "#FFFFFF" : INK }}>
+          {opt.primary}
+          {opt.detail && (
+            <span className="serif italic" style={{ fontWeight: 400, color: selected ? "rgba(255,255,255,0.7)" : SUB, marginLeft: 6 }}>
+              — {opt.detail}
+            </span>
+          )}
+        </span>
+      </span>
+    </button>
+  );
+}
+
+function PrivPill({ label, selected, onSelect }) {
+  return (
+    <button type="button" aria-pressed={selected} onClick={onSelect}
+            style={{
+              background: selected ? INK : "#FFFFFF",
+              color: selected ? "#FFFFFF" : INK,
+              border: `1px solid ${selected ? INK : LINE}`,
+              borderRadius: 999,
+              padding: "8px 16px",
+              fontSize: 12.5, fontWeight: selected ? 600 : 500,
+              cursor: "pointer",
+              whiteSpace: "nowrap"
+            }}>
+      {label}
+    </button>
+  );
+}
+
+function ResolvedFrame({ relAnswer, setRelAnswer, privAnswer, setPrivAnswer }) {
+  const enabled = relAnswer !== null;
+  return (
+    <div style={{
+      width: 375,
+      height: 760,
+      borderRadius: 36,
+      padding: 8,
+      background: "#1A1A1A",
+      boxShadow: "0 24px 60px rgba(124,58,237,0.16), 0 6px 16px rgba(26,26,26,0.06)"
+    }}>
+      <div style={{
+        width: "100%", height: "100%",
+        background: EXPRESSIVE_BG,
+        borderRadius: 28, overflow: "hidden",
+        position: "relative",
+        display: "flex", flexDirection: "column"
+      }}>
+        <div className="flex items-center justify-between px-6 pt-3 pb-1"
+             style={{ fontSize: 11, color: INK, fontWeight: 600 }}>
+          <span>9:41</span>
+          <span style={{ letterSpacing: 1, fontSize: 9, color: MUTE }}>RESOLVED · A1 · B1 · C2</span>
+          <span className="mono" style={{ fontSize: 10, color: MUTE }}>●●●</span>
+        </div>
+
+        {/* TopBar */}
+        <div className="px-5 pt-2 pb-3 flex items-center justify-between"
+             style={{ borderBottom: `1px solid ${LINE}` }}>
+          <a href="#" className="inline-flex items-center gap-1.5 text-[11px]" style={{ color: SUB }}>
+            <Arrow dir="left" size={11} />
+            <span>Back</span>
+          </a>
+          <StepRail current={3} total={8} />
+          <div style={{ width: 36 }} aria-hidden="true" />
+        </div>
+
+        {/* Hero */}
+        <div className="px-5 pt-4 pb-3">
+          <div className="label-xs" style={{ color: VIOLET, fontSize: 9.5 }}>Your ex</div>
+          <h2 className="serif mt-2" style={{ fontSize: 21, lineHeight: 1.18, letterSpacing: "-0.015em", fontWeight: 600 }}>
+            How would you describe things between you and your ex?
+          </h2>
+        </div>
+
+        {/* Body */}
+        <div className="px-5 pt-1 pb-3 flex-1 overflow-hidden flex flex-col">
+          <div className="space-y-2">
+            {REL_OPTIONS.map((opt) => (
+              <RelRow key={opt.key} opt={opt}
+                      selected={relAnswer === opt.key}
+                      onSelect={() => setRelAnswer(opt.key)} />
+            ))}
+          </div>
+
+          <div className="mt-4 pt-4" style={{ borderTop: `1px solid ${LINE}` }}>
+            {/* B1 — two-line caption */}
+            <p className="text-[11.5px] mb-2" style={{ color: SUB, lineHeight: 1.45 }}>
+              Some people read these screens with a partner nearby. We want to know whether you have privacy here.
+            </p>
+            <div className="flex items-center gap-2.5 flex-wrap">
+              <span className="text-[12.5px]" style={{ color: INK, fontWeight: 500 }}>
+                Is this device private to you?
+              </span>
+              <div className="flex items-center gap-1.5 ml-auto">
+                <PrivPill label="Yes"      selected={privAnswer === "yes"}      onSelect={() => setPrivAnswer("yes")} />
+                <PrivPill label="Not sure" selected={privAnswer === "notsure"}  onSelect={() => setPrivAnswer("notsure")} />
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Footer — C2 (privacy optional) */}
+        <div className="px-5 pt-3 pb-4 mt-auto" style={{
+          borderTop: `1px solid ${LINE}`,
+          background: "rgba(255,255,255,0.6)",
+          backdropFilter: "blur(10px)"
+        }}>
+          <div className="text-center text-[10.5px] mb-2.5 px-2" style={{ color: SUB, lineHeight: 1.35, minHeight: 14 }}>
+            {!enabled && <span style={{ color: MUTE }}>Pick the option that fits best to continue.</span>}
+            {enabled && privAnswer === null && (
+              <span className="serif italic">Device privacy is optional — skip if you'd like.</span>
+            )}
+            {enabled && privAnswer !== null && (
+              <span style={{ color: MUTE }}>Both answered.</span>
+            )}
+          </div>
+          <button disabled={!enabled} style={{
+            width: "100%",
+            background: enabled ? INK : "#E5E3DC",
+            color: enabled ? "#FFFFFF" : "#A8A29E",
+            padding: "13px 18px",
+            borderRadius: 999,
+            fontSize: 14, fontWeight: 600,
+            border: "none",
+            display: "inline-flex", alignItems: "center", justifyContent: "center", gap: 8,
+            cursor: enabled ? "pointer" : "not-allowed"
+          }}>
+            <span>Continue</span>
+            <Arrow dir="right" size={13} sw={2} />
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function AnnotPill({ children, color }) {
+  return (
+    <span className="mono inline-block px-2 py-1 rounded"
+          style={{ background: color || "#1A1A1A", color: "#FFFFFF", fontSize: 10.5, letterSpacing: "0.04em" }}>
+      {children}
+    </span>
+  );
+}
+
+function FlagBadge({ on }) {
+  return (
+    <span className="mono inline-flex items-center gap-1.5 px-2 py-1 rounded"
+          style={{
+            background: on ? INK : "#FFFFFF",
+            color: on ? "#FFFFFF" : MUTE,
+            border: `1px solid ${on ? INK : LINE}`,
+            fontSize: 10, letterSpacing: "0.04em"
+          }}>
+      <span style={{
+        width: 6, height: 6, borderRadius: 999,
+        background: on ? "#FFFFFF" : "#D6D3CC"
+      }} />
+      _safetyFlag = {on ? "true" : "false"}
+    </span>
+  );
+}
+
+function App() {
+  const [relAnswer, setRelAnswer] = useState(null);
+  const [privAnswer, setPrivAnswer] = useState(null);
+
+  const safetyFlag =
+    (relAnswer === "safety") ||
+    (privAnswer === "notsure");
+
+  return (
+    <div className="min-h-screen" style={{ background: "linear-gradient(180deg, #EFE7F8 0%, #F5F1F8 480px, #EFEEE9 100%)" }}>
+      <header className="px-12 pt-12 pb-8 max-w-[1480px] mx-auto" data-screen-label="03 Header">
+        <div className="flex items-baseline justify-between flex-wrap gap-y-3">
+          <div>
+            <div className="label-xs" style={{ color: VIOLET }}>
+              Decouple · Pre-signup interview · Wireframe O3 · Expressive
+            </div>
+            <h1 className="serif mt-2" style={{ fontSize: 36, lineHeight: 1.1, letterSpacing: "-0.02em", fontWeight: 600 }}>
+              Your ex &amp; safety — <span className="italic" style={{ fontWeight: 400, color: MAGENTA }}>screen 3 of 8</span>
+            </h1>
+          </div>
+          <div className="flex items-center gap-3 text-[12px] mono" style={{ color: SUB }}>
+            <AnnotPill color={VIOLET}>O3</AnnotPill>
+            <span>preSignup.exAndSafety</span>
+            <span style={{ color: "#C9C5BD" }}>·</span>
+            <span>{`{tone, devicePrivate, _safetyFlag}`}</span>
+          </div>
+        </div>
+        <p className="mt-4 max-w-[920px] text-[14px]" style={{ color: SUB, lineHeight: 1.6 }}>
+          Resolved: <strong>A1</strong> equal-weight safety option, <strong>B1</strong> two-line privacy
+          caption, <strong>C2</strong> privacy optional. The screen is interactive — click answers and
+          watch <span className="mono" style={{color: INK}}>_safetyFlag</span> change in the side rail.
+          Notice that nothing else changes: no modal, no banner, no colour shift, no warning glyph. The
+          flag is set silently and routes copy on the screens that follow. Variants archived in
+          <span className="mono" style={{color: INK}}> /archive</span>.
+        </p>
+      </header>
+
+      <main className="px-12 pb-24 max-w-[1480px] mx-auto" data-screen-label="03 Resolved">
+        <div className="grid gap-12" style={{ gridTemplateColumns: "minmax(0, 391px) 1fr" }}>
+
+          {/* LEFT: live frame */}
+          <div className="flex flex-col items-center">
+            <div className="mb-5 self-stretch flex items-baseline justify-between">
+              <div className="label-xs" style={{ color: INK }}>RESOLVED · LIVE</div>
+              <button type="button"
+                      onClick={() => { setRelAnswer(null); setPrivAnswer(null); }}
+                      className="mono text-[10.5px]"
+                      style={{ color: MUTE, letterSpacing: "0.06em", textDecoration: "underline", textUnderlineOffset: 3, cursor: "pointer", background: "transparent", border: "none", padding: 0 }}>
+                reset
+              </button>
+            </div>
+            <ResolvedFrame
+              relAnswer={relAnswer} setRelAnswer={setRelAnswer}
+              privAnswer={privAnswer} setPrivAnswer={setPrivAnswer}
+            />
+          </div>
+
+          {/* RIGHT: state rail + rationale */}
+          <div className="space-y-6">
+
+            {/* live state */}
+            <div className="plate p-6">
+              <div className="label-xs mb-4" style={{ color: VIOLET }}>Live state</div>
+              <div className="space-y-3 text-[13px]" style={{ color: SUB, lineHeight: 1.5 }}>
+                <div className="flex items-baseline gap-3">
+                  <span className="mono text-[11px]" style={{ color: MUTE, width: 110 }}>tone</span>
+                  <span className="mono text-[12.5px]" style={{ color: relAnswer ? INK : MUTE }}>
+                    {relAnswer ?? "— not answered —"}
+                  </span>
+                </div>
+                <div className="flex items-baseline gap-3">
+                  <span className="mono text-[11px]" style={{ color: MUTE, width: 110 }}>devicePrivate</span>
+                  <span className="mono text-[12.5px]" style={{ color: privAnswer ? INK : MUTE }}>
+                    {privAnswer ?? "— not answered (optional) —"}
+                  </span>
+                </div>
+                <div className="flex items-center gap-3 pt-2 mt-2" style={{ borderTop: `1px solid ${LINE}` }}>
+                  <span className="mono text-[11px]" style={{ color: MUTE, width: 110 }}>derived</span>
+                  <FlagBadge on={safetyFlag} />
+                </div>
+                {safetyFlag && (
+                  <p className="text-[12px] pt-1" style={{ color: SUB, lineHeight: 1.5 }}>
+                    Flag set, but the screen looks the same as before. The change surfaces two screens
+                    further on — softened copy on the safety-resources screen, doc-share defaults flip
+                    to private, and a "leave quickly" affordance is added to the workspace shell.
+                  </p>
+                )}
+              </div>
+            </div>
+
+            {/* try these */}
+            <div className="plate p-6">
+              <div className="label-xs mb-3" style={{ color: VIOLET }}>Try these</div>
+              <div className="grid grid-cols-2 gap-2 text-[12px]">
+                {[
+                  { label: "Amicable + Yes",          rel: "amicable",  priv: "yes"     },
+                  { label: "Difficult + Not sure",    rel: "difficult", priv: "notsure" },
+                  { label: "High conflict + skip",    rel: "highconf",  priv: null      },
+                  { label: "Safety concerns + Yes",   rel: "safety",    priv: "yes"     }
+                ].map((s, i) => (
+                  <button key={i} type="button"
+                          onClick={() => { setRelAnswer(s.rel); setPrivAnswer(s.priv); }}
+                          style={{
+                            background: "#FFFFFF",
+                            border: `1px solid ${LINE}`,
+                            borderRadius: 10,
+                            padding: "10px 12px",
+                            textAlign: "left",
+                            cursor: "pointer",
+                            color: INK, fontWeight: 500
+                          }}>
+                    {s.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* the three calls */}
+            <div className="plate p-6 text-[13px]" style={{ color: SUB, lineHeight: 1.6 }}>
+              <div className="label-xs mb-4" style={{ color: VIOLET }}>The three calls</div>
+              <div className="space-y-4">
+                <div>
+                  <div className="flex items-baseline gap-3 mb-1">
+                    <AnnotPill>A1</AnnotPill>
+                    <span className="serif" style={{ fontSize: 14.5, fontWeight: 600, color: INK }}>Equal weight</span>
+                  </div>
+                  <p>Safety option sits in the same list, in the same paper-white tile, with the same
+                  selected state as the other three. The brief said don't push any answer; this honours
+                  it. The user opts into care by choosing it.</p>
+                </div>
+                <div>
+                  <div className="flex items-baseline gap-3 mb-1">
+                    <AnnotPill>B1</AnnotPill>
+                    <span className="serif" style={{ fontSize: 14.5, fontWeight: 600, color: INK }}>Two-line caption</span>
+                  </div>
+                  <p>"Some people read these screens with a partner nearby." The preamble names the
+                  situation in general terms so any one user reading it doesn't feel singled out, and
+                  earns the right to ask the question.</p>
+                </div>
+                <div>
+                  <div className="flex items-baseline gap-3 mb-1">
+                    <AnnotPill>C2</AnnotPill>
+                    <span className="serif" style={{ fontSize: 14.5, fontWeight: 600, color: INK }}>Privacy optional</span>
+                  </div>
+                  <p>Continue unlocks after the relationship answer. Privacy is offered, not required.
+                  A user who skips it still progresses; they simply don't set the flag — which is the
+                  correct outcome when we genuinely don't know.</p>
+                </div>
+              </div>
+            </div>
+
+          </div>
+        </div>
+
+        {/* SILENT FLAG SPEC */}
+        <section className="plate p-8 mt-12" data-screen-label="03 Flag spec">
+          <div className="label-xs mb-4" style={{ color: MAGENTA }}>Silent flag — behavioural spec</div>
+          <div className="grid grid-cols-2 gap-10 text-[13px]" style={{ color: SUB, lineHeight: 1.6 }}>
+            <div>
+              <div className="serif mb-2" style={{ fontSize: 15, fontWeight: 600, color: INK }}>What sets it</div>
+              <p className="mb-3">
+                <span className="mono" style={{ color: INK }}>_safetyFlag = true</span> when either:
+              </p>
+              <ul className="space-y-1.5 list-disc pl-5">
+                <li>Relationship answer is <em>"I have safety concerns"</em>, OR</li>
+                <li>Device-privacy answer is <em>"Not sure"</em></li>
+              </ul>
+              <p className="mt-3 text-[12.5px]" style={{ color: MUTE }}>
+                OR-gated — one signal is enough. A skipped privacy answer leaves the flag at
+                whatever the relationship answer set it to.
+              </p>
+            </div>
+            <div>
+              <div className="serif mb-2" style={{ fontSize: 15, fontWeight: 600, color: INK }}>What it does NOT do</div>
+              <ul className="space-y-1.5 list-disc pl-5">
+                <li>No modal, no scrim, no toast on this screen</li>
+                <li>No banner, no callout, no change in colour or chrome</li>
+                <li>No re-routing of this screen — Continue still goes to O4</li>
+                <li>No telemetry beacon visible to the user</li>
+              </ul>
+              <p className="mt-3 text-[12.5px]" style={{ color: MUTE }}>
+                Downstream, the flag adjusts copy on the safety-resources screen, the doc-share
+                defaults, and the "leave quickly" affordance in the workspace shell. None of that
+                surfaces on O3.
+              </p>
+            </div>
+          </div>
+        </section>
+
+        {/* CANON */}
+        <section className="plate p-8 mt-8" data-screen-label="03 Canon">
+          <div className="label-xs mb-4" style={{ color: VIOLET }}>Canon — inheritance from O1 / O2</div>
+          <div className="grid grid-cols-3 gap-8 text-[13px]" style={{ color: SUB, lineHeight: 1.55 }}>
+            <div>
+              <div className="serif mb-2" style={{ fontSize: 15, fontWeight: 600, color: INK }}>Resemble</div>
+              <p>Same Inter + Source Serif Pro pairing. Same step rail (now at 3 / 8). Same paper-white
+              card, same ink-on-ink selected state. Italic accent on the trailing detail
+              ("— we want to sort this out together") rather than on the headline.</p>
+            </div>
+            <div>
+              <div className="serif mb-2" style={{ fontSize: 15, fontWeight: 600, color: INK }}>Differ</div>
+              <p>One vertical list of full-width answer rows, not chip groups — labels are too long and
+              too tonally distinct to fit on a chip. Selected state is still ink fill; a radio dot inside
+              gives the row enough structure to read as "one of four" at a glance.</p>
+            </div>
+            <div>
+              <div className="serif mb-2" style={{ fontSize: 15, fontWeight: 600, color: INK }}>Constraints honoured</div>
+              <p>No red anywhere. No warning triangle, no exclamation mark. No "rather not say". No
+              "if you're in immediate danger" copy on this canvas — that belongs to the safety-flag
+              flow downstream. The flag is set silently and never surfaced here.</p>
+            </div>
+          </div>
+        </section>
+
+      </main>
+    </div>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById("root")).render(<App/>);
+</script>
+</body>
+</html>

@@ -1,0 +1,552 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Decouple — Pre-signup interview · O8 what's next (Expressive)</title>
+<link href="https://cdnjs.cloudflare.com/ajax/libs/tailwindcss/2.2.19/tailwind.min.css" rel="stylesheet">
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Source+Serif+Pro:ital,wght@0,400;0,600;0,700;1,400;1,600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+<style>
+  html, body { margin: 0; padding: 0; }
+  body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    background: #F2EFF6;
+    color: #1A1A1A;
+    -webkit-font-smoothing: antialiased;
+    font-feature-settings: "ss01","cv11";
+  }
+  .serif { font-family: 'Source Serif Pro', Georgia, serif; }
+  .mono  { font-family: 'JetBrains Mono', ui-monospace, Menlo, monospace; }
+  .label-xs { font-size: 10.5px; letter-spacing: 0.14em; text-transform: uppercase; font-weight: 600; }
+  .tabular { font-variant-numeric: tabular-nums; }
+  *:focus-visible { outline: 2px solid #1A1A1A; outline-offset: 2px; border-radius: 4px; }
+  .plate { background: #F5F5F4; border: 1px solid #E5E3DC; border-radius: 14px; }
+  .vrow {
+    display: grid;
+    grid-template-columns: 220px 1fr;
+    gap: 28px;
+    align-items: start;
+  }
+  @keyframes o8-cta-in {
+    from { opacity: 0; transform: translateY(4px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+  @keyframes o8-card-in {
+    from { opacity: 0; transform: translateY(3px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+</style>
+</head>
+<body>
+<template id="__bundler_thumbnail">
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 400">
+    <defs>
+      <linearGradient id="thumbBg" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0%" stop-color="#F3EEFE"/>
+        <stop offset="55%" stop-color="#FCE7F3"/>
+        <stop offset="100%" stop-color="#FBFAF6"/>
+      </linearGradient>
+    </defs>
+    <rect width="400" height="400" fill="url(#thumbBg)"/>
+    <g transform="translate(80 90)">
+      <rect x="0"   y="0"   width="240" height="36" rx="18" fill="#FFFFFF" stroke="#E5E3DC"/>
+      <circle cx="20" cy="18" r="7" fill="#1A1A1A"/>
+      <rect x="40"  y="10" width="170" height="6" rx="3" fill="#1A1A1A"/>
+      <rect x="40"  y="22" width="120" height="4" rx="2" fill="#A8A29E"/>
+
+      <rect x="0"   y="48"  width="240" height="36" rx="18" fill="#FFFFFF" stroke="#E5E3DC"/>
+      <circle cx="20" cy="66" r="7" fill="none" stroke="#A8A29E" stroke-width="1.5"/>
+      <rect x="40"  y="58" width="150" height="6" rx="3" fill="#1A1A1A"/>
+      <rect x="40"  y="70" width="105" height="4" rx="2" fill="#A8A29E"/>
+
+      <rect x="0"   y="96"  width="240" height="36" rx="18" fill="#FFFFFF" stroke="#E5E3DC"/>
+      <circle cx="20" cy="114" r="7" fill="none" stroke="#A8A29E" stroke-width="1.5"/>
+      <rect x="40"  y="106" width="135" height="6" rx="3" fill="#1A1A1A"/>
+      <rect x="40"  y="118" width="100" height="4" rx="2" fill="#A8A29E"/>
+
+      <rect x="0"   y="144" width="240" height="36" rx="18" fill="#FFFFFF" stroke="#E5E3DC"/>
+      <circle cx="20" cy="162" r="7" fill="none" stroke="#A8A29E" stroke-width="1.5"/>
+      <rect x="40"  y="154" width="120" height="6" rx="3" fill="#1A1A1A"/>
+      <rect x="40"  y="166" width="135" height="4" rx="2" fill="#A8A29E"/>
+
+      <rect x="0"   y="208" width="240" height="14" rx="7" fill="#1A1A1A"/>
+    </g>
+  </svg>
+</template>
+<div id="root"></div>
+
+<script type="text/babel" src="o8-frames.jsx"></script>
+<script type="text/babel" data-presets="react">
+const { useState } = React;
+const {
+  INK, SUB, MUTE, FAINT, LINE, HAIR, INDIGO, MAGENTA, VIOLET, VIOLET_SOFT, MAGENTA_SOFT, TEAL,
+  EXPRESSIVE_BG, OPTIONS, ICONS,
+  ScreenBody, MobileFrame, useChoice,
+  EmailCaptureMicro, DesktopAdaptation
+} = window.o8;
+
+function Arrow({ size = 13, sw = 1.8, dir = "right" }) {
+  const r = { right: 0, left: 180, down: 90, up: 270 }[dir] || 0;
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={sw} strokeLinecap="round" strokeLinejoin="round" style={{ transform: `rotate(${r}deg)` }}>
+      <line x1="5" y1="12" x2="19" y2="12" />
+      <polyline points="12 5 19 12 12 19" />
+    </svg>
+  );
+}
+
+function AnnotPill({ children, color }) {
+  return (
+    <span className="mono inline-block px-2 py-1 rounded"
+          style={{ background: color || "#1A1A1A", color: "#FFFFFF", fontSize: 10.5, letterSpacing: "0.04em" }}>
+      {children}
+    </span>
+  );
+}
+
+/* =========================================================================
+   RESOLVED FRAME — A1 (equal weight) · B2 (tiny chip) · C1 (no default)
+   The full live combo, with reset wired to the rail.
+   ========================================================================= */
+function ResolvedFrame({ choice }) {
+  return (
+    <MobileFrame label="RESOLVED · A1 · B2 · C1">
+      <ScreenBody aTreatment="A1" bVariant="B2" cVariant="C1" choice={choice} />
+    </MobileFrame>
+  );
+}
+
+/* =========================================================================
+   Variant grid — same shape as O6 canvas
+   ========================================================================= */
+function VariantGroup({ id, title, lede, frames, resolvedKey, blurbs, screenLabel }) {
+  return (
+    <section className="plate p-8 mt-8" data-screen-label={screenLabel}>
+      <div className="vrow">
+        <div>
+          <div className="label-xs" style={{ color: MAGENTA }}>Decision {id}</div>
+          <h3 className="serif mt-2" style={{ fontSize: 22, lineHeight: 1.15, letterSpacing: "-0.015em", fontWeight: 600 }}>
+            {title}
+          </h3>
+          <p className="mt-3 text-[13px]" style={{ color: SUB, lineHeight: 1.55 }}>
+            {lede}
+          </p>
+          <div className="mt-4 mono text-[11px]" style={{ color: MUTE, letterSpacing: "0.04em", lineHeight: 1.7 }}>
+            <span>resolved → </span>
+            <span style={{ color: INK, fontWeight: 600 }}>{id}{resolvedKey}</span>
+          </div>
+        </div>
+
+        <div className="grid gap-6" style={{ gridTemplateColumns: "repeat(3, minmax(0, 1fr))" }}>
+          {frames.map((f, i) => {
+            const key = `${id}${i + 1}`;
+            const isResolved = key === `${id}${resolvedKey}`;
+            return (
+              <div key={i} className="flex flex-col">
+                <div className="flex items-baseline justify-between mb-3">
+                  <div className="flex items-center gap-2">
+                    <AnnotPill color={isResolved ? INK : "#9F9A92"}>{key}</AnnotPill>
+                    <span className="text-[12.5px]" style={{ color: INK, fontWeight: 600 }}>{f.title}</span>
+                  </div>
+                  {isResolved && (
+                    <span className="mono text-[9.5px]" style={{ color: INK, letterSpacing: "0.06em" }}>RESOLVED</span>
+                  )}
+                </div>
+                <div style={{
+                  borderRadius: 18,
+                  padding: 16,
+                  background: isResolved ? "#FFFFFF" : "transparent",
+                  border: isResolved ? `1px solid ${LINE}` : `1px dashed #D6D3CC`,
+                  display: "flex", justifyContent: "center"
+                }}>
+                  <div style={{ width: 320, height: 569, position: "relative" }}>
+                    <div style={{ transform: "scale(0.853)", transformOrigin: "top left", width: 375, height: 667 }}>
+                      {f.node}
+                    </div>
+                  </div>
+                </div>
+                <p className="mt-3 text-[12px]" style={{ color: SUB, lineHeight: 1.5 }}>
+                  {blurbs[i]}
+                </p>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+    </section>
+  );
+}
+
+/* =========================================================================
+   States grid — Default / Selected / Focus / Email-capture
+   ========================================================================= */
+function StatesGrid() {
+  const stateFrames = [
+    { key: "DEFAULT",  title: "Default — no choice", node: <window.o8.StateDefault />,
+      blurb: "Nothing selected. Continue is hidden in favour of a calm one-liner — the screen does not lecture an empty form. Eyebrow, headline, helper, four equal cards, plan-ready chip up top." },
+    { key: "SELECTED", title: "Selected — option 2", node: <window.o8.StateSelected />,
+      blurb: "User picks \"Download my plan and come back later.\" Card lifts half a pixel, INK border, INK radio. Continue fades in with the contextual label \"Download my plan\"." },
+    { key: "FOCUS",    title: "Focus — option 3",   node: <window.o8.StateFocus />,
+      blurb: "Keyboard / desktop focus ring on \"Conventional route.\" 2px violet ring, no other state change — it does not look like selection. Same treatment used across O1/O5." },
+    { key: "EMAIL",    title: "Post-Continue · option 2", node: <EmailCaptureMicro />,
+      blurb: "After Continue on option 2: a single email field with a calm secondary CTA, plus an equal \"Download the PDF now\" route. Skip link present. No urgency, no marketing capture." }
+  ];
+  return (
+    <section className="plate p-8 mt-12" data-screen-label="08 States">
+      <div className="flex items-baseline justify-between mb-6">
+        <div>
+          <div className="label-xs" style={{ color: MAGENTA }}>States</div>
+          <h3 className="serif mt-2" style={{ fontSize: 22, lineHeight: 1.15, letterSpacing: "-0.015em", fontWeight: 600 }}>
+            Default · selected · focus · post-Continue
+          </h3>
+          <p className="mt-3 text-[13px] max-w-[640px]" style={{ color: SUB, lineHeight: 1.55 }}>
+            All states use the resolved combination (A1 · B2 · C1). The post-Continue micro-state
+            is the one route that gets a screen of its own — option 2's email-capture form. The other
+            three options route off-product (signup auth, external links, support resources) and so
+            don't render here.
+          </p>
+        </div>
+      </div>
+
+      <div className="grid gap-6" style={{ gridTemplateColumns: "repeat(4, minmax(0, 1fr))" }}>
+        {stateFrames.map((s, i) => (
+          <div key={i} className="flex flex-col">
+            <div className="flex items-baseline justify-between mb-3">
+              <div className="flex items-center gap-2">
+                <AnnotPill color={INK}>{s.key}</AnnotPill>
+                <span className="text-[12.5px]" style={{ color: INK, fontWeight: 600 }}>{s.title}</span>
+              </div>
+            </div>
+            <div style={{
+              borderRadius: 18,
+              padding: 14,
+              background: "#FFFFFF",
+              border: `1px solid ${LINE}`,
+              display: "flex", justifyContent: "center"
+            }}>
+              <div style={{ width: 280, height: 498, position: "relative" }}>
+                <div style={{ transform: "scale(0.747)", transformOrigin: "top left", width: 375, height: 667 }}>
+                  {s.node}
+                </div>
+              </div>
+            </div>
+            <p className="mt-3 text-[12px]" style={{ color: SUB, lineHeight: 1.5 }}>
+              {s.blurb}
+            </p>
+          </div>
+        ))}
+      </div>
+    </section>
+  );
+}
+
+/* =========================================================================
+   Desktop adaptation
+   ========================================================================= */
+function DesktopSection() {
+  return (
+    <section className="plate p-8 mt-12" data-screen-label="08 Desktop">
+      <div className="vrow">
+        <div>
+          <div className="label-xs" style={{ color: MAGENTA }}>Desktop</div>
+          <h3 className="serif mt-2" style={{ fontSize: 22, lineHeight: 1.15, letterSpacing: "-0.015em", fontWeight: 600 }}>
+            The same screen, wider canvas
+          </h3>
+          <p className="mt-3 text-[13px]" style={{ color: SUB, lineHeight: 1.55 }}>
+            Single column, 540px reading width inside a soft window chrome. Same vocabulary as
+            mobile — no extra options surface on desktop, no rearrangement. The Continue button
+            moves inline next to the helper line because we have the horizontal room.
+          </p>
+          <div className="mt-4 mono text-[11px]" style={{ color: MUTE, letterSpacing: "0.04em", lineHeight: 1.7 }}>
+            <span>viewport → </span>
+            <span style={{ color: INK, fontWeight: 600 }}>880 × 600</span>
+          </div>
+        </div>
+        <div style={{
+          borderRadius: 18,
+          padding: 18,
+          background: "#FFFFFF",
+          border: `1px solid ${LINE}`,
+          display: "flex", justifyContent: "center"
+        }}>
+          <DesktopAdaptation />
+        </div>
+      </div>
+    </section>
+  );
+}
+
+function App() {
+  /* Live state for the resolved frame; quick-fill buttons set it. */
+  const choice = useChoice("C1");
+
+  return (
+    <div className="min-h-screen" style={{ background: "linear-gradient(180deg, #F3EEFE 0%, #FCE7F3 460px, #F4EFE9 920px, #EFEEE9 100%)" }}>
+      <header className="px-12 pt-12 pb-8 max-w-[1480px] mx-auto" data-screen-label="08 Header">
+        <div className="flex items-baseline justify-between flex-wrap gap-y-3">
+          <div>
+            <div className="label-xs" style={{ color: INDIGO }}>
+              Decouple · Pre-signup interview · Wireframe O8 · Expressive
+            </div>
+            <h1 className="serif mt-2" style={{ fontSize: 36, lineHeight: 1.1, letterSpacing: "-0.02em", fontWeight: 600 }}>
+              What's next — <span className="italic" style={{ fontWeight: 400, color: MAGENTA }}>screen 8 of 8</span>
+            </h1>
+          </div>
+          <div className="flex items-center gap-3 text-[12px] mono" style={{ color: SUB }}>
+            <AnnotPill color={INDIGO}>O8</AnnotPill>
+            <span>preSignup.exitChoice</span>
+            <span style={{ color: "#C9C5BD" }}>·</span>
+            <span>radio · 4 options</span>
+          </div>
+        </div>
+        <p className="mt-4 max-w-[920px] text-[14px]" style={{ color: SUB, lineHeight: 1.6 }}>
+          The exit screen, immediately after O7. The user has just received their plan and is now
+          deciding whether to continue with Decouple, take the plan and leave, go conventional, or
+          pause. All four are legitimate exits. The screen has to feel like a warm hand on a cold
+          day — agency-preserving, never pushing toward signup. Three calls below: how the four
+          options are visually weighted, whether the plan from O7 is recalled here, and whether
+          anything is pre-selected.
+        </p>
+      </header>
+
+      <main className="px-12 pb-24 max-w-[1480px] mx-auto" data-screen-label="08 Resolved">
+
+        {/* RESOLVED + RAIL */}
+        <section className="grid gap-12" style={{ gridTemplateColumns: "minmax(0, 391px) 1fr" }} data-screen-label="08 Resolved live">
+
+          <div className="flex flex-col items-center">
+            <div className="mb-5 self-stretch flex items-baseline justify-between">
+              <div className="label-xs" style={{ color: INK }}>RESOLVED · LIVE · 375 × 667</div>
+              <button type="button"
+                      onClick={() => choice.reset()}
+                      className="mono text-[10.5px]"
+                      style={{ color: MUTE, letterSpacing: "0.06em", textDecoration: "underline", textUnderlineOffset: 3, cursor: "pointer", background: "transparent", border: "none", padding: 0 }}>
+                reset
+              </button>
+            </div>
+            <ResolvedFrame choice={choice} />
+          </div>
+
+          <div className="space-y-6">
+            <div className="plate p-6">
+              <div className="label-xs mb-4" style={{ color: INDIGO }}>Live state</div>
+              <div className="space-y-3 text-[13px]" style={{ color: SUB, lineHeight: 1.5 }}>
+                <div className="flex items-baseline gap-3">
+                  <span className="mono text-[11px]" style={{ color: MUTE, width: 160 }}>preSignup.exitChoice</span>
+                  <span className="mono text-[11.5px]" style={{ color: choice.selectedId ? INK : MUTE }}>
+                    {choice.selectedId ? choice.selectedId : "— none —"}
+                  </span>
+                </div>
+                <div className="flex items-baseline gap-3 pt-2 mt-2" style={{ borderTop: `1px solid ${LINE}` }}>
+                  <span className="mono text-[11px]" style={{ color: MUTE, width: 160 }}>routes to</span>
+                  <span className="mono text-[11.5px]" style={{ color: choice.selectedId ? INK : MUTE }}>
+                    {choice.selectedId
+                      ? OPTIONS.find((o) => o.id === choice.selectedId).route
+                      : "— continue is hidden —"}
+                  </span>
+                </div>
+                <div className="flex items-baseline gap-3 pt-2 mt-2" style={{ borderTop: `1px solid ${LINE}` }}>
+                  <span className="mono text-[11px]" style={{ color: MUTE, width: 160 }}>cta label</span>
+                  <span className="mono text-[11.5px]" style={{ color: choice.selectedId ? INK : MUTE }}>
+                    {choice.selectedId
+                      ? OPTIONS.find((o) => o.id === choice.selectedId).cta
+                      : "— hidden —"}
+                  </span>
+                </div>
+                <p className="text-[12px] pt-2" style={{ color: SUB, lineHeight: 1.5 }}>
+                  Continue is hidden until the user picks an option (C1). Once picked, the button
+                  fades in with a label that names the next step — small payoff, not a push.
+                </p>
+              </div>
+            </div>
+
+            <div className="plate p-6">
+              <div className="label-xs mb-3" style={{ color: INDIGO }}>Try a path</div>
+              <div className="grid grid-cols-1 gap-2 text-[12px]">
+                {OPTIONS.map((o) => {
+                  const Icon = ICONS[o.id];
+                  return (
+                    <button key={o.id} type="button"
+                            onClick={() => choice.setSelectedId(o.id)}
+                            style={{
+                              background: choice.selectedId === o.id ? INK : "#FFFFFF",
+                              color: choice.selectedId === o.id ? "#FFFFFF" : INK,
+                              border: `1px solid ${choice.selectedId === o.id ? INK : LINE}`,
+                              borderRadius: 10,
+                              padding: "9px 11px",
+                              textAlign: "left",
+                              cursor: "pointer",
+                              fontWeight: 500,
+                              display: "flex", alignItems: "center", gap: 9
+                            }}>
+                      <span style={{ flex: "none", display: "inline-flex", alignItems: "center", justifyContent: "center" }}>
+                        <Icon size={14}/>
+                      </span>
+                      <span style={{ flex: 1 }}>{o.cta}</span>
+                      <span className="mono" style={{ fontSize: 9.5, opacity: 0.6, letterSpacing: "0.04em" }}>
+                        {o.id.slice(0, 4).toUpperCase()}
+                      </span>
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+
+            <div className="plate p-6 text-[13px]" style={{ color: SUB, lineHeight: 1.6 }}>
+              <div className="label-xs mb-4" style={{ color: INDIGO }}>The three calls</div>
+              <div className="space-y-4">
+                <div>
+                  <div className="flex items-baseline gap-3 mb-1">
+                    <AnnotPill>A1</AnnotPill>
+                    <span className="serif" style={{ fontSize: 14.5, fontWeight: 600, color: INK }}>Equal weight</span>
+                  </div>
+                  <p>All four cards rendered identically. The first option is the conversion path,
+                  but visual privilege would push the user — the spec is explicit about that. The
+                  cards earn their weight from copy and order, not tinted borders. A2 is workable
+                  but the violet hint on card 1 reads as "recommended"; A3's two-tier divider
+                  implies hierarchy where there isn't one.</p>
+                </div>
+                <div>
+                  <div className="flex items-baseline gap-3 mb-1">
+                    <AnnotPill>B2</AnnotPill>
+                    <span className="serif" style={{ fontSize: 14.5, fontWeight: 600, color: INK }}>Tiny "plan ready" chip</span>
+                  </div>
+                  <p>Bare radio (B1) makes the plan feel transient — the user just spent a minute
+                  reading it, then it's gone. A mini-summary card (B3) re-shows it and steals the
+                  weight from the question. The chip is the lightest possible reassurance: the plan
+                  is saved, here is the way back, the question is right where you'd expect it.</p>
+                </div>
+                <div>
+                  <div className="flex items-baseline gap-3 mb-1">
+                    <AnnotPill>C1</AnnotPill>
+                    <span className="serif" style={{ fontSize: 14.5, fontWeight: 600, color: INK }}>No default selection</span>
+                  </div>
+                  <p>Pre-selecting option 1 (C2) is conversion-friendly but soft pressure. C3
+                  (pre-selecting download) sends the right brand signal — "we're patient" — but
+                  still presumes the user wants to leave. C1 hands the choice back. The Continue
+                  button is hidden until a card is picked, replaced by a one-line prompt; the
+                  reveal animation is the small payoff for engaging.</p>
+                </div>
+              </div>
+            </div>
+
+            <div className="plate p-6 text-[12.5px]" style={{ color: SUB, lineHeight: 1.55 }}>
+              <div className="label-xs mb-3" style={{ color: INDIGO }}>Negative constraints honoured</div>
+              <ul className="space-y-2">
+                <li className="flex gap-2"><span style={{ color: TEAL, marginTop: 1 }}>✓</span><span>No "Recommended" or "Most people choose" copy on option 1.</span></li>
+                <li className="flex gap-2"><span style={{ color: TEAL, marginTop: 1 }}>✓</span><span>All four options visible on first paint — no "more options" disclosure.</span></li>
+                <li className="flex gap-2"><span style={{ color: TEAL, marginTop: 1 }}>✓</span><span>No scarcity, urgency, or fear cues anywhere.</span></li>
+                <li className="flex gap-2"><span style={{ color: TEAL, marginTop: 1 }}>✓</span><span>No legal jargon — the four options are plain language.</span></li>
+                <li className="flex gap-2"><span style={{ color: TEAL, marginTop: 1 }}>✓</span><span>No fifth implicit "skip" affordance — the four options ARE the exits.</span></li>
+              </ul>
+            </div>
+          </div>
+        </section>
+
+        {/* A — VISUAL WEIGHT */}
+        <VariantGroup
+          id="A"
+          screenLabel="08 A variants"
+          title="How are the four options visually weighted?"
+          lede="The first option is the conversion path. The product principle says the screen must not push the user there — visual subtlety is fine, copy pressure is not. Variants test how loud (or absent) that subtlety should be."
+          resolvedKey={1}
+          frames={[
+            { title: "Equal weight",      node: <window.o8.A1 /> },
+            { title: "Subtle primary",    node: <window.o8.A2 /> },
+            { title: "Two-tier",          node: <window.o8.A3 /> }
+          ]}
+          blurbs={[
+            "All four cards identical: white plate, lilac/grey border, ink radio. The first card is first because it is most engaged-with, not because the page tilts toward it. Resolved.",
+            "Option 1 carries a faint violet tint — not labelled \"recommended\", just gently surfaced. Reads more honest than dishonest, but still puts a thumb on the scale before the user has decided. Borderline; we'd take it if the conversion goal trumped the agency signal, which on this screen it does not.",
+            "Engagement paths (1 + 2) on top, exits (3 + 4) below a soft \"or exit\" rule. Internally tidy but the divider tells the user the bottom two are second-class — and if they're not the path you'd take, the screen has just whispered that you're choosing the lesser option."
+          ]}
+        />
+
+        {/* B — PLAN-RECALL FRAMING */}
+        <VariantGroup
+          id="B"
+          screenLabel="08 B variants"
+          title="How is the plan from O7 carried into this screen?"
+          lede="The user just read their plan. The question is whether to re-show it here — to remind them what they're choosing about — and how loud that reminder should be. Wrong volume in either direction breaks the screen."
+          resolvedKey={2}
+          frames={[
+            { title: "No recall",         node: <window.o8.B1 /> },
+            { title: "Tiny chip",         node: <window.o8.B2 /> },
+            { title: "Mini-summary card", node: <window.o8.B3 /> }
+          ]}
+          blurbs={[
+            "Bare. The headline question and four options, nothing else. Shortest screen of the three, and on a small viewport that matters — but the plan now feels like a thing the user passed through rather than a thing they own. The cost of one removed line is too high here.",
+            "A small \"Your plan is ready · back to plan\" pill at the top of the body. Reassures the user the plan is saved (and reachable), takes ~24px of vertical space, and reads as a piece of furniture rather than a section. The lightest viable recall. Resolved.",
+            "A 3-line plan summary card sits above the question. Comprehensive — but the card commands the same visual weight as the four option cards beneath it, and the user has already read the plan. Better as a hover/tap-to-expand on the chip than a permanent fixture."
+          ]}
+        />
+
+        {/* C — EMPTY-STATE DEFAULT */}
+        <VariantGroup
+          id="C"
+          screenLabel="08 C variants"
+          title="Is anything pre-selected?"
+          lede="With no default, Continue is disabled (or hidden) until the user picks. Pre-selecting an option saves a tap and signals brand stance — but it also nudges the user toward a choice they hadn't made yet."
+          resolvedKey={1}
+          frames={[
+            { title: "No default",            node: <window.o8.C1 /> },
+            { title: "Pre-select option 1",   node: <window.o8.C2 /> },
+            { title: "Pre-select option 2",   node: <window.o8.C3 /> }
+          ]}
+          blurbs={[
+            "All four radios empty. Continue is hidden in favour of a single line — \"Pick an option above to continue\" — and fades in once the user picks. Most agency-preserving; the user makes a deliberate choice and the screen rewards it. Resolved.",
+            "Option 1 is pre-checked; the user can change it. Conversion-friendly and saves a tap, but the screen has now made a choice on the user's behalf — and that choice is the one we'd most want them to question. Soft pressure dressed as a default.",
+            "Option 2 (\"Download and come back later\") pre-checked. Sends a strong brand signal — we don't pressure signup — but still presumes the user wants to leave, and the user reading this hasn't yet decided. We'd rather earn the agency signal by handing the choice back than by guessing it."
+          ]}
+        />
+
+        {/* States */}
+        <StatesGrid />
+
+        {/* Desktop */}
+        <DesktopSection />
+
+        {/* CANON */}
+        <section className="plate p-8 mt-12" data-screen-label="08 Canon">
+          <div className="label-xs mb-4" style={{ color: INDIGO }}>Canon — inheritance from O1 / O7</div>
+          <div className="grid grid-cols-3 gap-8 text-[13px]" style={{ color: SUB, lineHeight: 1.55 }}>
+            <div>
+              <div className="serif mb-2" style={{ fontSize: 15, fontWeight: 600, color: INK }}>Resemble</div>
+              <p>Same Inter + Source Serif Pro pairing as O1–O7. Magenta eyebrow (values, not money).
+              The expressive 3-stop hero gradient is inherited from O7 and runs the full height of
+              this screen — O7 and O8 are a pair, the closing two-step. Step rail at 8 / 8, fully
+              filled. Radio cards inherit O1's geometry: ~16px radius, 12px padding, 1.5px ink
+              border on selection.</p>
+            </div>
+            <div>
+              <div className="serif mb-2" style={{ fontSize: 15, fontWeight: 600, color: INK }}>Differ</div>
+              <p>One radio question rather than chips or rows. Card-style options with a small icon
+              tile and two-line labels (title + sub-text) — heavier than O5/O6's bare rows because
+              the four answers do four different things and the sub-text is load-bearing. Continue
+              is hidden by default and reveals on first selection — unique to this screen as the
+              terminal step.</p>
+            </div>
+            <div>
+              <div className="serif mb-2" style={{ fontSize: 15, fontWeight: 600, color: INK }}>Constraints honoured</div>
+              <p>No "Recommended" copy, no urgency, no scarcity. All four options visible on first
+              paint. No fifth implicit "skip" affordance. The Continue label is contextual to the
+              chosen route ("Create my account", "Download my plan", "See helpful links", "See
+              support resources") so the user always knows what the next tap does.</p>
+            </div>
+          </div>
+        </section>
+
+      </main>
+    </div>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById("root")).render(<App/>);
+</script>
+</body>
+</html>
