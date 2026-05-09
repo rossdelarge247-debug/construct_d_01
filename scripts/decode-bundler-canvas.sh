@@ -2,10 +2,21 @@
 # scripts/decode-bundler-canvas.sh — decode a bundled-HTML canvas export
 # to its readable inner HTML+CSS form.
 #
-# A bundled-HTML canvas (~5MB) wraps the real inner doc as a JSON-encoded
-# string inside `<script type="__bundler/template">"<!DOCTYPE html>..."</script>`.
-# Without decoding, grep-on-canvas reads the loader-shell CSS instead of the
-# actual visual treatment — the failure mode this slice prevents.
+# A bundled-HTML canvas (~5MB) wraps the inner doc as a JSON-encoded string
+# in `<script type="__bundler/template">"<!DOCTYPE html>..."</script>` and
+# asset bytes (text/babel React source, fonts, images, CSS) keyed by UUID
+# in `<script type="__bundler/manifest">{...}</script>`. The in-browser
+# loader script (visible in any raw canvas) base64-decodes and gunzips
+# manifest entries, converts them to blob URLs, and replaces UUID
+# placeholders in the template. This script mirrors that loader for an
+# offline-readable decoded sibling:
+#
+#   - text/babel|jsx scripts referenced as <script ... src="UUID"> are
+#     inlined (manifest bytes become the script body; src attribute
+#     dropped) so React source appears literally for grep on the decoded
+#     sibling.
+#   - All other UUIDs are replaced with self-contained `data:<mime>;base64`
+#     URLs (assets the in-browser loader would have served from blob URLs).
 
 set -uo pipefail
 
@@ -45,28 +56,34 @@ else
   HTML=$(cat "$INPUT")
 fi
 
-# Extract `<script type="__bundler/template">JSON_STRING</script>` content.
-# awk handles arbitrary line counts via state — content may span lines if
-# pretty-printed, but typical exports keep the JSON-string on one line.
-TEMPLATE=$(printf '%s' "$HTML" | awk '
-  BEGIN { in_template = 0 }
-  {
-    if (in_template) {
-      end = index($0, "</script>")
-      if (end > 0) { printf "%s", substr($0, 1, end - 1); exit }
-      printf "%s\n", $0
-      next
+# Extract `<script type="$marker">...</script>` body from $HTML.
+# awk handles arbitrary line counts via state; typical exports keep the
+# inner content on one line for template/manifest, multi-line for
+# ext_resources. Empty stdout if the script tag is absent.
+extract_block() {
+  local marker="$1"
+  printf '%s' "$HTML" | awk -v marker="<script type=\"$marker\">" '
+    BEGIN { in_block = 0; ml = length(marker) }
+    {
+      if (in_block) {
+        end = index($0, "</script>")
+        if (end > 0) { printf "%s", substr($0, 1, end - 1); exit }
+        printf "%s\n", $0
+        next
+      }
+      start = index($0, marker)
+      if (start > 0) {
+        rest = substr($0, start + ml)
+        end = index(rest, "</script>")
+        if (end > 0) { printf "%s", substr(rest, 1, end - 1); exit }
+        printf "%s\n", rest
+        in_block = 1
+      }
     }
-    start = index($0, "<script type=\"__bundler/template\">")
-    if (start > 0) {
-      rest = substr($0, start + length("<script type=\"__bundler/template\">"))
-      end = index(rest, "</script>")
-      if (end > 0) { printf "%s", substr(rest, 1, end - 1); exit }
-      printf "%s\n", rest
-      in_template = 1
-    }
-  }
-')
+  '
+}
+
+TEMPLATE=$(extract_block '__bundler/template')
 
 if [ -z "$TEMPLATE" ]; then
   printf 'decode-bundler-canvas: no <script type="__bundler/template"> in input\n' >&2
@@ -81,6 +98,80 @@ if [ -z "$DECODED" ]; then
   printf 'decode-bundler-canvas: empty decoded content\n' >&2
   exit 1
 fi
+
+# ─── Manifest substitution ────────────────────────────────────────────────
+# Skipped when manifest absent, empty, or carries no UUID-keyed entries —
+# decoded output stays as the JSON-decoded template, matching the pre-fix
+# behaviour for synthetic fixtures and shellspec test inputs.
+MANIFEST=$(extract_block '__bundler/manifest')
+MANIFEST_TRIMMED=$(printf '%s' "$MANIFEST" | tr -d ' \t\n\r')
+
+UUIDS=""
+if [ -n "$MANIFEST_TRIMMED" ]; then
+  UUIDS=$(printf '%s' "$MANIFEST" | jq -r '
+    keys_unsorted
+    | map(select(test("^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$")))
+    | .[]
+  ' 2>/dev/null) || UUIDS=""
+fi
+
+if [ -n "$UUIDS" ]; then
+  TMPDIR_DEC=$(mktemp -d)
+  trap 'rm -rf "$TMPDIR_DEC"' EXIT INT TERM
+
+  while IFS= read -r uuid; do
+    [ -z "$uuid" ] && continue
+
+    data=$(printf '%s' "$MANIFEST" | jq -r --arg u "$uuid" '.[$u].data // empty')
+    mime=$(printf '%s' "$MANIFEST" | jq -r --arg u "$uuid" '.[$u].mime // "application/octet-stream"')
+    compressed=$(printf '%s' "$MANIFEST" | jq -r --arg u "$uuid" '.[$u].compressed // false')
+
+    [ -z "$data" ] && continue
+
+    bin="$TMPDIR_DEC/$uuid.bin"
+
+    if [ "$compressed" = "true" ]; then
+      if ! printf '%s' "$data" | base64 -d 2>/dev/null | gunzip > "$bin" 2>/dev/null; then
+        # Python3 fallback — base64 piped through gzip in pure bash can
+        # mishandle binary at process boundaries on some environments;
+        # python3's gzip module is the same algorithm and safer.
+        if ! printf '%s' "$data" | python3 -c '
+import sys, base64, gzip
+sys.stdout.buffer.write(gzip.decompress(base64.b64decode(sys.stdin.read())))
+' > "$bin" 2>/dev/null; then
+          printf 'decode-bundler-canvas: failed to decode/gunzip asset %s\n' "$uuid" >&2
+          continue
+        fi
+      fi
+      final_b64=$(base64 -w0 < "$bin")
+    else
+      printf '%s' "$data" | base64 -d > "$bin"
+      final_b64="$data"
+    fi
+
+    # Detect text/babel|jsx tag with src="UUID" (either attribute order).
+    # Bundler output keeps script tags single-line, so grep -oE suffices.
+    babel_tag=$(printf '%s' "$DECODED" \
+      | grep -oE "<script[^>]*type=\"text/(babel|jsx)\"[^>]*src=\"$uuid\"[^>]*></script>|<script[^>]*src=\"$uuid\"[^>]*type=\"text/(babel|jsx)\"[^>]*></script>" \
+      | head -1)
+
+    if [ -n "$babel_tag" ]; then
+      decoded_text=$(cat "$bin")
+      replacement="<script type=\"text/babel\">${decoded_text}</script>"
+      DECODED=${DECODED//"$babel_tag"/"$replacement"}
+    fi
+
+    DATA_URL="data:$mime;base64,$final_b64"
+    DECODED=${DECODED//"$uuid"/"$DATA_URL"}
+  done <<<"$UUIDS"
+
+  # Strip integrity/crossorigin to mirror the loader: SRI was computed over
+  # the manifest's pre-substitution bytes and would reject blob/data URLs
+  # from a null origin.
+  DECODED=$(printf '%s' "$DECODED" \
+    | sed -E 's/[[:space:]]+integrity="[^"]*"//gI; s/[[:space:]]+crossorigin="[^"]*"//gI')
+fi
+# ──────────────────────────────────────────────────────────────────────────
 
 if [ "$STDOUT" -eq 1 ]; then
   printf '%s' "$DECODED"
