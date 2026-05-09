@@ -1,0 +1,13 @@
+{
+  "dimension": "plan-architect",
+  "fixture_path": "tests/personas/synthetic/plan-architect.plan",
+  "planted_defect_summary": "Plan claims canvas-derived visual fidelity but extracts via grep from the bundler-loader-shell CSS rather than decoding the JSON-encoded inner doc. Plan also paraphrases CLAUDE.md and spec 65 without literal quotes. Q6 source-artefact-verification should flag both: canvas-decode missing + spec citations unquoted.",
+  "expected_finding": {
+    "label_in": ["issue", "todo"],
+    "blocking_in": [true],
+    "category_pattern": "(?i)source-artefact-verification",
+    "evidence_must_contain_any_of": ["canvas", "grep", "decode", "bundler", "loader", "summary", "quote", "verbatim"],
+    "remediation_must_contain_any_of": ["decode", "quote", "verbatim", "read", "literal"]
+  },
+  "min_findings_count": 1
+}
