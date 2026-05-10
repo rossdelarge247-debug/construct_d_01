@@ -26,6 +26,12 @@ export const tokens = {
       page: '#F5F5F4',
       panel: '#FFFFFF',
       canvas: '#FAFAF7',
+      gradient: {
+        expressive:   'linear-gradient(180deg, #F3EEFE 0%, #FCE7F3 55%, #F5F5F4 100%)',
+        canvasChrome: 'linear-gradient(180deg, #EFE7F8 0%, #F5F1F8 60%, #EFEEE9 100%)',
+        o7Surface:    'linear-gradient(180deg, #F3EEFE 0%, #FAF6F0 60%, #F5F5F4 100%)',
+        standalone:   '#faf9f5',
+      },
     },
     phase: {
       build:     { accent: '#4338CA', soft: '#EEF2FF' },
@@ -34,6 +40,10 @@ export const tokens = {
       finalise:  { accent: '#166534', soft: '#DCFCE7' },
     },
     danger: '#FF3B30',
+    accent: {
+      violet:  '#7C3AED',
+      magenta: '#BE185D',
+    },
   },
   font: {
     sans:  "'Inter', -apple-system, BlinkMacSystemFont, sans-serif",
@@ -120,6 +130,11 @@ export type TokenName =
   | '--ds-color-surface-page'
   | '--ds-color-surface-panel'
   | '--ds-color-surface-canvas'
+  // Colours · Surface gradients
+  | '--ds-color-surface-gradient-expressive'
+  | '--ds-color-surface-gradient-canvas-chrome'
+  | '--ds-color-surface-gradient-o7-surface'
+  | '--ds-color-surface-gradient-standalone'
   // Colours · Phase
   | '--ds-color-phase-build'
   | '--ds-color-phase-build-soft'
@@ -136,6 +151,9 @@ export type TokenName =
   | '--ds-color-trust-bank-evidenced-soft'
   // Colours · State
   | '--ds-color-danger'
+  // Colours · Accents
+  | '--ds-color-accent-violet'
+  | '--ds-color-accent-magenta'
   // Fonts
   | '--ds-font-sans'
   | '--ds-font-serif'
@@ -207,6 +225,10 @@ export const TOKEN_NAMES: ReadonlyArray<TokenName> = [
   '--ds-color-surface-page',
   '--ds-color-surface-panel',
   '--ds-color-surface-canvas',
+  '--ds-color-surface-gradient-expressive',
+  '--ds-color-surface-gradient-canvas-chrome',
+  '--ds-color-surface-gradient-o7-surface',
+  '--ds-color-surface-gradient-standalone',
   '--ds-color-phase-build',
   '--ds-color-phase-build-soft',
   '--ds-color-phase-reconcile',
@@ -220,6 +242,8 @@ export const TOKEN_NAMES: ReadonlyArray<TokenName> = [
   '--ds-color-trust-bank-evidenced',
   '--ds-color-trust-bank-evidenced-soft',
   '--ds-color-danger',
+  '--ds-color-accent-violet',
+  '--ds-color-accent-magenta',
   '--ds-font-sans',
   '--ds-font-serif',
   '--ds-font-mono',

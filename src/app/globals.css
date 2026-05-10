@@ -125,6 +125,12 @@
   --ds-color-surface-panel: #FFFFFF;
   --ds-color-surface-canvas: #FAFAF7;
 
+  /* ─── Colours · Surface gradients (4) — pre-signup canvas canon ─── */
+  --ds-color-surface-gradient-expressive: linear-gradient(180deg, #F3EEFE 0%, #FCE7F3 55%, #F5F5F4 100%);
+  --ds-color-surface-gradient-canvas-chrome: linear-gradient(180deg, #EFE7F8 0%, #F5F1F8 60%, #EFEEE9 100%);
+  --ds-color-surface-gradient-o7-surface: linear-gradient(180deg, #F3EEFE 0%, #FAF6F0 60%, #F5F5F4 100%);
+  --ds-color-surface-gradient-standalone: #faf9f5;
+
   /* ─── Colours · Phase accents (8) — spec 68g C-V1 ─── */
   --ds-color-phase-build: #4338CA;
   --ds-color-phase-build-soft: #EEF2FF;
@@ -143,6 +149,10 @@
 
   /* ─── Colours · State (1) ─── */
   --ds-color-danger: #FF3B30;
+
+  /* ─── Colours · Accents (2) — pre-signup canvas canon ─── */
+  --ds-color-accent-violet: #7C3AED;
+  --ds-color-accent-magenta: #BE185D;
 
   /* ─── Typography · Families (3) ─── */
   --ds-font-sans: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
