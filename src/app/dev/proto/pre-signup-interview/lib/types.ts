@@ -1,30 +1,74 @@
 export type Stage = 'considering' | 'starting' | 'in-process';
-export type LivingArrangement = 'together' | 'separated' | 'undecided';
-export type ChildrenStatus = 'none' | 'have-with-partner' | 'have-from-prior';
-export type RelationshipDynamic =
-  | 'collaborative'
-  | 'difficult-but-managing'
-  | 'high-conflict'
-  | 'safety-concern';
-export type Employment = 'employed' | 'self-employed' | 'mixed' | 'not-working';
-export type PartnerFinanceKnowledge =
-  | 'open-book'
-  | 'mostly-known'
-  | 'partially-known'
-  | 'unknown';
 
-export type Priority = 'children-stability' | 'family-home' | 'finances-fair' | 'speed' | 'cost' | 'amicable';
-export type Worry = 'partner-disclosure' | 'court' | 'cost' | 'time' | 'safety' | 'children-impact';
+export type Priority =
+  | 'fair-split'
+  | 'keep-home'
+  | 'protect-pension'
+  | 'children-stability'
+  | 'clean-break'
+  | 'speed'
+  | 'low-cost'
+  | 'ongoing-support';
+
+export type Worry =
+  | 'enough-to-live'
+  | 'hidden-assets'
+  | 'losing-pension'
+  | 'mortgage-alone'
+  | 'process-cost'
+  | 'emotional-toll'
+  | 'ex-cooperation'
+  | 'fairness-unknown';
+
+export interface WhatMattersAnswers {
+  priorities?: ReadonlyArray<Priority>;
+  worries?: ReadonlyArray<Worry>;
+}
+
+export type RelationshipStatus = 'married' | 'civil-partnership' | 'cohabiting' | 'other';
+export type LivingTogether = 'yes' | 'no' | 'complicated';
+export type Home = 'mortgage' | 'own-outright' | 'rent' | 'other';
+export type ChildrenCount = 1 | 2 | 3 | 4;
+
+export interface SituationAnswers {
+  relationship?: RelationshipStatus;
+  living?: LivingTogether;
+  hasChildren?: 'yes' | 'no';
+  childrenCount?: ChildrenCount;
+  home?: Home;
+}
+
+export type RelationshipQuality = 'amicable' | 'difficult' | 'high-conflict' | 'safety-concern';
+export type DevicePrivate = 'yes' | 'not-sure';
+
+export interface ExAndSafetyAnswers {
+  relationshipQuality?: RelationshipQuality;
+  devicePrivate?: DevicePrivate;
+}
+
+export function hasSafetyFlag(ex: ExAndSafetyAnswers | undefined): boolean {
+  return ex?.relationshipQuality === 'safety-concern' || ex?.devicePrivate === 'not-sure';
+}
+
+export type SelfEmployment = 'neither' | 'me' | 'ex' | 'both';
+
+export interface EmploymentAnswers {
+  selfEmployment?: SelfEmployment;
+}
+
+export type PartnerAwareness = 'good-idea' | 'some-things' | 'very-little' | 'hiding';
+
+export interface PartnerFinancesAnswers {
+  awareness?: PartnerAwareness;
+}
 
 export interface Answers {
   stage?: Stage;
-  livingArrangement?: LivingArrangement;
-  children?: ChildrenStatus;
-  relationship?: RelationshipDynamic;
-  employment?: Employment;
-  partnerFinance?: PartnerFinanceKnowledge;
-  priorities?: ReadonlyArray<Priority>;
-  worries?: ReadonlyArray<Worry>;
+  situation?: SituationAnswers;
+  exAndSafety?: ExAndSafetyAnswers;
+  employment?: EmploymentAnswers;
+  partnerFinances?: PartnerFinancesAnswers;
+  whatMatters?: WhatMattersAnswers;
 }
 
 export interface PlanContent {
@@ -37,6 +81,7 @@ export interface PlanContent {
   links: { findOutMoreHref: string; primaryCTA: string };
 }
 
-export type BgMode = 'expressive' | 'standalone';
+export type BgMode = 'expressive' | 'canvasChrome' | 'o7Surface' | 'standalone';
+export const BG_MODES: ReadonlyArray<BgMode> = ['expressive', 'canvasChrome', 'o7Surface', 'standalone'] as const;
 
 export const TOTAL_STEPS = 8;

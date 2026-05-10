@@ -1,34 +1,60 @@
 'use client';
 
 import { ScreenShell } from '../components/ScreenShell';
-import { RadioCard } from '../components/RadioCard';
+import { CheckChips } from '../components/CheckChips';
+import { SubQuestionCard } from '../components/SubQuestionCard';
 import { useProto } from '../lib/proto-context';
-import type { PartnerFinanceKnowledge } from '../lib/types';
+import { getCopy } from '../lib/copy/o6';
+import { tokens } from '@/styles/tokens';
+import type { WhatMattersAnswers } from '../lib/types';
 
-const OPTIONS = [
-  { value: 'open-book' as const, label: 'I have a clear picture', helper: 'We share accounts, talk about money, nothing is hidden' },
-  { value: 'mostly-known' as const, label: 'I know most of it', helper: 'Big things yes, small things less so' },
-  { value: 'partially-known' as const, label: 'Some of it', helper: 'I know what they earn, not where it goes' },
-  { value: 'unknown' as const, label: 'Honestly, very little', helper: 'Money has been their domain — I don’t have full visibility' },
-];
+const CAP = 3;
 
 export function O6() {
   const { answers, setAnswer, next, back, step } = useProto();
+  const stage = answers.stage ?? 'considering';
+  const copy = getCopy(stage);
+  const whatMatters = answers.whatMatters ?? {};
+  const priorities = whatMatters.priorities ?? [];
+  const worries = whatMatters.worries ?? [];
+
+  const update = (patch: Partial<WhatMattersAnswers>) => {
+    setAnswer('whatMatters', { ...whatMatters, ...patch });
+  };
+
   return (
     <ScreenShell
       step={step}
-      heading="How much do you know about your partner’s finances?"
-      helper="There’s no right answer. Many people don’t — and Decouple is designed for exactly that."
-      ctaDisabled={!answers.partnerFinance}
+      eyebrow={copy.eyebrow}
+      heading={copy.heading}
+      ctaLabel={copy.ctaLabel(priorities.length, worries.length)}
       onContinue={next}
       onBack={back}
     >
-      <RadioCard<PartnerFinanceKnowledge>
-        name="partnerFinance"
-        options={OPTIONS}
-        value={answers.partnerFinance}
-        onChange={(v) => setAnswer('partnerFinance', v)}
-      />
+      <p style={{ font: `400 14px/1.5 ${tokens.font.sans}`, color: tokens.color.text.sub, margin: 0 }}>
+        {copy.hint}
+      </p>
+
+      <SubQuestionCard label={copy.priorities.label} caption={`Pick up to ${CAP} (${priorities.length}/${CAP})`}>
+        <CheckChips
+          name="priorities"
+          options={copy.priorities.options}
+          values={priorities}
+          cap={CAP}
+          onChange={(vals) => update({ priorities: vals })}
+        />
+      </SubQuestionCard>
+
+      <SubQuestionCard label={copy.worries.label} caption={`Pick up to ${CAP} (${worries.length}/${CAP})`}>
+        <CheckChips
+          name="worries"
+          options={copy.worries.options}
+          values={worries}
+          cap={CAP}
+          onChange={(vals) => update({ worries: vals })}
+        />
+      </SubQuestionCard>
     </ScreenShell>
   );
 }
+

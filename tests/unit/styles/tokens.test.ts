@@ -20,8 +20,8 @@ describe('Design system tokens — globals.css ↔ tokens.ts parity (S-F1)', () 
     expect(missing).toEqual([])
   })
 
-  it('TOKEN_NAMES has 69 entries', () => {
-    expect(TOKEN_NAMES.length).toBe(69)
+  it('TOKEN_NAMES has 75 entries', () => {
+    expect(TOKEN_NAMES.length).toBe(75)
   })
 
   it('phase colour quartet matches spec 68g C-V1', () => {

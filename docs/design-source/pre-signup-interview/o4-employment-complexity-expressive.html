@@ -1,0 +1,525 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Decouple — Pre-signup interview · O4 employment complexity (Expressive)</title>
+<link href="https://cdnjs.cloudflare.com/ajax/libs/tailwindcss/2.2.19/tailwind.min.css" rel="stylesheet">
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Source+Serif+Pro:ital,wght@0,400;0,600;0,700;1,400;1,600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+<style>
+  html, body { margin: 0; padding: 0; }
+  body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    background: #F2EFF6;
+    color: #1A1A1A;
+    -webkit-font-smoothing: antialiased;
+    font-feature-settings: "ss01","cv11";
+  }
+  .serif { font-family: 'Source Serif Pro', Georgia, serif; }
+  .mono  { font-family: 'JetBrains Mono', ui-monospace, Menlo, monospace; }
+  .label-xs { font-size: 10.5px; letter-spacing: 0.14em; text-transform: uppercase; font-weight: 600; }
+  .tabular { font-variant-numeric: tabular-nums; }
+  *:focus-visible { outline: 2px solid #1A1A1A; outline-offset: 2px; border-radius: 4px; }
+  .plate { background: #F5F5F4; border: 1px solid #E5E3DC; border-radius: 14px; }
+  .vrow {
+    display: grid;
+    grid-template-columns: 220px 1fr;
+    gap: 28px;
+    align-items: start;
+  }
+</style>
+</head>
+<body>
+<template id="__bundler_thumbnail">
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 400">
+    <defs>
+      <linearGradient id="thumbBg" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0%" stop-color="#EEEAF4"/>
+        <stop offset="100%" stop-color="#F8F5EF"/>
+      </linearGradient>
+    </defs>
+    <rect width="400" height="400" fill="url(#thumbBg)"/>
+    <g transform="translate(110 110)">
+      <rect x="0" y="0"   width="180" height="22" rx="6" fill="#FFFFFF" stroke="#E5E3DC"/>
+      <rect x="0" y="32"  width="180" height="22" rx="6" fill="#1A1A1A"/>
+      <rect x="0" y="64"  width="180" height="22" rx="6" fill="#FFFFFF" stroke="#E5E3DC"/>
+      <rect x="0" y="96"  width="180" height="22" rx="6" fill="#FFFFFF" stroke="#E5E3DC"/>
+      <rect x="0" y="148" width="180" height="14" rx="7" fill="#1A1A1A"/>
+    </g>
+  </svg>
+</template>
+<div id="root"></div>
+
+<script type="text/babel" src="o4-frames.jsx"></script>
+<script type="text/babel" data-presets="react">
+const { useState } = React;
+const { INK, SUB, MUTE, LINE, VIOLET, INDIGO, MAGENTA, EXPRESSIVE_BG, OPTIONS_FULL, TITLES, HELPER } = window.o4;
+
+/* ====== INTERACTIVE RESOLVED FRAME — A1 + B2 + C3 ====== */
+
+function Arrow({ size = 13, sw = 1.8, dir = "right" }) {
+  const r = { right: 0, left: 180, down: 90, up: 270 }[dir] || 0;
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={sw} strokeLinecap="round" strokeLinejoin="round" style={{ transform: `rotate(${r}deg)` }}>
+      <line x1="5" y1="12" x2="19" y2="12" />
+      <polyline points="12 5 19 12 12 19" />
+    </svg>
+  );
+}
+
+function StepRail({ current = 4, total = 8 }) {
+  return (
+    <div className="flex items-center gap-2.5">
+      <span className="label-xs" style={{ color: MUTE, fontSize: 9.5 }}>Step {current} / {total}</span>
+      <div className="relative rounded-full overflow-hidden" style={{ width: 96, height: 3, background: "#E5E3DC" }}>
+        <div className="absolute rounded-full" style={{ top: 0, bottom: 0, left: 0, width: `${(current / total) * 100}%`, background: INK }} />
+      </div>
+    </div>
+  );
+}
+
+function LiveOptionRow({ opt, selected, emphasized, onSelect }) {
+  const padV = emphasized ? 18 : 14;
+  const fontS = emphasized ? 15 : 14;
+  return (
+    <button type="button" aria-pressed={selected} onClick={onSelect} style={{
+      display: "flex", alignItems: "center", gap: 12,
+      width: "100%",
+      background: selected ? INK : "#FFFFFF",
+      border: `1px solid ${selected ? INK : LINE}`,
+      borderRadius: 14,
+      padding: `${padV}px 14px`,
+      textAlign: "left",
+      cursor: "pointer",
+      transition: "background 120ms ease-out, border-color 120ms ease-out, padding 160ms ease-out",
+      boxShadow: emphasized && !selected ? "0 1px 0 rgba(26,26,26,0.04), 0 6px 14px rgba(26,26,26,0.05)" : "none"
+    }}>
+      <span style={{
+        flex: "none",
+        width: 18, height: 18, borderRadius: 999,
+        border: `1.5px solid ${selected ? "#FFFFFF" : "#C9C5BD"}`,
+        background: selected ? INK : "#FFFFFF",
+        display: "inline-flex", alignItems: "center", justifyContent: "center"
+      }}>
+        {selected && (<span style={{ width: 8, height: 8, borderRadius: 999, background: "#FFFFFF" }} />)}
+      </span>
+      <span style={{ flex: 1, lineHeight: 1.25 }}>
+        <span style={{ display: "block", fontSize: fontS, fontWeight: 600, color: selected ? "#FFFFFF" : INK }}>
+          {opt.primary}
+          {opt.detail && (
+            <span className="serif italic" style={{ fontWeight: 400, color: selected ? "rgba(255,255,255,0.7)" : SUB, marginLeft: 6 }}>
+              — {opt.detail}
+            </span>
+          )}
+        </span>
+      </span>
+    </button>
+  );
+}
+
+function ResolvedFrame({ answer, setAnswer }) {
+  const enabled = answer !== null;
+  return (
+    <div style={{
+      width: 375,
+      height: 760,
+      borderRadius: 36,
+      padding: 8,
+      background: "#1A1A1A",
+      boxShadow: "0 24px 60px rgba(79,70,229,0.16), 0 6px 16px rgba(26,26,26,0.06)"
+    }}>
+      <div style={{
+        width: "100%", height: "100%",
+        background: EXPRESSIVE_BG,
+        borderRadius: 28, overflow: "hidden",
+        position: "relative",
+        display: "flex", flexDirection: "column"
+      }}>
+        <div className="flex items-center justify-between px-6 pt-3 pb-1"
+             style={{ fontSize: 11, color: INK, fontWeight: 600 }}>
+          <span>9:41</span>
+          <span style={{ letterSpacing: 1, fontSize: 9, color: MUTE }}>RESOLVED · A1 · B2 · C3</span>
+          <span className="mono" style={{ fontSize: 10, color: MUTE }}>●●●</span>
+        </div>
+
+        {/* TopBar */}
+        <div className="px-5 pt-2 pb-3 flex items-center justify-between"
+             style={{ borderBottom: `1px solid ${LINE}` }}>
+          <a href="#" className="inline-flex items-center gap-1.5 text-[11px]" style={{ color: SUB }}>
+            <Arrow dir="left" size={11} />
+            <span>Back</span>
+          </a>
+          <StepRail current={4} total={8} />
+          <div style={{ width: 36 }} aria-hidden="true" />
+        </div>
+
+        {/* Hero — A1 caption below */}
+        <div className="px-5 pt-4 pb-3">
+          <div className="label-xs flex items-center gap-1.5" style={{ color: INDIGO, fontSize: 9.5 }}>
+            <span style={{ width: 5, height: 5, borderRadius: 999, background: INDIGO }} />
+            <span>Money</span>
+          </div>
+          <h2 className="serif mt-2" style={{ fontSize: 21, lineHeight: 1.18, letterSpacing: "-0.015em", fontWeight: 600 }}>
+            {TITLES.B2}
+          </h2>
+          <p className="mt-2 text-[12px]" style={{ color: SUB, lineHeight: 1.45 }}>
+            {HELPER}
+          </p>
+        </div>
+
+        {/* Body — C3 emphasis on "No" */}
+        <div className="px-5 pt-1 pb-3 flex-1 overflow-hidden flex flex-col">
+          <div className="space-y-2">
+            {OPTIONS_FULL.map((opt) => (
+              <LiveOptionRow
+                key={opt.key} opt={opt}
+                selected={answer === opt.key}
+                emphasized={opt.key === "no"}
+                onSelect={() => setAnswer(opt.key)}
+              />
+            ))}
+          </div>
+        </div>
+
+        {/* Footer */}
+        <div className="px-5 pt-3 pb-4 mt-auto" style={{
+          borderTop: `1px solid ${LINE}`,
+          background: "rgba(255,255,255,0.6)",
+          backdropFilter: "blur(10px)"
+        }}>
+          <div className="text-center text-[10.5px] mb-2.5 px-2" style={{ color: SUB, lineHeight: 1.35, minHeight: 14 }}>
+            {!enabled && <span style={{ color: MUTE }}>Pick the option that fits to continue.</span>}
+            {enabled && <span className="serif italic">Answer recorded — continue when ready.</span>}
+          </div>
+          <button disabled={!enabled} style={{
+            width: "100%",
+            background: enabled ? INK : "#E5E3DC",
+            color: enabled ? "#FFFFFF" : "#A8A29E",
+            padding: "13px 18px",
+            borderRadius: 999,
+            fontSize: 14, fontWeight: 600,
+            border: "none",
+            display: "inline-flex", alignItems: "center", justifyContent: "center", gap: 8,
+            cursor: enabled ? "pointer" : "not-allowed"
+          }}>
+            <span>Continue</span>
+            <Arrow dir="right" size={13} sw={2} />
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function AnnotPill({ children, color }) {
+  return (
+    <span className="mono inline-block px-2 py-1 rounded"
+          style={{ background: color || "#1A1A1A", color: "#FFFFFF", fontSize: 10.5, letterSpacing: "0.04em" }}>
+      {children}
+    </span>
+  );
+}
+
+/* ====== Variant grid section ====== */
+function VariantGroup({ id, title, lede, frames, resolvedKey, blurbs }) {
+  return (
+    <section className="plate p-8 mt-8" data-screen-label={`04 ${id} variants`}>
+      <div className="vrow">
+        <div>
+          <div className="label-xs" style={{ color: MAGENTA }}>Decision {id}</div>
+          <h3 className="serif mt-2" style={{ fontSize: 22, lineHeight: 1.15, letterSpacing: "-0.015em", fontWeight: 600 }}>
+            {title}
+          </h3>
+          <p className="mt-3 text-[13px]" style={{ color: SUB, lineHeight: 1.55 }}>
+            {lede}
+          </p>
+          <div className="mt-4 mono text-[11px]" style={{ color: MUTE, letterSpacing: "0.04em", lineHeight: 1.7 }}>
+            <span>resolved → </span>
+            <span style={{ color: INK, fontWeight: 600 }}>{id}{resolvedKey}</span>
+          </div>
+        </div>
+
+        <div className="grid gap-6" style={{ gridTemplateColumns: "repeat(3, minmax(0, 1fr))" }}>
+          {frames.map((f, i) => {
+            const key = `${id}${i + 1}`;
+            const isResolved = key === `${id}${resolvedKey}`;
+            return (
+              <div key={i} className="flex flex-col">
+                <div className="flex items-baseline justify-between mb-3">
+                  <div className="flex items-center gap-2">
+                    <AnnotPill color={isResolved ? INK : "#9F9A92"}>{key}</AnnotPill>
+                    <span className="text-[12.5px]" style={{ color: INK, fontWeight: 600 }}>{f.title}</span>
+                  </div>
+                  {isResolved && (
+                    <span className="mono text-[9.5px]" style={{ color: INK, letterSpacing: "0.06em" }}>RESOLVED</span>
+                  )}
+                </div>
+                <div style={{
+                  borderRadius: 18,
+                  padding: 16,
+                  background: isResolved ? "#FFFFFF" : "transparent",
+                  border: isResolved ? `1px solid ${LINE}` : `1px dashed #D6D3CC`,
+                  display: "flex", justifyContent: "center"
+                }}>
+                  <div style={{ width: 320, height: 649, position: "relative" }}>
+                    <div style={{ transform: "scale(0.853)", transformOrigin: "top left", width: 375, height: 760 }}>
+                      {f.node}
+                    </div>
+                  </div>
+                </div>
+                <p className="mt-3 text-[12px]" style={{ color: SUB, lineHeight: 1.5 }}>
+                  {blurbs[i]}
+                </p>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+    </section>
+  );
+}
+
+function App() {
+  const [answer, setAnswer] = useState(null);
+
+  return (
+    <div className="min-h-screen" style={{ background: "linear-gradient(180deg, #EEEAF4 0%, #F4EFE9 520px, #EFEEE9 100%)" }}>
+      <header className="px-12 pt-12 pb-8 max-w-[1480px] mx-auto" data-screen-label="04 Header">
+        <div className="flex items-baseline justify-between flex-wrap gap-y-3">
+          <div>
+            <div className="label-xs" style={{ color: INDIGO }}>
+              Decouple · Pre-signup interview · Wireframe O4 · Expressive
+            </div>
+            <h1 className="serif mt-2" style={{ fontSize: 36, lineHeight: 1.1, letterSpacing: "-0.02em", fontWeight: 600 }}>
+              Employment complexity — <span className="italic" style={{ fontWeight: 400, color: MAGENTA }}>screen 4 of 8</span>
+            </h1>
+          </div>
+          <div className="flex items-center gap-3 text-[12px] mono" style={{ color: SUB }}>
+            <AnnotPill color={INDIGO}>O4</AnnotPill>
+            <span>preSignup.employmentComplexity</span>
+            <span style={{ color: "#C9C5BD" }}>·</span>
+            <span>{`{selfEmployedFlag}`}</span>
+          </div>
+        </div>
+        <p className="mt-4 max-w-[920px] text-[14px]" style={{ color: SUB, lineHeight: 1.6 }}>
+          One question, four options. The flag this screen sets routes income evidence later — PAYE-only
+          households take the slim path; anyone running their own thing gets a different upload step. The
+          screen itself can't show that complexity, so it has to ask cleanly. Three calls below: how the
+          helper text shows up, how plain to make the wording, and what (if anything) is pre-selected.
+        </p>
+      </header>
+
+      <main className="px-12 pb-24 max-w-[1480px] mx-auto" data-screen-label="04 Resolved">
+
+        {/* RESOLVED + RAIL */}
+        <section className="grid gap-12" style={{ gridTemplateColumns: "minmax(0, 391px) 1fr" }} data-screen-label="04 Resolved live">
+
+          <div className="flex flex-col items-center">
+            <div className="mb-5 self-stretch flex items-baseline justify-between">
+              <div className="label-xs" style={{ color: INK }}>RESOLVED · LIVE</div>
+              <button type="button"
+                      onClick={() => setAnswer(null)}
+                      className="mono text-[10.5px]"
+                      style={{ color: MUTE, letterSpacing: "0.06em", textDecoration: "underline", textUnderlineOffset: 3, cursor: "pointer", background: "transparent", border: "none", padding: 0 }}>
+                reset
+              </button>
+            </div>
+            <ResolvedFrame answer={answer} setAnswer={setAnswer} />
+          </div>
+
+          <div className="space-y-6">
+            <div className="plate p-6">
+              <div className="label-xs mb-4" style={{ color: INDIGO }}>Live state</div>
+              <div className="space-y-3 text-[13px]" style={{ color: SUB, lineHeight: 1.5 }}>
+                <div className="flex items-baseline gap-3">
+                  <span className="mono text-[11px]" style={{ color: MUTE, width: 130 }}>employmentMix</span>
+                  <span className="mono text-[12.5px]" style={{ color: answer ? INK : MUTE }}>
+                    {answer ?? "— not answered —"}
+                  </span>
+                </div>
+                <div className="flex items-center gap-3 pt-2 mt-2" style={{ borderTop: `1px solid ${LINE}` }}>
+                  <span className="mono text-[11px]" style={{ color: MUTE, width: 130 }}>derived</span>
+                  <span className="mono inline-flex items-center gap-1.5 px-2 py-1 rounded"
+                        style={{
+                          background: (answer && answer !== "no") ? INK : "#FFFFFF",
+                          color: (answer && answer !== "no") ? "#FFFFFF" : MUTE,
+                          border: `1px solid ${(answer && answer !== "no") ? INK : LINE}`,
+                          fontSize: 10, letterSpacing: "0.04em"
+                        }}>
+                    <span style={{
+                      width: 6, height: 6, borderRadius: 999,
+                      background: (answer && answer !== "no") ? "#FFFFFF" : "#D6D3CC"
+                    }} />
+                    selfEmployedFlag = {(answer && answer !== "no") ? "true" : (answer === "no" ? "false" : "—")}
+                  </span>
+                </div>
+                {answer && answer !== "no" && (
+                  <p className="text-[12px] pt-1" style={{ color: SUB, lineHeight: 1.5 }}>
+                    Routes the income-evidence step on screen 6 to the self-employed/director path:
+                    last 2 years of accounts or SA302s, plus a 3-month bank statement. PAYE households
+                    get the slim path: latest payslip + P60.
+                  </p>
+                )}
+                {answer === "no" && (
+                  <p className="text-[12px] pt-1" style={{ color: SUB, lineHeight: 1.5 }}>
+                    Routes income-evidence step on screen 6 to the slim PAYE path: latest payslip
+                    plus P60. No accountant required.
+                  </p>
+                )}
+              </div>
+            </div>
+
+            <div className="plate p-6">
+              <div className="label-xs mb-3" style={{ color: INDIGO }}>Try these</div>
+              <div className="grid grid-cols-2 gap-2 text-[12px]">
+                {[
+                  { label: "No — common path", k: "no"   },
+                  { label: "Yes — I am",       k: "me"   },
+                  { label: "Yes — my ex is",   k: "ex"   },
+                  { label: "Yes — we both",    k: "both" }
+                ].map((s) => (
+                  <button key={s.k} type="button"
+                          onClick={() => setAnswer(s.k)}
+                          style={{
+                            background: "#FFFFFF",
+                            border: `1px solid ${LINE}`,
+                            borderRadius: 10,
+                            padding: "10px 12px",
+                            textAlign: "left",
+                            cursor: "pointer",
+                            color: INK, fontWeight: 500
+                          }}>
+                    {s.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            <div className="plate p-6 text-[13px]" style={{ color: SUB, lineHeight: 1.6 }}>
+              <div className="label-xs mb-4" style={{ color: INDIGO }}>The three calls</div>
+              <div className="space-y-4">
+                <div>
+                  <div className="flex items-baseline gap-3 mb-1">
+                    <AnnotPill>A1</AnnotPill>
+                    <span className="serif" style={{ fontSize: 14.5, fontWeight: 600, color: INK }}>Caption below the headline</span>
+                  </div>
+                  <p>One line, one job. The helper sits where eyes already are after reading the title —
+                  no extra tap, no progressive trick. A "?" reveal hides the reason; a delayed reveal
+                  withholds it until after the user has already committed.</p>
+                </div>
+                <div>
+                  <div className="flex items-baseline gap-3 mb-1">
+                    <AnnotPill>B2</AnnotPill>
+                    <span className="serif" style={{ fontSize: 14.5, fontWeight: 600, color: INK }}>Plain rewording</span>
+                  </div>
+                  <p>"Work for yourself, or run a limited company." The verbatim version uses the right
+                  legal phrase but isn't how people describe their own work; the split version is more
+                  precise but doubles the questions on a screen we want to feel small.</p>
+                </div>
+                <div>
+                  <div className="flex items-baseline gap-3 mb-1">
+                    <AnnotPill>C3</AnnotPill>
+                    <span className="serif" style={{ fontSize: 14.5, fontWeight: 600, color: INK }}>Empty + ‘No’ emphasized</span>
+                  </div>
+                  <p>Nothing is pre-selected — we don't want a quiet auto-acceptance. But the most
+                  common path sits a touch larger so it reads as the calm option. Users opt in; we
+                  don't decide for them.</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* A — HELPER-TEXT TREATMENT */}
+        <VariantGroup
+          id="A"
+          title="How does the helper text appear?"
+          lede="Helper text is small, one line. The question is which moment it shows up: alongside the headline, behind a tap, or after the user has shown intent. The brief says one-line helper, not a paragraph — so the variants live entirely in *when*, not *how much*."
+          resolvedKey={1}
+          frames={[
+            { title: "Caption below", node: <window.o4.A1 /> },
+            { title: "‘?’ popover",   node: <window.o4.A2 /> },
+            { title: "Reveal on select", node: <window.o4.A3 /> }
+          ]}
+          blurbs={[
+            "Eyes are already there after reading the headline. No friction, no surprise — and screen-reader users get it without an extra control.",
+            "Cleaner headline, but the reason is hidden behind a tap. Users who don't see the cue make the call without context. Good for legal screens, wrong for this one.",
+            "Helper appears once a row is touched. Reads as a reward but in practice withholds the reason while asking for an answer. Feels coy."
+          ]}
+        />
+
+        {/* B — PLAIN-LANGUAGE REWORDING */}
+        <VariantGroup
+          id="B"
+          title="How precise vs. how plain?"
+          lede="‘Self-employed or company director’ is correct UK terminology. It's also five words of HMRC. Variants test how far we can step toward plain English without losing the legal-shape distinction the income evidence step depends on."
+          resolvedKey={2}
+          frames={[
+            { title: "Verbatim",  node: <window.o4.B1 /> },
+            { title: "Plain",     node: <window.o4.B2 /> },
+            { title: "Two questions", node: <window.o4.B3 /> }
+          ]}
+          blurbs={[
+            "The brief's words exactly. Precise but distancing — invokes a tax mental model right when we're trying to feel like a friend taking notes.",
+            "‘Work for yourself, or run a limited company.’ Same two categories, language anyone would use. The helper does the rest.",
+            "Splits the legal-shape distinction into two yes/nos. Maximum precision; doubles the screen's question count and breaks the steady one-question-per-screen rhythm of the interview."
+          ]}
+        />
+
+        {/* C — EMPTY-STATE DEFAULT */}
+        <VariantGroup
+          id="C"
+          title="What's selected when the screen opens?"
+          lede="The most common UK answer is ‘No’ — both PAYE or not working. The question is whether to reflect that statistical reality in the empty state. Three positions on a sliding scale of how much the screen pre-decides for the user."
+          resolvedKey={3}
+          frames={[
+            { title: "Blank slate",      node: <window.o4.C1 /> },
+            { title: "‘No’ pre-selected", node: <window.o4.C2 /> },
+            { title: "‘No’ emphasized",   node: <window.o4.C3 /> }
+          ]}
+          blurbs={[
+            "Equal weight, no nudge. Honest, but every user pays the cost of an extra tap — including the 80% whose answer is ‘No’.",
+            "Fastest for the common case but pre-records an answer the user never gave. If they tap Continue without reading, we've decided for them. Wrong for an evidence question.",
+            "Card stays unselected; ‘No’ sits a touch larger so the eye lands there first. The common path feels easier without the screen filling it in."
+          ]}
+        />
+
+        {/* CANON */}
+        <section className="plate p-8 mt-12" data-screen-label="04 Canon">
+          <div className="label-xs mb-4" style={{ color: INDIGO }}>Canon — inheritance from O1 / O2 / O3</div>
+          <div className="grid grid-cols-3 gap-8 text-[13px]" style={{ color: SUB, lineHeight: 1.55 }}>
+            <div>
+              <div className="serif mb-2" style={{ fontSize: 15, fontWeight: 600, color: INK }}>Resemble</div>
+              <p>Same Inter + Source Serif Pro pairing. Same step rail, advanced to 4 / 8. Same paper-white
+              cards on tinted gradient. Italic accent on the trailing detail ("— I am") matches the rhythm
+              of O3's relationship list.</p>
+            </div>
+            <div>
+              <div className="serif mb-2" style={{ fontSize: 15, fontWeight: 600, color: INK }}>Differ</div>
+              <p>Calmer EXPRESSIVE_BG — violet stop pulled back, cream extended. Eyebrow shifts from
+              violet (Your ex) to indigo (Money) so each section of the interview has its own quiet
+              chapter colour without changing the overall canvas.</p>
+            </div>
+            <div>
+              <div className="serif mb-2" style={{ fontSize: 15, fontWeight: 600, color: INK }}>Constraints honoured</div>
+              <p>No PAYE, IR35, Schedule D anywhere on-screen. The "why" is one line. No "this will take
+              longer if Yes" — both branches feel like normal next steps. No red, no warning glyphs:
+              this isn't a flag screen, it's a routing screen.</p>
+            </div>
+          </div>
+        </section>
+
+      </main>
+    </div>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById("root")).render(<App/>);
+</script>
+</body>
+</html>

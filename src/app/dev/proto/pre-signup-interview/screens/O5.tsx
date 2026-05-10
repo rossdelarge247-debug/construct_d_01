@@ -1,34 +1,95 @@
 'use client';
 
 import { ScreenShell } from '../components/ScreenShell';
-import { RadioCard } from '../components/RadioCard';
 import { useProto } from '../lib/proto-context';
-import type { Employment } from '../lib/types';
-
-const OPTIONS = [
-  { value: 'employed' as const, label: 'Employed', helper: 'Salary or wages from a single employer' },
-  { value: 'self-employed' as const, label: 'Self-employed', helper: 'Sole trader, partner, or running your own company' },
-  { value: 'mixed' as const, label: 'A mix of both', helper: 'Some payroll, some self-employment income' },
-  { value: 'not-working' as const, label: 'Not currently working', helper: 'Between roles, retired, or caring full-time' },
-];
+import { getCopy } from '../lib/copy/o5';
+import { tokens } from '@/styles/tokens';
+import type { PartnerFinancesAnswers, PartnerAwareness } from '../lib/types';
 
 export function O5() {
   const { answers, setAnswer, next, back, step } = useProto();
+  const stage = answers.stage ?? 'considering';
+  const copy = getCopy(stage);
+  const partnerFinances = answers.partnerFinances ?? {};
+
+  const update = (patch: Partial<PartnerFinancesAnswers>) => {
+    setAnswer('partnerFinances', { ...partnerFinances, ...patch });
+  };
+
   return (
     <ScreenShell
       step={step}
-      heading="What’s your working situation?"
-      helper="No income amounts yet — just the shape. We’ll use bank data later to do the heavy lifting."
-      ctaDisabled={!answers.employment}
+      eyebrow={copy.eyebrow}
+      heading={copy.heading}
+      ctaDisabled={!partnerFinances.awareness}
       onContinue={next}
       onBack={back}
     >
-      <RadioCard<Employment>
-        name="employment"
-        options={OPTIONS}
-        value={answers.employment}
-        onChange={(v) => setAnswer('employment', v)}
-      />
+      <fieldset
+        style={{
+          border: `1px solid ${tokens.color.border}`,
+          borderRadius: 14,
+          background: tokens.color.surface.panel,
+          padding: 0,
+          margin: 0,
+          display: 'flex',
+          flexDirection: 'column',
+        }}
+      >
+        <legend style={{ position: 'absolute', width: 1, height: 1, overflow: 'hidden', clipPath: 'inset(50%)' }}>
+          How much do you know about your partner&rsquo;s finances?
+        </legend>
+        {copy.options.map((opt, i) => (
+          <TallRow
+            key={opt.value}
+            id={`awareness-${opt.value}`}
+            isFirst={i === 0}
+            selected={partnerFinances.awareness === opt.value}
+            label={opt.label}
+            value={opt.value}
+            onSelect={(v) => update({ awareness: v })}
+          />
+        ))}
+      </fieldset>
     </ScreenShell>
+  );
+}
+
+interface TallRowProps {
+  id: string;
+  isFirst: boolean;
+  selected: boolean;
+  label: string;
+  value: PartnerAwareness;
+  onSelect: (v: PartnerAwareness) => void;
+}
+
+function TallRow({ id, isFirst, selected, label, value, onSelect }: TallRowProps) {
+  return (
+    <label
+      htmlFor={id}
+      style={{
+        display: 'flex',
+        alignItems: 'center',
+        padding: '16px 18px',
+        borderTop: isFirst ? 'none' : `1px solid ${tokens.color.border}`,
+        background: selected ? tokens.color.ink : 'transparent',
+        color: selected ? tokens.color.surface.panel : tokens.color.ink,
+        cursor: 'pointer',
+        font: `500 15px/1.4 ${tokens.font.sans}`,
+        transition: 'background-color 120ms ease, color 120ms ease',
+      }}
+    >
+      <input
+        type="radio"
+        id={id}
+        name="awareness"
+        value={value}
+        checked={selected}
+        onChange={() => onSelect(value)}
+        style={{ position: 'absolute', opacity: 0, pointerEvents: 'none' }}
+      />
+      {label}
+    </label>
   );
 }

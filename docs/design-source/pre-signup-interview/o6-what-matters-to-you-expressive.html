@@ -1,0 +1,425 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Decouple — Pre-signup interview · O6 what matters (Expressive)</title>
+<link href="https://cdnjs.cloudflare.com/ajax/libs/tailwindcss/2.2.19/tailwind.min.css" rel="stylesheet">
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Source+Serif+Pro:ital,wght@0,400;0,600;0,700;1,400;1,600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+<style>
+  html, body { margin: 0; padding: 0; }
+  body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    background: #F2EFF6;
+    color: #1A1A1A;
+    -webkit-font-smoothing: antialiased;
+    font-feature-settings: "ss01","cv11";
+  }
+  .serif { font-family: 'Source Serif Pro', Georgia, serif; }
+  .mono  { font-family: 'JetBrains Mono', ui-monospace, Menlo, monospace; }
+  .label-xs { font-size: 10.5px; letter-spacing: 0.14em; text-transform: uppercase; font-weight: 600; }
+  .tabular { font-variant-numeric: tabular-nums; }
+  *:focus-visible { outline: 2px solid #1A1A1A; outline-offset: 2px; border-radius: 4px; }
+  .plate { background: #F5F5F4; border: 1px solid #E5E3DC; border-radius: 14px; }
+  .vrow {
+    display: grid;
+    grid-template-columns: 220px 1fr;
+    gap: 28px;
+    align-items: start;
+  }
+</style>
+</head>
+<body>
+<template id="__bundler_thumbnail">
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 400">
+    <defs>
+      <linearGradient id="thumbBg" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0%" stop-color="#EEEAF4"/>
+        <stop offset="100%" stop-color="#F8F5EF"/>
+      </linearGradient>
+    </defs>
+    <rect width="400" height="400" fill="url(#thumbBg)"/>
+    <g transform="translate(80 120)">
+      <rect x="0"   y="0"   width="64" height="22" rx="11" fill="#1A1A1A"/>
+      <rect x="72"  y="0"   width="80" height="22" rx="11" fill="#FFFFFF" stroke="#E5E3DC"/>
+      <rect x="160" y="0"   width="56" height="22" rx="11" fill="#FFFFFF" stroke="#E5E3DC"/>
+      <rect x="0"   y="32"  width="92" height="22" rx="11" fill="#1A1A1A"/>
+      <rect x="100" y="32"  width="68" height="22" rx="11" fill="#FFFFFF" stroke="#E5E3DC"/>
+      <line x1="0" y1="76" x2="240" y2="76" stroke="#D6D3CC" stroke-dasharray="3 3"/>
+      <rect x="0"   y="92"  width="76" height="22" rx="11" fill="#1A1A1A"/>
+      <rect x="84"  y="92"  width="100" height="22" rx="11" fill="#FFFFFF" stroke="#E5E3DC"/>
+      <rect x="0"   y="146" width="240" height="14" rx="7" fill="#1A1A1A"/>
+    </g>
+  </svg>
+</template>
+<div id="root"></div>
+
+<script type="text/babel" src="o6-frames.jsx"></script>
+<script type="text/babel" data-presets="react">
+const { useState } = React;
+const {
+  INK, SUB, MUTE, FAINT, LINE, HAIR, INDIGO, MAGENTA, VIOLET, TEAL,
+  EXPRESSIVE_BG, PRIORITIES, WORRIES,
+  Hero, Footer, TopBar, MobileFrame, FormBody,
+  useGroupState, defaultCaption
+} = window.o6;
+
+function Arrow({ size = 13, sw = 1.8, dir = "right" }) {
+  const r = { right: 0, left: 180, down: 90, up: 270 }[dir] || 0;
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={sw} strokeLinecap="round" strokeLinejoin="round" style={{ transform: `rotate(${r}deg)` }}>
+      <line x1="5" y1="12" x2="19" y2="12" />
+      <polyline points="12 5 19 12 12 19" />
+    </svg>
+  );
+}
+
+function AnnotPill({ children, color }) {
+  return (
+    <span className="mono inline-block px-2 py-1 rounded"
+          style={{ background: color || "#1A1A1A", color: "#FFFFFF", fontSize: 10.5, letterSpacing: "0.04em" }}>
+      {children}
+    </span>
+  );
+}
+
+/* =========================================================================
+   RESOLVED FRAME — A1 (stacked cards) · B3 (calm hint) · C2 (acknowledging)
+   The full live combo, with reset wired to the rail.
+   ========================================================================= */
+function ResolvedFrame({ pri, wor }) {
+  return (
+    <MobileFrame label="RESOLVED · A1 · B3 · C2">
+      <TopBar />
+      <Hero />
+      <FormBody aTreatment="A1" bVariant="B3" cVariant="C2"
+                priorities={pri} worries={wor} />
+      <Footer enabled={true}
+              caption={defaultCaption(pri.count, wor.count)} />
+    </MobileFrame>
+  );
+}
+
+/* ---------- Variant grid ---------- */
+function VariantGroup({ id, title, lede, frames, resolvedKey, blurbs, screenLabel }) {
+  return (
+    <section className="plate p-8 mt-8" data-screen-label={screenLabel}>
+      <div className="vrow">
+        <div>
+          <div className="label-xs" style={{ color: MAGENTA }}>Decision {id}</div>
+          <h3 className="serif mt-2" style={{ fontSize: 22, lineHeight: 1.15, letterSpacing: "-0.015em", fontWeight: 600 }}>
+            {title}
+          </h3>
+          <p className="mt-3 text-[13px]" style={{ color: SUB, lineHeight: 1.55 }}>
+            {lede}
+          </p>
+          <div className="mt-4 mono text-[11px]" style={{ color: MUTE, letterSpacing: "0.04em", lineHeight: 1.7 }}>
+            <span>resolved → </span>
+            <span style={{ color: INK, fontWeight: 600 }}>{id}{resolvedKey}</span>
+          </div>
+        </div>
+
+        <div className="grid gap-6" style={{ gridTemplateColumns: "repeat(3, minmax(0, 1fr))" }}>
+          {frames.map((f, i) => {
+            const key = `${id}${i + 1}`;
+            const isResolved = key === `${id}${resolvedKey}`;
+            return (
+              <div key={i} className="flex flex-col">
+                <div className="flex items-baseline justify-between mb-3">
+                  <div className="flex items-center gap-2">
+                    <AnnotPill color={isResolved ? INK : "#9F9A92"}>{key}</AnnotPill>
+                    <span className="text-[12.5px]" style={{ color: INK, fontWeight: 600 }}>{f.title}</span>
+                  </div>
+                  {isResolved && (
+                    <span className="mono text-[9.5px]" style={{ color: INK, letterSpacing: "0.06em" }}>RESOLVED</span>
+                  )}
+                </div>
+                <div style={{
+                  borderRadius: 18,
+                  padding: 16,
+                  background: isResolved ? "#FFFFFF" : "transparent",
+                  border: isResolved ? `1px solid ${LINE}` : `1px dashed #D6D3CC`,
+                  display: "flex", justifyContent: "center"
+                }}>
+                  <div style={{ width: 320, height: 649, position: "relative" }}>
+                    <div style={{ transform: "scale(0.853)", transformOrigin: "top left", width: 375, height: 760 }}>
+                      {f.node}
+                    </div>
+                  </div>
+                </div>
+                <p className="mt-3 text-[12px]" style={{ color: SUB, lineHeight: 1.5 }}>
+                  {blurbs[i]}
+                </p>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+    </section>
+  );
+}
+
+function App() {
+  /* Live state for the resolved frame; quick-fill buttons set it. */
+  const pri = useGroupState("B3");
+  const wor = useGroupState("B3");
+
+  const totalPicked = pri.count + wor.count;
+
+  return (
+    <div className="min-h-screen" style={{ background: "linear-gradient(180deg, #EEEAF4 0%, #F4EFE9 520px, #EFEEE9 100%)" }}>
+      <header className="px-12 pt-12 pb-8 max-w-[1480px] mx-auto" data-screen-label="06 Header">
+        <div className="flex items-baseline justify-between flex-wrap gap-y-3">
+          <div>
+            <div className="label-xs" style={{ color: INDIGO }}>
+              Decouple · Pre-signup interview · Wireframe O6 · Expressive
+            </div>
+            <h1 className="serif mt-2" style={{ fontSize: 36, lineHeight: 1.1, letterSpacing: "-0.02em", fontWeight: 600 }}>
+              What matters to you, what worries you — <span className="italic" style={{ fontWeight: 400, color: MAGENTA }}>screen 6 of 8</span>
+            </h1>
+          </div>
+          <div className="flex items-center gap-3 text-[12px] mono" style={{ color: SUB }}>
+            <AnnotPill color={INDIGO}>O6</AnnotPill>
+            <span>preSignup.priorities · preSignup.worries</span>
+            <span style={{ color: "#C9C5BD" }}>·</span>
+            <span>{`max(3, 3)`}</span>
+          </div>
+        </div>
+        <p className="mt-4 max-w-[920px] text-[14px]" style={{ color: SUB, lineHeight: 1.6 }}>
+          The last input screen before the AI plan. Two multi-select chip groups — eight options
+          each, capped at three — that weight the plan toward what the user actually cares about.
+          The screen has to feel light at the end of an interview that has, by this point, asked
+          some heavy questions. Three calls below: how the two groups separate, how the cap of
+          three communicates itself, and what (if any) caption sits above an empty group.
+        </p>
+      </header>
+
+      <main className="px-12 pb-24 max-w-[1480px] mx-auto" data-screen-label="06 Resolved">
+
+        {/* RESOLVED + RAIL */}
+        <section className="grid gap-12" style={{ gridTemplateColumns: "minmax(0, 391px) 1fr" }} data-screen-label="06 Resolved live">
+
+          <div className="flex flex-col items-center">
+            <div className="mb-5 self-stretch flex items-baseline justify-between">
+              <div className="label-xs" style={{ color: INK }}>RESOLVED · LIVE</div>
+              <button type="button"
+                      onClick={() => { pri.reset(); wor.reset(); }}
+                      className="mono text-[10.5px]"
+                      style={{ color: MUTE, letterSpacing: "0.06em", textDecoration: "underline", textUnderlineOffset: 3, cursor: "pointer", background: "transparent", border: "none", padding: 0 }}>
+                reset
+              </button>
+            </div>
+            <ResolvedFrame pri={pri} wor={wor} />
+          </div>
+
+          <div className="space-y-6">
+            <div className="plate p-6">
+              <div className="label-xs mb-4" style={{ color: INDIGO }}>Live state</div>
+              <div className="space-y-3 text-[13px]" style={{ color: SUB, lineHeight: 1.5 }}>
+                <div className="flex items-baseline gap-3">
+                  <span className="mono text-[11px]" style={{ color: MUTE, width: 160 }}>preSignup.priorities</span>
+                  <span className="mono text-[11.5px]" style={{ color: pri.count ? INK : MUTE }}>
+                    {pri.count ? `${pri.count} / 3` : "— none —"}
+                  </span>
+                </div>
+                {pri.count > 0 && (
+                  <ul className="text-[12px] pl-4" style={{ color: INK, lineHeight: 1.5, listStyle: "disc" }}>
+                    {[...pri.set].map((x) => <li key={x}>{x}</li>)}
+                  </ul>
+                )}
+                <div className="flex items-baseline gap-3 pt-2 mt-2" style={{ borderTop: `1px solid ${LINE}` }}>
+                  <span className="mono text-[11px]" style={{ color: MUTE, width: 160 }}>preSignup.worries</span>
+                  <span className="mono text-[11.5px]" style={{ color: wor.count ? INK : MUTE }}>
+                    {wor.count ? `${wor.count} / 3` : "— none —"}
+                  </span>
+                </div>
+                {wor.count > 0 && (
+                  <ul className="text-[12px] pl-4" style={{ color: INK, lineHeight: 1.5, listStyle: "disc" }}>
+                    {[...wor.set].map((x) => <li key={x}>{x}</li>)}
+                  </ul>
+                )}
+                <div className="flex items-baseline gap-3 pt-2" style={{ borderTop: `1px solid ${LINE}` }}>
+                  <span className="mono text-[11px]" style={{ color: MUTE, width: 160 }}>plan weighting · O7</span>
+                  <span className="mono text-[12px]" style={{ color: totalPicked ? INK : MUTE }}>
+                    {totalPicked === 0 ? "neutral · default" :
+                     totalPicked <= 2 ? "light tilt"   :
+                     totalPicked <= 4 ? "balanced"     :
+                                        "strong tilt"}
+                  </span>
+                </div>
+                <p className="text-[12px] pt-1" style={{ color: SUB, lineHeight: 1.5 }}>
+                  The plan ranks sections, opens warmer or cooler copy, and chooses which calculator
+                  to lead with. No answer is fine — the plan defaults to a balanced template.
+                </p>
+              </div>
+            </div>
+
+            <div className="plate p-6">
+              <div className="label-xs mb-3" style={{ color: INDIGO }}>Try a scenario</div>
+              <div className="grid grid-cols-1 gap-2 text-[12px]">
+                {[
+                  { label: "Home + children + clean break", pri: [PRIORITIES[1], PRIORITIES[3], PRIORITIES[4]], wor: [WORRIES[3]] },
+                  { label: "Pension-anxious",                pri: [PRIORITIES[2]],                              wor: [WORRIES[2], WORRIES[0]] },
+                  { label: "Just wants it done",              pri: [PRIORITIES[5], PRIORITIES[6]],               wor: [WORRIES[5], WORRIES[6]] },
+                  { label: "Hidden-assets concern",           pri: [PRIORITIES[0]],                              wor: [WORRIES[1], WORRIES[7]] }
+                ].map((s, i) => (
+                  <button key={i} type="button"
+                          onClick={() => {
+                            pri.reset(); wor.reset();
+                            setTimeout(() => {
+                              s.pri.forEach((x) => pri.toggle(x));
+                              s.wor.forEach((x) => wor.toggle(x));
+                            }, 0);
+                          }}
+                          style={{
+                            background: "#FFFFFF",
+                            border: `1px solid ${LINE}`,
+                            borderRadius: 10,
+                            padding: "9px 11px",
+                            textAlign: "left",
+                            cursor: "pointer",
+                            color: INK, fontWeight: 500
+                          }}>
+                    {s.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            <div className="plate p-6 text-[13px]" style={{ color: SUB, lineHeight: 1.6 }}>
+              <div className="label-xs mb-4" style={{ color: INDIGO }}>The three calls</div>
+              <div className="space-y-4">
+                <div>
+                  <div className="flex items-baseline gap-3 mb-1">
+                    <AnnotPill>A1</AnnotPill>
+                    <span className="serif" style={{ fontSize: 14.5, fontWeight: 600, color: INK }}>Two stacked cards</span>
+                  </div>
+                  <p>The two questions are different jobs — what you want, what you fear — and a
+                  shared card flattens the distinction. Stacked cards let each headline carry its
+                  own weight; the fold between them gives the user permission to pause before the
+                  worry list. Tabs (A3) pretend the questions are sequential; they're not.</p>
+                </div>
+                <div>
+                  <div className="flex items-baseline gap-3 mb-1">
+                    <AnnotPill>B3</AnnotPill>
+                    <span className="serif" style={{ fontSize: 14.5, fontWeight: 600, color: INK }}>Calm hint at the cap</span>
+                  </div>
+                  <p>Disabling chips at three (B1) is correct but cold — the screen suddenly stops
+                  responding. Rolling out the oldest (B2) is too clever for an answer the user
+                  meant to keep. A line beneath the group is the lightest possible explanation
+                  and respects the user's intent.</p>
+                </div>
+                <div>
+                  <div className="flex items-baseline gap-3 mb-1">
+                    <AnnotPill>C2</AnnotPill>
+                    <span className="serif" style={{ fontSize: 14.5, fontWeight: 600, color: INK }}>Acknowledging caption</span>
+                  </div>
+                  <p>"Pick up to 3" (C1) is information. The two-line C2 caption is permission —
+                  it gives the user a way to choose without committing to a hierarchy of feeling
+                  that may not exist yet. The "you can change them later" half is load-bearing.</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* A — GROUP SEPARATION */}
+        <VariantGroup
+          id="A"
+          screenLabel="06 A variants"
+          title="How are the two groups separated?"
+          lede="Both groups are pick-up-to-three, but they ask different things — what you want and what you fear. Variants test how loud that distinction is, and whether to make the two questions feel sequential or parallel."
+          resolvedKey={1}
+          frames={[
+            { title: "Stacked cards",      node: <window.o6.A1 /> },
+            { title: "Hairline switch",    node: <window.o6.A2 /> },
+            { title: "Tabbed · gated",     node: <window.o6.A3 /> }
+          ]}
+          blurbs={[
+            "Two paper-white cards, each with its own headline and chip group. Visual fold between them; the user is told nothing about order. Easiest to scan, lightest reading. Resolved.",
+            "One card, hairline divider, two headlines. Compact and orderly. The single container subtly tells the user these are halves of the same question, which they aren't — the two answers do different work in the plan.",
+            "Tabs, with the second locked until at least one chip in group 1 is selected. Forces sequencing and adds a small hit of ceremony. Useful if we needed to make the two answers feel like a single act, but on a closing screen it reads as gatekeeping."
+          ]}
+        />
+
+        {/* B — CAP-FEEDBACK TREATMENT */}
+        <VariantGroup
+          id="B"
+          screenLabel="06 B variants"
+          title="What happens at three?"
+          lede="The cap is three. Three is generous on a question of this kind, but a hard cap still asks the user to choose between things they wouldn't normally rank. Variants test how the cap announces itself, and whether it punishes a fourth tap or lets it through."
+          resolvedKey={3}
+          frames={[
+            { title: "Disabled at cap",      node: <window.o6.B1 /> },
+            { title: "Oldest rolls out",     node: <window.o6.B2 /> },
+            { title: "Calm hint below",      node: <window.o6.B3 /> }
+          ]}
+          blurbs={[
+            "Unselected chips fade and refuse to respond once three are picked. Honest, but feels like the screen has stopped working. The user is left to figure out why on their own — and on a sensitive group like the worries, that small dead end is a bad note to end the interview on.",
+            "All chips stay live; tapping a fourth quietly drops the oldest selection. Clever, and saves a tap, but it can also remove an answer the user genuinely meant. We're not confident it's discoverable without the small caption hint, and the caption then has to apologise for the behaviour.",
+            "Chips stay live, a calm one-liner appears beneath the group: \"you can pick up to 3 — drop one to add another.\" The fourth tap simply doesn't take effect; the user reads the line, drops one, moves on. Lightest of the three, no surprises. Resolved."
+          ]}
+        />
+
+        {/* C — EMPTY-STATE GUIDANCE */}
+        <VariantGroup
+          id="C"
+          screenLabel="06 C variants"
+          title="What do we say above an empty group?"
+          lede="The chips do most of the talking. The question is whether to put a caption above each group — and if so, whether to be terse, acknowledging, or to skip the caption and let an inline counter carry the cap."
+          resolvedKey={2}
+          frames={[
+            { title: "Terse — \"Pick up to 3\"",    node: <window.o6.C1 /> },
+            { title: "Acknowledging two-liner",     node: <window.o6.C2 /> },
+            { title: "Inline counter, no caption",  node: <window.o6.C3 /> }
+          ]}
+          blurbs={[
+            "One line. Says what it has to and nothing more. Reads as a form, which the rest of the interview has carefully avoided being. On the closing screen we've earned a softer tone than this gives us.",
+            "Two lines: \"these can be hard to pick — go with what feels true today, you can change them later.\" Names the difficulty without dwelling on it, and the editable promise is what makes the cap feel survivable. Resolved.",
+            "No caption. \"(0 of 3)\" sits inline with the headline and updates as chips are picked. Cleanest visually; the headline carries the whole thing. But on these particular questions, silence reads as judgement — the user is alone with the wording."
+          ]}
+        />
+
+        {/* CANON */}
+        <section className="plate p-8 mt-12" data-screen-label="06 Canon">
+          <div className="label-xs mb-4" style={{ color: INDIGO }}>Canon — inheritance from O1 / O5</div>
+          <div className="grid grid-cols-3 gap-8 text-[13px]" style={{ color: SUB, lineHeight: 1.55 }}>
+            <div>
+              <div className="serif mb-2" style={{ fontSize: 15, fontWeight: 600, color: INK }}>Resemble</div>
+              <p>Same Inter + Source Serif Pro pairing, same calmer expressive gradient as O5 — the
+              violet stop pulled back, cream extended further down. Step rail at 6 / 8. The eyebrow
+              swaps from O5's indigo (Money) to a quiet magenta — this screen isn't a money question,
+              it's a values question. Continue button reads "Build my plan" because the next screen
+              is the plan.</p>
+            </div>
+            <div>
+              <div className="serif mb-2" style={{ fontSize: 15, fontWeight: 600, color: INK }}>Differ</div>
+              <p>Chips, not radio rows — multi-select, and the answers are short. Two questions on
+              one screen is new for the interview; the stacked-card layout is the only place this
+              has been tried. Inline counter and below-cap hint are unique to this screen and
+              shouldn't escape it without justification.</p>
+            </div>
+            <div>
+              <div className="serif mb-2" style={{ fontSize: 15, fontWeight: 600, color: INK }}>Constraints honoured</div>
+              <p>No "Other" or free-text field — the picks are calibrated. No minimum-1 enforcement —
+              a user who genuinely has no priority yet can still continue, and the plan adapts.
+              Spec-65 chip order preserved (no alphabetisation). Cap is three on each side; nothing
+              about the screen pushes a user to fill it.</p>
+            </div>
+          </div>
+        </section>
+
+      </main>
+    </div>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById("root")).render(<App/>);
+</script>
+</body>
+</html>

@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Decouple — Pre-signup interview · O2 your situation (Expressive)</title>
+<link href="https://cdnjs.cloudflare.com/ajax/libs/tailwindcss/2.2.19/tailwind.min.css" rel="stylesheet">
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Source+Serif+Pro:ital,wght@0,400;0,600;0,700;1,400;1,600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+<style>
+  html, body { margin: 0; padding: 0; }
+  body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    background: #F5F1F8;
+    color: #1A1A1A;
+    -webkit-font-smoothing: antialiased;
+    font-feature-settings: "ss01","cv11";
+  }
+  .serif { font-family: 'Source Serif Pro', Georgia, serif; }
+  .mono  { font-family: 'JetBrains Mono', ui-monospace, Menlo, monospace; }
+  .label-xs { font-size: 10.5px; letter-spacing: 0.14em; text-transform: uppercase; font-weight: 600; }
+  .tabular { font-variant-numeric: tabular-nums; }
+  *:focus-visible { outline: 2px solid #1A1A1A; outline-offset: 2px; border-radius: 4px; }
+  .plate { background: #F5F5F4; border: 1px solid #E5E3DC; border-radius: 14px; }
+</style>
+</head>
+<body>
+<template id="__bundler_thumbnail">
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 400">
+    <defs>
+      <linearGradient id="thumbBg" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0%" stop-color="#F3EEFE"/>
+        <stop offset="100%" stop-color="#FAF6F0"/>
+      </linearGradient>
+    </defs>
+    <rect width="400" height="400" fill="url(#thumbBg)"/>
+    <g transform="translate(120 110)">
+      <rect x="0" y="0" width="160" height="20" rx="6" fill="#FFFFFF" stroke="#E5E3DC"/>
+      <rect x="0" y="32" width="160" height="20" rx="6" fill="#FFFFFF" stroke="#E5E3DC"/>
+      <rect x="0" y="64" width="160" height="20" rx="6" fill="#FFFFFF" stroke="#1A1A1A" stroke-width="2"/>
+      <rect x="0" y="96" width="160" height="20" rx="6" fill="#FFFFFF" stroke="#E5E3DC"/>
+      <rect x="0" y="148" width="160" height="14" rx="7" fill="#1A1A1A"/>
+    </g>
+  </svg>
+</template>
+<div id="root"></div>
+
+<script type="text/babel" src="o2-frames.jsx"></script>
+<script type="text/babel" data-presets="react">
+const { useState } = React;
+const { A1, B1, C1, INK, SUB, MUTE, VIOLET, MAGENTA } = window.o2;
+
+function StateCaption({ no, name, hint }) {
+  return (
+    <div className="flex items-baseline gap-3 mb-4">
+      <span className="label-xs" style={{ color: INK }}>{no}</span>
+      <span className="serif" style={{ fontSize: 16, fontWeight: 600 }}>{name}</span>
+      <span className="text-[12px]" style={{ color: MUTE }}>{hint}</span>
+    </div>
+  );
+}
+
+function AnnotPill({ children, color }) {
+  return (
+    <span className="mono inline-block px-2 py-1 rounded"
+          style={{ background: color || "#1A1A1A", color: "#FFFFFF", fontSize: 10.5, letterSpacing: "0.04em" }}>
+      {children}
+    </span>
+  );
+}
+
+function App() {
+  return (
+    <div className="min-h-screen" style={{ background: "linear-gradient(180deg, #EFE7F8 0%, #F5F1F8 480px, #EFEEE9 100%)" }}>
+      <header className="px-12 pt-12 pb-8 max-w-[1680px] mx-auto">
+        <div className="flex items-baseline justify-between flex-wrap gap-y-3">
+          <div>
+            <div className="label-xs" style={{ color: VIOLET }}>
+              Decouple · Pre-signup interview · Wireframe O2 · Expressive
+            </div>
+            <h1 className="serif mt-2" style={{ fontSize: 36, lineHeight: 1.1, letterSpacing: "-0.02em", fontWeight: 600 }}>
+              Your situation — <span className="italic" style={{ fontWeight: 400, color: MAGENTA }}>screen 2 of 8</span>
+            </h1>
+          </div>
+          <div className="flex items-center gap-3 text-[12px] mono" style={{ color: SUB }}>
+            <AnnotPill color={VIOLET}>O2</AnnotPill>
+            <span>preSignup.situation</span>
+            <span style={{ color: "#C9C5BD" }}>·</span>
+            <span>{`{relationship, living, children, home}`}</span>
+          </div>
+        </div>
+        <p className="mt-4 max-w-[840px] text-[14px]" style={{ color: SUB, lineHeight: 1.6 }}>
+          First content-bearing screen after the stage router. Four sub-questions on one page,
+          all radios, fast. Calmer <span className="mono" style={{color: INK}}>EXPRESSIVE_BG</span> — lilac → cream,
+          no magenta stop — so the screen recedes and the answers carry. Style and chrome inherit O1.
+          Three loveability decisions, now resolved:
+          <strong> A1</strong> four cards stacked,
+          <strong> B1</strong> inline reveal under "Yes",
+          <strong> C1</strong> gated Continue.
+          Alternates archived in <span className="mono" style={{color: INK}}>/archive</span>.
+        </p>
+      </header>
+
+      <main className="px-12 pb-24 max-w-[1680px] mx-auto space-y-16">
+
+        {/* RESOLVED — three chosen treatments side by side */}
+        <section>
+          <div className="mb-6 flex items-baseline gap-4">
+            <AnnotPill color={VIOLET}>RESOLVED</AnnotPill>
+            <h2 className="serif" style={{ fontSize: 22, fontWeight: 600, letterSpacing: "-0.01em" }}>
+              The three decisions, settled
+            </h2>
+            <span className="text-[12.5px]" style={{ color: SUB }}>A1 · B1 · C1 — alternates archived</span>
+          </div>
+          <div className="grid grid-cols-3 gap-8">
+            <div>
+              <StateCaption no="A1" name="Four cards stacked" hint="One sub-question per card"/>
+              <A1 />
+            </div>
+            <div>
+              <StateCaption no="B1" name="Inline reveal" hint="Count chips appear under Yes"/>
+              <B1 />
+            </div>
+            <div>
+              <StateCaption no="C1" name="Gated Continue" hint="Disabled until 4 of 4 answered"/>
+              <C1 />
+            </div>
+          </div>
+        </section>
+
+        {/* RATIONALE */}
+        <section className="grid grid-cols-3 gap-6">
+          <div className="plate p-6 text-[13px]" style={{ color: SUB, lineHeight: 1.6 }}>
+            <div className="flex items-baseline gap-3 mb-2">
+              <AnnotPill>A1</AnnotPill>
+              <span className="serif" style={{ fontSize: 15, fontWeight: 600, color: INK }}>Why four cards</span>
+            </div>
+            <p>Each ask gets its own container, which on a phone reads as four glanceable rows
+            rather than a single dense form. Vertical reach is longer, but scroll is cheap on mobile and the
+            payoff is that no sub-question gets lost against another.</p>
+          </div>
+          <div className="plate p-6 text-[13px]" style={{ color: SUB, lineHeight: 1.6 }}>
+            <div className="flex items-baseline gap-3 mb-2">
+              <AnnotPill>B1</AnnotPill>
+              <span className="serif" style={{ fontSize: 15, fontWeight: 600, color: INK }}>Why inline reveal</span>
+            </div>
+            <p>Keeps the user in flow — no modal, no extra row burning space for the majority who answer No.
+            The cost is a small layout shift on tap, which we accept in exchange for a single linear pass through
+            the screen.</p>
+          </div>
+          <div className="plate p-6 text-[13px]" style={{ color: SUB, lineHeight: 1.6 }}>
+            <div className="flex items-baseline gap-3 mb-2">
+              <AnnotPill>C1</AnnotPill>
+              <span className="serif" style={{ fontSize: 15, fontWeight: 600, color: INK }}>Why gated</span>
+            </div>
+            <p>Honest about what the downstream plan needs. The "x of 4 answered" caption above the disabled
+            CTA gives the user a clear destination without a separate progress chrome. Four answers is a low ask;
+            we trust people to finish.</p>
+          </div>
+        </section>
+
+        {/* CANON */}
+        <section className="plate p-8">
+          <div className="label-xs mb-4" style={{ color: VIOLET }}>Canon — inheritance from O1</div>
+          <div className="grid grid-cols-3 gap-8 text-[13px]" style={{ color: SUB, lineHeight: 1.55 }}>
+            <div>
+              <div className="serif mb-2" style={{ fontSize: 15, fontWeight: 600, color: INK }}>Resemble</div>
+              <p>Same Inter + Source Serif Pro pairing. Same step rail (now at 2 / 8). Same paper-white card,
+              same ink-on-ink selected state. Italic accent reserved for the headline.</p>
+            </div>
+            <div>
+              <div className="serif mb-2" style={{ fontSize: 15, fontWeight: 600, color: INK }}>Differ</div>
+              <p>Calmer <span className="mono" style={{color:INK}}>EXPRESSIVE_BG</span> — lilac → cream, no magenta
+              mid-stop. The hero gradient is reserved for entry &amp; exit screens; O2–O6 use this calmer wash so
+              the questions stay neutral.</p>
+            </div>
+            <div>
+              <div className="serif mb-2" style={{ fontSize: 15, fontWeight: 600, color: INK }}>Constraints honoured</div>
+              <p>No "why we ask" tooltips. No "rather not say" option in any group. Equal visual weight on every
+              answer — selected state is ink fill, identical across all chips.</p>
+            </div>
+          </div>
+        </section>
+
+      </main>
+    </div>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById("root")).render(<App/>);
+</script>
+</body>
+</html>

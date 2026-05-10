@@ -1,6 +1,6 @@
 'use client';
 
-import type { BgMode } from '../lib/types';
+import { type BgMode, BG_MODES } from '../lib/types';
 import styles from '../page.module.css';
 
 interface Props {
@@ -9,16 +9,16 @@ interface Props {
 }
 
 export function BgToggle({ mode, onToggle }: Props) {
-  const next: BgMode = mode === 'expressive' ? 'standalone' : 'expressive';
-  const label = `bg: ${mode}`;
+  const idx = BG_MODES.indexOf(mode);
+  const next: BgMode = BG_MODES[(idx + 1) % BG_MODES.length];
   return (
     <button
       type="button"
       className={styles.toggle}
       onClick={() => onToggle(next)}
-      aria-label={`Toggle background — currently ${mode}, click to switch to ${next}`}
+      aria-label={`Background — currently ${mode}, click to cycle to ${next}`}
     >
-      {label}
+      bg: {mode}
     </button>
   );
 }

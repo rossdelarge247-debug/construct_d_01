@@ -9,7 +9,8 @@ export function O8() {
   return (
     <ScreenShell
       step={step}
-      heading="What happens next"
+      eyebrow="O8 · What’s next"
+      heading="What’s next"
       helper="If you’d like Decouple to walk you through your settlement — finances, children, housing, future needs — you can sign up below."
       ctaLabel="Start over"
       onContinue={() => goTo(1)}

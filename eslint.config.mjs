@@ -12,6 +12,8 @@ const eslintConfig = defineConfig([
     "out/**",
     "build/**",
     "next-env.d.ts",
+    // Claude AI Design tool canvas exports — not valid as lintable app src.
+    "docs/**",
   ]),
   // AC-3 (v3a-foundation): function-size thresholds. General cap 40 lines;
   // *.tsx React-component override 80 lines per acceptance.md L48.

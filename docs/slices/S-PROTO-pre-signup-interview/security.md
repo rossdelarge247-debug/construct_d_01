@@ -15,7 +15,7 @@ Spec 72 §11 14-item per-slice security checklist, applied as **prototype short-
 | 9 | **Dev/prod boundary.** New dev-only routes gate via `.dev.tsx` or `MODE === 'prod'` notFound. | Accepted risk (Option A) | Files use `page.tsx` not `.dev.tsx` (Option A — matches `S-PROTO-hub` precedent + `/dev/heroes` pattern). Routes intentionally compile in production bundles; T0 prototype content only. Dev-mode leak scan CI gate is N/A for Option A routes. |
 | 10 | **Safeguarding impact.** Touches T4? If yes: review against §9 rules. | N/A | No T4 data. O4 ex-partner relationship dynamic question is presentation-only; templated answers don't surface safeguarding content. |
 | 11 | **Security headers + CSP.** New external scripts / origins → CSP allowlist + SCP test. | N/A | No external scripts. |
-| 12 | **Adversarial review.** `/security-review` skill run on slice diff. | Done | Satisfied by the auto-review.yml multi-agent security specialist run at PR open — verdict carried 2 praise findings (build-plan.ts pure-logic / no-XSS; URL bg param whitelist-validated) + 1 todo on this very item; no blocking findings. |
+| 12 | **Adversarial review.** `/security-review` skill run on slice diff. | Done | auto-review.yml multi-agent security specialist run on this PR completed with verdict `nit-only` (3-specialist matrix, k=2 default quorum). Security findings: 2 praises (URL bg-param whitelist validation; the security item 12 correction itself) + 1 note (`hasSafetyFlag` predicate is in-memory only, never persisted/egressed — correct safeguarding handling). Zero blocking findings. |
 | 13 | **Dependency audit.** `npm audit` clean (high + critical); new deps justified. | N/A · prototype short-form | No new deps planned. |
 | 14 | **Secrets hygiene.** No secrets in client bundle / commit history; `gitleaks` clean. | Done | No secrets introduced. |
 
@@ -25,6 +25,6 @@ Slice is a client-only static-content + in-memory-state prototype at `src/app/de
 
 Item 9 carries accepted-risk status under Option A per S-PROTO-hub precedent. Risk profile is T0 prototype content only.
 
-Items 8 + 12 closed at PR open: item 8 confirmed (Next.js default error boundary covers all surfaces in scope, no custom error handling introduced); item 12 satisfied by the auto-review.yml security specialist run.
+Item 8 closed at PR open (Next.js default error boundary covers all surfaces in scope; no custom error handling introduced). Item 12 deliberately Pending at PR open — auto-review.yml multi-agent security specialist run on the PR opened from this branch is the validation; status updates to Done in a follow-up commit after the verdict is known.
 
 Item 13 marked N/A · prototype short-form (spec 76 §3) (still verified on the prototype's actual diff at PR time — no new deps planned).

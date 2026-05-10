@@ -33,9 +33,9 @@ export function RadioCard<T extends string>({ name, options, value, onChange }: 
               padding: '14px 16px',
               borderRadius: 12,
               background: tokens.color.surface.panel,
-              border: `2px solid ${selected ? tokens.color.phase.build.accent : tokens.color.border}`,
+              border: `2px solid ${selected ? tokens.color.ink : tokens.color.border}`,
               cursor: 'pointer',
-              boxShadow: selected ? tokens.shadow.phase.build : 'none',
+              boxShadow: selected ? tokens.shadow.md : 'none',
               transition: 'border-color 120ms ease, box-shadow 120ms ease',
             }}
           >

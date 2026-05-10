@@ -1,0 +1,437 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Decouple — Pre-signup interview · O5 partner finances (Expressive)</title>
+<link href="https://cdnjs.cloudflare.com/ajax/libs/tailwindcss/2.2.19/tailwind.min.css" rel="stylesheet">
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Source+Serif+Pro:ital,wght@0,400;0,600;0,700;1,400;1,600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+<style>
+  html, body { margin: 0; padding: 0; }
+  body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    background: #F2EFF6;
+    color: #1A1A1A;
+    -webkit-font-smoothing: antialiased;
+    font-feature-settings: "ss01","cv11";
+  }
+  .serif { font-family: 'Source Serif Pro', Georgia, serif; }
+  .mono  { font-family: 'JetBrains Mono', ui-monospace, Menlo, monospace; }
+  .label-xs { font-size: 10.5px; letter-spacing: 0.14em; text-transform: uppercase; font-weight: 600; }
+  .tabular { font-variant-numeric: tabular-nums; }
+  *:focus-visible { outline: 2px solid #1A1A1A; outline-offset: 2px; border-radius: 4px; }
+  .plate { background: #F5F5F4; border: 1px solid #E5E3DC; border-radius: 14px; }
+  .vrow {
+    display: grid;
+    grid-template-columns: 220px 1fr;
+    gap: 28px;
+    align-items: start;
+  }
+</style>
+</head>
+<body>
+<template id="__bundler_thumbnail">
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 400">
+    <defs>
+      <linearGradient id="thumbBg" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0%" stop-color="#EEEAF4"/>
+        <stop offset="100%" stop-color="#F8F5EF"/>
+      </linearGradient>
+    </defs>
+    <rect width="400" height="400" fill="url(#thumbBg)"/>
+    <g transform="translate(110 110)">
+      <rect x="0" y="0"   width="180" height="22" rx="6" fill="#FFFFFF" stroke="#E5E3DC"/>
+      <rect x="0" y="32"  width="180" height="22" rx="6" fill="#FFFFFF" stroke="#E5E3DC"/>
+      <rect x="0" y="64"  width="180" height="22" rx="6" fill="#FFFFFF" stroke="#E5E3DC"/>
+      <line x1="0" y1="100" x2="180" y2="100" stroke="#D6D3CC" stroke-dasharray="3 3"/>
+      <rect x="0" y="112" width="180" height="22" rx="6" fill="#1A1A1A"/>
+      <rect x="0" y="158" width="180" height="14" rx="7" fill="#4F46E5"/>
+    </g>
+  </svg>
+</template>
+<div id="root"></div>
+
+<script type="text/babel" src="o5-frames.jsx"></script>
+<script type="text/babel" data-presets="react">
+const { useState } = React;
+const {
+  INK, SUB, MUTE, LINE, HAIR, INDIGO, MAGENTA, VIOLET,
+  EXPRESSIVE_BG,
+  OPT_FULL, OPT_SOME, OPT_LITTLE, OPT_SUSPECT,
+  Hero, Footer, TopBar, MobileFrame, FormBody, defaultCaption
+} = window.o5;
+
+function Arrow({ size = 13, sw = 1.8, dir = "right" }) {
+  const r = { right: 0, left: 180, down: 90, up: 270 }[dir] || 0;
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={sw} strokeLinecap="round" strokeLinejoin="round" style={{ transform: `rotate(${r}deg)` }}>
+      <line x1="5" y1="12" x2="19" y2="12" />
+      <polyline points="12 5 19 12 12 19" />
+    </svg>
+  );
+}
+
+/* ====== INTERACTIVE RESOLVED FRAME — A3 + B1 + C2 ====== */
+
+function ResolvedFrame({ answer, setAnswer }) {
+  const enabled = answer !== null;
+  return (
+    <MobileFrame label="RESOLVED · A3 · B1 · C2">
+      <TopBar />
+      <Hero framing="B1" />
+      <FormBody
+        aTreatment="A3"
+        cVariant="C2"
+        selectedKey={answer}
+        onSelect={(k) => setAnswer(k)}
+      />
+      <Footer
+        enabled={enabled}
+        caption={defaultCaption(enabled)}
+      />
+    </MobileFrame>
+  );
+}
+
+function AnnotPill({ children, color }) {
+  return (
+    <span className="mono inline-block px-2 py-1 rounded"
+          style={{ background: color || "#1A1A1A", color: "#FFFFFF", fontSize: 10.5, letterSpacing: "0.04em" }}>
+      {children}
+    </span>
+  );
+}
+
+/* ====== Variant grid section ====== */
+function VariantGroup({ id, title, lede, frames, resolvedKey, blurbs, screenLabel }) {
+  return (
+    <section className="plate p-8 mt-8" data-screen-label={screenLabel}>
+      <div className="vrow">
+        <div>
+          <div className="label-xs" style={{ color: MAGENTA }}>Decision {id}</div>
+          <h3 className="serif mt-2" style={{ fontSize: 22, lineHeight: 1.15, letterSpacing: "-0.015em", fontWeight: 600 }}>
+            {title}
+          </h3>
+          <p className="mt-3 text-[13px]" style={{ color: SUB, lineHeight: 1.55 }}>
+            {lede}
+          </p>
+          <div className="mt-4 mono text-[11px]" style={{ color: MUTE, letterSpacing: "0.04em", lineHeight: 1.7 }}>
+            <span>resolved → </span>
+            <span style={{ color: INK, fontWeight: 600 }}>{id}{resolvedKey}</span>
+          </div>
+        </div>
+
+        <div className="grid gap-6" style={{ gridTemplateColumns: "repeat(3, minmax(0, 1fr))" }}>
+          {frames.map((f, i) => {
+            const key = `${id}${i + 1}`;
+            const isResolved = key === `${id}${resolvedKey}`;
+            return (
+              <div key={i} className="flex flex-col">
+                <div className="flex items-baseline justify-between mb-3">
+                  <div className="flex items-center gap-2">
+                    <AnnotPill color={isResolved ? INK : "#9F9A92"}>{key}</AnnotPill>
+                    <span className="text-[12.5px]" style={{ color: INK, fontWeight: 600 }}>{f.title}</span>
+                  </div>
+                  {isResolved && (
+                    <span className="mono text-[9.5px]" style={{ color: INK, letterSpacing: "0.06em" }}>RESOLVED</span>
+                  )}
+                </div>
+                <div style={{
+                  borderRadius: 18,
+                  padding: 16,
+                  background: isResolved ? "#FFFFFF" : "transparent",
+                  border: isResolved ? `1px solid ${LINE}` : `1px dashed #D6D3CC`,
+                  display: "flex", justifyContent: "center"
+                }}>
+                  <div style={{ width: 320, height: 649, position: "relative" }}>
+                    <div style={{ transform: "scale(0.853)", transformOrigin: "top left", width: 375, height: 760 }}>
+                      {f.node}
+                    </div>
+                  </div>
+                </div>
+                <p className="mt-3 text-[12px]" style={{ color: SUB, lineHeight: 1.5 }}>
+                  {blurbs[i]}
+                </p>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+    </section>
+  );
+}
+
+function App() {
+  const [answer, setAnswer] = useState(null);
+
+  /* derived: does the answer route into the hidden-assets pathway? */
+  const hiddenAssetsFlag = answer === "suspect";
+  const supportLevel = answer === "full"    ? "light"
+                     : answer === "some"    ? "standard"
+                     : answer === "little"  ? "high"
+                     : answer === "suspect" ? "high · forensic add-on"
+                     : "—";
+
+  return (
+    <div className="min-h-screen" style={{ background: "linear-gradient(180deg, #EEEAF4 0%, #F4EFE9 520px, #EFEEE9 100%)" }}>
+      <header className="px-12 pt-12 pb-8 max-w-[1480px] mx-auto" data-screen-label="05 Header">
+        <div className="flex items-baseline justify-between flex-wrap gap-y-3">
+          <div>
+            <div className="label-xs" style={{ color: INDIGO }}>
+              Decouple · Pre-signup interview · Wireframe O5 · Expressive
+            </div>
+            <h1 className="serif mt-2" style={{ fontSize: 36, lineHeight: 1.1, letterSpacing: "-0.02em", fontWeight: 600 }}>
+              What you know about your partner's finances — <span className="italic" style={{ fontWeight: 400, color: MAGENTA }}>screen 5 of 8</span>
+            </h1>
+          </div>
+          <div className="flex items-center gap-3 text-[12px] mono" style={{ color: SUB }}>
+            <AnnotPill color={INDIGO}>O5</AnnotPill>
+            <span>preSignup.partnerFinanceAwareness</span>
+            <span style={{ color: "#C9C5BD" }}>·</span>
+            <span>{`{hiddenAssetsFlag}`}</span>
+          </div>
+        </div>
+        <p className="mt-4 max-w-[920px] text-[14px]" style={{ color: SUB, lineHeight: 1.6 }}>
+          One question, four options — and the most sensitive screen in the eight. The fourth option
+          quietly gates a hidden-assets pathway later in the plan, so it has to live on the page
+          without making the screen feel like a fishing expedition or pushing anyone toward it. Three
+          calls below: how the suspicion option is presented, how (and whether) the helper text
+          reassures, and the order the four answers sit in.
+        </p>
+      </header>
+
+      <main className="px-12 pb-24 max-w-[1480px] mx-auto" data-screen-label="05 Resolved">
+
+        {/* RESOLVED + RAIL */}
+        <section className="grid gap-12" style={{ gridTemplateColumns: "minmax(0, 391px) 1fr" }} data-screen-label="05 Resolved live">
+
+          <div className="flex flex-col items-center">
+            <div className="mb-5 self-stretch flex items-baseline justify-between">
+              <div className="label-xs" style={{ color: INK }}>RESOLVED · LIVE</div>
+              <button type="button"
+                      onClick={() => setAnswer(null)}
+                      className="mono text-[10.5px]"
+                      style={{ color: MUTE, letterSpacing: "0.06em", textDecoration: "underline", textUnderlineOffset: 3, cursor: "pointer", background: "transparent", border: "none", padding: 0 }}>
+                reset
+              </button>
+            </div>
+            <ResolvedFrame answer={answer} setAnswer={setAnswer} />
+          </div>
+
+          <div className="space-y-6">
+            <div className="plate p-6">
+              <div className="label-xs mb-4" style={{ color: INDIGO }}>Live state</div>
+              <div className="space-y-3 text-[13px]" style={{ color: SUB, lineHeight: 1.5 }}>
+                <div className="flex items-baseline gap-3">
+                  <span className="mono text-[11px]" style={{ color: MUTE, width: 160 }}>partnerFinanceAwareness</span>
+                  <span className="mono text-[12.5px]" style={{ color: answer ? INK : MUTE }}>
+                    {answer ?? "— not answered —"}
+                  </span>
+                </div>
+                <div className="flex items-center gap-3 pt-2 mt-2" style={{ borderTop: `1px solid ${LINE}` }}>
+                  <span className="mono text-[11px]" style={{ color: MUTE, width: 160 }}>hiddenAssetsFlag</span>
+                  <span className="mono inline-flex items-center gap-1.5 px-2 py-1 rounded"
+                        style={{
+                          background: hiddenAssetsFlag ? INK : "#FFFFFF",
+                          color: hiddenAssetsFlag ? "#FFFFFF" : MUTE,
+                          border: `1px solid ${hiddenAssetsFlag ? INK : LINE}`,
+                          fontSize: 10, letterSpacing: "0.04em"
+                        }}>
+                    <span style={{
+                      width: 6, height: 6, borderRadius: 999,
+                      background: hiddenAssetsFlag ? "#FFFFFF" : "#D6D3CC"
+                    }} />
+                    {answer ? (hiddenAssetsFlag ? "true" : "false") : "—"}
+                  </span>
+                </div>
+                <div className="flex items-baseline gap-3 pt-2" style={{ borderTop: `1px solid ${LINE}` }}>
+                  <span className="mono text-[11px]" style={{ color: MUTE, width: 160 }}>derived · disclosure support</span>
+                  <span className="mono text-[12px]" style={{ color: answer ? INK : MUTE }}>
+                    {supportLevel}
+                  </span>
+                </div>
+                {answer === "suspect" && (
+                  <p className="text-[12px] pt-1" style={{ color: SUB, lineHeight: 1.5 }}>
+                    Quietly adds a hidden-assets pathway to the plan output (screen 7) — a checklist
+                    of records to gather and a forensic-accountant sidebar. No mention of this on
+                    screen 5 itself. The user discovers it as a normal part of their plan.
+                  </p>
+                )}
+                {answer === "little" && (
+                  <p className="text-[12px] pt-1" style={{ color: SUB, lineHeight: 1.5 }}>
+                    Plan emphasises the disclosure-support track: walkthroughs of where to find
+                    statements, what Form E asks for, and a step that explicitly anticipates
+                    "I don't have this" answers.
+                  </p>
+                )}
+                {(answer === "full" || answer === "some") && (
+                  <p className="text-[12px] pt-1" style={{ color: SUB, lineHeight: 1.5 }}>
+                    Plan uses the standard disclosure track. We still ask for everything, but the
+                    UI assumes you can answer most prompts without external help.
+                  </p>
+                )}
+              </div>
+            </div>
+
+            <div className="plate p-6">
+              <div className="label-xs mb-3" style={{ color: INDIGO }}>Try these</div>
+              <div className="grid grid-cols-2 gap-2 text-[12px]">
+                {[
+                  { label: "I have a good idea",      k: "full"    },
+                  { label: "Some but not all",        k: "some"    },
+                  { label: "Very little",             k: "little"  },
+                  { label: "I suspect they're hiding…", k: "suspect" }
+                ].map((s) => (
+                  <button key={s.k} type="button"
+                          onClick={() => setAnswer(s.k)}
+                          style={{
+                            background: "#FFFFFF",
+                            border: `1px solid ${LINE}`,
+                            borderRadius: 10,
+                            padding: "10px 12px",
+                            textAlign: "left",
+                            cursor: "pointer",
+                            color: INK, fontWeight: 500
+                          }}>
+                    {s.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            <div className="plate p-6 text-[13px]" style={{ color: SUB, lineHeight: 1.6 }}>
+              <div className="label-xs mb-4" style={{ color: INDIGO }}>The three calls</div>
+              <div className="space-y-4">
+                <div>
+                  <div className="flex items-baseline gap-3 mb-1">
+                    <AnnotPill>A3</AnnotPill>
+                    <span className="serif" style={{ fontSize: 14.5, fontWeight: 600, color: INK }}>Suspicion option below a hairline</span>
+                  </div>
+                  <p>The fourth option sits below a divider, under "If you have concerns…". It's
+                  reachable in one tap, but visually outside the main spectrum — so the spectrum
+                  reads as the question and the suspicion row reads as a quiet permission slip
+                  for users who need it.</p>
+                </div>
+                <div>
+                  <div className="flex items-baseline gap-3 mb-1">
+                    <AnnotPill>B1</AnnotPill>
+                    <span className="serif" style={{ fontSize: 14.5, fontWeight: 600, color: INK }}>"There's no wrong answer"</span>
+                  </div>
+                  <p>Reassures without asking the user to think about why we're asking. The
+                  alternative framing ("how much support you'll need with disclosure") is more
+                  transparent but introduces the word disclosure — heavier than this screen needs
+                  to carry.</p>
+                </div>
+                <div>
+                  <div className="flex items-baseline gap-3 mb-1">
+                    <AnnotPill>C2</AnnotPill>
+                    <span className="serif" style={{ fontSize: 14.5, fontWeight: 600, color: INK }}>Most-knowing → least, suspect set apart</span>
+                  </div>
+                  <p>Reads as a calm spectrum from confident to "they handled it" — a shape most
+                  users will recognise themselves on. Pairing the order with A3's divider keeps
+                  the suspicion row off the spectrum entirely; it's its own door.</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* A — SUSPICION-OPTION TREATMENT */}
+        <VariantGroup
+          id="A"
+          screenLabel="05 A variants"
+          title="How does the fourth option sit?"
+          lede="The suspicion option does real work — it routes a hidden-assets pathway in the plan. But it's also the most loaded thing on the screen. Variants test how visually present it is, from full equality with the other three to a distinctly framed safety-net row at the bottom."
+          resolvedKey={3}
+          frames={[
+            { title: "Identical weight",   node: <window.o5.A1 /> },
+            { title: "Subtle de-emphasis", node: <window.o5.A2 /> },
+            { title: "Below a hairline",   node: <window.o5.A3 /> }
+          ]}
+          blurbs={[
+            "Honest — every option is equal. But on a sensitive screen it can read as the question slowly turning into an accusation by row four. No safety valve, no breathing room.",
+            "Slight muted tone and a tiny caption underneath — quieter, but the user still reads it as one of four answers in the same list. The de-emphasis can also feel patronising.",
+            "Separated under \"If you have concerns…\". The first three options form the spectrum; the fourth is a door, framed as the user's own concern rather than our suspicion. Calmest treatment that still keeps the option fully reachable."
+          ]}
+        />
+
+        {/* B — HELPER-TEXT FRAMING */}
+        <VariantGroup
+          id="B"
+          screenLabel="05 B variants"
+          title="What does the helper text do?"
+          lede="One line of helper, small. The question is whether to reassure ('no wrong answer'), be transparent about why we're asking ('helps us know how much support you'll need with disclosure'), or trust the question to stand alone. Each leans into a different theory of what's making the user nervous."
+          resolvedKey={1}
+          frames={[
+            { title: "No wrong answer",     node: <window.o5.B1 /> },
+            { title: "Disclosure framing",  node: <window.o5.B2 /> },
+            { title: "No helper",           node: <window.o5.B3 /> }
+          ]}
+          blurbs={[
+            "Names the worry directly — that there's a right answer and they're failing it. Doesn't ask the user to reason about consequences. Calmest reading; the resolved choice.",
+            "More transparent: tells them the answer changes how much support we'll give. Useful in a vacuum, but introduces \"disclosure\" — a heavier word than this screen needs, and one most pre-signup users haven't met yet.",
+            "Trusts the headline. Cleaner. But on a sensitive screen, silence reads as scrutiny — the user hunts for the angle and supplies their own. The space the helper would occupy isn't free."
+          ]}
+        />
+
+        {/* C — ORDER OF OPTIONS */}
+        <VariantGroup
+          id="C"
+          screenLabel="05 C variants"
+          title="In what order do the answers sit?"
+          lede="The four answers form a rough spectrum of self-reported knowledge — except the fourth, which is its own kind of statement. Ordering decides what the spectrum reads as, and where the eye lands first."
+          resolvedKey={2}
+          frames={[
+            { title: "Spec verbatim",         node: <window.o5.C1 /> },
+            { title: "Knowing → least",       node: <window.o5.C2 /> },
+            { title: "Reversed — least first", node: <window.o5.C3 /> }
+          ]}
+          blurbs={[
+            "Brief order. Reads top-down as a confident-to-uncertain scale that ends in suspicion — which makes the fourth option feel like the bottom of the same ladder rather than a separate question.",
+            "Same first three rows, but the suspicion option is set apart below the spectrum. The eye lands on the spectrum first; the fourth row is reachable but optional in spirit. Pairs with A3.",
+            "Lowers the entry bar — the first option a user reads is the most generous. Less judgemental for users who know little, but flips the implicit hierarchy and makes \"good idea\" feel like the harder claim."
+          ]}
+        />
+
+        {/* CANON */}
+        <section className="plate p-8 mt-12" data-screen-label="05 Canon">
+          <div className="label-xs mb-4" style={{ color: INDIGO }}>Canon — inheritance from O1 / O2 / O3 / O4</div>
+          <div className="grid grid-cols-3 gap-8 text-[13px]" style={{ color: SUB, lineHeight: 1.55 }}>
+            <div>
+              <div className="serif mb-2" style={{ fontSize: 15, fontWeight: 600, color: INK }}>Resemble</div>
+              <p>Same Inter + Source Serif Pro pairing. Step rail advances to 5 / 8. Same paper-white
+              cards on calmer expressive gradient as O4 — the violet stop pulled back, cream extended.
+              Eyebrow stays indigo (Money) but specifies "Money · their side" so the user knows we've
+              shifted from their picture to their partner's.</p>
+            </div>
+            <div>
+              <div className="serif mb-2" style={{ fontSize: 15, fontWeight: 600, color: INK }}>Differ</div>
+              <p>The hairline-divider treatment for the fourth option is new — every prior screen has
+              been a flat list. We earn the divider by using it sparingly and labelling it in the
+              softest serif italic on the screen. It's the only place on O5 that breaks the four-row
+              rhythm.</p>
+            </div>
+            <div>
+              <div className="serif mb-2" style={{ fontSize: 15, fontWeight: 600, color: INK }}>Constraints honoured</div>
+              <p>Words "controlling", "abuse" and "victim" do not appear on the screen. No
+              "I don't want to answer" affordance — the four options span the spectrum. The plan-output
+              consequences of each answer are not surfaced here; gating is silent. No red, no warning
+              glyphs. The screen reads as a routing question, not a flag.</p>
+            </div>
+          </div>
+        </section>
+
+      </main>
+    </div>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById("root")).render(<App/>);
+</script>
+</body>
+</html>

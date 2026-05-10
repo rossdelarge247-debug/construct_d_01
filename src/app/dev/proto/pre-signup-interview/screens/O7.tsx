@@ -14,7 +14,8 @@ export function O7() {
   return (
     <ScreenShell
       step={step}
-      heading="Your picture, taking shape"
+      eyebrow="O7 · Your plan"
+      heading="Your plan"
       helper="From what you’ve told us. You can change any answer by going back."
       ctaLabel="See what’s next"
       onContinue={next}
