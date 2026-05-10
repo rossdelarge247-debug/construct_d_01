@@ -37,10 +37,10 @@ This slice ships the gate (specialist persona + workflow wire-up + synthetic reg
 ## Pre-flight notes
 
 - **Slice size pre-flight.** Estimated diff: persona file ~150L · auto-review.yml additions ~30L · 4 P6 script extensions ~30L combined · synthetic fixture diff ~40L + expected JSON ~30L · slice docs (this acceptance + verification + security + test-plan) ~250L · CLAUDE.md §"Visual direction" + §"Hard controls" updates ~50L · spec 72c §4 + §7 updates ~30L · calibration-report ~120L. Total ~750L. Single PR.
-- **Adversarial review budget.** acceptance.md targeted ≤300L per spec 72b Option A (single sub-spawn). At freeze: re-check `wc -l` and partition if >300L per Option B/C convention.
+- **Adversarial review budget.** acceptance.md targeted ≤300L spec 72b Option A (single sub-spawn). At freeze: re-check `wc -l` and partition if >300L per Option B/C convention.
 - **TDD-applicable surface.** `scripts/spawn-multi-reviewer.sh DIMENSIONS` validation extension is logic surface — extend `tests/shellspec/spawn-multi-reviewer.spec.sh` RED-first to assert `canvas-fidelity` is accepted. `scripts/auto-review-filter-prior.sh` similarly. Persona file is pure-prose under `pure-config:.claude/agents/*` allowlist entry. Synthetic fixture diff + expected JSON are deterministic content under `pure-config:tests/personas/synthetic/**/*` allowlist entry.
 - **Test-pain audit (spec 72d §3).** No new logic seams introduced beyond extending existing case statements; mock-count not at risk.
-- **Architectural-smell awareness.** Persona file is the at-risk-of-smell artefact — pattern: criteria sprawl across categories, JSON envelope schema drift from spec 72c §5, label/blocking matrix decision-fatigue. Pre-empted: persona-file size capped at ≤300L per spec 72c §4 directive (target ≤200L); criteria capped at 6 categories matching the structured findings 1-4 + 2 stretch (typography · layout-chrome · spacing · color-treatment · header-affordances · missing-element).
+- **Architectural-smell awareness.** Persona file is the at-risk-of-smell artefact — pattern: criteria sprawl across categories, JSON envelope schema drift from spec 72c §5, label/blocking matrix decision-fatigue. Pre-empted: persona-file size capped at ≤300L spec 72c §4 directive (target ≤200L); criteria capped at 6 categories matching the structured findings 1-4 + 2 stretch (typography · layout-chrome · spacing · color-treatment · header-affordances · missing-element).
 
 ## MLP framing
 
@@ -55,10 +55,10 @@ Cuts: if persona surfaces too many false positives at first run (e.g. flagging s
 - **Outcome:** A new specialist persona file exists at `.claude/agents/reviewer-canvas-fidelity.md` matching the structure of existing specialists (`reviewer-security.md` · `reviewer-correctness.md` · `reviewer-style.md` · `reviewer-prototype-readiness.md`). The persona's job is to compare a slice diff against its linked canvas (`.html` or `.jsx`) and flag visual-treatment drift.
 - **Verification:**
   1. File exists at `.claude/agents/reviewer-canvas-fidelity.md`.
-  2. File size ≤300L per spec 72c §4 directive (target ≤200L via include-by-reference for verdict vocab + JSON schema).
+  2. File size ≤300L spec 72c §4 directive (target ≤200L via include-by-reference for verdict vocab + JSON schema).
   3. File names six categories: `typography` · `layout-chrome` · `spacing` · `color-treatment` · `header-affordances` · `missing-element`. Each category carries default `label` + default `blocking` per a deterministic matrix (see persona file for matrix; visual-fidelity defaults to `issue` with `blocking: false` since visual recoverable; `missing-element` blocking when the element is AC-mandated).
-  4. File specifies per-invocation context fences: `<pr-diff-NONCE>` · `<slice-ac-NONCE>` · `<linked-canvas-NONCE>` (the new fence — content is the linked canvas .jsx or .html file inlined per spec 72b Option C nonced delimiters) · `<verdict-vocab-NONCE>` · `<spec-72c-section-5-NONCE>`.
-  5. File specifies strict-JSON output envelope per spec 72c §5 with `specialist: "reviewer-canvas-fidelity"` + `findings[]` shape matching existing personas (label · blocking · category · evidence · remediation).
+  4. File specifies per-invocation context fences: `<pr-diff-NONCE>` · `<slice-ac-NONCE>` · `<linked-canvas-NONCE>` (the new fence — content is the linked canvas .jsx or .html file inlined spec 72b Option C nonced delimiters) · `<verdict-vocab-NONCE>` · `<spec-72c-section-5-NONCE>`.
+  5. File specifies strict-JSON output envelope spec 72c §5 with `specialist: "reviewer-canvas-fidelity"` + `findings[]` shape matching existing personas (label · blocking · category · evidence · remediation).
   6. File includes ≥1 example invocation showing input shape + expected output JSON for a planted typography-drift finding.
 - **In scope:** persona file authoring at `.claude/agents/reviewer-canvas-fidelity.md`.
 - **Out of scope:**
@@ -92,15 +92,15 @@ Cuts: if persona surfaces too many false positives at first run (e.g. flagging s
 
 ## AC-4 · Synthetic fixture covers canvas-fidelity regression
 
-- **Outcome:** A synthetic-deliberate-injection fixture pair at `tests/personas/synthetic/canvas-fidelity.diff` + `tests/personas/synthetic/expected/canvas-fidelity.json` per spec 72c §7 first-3-src-slice synthetic-fixtures harness. The diff carries a planted typography-drift defect (`<h1>Your situation</h1>` rendered as flat string instead of canvas-spec'd bold/italic split with full stop). The expected envelope asserts the persona flags it via signature predicates (label set, blocking set, category-pattern matching `typography`, evidence-keyword any-of, remediation-keyword any-of, min-count ≥1).
+- **Outcome:** A synthetic-deliberate-injection fixture pair at `tests/personas/synthetic/canvas-fidelity.diff` + `tests/personas/synthetic/expected/canvas-fidelity.json` spec 72c §7 first-3-src-slice synthetic-fixtures harness. The diff carries a planted typography-drift defect (`<h1>Your situation</h1>` rendered as flat string instead of canvas-spec'd bold/italic split with full stop). The expected envelope asserts the persona flags it via signature predicates (label set, blocking set, category-pattern matching `typography`, evidence-keyword any-of, remediation-keyword any-of, min-count ≥1).
 - **Verification:**
   1. Fixture pair exists at the canonical paths.
   2. `tests/personas/run-synthetic.sh` invokes the canvas-fidelity persona (when `ANTHROPIC_API_KEY` set) against the diff with a fixture linked-canvas file (an extracted snippet of `o2-frames.jsx` L171-172 showing the canon pattern).
   3. `tests/personas/match-synthetic.sh` confirms the planted defect is flagged per the expected envelope predicates.
-  4. `.github/workflows/persona-synthetic-fixtures.yml` includes `canvas-fidelity` in path filter + run loop. CLI version pinned in lockstep with `auto-review.yml` per spec 72c §7 directive.
+  4. `.github/workflows/persona-synthetic-fixtures.yml` includes `canvas-fidelity` in path filter + run loop. CLI version pinned in lockstep with `auto-review.yml` spec 72c §7 directive.
   5. Regression: when `ANTHROPIC_API_KEY` absent, harness exits 0 with neutral (forks unaffected, same skip behaviour as existing fixtures).
 - **In scope:** fixture pair authoring + workflow path-filter extension + run-loop entry.
-- **Out of scope:** golden-PR replay fixtures (deferred per spec 72c §7 — synthetic-deliberate-injection is the v3b harness; replay is v3c carry-over).
+- **Out of scope:** golden-PR replay fixtures (deferred spec 72c §7 — synthetic-deliberate-injection is the v3b harness; replay is v3c carry-over).
 
 ## AC-5 · Calibration report captures user feedback verbatim + structured findings + canvas L-refs
 
@@ -135,7 +135,7 @@ Cuts: if persona surfaces too many false positives at first run (e.g. flagging s
 - **Inline-style proto consumption refactor.** Deferred — fidelity rebuild may resolve some inline-style concerns naturally; re-scope after rebuild.
 - **Spec 65 amendments to capture quantitative profiling data.** Deferred — needs canon-author conversation; pushes against spec 65 §P1 (~3min ceiling).
 - **Public-pages header reconciliation** — explicitly user-flagged as separate activity; not blocking this slice or the rebuild slice.
-- **Multi-provider 3rd-agent reviewer** for canvas-fidelity (e.g. cross-provider drift detection). v3c carry-over per spec 72c §9.
+- **Multi-provider 3rd-agent reviewer** for canvas-fidelity (e.g. cross-provider drift detection). v3c carry-over spec 72c §9.
 
 ## Definition of Done (per CLAUDE.md §"Engineering conventions" §"Definition of Done")
 

@@ -28,7 +28,7 @@
 5. **Auto-review verdict.** `approve` or `nit-only` on the PR before merge.
 6. **Synthetic-fixture workflow.** Green on PR (or skip-with-neutral when `ANTHROPIC_API_KEY` absent in fork-PR context).
 
-## Test-pain audit (per spec 72d §3)
+## Test-pain audit (spec 72d §3)
 
 No new logic seams introduced beyond extending existing case-statement allowed-dimension lists. Mock-count not at risk; threshold (≤2 mocks per unit test for `infrastructure` category, ≤5 for prototype) easily under.
 

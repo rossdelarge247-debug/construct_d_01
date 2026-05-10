@@ -12,7 +12,7 @@ Final-state record of evidence per AC. Skeleton at slice setup; full fill-in at 
 | Size ≤300L (target ≤200L) | `wc -l .claude/agents/reviewer-canvas-fidelity.md` |
 | Names six categories | `grep -oE "^- \*\*\d+\." .claude/agents/reviewer-canvas-fidelity.md \| wc -l` (≥6) and individual category names verifiable via grep |
 | Per-invocation context fences | `grep "<linked-canvas-NONCE>" .claude/agents/reviewer-canvas-fidelity.md` (new fence) + existing fences |
-| Strict-JSON envelope per spec 72c §5 | `grep '"specialist": "reviewer-canvas-fidelity"' .claude/agents/reviewer-canvas-fidelity.md` + envelope schema visible |
+| Strict-JSON envelope spec 72c §5 | `grep '"specialist": "reviewer-canvas-fidelity"' .claude/agents/reviewer-canvas-fidelity.md` + envelope schema visible |
 | ≥1 example invocation | `grep -c "^### Example" .claude/agents/reviewer-canvas-fidelity.md` (≥1) |
 
 ### AC-2 · auto-review.yml routes canvas-fidelity dimension

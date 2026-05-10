@@ -1,7 +1,7 @@
 # S-INFRA-canvas-fidelity-gate · Security DoD
 
 **Slice:** S-INFRA-canvas-fidelity-gate
-**Category:** infrastructure (full production rigour per spec 76 §3)
+**Category:** infrastructure (full production rigour spec 76 §3)
 **Source:** `docs/workspace-spec/72-engineering-security.md` §11 (per-slice security checklist)
 **Data-tier reference:** spec 72 §1 (T0 Public · T1 Functional · T2 Personal · T3 Financial · T4 Safeguarding · T5 Legal)
 
@@ -38,7 +38,7 @@ This slice is **rigour infrastructure** — adds a multi-agent specialist person
 
 ## 6. Third-party data flows
 
-- [x] N/A · reason: **No new third-party integration.** The canvas-fidelity persona is invoked via the existing Anthropic Claude Code CLI invocation pattern (`npx -y @anthropic-ai/claude-code -p`) shared with the other specialists in the harness; the diff + slice AC + linked canvas content sent in the per-invocation prompt are all T0 Public artefacts already in the public slice diff. CLI version stays in lockstep with `auto-review.yml` per spec 72c §7 directive.
+- [x] N/A · reason: **No new third-party integration.** The canvas-fidelity persona is invoked via the existing Anthropic Claude Code CLI invocation pattern (`npx -y @anthropic-ai/claude-code -p`) shared with the other specialists in the harness; the diff + slice AC + linked canvas content sent in the per-invocation prompt are all T0 Public artefacts already in the public slice diff. CLI version stays in lockstep with `auto-review.yml` spec 72c §7 directive.
 
 ## 7. Audit log entries
 
