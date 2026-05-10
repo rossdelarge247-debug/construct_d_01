@@ -201,6 +201,8 @@ jobs:
                         printf -- '--- BEGIN %s %s ---\n' "$canvas_path" "$NONCE"
                         cat "$canvas_path"
                         printf -- '\n--- END %s %s ---\n' "$canvas_path" "$NONCE"
+                      else
+                        echo "::warning::Skipping missing canvas path: $canvas_path" >&2
                       fi
                       ;;
                     *)
