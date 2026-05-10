@@ -65,7 +65,7 @@ function composePersonalisedNotes(a: Answers): PlanContent['personalisedNotes'] 
         'Because there are children involved, Decouple gives you a parenting plan tool you both build together — schedule, school, healthcare, decisions — alongside the financial picture.',
     });
   }
-  if (a.employment === 'self-employed' || a.employment === 'mixed') {
+  if (a.employment?.selfEmployment && a.employment.selfEmployment !== 'neither') {
     notes.push({
       trigger: 'self-employed',
       body:

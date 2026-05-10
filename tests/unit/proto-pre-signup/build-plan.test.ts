@@ -26,7 +26,7 @@ describe('buildPlanFromAnswers', () => {
   });
 
   it('adds a self-employed note when the user or partner is self-employed', () => {
-    const a: Answers = { employment: 'self-employed' };
+    const a: Answers = { employment: { selfEmployment: 'me' } };
     const plan = buildPlanFromAnswers(a);
     expect(plan.personalisedNotes.some((n) => n.trigger === 'self-employed')).toBe(true);
   });

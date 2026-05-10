@@ -41,14 +41,20 @@ export function hasSafetyFlag(ex: ExAndSafetyAnswers | undefined): boolean {
   return ex?.relationshipQuality === 'safety-concern' || ex?.devicePrivate === 'not-sure';
 }
 
+export type SelfEmployment = 'neither' | 'me' | 'ex' | 'both';
+
+export interface EmploymentAnswers {
+  selfEmployment?: SelfEmployment;
+}
+
 export interface Answers {
   stage?: Stage;
   situation?: SituationAnswers;
   exAndSafety?: ExAndSafetyAnswers;
+  employment?: EmploymentAnswers;
   livingArrangement?: LivingArrangement;
   children?: ChildrenStatus;
   relationship?: RelationshipDynamic;
-  employment?: Employment;
   partnerFinance?: PartnerFinanceKnowledge;
   priorities?: ReadonlyArray<Priority>;
   worries?: ReadonlyArray<Worry>;

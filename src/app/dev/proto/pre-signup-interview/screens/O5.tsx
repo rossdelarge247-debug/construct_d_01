@@ -1,34 +1,22 @@
 'use client';
 
 import { ScreenShell } from '../components/ScreenShell';
-import { RadioCard } from '../components/RadioCard';
 import { useProto } from '../lib/proto-context';
-import type { Employment } from '../lib/types';
-
-const OPTIONS = [
-  { value: 'employed' as const, label: 'Employed', helper: 'Salary or wages from a single employer' },
-  { value: 'self-employed' as const, label: 'Self-employed', helper: 'Sole trader, partner, or running your own company' },
-  { value: 'mixed' as const, label: 'A mix of both', helper: 'Some payroll, some self-employment income' },
-  { value: 'not-working' as const, label: 'Not currently working', helper: 'Between roles, retired, or caring full-time' },
-];
+import { tokens } from '@/styles/tokens';
 
 export function O5() {
-  const { answers, setAnswer, next, back, step } = useProto();
+  const { next, back, step } = useProto();
   return (
     <ScreenShell
       step={step}
-      heading="What’s your working situation?"
-      helper="No income amounts yet — just the shape. We’ll use bank data later to do the heavy lifting."
-      ctaDisabled={!answers.employment}
+      eyebrow="O5 · Partner finances"
+      heading="Coming up"
       onContinue={next}
       onBack={back}
     >
-      <RadioCard<Employment>
-        name="employment"
-        options={OPTIONS}
-        value={answers.employment}
-        onChange={(v) => setAnswer('employment', v)}
-      />
+      <p style={{ font: `400 14px/1.5 ${tokens.font.sans}`, color: tokens.color.text.sub }}>
+        Reconstruction lands next turn.
+      </p>
     </ScreenShell>
   );
 }
