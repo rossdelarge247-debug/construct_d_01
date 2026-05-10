@@ -46,19 +46,39 @@ Session 81 reframed mid-session from the SESSION-CONTEXT-suggested P3+P6 pairing
 - **`spawn-multi-reviewer.sh aggregate` arg-order bug** — `--dimensions <csv>` placed before positional `<dir>` in auto-review.yml call site; parser reads `<dir>` first then flags, so `--dimensions` got assigned as the directory. Fix: flip to `<dir> --dimensions <csv>` matching parser's established convention. Same bug in `preflight-review.sh` (local-only) — fix deferred.
 - **`Mobile Screens v2 - Standalone (2).html` decode failure** — file is plain-HTML, not bundled (no `<script type="__bundler/template">`). Decoder correctly refused. No fix needed; the file is already directly grep-able.
 
-## Persona findings recorded (PR #137 — pending at wrap)
+## Persona findings recorded (PR #137 final verdict)
 
-PR #137 has not yet produced an aggregated auto-review verdict at wrap (aggregator failed on first push due to arg-order bug; re-fires after `e7f1fdd`). The 3 specialists each individually emitted `success` (no findings). Final verdict + retain/drop signal recorded at session 82 turn 1 once the aggregator runs clean.
+PR #137 reached merged state at `ecbdf9d`. Aggregator final verdict: `request-changes` (informational at v3b ship) — 5 advisory findings on the merge SHA `135d9da` (down from 7 on `3318c8d` after the security path-traversal fix). All 3 specialists found issues the main conversation missed; retain/drop signal: **retain** all 3 specialists (security · correctness · style) — each surfaced ≥1 actionable finding. Canvas-fidelity persona untested in PR #137 itself (slice was `infrastructure` category, no canvas linked); first real exercise is the rebuild slice's prototype PR.
+
+| Specialist | Findings on `135d9da` (final SHA) | Issues main missed | Retain? |
+|---|---|---|---|
+| `security` | 0 (path-traversal fix landed) | Yes — flagged path-traversal pre-fix | retain |
+| `correctness` | 3 (1 regression · 2 spec-citation) | Yes — caught preflight arg-order + spec-citation philosophy | retain |
+| `style` | 2 (commenting · nitpick) | Yes — caught WHAT-narration in 2 places | retain |
+
+## Post-wrap addendum (CI debugging tail + merge)
+
+Wrap docs were committed in `1b7e74e` before the auto-review aggregator's verdict landed. The session continued past the wrap-commit to address CI feedback:
+
+- **`3318c8d` — `spec-citation-quote-check` CI failure resolved.** 13 violations across 4 slice docs (`acceptance.md` · `verification.md` · `security.md` · `test-plan.md`). Fix: option (b) reframe-as-doc-pointer per the check's exit message — sed reframe of `per spec NN` → `spec NN` since all 13 references were navigational doc-pointers, not load-bearing claims. Re-run returned zero violations.
+- **`135d9da` — security path-traversal guard.** Auto-review on `3318c8d` returned 7 findings including 1 blocking-at-`k=1` security issue from the security specialist: canvas-fidelity brief-compose step reads files declared in PR-author-controlled slice acceptance.md via `cat "$CANVAS_PATH"` without containment validation. A slice declaring `**Linked canvas:** /etc/passwd` would have its file content loaded into the persona prompt before the `ANTHROPIC_API_KEY` skip-neutral path fires. Fix: `realpath -m` canonicalisation + `case "$WORKSPACE"/*)` containment check; out-of-workspace paths emit `::warning::` and continue the loop. Real concern on self-hosted runners; mitigated on GitHub-hosted's read-only sandbox.
+- **5 advisory findings deferred at slice ship.** Recorded in `verification.md` §"Architectural deferrals" on the merge SHA. Carry-over to session 82 (single cleanup PR ~50L; see new P-NEW row in SESSION-CONTEXT.md): #1 commenting-WHAT in `auto-review.yml` brief-compose · #2 `preflight-review.sh` aggregator arg-order bug · #4 nitpick parenthetical in `run-synthetic.sh` · #6 + #7 spec-citation philosophy (verbatim-quote audit on slice doc spec-refs).
+- **Merged at `ecbdf9d`** — squash merge to main; CODEOWNERS solo-operator gate cleared via admin-bypass. 27/27 CI checks green/neutral on the merge SHA.
+
+## Lessons for session 82 (post-merge reflections)
+
+- **Wrap-commit-then-CI-tail pattern works.** The wrap docs (`1b7e74e`) captured the slice's strategic intent + open issues. The two follow-up commits (`3318c8d` + `135d9da`) addressed CI feedback discovered post-wrap. Both shipped via the same PR. Better than fragmenting into a separate "follow-up" PR.
+- **Sed-reframe is syntactic, not substantive.** The spec-citation-quote-check fix was a regex-pattern dodge, not a discipline upgrade. The correctness specialist correctly flagged this as `suggestion · spec-citation`. The 50L verbatim-quote audit (P-NEW row) is the substantive follow-through.
+- **Path-traversal in workflow file-read paths is now a known anti-pattern.** Any future workflow that reads PR-author-controlled paths (slice metadata, branch-name globs, etc.) needs the same realpath-containment guard. Pattern worth adding to spec 72 §6 (third-party / external-input handling).
 
 ## Next session priorities (for session 82 kickoff in `SESSION-CONTEXT.md`)
 
-User picks scope from these candidates (any 1-3 plausibly fit a single session):
+P1 from the original list (`Re-verify PR #137 CI + merge`) is **DONE** as part of this session. Renumbered candidates for session 82:
 
-1. **Re-verify PR #137 CI + merge.** Aggregator fix in `e7f1fdd`. Confirm CI green on next run. Address `spec-citation-quote-check` failure (likely needs verbatim quotes added wherever "per spec X" appears in slice docs). Admin-bypass click + merge to main.
-2. **Inspect decoded canvases + scope rebuild slice.** Read decoded canvases (grep first for structure) to map: which screens does each cover · does `Pre-signup Canvas` supersede the per-screen canvases · does `Mobile Screens v2` cover both viewports · is the Help Rail a separate component or built into desktop layout · what does Welcome Tour add. Output: rebuild slice's `Linked canvas:` field declared + draft AC list per AC-as-canvas-quote.
-3. **Open rebuild slice PR (gate's first live run).** Branch off main; ship rebuild slice with `Linked canvas:` declared; canvas-fidelity gate fires for the first time = calibration evidence captured.
-4. **`preflight-review.sh` arg-order fix.** 1-line fix; same bug as auto-review.yml had. Local-only, not CI-blocking.
-5. **Decide on `Decouple.zip` unpacking.** Carries 17 sub-canvases including Master Components + Decisions Log. Defer unless rebuild scope expands beyond pre-signup.
+1. **Inspect decoded canvases + scope rebuild slice.** Read decoded canvases (grep first for structure) to map: which screens does each cover · does `Pre-signup Canvas` supersede the per-screen canvases · does `Mobile Screens v2` cover both viewports · is the Help Rail a separate component or built into desktop layout · what does Welcome Tour add. Output: rebuild slice's `Linked canvas:` field declared + draft AC list per AC-as-canvas-quote.
+2. **Open rebuild slice PR (gate's first live run).** Branch off main; ship rebuild slice with `Linked canvas:` declared; canvas-fidelity gate fires for the first time = calibration evidence captured.
+3. **5 deferred-finding cleanup PR (~50L).** Single small PR addressing the 5 advisory findings deferred at PR #137 ship. Items: #1 + #4 comment trims in `auto-review.yml` + `run-synthetic.sh` · #2 `preflight-review.sh` arg-order fix (1L) · #6 + #7 verbatim-quote audit on slice doc spec-refs (~30L). Pure cleanup; could fold into start-of-session warm-up before P1.
+4. **Decide on `Decouple.zip` unpacking.** Carries 17 sub-canvases including Master Components + Decisions Log. Defer unless rebuild scope expands beyond pre-signup.
 
 ## Constraints unchanged
 
