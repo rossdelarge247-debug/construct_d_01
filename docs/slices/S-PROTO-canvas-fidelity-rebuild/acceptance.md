@@ -12,10 +12,10 @@ Scope: O2-O6 fidelity rebuild only. O7 + O8 + Welcome Tour + Mobile/Desktop resp
 
 ## Pre-flight notes
 
-- **Slice category:** prototype (path-default per spec 76 §1: *"`src/app/dev/proto/<literal-slug>/**` where `<literal-slug>` is a directory whose name does NOT begin with `[`"*); explicit override declared above for clarity. Canvas-fidelity gate fires conditionally on `Linked canvas:` field presence per CLAUDE.md §"Hard controls" canvas-fidelity row.
+- **Slice category:** prototype (spec 76 §1 path-default for `src/app/dev/proto/<literal-slug>/**`; declared explicitly above for clarity). Canvas-fidelity gate fires conditionally on `Linked canvas:` field presence — see CLAUDE.md §"Hard controls" canvas-fidelity row.
 - **Slice size pre-flight:** acceptance ~180L · verification + security + test-plan ~150L combined · impl ~400-500L (ScreenShell.tsx + SubQuestionCard.tsx + ProgressChip.tsx → ProgressPill.tsx + per-screen copy resolver structured-title support) · est total ~700-800L.
 - **Adversarial review budget:** acceptance.md targeted ≤200L (under spec 72b's sub-spawn cap).
-- **TDD-applicable surface:** visual-treatment changes per CLAUDE.md §"Engineering conventions": *"Not mandatory for pure-visual UI (visual regression covers that), but preferred wherever state or branching logic exists."* Structured-title shape introduces a TitleShape type — unit-test the type's parser/renderer. Visual fixes themselves verified via preview-deploy 6-dim rubric per spec 72a.
+- **TDD-applicable surface:** visual-treatment changes are not strictly TDD-tractable (CLAUDE.md §"Engineering conventions" §"TDD where tractable" exempts pure-visual UI; visual regression covers it). Structured-title shape introduces a `TitleShape` type — unit-test the type's parser/renderer. Visual fixes themselves verified via the spec 72a preview-deploy 6-dim rubric.
 - **Test-pain audit (spec 72d §3):** structured-title shape is a new logic seam; mock-count target ≤2 per unit test.
 - **Architectural-smell awareness:** ScreenShell title-prop shape change risks prop sprawl. Pre-empted: define a single `TitleShape` discriminated union (`{kind: 'plain', text} | {kind: 'split', bold, accent, period}`) that the copy resolver supplies; ScreenShell switches on `kind`.
 
@@ -124,11 +124,11 @@ Per CLAUDE.md §"Engineering conventions" §"Definition of Done":
 1. All 4 ACs met with evidence per AC in `verification.md`.
 2. Tests written + passing: structured-title `TitleShape` type tested at `__tests__/`; visual regression covers fixed surfaces; test-pain audit clear (≤2 mocks per unit test).
 3. Adversarial review done; multi-agent auto-review verdict target: `approve` / `nit-only`. Canvas-fidelity persona's first live exercise — surprises expected per kickoff DoD note ("tune the persona prompt before merge if false-positive rate is high").
-4. Preview-deploy verified in-browser (6-dim per spec 72a: golden path · edge cases · `prefers-reduced-motion` · keyboard-only · mobile viewport · screen-reader). Each calibration finding visually resolved as confirmed by side-by-side comparison with Pre-signup Canvas O2 section.
+4. Preview-deploy verified in-browser against the spec 72a 6-dim rubric: golden path · edge cases · `prefers-reduced-motion` · keyboard-only · mobile viewport · screen-reader. Each calibration finding visually resolved as confirmed by side-by-side comparison with Pre-signup Canvas O2 section.
 5. No regression in adjacent slices: O1 stage-router (still wired); SubQuestionCard not breaking elsewhere if used in O3-O6.
 6. Open 68f/g entries: N/A for this slice.
 
-Plus 14-item security checklist in spec 72 §11 — short-form for `category: prototype` per spec 76 §3 (items 1, 8, 12, 14 only). See `security.md`.
+Plus 14-item security checklist in spec 72 §11 — short-form for `category: prototype` slices (spec 76 §3 calibration: items 1, 8, 12, 14 only). See `security.md`.
 
 ## Status
 

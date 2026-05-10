@@ -12,7 +12,7 @@ Visual-treatment fidelity work; pure-visual changes are not strictly TDD-tractab
 | Copy resolver structured-title support | Unit | `src/app/dev/proto/pre-signup-interview/copy/__tests__/copy-resolver.test.ts` | O2-O6 copy fixtures w/ structured shape |
 | ScreenShell render integration | RTL | `src/app/dev/proto/pre-signup-interview/components/__tests__/ScreenShell.integration.test.tsx` | Full screen render with title shape + back-button + step pill |
 | ProgressPill geometry | Unit | `src/app/dev/proto/pre-signup-interview/components/__tests__/ProgressPill.test.tsx` | Width-fill computation across (current, total) cases |
-| SubQuestionCard label serif | Snapshot/visual | preview-deploy 6-dim per spec 72a | Visual diff against canvas reference |
+| SubQuestionCard label serif | Snapshot/visual | preview-deploy 6-dim (spec 72a rubric) | Visual diff against canvas reference |
 | Header chrome (back-button + divider) | RTL + visual | `ScreenShell.integration.test.tsx` + preview-deploy | Tab-order tested in RTL; visual treatment via preview-deploy |
 
 ## Test-pain audit (spec 72d §3)

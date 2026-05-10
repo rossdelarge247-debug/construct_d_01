@@ -1,6 +1,6 @@
 # S-PROTO-canvas-fidelity-rebuild · security
 
-**Category:** prototype (path-default per spec 76 §1; declared explicitly in `acceptance.md`)
+**Category:** prototype (spec 76 §1 path-default; declared explicitly in `acceptance.md`)
 
 **Data-tier reference:** spec 72 §1 (T0 Public · T1 Functional · T2 Personal · T3 Financial · T4 Safeguarding · T5 Legal)
 
@@ -31,7 +31,7 @@ Per CLAUDE.md §"Slice categories" + spec 76 §3 §3.5: prototype slices run the
 
 ## Items intentionally not assessed (prototype short-form)
 
-Items 2-7, 9-11, 13 from spec 72 §11 do not apply to this slice per spec 76 §3 prototype calibration:
+Items 2-7, 9-11, 13 from spec 72 §11 do not apply to this slice under the spec 76 §3 prototype calibration:
 - Items 2-7 (env vars · auth/session · RLS · logging · dev/prod boundary · third-party): no env var · no session · no DB · no logging · same `/dev/proto/*` boundary · no third-party.
 - Items 9-11, 13 (rate limit · safeguarding · audit log · pen-test): N/A for static-data dev-mode UI.
 
