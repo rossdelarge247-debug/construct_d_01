@@ -13,8 +13,30 @@ export type PartnerFinanceKnowledge =
   | 'partially-known'
   | 'unknown';
 
-export type Priority = 'children-stability' | 'family-home' | 'finances-fair' | 'speed' | 'cost' | 'amicable';
-export type Worry = 'partner-disclosure' | 'court' | 'cost' | 'time' | 'safety' | 'children-impact';
+export type Priority =
+  | 'fair-split'
+  | 'keep-home'
+  | 'protect-pension'
+  | 'children-stability'
+  | 'clean-break'
+  | 'speed'
+  | 'low-cost'
+  | 'ongoing-support';
+
+export type Worry =
+  | 'enough-to-live'
+  | 'hidden-assets'
+  | 'losing-pension'
+  | 'mortgage-alone'
+  | 'process-cost'
+  | 'emotional-toll'
+  | 'ex-cooperation'
+  | 'fairness-unknown';
+
+export interface WhatMattersAnswers {
+  priorities?: ReadonlyArray<Priority>;
+  worries?: ReadonlyArray<Worry>;
+}
 
 export type RelationshipStatus = 'married' | 'civil-partnership' | 'cohabiting' | 'other';
 export type LivingTogether = 'yes' | 'no' | 'complicated';
@@ -59,11 +81,10 @@ export interface Answers {
   exAndSafety?: ExAndSafetyAnswers;
   employment?: EmploymentAnswers;
   partnerFinances?: PartnerFinancesAnswers;
+  whatMatters?: WhatMattersAnswers;
   livingArrangement?: LivingArrangement;
   children?: ChildrenStatus;
   relationship?: RelationshipDynamic;
-  priorities?: ReadonlyArray<Priority>;
-  worries?: ReadonlyArray<Worry>;
 }
 
 export interface PlanContent {
