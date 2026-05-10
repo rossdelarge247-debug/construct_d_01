@@ -51,13 +51,20 @@
 
 set -euo pipefail
 
-readonly DIMENSIONS=(security correctness style)
+readonly DEFAULT_DIMENSIONS=(security correctness style)
+DIMENSIONS=("${DEFAULT_DIMENSIONS[@]}")
 
 usage() {
   cat <<EOF >&2
-usage: $0 aggregate <envelopes-dir> [--differential --prior-findings <path>]
+usage: $0 aggregate <envelopes-dir> [--dimensions <comma-separated>] [--differential --prior-findings <path>]
 
   aggregate <envelopes-dir>          dedupe + verdict from per-specialist envelopes
+  --dimensions <list>                comma-separated dimension list to expect
+                                     (default: security,correctness,style; canvas-fidelity
+                                     and prototype-readiness are recognised when
+                                     supplied — pass explicitly when running 4-dim
+                                     prototype-with-canvas review or substituted
+                                     prototype-readiness review)
   --differential                     annotate findings as was_in_prior + emit
                                      prior_findings_resolved + token_metrics
   --prior-findings <path>            JSON-array file of prior-round findings
@@ -89,6 +96,20 @@ case "$SUBCMD" in
         --prior-findings)
           [ $# -ge 2 ] || usage
           PRIOR_FINDINGS_PATH="$2"
+          shift 2
+          ;;
+        --dimensions)
+          [ $# -ge 2 ] || usage
+          IFS=',' read -ra DIMENSIONS <<< "$2"
+          for D in "${DIMENSIONS[@]}"; do
+            case "$D" in
+              security|correctness|style|prototype-readiness|canvas-fidelity) ;;
+              *)
+                printf 'spawn-multi-reviewer.sh: invalid dimension: %s (expected one of: security correctness style prototype-readiness canvas-fidelity)\n' "$D" >&2
+                exit 2
+                ;;
+            esac
+          done
           shift 2
           ;;
         *)

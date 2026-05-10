@@ -34,7 +34,24 @@ fi
 BRANCH=$(git rev-parse --abbrev-ref HEAD)
 SLICE_AC=$(scripts/auto-review-slice-resolve.sh "$BRANCH" "" 2>/dev/null || true)
 
-for DIM in security correctness style; do
+# Category-aware dimension list (mirrors auto-review.yml). Prototype slices
+# substitute prototype-readiness for correctness per spec 76 §3.
+# Canvas-fidelity (4th dimension) is CI-only — local preflight stays 3-dim
+# because canvas content loading is wired in auto-review.yml's brief
+# composition, not duplicated here.
+CATEGORY="production"
+if [ -n "${SLICE_AC:-}" ] && [ -f "$SLICE_AC" ]; then
+  OVERRIDE=$(grep -E '^\*\*Category:\*\*[[:space:]]+(prototype|production|infrastructure)$' "$SLICE_AC" | head -1 || true)
+  if [ -n "$OVERRIDE" ]; then
+    CATEGORY=$(printf '%s' "$OVERRIDE" | sed -E 's/^\*\*Category:\*\*[[:space:]]+//; s/[[:space:]]*$//')
+  fi
+fi
+case "$CATEGORY" in
+  prototype) DIMS=(security prototype-readiness style) ;;
+  *)         DIMS=(security correctness style) ;;
+esac
+
+for DIM in "${DIMS[@]}"; do
   NONCE=$(openssl rand -hex 16)
   {
     cat ".claude/agents/reviewer-${DIM}.md"
@@ -55,9 +72,9 @@ for DIM in security correctness style; do
   } > "$PREFLIGHT_DIR/briefs/${DIM}.txt"
 done
 
-echo "preflight: spawning 3 specialists in parallel..." >&2
+echo "preflight: spawning ${#DIMS[@]} specialists in parallel ($CATEGORY category)..." >&2
 
-for DIM in security correctness style; do
+for DIM in "${DIMS[@]}"; do
   (
     set +e
     npx -y @anthropic-ai/claude-code@2.1.126 -p --output-format=json \
@@ -67,7 +84,8 @@ for DIM in security correctness style; do
 done
 wait
 
-AGGREGATE_JSON=$(scripts/spawn-multi-reviewer.sh aggregate "$PREFLIGHT_DIR/envelopes") || {
+DIMS_CSV=$(IFS=,; echo "${DIMS[*]}")
+AGGREGATE_JSON=$(scripts/spawn-multi-reviewer.sh aggregate --dimensions "$DIMS_CSV" "$PREFLIGHT_DIR/envelopes") || {
   echo "preflight: aggregator failed" >&2
   exit 1
 }

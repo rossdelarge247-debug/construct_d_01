@@ -27,9 +27,9 @@ printf '%s' "$INPUT" | jq -e '(keys | sort) == ["findings", "specialist", "summa
 
 printf '%s' "$INPUT" | jq -e '
   .specialist as $s |
-  $s | (. == "reviewer-security" or . == "reviewer-correctness" or . == "reviewer-style")
+  $s | (. == "reviewer-security" or . == "reviewer-correctness" or . == "reviewer-style" or . == "reviewer-prototype-readiness" or . == "reviewer-canvas-fidelity")
 ' >/dev/null \
-  || fail "specialist must be one of: reviewer-security, reviewer-correctness, reviewer-style"
+  || fail "specialist must be one of: reviewer-security, reviewer-correctness, reviewer-style, reviewer-prototype-readiness, reviewer-canvas-fidelity"
 
 printf '%s' "$INPUT" | jq -e '.summary | type == "string" and length > 0' >/dev/null \
   || fail "summary must be a non-empty string"
