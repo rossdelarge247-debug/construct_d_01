@@ -180,7 +180,16 @@ jobs:
               fi
               if [ "$DIM" = "canvas-fidelity" ] && [ -n "$CANVAS_PATHS" ]; then
                 printf '<linked-canvas-%s>\n' "$NONCE"
+                WORKSPACE=$(pwd)
                 for CANVAS_PATH in $CANVAS_PATHS; do
+                  # Path-traversal guard: slice acceptance.md is PR-author-
+                  # controlled, so canvas paths must canonicalise inside the
+                  # workspace before `cat` reads file content into the prompt.
+                  CANVAS_REAL=$(realpath -m "$CANVAS_PATH" 2>/dev/null || echo "")
+                  case "$CANVAS_REAL" in
+                    "$WORKSPACE"/*) ;;
+                    *) echo "::warning::Skipping out-of-workspace canvas path: $CANVAS_PATH" >&2; continue ;;
+                  esac
                   if [ -f "$CANVAS_PATH" ]; then
                     printf -- '--- BEGIN %s %s ---\n' "$CANVAS_PATH" "$NONCE"
                     cat "$CANVAS_PATH"
