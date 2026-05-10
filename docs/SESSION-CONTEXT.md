@@ -1,103 +1,98 @@
-# Session 81 Pre-flight Context Block (carrying session 80 wrap delta)
+# Session 82 Pre-flight Context Block (carrying session 81 wrap delta)
 
-## Session 80 wrap delta — read this first
+## Session 81 wrap delta — read this first
 
-Session 80 shipped the canvas-canon refactor of `src/app/dev/proto/pre-signup-interview/`. PR #135 merged to main as squash `94007b6`. 20 atomic commits across F1 token extension + ScreenShell rebuild + 4-state BgToggle + per-screen reconstruction (O1 audit + O2-O6 full rebuild + O7+O8 polished placeholders) + auto-review nit cycles + a latent prototype-readiness bug fix in `scripts/auto-review-filter-prior.sh`.
+Session 81 shipped the canvas-fidelity gate as PR #137 (open at wrap, awaiting auto-review re-run after a 1-line aggregator arg-order fix). 10 atomic commits across persona authoring + workflow wire-up + P6 script cleanup + synthetic regression fixture + slice scaffolding + CLAUDE.md/spec-72c amendments + 5 new bundled-HTML canvases (decoded into readable siblings) + 1 in-flight bug fix on the aggregator arg ordering.
 
-**Final state on main:**
-- F1 design system extended with 6 new tokens (violet · magenta · 4 surface gradients); CSS↔TS parity test 75/75 GREEN
-- 5 nested state slices on Answers: situation · exAndSafety · employment · partnerFinances · whatMatters; flat fields fully pruned
-- 4 atom families: RadioCard · RadioChips · CheckChips · SubQuestionCard; inline TallRow in O5
-- Auto-review verdict on merged commit: success (approve) after 4 review rounds
-- All 25 CI checks GREEN at merge
-- Full vitest suite: 402/402 GREEN
+**Final state on the PR branch (`claude/canvas-refactor-session-81-I4X8l` @ `e7f1fdd`):**
+- New specialist persona: `.claude/agents/reviewer-canvas-fidelity.md` (146L, 6 categories, conditional invocation when slice has `Linked canvas:` field)
+- `auto-review.yml` extended: `Linked canvas:` field detection · 4-dim matrix routing · per-canvas brief composition · `--dimensions <csv>` flag passed to aggregator
+- `spawn-multi-reviewer.sh`: `--dimensions` flag with default fallback
+- 3 supporting P6 script extensions (`validate-finding-envelope.sh` · `auto-review-filter-prior.sh` · `preflight-review.sh` category-aware)
+- Synthetic fixture pair: `tests/personas/synthetic/canvas-fidelity.{diff,canvas}` + `expected/canvas-fidelity.json` + `run-synthetic.sh` extended
+- Slice docs: `docs/slices/S-INFRA-canvas-fidelity-gate/{acceptance,verification,security,test-plan,calibration-report}.md`
+- CLAUDE.md §"Visual direction" extended with AC-as-canvas-quote discipline + Linked canvas field convention; §"Hard controls" canvas-fidelity row added
+- Spec 72c §4 personas table extended to 5 rows; §7 synthetic-fixtures section extended
+- 5 new bundled-HTML canvases decoded: `Pre-signup Canvas` (5133L) · `Desktop Help Rail` (2235L) · `Mobile Screens v2` (5233L) · `Landing Page` (2026L) · `Welcome Tour` (1497L); two root files moved into slug subdirectories
 
-Read `docs/HANDOFF-SESSION-80.md` for full retro.
+**PR #137 status at wrap:**
+- Vercel preview READY · Lint · Typecheck · Tests · audit · build · synthetic-fixtures · golden-replay · all GREEN
+- 3 individual specialists (security · correctness · style) all GREEN
+- **Aggregator failed initially** — arg-order bug in `auto-review.yml` invocation (`--dimensions` placed before positional `<dir>` but parser expects `<dir>` first). Fixed in `e7f1fdd`; CI will re-fire on push
+- **`spec-citation-quote-check` failure** — UNRESOLVED at wrap. Workflow checks "per spec X §Y" claims have a verbatim quote in the same context; my CLAUDE.md / slice doc edits have many "per spec" references. Investigation deferred to session 82 turn 1.
 
-## Session 81 priorities — user picks scope
+Read `docs/HANDOFF-SESSION-81.md` for full retro.
 
-Six candidates in the pipeline. Sessions typically take 1-3.
+## Session 82 priorities — user picks scope
+
+Five candidates in the pipeline. Sessions typically take 1-3.
 
 | # | Priority | Scope | Effort | Blocked? |
 |---|---|---|---|---|
-| 1 | **O7 reconstruction** (Your plan) | Long-form plan render with timeline + conventional-path comparison + personalisation. Strategic apex per spec 42 — value-prop crystallisation moment. Assets preserved at `docs/design-source/pre-signup-interview/jsx/o7-{page,components,plan-page,plan-components}.jsx` + `o7-your-plan-expressive{,-source}.html`. | Heavy (~300-500L est.) | No |
-| 2 | **O8 reconstruction** (What's next) | 4-route picker. Canvas authors instructed "do not lift from existing draft" — likely needs canon authors to lock framing first. | Medium (~150L est.) | Yes (canon authors) |
-| 3 | **Inline-style proto consumption refactor** | Proto-wide change. Migrate all components from inline `style={{}}` consuming `tokens.color.*` to CSS-class consuming `var(--ds-color-*)` per F1 design intent at `tokens.ts` L7-9. Affects 12+ atoms (RadioCard · RadioChips · CheckChips · SubQuestionCard · ScreenShell · BackgroundShell · BgToggle · JourneyTimeline · PlanSection · PrimaryCTA · ProgressChip · inline TallRow in O5). | Heavy proto-wide (~400-600L est.) | No |
-| 4 | **Per-screen bg defaults** | Canvas-overview L177-179: O2-O6 use canvasChrome, O1+O7+O8 use expressive. Currently global default is expressive with BgToggle override. Implementation: route BackgroundShell mode based on current screen. | Light (~50L est.) | No |
-| 5 | **Stage-tone copy differentiation** per spec 65 §Principle 6 | Populate per-stage variants in `lib/copy/o{1-6}.ts` when canon authors specify per-stage tone. Resolver shape ships; just populate. | Medium per screen | Yes (canon authors) |
-| 6 | **Auto-review script cleanup** | Extend `preflight-review.sh` · `validate-finding-envelope.sh` · `spawn-multi-reviewer.sh DIMENSIONS` to support `prototype-readiness` alongside production dimensions. Control-plane PR (`control-change` label). | Light (~30L est.) | No |
+| 1 | **Re-verify PR #137 CI + merge** | Aggregator fix is in `e7f1fdd`. Confirm CI green on next run. Address `spec-citation-quote-check` failure (likely needs verbatim quotes added wherever "per spec X" appears in slice docs). Admin-bypass click + merge to main. | Light (~30L if quote-check needs a few additions) | No |
+| 2 | **Inspect decoded canvases + scope rebuild slice** | Read decoded canvases to map: which screens does each cover · does `Pre-signup Canvas` supersede the per-screen canvases at `pre-signup-interview/jsx/o{2-6}-frames.jsx` · does `Mobile Screens v2` cover both mobile + desktop · is the Help Rail a separate component or built into the desktop layout · what does Welcome Tour add. Output: rebuild slice's `Linked canvas:` field + draft AC list per AC-as-canvas-quote. | Medium (read-heavy; ~100L of slice scaffolding output) | Yes — wait for #137 merge so rebuild slice branches off main with the gate active |
+| 3 | **Open rebuild slice PR (gate's first live run)** | Branch off main; ship rebuild slice with `Linked canvas:` declared; canvas-fidelity gate fires for the first time = calibration evidence captured in PR's auto-review verdict. | Heavy (~400-600L impl + slice docs) | Yes — depends on P1 + P2 |
+| 4 | **`preflight-review.sh` arg-order fix** | Same bug as auto-review.yml had — `--dimensions` placed before positional. Local-only script (not CI-blocking). 1-line fix. | Trivial | No |
+| 5 | **Decide on `Decouple.zip` unpacking** | The `marketing-landing/Decouple.zip` carries 17 sub-canvases including Master Components (design system) + Decisions Log (rationale). Decision deferred at session 81 — leave packed unless rebuild scope expands beyond pre-signup. | Light if needed | No |
 
-**Recommended pairing:** P3 + P6 (both unblocked, neither needs canon-author input, complementary control-plane improvements). Or P1 alone (heavy, single-focus, ships the strategic apex).
+**Recommended sequence:** P1 (~30 min) → P2 (read-heavy, prep for P3) → P3 (the heavy slice). P4 + P5 fold in opportunistically.
 
-## Authoritative reading order at session 81 start
+## Authoritative reading order at session 82 start
 
 1. This file (you are here).
-2. `docs/HANDOFF-SESSION-80.md` (last session's retro).
-3. `docs/slices/S-PROTO-pre-signup-interview/` — `acceptance.md` (post session-80 amendments) + `verification.md` (architectural deferrals + preview-deploy 6-dim populated).
-4. **Spec 65** `docs/workspace-spec/65-pre-signup-interview-reconciled.md` (190L) — already ingested session 80 but worth re-skimming for any session 81 priority.
-5. **Spec 76** `docs/workspace-spec/76-prototype-mode-rigour.md` §3 — prototype-category gate calibration (still in calibration row 2; row 3 verdict pending).
-6. **Spec 72c** `docs/workspace-spec/72c-multi-agent-review-framework.md` if working on P6 (auto-review script cleanup).
+2. `docs/HANDOFF-SESSION-81.md` (last session's retro).
+3. `docs/slices/S-INFRA-canvas-fidelity-gate/calibration-report.md` (durable record of user feedback feeding the rebuild AC list).
+4. PR #137 check-runs status (re-verify CI greens; address `spec-citation-quote-check` if still failing).
+5. **Decoded canvases** (when scoping rebuild slice): grep first for `<title>`, `<h1>`, `<h2>` to map structure; targeted reads only (each canvas 1500-5200L; full reads exceed 300L cap).
 
-## Session 81 kickoff prompt (paste-ready)
+## Session 82 kickoff prompt (paste-ready)
 
 ```
-Kick off session 81.
+Kick off session 82.
 
-Pick scope from SESSION-CONTEXT.md "Session 81 priorities — user picks scope"
-(P1-P6 candidates).
+Read this file (SESSION-CONTEXT.md) first; check PR #137 CI state.
 
 Turn-0 verification:
 - SessionStart hook surfaces live branch state.
-- git log --oneline origin/main | head -3 — confirm 94007b6 is the
-  session-80 squash + the wrap commit on top of it.
-- Branch convention: harness-suffixed; if a non-suffixed canonical exists,
-  follow CLAUDE.md §"Branch-resume check".
+- gh / mcp__github__pull_request_read get_check_runs on PR #137 to
+  confirm: aggregator fix worked, spec-citation-quote-check status.
+- Branch convention: harness-suffixed; if non-suffixed canonical
+  exists, follow CLAUDE.md §"Branch-resume check".
 
 Read at session start (Tier 2 + Tier 3, in order):
 1. docs/SESSION-CONTEXT.md (this file).
-2. docs/HANDOFF-SESSION-80.md.
-3. docs/slices/S-PROTO-pre-signup-interview/acceptance.md +
-   verification.md (post session-80 state — architectural deferrals
-   listed at verification.md §"Architectural deferrals").
-4. Specs per chosen priority (see "Authoritative reading order" above).
+2. docs/HANDOFF-SESSION-81.md.
+3. docs/slices/S-INFRA-canvas-fidelity-gate/calibration-report.md.
 
 Definition of Done for the chosen priority:
-- All ACs met with evidence per AC in verification.md (new slice if
-  P3 or P6 — those aren't covered by the existing pre-signup slice's
-  acceptance.md).
-- Tests written + passing where tractable (TDD-guard skips for
-  /dev/proto/<literal>/** but applies to scripts/* and src/app/**).
-- Adversarial review done (auto-review.yml fires on PR open;
-  request-changes/nit-only is advisory; block / parse-failed / pipeline-
-  crash gate the merge).
+- All ACs met with evidence per AC in verification.md.
+- Tests written + passing where tractable.
+- Auto-review verdict: approve / nit-only on the new PR.
 - Preview-deploy verified in-browser if UI work.
-- security.md item 12 stays Pending at PR open; closed Done post-verdict
-  (per session-80 PR #131-F2 nit pattern).
+- security.md item 12 stays Pending at PR open; closes Done post-verdict.
 ```
 
 ## Product positioning (preserve across sessions)
 
-Decouple is the **complete settlement workspace for separating couples**. NOT a financial disclosure tool. NOT a Form E alternative. The unique claim is "the only place where both parties build one evidence-backed, shared picture." Tagline: *"Decouple — the complete picture."*
+Decouple is the **complete settlement workspace for separating couples**. NOT a financial disclosure tool. NOT a Form E alternative. Tagline: *"Decouple — the complete picture."*
 
 ## Stack
 
-Next.js 14 (app router) + TypeScript · Tailwind via CSS variables · S-F1 token system at `src/styles/tokens.ts` (75 entries post session 80) · Tink for bank connect · Anthropic SDK for AI extraction · Vercel previews per branch, production at `construct-dev.vercel.app`.
+Next.js 14 (app router) + TypeScript · Tailwind via CSS variables · S-F1 token system at `src/styles/tokens.ts` (75 entries) · Tink for bank connect · Anthropic SDK for AI extraction · Vercel previews per branch, production at `construct-dev.vercel.app`.
 
 ## Branch
 
-Session 81 branch: harness-suffixed (e.g. `claude/session-81-…`). Confirm at turn-0 via SessionStart hook.
+Session 82 branch: harness-suffixed. If session 82 starts before PR #137 merges, work continues on `claude/canvas-refactor-session-81-I4X8l`. After merge, new branch off main.
 
 ## Negative constraints (preserve)
 
-#1-#39 from prior sessions. No new constraints session 80.
-
-**Future-add candidate** (logged session 78, dormant since): "After decoding any bundled-HTML canvas, verify decoded sibling carries layout-bearing JSX (≈1000+ lines + 50+ `<div>` elements)." Not promoted in session 80 because session 80's canvases shipped in plain-HTML+JSX format (no decoder needed). Re-evaluate when next bundled-format canvas arrives.
+#1-#39 from prior sessions. No new constraints session 81.
 
 ## Scope ceiling
 
-Session 81 is screen reconstruction (P1) OR proto-wide refactor (P3) OR control-plane cleanup (P6). Out of scope unless explicitly added: spec changes · CLAUDE.md constraint additions · auto-review persona retain/drop verdicts (calibration cohort still at row 2 — pre-signup-interview was row 2; row 3 verdict pending after the next prototype slice).
+Session 82 is most likely P1 + P2 + start of P3 (rebuild scoping inspection, then begin AC drafting). Out of scope unless explicitly added: the public-pages nav-bar reconciliation (separate concern flagged session 81 turn 3) · `Decouple.zip` unpacking · spec 65 amendments to capture quantitative profiling data.
 
 ## Current pre-signup prototype URL
 
 - Production (after session-80 squash deployed): `https://construct-dev.vercel.app/dev/proto/pre-signup-interview`
-- Per-PR preview: surfaced as Vercel comment on each PR; pattern `https://construct-dev-git-claude-{hash}-rossdelarge247-debugs-projects.vercel.app/dev/proto/pre-signup-interview`
+- Per-PR preview: surfaced as Vercel comment on each PR.
