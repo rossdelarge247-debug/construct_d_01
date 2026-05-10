@@ -105,6 +105,8 @@ ls docs/design-source/pre-signup-interview/o8-whats-next-expressive.html
 
 Stage-tone copy differentiation per spec 65 §Principle 6 — resolver scaffold ships this slice (per AC-5); per-stage copy differentiation deferred until canon authors specify the per-stage tone treatment. Resolver-shape lets future work edit one function per screen, no screen rewrites required.
 
+Inline-style consumption of design tokens — pre-signup proto components consume F1 tokens via inline `style={{}}` referencing the TS tokens object directly (`tokens.color.ink`, `tokens.font.sans`). This contradicts F1's stated design intent at `src/styles/tokens.ts` L7-9: *"Components style via CSS classes that reference the custom properties (`var(--ds-color-phase-build)` etc), not via inline `style={{}}` everywhere."* Drift is pre-existing (not introduced by this slice) and out-of-scope for this reconstruction. Deferred to next session for systematic refactor across all proto components — addresses the architectural seam without entangling the canvas-canon reconstruction work.
+
 (Other architectural deferrals populate at slice ship if test-pain audit (spec 72d §3) surfaces a seam that doesn't get extracted.)
 
 ## Loveability decisions committed

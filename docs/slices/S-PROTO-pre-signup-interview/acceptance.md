@@ -34,7 +34,7 @@ Re-scoped 10 May 2026 for canvas-canon reconstruction. Steps 1-3 of the 4-step p
   - **O6** (A1·B3·C2): two stacked multi-select cards (priorities + worries, each on own card, same shape as O2), capped at 3 each, "Pick what matters most. There's no wrong answer." soft hint, count-adaptive CTA copy.
 - O1 audit + polish if drift detected against canon style atoms (canvas L545: "Style canon is inherited from O1").
 - Dev-mode in-memory store with nested state shape per canvas convention `preSignup.{situation, exAndSafety, employment, partnerFinances, whatMatters, plan}`; `toFlat()` selector projects to spec 65 flat-field bridge format.
-- F1 token extension: add canvas-canon values (`color.accent.violet`, `color.accent.magenta`, `color.surface.gradient.{expressive,canvasChrome,o7Surface,standalone}`, `font.serif`, `font.mono`) to `src/styles/tokens.ts` + parity-mirror in `src/app/globals.css`; CSS↔TS parity test must pass.
+- F1 token extension: add canvas-canon values (`color.accent.violet`, `color.accent.magenta`, `color.surface.gradient.{expressive,canvasChrome,o7Surface,standalone}`) to `src/styles/tokens.ts` + parity-mirror in `src/app/globals.css`; CSS↔TS parity test must pass. (Note: `font.serif` + `font.mono` already exist in F1 at `tokens.ts` L40-41 and `globals.css` L149-150; pre-signup is the first consumer — see "Reused from S-F1" table below.)
 - Stage-tone resolver scaffold per screen at `src/app/dev/proto/pre-signup-interview/lib/copy/o{N}.ts` exporting `getCopy(stage)` — today returns identical strings across stages; future principle-6 expansion edits one function per screen, no screen rewrites.
 - 4-state BgToggle (cycle or dropdown): `expressive` (default) · `canvasChrome` · `o7Surface` · `standalone`, persisting via URL query param `?bg={value}`.
 - Mobile-first 375×667 layouts; desktop = same frame at 1.6× inside browser chrome (canvas authorial decision: "no separate desktop layout").
@@ -60,6 +60,8 @@ Re-scoped 10 May 2026 for canvas-canon reconstruction. Steps 1-3 of the 4-step p
 | `#E5E3DC` | `color.border` | Card outlines, dividers |
 | `#FFFFFF` | `color.surface.panel` | Card / input backgrounds |
 | `#F5F5F4` | `color.surface.page` | Plate background, standalone-bg fallback stop |
+| Source Serif Pro family | `font.serif` | H1 headings, display text, italic accents (pre-existing in F1; pre-signup is first consumer) |
+| JetBrains Mono family | `font.mono` | Eyebrow labels (label-xs uppercase), monospace chips (pre-existing in F1; pre-signup is first consumer) |
 
 ### F1 extensions added in this slice
 Rationale for promotion (was scoped out original authoring): the canvas-overview shipped 9 May 2026 is now authoritative locked design canon (CLAUDE.md §Visual direction: *"Canonical source: the Claude AI Design tool outputs"*). The validate-first uncertainty that gated the original out-of-scope ruling has resolved — these are no longer prototype-exploration values, they're the design system.
@@ -68,8 +70,6 @@ Rationale for promotion (was scoped out original authoring): the canvas-overview
 |---|---|---|
 | `#7C3AED` | `color.accent.violet` | Eyebrow labels, primary CTA fill, link emphasis |
 | `#BE185D` | `color.accent.magenta` | Italic-display emphasis (e.g. O7 "opens in its own canvas" treatment) |
-| Source Serif Pro | `font.serif` | H1 headings, display text, italic accents |
-| JetBrains Mono | `font.mono` | Eyebrow labels (label-xs uppercase), monospace chips |
 
 ### F1 surface gradients added in this slice (4 BgToggle options)
 | Gradient option | New F1 token | Source | Query param |
