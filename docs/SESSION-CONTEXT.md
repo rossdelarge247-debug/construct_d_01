@@ -1,75 +1,87 @@
-# Session 82 Pre-flight Context Block (carrying session 81 wrap delta)
+# Session 82 Pre-flight Context Block (carrying session 81 wrap delta + post-merge tail)
 
 ## Session 81 wrap delta — read this first
 
-Session 81 shipped the canvas-fidelity gate as PR #137 (open at wrap, awaiting auto-review re-run after a 1-line aggregator arg-order fix). 10 atomic commits across persona authoring + workflow wire-up + P6 script cleanup + synthetic regression fixture + slice scaffolding + CLAUDE.md/spec-72c amendments + 5 new bundled-HTML canvases (decoded into readable siblings) + 1 in-flight bug fix on the aggregator arg ordering.
+Session 81 shipped `S-INFRA-canvas-fidelity-gate` as PR #137, merged to main at `ecbdf9d`. The slice introduces a 4th specialist persona (`reviewer-canvas-fidelity`) for the multi-agent auto-review harness — fires conditionally on `prototype` slices declaring a `**Linked canvas:**` field — plus AC-as-canvas-quote discipline + 5 new bundled-HTML canvases decoded into readable siblings + path-traversal guard on canvas-path reads + 4 P6 supporting-script extensions + synthetic regression fixture.
 
-**Final state on the PR branch (`claude/canvas-refactor-session-81-I4X8l` @ `e7f1fdd`):**
-- New specialist persona: `.claude/agents/reviewer-canvas-fidelity.md` (146L, 6 categories, conditional invocation when slice has `Linked canvas:` field)
-- `auto-review.yml` extended: `Linked canvas:` field detection · 4-dim matrix routing · per-canvas brief composition · `--dimensions <csv>` flag passed to aggregator
-- `spawn-multi-reviewer.sh`: `--dimensions` flag with default fallback
-- 3 supporting P6 script extensions (`validate-finding-envelope.sh` · `auto-review-filter-prior.sh` · `preflight-review.sh` category-aware)
-- Synthetic fixture pair: `tests/personas/synthetic/canvas-fidelity.{diff,canvas}` + `expected/canvas-fidelity.json` + `run-synthetic.sh` extended
-- Slice docs: `docs/slices/S-INFRA-canvas-fidelity-gate/{acceptance,verification,security,test-plan,calibration-report}.md`
-- CLAUDE.md §"Visual direction" extended with AC-as-canvas-quote discipline + Linked canvas field convention; §"Hard controls" canvas-fidelity row added
+**Delivery summary:**
+
+- Persona file `.claude/agents/reviewer-canvas-fidelity.md` — 6 categories, default-label/blocking matrix, conditional invocation
+- `auto-review.yml` — `Linked canvas:` field detection + 4-dim matrix routing for prototype-with-canvas slices + per-canvas brief composition + workspace-containment guard on canvas reads (`realpath -m` + `case "$WORKSPACE"/*)`)
+- 4 P6 scripts accept `canvas-fidelity` dimension: `spawn-multi-reviewer.sh` · `preflight-review.sh` · `validate-finding-envelope.sh` · `auto-review-filter-prior.sh`
+- Synthetic-deliberate-injection fixture: `tests/personas/synthetic/canvas-fidelity.{diff,canvas}` + `expected/canvas-fidelity.json` + workflow path-filter extended
+- CLAUDE.md §"Visual direction" AC-as-canvas-quote rule + `Linked canvas:` field convention; §"Hard controls" canvas-fidelity row
 - Spec 72c §4 personas table extended to 5 rows; §7 synthetic-fixtures section extended
-- 5 new bundled-HTML canvases decoded: `Pre-signup Canvas` (5133L) · `Desktop Help Rail` (2235L) · `Mobile Screens v2` (5233L) · `Landing Page` (2026L) · `Welcome Tour` (1497L); two root files moved into slug subdirectories
+- Slice docs: `acceptance.md` · `verification.md` · `security.md` · `test-plan.md` · `calibration-report.md`
+- 5 new bundled-HTML canvases decoded under `docs/design-source/`: `Pre-signup Canvas` (5133L) · `Desktop Help Rail` (2235L) · `Mobile Screens v2` (5233L) · `Landing Page` (2026L) · `Welcome Tour` (1497L)
 
-**PR #137 status at wrap:**
-- Vercel preview READY · Lint · Typecheck · Tests · audit · build · synthetic-fixtures · golden-replay · all GREEN
-- 3 individual specialists (security · correctness · style) all GREEN
-- **Aggregator failed initially** — arg-order bug in `auto-review.yml` invocation (`--dimensions` placed before positional `<dir>` but parser expects `<dir>` first). Fixed in `e7f1fdd`; CI will re-fire on push
-- **`spec-citation-quote-check` failure** — UNRESOLVED at wrap. Workflow checks "per spec X §Y" claims have a verbatim quote in the same context; my CLAUDE.md / slice doc edits have many "per spec" references. Investigation deferred to session 82 turn 1.
+**PR #137 final state:**
+- Merged at `ecbdf9d` via squash merge to main; CODEOWNERS solo-operator admin-bypass gate cleared
+- 27/27 CI checks green/neutral on merge SHA `135d9da`
+- Auto-review verdict: `request-changes` (informational at v3b ship) — 5 advisory findings, 0 blocking. Findings carried over to session 82 as a single cleanup PR (P3 below)
+- Specialist retain/drop signal: **retain all 3** (`security` · `correctness` · `style`) — each surfaced ≥1 actionable finding the main conversation missed; canvas-fidelity persona's first real exercise is the rebuild slice's prototype PR
 
-Read `docs/HANDOFF-SESSION-81.md` for full retro.
+Read `docs/HANDOFF-SESSION-81.md` for the full retro including the post-wrap CI tail (path-traversal fix in `135d9da`).
 
 ## Session 82 priorities — user picks scope
 
-Five candidates in the pipeline. Sessions typically take 1-3.
-
 | # | Priority | Scope | Effort | Blocked? |
 |---|---|---|---|---|
-| 1 | **Re-verify PR #137 CI + merge** | Aggregator fix is in `e7f1fdd`. Confirm CI green on next run. Address `spec-citation-quote-check` failure (likely needs verbatim quotes added wherever "per spec X" appears in slice docs). Admin-bypass click + merge to main. | Light (~30L if quote-check needs a few additions) | No |
-| 2 | **Inspect decoded canvases + scope rebuild slice** | Read decoded canvases to map: which screens does each cover · does `Pre-signup Canvas` supersede the per-screen canvases at `pre-signup-interview/jsx/o{2-6}-frames.jsx` · does `Mobile Screens v2` cover both mobile + desktop · is the Help Rail a separate component or built into the desktop layout · what does Welcome Tour add. Output: rebuild slice's `Linked canvas:` field + draft AC list per AC-as-canvas-quote. | Medium (read-heavy; ~100L of slice scaffolding output) | Yes — wait for #137 merge so rebuild slice branches off main with the gate active |
-| 3 | **Open rebuild slice PR (gate's first live run)** | Branch off main; ship rebuild slice with `Linked canvas:` declared; canvas-fidelity gate fires for the first time = calibration evidence captured in PR's auto-review verdict. | Heavy (~400-600L impl + slice docs) | Yes — depends on P1 + P2 |
-| 4 | **`preflight-review.sh` arg-order fix** | Same bug as auto-review.yml had — `--dimensions` placed before positional. Local-only script (not CI-blocking). 1-line fix. | Trivial | No |
-| 5 | **Decide on `Decouple.zip` unpacking** | The `marketing-landing/Decouple.zip` carries 17 sub-canvases including Master Components (design system) + Decisions Log (rationale). Decision deferred at session 81 — leave packed unless rebuild scope expands beyond pre-signup. | Light if needed | No |
+| 1 | **Inspect decoded canvases + scope rebuild slice** | Read decoded canvases to map: which screens does each cover · does `Pre-signup Canvas` supersede the per-screen canvases at `pre-signup-interview/jsx/o{2-6}-frames.jsx` · does `Mobile Screens v2` cover mobile + desktop · is the Help Rail a separate component or built into the desktop layout · what does Welcome Tour add. Output: rebuild slice's `Linked canvas:` field + draft AC list per AC-as-canvas-quote. | Medium (read-heavy; ~100L of slice scaffolding output) | No |
+| 2 | **Open rebuild slice PR (gate's first live run)** | Branch off main; ship rebuild slice with `Linked canvas:` declared; canvas-fidelity gate fires for the first time = calibration evidence captured in PR's auto-review verdict. | Heavy (~400-600L impl + slice docs) | Yes — depends on P1 |
+| 3 | **5 deferred-finding cleanup PR** | Single small PR addressing the 5 advisory findings deferred at PR #137 ship: #1 + #4 comment trims in `auto-review.yml` + `tests/personas/run-synthetic.sh` · #2 `preflight-review.sh` aggregator arg-order fix (1L) · #6 + #7 verbatim-quote audit on slice doc spec-refs (~30L). | Light (~50L total) | No — could fold into start-of-session warm-up before P1 |
+| 4 | **Decide on `Decouple.zip` unpacking** | The `marketing-landing/Decouple.zip` carries 17 sub-canvases including Master Components (design system) + Decisions Log (rationale). Decision deferred — leave packed unless rebuild scope expands beyond pre-signup. | Light if needed | No |
 
-**Recommended sequence:** P1 (~30 min) → P2 (read-heavy, prep for P3) → P3 (the heavy slice). P4 + P5 fold in opportunistically.
+**Recommended sequence:** P3 (~30 min cleanup warm-up) → P1 (read-heavy, prep for P2) → P2 (the heavy slice). P4 folds in opportunistically.
 
 ## Authoritative reading order at session 82 start
 
 1. This file (you are here).
-2. `docs/HANDOFF-SESSION-81.md` (last session's retro).
+2. `docs/HANDOFF-SESSION-81.md` (last session's retro including post-wrap CI tail).
 3. `docs/slices/S-INFRA-canvas-fidelity-gate/calibration-report.md` (durable record of user feedback feeding the rebuild AC list).
-4. PR #137 check-runs status (re-verify CI greens; address `spec-citation-quote-check` if still failing).
-5. **Decoded canvases** (when scoping rebuild slice): grep first for `<title>`, `<h1>`, `<h2>` to map structure; targeted reads only (each canvas 1500-5200L; full reads exceed 300L cap).
+4. **Decoded canvases** (when scoping rebuild slice): grep first for `<title>`, `<h1>`, `<h2>` to map structure; targeted reads only (each canvas 1500-5200L; full reads exceed 300L cap).
 
 ## Session 82 kickoff prompt (paste-ready)
 
 ```
 Kick off session 82.
 
-Read this file (SESSION-CONTEXT.md) first; check PR #137 CI state.
+Read this file (SESSION-CONTEXT.md) first.
 
 Turn-0 verification:
-- SessionStart hook surfaces live branch state.
-- gh / mcp__github__pull_request_read get_check_runs on PR #137 to
-  confirm: aggregator fix worked, spec-citation-quote-check status.
-- Branch convention: harness-suffixed; if non-suffixed canonical
-  exists, follow CLAUDE.md §"Branch-resume check".
+- SessionStart hook surfaces live branch state (current branch +
+  HEAD vs origin/main + ahead/behind + tree state).
+- Branch convention: harness-suffixed (claude/<scope>-XXXXX). PR #137
+  is merged at ecbdf9d on main; session 82 starts from clean main.
+  If the harness landed you on a different base, follow CLAUDE.md
+  §"Branch-resume check": git fetch origin main → git checkout -B
+  <branch> origin/main.
 
 Read at session start (Tier 2 + Tier 3, in order):
 1. docs/SESSION-CONTEXT.md (this file).
 2. docs/HANDOFF-SESSION-81.md.
 3. docs/slices/S-INFRA-canvas-fidelity-gate/calibration-report.md.
 
+Confirm priority with user. SESSION-CONTEXT recommends sequence
+P3 (cleanup warm-up) → P1 (canvas inspection) → P2 (rebuild slice
+ship). User may pick different scope.
+
 Definition of Done for the chosen priority:
 - All ACs met with evidence per AC in verification.md.
 - Tests written + passing where tractable.
 - Auto-review verdict: approve / nit-only on the new PR.
 - Preview-deploy verified in-browser if UI work.
-- security.md item 12 stays Pending at PR open; closes Done post-verdict.
+- security.md item 12 stays Pending at PR open; closes Done
+  post-verdict.
+
+If P2 (rebuild slice) is the pick: this is the first PR where the
+canvas-fidelity gate fires live. Treat the gate's findings as
+calibration data for the persona's category × default-label/blocking
+matrix. Surprises are expected on first run; tune the persona
+prompt before merge if false-positive rate is high.
+
+If P3 (deferred-finding cleanup) is the pick: see HANDOFF-81 §"Post-
+wrap addendum" for the 5 specific findings. Single PR; ~50L total.
 ```
 
 ## Product positioning (preserve across sessions)
@@ -82,7 +94,7 @@ Next.js 14 (app router) + TypeScript · Tailwind via CSS variables · S-F1 token
 
 ## Branch
 
-Session 82 branch: harness-suffixed. If session 82 starts before PR #137 merges, work continues on `claude/canvas-refactor-session-81-I4X8l`. After merge, new branch off main.
+Session 82 branch: harness-suffixed off clean main (`ecbdf9d`). PR #137 merged; session 81 working branch deletable.
 
 ## Negative constraints (preserve)
 
@@ -90,7 +102,7 @@ Session 82 branch: harness-suffixed. If session 82 starts before PR #137 merges,
 
 ## Scope ceiling
 
-Session 82 is most likely P1 + P2 + start of P3 (rebuild scoping inspection, then begin AC drafting). Out of scope unless explicitly added: the public-pages nav-bar reconciliation (separate concern flagged session 81 turn 3) · `Decouple.zip` unpacking · spec 65 amendments to capture quantitative profiling data.
+Session 82 is most likely P3 (cleanup) + P1 (canvas inspection) + start of P2 (rebuild scoping then begin AC drafting). Out of scope unless explicitly added: the public-pages nav-bar reconciliation (separate concern flagged session 81 turn 3) · `Decouple.zip` unpacking · spec 65 amendments to capture quantitative profiling data.
 
 ## Current pre-signup prototype URL
 
