@@ -38,7 +38,7 @@ This slice is **rigour infrastructure** — adds a multi-agent specialist person
 
 ## 6. Third-party data flows
 
-- [x] N/A · reason: **No new third-party integration.** The canvas-fidelity persona is invoked via the existing Anthropic Claude Code CLI invocation pattern (`npx -y @anthropic-ai/claude-code -p`) shared with the other specialists in the harness; the diff + slice AC + linked canvas content sent in the per-invocation prompt are all T0 Public artefacts already in the public slice diff. CLI version stays in lockstep with `auto-review.yml` spec 72c §7 directive.
+- [x] N/A · reason: **No new third-party integration.** The canvas-fidelity persona is invoked via the existing Anthropic Claude Code CLI invocation pattern (`npx -y @anthropic-ai/claude-code -p`) shared with the other specialists in the harness; the diff + slice AC + linked canvas content sent in the per-invocation prompt are all T0 Public artefacts already in the public slice diff. CLI version stays pinned in lockstep with `auto-review.yml` to keep harness behaviour aligned across workflows.
 
 ## 7. Audit log entries
 

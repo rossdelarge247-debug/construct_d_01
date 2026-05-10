@@ -89,11 +89,9 @@ for DIM in security correctness style plan-architect canvas-fidelity; do
 
   NONCE=$(openssl rand -hex 16 2>/dev/null || head -c 32 /dev/urandom | xxd -p)
 
-  # Compose synthetic brief: persona body + nonce + fenced fixture content.
-  # Specialist fixtures use <pr-diff-NONCE>; plan-architect uses
-  # <plan-from-author-NONCE> matching the framing exit-plan-review.sh produces;
-  # canvas-fidelity additionally fences <linked-canvas-NONCE> with the
-  # canvas-content fixture (the file the persona compares the diff against).
+  # Brief shape: persona body + nonce + fenced fixture; canvas-fidelity
+  # additionally fences a `<linked-canvas-NONCE>` block when CANVAS_FIXTURE
+  # is set.
   {
     cat "$PERSONA_FILE"
     printf '\nYour per-invocation nonce: %s\n\n' "$NONCE"

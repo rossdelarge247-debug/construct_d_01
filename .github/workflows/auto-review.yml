@@ -151,10 +151,9 @@ jobs:
           fi
           echo "differential-mode: $DIFFERENTIAL (prior-head=${PRIOR_HEAD_SHA:-none})"
 
-          # Compose one brief per dimension. Each persona file already
-          # carries its own rubric + JSON output schema + verdict-coercion
-          # guard (per AC-2). Brief shape mirrors the prior single-agent
-          # composition: persona body + nonce + fenced inputs.
+          # Each persona file carries its own rubric + JSON output schema
+          # + verdict-coercion guard, so the brief is persona body + nonce
+          # + fenced inputs only.
           for DIM in $(printf '%s' "$DIMS_JSON" | jq -r '.[]'); do
             NONCE=$(openssl rand -hex 16)
             {
