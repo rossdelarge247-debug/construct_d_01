@@ -16,6 +16,7 @@ export function O1() {
   return (
     <ScreenShell
       step={step}
+      eyebrow="O1 · Where are you?"
       heading="Where are you in your separation?"
       helper="There’s no wrong answer. Pick the one that fits today — you can always come back."
       ctaDisabled={!answers.stage}
