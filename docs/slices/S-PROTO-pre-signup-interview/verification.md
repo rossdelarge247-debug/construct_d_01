@@ -18,14 +18,16 @@ Final-state evidence record per CLAUDE.md §Engineering conventions §Definition
 
 ## Preview-deploy verification (spec 72a)
 
+**Sandbox-vs-browser caveat:** the Claude Code sandbox cannot run a browser. Status entries below stay 'Pending' until verified against the Vercel preview URL that auto-generates when the PR opens. Each row's Evidence column lists the exact verification protocol — copy-paste runnable.
+
 | Dimension | Status | Evidence |
 |---|---|---|
-| Golden path (O1 → O6 happy path; O7+O8 deferred placeholders) | Pending | Preview URL · screencast or screenshot trail · all 4 BgToggle options |
-| Edge cases (back-nav from O6 · refresh on O5 · cycle BgToggle mid-flow · O7+O8 deferred-banner) | Pending | Specific screenshots / observed behaviours |
-| `prefers-reduced-motion` | Pending | DevTools rendering pane override · subdued-motion screenshot |
-| Keyboard-only navigation | Pending | Tab-order trace · Enter-to-advance trace |
-| Mobile viewport 375x667 | Pending | iPhone SE preset screenshots · thumb-zone CTA reachability |
-| Screen reader (basic) | Pending | VoiceOver announcement trace on first 2 screens + deferred-banner announcement |
+| Golden path (O1 → O8 happy path) | Pending | Open preview URL · click through O1→O8 making one valid selection per screen · verify Continue advances each screen · cycle BgToggle through all 4 modes (expressive · canvasChrome · o7Surface · standalone) on any screen and confirm the bg changes + URL `?bg=` updates · screenshot the O7 personalised plan with at least 2 trigger conditions met (e.g. children=yes + safety-concern) to confirm wired triggers fire. |
+| Edge cases | Pending | (a) On O7, click Back → expect O6 with priorities + worries selections preserved. (b) On O5, refresh page → expect proto state resets to O1 (per acceptance.md L25 "no persistence beyond page-refresh"). (c) On O6, cycle BgToggle mid-flow → expect bg changes without losing chip selections. (d) On O3, pick "I have safety concerns" → expect screen renders without modal/banner; CTA enables on relationship answer alone (canvas C2). |
+| `prefers-reduced-motion` | Pending | DevTools → Rendering tab → "Emulate CSS media feature prefers-reduced-motion: reduce" → walk through O1-O6 → expect: (a) BgToggle cycle changes bg with no fade/transition · (b) RadioCard selected-state border change is instant · (c) RadioChips/CheckChips bg+color toggle is instant · (d) any other transition is suppressed. Implementation: page.module.css `@media (prefers-reduced-motion: reduce)` cascades to all descendants of the 4 bg classes via `.scope *` selector. |
+| Keyboard-only navigation | Pending | Tab from URL bar → expect focus order: BgToggle (top-right) → Back button (when step > 1) → first interactive in screen body (RadioCard option / RadioChips chip / CheckChips chip) → subsequent options → Continue CTA. Enter on focused radio/chip selects. Enter on Continue advances. Verified on O1 (RadioCard), O2 (multiple RadioChips groups + sub-Q cards), O5 (TallRow rendering), O6 (CheckChips with cap=3). Focus-visible ring honoured (browser default + tokens.color.accent.violet on .toggle per page.module.css). |
+| Mobile viewport 375×667 (iPhone SE) | Pending | Chrome DevTools → device mode → iPhone SE preset (375×667) → walk through O1-O8 → expect: (a) no horizontal scroll on any screen · (b) primary CTA reachable in thumb zone (bottom 33% of viewport) · (c) ScreenShell maxWidth: 480 doesn't constrain (375 < 480) · (d) RadioChips wrap onto multiple lines without overflow · (e) O6's two CheckChips grids each stay vertically aligned with caption above. |
+| Screen reader (VoiceOver / NVDA) | Pending | Enable VoiceOver (Mac) or NVDA (Win) · navigate O1 → expect: eyebrow read as text → H1 ("Where are you in your separation?") read with heading semantics → 3 RadioCard options read as radio group with helpers → Continue CTA read as button + state. Repeat on O2 to verify SubQuestionCard label is read as text before each RadioChips group, hidden `<legend>` provides accessible name. Verify O3 silent _safetyFlag: choosing "I have safety concerns" does NOT trigger any AT announcement (canvas requirement: silent flag, no modal/banner). |
 
 ## Design tokens (from `acceptance.md` §Design tokens)
 

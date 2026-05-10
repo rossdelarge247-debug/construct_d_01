@@ -38,5 +38,10 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .expressive, .canvasChrome, .o7Surface, .standalone { transition: none; }
+  .expressive, .canvasChrome, .o7Surface, .standalone,
+  .expressive *, .canvasChrome *, .o7Surface *, .standalone *,
+  .toggle {
+    transition: none !important;
+    animation-duration: 0.01ms !important;
+  }
 }
