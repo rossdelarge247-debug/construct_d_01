@@ -29,9 +29,22 @@ export interface SituationAnswers {
   home?: Home;
 }
 
+export type RelationshipQuality = 'amicable' | 'difficult' | 'high-conflict' | 'safety-concern';
+export type DevicePrivate = 'yes' | 'not-sure';
+
+export interface ExAndSafetyAnswers {
+  relationshipQuality?: RelationshipQuality;
+  devicePrivate?: DevicePrivate;
+}
+
+export function hasSafetyFlag(ex: ExAndSafetyAnswers | undefined): boolean {
+  return ex?.relationshipQuality === 'safety-concern' || ex?.devicePrivate === 'not-sure';
+}
+
 export interface Answers {
   stage?: Stage;
   situation?: SituationAnswers;
+  exAndSafety?: ExAndSafetyAnswers;
   livingArrangement?: LivingArrangement;
   children?: ChildrenStatus;
   relationship?: RelationshipDynamic;

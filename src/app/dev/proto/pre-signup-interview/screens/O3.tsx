@@ -2,32 +2,73 @@
 
 import { ScreenShell } from '../components/ScreenShell';
 import { RadioCard } from '../components/RadioCard';
+import { RadioChips } from '../components/RadioChips';
 import { useProto } from '../lib/proto-context';
-import type { ChildrenStatus } from '../lib/types';
-
-const OPTIONS = [
-  { value: 'none' as const, label: 'No children', helper: 'Between the two of you' },
-  { value: 'have-with-partner' as const, label: 'We have children together', helper: 'Whether they live with you or your partner' },
-  { value: 'have-from-prior' as const, label: 'Children from a prior relationship', helper: 'Yours, theirs, or both — but not shared' },
-];
+import { getCopy } from '../lib/copy/o3';
+import { tokens } from '@/styles/tokens';
+import type { ExAndSafetyAnswers } from '../lib/types';
 
 export function O3() {
   const { answers, setAnswer, next, back, step } = useProto();
+  const stage = answers.stage ?? 'considering';
+  const copy = getCopy(stage);
+  const ex = answers.exAndSafety ?? {};
+
+  const update = (patch: Partial<ExAndSafetyAnswers>) => {
+    setAnswer('exAndSafety', { ...ex, ...patch });
+  };
+
   return (
     <ScreenShell
       step={step}
-      heading="Are there children involved?"
-      helper="If there are, the picture has more layers — but Decouple is built to handle them."
-      ctaDisabled={!answers.children}
+      eyebrow={copy.eyebrow}
+      heading={copy.heading}
+      ctaDisabled={!ex.relationshipQuality}
       onContinue={next}
       onBack={back}
     >
-      <RadioCard<ChildrenStatus>
-        name="children"
-        options={OPTIONS}
-        value={answers.children}
-        onChange={(v) => setAnswer('children', v)}
-      />
+      <section style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+        <div
+          style={{
+            font: `600 13px/1.3 ${tokens.font.sans}`,
+            color: tokens.color.text.sub,
+          }}
+        >
+          {copy.relationship.label}
+        </div>
+        <RadioCard
+          name="relationshipQuality"
+          options={copy.relationship.options}
+          value={ex.relationshipQuality}
+          onChange={(v) => update({ relationshipQuality: v })}
+        />
+      </section>
+
+      <section style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+        <p
+          style={{
+            font: `400 14px/1.5 ${tokens.font.sans}`,
+            color: tokens.color.text.sub,
+            margin: 0,
+          }}
+        >
+          {copy.privacy.preamble}
+        </p>
+        <div
+          style={{
+            font: `600 13px/1.3 ${tokens.font.sans}`,
+            color: tokens.color.text.sub,
+          }}
+        >
+          {copy.privacy.label}
+        </div>
+        <RadioChips
+          name="devicePrivate"
+          options={copy.privacy.options}
+          value={ex.devicePrivate}
+          onChange={(v) => update({ devicePrivate: v })}
+        />
+      </section>
     </ScreenShell>
   );
 }
