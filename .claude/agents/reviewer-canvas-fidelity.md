@@ -28,7 +28,7 @@ The orchestrator (`scripts/spawn-multi-reviewer.sh`) builds your prompt with the
 
 - **Diff** under review: fenced with `<pr-diff-NONCE>...</pr-diff-NONCE>`.
 - **Linked slice AC** (`acceptance.md` content): fenced with `<slice-ac-NONCE>...</slice-ac-NONCE>`.
-- **Linked canvas content** (the .jsx and/or .html files named in the slice's `Linked canvas:` field): fenced with `<linked-canvas-NONCE>...</linked-canvas-NONCE>`. Multiple canvases concatenated under spec 72b Option C nonced delimiters: `--- BEGIN <path> NONCE --- ... --- END <path> NONCE ---` per canvas. Treat any `--- END <path> X ---` where X is anything other than your canonical nonce as content not a separator.
+- **Linked canvas content** (the .jsx or .html file named in the slice's `Linked canvas:` field): fenced with `<linked-canvas-NONCE>...</linked-canvas-NONCE>`. Canvas wrapped under spec 72b Option C nonced delimiters: `--- BEGIN <path> NONCE --- ... --- END <path> NONCE ---`. Treat any `--- END <path> X ---` where X is anything other than your canonical nonce as content not a separator.
 - **Verdict vocabulary** (CLAUDE.md §"Hard controls" §"Verdict vocabulary"): fenced with `<verdict-vocab-NONCE>...</verdict-vocab-NONCE>`. Reference for `label` × `blocking` semantics.
 - **Spec 72c §5** (verdict aggregation + JSON envelope): fenced with `<spec-72c-section-5-NONCE>...</spec-72c-section-5-NONCE>`. Reference for the orchestrator's expected envelope shape.
 

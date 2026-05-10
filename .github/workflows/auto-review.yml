@@ -111,16 +111,18 @@ jobs:
           esac
 
           # Canvas-fidelity dimension (additive, conditional): when prototype
-          # slice's acceptance.md carries `**Linked canvas:** <path1> <path2> ...`,
-          # fan out a 4th specialist comparing diff against the named canvas
-          # files. Field-absent OR non-prototype keeps DIMS_JSON unchanged.
+          # slice's acceptance.md carries `**Linked canvas:** <path>`, fan
+          # out a 4th specialist comparing diff against the named canvas
+          # file. Field-absent OR non-prototype keeps DIMS_JSON unchanged.
+          # Single canvas path per slice — paths-with-spaces work as-is
+          # because the variable is quoted at every consumer site below.
           # Workflow header still says "3 specialists" — kept for branch-
           # protection / required-status-check stability.
-          CANVAS_PATHS=""
+          CANVAS_PATH=""
           if [ "$CATEGORY" = "prototype" ] && [ -n "$SLICE_AC" ] && [ -f "$SLICE_AC" ]; then
             CANVAS_LINE=$(grep -E '^\*\*Linked canvas:\*\*[[:space:]]+' "$SLICE_AC" | head -1 || true)
             if [ -n "$CANVAS_LINE" ]; then
-              CANVAS_PATHS=$(printf '%s' "$CANVAS_LINE" | sed -E 's/^\*\*Linked canvas:\*\*[[:space:]]+//; s/[[:space:]]+$//')
+              CANVAS_PATH=$(printf '%s' "$CANVAS_LINE" | sed -E 's/^\*\*Linked canvas:\*\*[[:space:]]+//; s/[[:space:]]+$//')
               DIMS_JSON='["security","prototype-readiness","style","canvas-fidelity"]'
             fi
           fi
@@ -178,24 +180,25 @@ jobs:
                 cat "$SLICE_AC"
                 printf '</slice-ac-%s>\n\n' "$NONCE"
               fi
-              if [ "$DIM" = "canvas-fidelity" ] && [ -n "$CANVAS_PATHS" ]; then
+              if [ "$DIM" = "canvas-fidelity" ] && [ -n "$CANVAS_PATH" ]; then
                 printf '<linked-canvas-%s>\n' "$NONCE"
                 WORKSPACE=$(pwd)
-                for CANVAS_PATH in $CANVAS_PATHS; do
-                  # Path-traversal guard: slice acceptance.md is PR-author-
-                  # controlled, so canvas paths must canonicalise inside the
-                  # workspace before `cat` reads file content into the prompt.
-                  CANVAS_REAL=$(realpath -m "$CANVAS_PATH" 2>/dev/null || echo "")
-                  case "$CANVAS_REAL" in
-                    "$WORKSPACE"/*) ;;
-                    *) echo "::warning::Skipping out-of-workspace canvas path: $CANVAS_PATH" >&2; continue ;;
-                  esac
-                  if [ -f "$CANVAS_PATH" ]; then
-                    printf -- '--- BEGIN %s %s ---\n' "$CANVAS_PATH" "$NONCE"
-                    cat "$CANVAS_PATH"
-                    printf -- '\n--- END %s %s ---\n' "$CANVAS_PATH" "$NONCE"
-                  fi
-                done
+                # Path-traversal guard: slice acceptance.md is PR-author-
+                # controlled, so canvas path must canonicalise inside the
+                # workspace before `cat` reads file content into the prompt.
+                CANVAS_REAL=$(realpath -m "$CANVAS_PATH" 2>/dev/null || echo "")
+                case "$CANVAS_REAL" in
+                  "$WORKSPACE"/*)
+                    if [ -f "$CANVAS_PATH" ]; then
+                      printf -- '--- BEGIN %s %s ---\n' "$CANVAS_PATH" "$NONCE"
+                      cat "$CANVAS_PATH"
+                      printf -- '\n--- END %s %s ---\n' "$CANVAS_PATH" "$NONCE"
+                    fi
+                    ;;
+                  *)
+                    echo "::warning::Skipping out-of-workspace canvas path: $CANVAS_PATH" >&2
+                    ;;
+                esac
                 printf '</linked-canvas-%s>\n\n' "$NONCE"
               fi
               printf '<coding-conduct-%s>\n' "$NONCE"

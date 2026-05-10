@@ -417,7 +417,7 @@ Canonical sources: `docs/HANDOFF-SESSION-55.md` ยง"v3c carry-overs" + spec 72c ย
 
 When the AC quotes the canvas line, the build can't ignore it; the canvas-fidelity gate (Hard controls table row) flags drift at PR review. Slice authors discover treatment-level claims at AC-freeze time, not after deploy.
 
-**Linked canvas: field convention.** Slices that ship UI surface against a canonical canvas declare canvas paths via `**Linked canvas:** <path1> <path2> ...` in `acceptance.md` immediately after the slice header. Field-absent slices skip the canvas-fidelity dimension. Detection regex (auto-review.yml + persona harness): `^\*\*Linked canvas:\*\*[[:space:]]+`.
+**Linked canvas: field convention.** Slices that ship UI surface against a canonical canvas declare a canvas path via `**Linked canvas:** <path>` in `acceptance.md` immediately after the slice header. Single canvas per slice; the path may contain spaces and is consumed verbatim. Field-absent slices skip the canvas-fidelity dimension. Detection regex (auto-review.yml + persona harness): `^\*\*Linked canvas:\*\*[[:space:]]+`.
 
 ## Product rules
 
