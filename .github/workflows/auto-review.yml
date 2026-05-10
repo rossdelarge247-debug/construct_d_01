@@ -345,7 +345,7 @@ jobs:
           done
 
           DIMS_CSV=$(printf '%s' "$DIMENSIONS_JSON" | jq -r 'join(",")')
-          AGGREGATE_JSON=$(scripts/spawn-multi-reviewer.sh aggregate --dimensions "$DIMS_CSV" /tmp/envelopes)
+          AGGREGATE_JSON=$(scripts/spawn-multi-reviewer.sh aggregate /tmp/envelopes --dimensions "$DIMS_CSV")
 
           echo "::group::aggregated envelope"
           printf '%s\n' "$AGGREGATE_JSON" | jq .
