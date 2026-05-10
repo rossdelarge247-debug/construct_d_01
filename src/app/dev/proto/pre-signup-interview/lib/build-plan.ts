@@ -31,11 +31,10 @@ function composeSituationSummary(a: Answers): string {
   else if (a.stage === 'in-process') parts.push('You are already in the process of separating.');
   else parts.push('You are thinking through your separation.');
 
-  if (a.livingArrangement === 'together') parts.push('You still live together.');
-  else if (a.livingArrangement === 'separated') parts.push('You are living apart.');
+  if (a.situation?.living === 'yes') parts.push('You still live together.');
+  else if (a.situation?.living === 'no') parts.push('You are living apart.');
 
-  if (a.children === 'have-with-partner') parts.push('You have children together.');
-  else if (a.children === 'have-from-prior') parts.push('You have children from a prior relationship.');
+  if (a.situation?.hasChildren === 'yes') parts.push('You have children together.');
 
   return parts.join(' ');
 }
@@ -46,7 +45,7 @@ function composeWhatNeedsToHappen(a: Answers): ReadonlyArray<string> {
     'You both look at the picture together and talk through what feels fair.',
     'You write down what you have agreed.',
   ];
-  if (a.children && a.children !== 'none') {
+  if (a.situation?.hasChildren === 'yes') {
     items.push('You agree how time with the children works week-to-week, and what each of you contributes.');
   }
   if (a.livingArrangement === 'together') {
@@ -58,7 +57,7 @@ function composeWhatNeedsToHappen(a: Answers): ReadonlyArray<string> {
 
 function composePersonalisedNotes(a: Answers): PlanContent['personalisedNotes'] {
   const notes: PlanContent['personalisedNotes'][number][] = [];
-  if (a.children && a.children !== 'none') {
+  if (a.situation?.hasChildren === 'yes') {
     notes.push({
       trigger: 'children',
       body:
@@ -72,7 +71,7 @@ function composePersonalisedNotes(a: Answers): PlanContent['personalisedNotes'] 
         'Because you (or your partner) are self-employed, Decouple surfaces business income and asset valuations clearly — often the part of disclosure that solicitors charge most for.',
     });
   }
-  if (a.relationship === 'safety-concern') {
+  if (a.exAndSafety?.relationshipQuality === 'safety-concern' || a.exAndSafety?.devicePrivate === 'not-sure') {
     notes.push({
       trigger: 'safety',
       body:

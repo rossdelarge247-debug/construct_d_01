@@ -19,7 +19,7 @@ describe('buildPlanFromAnswers', () => {
   });
 
   it('adds a parenting note when children are involved', () => {
-    const a: Answers = { children: 'have-with-partner' };
+    const a: Answers = { situation: { hasChildren: 'yes' } };
     const plan = buildPlanFromAnswers(a);
     expect(plan.personalisedNotes.some((n) => n.trigger === 'children')).toBe(true);
     expect(plan.whatNeedsToHappen.some((s) => s.toLowerCase().includes('children'))).toBe(true);
@@ -32,7 +32,7 @@ describe('buildPlanFromAnswers', () => {
   });
 
   it('adds a safety-concern note with soft framing when relationship is unsafe', () => {
-    const a: Answers = { relationship: 'safety-concern' };
+    const a: Answers = { exAndSafety: { relationshipQuality: 'safety-concern' } };
     const plan = buildPlanFromAnswers(a);
     const note = plan.personalisedNotes.find((n) => n.trigger === 'safety');
     expect(note).toBeDefined();
@@ -46,7 +46,7 @@ describe('buildPlanFromAnswers', () => {
   });
 
   it('does not include a children-related task when children=none', () => {
-    const a: Answers = { children: 'none' };
+    const a: Answers = { situation: { hasChildren: 'no' } };
     const plan = buildPlanFromAnswers(a);
     expect(plan.whatNeedsToHappen.some((s) => s.toLowerCase().includes('children'))).toBe(false);
     expect(plan.personalisedNotes.some((n) => n.trigger === 'children')).toBe(false);
