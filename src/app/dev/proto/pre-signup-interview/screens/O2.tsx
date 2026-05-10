@@ -11,17 +11,17 @@ export function O2() {
   const { answers, setAnswer, next, back, step } = useProto();
   const stage = answers.stage ?? 'considering';
   const copy = getCopy(stage);
-  const sit = answers.situation ?? {};
+  const situation = answers.situation ?? {};
 
   const update = (patch: Partial<SituationAnswers>) => {
-    setAnswer('situation', { ...sit, ...patch });
+    setAnswer('situation', { ...situation, ...patch });
   };
 
   const answered =
-    (sit.relationship ? 1 : 0) +
-    (sit.living ? 1 : 0) +
-    (sit.hasChildren ? 1 : 0) +
-    (sit.home ? 1 : 0);
+    (situation.relationship ? 1 : 0) +
+    (situation.living ? 1 : 0) +
+    (situation.hasChildren ? 1 : 0) +
+    (situation.home ? 1 : 0);
 
   return (
     <ScreenShell
@@ -37,7 +37,7 @@ export function O2() {
         <RadioChips
           name="relationship"
           options={copy.relationship.options}
-          value={sit.relationship}
+          value={situation.relationship}
           onChange={(v) => update({ relationship: v })}
         />
       </SubQuestionCard>
@@ -46,7 +46,7 @@ export function O2() {
         <RadioChips
           name="living"
           options={copy.living.options}
-          value={sit.living}
+          value={situation.living}
           onChange={(v) => update({ living: v })}
         />
       </SubQuestionCard>
@@ -58,18 +58,18 @@ export function O2() {
             { value: 'no' as const, label: copy.children.noLabel },
             { value: 'yes' as const, label: copy.children.yesLabel },
           ]}
-          value={sit.hasChildren}
+          value={situation.hasChildren}
           onChange={(v) => {
             if (v === 'no') update({ hasChildren: 'no', childrenCount: undefined });
             else update({ hasChildren: 'yes' });
           }}
         />
-        {sit.hasChildren === 'yes' && (
+        {situation.hasChildren === 'yes' && (
           <div style={{ marginTop: 12 }}>
             <RadioChips
               name="childrenCount"
               options={copy.children.countOptions}
-              value={sit.childrenCount}
+              value={situation.childrenCount}
               onChange={(v) => update({ childrenCount: v })}
             />
           </div>
@@ -80,7 +80,7 @@ export function O2() {
         <RadioChips
           name="home"
           options={copy.home.options}
-          value={sit.home}
+          value={situation.home}
           onChange={(v) => update({ home: v })}
         />
       </SubQuestionCard>

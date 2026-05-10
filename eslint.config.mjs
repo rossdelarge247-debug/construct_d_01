@@ -12,8 +12,7 @@ const eslintConfig = defineConfig([
     "out/**",
     "build/**",
     "next-env.d.ts",
-    // docs/** holds documentation including design-source canvas .jsx
-    // assets authored externally (Claude AI Design tool exports). Not src.
+    // Claude AI Design tool canvas exports — not valid as lintable app src.
     "docs/**",
   ]),
   // AC-3 (v3a-foundation): function-size thresholds. General cap 40 lines;

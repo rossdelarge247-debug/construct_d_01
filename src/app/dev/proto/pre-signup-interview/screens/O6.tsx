@@ -14,12 +14,12 @@ export function O6() {
   const { answers, setAnswer, next, back, step } = useProto();
   const stage = answers.stage ?? 'considering';
   const copy = getCopy(stage);
-  const wm = answers.whatMatters ?? {};
-  const priorities = wm.priorities ?? [];
-  const worries = wm.worries ?? [];
+  const whatMatters = answers.whatMatters ?? {};
+  const priorities = whatMatters.priorities ?? [];
+  const worries = whatMatters.worries ?? [];
 
   const update = (patch: Partial<WhatMattersAnswers>) => {
-    setAnswer('whatMatters', { ...wm, ...patch });
+    setAnswer('whatMatters', { ...whatMatters, ...patch });
   };
 
   return (
@@ -41,7 +41,7 @@ export function O6() {
           options={copy.priorities.options}
           values={priorities}
           cap={CAP}
-          onChange={(next) => update({ priorities: next })}
+          onChange={(vals) => update({ priorities: vals })}
         />
       </SubQuestionCard>
 
@@ -51,7 +51,7 @@ export function O6() {
           options={copy.worries.options}
           values={worries}
           cap={CAP}
-          onChange={(next) => update({ worries: next })}
+          onChange={(vals) => update({ worries: vals })}
         />
       </SubQuestionCard>
     </ScreenShell>

@@ -12,10 +12,10 @@ export function O3() {
   const { answers, setAnswer, next, back, step } = useProto();
   const stage = answers.stage ?? 'considering';
   const copy = getCopy(stage);
-  const ex = answers.exAndSafety ?? {};
+  const exAndSafety = answers.exAndSafety ?? {};
 
   const update = (patch: Partial<ExAndSafetyAnswers>) => {
-    setAnswer('exAndSafety', { ...ex, ...patch });
+    setAnswer('exAndSafety', { ...exAndSafety, ...patch });
   };
 
   return (
@@ -23,7 +23,7 @@ export function O3() {
       step={step}
       eyebrow={copy.eyebrow}
       heading={copy.heading}
-      ctaDisabled={!ex.relationshipQuality}
+      ctaDisabled={!exAndSafety.relationshipQuality}
       onContinue={next}
       onBack={back}
     >
@@ -39,7 +39,7 @@ export function O3() {
         <RadioCard
           name="relationshipQuality"
           options={copy.relationship.options}
-          value={ex.relationshipQuality}
+          value={exAndSafety.relationshipQuality}
           onChange={(v) => update({ relationshipQuality: v })}
         />
       </section>
@@ -65,7 +65,7 @@ export function O3() {
         <RadioChips
           name="devicePrivate"
           options={copy.privacy.options}
-          value={ex.devicePrivate}
+          value={exAndSafety.devicePrivate}
           onChange={(v) => update({ devicePrivate: v })}
         />
       </section>

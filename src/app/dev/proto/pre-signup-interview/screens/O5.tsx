@@ -10,10 +10,10 @@ export function O5() {
   const { answers, setAnswer, next, back, step } = useProto();
   const stage = answers.stage ?? 'considering';
   const copy = getCopy(stage);
-  const pf = answers.partnerFinances ?? {};
+  const partnerFinances = answers.partnerFinances ?? {};
 
   const update = (patch: Partial<PartnerFinancesAnswers>) => {
-    setAnswer('partnerFinances', { ...pf, ...patch });
+    setAnswer('partnerFinances', { ...partnerFinances, ...patch });
   };
 
   return (
@@ -21,7 +21,7 @@ export function O5() {
       step={step}
       eyebrow={copy.eyebrow}
       heading={copy.heading}
-      ctaDisabled={!pf.awareness}
+      ctaDisabled={!partnerFinances.awareness}
       onContinue={next}
       onBack={back}
     >
@@ -44,7 +44,7 @@ export function O5() {
             key={opt.value}
             id={`awareness-${opt.value}`}
             isFirst={i === 0}
-            selected={pf.awareness === opt.value}
+            selected={partnerFinances.awareness === opt.value}
             label={opt.label}
             value={opt.value}
             onSelect={(v) => update({ awareness: v })}
