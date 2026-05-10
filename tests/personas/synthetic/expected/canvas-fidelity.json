@@ -1,0 +1,14 @@
+{
+  "dimension": "canvas-fidelity",
+  "fixture_path": "tests/personas/synthetic/canvas-fidelity.diff",
+  "canvas_path": "tests/personas/synthetic/canvas-fidelity.canvas",
+  "planted_defect_summary": "ScreenShell renders title as a flat string {heading} via single <h1> with size 24px and no italic accent or full-stop suffix, missing the canvas-canon pattern: 'Your <span italic 400>situation</span>.' at fontSize 26 (typography drift) and missing back-button + step-pill + borderBottom divider chrome (layout-chrome drift).",
+  "expected_finding": {
+    "label_in": ["issue"],
+    "blocking_in": [false, true],
+    "category_pattern": "(?i)(typography|layout-chrome|missing-element)",
+    "evidence_must_contain_any_of": ["heading", "<h1>", "24px", "italic", "Your", "situation", "borderBottom", "Back", "step", "pill", "ScreenShell"],
+    "remediation_must_contain_any_of": ["bold", "italic", "fontSize 26", "26px", "canvas", "back", "chevron", "borderBottom", "divider", "pill", "Your situation", "full stop"]
+  },
+  "min_findings_count": 1
+}

@@ -1,0 +1,18 @@
+// Excerpt from canvas: docs/design-source/example-slice/jsx/o2-frames.jsx (synthetic)
+// Canonical typography pattern for ScreenShell title rendering.
+
+const ScreenShellHeader = ({ heading }) => (
+  <header style={{ borderBottom: `1px solid ${LINE}` }}>
+    <button aria-label="Back to previous step">
+      <ChevronLeft size={20} />
+      <span>Back</span>
+    </button>
+    <div className="relative rounded-full overflow-hidden" style={{ width: 96, height: 3, background: "#E5E3DC" }}
+         aria-label={`Step ${current} of ${total}`}>
+      <div className="absolute rounded-full" style={{ top: 0, bottom: 0, left: 0, width: `${(current / total) * 100}%`, background: INK }} />
+    </div>
+    <h1 className="serif" style={{ fontSize: 26, lineHeight: 1.05, letterSpacing: "-0.02em", fontWeight: 600 }}>
+      Your <span className="italic" style={{ fontWeight: 400 }}>situation</span>.
+    </h1>
+  </header>
+);

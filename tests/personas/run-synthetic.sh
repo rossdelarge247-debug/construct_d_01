@@ -48,13 +48,14 @@ trap 'rm -rf "$WORKDIR"' EXIT
 FAIL=0
 TOTAL=0
 
-for DIM in security correctness style plan-architect; do
+for DIM in security correctness style plan-architect canvas-fidelity; do
   TOTAL=$((TOTAL + 1))
   printf '\n=== Synthetic [%s] ===\n' "$DIM"
 
   # Plan-architect is a plan-time persona reviewing plan-text rather than
   # PR-time specialist reviewing diff content; persona file path + fixture
   # extension + envelope-fence tag differ from the specialist suite.
+  CANVAS_FIXTURE=""
   if [ "$DIM" = "plan-architect" ]; then
     PERSONA_FILE="$REPO_ROOT/.claude/agents/plan-architect.md"
     FIXTURE="$SYNTHETIC_DIR/${DIM}.plan"
@@ -63,6 +64,9 @@ for DIM in security correctness style plan-architect; do
     PERSONA_FILE="$REPO_ROOT/.claude/agents/reviewer-${DIM}.md"
     FIXTURE="$SYNTHETIC_DIR/${DIM}.diff"
     FENCE_TAG="pr-diff"
+    if [ "$DIM" = "canvas-fidelity" ]; then
+      CANVAS_FIXTURE="$SYNTHETIC_DIR/${DIM}.canvas"
+    fi
   fi
   EXPECTED="$EXPECTED_DIR/${DIM}.json"
   BRIEF="$WORKDIR/brief-${DIM}.txt"
@@ -77,18 +81,32 @@ for DIM in security correctness style plan-architect; do
     FAIL=$((FAIL + 1))
     continue
   fi
+  if [ -n "$CANVAS_FIXTURE" ] && [ ! -f "$CANVAS_FIXTURE" ]; then
+    printf 'run-synthetic.sh [%s]: FAIL — missing canvas fixture: %s\n' "$DIM" "$CANVAS_FIXTURE" >&2
+    FAIL=$((FAIL + 1))
+    continue
+  fi
 
   NONCE=$(openssl rand -hex 16 2>/dev/null || head -c 32 /dev/urandom | xxd -p)
 
   # Compose synthetic brief: persona body + nonce + fenced fixture content.
   # Specialist fixtures use <pr-diff-NONCE>; plan-architect uses
-  # <plan-from-author-NONCE> matching the framing exit-plan-review.sh produces.
+  # <plan-from-author-NONCE> matching the framing exit-plan-review.sh produces;
+  # canvas-fidelity additionally fences <linked-canvas-NONCE> with the
+  # canvas-content fixture (the file the persona compares the diff against).
   {
     cat "$PERSONA_FILE"
     printf '\nYour per-invocation nonce: %s\n\n' "$NONCE"
     printf '<%s-%s>\n' "$FENCE_TAG" "$NONCE"
     cat "$FIXTURE"
     printf '</%s-%s>\n' "$FENCE_TAG" "$NONCE"
+    if [ -n "$CANVAS_FIXTURE" ]; then
+      printf '\n<linked-canvas-%s>\n' "$NONCE"
+      printf -- '--- BEGIN %s %s ---\n' "$CANVAS_FIXTURE" "$NONCE"
+      cat "$CANVAS_FIXTURE"
+      printf -- '\n--- END %s %s ---\n' "$CANVAS_FIXTURE" "$NONCE"
+      printf '</linked-canvas-%s>\n' "$NONCE"
+    fi
   } > "$BRIEF"
 
   printf 'run-synthetic.sh [%s]: invoking claude -p (CLI %s)...\n' "$DIM" "$CLAUDE_CLI_VERSION"

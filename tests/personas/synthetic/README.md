@@ -24,11 +24,16 @@ tests/personas/synthetic/
 ├── security.diff                        (planted XSS defect)
 ├── correctness.diff                     (planted off-by-one defect)
 ├── style.diff                           (planted PR/round provenance comment)
+├── canvas-fidelity.diff                 (planted typography + layout-chrome drift)
+├── canvas-fidelity.canvas               (canon canvas content the persona compares against)
 └── expected/
     ├── security.json                    (expected-finding signature)
     ├── correctness.json
-    └── style.json
+    ├── style.json
+    └── canvas-fidelity.json
 ```
+
+The `canvas-fidelity` dimension is unique among specialists in carrying a sibling `.canvas` file alongside its `.diff`. The runner detects the dimension and additionally fences `<linked-canvas-NONCE>` with the `.canvas` content (mirroring how `auto-review.yml` composes briefs for prototype slices declaring a `Linked canvas:` field).
 
 Each `expected/<dimension>.json` declares the predicates the persona's envelope
 must satisfy: label set, blocking flag set, category regex, evidence keyword

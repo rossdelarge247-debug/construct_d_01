@@ -1,0 +1,33 @@
+diff --git a/src/app/dev/proto/example-slice/components/ScreenShell.tsx b/src/app/dev/proto/example-slice/components/ScreenShell.tsx
+new file mode 100644
+index 0000000..a1b2c3d
+--- /dev/null
++++ b/src/app/dev/proto/example-slice/components/ScreenShell.tsx
+@@ -0,0 +1,28 @@
++'use client';
++
++import type { ReactNode } from 'react';
++import { tokens } from '@/styles/tokens';
++
++interface Props {
++  heading: string;
++  children: ReactNode;
++}
++
++export function ScreenShell({ heading, children }: Props) {
++  return (
++    <main style={{ maxWidth: 480, margin: '0 auto', padding: '64px 20px 48px' }}>
++      <h1
++        style={{
++          font: `600 24px/1.2 ${tokens.font.serif}`,
++          color: tokens.color.ink,
++          margin: 0,
++        }}
++      >
++        {heading}
++      </h1>
++      <div>{children}</div>
++    </main>
++  );
++}
++
