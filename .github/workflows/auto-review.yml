@@ -109,6 +109,22 @@ jobs:
             prototype) DIMS_JSON='["security","prototype-readiness","style"]' ;;
             *)         DIMS_JSON='["security","correctness","style"]' ;;
           esac
+
+          # Canvas-fidelity dimension (additive, conditional): when prototype
+          # slice's acceptance.md carries `**Linked canvas:** <path1> <path2> ...`,
+          # fan out a 4th specialist comparing diff against the named canvas
+          # files. Field-absent OR non-prototype keeps DIMS_JSON unchanged.
+          # Workflow header still says "3 specialists" — kept for branch-
+          # protection / required-status-check stability.
+          CANVAS_PATHS=""
+          if [ "$CATEGORY" = "prototype" ] && [ -n "$SLICE_AC" ] && [ -f "$SLICE_AC" ]; then
+            CANVAS_LINE=$(grep -E '^\*\*Linked canvas:\*\*[[:space:]]+' "$SLICE_AC" | head -1 || true)
+            if [ -n "$CANVAS_LINE" ]; then
+              CANVAS_PATHS=$(printf '%s' "$CANVAS_LINE" | sed -E 's/^\*\*Linked canvas:\*\*[[:space:]]+//; s/[[:space:]]+$//')
+              DIMS_JSON='["security","prototype-readiness","style","canvas-fidelity"]'
+            fi
+          fi
+
           echo "Resolved slice category: $CATEGORY"
           echo "Specialist dimensions: $DIMS_JSON"
           echo "dimensions=$DIMS_JSON" >> "$GITHUB_OUTPUT"
@@ -161,6 +177,17 @@ jobs:
                 printf '<slice-ac-%s>\n' "$NONCE"
                 cat "$SLICE_AC"
                 printf '</slice-ac-%s>\n\n' "$NONCE"
+              fi
+              if [ "$DIM" = "canvas-fidelity" ] && [ -n "$CANVAS_PATHS" ]; then
+                printf '<linked-canvas-%s>\n' "$NONCE"
+                for CANVAS_PATH in $CANVAS_PATHS; do
+                  if [ -f "$CANVAS_PATH" ]; then
+                    printf -- '--- BEGIN %s %s ---\n' "$CANVAS_PATH" "$NONCE"
+                    cat "$CANVAS_PATH"
+                    printf -- '\n--- END %s %s ---\n' "$CANVAS_PATH" "$NONCE"
+                  fi
+                done
+                printf '</linked-canvas-%s>\n\n' "$NONCE"
               fi
               printf '<coding-conduct-%s>\n' "$NONCE"
               # Drop trailing `## Engineering conventions` header that
@@ -317,7 +344,8 @@ jobs:
             fi
           done
 
-          AGGREGATE_JSON=$(scripts/spawn-multi-reviewer.sh aggregate /tmp/envelopes)
+          DIMS_CSV=$(printf '%s' "$DIMENSIONS_JSON" | jq -r 'join(",")')
+          AGGREGATE_JSON=$(scripts/spawn-multi-reviewer.sh aggregate --dimensions "$DIMS_CSV" /tmp/envelopes)
 
           echo "::group::aggregated envelope"
           printf '%s\n' "$AGGREGATE_JSON" | jq .
