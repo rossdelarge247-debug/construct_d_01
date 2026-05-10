@@ -56,11 +56,13 @@ Bias for multi-agent in `src/` slices from S-F1 onwards, where the AC-4 retain/d
 
 Three dimensions post session-70 drop of `reviewer-architecture` — `security · correctness · style`. Initial v3b ship was 4 dimensions per `/ultrareview` for Claude Code convergence (§10 L194 prior-art audit); session-70 reduced to 3 after the architecture specialist's cumulative catch-rate fell well below the CLAUDE.md retain bar (0.33 catches per slice) over the 13-PR cohort. Pre-v3b the original draft had 7 dimensions, realigned to 4 at session-54 — the original 7 was inferred from session-47's 9-round dataset which only exercised 4 of the 7 categories empirically, and three of the original seven were speculation.
 
-| File | Dimension | Absorbs criteria from prior `slice-reviewer.md` rubric |
-|---|---|---|
-| `.claude/agents/reviewer-security.md` | OWASP top 10 + spec 72 §11 13-item security DoD | criterion 4 (security) |
-| `.claude/agents/reviewer-correctness.md` | AC alignment (under- and over-implementation, logic-severity) · edge cases · regression · spec-citation accuracy · hidden state · effects-behind-interfaces | criteria 2 (logic), 3 (edge), 5 (regression), 6 (spec-citation), 7 (hidden effects), 8 (ac-gap) |
-| `.claude/agents/reviewer-style.md` | CLAUDE.md §"Coding conduct" adherence · simplicity · naming · nitpick-tier polish | criterion 1 (coding conduct) + simplicity nitpick-tier |
+| File | Dimension | Absorbs criteria from prior `slice-reviewer.md` rubric | Conditional invocation |
+|---|---|---|---|
+| `.claude/agents/reviewer-security.md` | OWASP top 10 + spec 72 §11 14-item security DoD | criterion 4 (security) | always |
+| `.claude/agents/reviewer-correctness.md` | AC alignment (under- and over-implementation, logic-severity) · edge cases · regression · spec-citation accuracy · hidden state · effects-behind-interfaces | criteria 2 (logic), 3 (edge), 5 (regression), 6 (spec-citation), 7 (hidden effects), 8 (ac-gap) | production category only (substituted for prototype) |
+| `.claude/agents/reviewer-style.md` | CLAUDE.md §"Coding conduct" adherence · simplicity · naming · nitpick-tier polish | criterion 1 (coding conduct) + simplicity nitpick-tier | always |
+| `.claude/agents/reviewer-prototype-readiness.md` | UI/UX loveability for `category: prototype`: interaction-pattern · accessibility · state-coverage · copy-clarity · motion · mobile-viewport · ac-gap | substitutes for `reviewer-correctness` per spec 76 §3 | prototype category only |
+| `.claude/agents/reviewer-canvas-fidelity.md` | typography · layout-chrome · spacing · color-treatment · header-affordances · missing-element vs the slice's named canonical canvas | additive (none — new dimension) | prototype category AND slice acceptance.md has `Linked canvas:` field |
 
 The full criterion → partition mapping post session-70: `correctness` is the heaviest partition (6 absorbed criteria — picked up criterion 7 "hidden effects" + the architectural-severity logic facets when reviewer-architecture was dropped), reflecting the empirical bias from session-47 plus the absorbed scope from the architecture-specialist drop. `security` and `style` retain single tight rubrics.
 
@@ -138,6 +140,8 @@ The harness is golden-PR replay over a calibration set of real merged PRs — pr
 **Why replay over synthetic at v3b ship:** synthetic-injection answers "did this persona stop catching its target dimension after an edit?" — a useful question, but presupposes the dimension partition is correct. Replay answers "did the suite's verdict on a real PR change after an edit?" — which both validates the partition and the per-persona signal in one run. At v3b the partition itself is the load-bearing question (4-vs-5-vs-7), so replay delivers more signal per run.
 
 **Synthetic-injection (deferred, v3c):** once first-3-src-slice retain/drop data confirms the 3-partition holds, add `tests/personas/synthetic/{security,correctness,style}.diff` per-persona fixtures with deliberate-injection per the original spec 72c §7 design. Synthetic catches per-persona regressions that golden-replay can't isolate (e.g. a persona edit that subtly weakens security signal but doesn't change verdict-tier on the 4-PR seed). Both then run.
+
+**Canvas-fidelity fixture extension (per S-INFRA-canvas-fidelity-gate AC-4):** the canvas-fidelity persona's synthetic fixture additionally requires a `<linked-canvas-NONCE>` fence with canvas-content the persona compares against. Fixture pair: `tests/personas/synthetic/canvas-fidelity.diff` (the planted-drift slice diff) + `tests/personas/synthetic/canvas-fidelity.canvas` (the canon canvas content the persona contrasts against). The harness `tests/personas/run-synthetic.sh` recognises `canvas-fidelity` and loads the `.canvas` sibling as additional fenced input. Expected envelope predicates at `tests/personas/synthetic/expected/canvas-fidelity.json` follow the same signature-predicate shape as the other personas (label set, blocking set, category-pattern matching enum, evidence-keyword any-of, remediation-keyword any-of, min-count). Workflow path filter `.github/workflows/persona-synthetic-fixtures.yml` already covers `tests/personas/synthetic/**` glob — no path-filter amendment needed.
 
 ## §8 — Measurement (retain/drop signal)
 
