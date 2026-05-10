@@ -19,6 +19,13 @@ Describe 'scripts/auto-review-filter-prior.sh'
       The stderr should include 'invalid dimension'
     End
 
+    It 'accepts the prototype-readiness dimension (per spec 76 §3 substitute)'
+      Data <<< '{"head_sha":"abc","findings":[{"label":"issue","blocking":true,"category":"prototype","evidence":"X","seen_by":["prototype-readiness"]}]}'
+      When run "$SCRIPT" prototype-readiness
+      The status should equal 0
+      The output should include '"seen_by":["prototype-readiness"]'
+    End
+
     It 'rejects malformed input shape'
       Data <<< '{"findings":[]}'
       When run "$SCRIPT" security
