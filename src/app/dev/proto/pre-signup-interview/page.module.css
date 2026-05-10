@@ -1,20 +1,20 @@
-.scope {
-  --proto-bg-cream: #faf9f5;
-  --proto-bg-soft-purple: #F3EEFE;
-  --proto-bg-soft-pink: #FCE7F3;
-  --proto-bg-page-fade: #F5F5F4;
-  --proto-bg-soft-lavender: #F5F1F8;
-  --proto-accent-purple: #7C3AED;
-  --proto-accent-pink: #BE185D;
+.expressive {
+  background: var(--ds-color-surface-gradient-expressive);
+  min-height: 100vh;
 }
 
-.expressive {
-  background: linear-gradient(180deg, var(--proto-bg-soft-purple) 0%, var(--proto-bg-soft-pink) 55%, var(--proto-bg-page-fade) 100%);
+.canvasChrome {
+  background: var(--ds-color-surface-gradient-canvas-chrome);
+  min-height: 100vh;
+}
+
+.o7Surface {
+  background: var(--ds-color-surface-gradient-o7-surface);
   min-height: 100vh;
 }
 
 .standalone {
-  background: var(--proto-bg-cream);
+  background: var(--ds-color-surface-gradient-standalone);
   min-height: 100vh;
 }
 
@@ -23,9 +23,9 @@
   top: 12px;
   right: 12px;
   font: 12px/1.2 -apple-system, BlinkMacSystemFont, 'Inter', sans-serif;
-  color: #1A1A1A;
+  color: var(--ds-color-ink);
   background: rgba(255, 255, 255, 0.85);
-  border: 1px solid #E5E3DC;
+  border: 1px solid var(--ds-color-border);
   border-radius: 999px;
   padding: 6px 12px;
   cursor: pointer;
@@ -33,10 +33,10 @@
 }
 
 .toggle:focus-visible {
-  outline: 2px solid var(--proto-accent-purple);
+  outline: 2px solid var(--ds-color-accent-violet);
   outline-offset: 2px;
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .expressive, .standalone { transition: none; }
+  .expressive, .canvasChrome, .o7Surface, .standalone { transition: none; }
 }

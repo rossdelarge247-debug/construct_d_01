@@ -5,7 +5,7 @@ import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { BackgroundShell } from './components/BackgroundShell';
 import { BgToggle } from './components/BgToggle';
 import { ProtoProvider, useProto } from './lib/proto-context';
-import type { BgMode } from './lib/types';
+import { type BgMode, BG_MODES } from './lib/types';
 import { O1 } from './screens/O1';
 import { O2 } from './screens/O2';
 import { O3 } from './screens/O3';
@@ -34,9 +34,10 @@ function Inner() {
   const params = useSearchParams();
   const router = useRouter();
   const pathname = usePathname();
-  const bgMode: BgMode = params.get('bg') === 'standalone' ? 'standalone' : 'expressive';
+  const bgParam = params.get('bg');
+  const bgMode: BgMode = (BG_MODES as ReadonlyArray<string>).includes(bgParam ?? '') ? (bgParam as BgMode) : 'expressive';
   const handleToggle = (next: BgMode) => {
-    const url = next === 'expressive' ? pathname : `${pathname}?bg=standalone`;
+    const url = next === 'expressive' ? pathname : `${pathname}?bg=${next}`;
     router.replace(url);
   };
   return (

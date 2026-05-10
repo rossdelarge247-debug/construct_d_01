@@ -37,6 +37,7 @@ export interface PlanContent {
   links: { findOutMoreHref: string; primaryCTA: string };
 }
 
-export type BgMode = 'expressive' | 'standalone';
+export type BgMode = 'expressive' | 'canvasChrome' | 'o7Surface' | 'standalone';
+export const BG_MODES: ReadonlyArray<BgMode> = ['expressive', 'canvasChrome', 'o7Surface', 'standalone'] as const;
 
 export const TOTAL_STEPS = 8;
