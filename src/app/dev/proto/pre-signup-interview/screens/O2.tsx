@@ -1,11 +1,10 @@
 'use client';
 
-import type { ReactNode } from 'react';
 import { ScreenShell } from '../components/ScreenShell';
 import { RadioChips } from '../components/RadioChips';
+import { SubQuestionCard } from '../components/SubQuestionCard';
 import { useProto } from '../lib/proto-context';
 import { getCopy } from '../lib/copy/o2';
-import { tokens } from '@/styles/tokens';
 import type { SituationAnswers } from '../lib/types';
 
 export function O2() {
@@ -89,28 +88,3 @@ export function O2() {
   );
 }
 
-function SubQuestionCard({ label, children }: { label: string; children: ReactNode }) {
-  return (
-    <div
-      style={{
-        background: tokens.color.surface.panel,
-        border: `1px solid ${tokens.color.border}`,
-        borderRadius: 14,
-        padding: 16,
-        display: 'flex',
-        flexDirection: 'column',
-        gap: 10,
-      }}
-    >
-      <div
-        style={{
-          font: `600 13px/1.3 ${tokens.font.sans}`,
-          color: tokens.color.text.sub,
-        }}
-      >
-        {label}
-      </div>
-      {children}
-    </div>
-  );
-}

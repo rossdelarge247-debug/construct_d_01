@@ -1,17 +1,4 @@
 export type Stage = 'considering' | 'starting' | 'in-process';
-export type LivingArrangement = 'together' | 'separated' | 'undecided';
-export type ChildrenStatus = 'none' | 'have-with-partner' | 'have-from-prior';
-export type RelationshipDynamic =
-  | 'collaborative'
-  | 'difficult-but-managing'
-  | 'high-conflict'
-  | 'safety-concern';
-export type Employment = 'employed' | 'self-employed' | 'mixed' | 'not-working';
-export type PartnerFinanceKnowledge =
-  | 'open-book'
-  | 'mostly-known'
-  | 'partially-known'
-  | 'unknown';
 
 export type Priority =
   | 'fair-split'
@@ -82,9 +69,6 @@ export interface Answers {
   employment?: EmploymentAnswers;
   partnerFinances?: PartnerFinancesAnswers;
   whatMatters?: WhatMattersAnswers;
-  livingArrangement?: LivingArrangement;
-  children?: ChildrenStatus;
-  relationship?: RelationshipDynamic;
 }
 
 export interface PlanContent {

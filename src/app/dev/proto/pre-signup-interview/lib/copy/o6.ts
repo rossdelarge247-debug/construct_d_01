@@ -56,6 +56,7 @@ export function getCopy(_stage: Stage): O6Copy {
         { value: 'fairness-unknown', label: 'Not knowing what’s fair' },
       ],
     },
-    ctaLabel: (p, w) => `Continue${p + w > 0 ? ` (${p + w} chosen)` : ''}`,
+    ctaLabel: (priorityCount, worryCount) =>
+      `Continue${priorityCount + worryCount > 0 ? ` (${priorityCount + worryCount} chosen)` : ''}`,
   };
 }

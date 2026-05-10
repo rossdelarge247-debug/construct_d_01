@@ -3,6 +3,7 @@
 import { ScreenShell } from '../components/ScreenShell';
 import { RadioCard } from '../components/RadioCard';
 import { useProto } from '../lib/proto-context';
+import { getCopy } from '../lib/copy/o1';
 import type { Stage } from '../lib/types';
 
 const OPTIONS = [
@@ -13,12 +14,14 @@ const OPTIONS = [
 
 export function O1() {
   const { answers, setAnswer, next, back, step } = useProto();
+  const stage = answers.stage ?? 'considering';
+  const copy = getCopy(stage);
   return (
     <ScreenShell
       step={step}
-      eyebrow="O1 · Where are you?"
-      heading="Where are you in your separation?"
-      helper="There’s no wrong answer. Pick the one that fits today — you can always come back."
+      eyebrow={copy.eyebrow}
+      heading={copy.heading}
+      helper={copy.helper}
       ctaDisabled={!answers.stage}
       onContinue={next}
       onBack={back}
