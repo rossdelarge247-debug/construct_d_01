@@ -50,7 +50,10 @@ Final-state record assembled at slice ship. Round-by-round multi-agent audit det
 
 ## Architectural deferrals
 
-- **Linked-canvas fence delivered empty (orchestrator bug surfaced by gate first live run).** The canvas-fidelity persona on this PR's auto-review reported via `question · missing-element`: *"The `<linked-canvas-NONCE>` fence was delivered empty — canvas file content absent. Cannot verify that cited L-refs exist in the file."* Root cause: `.github/workflows/auto-review.yml` `brief.compose` step has `for CANVAS_PATH in $CANVAS_PATHS` (unquoted), which word-splits on spaces. This slice's `Linked canvas:` path contains spaces (`Pre-signup Canvas - Standalone.html`), so the for-loop iterates over 4 word-fragments, each failing the `[ -f "$CANVAS_PATH" ]` existence check, and the fence stays empty. Fix needed in the workflow (split on newlines or use array assignment); deferred to a separate workflow-fix PR — out of scope for the scaffold-only deliverable. Until fixed, the canvas-fidelity persona on this slice's impl PR will also fire empty unless the workflow is patched OR the canvas filename is space-free.
+- **Linked-canvas fence delivered empty (orchestrator bug surfaced by gate first live run) — RESOLVED.** The canvas-fidelity persona on this PR's first auto-review reported via `question · missing-element`: *"The `<linked-canvas-NONCE>` fence was delivered empty — canvas file content absent."* Root cause: `.github/workflows/auto-review.yml` `brief.compose` step had `for CANVAS_PATH in $CANVAS_PATHS` (unquoted), which word-split on spaces. Resolution landed across two workflow PRs and one slice update:
+  - **`auto-review.yml` `brief.compose` step** now parses `Linked canvas:` as a comma-separated list (`IFS=',' read -ra CANVAS_PATH_ARRAY <<< "$CANVAS_PATHS"`), preserving whitespace within each path entry.
+  - **`auto-review.yml` specialist-invocation step** captures `claude -p` exit code via `|| CLAUDE_EXIT=$?` and emits a `::warning::` annotation when non-zero, so a transient API failure (rate limit, request-too-large) surfaces in-log instead of silently leaving an empty stream. The diagnostic group runs unconditionally; parser tolerates empty stdin via the `{}` sentinel; aggregator records inconclusive dim per spec 72c §3.
+  - **Slice's `Linked canvas:` field** swapped from the 10.8MB combined `Pre-signup Canvas - Standalone.html` to comma-separated per-screen JSX source files (`jsx/o{2..6}-frames.jsx`, ~91KB total), so the persona receives canon content within Anthropic API per-request limits. AC L-refs re-quoted at JSX line numbers; cross-screen pattern repeats noted for AC-3 + AC-4.
 
 ## Loveability decisions committed
 
@@ -59,3 +62,4 @@ Final-state record assembled at slice ship. Round-by-round multi-agent audit det
 ## Status
 
 - 2026-05-10: skeleton authored at slice setup; AC verification recipes scoped pending impl in follow-up session.
+- 2026-05-10: architectural deferral resolved — `Linked canvas:` field updated to comma-separated per-screen JSX source files (`jsx/o{2..6}-frames.jsx`); AC L-refs re-quoted at JSX line numbers. `auto-review.yml` workflow updates landed alongside (comma-separator parsing in `brief.compose`; exit-code capture + `::warning::` annotation in the specialist invocation) make the canvas-fidelity persona observable and tolerant of transient `claude -p` failures.

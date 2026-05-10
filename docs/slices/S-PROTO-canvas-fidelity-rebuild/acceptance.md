@@ -2,7 +2,7 @@
 
 **Category:** prototype
 
-**Linked canvas:** docs/design-source/pre-signup-interview/decoded/Pre-signup Canvas - Standalone.html
+**Linked canvas:** docs/design-source/pre-signup-interview/jsx/o2-frames.jsx, docs/design-source/pre-signup-interview/jsx/o3-frames.jsx, docs/design-source/pre-signup-interview/jsx/o4-frames.jsx, docs/design-source/pre-signup-interview/jsx/o5-frames.jsx, docs/design-source/pre-signup-interview/jsx/o6-frames.jsx
 
 ## Why
 
@@ -27,7 +27,7 @@ What "loveable" requires: a user comparing the prototype to the canvas sees no v
 
 - **Outcome:** ScreenShell renders the screen title with a structured shape: bold pre-segment + italic non-bold accent segment + optional terminal full stop. Treatment per canvas verbatim:
 
-  > *Pre-signup Canvas L1079-1080:*
+  > *jsx/o2-frames.jsx L171-172* (canonical example; per-screen JSX files supply screen-specific titles via the same TitleShape):
   > ```jsx
   > <h2 className="serif mt-2" style={{ fontSize: 26, lineHeight: 1.05, letterSpacing: "-0.02em", fontWeight: 600 }}>
   >   Your <span className="italic" style={{ fontWeight: 400 }}>situation</span>.
@@ -47,12 +47,12 @@ What "loveable" requires: a user comparing the prototype to the canvas sees no v
 
 - **Outcome:** SubQuestionCard label uses serif font at size 14px, fontWeight 600, INK color, lineHeight 1.2. Per canvas verbatim:
 
-  > *Pre-signup Canvas L990:*
+  > *jsx/o2-frames.jsx L89* (inside `SubLabel` at L83-94):
   > ```jsx
   > <div className="serif" style={{ fontSize: 14, fontWeight: 600, color: INK, lineHeight: 1.2 }}>
   > ```
   >
-  > where the canvas declares `const INK = "#1A1A1A"` at L4721.
+  > where the canvas declares `const INK = "#1A1A1A"` at jsx/o2-frames.jsx L6.
 
 - **Verification:**
   1. SubQuestionCard label renders with: serif font · fontSize 14px · fontWeight 600 · color #1A1A1A (INK) · lineHeight 1.2.
@@ -65,13 +65,16 @@ What "loveable" requires: a user comparing the prototype to the canvas sees no v
 
 - **Outcome:** ScreenShell header has top-left back-button with chevron + "Back" label, with `borderBottom 1px solid LINE` divider beneath the top-bar zone. Per canvas verbatim:
 
-  > *Pre-signup Canvas L1063-1066:*
+  > *jsx/o2-frames.jsx L154-158* (inside `TopBar` at L152-164):
   > ```jsx
-  > <div ... style={{ borderBottom: `1px solid ${LINE}` }}>
-  >   <span>Back</span>
+  > <div className="px-5 pt-2 pb-3 flex items-center justify-between"
+  >      style={{ borderBottom: `1px solid ${LINE}` }}>
+  >   <a href="#" className="inline-flex items-center gap-1.5 text-[11px]" style={{ color: SUB }}>
+  >     <Arrow dir="left" size={11} />
+  >     <span>Back</span>
   > ```
   >
-  > where the canvas declares `const LINE = "#E5E3DC"` at L4724. Pattern repeats per screen at L1574-1577, L1977-1980, L2417-2420 (verified consistent across O2-O5 sections of the canvas).
+  > where the canvas declares `const LINE = "#E5E3DC"` at jsx/o2-frames.jsx L9. Pattern repeats per screen: jsx/o3-frames.jsx L87, jsx/o4-frames.jsx L86, jsx/o5-frames.jsx L83, jsx/o6-frames.jsx L109 (verified consistent across O2-O6 per-screen JSX files).
 
 - **Verification:**
   1. Back-button positioned top-left of header (current impl is right-side via `space-between` flex; flip required).
@@ -79,7 +82,7 @@ What "loveable" requires: a user comparing the prototype to the canvas sees no v
   3. Header has `borderBottom: 1px solid #E5E3DC` divider rule beneath the top-bar zone.
   4. Treatment applied consistently to all O2-O6 screens via shared ScreenShell.
   5. Back-button click navigation behaviour preserved (assumed already wired via stage router).
-  6. Back-button rendered as `<button>` element (not `<span>` or `<div>`) — keyboard-reachable + activatable without ARIA augmentation. Canvas literal at L1066 shows `<span>Back</span>`; rebuild substitutes a `<button>` to satisfy semantic + a11y discipline.
+  6. Back-button rendered as `<button>` element (not `<span>` or `<div>`) — keyboard-reachable + activatable without ARIA augmentation. Canvas literal at jsx/o2-frames.jsx L158 shows `<span>Back</span>` (wrapped inside an `<a href="#">` for visual styling); rebuild substitutes a `<button>` to satisfy semantic + a11y discipline.
   7. Back-button interactive area ≥ 44×44px on 375×667 viewport — confirm via DevTools touch-target simulation at preview-deploy.
 
 - **In scope:** `ScreenShell.tsx` header layout (back-button positioning, chevron, divider).
@@ -89,14 +92,14 @@ What "loveable" requires: a user comparing the prototype to the canvas sees no v
 
 - **Outcome:** Step indicator is a 96×3px rounded pill with INK fill on `#E5E3DC` ground; fill width = `current/total`. aria-label preserved verbatim. Per canvas verbatim:
 
-  > *Pre-signup Canvas L941:*
+  > *jsx/o2-frames.jsx L40-42* (inside `StepRail` at L34-45; aria-label at L38):
   > ```jsx
   > <div className="relative rounded-full overflow-hidden" style={{ width: 96, height: 3, background: "#E5E3DC" }}>
   >   <div className="absolute rounded-full" style={{ top: 0, bottom: 0, left: 0, width: `${(current / total) * 100}%`, background: INK }} />
   > </div>
   > ```
   >
-  > with aria-label `Step ${current} of ${total}` (pattern repeats per screen at L1527, L1923, L2366, L2796, L3424).
+  > with aria-label `Step ${current} of ${total}` declared at the parent `<div role="progressbar">` (jsx/o2-frames.jsx L36-38). Pattern repeats per screen: jsx/o3-frames.jsx L47, jsx/o4-frames.jsx L39, jsx/o5-frames.jsx L39, jsx/o6-frames.jsx L69.
 
 - **Verification:**
   1. Step indicator renders as a horizontal pill (NOT a chip).
@@ -135,3 +138,4 @@ Plus 14-item security checklist in spec 72 §11 — short-form for `category: pr
 ## Status
 
 - 2026-05-10: scaffold authored at slice setup (session 82 P2); 4 ACs evidence-recipe scoped per AC-as-canvas-quote with verbatim Pre-signup Canvas L-refs; canvas-fidelity gate fires for first time live on this slice's PR (calibration data captured in PR auto-review verdict + carry-over to gate slice's calibration-report.md `## Status` post-merge entry).
+- 2026-05-10 (session 84 P2): `Linked canvas:` swapped from the 10.8MB combined `Pre-signup Canvas - Standalone.html` to comma-separated per-screen JSX source files (`jsx/o{2..6}-frames.jsx`, ~91KB total). 4 AC L-refs re-quoted at JSX line numbers (AC-1 L171-172, AC-2 L89, AC-3 L154-158, AC-4 L40-42). Canon source aligns with `S-INFRA-canvas-fidelity-gate/calibration-report.md` "Canvas (canon)" labels which already cite the JSX paths. Per-screen cross-references added for AC-3 and AC-4 where the visual treatment is shared verbatim across O2-O6.
