@@ -79,6 +79,8 @@ What "loveable" requires: a user comparing the prototype to the canvas sees no v
   3. Header has `borderBottom: 1px solid #E5E3DC` divider rule beneath the top-bar zone.
   4. Treatment applied consistently to all O2-O6 screens via shared ScreenShell.
   5. Back-button click navigation behaviour preserved (assumed already wired via stage router).
+  6. Back-button rendered as `<button>` element (not `<span>` or `<div>`) — keyboard-reachable + activatable without ARIA augmentation. Canvas literal at L1066 shows `<span>Back</span>`; rebuild substitutes a `<button>` to satisfy semantic + a11y discipline.
+  7. Back-button interactive area ≥ 44×44px on 375×667 viewport — confirm via DevTools touch-target simulation at preview-deploy.
 
 - **In scope:** `ScreenShell.tsx` header layout (back-button positioning, chevron, divider).
 - **Out of scope:** stage-router back-navigation logic (already wired); chevron icon authoring (use existing inline SVG pattern from elsewhere if available, else minimal new SVG).
@@ -109,7 +111,7 @@ What "loveable" requires: a user comparing the prototype to the canvas sees no v
 
 ## Out of scope (slice-level)
 
-- **O7 + O8 fidelity rebuild.** Pre-signup Canvas covers O2-O8; this slice scopes O2-O6 per session-82 Scope-A. O7-O8 land in a follow-up slice.
+- **O7 + O8 fidelity rebuild.** Pre-signup Canvas covers O2-O8; this slice scopes O2-O6 only. O7-O8 land in a follow-up slice.
 - **Mobile + desktop responsive variants.** Mobile Screens v2 canvas (5233L) deferred to follow-up.
 - **Welcome Tour pre-O1 onboarding.** Welcome Tour canvas (1497L) deferred to follow-up.
 - **Help Rail desktop variant.** Desktop Enhanced - Help Rail canvas (2235L) deferred to follow-up.

@@ -43,14 +43,14 @@ Final-state record assembled at slice ship. Round-by-round multi-agent audit det
 |---|---|---|
 | Golden path | Pending | Vercel preview URL · O2-O6 walk-through |
 | Edge cases | Pending | Long-text title overflow · keyboard navigation through chips |
-| `prefers-reduced-motion` | Pending | Title transition disabled when set |
+| `prefers-reduced-motion` | N/A | Title-mount animation explicitly out-of-scope per AC-1; no motion introduced in this slice |
 | Keyboard-only | Pending | Tab order through back-button · chips · CTA |
 | Mobile viewport (375×667) | Pending | Pre-signup Canvas O2 visual fidelity preserved at narrow width |
 | Screen-reader | Pending | `aria-label` for step indicator + back-button announced correctly |
 
 ## Architectural deferrals
 
-(None at scaffold time. Filled at slice ship if the canvas-fidelity gate's first live run surfaces deferred-with-reasoning items.)
+- **Linked-canvas fence delivered empty (orchestrator bug surfaced by gate first live run).** The canvas-fidelity persona on this PR's auto-review reported via `question · missing-element`: *"The `<linked-canvas-NONCE>` fence was delivered empty — canvas file content absent. Cannot verify that cited L-refs exist in the file."* Root cause: `.github/workflows/auto-review.yml` `brief.compose` step has `for CANVAS_PATH in $CANVAS_PATHS` (unquoted), which word-splits on spaces. This slice's `Linked canvas:` path contains spaces (`Pre-signup Canvas - Standalone.html`), so the for-loop iterates over 4 word-fragments, each failing the `[ -f "$CANVAS_PATH" ]` existence check, and the fence stays empty. Fix needed in the workflow (split on newlines or use array assignment); deferred to a separate workflow-fix PR — out of scope for the scaffold-only deliverable. Until fixed, the canvas-fidelity persona on this slice's impl PR will also fire empty unless the workflow is patched OR the canvas filename is space-free.
 
 ## Loveability decisions committed
 
