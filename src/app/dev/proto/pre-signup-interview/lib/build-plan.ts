@@ -24,61 +24,61 @@ const STANDARD_DECOUPLE_HELPS: PlanContent['howDecoupleHelps'] = {
   pillars: ['Shared, not adversarial', 'Evidenced, not asserted', 'End-to-end, not hand-off'],
 };
 
-function composeSituationSummary(a: Answers): string {
+function composeSituationSummary(answers: Answers): string {
   const parts: string[] = [];
-  if (a.stage === 'considering') parts.push('You are considering separating from your partner.');
-  else if (a.stage === 'starting') parts.push('You and your partner have decided to separate.');
-  else if (a.stage === 'in-process') parts.push('You are already in the process of separating.');
+  if (answers.stage === 'considering') parts.push('You are considering separating from your partner.');
+  else if (answers.stage === 'starting') parts.push('You and your partner have decided to separate.');
+  else if (answers.stage === 'in-process') parts.push('You are already in the process of separating.');
   else parts.push('You are thinking through your separation.');
 
-  if (a.situation?.living === 'yes') parts.push('You still live together.');
-  else if (a.situation?.living === 'no') parts.push('You are living apart.');
+  if (answers.situation?.living === 'yes') parts.push('You still live together.');
+  else if (answers.situation?.living === 'no') parts.push('You are living apart.');
 
-  if (a.situation?.hasChildren === 'yes') parts.push('You have children together.');
+  if (answers.situation?.hasChildren === 'yes') parts.push('You have children together.');
 
   return parts.join(' ');
 }
 
-function composeWhatNeedsToHappen(a: Answers): ReadonlyArray<string> {
+function composeWhatNeedsToHappen(answers: Answers): ReadonlyArray<string> {
   const items: string[] = [
     'Each of you opens up about what you own, owe, earn and spend.',
     'You both look at the picture together and talk through what feels fair.',
     'You write down what you have agreed.',
   ];
-  if (a.situation?.hasChildren === 'yes') {
+  if (answers.situation?.hasChildren === 'yes') {
     items.push('You agree how time with the children works week-to-week, and what each of you contributes.');
   }
-  if (a.livingArrangement === 'together') {
+  if (answers.situation?.living === 'yes') {
     items.push('You decide who stays in the home, when, and what happens to it longer term.');
   }
   items.push('A judge approves the financial agreement (a consent order) so it is binding.');
   return items;
 }
 
-function composePersonalisedNotes(a: Answers): PlanContent['personalisedNotes'] {
+function composePersonalisedNotes(answers: Answers): PlanContent['personalisedNotes'] {
   const notes: PlanContent['personalisedNotes'][number][] = [];
-  if (a.situation?.hasChildren === 'yes') {
+  if (answers.situation?.hasChildren === 'yes') {
     notes.push({
       trigger: 'children',
       body:
         'Because there are children involved, Decouple gives you a parenting plan tool you both build together — schedule, school, healthcare, decisions — alongside the financial picture.',
     });
   }
-  if (a.employment?.selfEmployment && a.employment.selfEmployment !== 'neither') {
+  if (answers.employment?.selfEmployment && answers.employment.selfEmployment !== 'neither') {
     notes.push({
       trigger: 'self-employed',
       body:
         'Because you (or your partner) are self-employed, Decouple surfaces business income and asset valuations clearly — often the part of disclosure that solicitors charge most for.',
     });
   }
-  if (a.exAndSafety?.relationshipQuality === 'safety-concern' || a.exAndSafety?.devicePrivate === 'not-sure') {
+  if (answers.exAndSafety?.relationshipQuality === 'safety-concern' || answers.exAndSafety?.devicePrivate === 'not-sure') {
     notes.push({
       trigger: 'safety',
       body:
         'Because you mentioned safety concerns, Decouple keeps your inputs private until you choose to share, and points you to specialist support if anything feels unsafe.',
     });
   }
-  if (a.partnerFinances?.awareness === 'very-little' || a.partnerFinances?.awareness === 'hiding') {
+  if (answers.partnerFinances?.awareness === 'very-little' || answers.partnerFinances?.awareness === 'hiding') {
     notes.push({
       trigger: 'partner-finance-unknown',
       body:
