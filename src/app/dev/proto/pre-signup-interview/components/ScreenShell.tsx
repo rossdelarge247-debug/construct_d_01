@@ -8,6 +8,7 @@ import { PrimaryCTA } from './PrimaryCTA';
 interface Props {
   step: number;
   heading: string;
+  eyebrow?: string;
   helper?: string;
   ctaLabel?: string;
   ctaDisabled?: boolean;
@@ -16,7 +17,7 @@ interface Props {
   children: ReactNode;
 }
 
-export function ScreenShell({ step, heading, helper, ctaLabel = 'Continue', ctaDisabled, onContinue, onBack, children }: Props) {
+export function ScreenShell({ step, heading, eyebrow, helper, ctaLabel = 'Continue', ctaDisabled, onContinue, onBack, children }: Props) {
   return (
     <main
       style={{
@@ -53,7 +54,28 @@ export function ScreenShell({ step, heading, helper, ctaLabel = 'Continue', ctaD
       </header>
 
       <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-        <h1 style={{ font: `600 24px/1.3 ${tokens.font.sans}`, color: tokens.color.ink, margin: 0 }}>{heading}</h1>
+        {eyebrow && (
+          <div
+            style={{
+              font: `600 10.5px/1.2 ${tokens.font.mono}`,
+              letterSpacing: '0.14em',
+              textTransform: 'uppercase',
+              color: tokens.color.accent.violet,
+            }}
+          >
+            {eyebrow}
+          </div>
+        )}
+        <h1
+          style={{
+            font: `600 24px/1.2 ${tokens.font.serif}`,
+            letterSpacing: '-0.02em',
+            color: tokens.color.ink,
+            margin: 0,
+          }}
+        >
+          {heading}
+        </h1>
         {helper && (
           <p style={{ font: `400 15px/1.5 ${tokens.font.sans}`, color: tokens.color.text.sub, margin: 0 }}>{helper}</p>
         )}
