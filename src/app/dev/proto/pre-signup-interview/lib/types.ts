@@ -16,8 +16,22 @@ export type PartnerFinanceKnowledge =
 export type Priority = 'children-stability' | 'family-home' | 'finances-fair' | 'speed' | 'cost' | 'amicable';
 export type Worry = 'partner-disclosure' | 'court' | 'cost' | 'time' | 'safety' | 'children-impact';
 
+export type RelationshipStatus = 'married' | 'civil-partnership' | 'cohabiting' | 'other';
+export type LivingTogether = 'yes' | 'no' | 'complicated';
+export type Home = 'mortgage' | 'own-outright' | 'rent' | 'other';
+export type ChildrenCount = 1 | 2 | 3 | 4;
+
+export interface SituationAnswers {
+  relationship?: RelationshipStatus;
+  living?: LivingTogether;
+  hasChildren?: 'yes' | 'no';
+  childrenCount?: ChildrenCount;
+  home?: Home;
+}
+
 export interface Answers {
   stage?: Stage;
+  situation?: SituationAnswers;
   livingArrangement?: LivingArrangement;
   children?: ChildrenStatus;
   relationship?: RelationshipDynamic;

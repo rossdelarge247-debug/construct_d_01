@@ -11,13 +11,14 @@ interface Props {
   eyebrow?: string;
   helper?: string;
   ctaLabel?: string;
+  ctaCaption?: string;
   ctaDisabled?: boolean;
   onContinue?: () => void;
   onBack?: () => void;
   children: ReactNode;
 }
 
-export function ScreenShell({ step, heading, eyebrow, helper, ctaLabel = 'Continue', ctaDisabled, onContinue, onBack, children }: Props) {
+export function ScreenShell({ step, heading, eyebrow, helper, ctaLabel = 'Continue', ctaCaption, ctaDisabled, onContinue, onBack, children }: Props) {
   return (
     <main
       style={{
@@ -84,7 +85,18 @@ export function ScreenShell({ step, heading, eyebrow, helper, ctaLabel = 'Contin
       <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>{children}</div>
 
       {onContinue && (
-        <div style={{ marginTop: 'auto', paddingTop: 24 }}>
+        <div style={{ marginTop: 'auto', paddingTop: 24, display: 'flex', flexDirection: 'column', gap: 10 }}>
+          {ctaCaption && (
+            <div
+              style={{
+                font: `500 12px/1.3 ${tokens.font.sans}`,
+                color: tokens.color.text.muted,
+                textAlign: 'center',
+              }}
+            >
+              {ctaCaption}
+            </div>
+          )}
           <PrimaryCTA label={ctaLabel} onClick={onContinue} disabled={ctaDisabled} />
         </div>
       )}
