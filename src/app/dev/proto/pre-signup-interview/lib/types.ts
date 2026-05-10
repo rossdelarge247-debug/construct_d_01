@@ -47,15 +47,21 @@ export interface EmploymentAnswers {
   selfEmployment?: SelfEmployment;
 }
 
+export type PartnerAwareness = 'good-idea' | 'some-things' | 'very-little' | 'hiding';
+
+export interface PartnerFinancesAnswers {
+  awareness?: PartnerAwareness;
+}
+
 export interface Answers {
   stage?: Stage;
   situation?: SituationAnswers;
   exAndSafety?: ExAndSafetyAnswers;
   employment?: EmploymentAnswers;
+  partnerFinances?: PartnerFinancesAnswers;
   livingArrangement?: LivingArrangement;
   children?: ChildrenStatus;
   relationship?: RelationshipDynamic;
-  partnerFinance?: PartnerFinanceKnowledge;
   priorities?: ReadonlyArray<Priority>;
   worries?: ReadonlyArray<Worry>;
 }

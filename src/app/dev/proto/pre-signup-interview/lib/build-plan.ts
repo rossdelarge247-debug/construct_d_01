@@ -79,7 +79,7 @@ function composePersonalisedNotes(a: Answers): PlanContent['personalisedNotes'] 
         'Because you mentioned safety concerns, Decouple keeps your inputs private until you choose to share, and points you to specialist support if anything feels unsafe.',
     });
   }
-  if (a.partnerFinance === 'unknown' || a.partnerFinance === 'partially-known') {
+  if (a.partnerFinances?.awareness === 'very-little' || a.partnerFinances?.awareness === 'hiding') {
     notes.push({
       trigger: 'partner-finance-unknown',
       body:
