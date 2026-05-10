@@ -1,87 +1,70 @@
-# Session 82 Pre-flight Context Block (carrying session 81 wrap delta + post-merge tail)
+# Session 83 Pre-flight Context Block (carrying session 82 wrap delta)
 
-## Session 81 wrap delta — read this first
+## Session 82 wrap delta — read this first
 
-Session 81 shipped `S-INFRA-canvas-fidelity-gate` as PR #137, merged to main at `ecbdf9d`. The slice introduces a 4th specialist persona (`reviewer-canvas-fidelity`) for the multi-agent auto-review harness — fires conditionally on `prototype` slices declaring a `**Linked canvas:**` field — plus AC-as-canvas-quote discipline + 5 new bundled-HTML canvases decoded into readable siblings + path-traversal guard on canvas-path reads + 4 P6 supporting-script extensions + synthetic regression fixture.
+Session 82 executed the SESSION-CONTEXT-recommended sequence in full: P3 cleanup ship → P1 canvas inspection → P2 scaffold ship → wrap. Two PRs open + one wrap PR:
 
-**Delivery summary:**
+- **PR #139** (P3 cleanup) — addresses the 5 advisory findings deferred at PR #137 ship: preflight arg-order fix (1L) + 3 comment trims (auto-review.yml + run-synthetic.sh) + verbatim-quote audit on 4 load-bearing slice doc spec-refs. Auto-review verdict: `request-changes` (advisory) with 2 findings; both verified non-actionable, replied with parser line-refs + grep evidence. CI: 22/22 ✓.
+- **PR #140** (draft) — `S-PROTO-canvas-fidelity-rebuild` slice scaffold (acceptance + verification + security + test-plan). 4 ACs, one per calibration finding, each carrying verbatim Pre-signup Canvas L-refs per AC-as-canvas-quote discipline. **Canvas-fidelity gate fired live for first time** — 9 findings across 4 specialists; 5 addressed in `0f53cea`; 1 substantive bug deferred (orchestrator word-splits on spaces in canvas paths); 3 informational praise/note.
+- **PR #X** (this wrap, opening at session close) — calibration-report `§Status` first-run append + SESSION-CONTEXT refresh + HANDOFF-82.
 
-- Persona file `.claude/agents/reviewer-canvas-fidelity.md` — 6 categories, default-label/blocking matrix, conditional invocation
-- `auto-review.yml` — `Linked canvas:` field detection + 4-dim matrix routing for prototype-with-canvas slices + per-canvas brief composition + workspace-containment guard on canvas reads (`realpath -m` + `case "$WORKSPACE"/*)`)
-- 4 P6 scripts accept `canvas-fidelity` dimension: `spawn-multi-reviewer.sh` · `preflight-review.sh` · `validate-finding-envelope.sh` · `auto-review-filter-prior.sh`
-- Synthetic-deliberate-injection fixture: `tests/personas/synthetic/canvas-fidelity.{diff,canvas}` + `expected/canvas-fidelity.json` + workflow path-filter extended
-- CLAUDE.md §"Visual direction" AC-as-canvas-quote rule + `Linked canvas:` field convention; §"Hard controls" canvas-fidelity row
-- Spec 72c §4 personas table extended to 5 rows; §7 synthetic-fixtures section extended
-- Slice docs: `acceptance.md` · `verification.md` · `security.md` · `test-plan.md` · `calibration-report.md`
-- 5 new bundled-HTML canvases decoded under `docs/design-source/`: `Pre-signup Canvas` (5133L) · `Desktop Help Rail` (2235L) · `Mobile Screens v2` (5233L) · `Landing Page` (2026L) · `Welcome Tour` (1497L)
+**Calibration takeaway from gate's first live run:** Persona-prompt design works (praise on AC-as-canvas-quote discipline, calibration-report mapping holds). Persona surfaced an orchestrator bug via a `question · missing-element` finding rather than a false positive — the kind of self-aware diagnostic we want during the calibration window. Findings 1-4 + speculative findings NOT surfaced because (a) scaffold PR has no `src/` to compare and (b) the empty `<linked-canvas-NONCE>` fence (orchestrator bug) prevented canvas-side comparison anyway. Meaningful calibration needs the impl PR + the workflow fix.
 
-**PR #137 final state:**
-- Merged at `ecbdf9d` via squash merge to main; CODEOWNERS solo-operator admin-bypass gate cleared
-- 27/27 CI checks green/neutral on merge SHA `135d9da`
-- Auto-review verdict: `request-changes` (informational at v3b ship) — 5 advisory findings, 0 blocking. Findings carried over to session 82 as a single cleanup PR (P3 below)
-- Specialist retain/drop signal: **retain all 3** (`security` · `correctness` · `style`) — each surfaced ≥1 actionable finding the main conversation missed; canvas-fidelity persona's first real exercise is the rebuild slice's prototype PR
-
-Read `docs/HANDOFF-SESSION-81.md` for the full retro including the post-wrap CI tail (path-traversal fix in `135d9da`).
-
-## Session 82 priorities — user picks scope
+## Session 83 priorities
 
 | # | Priority | Scope | Effort | Blocked? |
 |---|---|---|---|---|
-| 1 | **Inspect decoded canvases + scope rebuild slice** | Read decoded canvases to map: which screens does each cover · does `Pre-signup Canvas` supersede the per-screen canvases at `pre-signup-interview/jsx/o{2-6}-frames.jsx` · does `Mobile Screens v2` cover mobile + desktop · is the Help Rail a separate component or built into the desktop layout · what does Welcome Tour add. Output: rebuild slice's `Linked canvas:` field + draft AC list per AC-as-canvas-quote. | Medium (read-heavy; ~100L of slice scaffolding output) | No |
-| 2 | **Open rebuild slice PR (gate's first live run)** | Branch off main; ship rebuild slice with `Linked canvas:` declared; canvas-fidelity gate fires for the first time = calibration evidence captured in PR's auto-review verdict. | Heavy (~400-600L impl + slice docs) | Yes — depends on P1 |
-| 3 | **5 deferred-finding cleanup PR** | Single small PR addressing the 5 advisory findings deferred at PR #137 ship: #1 + #4 comment trims in `auto-review.yml` + `tests/personas/run-synthetic.sh` · #2 `preflight-review.sh` aggregator arg-order fix (1L) · #6 + #7 verbatim-quote audit on slice doc spec-refs (~30L). | Light (~50L total) | No — could fold into start-of-session warm-up before P1 |
-| 4 | **Decide on `Decouple.zip` unpacking** | The `marketing-landing/Decouple.zip` carries 17 sub-canvases including Master Components (design system) + Decisions Log (rationale). Decision deferred — leave packed unless rebuild scope expands beyond pre-signup. | Light if needed | No |
+| 1 | **Fix orchestrator bug — empty linked-canvas fence** | `.github/workflows/auto-review.yml` `brief.compose`: `for CANVAS_PATH in $CANVAS_PATHS` word-splits on spaces. Fix: split on newlines (set `IFS=$'\n'`) or use array assignment. Critical for impl PR's gate firing. ~5L workflow change + shellspec coverage if testable. | Light | No |
+| 2 | **`S-PROTO-canvas-fidelity-rebuild` impl** | Consume PR #140 scaffold → implement `ScreenShell.tsx` (TitleShape + back-button + divider) · `SubQuestionCard.tsx` (serif label) · `ProgressPill.tsx` (rename + reshape from `ProgressChip.tsx`) · per-screen copy resolvers (structured-title support) · unit + integration tests. Preview-deploy 6-dim verification. Canvas-fidelity gate re-fires meaningfully once orchestrator bug is fixed. ~400-500L impl + tests. | Heavy | Yes — depends on P1 |
+| 3 | **Merge backlog** | PR #139 (P3 cleanup) + PR #140 (rebuild scaffold, after marking ready-for-review) + session-82 wrap PR. CODEOWNERS solo-operator gate via admin-bypass. | Light | No |
+| 4 | **(Stretch) Resolve spec 72c §7 divergence** | PR #139's audit surfaced: spec 72c §7 L130+L142 say synthetic-deliberate-injection is deferred to v3c, but synthetic shipped in v3b (`S-INFRA-synthetic-fixtures` then `S-INFRA-canvas-fidelity-gate`). Either amend §7 (synthetic flipped to v3b primary) OR add divergence-acknowledgement to the affected slice docs. ~15-30L. | Medium | No |
 
-**Recommended sequence:** P3 (~30 min cleanup warm-up) → P1 (read-heavy, prep for P2) → P2 (the heavy slice). P4 folds in opportunistically.
+**Recommended sequence:** P1 (orchestrator fix) → P3 (merge backlog including session-82 PRs) → P2 (impl). P1 unblocks meaningful gate calibration on the impl PR's auto-review verdict.
 
-## Authoritative reading order at session 82 start
+## Authoritative reading order at session 83 start
 
 1. This file (you are here).
-2. `docs/HANDOFF-SESSION-81.md` (last session's retro including post-wrap CI tail).
-3. `docs/slices/S-INFRA-canvas-fidelity-gate/calibration-report.md` (durable record of user feedback feeding the rebuild AC list).
-4. **Decoded canvases** (when scoping rebuild slice): grep first for `<title>`, `<h1>`, `<h2>` to map structure; targeted reads only (each canvas 1500-5200L; full reads exceed 300L cap).
+2. `docs/HANDOFF-SESSION-82.md` (last session's retro including gate's first-run calibration analysis).
+3. `docs/slices/S-INFRA-canvas-fidelity-gate/calibration-report.md` `§Status` (first-run append landing this wrap).
+4. `docs/slices/S-PROTO-canvas-fidelity-rebuild/acceptance.md` (4 ACs to implement — verbatim canvas quotes).
+5. `.github/workflows/auto-review.yml` lines around L181-L200 (brief.compose canvas-fidelity branch — the orchestrator bug location).
 
-## Session 82 kickoff prompt (paste-ready)
+## Session 83 kickoff prompt (paste-ready)
 
 ```
-Kick off session 82.
+Kick off session 83.
 
 Read this file (SESSION-CONTEXT.md) first.
 
 Turn-0 verification:
-- SessionStart hook surfaces live branch state (current branch +
-  HEAD vs origin/main + ahead/behind + tree state).
-- Branch convention: harness-suffixed (claude/<scope>-XXXXX). PR #137
-  is merged at ecbdf9d on main; session 82 starts from clean main.
-  If the harness landed you on a different base, follow CLAUDE.md
-  §"Branch-resume check": git fetch origin main → git checkout -B
-  <branch> origin/main.
+- SessionStart hook surfaces live branch state.
+- 2 open PRs from session 82: #139 (P3 cleanup) +
+  #140 draft (rebuild scaffold). Wrap PR opening at
+  session-82 close.
 
 Read at session start (Tier 2 + Tier 3, in order):
 1. docs/SESSION-CONTEXT.md (this file).
-2. docs/HANDOFF-SESSION-81.md.
-3. docs/slices/S-INFRA-canvas-fidelity-gate/calibration-report.md.
+2. docs/HANDOFF-SESSION-82.md.
+3. docs/slices/S-PROTO-canvas-fidelity-rebuild/acceptance.md
+   (the impl spec — 4 ACs with verbatim canvas quotes).
 
-Confirm priority with user. SESSION-CONTEXT recommends sequence
-P3 (cleanup warm-up) → P1 (canvas inspection) → P2 (rebuild slice
-ship). User may pick different scope.
+Confirm priority with user. SESSION-CONTEXT recommends
+P1 (orchestrator fix ~5L) → P3 (merge backlog) → P2
+(rebuild slice impl ~400-500L). User may pick different.
 
-Definition of Done for the chosen priority:
-- All ACs met with evidence per AC in verification.md.
-- Tests written + passing where tractable.
-- Auto-review verdict: approve / nit-only on the new PR.
-- Preview-deploy verified in-browser if UI work.
-- security.md item 12 stays Pending at PR open; closes Done
-  post-verdict.
+If P1 (orchestrator fix): the bug is in
+.github/workflows/auto-review.yml brief.compose loop
+`for CANVAS_PATH in $CANVAS_PATHS` — word-splits on
+spaces. Canvas filenames contain spaces (e.g.
+"Pre-signup Canvas - Standalone.html"). Fix: split on
+newlines (IFS=$'\n') or array assignment. Verify by
+running auto-review on a PR with the fixed workflow.
 
-If P2 (rebuild slice) is the pick: this is the first PR where the
-canvas-fidelity gate fires live. Treat the gate's findings as
-calibration data for the persona's category × default-label/blocking
-matrix. Surprises are expected on first run; tune the persona
-prompt before merge if false-positive rate is high.
-
-If P3 (deferred-finding cleanup) is the pick: see HANDOFF-81 §"Post-
-wrap addendum" for the 5 specific findings. Single PR; ~50L total.
+If P2 (rebuild impl): verify P1 has merged first
+(impl gate firing depends on it). Then implement
+the 4 ACs against Pre-signup Canvas verbatim
+references documented in acceptance.md. Preview-deploy
+6-dim verification per spec 72a rubric.
 ```
 
 ## Product positioning (preserve across sessions)
@@ -94,15 +77,15 @@ Next.js 14 (app router) + TypeScript · Tailwind via CSS variables · S-F1 token
 
 ## Branch
 
-Session 82 branch: harness-suffixed off clean main (`ecbdf9d`). PR #137 merged; session 81 working branch deletable.
+Session 83 branch: harness-suffixed off clean main. PRs #139 + #140 + session-82-wrap may still be open at session 83 start; resync per CLAUDE.md §"Branch-resume check" if landed on a different base.
 
 ## Negative constraints (preserve)
 
-#1-#39 from prior sessions. No new constraints session 81.
+#1-#39 from prior sessions. **No new constraints session 82.**
 
 ## Scope ceiling
 
-Session 82 is most likely P3 (cleanup) + P1 (canvas inspection) + start of P2 (rebuild scoping then begin AC drafting). Out of scope unless explicitly added: the public-pages nav-bar reconciliation (separate concern flagged session 81 turn 3) · `Decouple.zip` unpacking · spec 65 amendments to capture quantitative profiling data.
+Session 83 is most likely P1 (orchestrator fix) + P3 (merge backlog) + start of P2 (rebuild impl scoping then begin TDD). Out of scope unless explicitly added: the public-pages nav-bar reconciliation (separate concern) · `Decouple.zip` unpacking · spec 65 amendments to capture quantitative profiling data · O7-O8 + Welcome Tour + Mobile/Desktop responsive variants + Help Rail + Landing Page (all deferred to follow-up slices per session-82 user-confirmed Scope-A).
 
 ## Current pre-signup prototype URL
 
