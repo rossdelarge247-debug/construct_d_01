@@ -127,7 +127,7 @@ function OptionRow({
   staggerIndex: number;
 }) {
   const emphasised = Boolean(opt.emphasised);
-  const padV = emphasised ? 18 : 14;
+  const verticalPad = emphasised ? 18 : 14;
   const fontSize = emphasised ? 15 : 14;
   return (
     <label
@@ -141,7 +141,7 @@ function OptionRow({
           background: selected ? colors.ink : '#FFFFFF',
           border: `1px solid ${selected ? colors.ink : colors.line}`,
           borderRadius: 14,
-          padding: `${padV}px 14px`,
+          padding: `${verticalPad}px 14px`,
           cursor: 'pointer',
           '--stagger-index': staggerIndex,
         } as CSSProperties
