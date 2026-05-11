@@ -176,16 +176,21 @@ function Footer({
   const enabled = answered === total;
   return (
     <div
-      className="px-5 pt-3 pb-4"
+      className="px-5 pt-3 pb-5"
       style={{
         borderTop: `1px solid ${colors.line}`,
-        background: 'rgba(255,255,255,0.6)',
-        backdropFilter: 'blur(10px)',
+        background: 'rgba(245,245,244,0.85)',
+        backdropFilter: 'blur(8px)',
       }}
     >
       <div
         className="flex items-center justify-center mb-2.5"
-        style={{ color: colors.mute, fontSize: 10 }}
+        style={{
+          color: colors.mute,
+          font: `500 10.5px/1.3 ${tokens.font.mono}`,
+          textTransform: 'uppercase',
+          letterSpacing: '0.08em',
+        }}
       >
         <span>{ctaCaption}</span>
       </div>
@@ -198,7 +203,7 @@ function Footer({
           width: '100%',
           background: enabled ? colors.ink : colors.line,
           color: enabled ? '#FFFFFF' : colors.disabled,
-          padding: '13px 18px',
+          padding: '14px 18px',
           borderRadius: 999,
           fontSize: 14,
           fontWeight: 600,
