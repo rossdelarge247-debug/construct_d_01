@@ -1,4 +1,4 @@
-import type { Stage, PartnerAwareness } from '../types';
+import type { Stage, PartnerAwareness, TitleShape } from '../types';
 
 interface AwarenessOption {
   value: PartnerAwareness;
@@ -7,14 +7,14 @@ interface AwarenessOption {
 
 export interface O5Copy {
   eyebrow: string;
-  heading: string;
+  heading: TitleShape;
   options: ReadonlyArray<AwarenessOption>;
 }
 
 export function getCopy(_stage: Stage): O5Copy {
   return {
     eyebrow: 'O5 · Partner finances',
-    heading: 'How much do you know about your partner’s finances?',
+    heading: { kind: 'plain', text: 'How much do you know about your partner’s finances?' },
     options: [
       { value: 'good-idea', label: 'I have a good idea of everything' },
       { value: 'some-things', label: 'I know some things but not all' },

@@ -1,4 +1,4 @@
-import type { Stage, RelationshipStatus, LivingTogether, ChildrenCount, Home } from '../types';
+import type { Stage, RelationshipStatus, LivingTogether, ChildrenCount, Home, TitleShape } from '../types';
 
 interface QuestionRelationship {
   key: 'relationship';
@@ -28,7 +28,7 @@ interface QuestionHome {
 
 export interface O2Copy {
   eyebrow: string;
-  heading: string;
+  heading: TitleShape;
   helper?: string;
   relationship: QuestionRelationship;
   living: QuestionLiving;
@@ -40,7 +40,7 @@ export interface O2Copy {
 export function getCopy(_stage: Stage): O2Copy {
   return {
     eyebrow: 'O2 · Your situation',
-    heading: 'Your situation',
+    heading: { kind: 'split', bold: 'Your', accent: 'situation', period: true },
     relationship: {
       key: 'relationship',
       label: 'Relationship',

@@ -23,7 +23,7 @@ export function SubQuestionCard({ label, caption, children }: Props) {
       }}
     >
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', gap: 12 }}>
-        <div style={{ font: `600 13px/1.3 ${tokens.font.sans}`, color: tokens.color.text.sub }}>
+        <div style={{ font: `600 14px/1.2 ${tokens.font.serif}`, color: tokens.color.ink }}>
           {label}
         </div>
         {caption && (
