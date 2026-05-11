@@ -20,7 +20,7 @@
 
 .toggle {
   position: fixed;
-  top: 12px;
+  bottom: 12px;
   right: 12px;
   font: 12px/1.2 -apple-system, BlinkMacSystemFont, 'Inter', sans-serif;
   color: var(--ds-color-ink);
