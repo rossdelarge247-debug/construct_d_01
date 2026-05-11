@@ -6,8 +6,15 @@ export interface O1StageOption {
   sub: string;
 }
 
+export interface O1Heading {
+  pre: string;
+  italic: string;
+  tail: string;
+}
+
 export interface O1Copy {
   eyebrow: string;
+  heading: O1Heading;
   subStem: string;
   options: ReadonlyArray<O1StageOption>;
   cta: string;
@@ -17,6 +24,7 @@ export interface O1Copy {
 export function getCopy(_stage: Stage): O1Copy {
   return {
     eyebrow: 'To start your plan…',
+    heading: { pre: 'Tell us ', italic: 'where', tail: ' you\'re at.' },
     subStem: 'Your answer shapes the rest of the plan. There\'s no wrong choice.',
     options: [
       { value: 'decided', label: 'We\'ve decided to separate', sub: 'You want to get the finances sorted.' },

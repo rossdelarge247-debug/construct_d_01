@@ -1,5 +1,6 @@
 'use client';
 
+import { type CSSProperties } from 'react';
 import { tokens } from '@/styles/tokens';
 import { BrandBar } from '../components/BrandBar';
 import { ProgressPill } from '../components/ProgressPill';
@@ -11,7 +12,7 @@ import styles from './O1.module.css';
 const colors = {
   ink: tokens.color.ink,
   sub: tokens.color.text.sub,
-  mute: tokens.color.text.muted,
+  muted: tokens.color.text.muted,
   line: tokens.color.border,
 };
 
@@ -54,12 +55,20 @@ function TopBar({ step }: { step: number }) {
   );
 }
 
-function Hero({ eyebrow, subStem }: { eyebrow: string; subStem: string }) {
+function Hero({
+  eyebrow,
+  heading,
+  subStem,
+}: {
+  eyebrow: string;
+  heading: { pre: string; italic: string; tail: string };
+  subStem: string;
+}) {
   return (
     <div className={`px-5 pt-5 pb-4 ${styles.entry}`}>
       <div
         style={{
-          color: colors.mute,
+          color: colors.muted,
           fontSize: 10.5,
           fontFamily: tokens.font.mono,
           letterSpacing: '0.14em',
@@ -79,7 +88,9 @@ function Hero({ eyebrow, subStem }: { eyebrow: string; subStem: string }) {
           color: colors.ink,
         }}
       >
-        Tell us <span style={{ fontStyle: 'italic', fontWeight: 400 }}>where</span> you&apos;re at.
+        {heading.pre}
+        <span style={{ fontStyle: 'italic', fontWeight: 400 }}>{heading.italic}</span>
+        {heading.tail}
       </h2>
       <p
         style={{
@@ -184,24 +195,29 @@ export function O1() {
     <div className="flex flex-col min-h-screen w-full max-w-[480px] mx-auto pt-6">
       <BrandBar />
       <TopBar step={step} />
-      <Hero eyebrow={copy.eyebrow} subStem={copy.subStem} />
+      <Hero eyebrow={copy.eyebrow} heading={copy.heading} subStem={copy.subStem} />
       <fieldset
         aria-labelledby="o1-legend"
-        className={`px-5 mt-5 space-y-2.5 flex-1 ${styles.entry}`}
-        style={{ border: 'none', padding: '0 20px', margin: 0 }}
+        className="px-5 mt-5 space-y-2.5 flex-1"
+        style={{ border: 'none' }}
       >
         <legend id="o1-legend" className="sr-only">
           Tell us where you&apos;re at.
         </legend>
-        {copy.options.map((opt) => (
-          <RadioCard
+        {copy.options.map((opt, i) => (
+          <div
             key={opt.value}
-            value={opt.value}
-            label={opt.label}
-            sub={opt.sub}
-            selected={stage === opt.value}
-            onChange={(v) => setAnswer('stage', v)}
-          />
+            className={styles.entry}
+            style={{ '--stagger-index': i + 1 } as CSSProperties}
+          >
+            <RadioCard
+              value={opt.value}
+              label={opt.label}
+              sub={opt.sub}
+              selected={stage === opt.value}
+              onChange={(v) => setAnswer('stage', v)}
+            />
+          </div>
         ))}
       </fieldset>
       <div
@@ -214,7 +230,7 @@ export function O1() {
       >
         <div
           className="flex items-center justify-center gap-2 mb-2.5 flex-wrap"
-          style={{ color: colors.mute, fontSize: 10.5 }}
+          style={{ color: colors.muted, fontSize: 10.5 }}
         >
           <span>{copy.trustBand.left}</span>
           <span style={{ color: '#C9C5BD' }}>·</span>
@@ -224,7 +240,7 @@ export function O1() {
           type="button"
           disabled={!ctaEnabled}
           onClick={next}
-          className={ctaEnabled ? styles.ctaEnabled : undefined}
+          className={`${styles.cta}${ctaEnabled ? ' ' + styles.ctaEnabled : ''}`}
           style={{
             width: '100%',
             background: ctaEnabled ? colors.ink : colors.line,
@@ -239,7 +255,6 @@ export function O1() {
             justifyContent: 'center',
             gap: 8,
             cursor: ctaEnabled ? 'pointer' : 'not-allowed',
-            transition: 'background-color 240ms ease-out, color 240ms ease-out',
           }}
         >
           <span>{copy.cta}</span>
