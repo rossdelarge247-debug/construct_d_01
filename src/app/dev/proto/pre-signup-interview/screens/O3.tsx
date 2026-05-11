@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useRef, useState, type CSSProperties, type ReactNode } from 'react';
+import type { CSSProperties, ReactNode } from 'react';
 import { tokens } from '@/styles/tokens';
 import { Arrow } from '../components/Arrow';
 import { BrandBar } from '../components/BrandBar';
@@ -232,13 +232,11 @@ function PrivPill({
 
 function Footer({
   enabled,
-  showBounce,
   hasPrivacy,
   copy,
   onContinue,
 }: {
   enabled: boolean;
-  showBounce: boolean;
   hasPrivacy: boolean;
   copy: O3Copy;
   onContinue: () => void;
@@ -295,7 +293,7 @@ function Footer({
         type="button"
         disabled={!enabled}
         onClick={onContinue}
-        className={`${styles.cta}${showBounce ? ` ${styles.ctaEnabled}` : ''}`}
+        className={`${styles.cta}${enabled ? ` ${styles.ctaEnabled}` : ''}`}
         style={{
           width: '100%',
           background: enabled ? colors.ink : colors.line,
@@ -326,20 +324,6 @@ export function O3() {
   const relationshipQuality = exAndSafety.relationshipQuality;
   const devicePrivate = exAndSafety.devicePrivate;
   const enabled = Boolean(relationshipQuality);
-
-  const [showBounce, setShowBounce] = useState(false);
-  const isFirstRunRef = useRef(true);
-  useEffect(() => {
-    if (isFirstRunRef.current) {
-      isFirstRunRef.current = false;
-      return;
-    }
-    if (enabled) {
-      setShowBounce(true);
-      const t = setTimeout(() => setShowBounce(false), 350);
-      return () => clearTimeout(t);
-    }
-  }, [enabled]);
 
   const setRelationship = (v: RelationshipQuality) => {
     setAnswer('exAndSafety', { ...exAndSafety, relationshipQuality: v });
@@ -456,7 +440,6 @@ export function O3() {
       </section>
       <Footer
         enabled={enabled}
-        showBounce={showBounce}
         hasPrivacy={Boolean(devicePrivate)}
         copy={copy}
         onContinue={next}
