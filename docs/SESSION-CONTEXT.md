@@ -1,44 +1,44 @@
-# Session 86 Pre-flight Context Block (carrying session 85 wrap delta)
+# Session 87 Pre-flight Context Block (carrying session 86 wrap delta)
 
-## Session 85 wrap delta — read this first
+## Session 86 wrap delta — read this first
 
-Session 85 shipped two PRs that closed the canvas-fidelity calibration cycle + pivoted the visual-direction conduct.
+Session 86 shipped one slice (with a gap surfaced at preview-deploy) and is wrapping with a clear next-session priority.
 
-**PR #146 + PR #147 — `S-PROTO-canvas-fidelity-rebuild · impl (AC-1..AC-4)`** — merged at `b023461`. PR #146 was round-1 impl scaffold (`TitleShape` discriminated union + ScreenShell title rendering + SubQuestionCard label serif + ScreenShell header chrome + ProgressChip → ProgressPill + 6 tests). PR #147 was rounds 2-5 iteration on auto-review findings: round-2 fixed 4 of 5 round-1 findings (focus-visible inline · describe rename · aria-valuenow guard · aria-hidden visual span); round-3 fixed the data-testid regression introduced by round-2's aria-hidden add; round-4 added §Status entry + diagnosed the canvas-fidelity miss (slice-resolve needed PR-body `Slice references:` paragraph, not just acceptance.md `Linked canvas:` field); round-5 added the explicit slice-reference paragraph that triggered all 4 specialists firing for the first time on actual src/ diff.
+**PR #150 — `S-PROTO-o2-canvas-as-source · impl (AC-1..AC-4)`** — first src/ slice demonstrating the canvas-as-source pattern. Three commits across the rounds:
+- `fddfda1` slice impl — O2 rewritten from canvas frame A1 via the 5-step adapt pattern (tokens · copy resolver · useProto wiring · Next.js wrap · inline helpers). `MobileFrame` + status bar dropped. 8 unit tests.
+- `07812db` round-1 — auto-review's 7-finding fan-out addressed (`prefers-reduced-motion` via Tailwind `motion-reduce:!transition-none` · `aria-hidden` on decorative Arrow SVGs · `:focus-visible` outline on Chip + back + Continue · `C` → `colors` + `sw` → `strokeWidth` · 3 paraphrased spec citations rephrased to doc-pointer form to unblock the merge gate). 10 tests. Auto-review verdict moved `request-changes` → `approve`.
+- `de99334` round-2 — desktop width cap. Preview-deploy user feedback caught a regression: canvas-as-source rewrite dropped `MobileFrame`'s 375px width without substituting a CSS cap, so O2 was full-width on desktop while O1/O3-O8 (still on `ScreenShell`) cap at 480px. Outer div now `w-full max-w-[480px] mx-auto` matching `ScreenShell.tsx:33`. 11 tests. Auto-review stayed `approve`.
 
-**Calibration moment achieved on round-5.** Canvas-fidelity persona's first src/-diff fire surfaced 2 issues (chevron-vs-arrow SVG · per-screen typography variance O3-O5/O6) — both genuinely missed by main conversation. Verdict: request-changes (4 findings, all non-blocking). Persona is calibrated against the rebuild flow.
+**Header gap surfaced at preview-deploy.** User-flagged: the "Decouple." word stamp expected from `docs/design-source/pre-signup-interview/decoded/Pre-signup Canvas - Standalone.html` (the kickoff-named header source) is absent. Diagnosed: at scope-time I substituted `o2-frames.jsx`'s internal `TopBar` because the Standalone HTML is 5133L / 2.8MB inline-styled CSS and reading verbatim was awkward inside the 300-line read cap. Substitution documented in slice docs §"Out of scope" but the kickoff's design expectation went unflagged until preview review. Deferred to session 87 P1 because the header is cross-screen scope (touches `ScreenShell.tsx` for O1/O3-O8 + O2's inline `TopBar` for canvas-as-source) and an O2-only fix would create new cross-screen inconsistency.
 
-**PR #148 — `docs(claude): canvas-as-source as prototype default; rebuild scoped to Phase C+`** — merged at `43dbf27`. The calibration findings (chevron-vs-arrow · typography variance) confirmed the gate's value AND the reconciliation overhead's cost: rebuilding from spec is harder than starting from the canvas. User-confirmed pivot: prototype-phase screens use canvas-as-source (5-step adapt pattern: tokenise colours · replace placeholder data · wire state · Next.js wrapping · inline-or-adapt helpers); Phase C+ production work continues to use preserve-and-rebuild. CLAUDE.md §"Visual direction" rewritten accordingly. The canvas-fidelity gate stays in the rig; its conditional firing on `Linked canvas:` field presence already supports both patterns. Auto-review on PR #148 ran clean (3 default specialists, canvas-fidelity correctly dormant on the docs-only diff — itself a worked example of the new convention).
+**Diagnosis trail durably captured in `docs/HANDOFF-SESSION-86.md`** — read for the round-by-round narrative, persona findings calibration, the cross-canvas scoping discipline observation, and the new known-gap class around shared-infrastructure decisions (width cap was a `ScreenShell:33` decision the canvas-as-source rewrite lost track of).
 
-**Cross-canvas reconciliation explicitly deferred to per-instance user decision** — variant (Pre-signup Standalone mobile vs Desktop Help Rail) + responsiveness (intermediate breakpoints) are out-of-scope until scoping a screen where it matters. Header for un-authenticated screens sources from Pre-signup Canvas Standalone (mobile) + Desktop Help Rail (desktop graceful enhancement). Authenticated screens have a separate logged-in header (already designed) — out of scope for this pivot.
-
-**Diagnosis trail durably captured in `docs/HANDOFF-SESSION-85.md`** — read for the round-by-round narrative, calibration findings detail, pivot reasoning, and the new constraints #40 + #41.
-
-## Session 86 priorities — user picks scope
+## Session 87 priorities — user picks scope
 
 | # | Priority | Scope | Effort | Blocked? |
 |---|---|---|---|---|
-| 1 | **Pilot canvas-as-source by re-doing O2** | First src/ slice demonstrating the new pattern, against the highest-contrast target: refactor `src/app/dev/proto/pre-signup-interview/screens/o2.tsx` (the screen PR #147's rebuild just merged) to use canvas-as-source. Tear down the rebuild artefacts (TitleShape discriminated union · ScreenShell title rendering · SubQuestionCard label · ScreenShell header chrome · ProgressPill component) and replace with the canvas JSX adapted via the 5-step pattern per CLAUDE.md §"Visual direction" §"Canvas-as-source (prototype default)". Apply the new header from session-81 Pre-signup Canvas Standalone (mobile, un-authenticated). Preview-deploy → user feedback → iterate. No `Linked canvas:` field in `acceptance.md`; canvas-fidelity stays dormant. Comparing the two artefacts side-by-side is the loveable-demonstration: the rebuild work is the control; the canvas-as-source version is the new norm. | Medium-Heavy (~300-500L est, but a chunk is *deletion* of rebuild work) | No |
-| 2 | **Spec 76 §3 matrix clarification (optional)** | Add explicit note that prototype-default is `Linked canvas:`-field-absent. Spec 72c §4 (canvas-fidelity dimension) similarly. Small doc PR; not blocking the pilot. | Light (~20-40L doc) | No |
-| 3 | **(Inherited) spec-citation-quote-check author-time hook** | Mirror `.claude/hooks/comment-review.sh` pattern (PostToolUse Write\|Edit, advisory exit-0). Catches "per spec X" without proximity quote at edit time, before the CI cycle. Small standalone PR. | Light (~50L bash + shellspec) | No |
-| 4 | **(Inherited) Comment-review hook §Status exemption fix** | Stub-mode hook flags "session X" provenance inside `## Status` blocks where CLAUDE.md `^## (§)?Status` exemption should apply. Investigate + repair. Stub-mode advisory only at v3b ship; not urgent. | Light (~20-30L bash) | No |
-| 5 | **(Inherited) Spec 65 amendment for quantitative profiling data** | Still parked. Out of scope unless explicitly added. | Heavy | No |
+| 1 | **Standalone header consistency across all 8 screens** | New slice `S-PROTO-header-standalone-consistency`. Apply Decouple. word stamp + cross-screen un-authenticated header treatment from `docs/design-source/pre-signup-interview/decoded/Pre-signup Canvas - Standalone.html` (decoded sibling already in repo — no decode-step needed). Touches `ScreenShell.tsx` for O1, O3-O8 (still on rebuild pattern) + O2's inline `TopBar` (canvas-as-source). Read budget at scope-time: grep for header markers in the 5133L decoded HTML, targeted offset+limit reads to extract just the header structure. Cross-screen consistency is the AC. | Medium (~150-250L est across ScreenShell + O2.tsx + acceptance/verification + tests) | No |
+| 2 | **Continue canvas-as-source migration of O1, O3-O8** | One slice per screen, or batch where the canvas frames are similar (O3-O6 are all A1-style chip-card layouts). Order: O1 (entry screen, introduces the new header) → O3, O4, O5, O6 → O7 (your plan — different shape) → O8 (what's next — different shape). Each slice follows the S-PROTO-o2-canvas-as-source template. Note: P1 should land first because the header decision affects every migrated screen. | Heavy (~250-500L per screen) | Yes — wait for P1 to ship the canonical header treatment |
+| 3 | **Desktop-enhanced graceful enhancement (deferred per constraint #41)** | `docs/design-source/pre-signup-interview/desktop/Desktop Enhanced - Help Rail - Standalone.html` is the cross-canvas reconciliation target. Help Rail integration + intermediate breakpoints + extra-space utilisation above the 480px mobile cap. Opens once mobile header consistency lands (P1). | Heavy | Yes — wait for P1 |
+| 4 | **(Inherited) spec-citation-quote-check author-time hook** | Mirror `.claude/hooks/comment-review.sh` PostToolUse Write\|Edit advisory exit-0 pattern. Catches "per spec X" without proximity quote at edit time, before the CI cycle. Small standalone PR. | Light (~50L bash + shellspec) | No |
+| 5 | **(Inherited) Comment-review hook §Status exemption fix** | Stub-mode hook flags "session X" provenance inside `## Status` blocks where CLAUDE.md `^## (§)?Status` exemption should apply. | Light (~20-30L bash) | No |
+| 6 | **(Inherited) Spec 65 amendment for quantitative profiling data** | Still parked. | Heavy | No |
 
-**Recommended sequence:** P1 alone — re-doing O2 with canvas-as-source is the highest-contrast pilot (replaces just-merged rebuild work on the same screen, demonstrating the cost-vs-value difference between the two patterns). P2 + P3 + P4 are tractable side-quests but not on the critical path.
+**Recommended sequence:** P1 alone. The header is the user-flagged gap from session 86's preview review; it's also the prerequisite for P2 (O3-O8 migrations would otherwise re-do the header decision inconsistently). P3 unlocks once P1 lands. P4-P6 are tractable side-quests but not on the critical path.
 
-**Session 85 user-confirmed (durably here, not in the prompt):** O2 is the pilot target. O1 stage router and O7 your plan were the alternatives; user picked O2 explicitly for the side-by-side comparison value — the rebuild work is the control artefact, the canvas-as-source version is the new norm. Acknowledge the trade-off: O2 touches merged work (the TitleShape + ScreenShell + ProgressPill components shipped in PR #147), so the slice must explicitly call out which rebuild artefacts get removed and which (if any) survive. The header itself (session-81 Pre-signup Canvas Standalone, mobile) is new content not in the rebuild scope.
+**Scoping-discipline observation for P1.** Session-86 retro surfaced that shared-infrastructure decisions baked into rebuild components (e.g. `ScreenShell:33`'s `maxWidth: 480`) need explicit audit at scope-time, not discovery at preview-deploy. For P1, when scoping the header treatment touching `ScreenShell.tsx`, audit what other shared-chrome decisions live there (progress rail position, eyebrow placement, back-affordance shape) and explicitly carry the ones that remain valid into both `ScreenShell` and O2's inline `TopBar` so the two stay consistent.
 
-## Authoritative reading order at session 86 start
+## Authoritative reading order at session 87 start
 
 1. This file (you are here).
-2. `docs/HANDOFF-SESSION-85.md` (last session's retro — rebuild calibration moment + canvas-as-source pivot reasoning).
-3. `CLAUDE.md` §"Visual direction" (the new conduct — canvas-as-source default for prototype + preserve-and-rebuild for Phase C+; 5-step adapt pattern).
-4. **For pilot screen scoping (when chosen):** the relevant canvas file under `docs/design-source/pre-signup-interview/jsx/` (per-screen JSX, ~15-22KB each) — grep first for header/component patterns, then targeted reads.
+2. `docs/HANDOFF-SESSION-86.md` (last session's retro — three rounds + header gap diagnosis).
+3. **For P1 (when chosen):** `docs/design-source/pre-signup-interview/decoded/Pre-signup Canvas - Standalone.html` — large (5133L / 2.8MB CSS-heavy); grep first for header markers (e.g. `Decouple`, `<header`, top-of-body markup patterns), then targeted offset+limit reads of the header section.
+4. **For P1 (when scoping the consistency target):** `src/app/dev/proto/pre-signup-interview/components/ScreenShell.tsx` — the rebuild-pattern shared shell that currently chromes O1, O3-O8. The O2 canvas-as-source inline `TopBar` is the second integration surface. Spec 76 §3 + CLAUDE.md §"Visual direction" remain authoritative for category-mechanics.
 
-## Session 86 kickoff prompt (paste-ready)
+## Session 87 kickoff prompt (paste-ready)
 
 ```
-Kick off session 86.
+Kick off session 87.
 
 Read this file (SESSION-CONTEXT.md) first.
 
@@ -46,40 +46,61 @@ Turn-0 verification:
 - SessionStart hook surfaces live branch state (current branch +
   HEAD vs origin/main + ahead/behind + tree state).
 - Branch convention: harness-suffixed (claude/<scope>-XXXXX).
-  Session 85 shipped PR #147 (rebuild + calibration; merged at
-  b023461) + PR #148 (canvas-as-source rule; merged at 43dbf27).
-  Session 86 starts from clean main if the wrap PR has merged.
+  Session 86 shipped PR #150 (S-PROTO-o2-canvas-as-source impl +
+  rounds 1-2 a11y/width-cap) + PR #??? (session-86 wrap docs).
+  Session 87 starts from clean main if both have merged.
 - If the harness landed you on a different base, follow CLAUDE.md
   §"Branch-resume check": git fetch origin main → git checkout -B
   <branch> origin/main.
 
 Read at session start (Tier 2 + Tier 3, in order):
 1. docs/SESSION-CONTEXT.md (this file).
-2. docs/HANDOFF-SESSION-85.md.
-3. CLAUDE.md §"Visual direction" (new conduct — phase split +
-   5-step canvas-as-source pattern).
+2. docs/HANDOFF-SESSION-86.md.
+3. CLAUDE.md §"Visual direction" §"Canvas-as-source (prototype
+   default)" — the 5-step adapt pattern is the template for any
+   canvas-as-source work touching `ScreenShell` chrome.
 
-Confirm priority with user. SESSION-CONTEXT recommends P1 (re-do
-O2 with canvas-as-source) — user already picked O2 explicitly at
-session-85 wrap for the side-by-side comparison value. The rebuild
-work (TitleShape + ScreenShell + SubQuestionCard label + ScreenShell
-header chrome + ProgressPill) shipped in PR #147 is the control
-artefact; canvas-as-source O2 is the new norm. Scope decision needed
-at session-86 turn-1: which rebuild artefacts get removed, which (if
-any) survive as shared components for other screens.
+Confirm priority with user. SESSION-CONTEXT recommends P1
+(S-PROTO-header-standalone-consistency) — user already flagged
+the Decouple. word stamp gap at preview-deploy review of session 86's
+O2 pilot. Touches ScreenShell.tsx (O1, O3-O8) + O2's inline TopBar
+(canvas-as-source). Cross-screen consistency is the AC.
 
-Header source: session-81 Pre-signup Canvas Standalone (mobile,
-un-authenticated). The new header design is not part of the rebuild
-scope — it's new content sourced from a different canvas.
+Header source: docs/design-source/pre-signup-interview/decoded/
+Pre-signup Canvas - Standalone.html. Decoded sibling already in
+repo. Read discipline: grep for header markers first (Decouple,
+<header, top-of-body markup), then targeted offset+limit reads to
+extract just the header section. The full file is 5133L /
+2.8MB CSS-heavy — full reads will blow the 300-line cap.
 
-Definition of Done for the pilot (per CLAUDE.md §"Definition of Done"):
-- Slice acceptance.md + verification.md per the prototype category
-  (no Linked canvas: field; canvas-fidelity stays dormant).
-- Tests written + passing where tractable (logic units; visual-only
-  changes verified via preview-deploy).
+Slice convention: rebuild + canvas-as-source surfaces both updated
+in one slice for cross-screen consistency. ScreenShell.tsx +
+O2.tsx changes co-located. No `Linked canvas:` field (canvas-
+fidelity persona stays dormant per the prototype policy unless
+the slice opts in). **Category:** prototype.
+
+Definition of Done (per CLAUDE.md §"Definition of Done"):
+- Slice acceptance.md + verification.md per the prototype category.
+- Tests written + passing where tractable (logic units + class
+  presence assertions for the header DOM).
 - Auto-review verdict: approve / nit-only on the impl PR.
 - Preview-deploy verified in-browser per spec 72a 6-dim rubric.
+  Cross-screen navigation visual consistency (O1 → O2 → O3) is
+  the new dimension to walk this session.
 - User feedback received + addressed (or explicitly deferred).
+
+Scoping-discipline note (carried from session 86): audit
+shared-infrastructure decisions in ScreenShell.tsx at scope-time.
+The maxWidth: 480 cap was missed by O2's canvas-as-source rewrite
+in session 86 and surfaced as a regression at preview-deploy.
+Cross-list ScreenShell's chrome decisions (progress rail position,
+eyebrow placement, back-affordance shape, header-divider treatment,
+any width caps) and explicitly carry the ones that remain valid
+into both ScreenShell and O2's inline TopBar.
+
+Workflow: scope-time audit → build → preview-deploy → user
+feedback → iterate. Don't pre-spec visual treatment for prototype
+screens (constraint #40).
 ```
 
 ## Product positioning (preserve across sessions)
@@ -88,22 +109,19 @@ Decouple is the **complete settlement workspace for separating couples**. NOT a 
 
 ## Stack
 
-Next.js 14 (app router) + TypeScript · Tailwind via CSS variables · S-F1 token system at `src/styles/tokens.ts` · Tink for bank connect · Anthropic SDK for AI extraction · Vercel previews per branch, production at `construct-dev.vercel.app`.
+Next.js 14 (app router) + TypeScript · Tailwind v4 via CSS variables · S-F1 token system at `src/styles/tokens.ts` · Tink for bank connect · Anthropic SDK for AI extraction · Vercel previews per branch, production at `construct-dev.vercel.app`.
 
 ## Branch
 
-Session 86 branch: harness-suffixed off clean main. Session 85 shipped PR #147 (`b023461`) + PR #148 (`43dbf27`) + the wrap PR (TBD merge SHA). Session 85 working branches deletable post-merge.
+Session 87 branch: harness-suffixed off clean main. Session 86 shipped PR #150 (slice impl) + the session-86 wrap PR. Session 86 working branches deletable post-merge.
 
 ## Negative constraints (preserve)
 
-#1-#39 from prior sessions. **New session 85:**
-
-- **#40 — No preserve-and-rebuild rigour for prototype-phase screens.** Use canvas-as-source per CLAUDE.md §"Visual direction" §"Canvas-as-source (prototype default)". Canvas-fidelity gate stays dormant on prototype slices by default (`Linked canvas:` field absent in `acceptance.md`). Phase C+ production work continues to use preserve-and-rebuild with the gate active.
-- **#41 — Cross-canvas reconciliation (variant + responsive) deferred to per-instance user decision.** Not a build-time rule. Variant + responsive raise per-screen at scoping time.
+#1-#41 from prior sessions. **No new constraints surfaced session 86** — the cross-canvas scoping discipline observation (audit shared-infrastructure decisions before dropping a rebuild wrapper) is documented in HANDOFF-86 as a recurrence-watch, not yet promoted to a numbered constraint.
 
 ## Scope ceiling
 
-Session 86 is most likely P1 (pilot canvas-as-source on a chosen screen) alone. Out of scope unless explicitly added: P2 (spec 76 matrix clarification) · P3 (spec-citation-quote-check author-time hook) · P4 (comment-review §Status exemption fix) · spec 65 amendments · cross-canvas reconciliation (deferred per-instance) · Welcome Tour · Marketing Landing · Post-connect Dashboard · `Decouple.zip` unpacking · Mobile Screens v2 · authenticated-screens header work (separate logged-in header out of scope for the canvas-as-source pivot).
+Session 87 is most likely P1 (standalone header consistency) alone. Out of scope unless explicitly added: P2 (continue migrating O1, O3-O8 to canvas-as-source — needs P1 first) · P3 (desktop-enhanced graceful enhancement — needs P1 first) · P4-P6 (inherited tractable side-quests) · Welcome Tour · Marketing Landing · Post-connect Dashboard · `Decouple.zip` unpacking · Mobile Screens v2 · authenticated-screens header work (separate logged-in header out of scope for the un-authenticated header work).
 
 ## Current pre-signup prototype URL
 
