@@ -45,6 +45,9 @@
   outline-offset: 2px;
 }
 
+.pillSelected {
+}
+
 .cta {
   transition: opacity 240ms ease-out, filter 240ms ease-out, background-color 240ms ease-out, color 240ms ease-out;
 }

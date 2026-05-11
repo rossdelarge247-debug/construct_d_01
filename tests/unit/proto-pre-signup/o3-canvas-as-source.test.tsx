@@ -115,7 +115,7 @@ describe('O3 (canvas-as-source)', () => {
     expect(back.tagName).toBe('BUTTON');
   });
 
-  it('hides decorative Arrow SVGs in labelled buttons from screen readers', () => {
+  it('hides decorative Arrow SVGs in labelled buttons from screen readers (aria-hidden=true)', () => {
     renderO3();
     const back = screen.getByRole('button', { name: /back/i });
     const continueBtn = screen.getByRole('button', { name: /continue/i });
@@ -123,5 +123,7 @@ describe('O3 (canvas-as-source)', () => {
     const ctaSvg = continueBtn.querySelector('svg');
     expect(backSvg).not.toBeNull();
     expect(ctaSvg).not.toBeNull();
+    expect(backSvg?.getAttribute('aria-hidden')).toBe('true');
+    expect(ctaSvg?.getAttribute('aria-hidden')).toBe('true');
   });
 });

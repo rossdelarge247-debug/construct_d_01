@@ -72,6 +72,7 @@ Carry-forward from the prior canvas-as-source slices; no new deferrals introduce
 
 - **Sticky CTA mechanism** — `position: sticky` + safe-area-inset + shorter-than-667 viewport hardening. Originating deferral recorded in `docs/slices/S-PROTO-o1-canvas-as-source/verification.md` §"Architectural deferrals". Resolution recipe inherits.
 - **44×44 touch target on Back link** — canvas-faithful small Back affordance retained for cross-screen visual consistency. Originating deferral recorded in `docs/slices/S-PROTO-o1-canvas-as-source/verification.md` §"Architectural deferrals". Resolution recipe (negative-margin or invisible hit-area extender) inherits.
+- **44×44 touch target on PrivPill** — canvas-faithful pill rendered at ~31px height (canvas L131-147: `padding: '8px 16px', fontSize: 12.5`). WCAG 2.5.5 AAA expects ≥44×44 on touch surfaces. Canvas-fidelity wins for prototype category here on the same rationale as the Back-link deferral: preserving the canvas's inline pill treatment matters more than meeting AAA at prototype stage. Resolution recipe at production graduation: increase vertical padding to ~15px each side (yielding ~46px) or apply a negative-margin hit-area extender to keep the visual at 31px and the hit-area at 44×44.
 
 Test-pain audit cleared at impl: unit tests written without module-level mocks; well below the prototype-category threshold (>5 mocks per unit test triggers seam re-evaluation).
 
