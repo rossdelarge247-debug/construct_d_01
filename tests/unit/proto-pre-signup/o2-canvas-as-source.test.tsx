@@ -107,4 +107,12 @@ describe('O2 (canvas-as-source)', () => {
     expect(cls).toContain('focus-visible:outline');
     expect(cls).toContain('motion-reduce:!transition-none');
   });
+
+  it('caps the page width at 480px and centers on desktop (matches ScreenShell convention)', () => {
+    const { container } = renderO2();
+    const root = container.firstChild as HTMLElement;
+    expect(root.className).toContain('max-w-[480px]');
+    expect(root.className).toContain('mx-auto');
+    expect(root.className).toContain('w-full');
+  });
 });

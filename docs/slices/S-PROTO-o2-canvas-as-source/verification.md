@@ -59,6 +59,11 @@ Two canvas-faithful visual choices flagged by `reviewer-prototype-readiness` at 
 - **Footer caption font-size: 10px** — canvas A1 Footer renders `X of 4 answered` at `fontSize: 10`. WCAG AA prefers ≥12px for normal text contrast certainty. Canvas-as-source rule (CLAUDE.md §"Visual direction") makes the canvas the source; divergence raised to user at preview-deploy. Persona-flagged finding: `accessibility-visual` issue, non-blocking.
 - **Chip touch target: ~32px height; back button: ~13px** — canvas A1 Chip uses `padding: '9px 13px', fontSize: 12.5` (~32px rendered height); back button has `padding: 0` (~13px). Spec 72a mobile-viewport dimension expects ≥44×44 touch targets. Canvas-faithful values raised to user at preview-deploy. Persona-flagged finding: `mobile-viewport` issue, non-blocking.
 
+Two further canvas-source mobile-only constraints surfaced at preview-deploy:
+
+- **Outer width cap = 480px** added in round-2 (`w-full max-w-[480px] mx-auto` on the outer flex column). Matches `ScreenShell.tsx:33` `maxWidth: 480` so O1 (capped) → O2 (capped) → O3 (capped) navigation is consistent on desktop. The canvas literal was 375px (inside `MobileFrame`), but 480 matches the rest of the prototype today; the canvas-vs-rebuild width-cap delta is also deferred to the desktop-enhanced slice below.
+- **Desktop-enhanced treatment (extra-space utilisation)** — `docs/design-source/pre-signup-interview/desktop/Desktop Enhanced - Help Rail - Standalone.html` exists and was identified as the cross-canvas reconciliation target for the desktop graceful-enhancement. Out of scope for this prototype pilot slice; deferred per constraint #41 (cross-canvas reconciliation per-instance). Future slice introduces Help Rail integration, intermediate breakpoints, and any width-cap reconciliation between mobile and desktop variants.
+
 Test-pain audit cleared at impl: 8 tests written, 0 mocks required, well below the prototype-category threshold (>5 mocks per unit test triggers seam re-evaluation).
 
 ## Status

@@ -297,7 +297,7 @@ export function O2() {
     (situation.home ? 1 : 0);
 
   return (
-    <div className="flex flex-col min-h-screen">
+    <div className="flex flex-col min-h-screen w-full max-w-[480px] mx-auto">
       <TopBar step={step} onBack={back} />
       <Hero eyebrow={copy.eyebrow} heading={copy.heading} />
       <div className="px-5 pt-2 pb-3 space-y-2.5 flex-1">
