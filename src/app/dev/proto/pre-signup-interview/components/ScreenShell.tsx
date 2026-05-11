@@ -2,6 +2,7 @@
 
 import { useState, type ReactNode } from 'react';
 import { tokens } from '@/styles/tokens';
+import { BrandBar } from './BrandBar';
 import { ProgressPill } from './ProgressPill';
 import { PrimaryCTA } from './PrimaryCTA';
 import type { TitleShape } from '../lib/types';
@@ -32,7 +33,7 @@ export function ScreenShell({ step, heading, eyebrow, helper, ctaLabel = 'Contin
       style={{
         maxWidth: 480,
         margin: '0 auto',
-        padding: '64px 20px 48px',
+        padding: '24px 20px 48px',
         display: 'flex',
         flexDirection: 'column',
         gap: 28,
@@ -40,6 +41,7 @@ export function ScreenShell({ step, heading, eyebrow, helper, ctaLabel = 'Contin
         boxSizing: 'border-box',
       }}
     >
+      <BrandBar />
       <header
         style={{
           display: 'flex',
