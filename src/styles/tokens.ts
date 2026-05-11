@@ -43,6 +43,7 @@ export const tokens = {
     accent: {
       violet:  '#7C3AED',
       magenta: '#BE185D',
+      indigo:  '#4F46E5',
     },
   },
   font: {
@@ -154,6 +155,7 @@ export type TokenName =
   // Colours · Accents
   | '--ds-color-accent-violet'
   | '--ds-color-accent-magenta'
+  | '--ds-color-accent-indigo'
   // Fonts
   | '--ds-font-sans'
   | '--ds-font-serif'
@@ -244,6 +246,7 @@ export const TOKEN_NAMES: ReadonlyArray<TokenName> = [
   '--ds-color-danger',
   '--ds-color-accent-violet',
   '--ds-color-accent-magenta',
+  '--ds-color-accent-indigo',
   '--ds-font-sans',
   '--ds-font-serif',
   '--ds-font-mono',
