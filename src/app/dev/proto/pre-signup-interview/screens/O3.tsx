@@ -10,7 +10,7 @@ import type { ExAndSafetyAnswers } from '../lib/types';
 
 export function O3() {
   const { answers, setAnswer, next, back, step } = useProto();
-  const stage = answers.stage ?? 'considering';
+  const stage = answers.stage ?? 'thinking';
   const copy = getCopy(stage);
   const exAndSafety = answers.exAndSafety ?? {};
 

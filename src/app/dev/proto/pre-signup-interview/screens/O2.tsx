@@ -2,7 +2,9 @@
 
 import type { CSSProperties, ReactNode } from 'react';
 import { tokens } from '@/styles/tokens';
+import { Arrow } from '../components/Arrow';
 import { BrandBar } from '../components/BrandBar';
+import { ProgressPill } from '../components/ProgressPill';
 import { useProto } from '../lib/proto-context';
 import { getCopy } from '../lib/copy/o2';
 import type {
@@ -22,64 +24,6 @@ const colors = {
   disabled: '#A8A29E',
   violet: tokens.color.accent.violet,
 };
-
-type ArrowDir = 'right' | 'left' | 'up' | 'down';
-
-function Arrow({
-  size = 13,
-  strokeWidth = 1.8,
-  dir = 'right',
-}: {
-  size?: number;
-  strokeWidth?: number;
-  dir?: ArrowDir;
-}) {
-  const r = { right: 0, left: 180, down: 90, up: 270 }[dir];
-  return (
-    <svg
-      width={size}
-      height={size}
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth={strokeWidth}
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      style={{ transform: `rotate(${r}deg)` }}
-      aria-hidden="true"
-    >
-      <line x1="5" y1="12" x2="19" y2="12" />
-      <polyline points="12 5 19 12 12 19" />
-    </svg>
-  );
-}
-
-function StepRail({ current, total = 8 }: { current: number; total?: number }) {
-  return (
-    <div
-      className="flex items-center gap-2.5"
-      role="progressbar"
-      aria-valuenow={current}
-      aria-valuemin={1}
-      aria-valuemax={total}
-      aria-label={`Step ${current} of ${total}`}
-    >
-      <span style={{ color: colors.mute, fontSize: 9.5, fontFamily: tokens.font.mono }}>
-        Step {current} / {total}
-      </span>
-      <div
-        className="relative rounded-full overflow-hidden"
-        style={{ width: 96, height: 3, background: colors.line }}
-        aria-hidden="true"
-      >
-        <div
-          className="absolute rounded-full"
-          style={{ top: 0, bottom: 0, left: 0, width: `${(current / total) * 100}%`, background: colors.ink }}
-        />
-      </div>
-    </div>
-  );
-}
 
 function Chip({
   label,
@@ -174,7 +118,7 @@ function TopBar({ step, total = 8, onBack }: { step: number; total?: number; onB
         <Arrow dir="left" size={11} />
         <span>Back</span>
       </button>
-      <StepRail current={step} total={total} />
+      <ProgressPill step={step} total={total} />
       <div style={{ width: 36 }} aria-hidden="true" />
     </div>
   );
@@ -232,16 +176,21 @@ function Footer({
   const enabled = answered === total;
   return (
     <div
-      className="px-5 pt-3 pb-4"
+      className="px-5 pt-3 pb-5"
       style={{
         borderTop: `1px solid ${colors.line}`,
-        background: 'rgba(255,255,255,0.6)',
-        backdropFilter: 'blur(10px)',
+        background: 'rgba(245,245,244,0.85)',
+        backdropFilter: 'blur(8px)',
       }}
     >
       <div
         className="flex items-center justify-center mb-2.5"
-        style={{ color: colors.mute, fontSize: 10 }}
+        style={{
+          color: colors.mute,
+          font: `500 10.5px/1.3 ${tokens.font.mono}`,
+          textTransform: 'uppercase',
+          letterSpacing: '0.08em',
+        }}
       >
         <span>{ctaCaption}</span>
       </div>
@@ -254,7 +203,7 @@ function Footer({
           width: '100%',
           background: enabled ? colors.ink : colors.line,
           color: enabled ? '#FFFFFF' : colors.disabled,
-          padding: '13px 18px',
+          padding: '14px 18px',
           borderRadius: 999,
           fontSize: 14,
           fontWeight: 600,
@@ -283,7 +232,7 @@ const cardStyle: CSSProperties = {
 
 export function O2() {
   const { answers, setAnswer, next, back, step } = useProto();
-  const stage = answers.stage ?? 'considering';
+  const stage = answers.stage ?? 'thinking';
   const copy = getCopy(stage);
   const situation: SituationAnswers = answers.situation ?? {};
 

@@ -1,4 +1,4 @@
-export type Stage = 'considering' | 'starting' | 'in-process';
+export type Stage = 'thinking' | 'decided' | 'in_process';
 
 export type Priority =
   | 'fair-split'

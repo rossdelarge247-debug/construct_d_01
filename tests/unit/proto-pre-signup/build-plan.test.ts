@@ -13,7 +13,7 @@ describe('buildPlanFromAnswers', () => {
   });
 
   it('echoes the stage in the situation summary', () => {
-    const a: Answers = { stage: 'in-process' };
+    const a: Answers = { stage: 'in_process' };
     const plan = buildPlanFromAnswers(a);
     expect(plan.situationSummary).toMatch(/already in the process/i);
   });
