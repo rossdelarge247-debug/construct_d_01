@@ -150,9 +150,10 @@
   /* ─── Colours · State (1) ─── */
   --ds-color-danger: #FF3B30;
 
-  /* ─── Colours · Accents (2) — pre-signup canvas canon ─── */
+  /* ─── Colours · Accents (3) — pre-signup canvas canon ─── */
   --ds-color-accent-violet: #7C3AED;
   --ds-color-accent-magenta: #BE185D;
+  --ds-color-accent-indigo: #4F46E5;
 
   /* ─── Typography · Families (3) ─── */
   --ds-font-sans: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;

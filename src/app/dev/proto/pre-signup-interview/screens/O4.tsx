@@ -15,7 +15,7 @@ const colors = {
   sub: tokens.color.text.sub,
   muted: tokens.color.text.muted,
   line: tokens.color.border,
-  indigo: '#4F46E5',
+  indigo: tokens.color.accent.indigo,
 };
 
 function TopBar({ step, onBack }: { step: number; onBack: () => void }) {
@@ -45,7 +45,7 @@ function TopBar({ step, onBack }: { step: number; onBack: () => void }) {
           cursor: 'pointer',
         }}
       >
-        <Arrow dir="left" size={11} aria-hidden="true" />
+        <Arrow dir="left" size={11} />
         <span>Back</span>
       </button>
       <ProgressPill step={step} total={8} />
@@ -59,16 +59,11 @@ function Hero({
   heading,
   helper,
 }: {
-  eyebrow: { label: string; accent: 'indigo' | 'violet' | 'magenta' };
+  eyebrow: { label: string; accent: 'indigo' };
   heading: string;
   helper: string;
 }) {
-  const accentColor =
-    eyebrow.accent === 'violet'
-      ? tokens.color.accent.violet
-      : eyebrow.accent === 'magenta'
-        ? tokens.color.accent.magenta
-        : colors.indigo;
+  const accentColor = colors.indigo;
   return (
     <div
       className={styles.entry}
@@ -239,7 +234,6 @@ function Footer({
 
   return (
     <div
-      className={styles.footer}
       style={{
         padding: '12px 20px 16px',
         borderTop: `1px solid ${colors.line}`,
@@ -330,7 +324,7 @@ export function O4() {
         }}
       >
         <legend id="o4-emp-legend" className="sr-only">
-          {copy.question}
+          {copy.heading}
         </legend>
         {copy.options.map((opt, i) => (
           <OptionRow

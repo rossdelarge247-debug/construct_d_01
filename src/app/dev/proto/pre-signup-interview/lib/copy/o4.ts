@@ -10,11 +10,10 @@ export interface O4Option {
 export interface O4Copy {
   eyebrow: {
     label: string;
-    accent: 'indigo' | 'violet' | 'magenta';
+    accent: 'indigo';
   };
   heading: string;
   helper: string;
-  question: string;
   options: ReadonlyArray<O4Option>;
   captions: {
     pickToContinue: string;
@@ -30,7 +29,6 @@ export function getCopy(_stage: Stage): O4Copy {
     eyebrow: { label: 'Money', accent: 'indigo' },
     heading: 'Does either of you work for yourself, or run a limited company?',
     helper: 'This affects how we handle income evidence later.',
-    question: 'Does either of you work for yourself, or run a limited company?',
     options: [
       { value: 'no', primary: 'No', detail: 'both employed, or not working', emphasised: true },
       { value: 'me', primary: 'Yes', detail: 'I am' },

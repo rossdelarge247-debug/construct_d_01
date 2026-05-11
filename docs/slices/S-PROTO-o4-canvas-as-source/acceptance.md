@@ -39,7 +39,7 @@ Keyboard model: arrow keys move within the radio group, Space selects, Tab leave
 `src/app/dev/proto/pre-signup-interview/screens/O4.module.css` ships the canvas's animation spec consistent with O1-O3:
 
 - **Chip-card hover:** 1px upward translate + border-colour transition 160ms ease (canvas `LiveOptionRow` L99 `transition: "background 120ms ease-out, border-color 120ms ease-out, padding 160ms ease-out"` — 160ms aligns to O1-O3's established cross-screen rhythm).
-- **Chip-card selected:** INK fill + dot transitions inherited from canvas (border-color 160ms + dot-fill 120ms + background 160ms). Emphasised variant: padding transitions 160ms ease so the emphasised → selected transition stays smooth (matches canvas L99 `padding 160ms ease-out`).
+- **Chip-card selected:** INK fill via `.cardSelected` (background-color 160ms + border-color 160ms). Inner radio dot is conditional-rendered (matches canvas `LiveOptionRow` L102-110 `{selected && <span ... />}`); the dot itself has no CSS transition — the canvas transition list at L99 covers `background, border-color, padding` only. Emphasised variant: padding transitions 160ms ease so the emphasised → selected transition stays smooth (matches canvas L99 `padding 160ms ease-out`).
 - **Chip-card focus-visible:** 2px INK outline at 2px offset on the native `<input>` parent label.
 - **CTA enable:** opacity + saturation 240ms ease-out + single 1px upward keyframe bounce ≤320ms when the button transitions from disabled to enabled.
 - **Page entry:** 8px upward translate + opacity 0→1, 320ms ease-out, 80ms stagger across hero block + 4 OptionRow cards via `animation-delay: calc(var(--stagger-index, 0) * 80ms)` driven by inline `--stagger-index` custom property (matches the unified stagger pattern in O1-O3).
