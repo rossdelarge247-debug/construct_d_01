@@ -16,7 +16,7 @@ Status: TBD pending impl.
 
 ## AC-3 — O2.tsx renders BrandBar (canvas-as-source O2 coverage)
 
-Evidence: diff at `src/app/dev/proto/pre-signup-interview/screens/O2.tsx`. `BrandBar` imported from `../components/BrandBar`; rendered as first child of outer `<div className="flex flex-col min-h-screen w-full max-w-[480px] mx-auto pt-16">` (outer wrapper gains `pt-16` ≈ 64px so position-from-viewport-top matches ScreenShell's 64px top padding). Existing inline `TopBar`, `Hero`, four cards, and footer untouched. Width cap `max-w-[480px]` preserved (the 480px outer cap matching `ScreenShell.tsx:33` is unchanged). Unit test in `brand-bar.test.tsx` renders `<O2 />` (wrapped in the existing `ProtoProvider` test fixture) and asserts the text `Decouple.` is present in the rendered DOM.
+Evidence: diff at `src/app/dev/proto/pre-signup-interview/screens/O2.tsx`. `BrandBar` imported from `../components/BrandBar`; rendered as first child of outer `<div className="flex flex-col min-h-screen w-full max-w-[480px] mx-auto pt-6">` (outer wrapper gains `pt-6` ≈ 24px so position-from-viewport-top matches ScreenShell's 24px top padding). Existing inline `TopBar`, `Hero`, four cards, and footer untouched. Width cap `max-w-[480px]` preserved (the 480px outer cap matching `ScreenShell.tsx:33` is unchanged). Unit test in `brand-bar.test.tsx` renders `<O2 />` (wrapped in the existing `ProtoProvider` test fixture) and asserts the text `Decouple.` is present in the rendered DOM.
 
 Status: TBD pending impl.
 
@@ -49,7 +49,7 @@ Spec 72a six-dimension rubric plus new cross-screen consistency dimension introd
 
 ## Architectural deferrals
 
-Position-from-viewport-top alignment: ScreenShell uses `<main padding: '64px 20px 48px'>` so the BrandBar starts ≈64px from the top of the viewport. O2 outer carries `pt-16` (Tailwind = 64px) so its BrandBar sits at the same ≈64px offset. The canvas L1041-1046 status-bar (`pt-3`) + L1047-1052 brand-bar (`pt-1 pb-2`) rhythm assumes a mobile-shell context; in real-browser context 64px gives the wordmark comfortable breathing room above the back/progress TopBar.
+Position-from-viewport-top alignment: ScreenShell uses `<main padding: '24px 20px 48px'>` so the BrandBar starts ≈24px from the top of the viewport. O2 outer carries `pt-6` (Tailwind = 24px) so its BrandBar sits at the same ≈24px offset. The canvas L1041-1046 status-bar (`pt-3`) + L1047-1052 brand-bar (`pt-1 pb-2`) rhythm assumes a mobile-shell context with a fake 9:41 status row eating the first ~12px; in real-browser context without that row, 24px gives the wordmark comfortable breathing room above the back/progress TopBar without the airy gap that 64px left.
 
 Test-pain audit cleared at impl: brand-bar tests use simple `render()` + `screen.getByText('Decouple.')` assertions and inline-style readouts via `getComputedStyle`; 0 mocks required. Well below the test-pain threshold — spec 72d §3 sets the mock-count rule; spec 76 §3 raises it from >2 to >5 for prototype category.
 

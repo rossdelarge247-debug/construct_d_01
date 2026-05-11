@@ -33,7 +33,7 @@ export function ScreenShell({ step, heading, eyebrow, helper, ctaLabel = 'Contin
       style={{
         maxWidth: 480,
         margin: '0 auto',
-        padding: '64px 20px 48px',
+        padding: '24px 20px 48px',
         display: 'flex',
         flexDirection: 'column',
         gap: 28,
