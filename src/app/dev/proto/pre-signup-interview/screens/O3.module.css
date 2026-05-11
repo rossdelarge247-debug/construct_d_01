@@ -1,0 +1,77 @@
+.entry {
+  animation: o3-entry-in 320ms ease-out both;
+  animation-delay: calc(var(--stagger-index, 0) * 80ms);
+}
+
+@keyframes o3-entry-in {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.card {
+  transition: background-color 160ms ease, border-color 160ms ease, transform 160ms ease, box-shadow 200ms ease;
+}
+
+.card:hover:not(.cardSelected) {
+  transform: translateY(-1px);
+  border-color: #C9C5BD;
+}
+
+.card:focus-within {
+  outline: 2px solid #1A1A1A;
+  outline-offset: 2px;
+}
+
+.cardSelected {
+  box-shadow: 0 4px 16px rgba(26, 26, 26, 0.08);
+}
+
+.pill {
+  transition: background-color 120ms ease, color 120ms ease, border-color 120ms ease;
+}
+
+.pill:has(input:not(:checked)):hover {
+  border-color: #C9C5BD;
+}
+
+.pill:focus-within {
+  outline: 2px solid #1A1A1A;
+  outline-offset: 2px;
+}
+
+.cta {
+  transition: opacity 240ms ease-out, filter 240ms ease-out, background-color 240ms ease-out, color 240ms ease-out;
+}
+
+.ctaEnabled {
+  animation: o3-cta-bounce 320ms ease-out 1;
+}
+
+@keyframes o3-cta-bounce {
+  0% {
+    transform: translateY(0);
+  }
+  40% {
+    transform: translateY(-1px);
+  }
+  100% {
+    transform: translateY(0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .entry,
+  .card,
+  .pill,
+  .cta,
+  .ctaEnabled {
+    animation: none !important;
+    transition: none !important;
+  }
+}
