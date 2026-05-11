@@ -50,7 +50,7 @@ export function hasSafetyFlag(ex: ExAndSafetyAnswers | undefined): boolean {
   return ex?.relationshipQuality === 'safety-concern' || ex?.devicePrivate === 'not-sure';
 }
 
-export type SelfEmployment = 'neither' | 'me' | 'ex' | 'both';
+export type SelfEmployment = 'no' | 'me' | 'ex' | 'both';
 
 export interface EmploymentAnswers {
   selfEmployment?: SelfEmployment;
