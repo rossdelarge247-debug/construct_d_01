@@ -339,7 +339,24 @@ export function O5() {
             />
           ))}
         </div>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 8, marginTop: 12 }}>
+        <div
+          aria-hidden="true"
+          style={{
+            marginTop: 20,
+            marginBottom: 12,
+            borderTop: `1px solid ${colors.border}`,
+          }}
+        />
+        <div
+          style={{
+            marginBottom: 8,
+            font: `italic 400 11px/1.4 ${tokens.font.serif}`,
+            color: colors.sub,
+          }}
+        >
+          If you have concerns…
+        </div>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
           {secondary.map((opt, i) => (
             <OptionRow
               key={opt.value}

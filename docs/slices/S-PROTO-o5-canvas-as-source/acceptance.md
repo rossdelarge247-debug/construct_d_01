@@ -6,7 +6,7 @@
 
 Port the O5 frame ("How much do you know about your partner's financial situation?") from the Claude AI Design canvas to `src/app/dev/proto/pre-signup-interview/screens/O5.tsx` via the 5-step canvas-as-source pattern (CLAUDE.md §"Visual direction" §"Canvas-as-source"). Replaces the current V1 placeholder (`ScreenShell` + `TallRow` flat list, divergent state literals).
 
-Canvas source: `docs/design-source/pre-signup-interview/jsx/o5-frames.jsx`. The canvas exposes 9 variants (A1/A2/A3 × B1/B2/B3 × C1/C2/C3); user-confirmed pick at slice scoping is **A1 + B1 + C2** — `FrameC` with `variant="C2"` at `jsx/o5-frames.jsx` L369-L377, materialised by `C2()` at L379.
+Canvas source: `docs/design-source/pre-signup-interview/jsx/o5-frames.jsx`. The canvas exposes 9 variants (A1/A2/A3 × B1/B2/B3 × C1/C2/C3); user-confirmed pick at slice scoping is **A3 + B1 + C2** — `FrameC` with `variant="C2"` at `jsx/o5-frames.jsx` L369-L377, materialised by `C2()` at L379.
 
 - **A1** — identical visual weight for all four options (no emphasis, no de-emphasis).
 - **B1** — helper text: *"There's no wrong answer. Many people don't know everything."* (`jsx/o5-frames.jsx` L158).
@@ -23,14 +23,14 @@ Canvas source: `docs/design-source/pre-signup-interview/jsx/o5-frames.jsx`. The 
 
 ## Out of scope
 
-- Canvas variants A2, A3, B2, B3, C1, C3 — only A1+B1+C2 ships (user-confirmed pick at scoping).
+- Canvas variants A1, A2, B2, B3, C1, C3 — only A3+B1+C2 ships (user-confirmed pick after preview pre-flight; recorded in `verification.md` §"User-feedback iterations").
 - Production-graduation backlog items (sticky-CTA hardening, 44×44 touch target on Back, `100dvh` vs `100vh` sweep) — bundle deferred to a single production-graduation pass when the pre-signup flow exits `/dev/proto/`.
 - Shared component changes (`BrandBar`, `Arrow`, `ProgressPill`, `ScreenShell`) — already audited at sessions 87-88, no new requirements emerge from O5.
 - O6 — separate slice (`S-PROTO-o6-canvas-as-source`).
 
 ## Acceptance criteria
 
-### AC-1 — Visual structure mirrors canvas A1+B1+C2
+### AC-1 — Visual structure mirrors canvas A3+B1+C2
 
 The O5 page is the canvas-derived composition at `jsx/o5-frames.jsx` `FrameC variant="C2"` (L369-L377), with shared chassis matching O3/O4 siblings:
 
@@ -39,11 +39,11 @@ The O5 page is the canvas-derived composition at `jsx/o5-frames.jsx` `FrameC var
    - Eyebrow row: 5×5 indigo dot + `"Money · their side"` text (fontSize 9.5, color indigo, gap 1.5).
    - H2: *"How much do you know about your partner's financial situation?"* — serif, fontSize 21, lineHeight 1.18, letterSpacing -0.015em, fontWeight 600.
    - Helper paragraph (B1): *"There's no wrong answer. Many people don't know everything."* — fontSize 12, color SUB, lineHeight 1.45.
-3. **Body fieldset** with single sr-only `<legend>` + four `<input type="radio" name="o5-partner-awareness">` rendered as chip-cards. Layout splits visually per C2 (`jsx/o5-frames.jsx` L302-L313):
-   - Primary group (three rows): full → some → little, vertical gap `space-y-2`.
-   - `mt-3` gap.
-   - Secondary group (one row): suspect.
-   - No divider, no "If you have concerns…" header (A1 holds; the divider belongs to A3).
+3. **Body fieldset** with single sr-only `<legend>` + four `<input type="radio" name="o5-partner-awareness">` rendered as chip-cards. Layout splits visually per canvas A3+C2 (`jsx/o5-frames.jsx` L281-L298 with `ord.kind === "split"`):
+   - Primary group (three rows): full → some → little, vertical gap 8px.
+   - 20px `marginTop` then a 1px `colors.border` top-divider (`aria-hidden`), then 12px `marginBottom`.
+   - 11px serif-italic *"If you have concerns…"* header in `colors.sub`, 8px below before the secondary row.
+   - Secondary group (one row): suspect, no de-emphasis (A3 keeps the chip identical-weight; only A2 mutes).
 4. **Chip-card** per `OptionRow` (`jsx/o5-frames.jsx` L102-L154):
    - Padding 14px both axes, border-radius 14, 1px border (ink when selected, line otherwise).
    - Background ink when selected, white otherwise.

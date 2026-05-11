@@ -82,6 +82,12 @@ Full DoD per CLAUDE.md:
 - [ ] User feedback received + addressed (or explicitly deferred)
 - [ ] No regression in O3 / O4 / O7 / O8 (smoke check)
 
+## User-feedback iterations
+
+In-PR visual iterations on the preview deploy, recorded atomically per CLAUDE.md §"Scoping-discipline observations" recurrence-watch (in-PR scope-expansion confirmation gate):
+
+- **Variant pick switched from A1+B1+C2 to A3+B1+C2 after preview pre-flight.** User direction verbatim from preview pre-flight: *"i suspect they might be hiding something isnt separated by a thin line"*; clarification follow-up: *"doent c2 have that in canvas"*. After confirming canvas A1+C2 has only a gap and the thin line + framing header live in A3, user picked the full A3 treatment from a three-option clarification (canvas-pure C2, hybrid line-only, full A3). Implementation now mirrors canvas FormBody A3 branch at `jsx/o5-frames.jsx` L281-L298 with `ord.kind === "split"`: 20px gap + 1px `borderTop` divider in `colors.border` + 12px gap + 11px serif-italic *"If you have concerns…"* header in `colors.sub` + 8px gap before the suspect chip-card. The chip retains identical visual weight (A3 doesn't de-emphasise; only A2 does). AC-1 item 3 + §Scope variant pick + §Out of scope variant list amended atomically.
+
 ## Architectural deferrals
 
 Findings from auto-review that are explicitly deferred with reasoning:

@@ -57,20 +57,43 @@ describe('O5 (canvas-as-source)', () => {
     expect(fieldset?.getAttribute('aria-labelledby')).toBe('o5-partner-legend');
   });
 
-  it('splits the four options into a primary group of 3 and a secondary group of 1 (C2 layout)', () => {
+  it('splits the four options into a primary group of 3 and a secondary group of 1 (A3+C2 layout)', () => {
     renderO5();
     const legend = screen.getByText(
       "How much do you know about your partner's financial situation?",
       { selector: 'legend' },
     );
     const fieldset = legend.closest('fieldset')!;
-    const groupDivs = Array.from(fieldset.children).filter((c) => c.tagName === 'DIV');
-    expect(groupDivs).toHaveLength(2);
-    const primaryRadios = groupDivs[0].querySelectorAll('input[type="radio"]');
-    const secondaryRadios = groupDivs[1].querySelectorAll('input[type="radio"]');
+    const radioContainingDivs = Array.from(fieldset.children).filter(
+      (c) => c.tagName === 'DIV' && c.querySelectorAll('input[type="radio"]').length > 0,
+    );
+    expect(radioContainingDivs).toHaveLength(2);
+    const primaryRadios = radioContainingDivs[0].querySelectorAll('input[type="radio"]');
+    const secondaryRadios = radioContainingDivs[1].querySelectorAll('input[type="radio"]');
     expect(primaryRadios).toHaveLength(3);
     expect(secondaryRadios).toHaveLength(1);
     expect((secondaryRadios[0] as HTMLInputElement).value).toBe('suspect');
+  });
+
+  it('renders the A3 separator: thin divider line + "If you have concerns…" italic header above the suspect row', () => {
+    renderO5();
+    const header = screen.getByText('If you have concerns…');
+    expect(header).toBeTruthy();
+    const suspectRadio = radio(/I suspect they may be hiding things/);
+    const legend = screen.getByText(
+      "How much do you know about your partner's financial situation?",
+      { selector: 'legend' },
+    );
+    const fieldset = legend.closest('fieldset')!;
+    const children = Array.from(fieldset.children);
+    const headerIdx = children.indexOf(header);
+    const suspectGroup = suspectRadio.closest('label')?.parentElement;
+    const suspectIdx = suspectGroup ? children.indexOf(suspectGroup) : -1;
+    expect(headerIdx).toBeGreaterThan(-1);
+    expect(suspectIdx).toBeGreaterThan(headerIdx);
+    const divider = children[headerIdx - 1] as HTMLElement;
+    expect(divider.getAttribute('style')).toMatch(/border-top/i);
+    expect(divider.getAttribute('aria-hidden')).toBe('true');
   });
 
   it('renders the "little" option with the canvas detail string as an inline suffix', () => {
