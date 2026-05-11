@@ -14,12 +14,15 @@ export function ProgressPill({ step, total = TOTAL_STEPS }: Props) {
     <div
       style={{ display: 'inline-flex', alignItems: 'center', gap: 10 }}
       role="progressbar"
-      aria-valuenow={step}
+      aria-valuenow={Math.max(1, step)}
       aria-valuemin={1}
       aria-valuemax={total}
       aria-label={`Step ${step} of ${total}`}
     >
-      <span style={{ font: `500 9.5px/1.2 ${tokens.font.sans}`, color: tokens.color.text.muted }}>
+      <span
+        aria-hidden="true"
+        style={{ font: `500 9.5px/1.2 ${tokens.font.sans}`, color: tokens.color.text.muted }}
+      >
         Step {step} / {total}
       </span>
       <span

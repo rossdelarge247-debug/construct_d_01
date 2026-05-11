@@ -1,6 +1,6 @@
 'use client';
 
-import type { ReactNode } from 'react';
+import { useState, type ReactNode } from 'react';
 import { tokens } from '@/styles/tokens';
 import { ProgressPill } from './ProgressPill';
 import { PrimaryCTA } from './PrimaryCTA';
@@ -26,6 +26,7 @@ function normalizeTitle(heading: string | TitleShape): TitleShape {
 export function ScreenShell({ step, heading, eyebrow, helper, ctaLabel = 'Continue', ctaCaption, ctaDisabled, onContinue, onBack, children }: Props) {
   const title = normalizeTitle(heading);
   const backVisible = Boolean(onBack && step > 1);
+  const [backFocused, setBackFocused] = useState(false);
   return (
     <main
       style={{
@@ -51,6 +52,8 @@ export function ScreenShell({ step, heading, eyebrow, helper, ctaLabel = 'Contin
         <button
           type="button"
           onClick={onBack}
+          onFocus={() => setBackFocused(true)}
+          onBlur={() => setBackFocused(false)}
           aria-hidden={!backVisible}
           aria-label={backVisible ? 'Back to previous step' : undefined}
           tabIndex={backVisible ? 0 : -1}
@@ -68,6 +71,9 @@ export function ScreenShell({ step, heading, eyebrow, helper, ctaLabel = 'Contin
             minWidth: 44,
             font: `500 11px/1.2 ${tokens.font.sans}`,
             color: tokens.color.text.sub,
+            outline: backVisible && backFocused ? `2px solid ${tokens.color.ink}` : 'none',
+            outlineOffset: 2,
+            borderRadius: 4,
           }}
         >
           <svg

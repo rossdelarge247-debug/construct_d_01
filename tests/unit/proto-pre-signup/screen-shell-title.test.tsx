@@ -12,7 +12,7 @@ function renderShell(heading: Parameters<typeof ScreenShell>[0]['heading']) {
   );
 }
 
-describe('ScreenShell title rendering (AC-1 TitleShape)', () => {
+describe('ScreenShell title rendering', () => {
   it('normalises a plain string heading into an h1', () => {
     const { getByRole } = renderShell('Hello world');
     expect(getByRole('heading', { level: 1 }).textContent).toBe('Hello world');
