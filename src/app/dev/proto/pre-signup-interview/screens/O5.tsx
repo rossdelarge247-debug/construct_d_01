@@ -14,7 +14,7 @@ const colors = {
   ink: tokens.color.ink,
   sub: tokens.color.text.sub,
   muted: tokens.color.text.muted,
-  line: tokens.color.border,
+  border: tokens.color.border,
   indigo: tokens.color.accent.indigo,
 };
 
@@ -28,7 +28,7 @@ function TopBar({ step, onBack }: { step: number; onBack: () => void }) {
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'space-between',
-        borderBottom: `1px solid ${colors.line}`,
+        borderBottom: `1px solid ${colors.border}`,
       }}
     >
       <button
@@ -138,7 +138,7 @@ function OptionRow({
           gap: 12,
           width: '100%',
           background: selected ? colors.ink : '#FFFFFF',
-          border: `1px solid ${selected ? colors.ink : colors.line}`,
+          border: `1px solid ${selected ? colors.ink : colors.border}`,
           borderRadius: 14,
           padding: '14px 14px',
           cursor: 'pointer',
@@ -235,7 +235,7 @@ function Footer({
     <div
       style={{
         padding: '12px 20px 16px',
-        borderTop: `1px solid ${colors.line}`,
+        borderTop: `1px solid ${colors.border}`,
         background: 'rgba(245,245,244,0.85)',
         backdropFilter: 'blur(8px)',
       }}

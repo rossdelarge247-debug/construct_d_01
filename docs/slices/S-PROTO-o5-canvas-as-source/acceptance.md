@@ -68,7 +68,7 @@ The O5 page is the canvas-derived composition at `jsx/o5-frames.jsx` `FrameC var
 ### AC-4 — Motion: transitions match canvas L113; entry stagger; reduced-motion fallback
 
 - Chip-card transition list verbatim from canvas L113: `background 120ms ease-out, border-color 120ms ease-out`. No other transitions on the chip-card itself; the inner dot is conditional-rendered with no CSS transition.
-- Entry stagger via `--stagger-index` CSS custom property on each chip-card (mirrors `O4.module.css`); the `mt-3`-gap secondary group continues the stagger sequence (suspect = index 3 if primary is 0/1/2).
+- Entry stagger via `--stagger-index` CSS custom property on each chip-card (mirrors `O4.module.css`); the `mt-3`-gap secondary group continues the stagger sequence. Hero is `--stagger-index: 0` (matching O4 sibling chassis), so the chip indices are 1/2/3 (primary group) + 4 (secondary `suspect`).
 - CTA enter-bounce when state flips from disabled → enabled (single keyframe, mirrors O4).
 - `@media (prefers-reduced-motion: reduce)` fallback: all transitions + entry animations set to `none` / `0s`.
 
