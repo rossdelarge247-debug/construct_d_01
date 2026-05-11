@@ -301,12 +301,13 @@ export function O4() {
   return (
     <main
       style={{
+        width: '100%',
         maxWidth: 480,
         margin: '0 auto',
-        minHeight: '100dvh',
+        paddingTop: 24,
+        minHeight: '100vh',
         display: 'flex',
         flexDirection: 'column',
-        background: '#FFFFFF',
       }}
     >
       <BrandBar />
