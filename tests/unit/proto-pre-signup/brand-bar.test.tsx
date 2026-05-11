@@ -21,10 +21,11 @@ describe('BrandBar (component isolation)', () => {
     expect(screen.queryByRole('link', { name: /decouple/i })).toBeNull();
   });
 
-  it('applies canvas-verbatim typography (14px / 700 / -0.02em)', () => {
+  it('applies canvas-verbatim typography (Inter / 14px / 700 / -0.02em)', () => {
     render(<BrandBar />);
     const wordmark = screen.getByText('Decouple.') as HTMLElement;
     const styleAttr = wordmark.getAttribute('style') ?? '';
+    expect(styleAttr).toContain('Inter');
     expect(styleAttr).toContain('14px');
     expect(styleAttr).toContain('font-weight: 700');
     expect(styleAttr).toContain('-0.02em');
