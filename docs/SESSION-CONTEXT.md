@@ -1,81 +1,85 @@
-# Session 84 Pre-flight Context Block (carrying session 83 wrap delta)
+# Session 85 Pre-flight Context Block (carrying session 84 wrap delta)
 
-## Session 83 wrap delta — read this first
+## Session 84 wrap delta — read this first
 
-Session 83 shipped two PRs addressing the canvas-fidelity orchestrator's first live exercise + downstream sizing constraint. Both originated from the same source: PR #140's `Linked canvas:` field declaring `Pre-signup Canvas - Standalone.html` (path with 3 spaces), surfacing a word-split bug at session 81's ship + a follow-on canvas-too-large rejection on Anthropic API.
+Session 84 shipped two PRs against the carrying-forward problem from session 83 (canvas-fidelity persona's first calibration cycle).
 
-**PR #142 — `fix(auto-review): canvas-fidelity orchestrator handles paths-with-spaces`** — merged at `2f8bc48`. Single-canvas-per-slice convention. Drops the loop in `auto-review.yml` `brief.compose` step; renames `CANVAS_PATHS` → `CANVAS_PATH`; quotes at every consumer site. Aligned across 3 surfaces (workflow + CLAUDE.md + persona file).
+**PR #145 — `fix(auto-review): tolerate claude -p non-zero + capture exit code for step warning`** — merged at `56475b4`. Round-1 added `|| true` so the diagnostic group + parse below run when `claude -p` exits non-zero (transient API errors). Round-2 (addressing auto-review correctness + style findings) replaced `|| true` with `|| CLAUDE_EXIT=$?` + a `::warning::` annotation when non-zero, so persistent failures (e.g. brief-size regression) surface distinctly from one-off rate-limits at job granularity. Parse-script tolerates empty stdin via `{}` sentinel; aggregator handles inconclusive dim per spec 72c §3 degraded-mode rules. Auto-review verdict: `approve`, 0 findings, all 3 specialists healthy. Shadow monitor: k=1 + k=3 both would-have-been approve.
 
-**PR #143 — `fix(auto-review): restore multi-canvas support with comma-separator`** — open + approved at session wrap (CI 25/25 success, auto-review round-2 verdict `approve`). Same-session reversal of PR #142's single-canvas convention after data-driven recalibration. PR #140's re-fire on post-#142 main proved the orchestrator fix worked but surfaced a new failure mode: canvas-fidelity persona crashed at 11s with no diagnostic output (claude -p exit code 1; stderr empty because `--output-format=json` mode writes errors to stdout which gets redirected; the diagnostic block at workflow L290-292 is gated behind `set -e` and never runs). Root cause: 10.8MB combined `Pre-signup Canvas - Standalone.html` exceeds Anthropic API per-request limits. Per-screen decoded HTML files (10-30KB each) fit comfortably; comma-separator multi-path syntax restored to support them.
+**PR #140 update (3 commits) — `S-PROTO-canvas-fidelity-rebuild · swap Linked canvas to per-screen JSX + re-quote ACs at JSX line numbers`** — open + approved at session wrap (still draft per session-82 choice to defer impl). Discovery during P2-prep: the kickoff/HANDOFF-83 claim that "per-screen decoded HTML files exist alongside the combined canvas" was misleading — those parent-level HTML files are React-SPA wrappers with meta-framing (`color: MAGENTA`, "screen N of 8" captions), NOT the canonical visual treatment. The canon source is `docs/design-source/pre-signup-interview/jsx/o{2..6}-frames.jsx` — already labelled `**Canvas (canon)**` verbatim by `S-INFRA-canvas-fidelity-gate/calibration-report.md`. The slice's existing AC quote blocks were JSX content but mislabelled "Pre-signup Canvas Lxxxx" (combined-canvas line numbers). Relabel was tighter than re-finding the same content in HTML.
 
-**Diagnosis trail durably captured in `docs/HANDOFF-SESSION-83.md`** — read for the full retro including the empty-runtime-stream signature that pinned down the failure mode and the route-2 trade-off matrix that informed the multi-canvas restoration.
+Round-1 (`959d930`) swapped `Linked canvas:` to 5 comma-separated JSX paths (~91KB total), re-quoted 4 ACs at JSX line refs (AC-1 L171-172, AC-2 L89, AC-3 L154-158, AC-4 L40-42), added cross-screen pattern repeats for AC-3 + AC-4, marked the empty-fence architectural deferral RESOLVED. Round-2 (`8dfe2a2`) fixed spec-citation-quote-check failure by rephrasing "per spec 72c §3" to drop the trigger phrase while preserving the spec link.
 
-## Session 84 priorities — user picks scope
+**Auto-review on PR #140 round-2 push:** approve — 4 findings, all non-blocking. Canvas-fidelity persona's first real fire against JSX canon ran in ~46s (vs 11s crash on the 10.8MB combined). 1 note (header-affordances `<a href="#">` wrapper observation), 2 praise (spec-citation alignment, security guard), 1 question (cross-screen L39 verification — confirmed accurate at P2-prep).
+
+**Diagnosis trail durably captured in `docs/HANDOFF-SESSION-84.md`** — read for the HTML-vs-JSX discovery, the round-1/round-2 evolutions, and the calibration-status framing (findings 1-4 deferred to impl PR per persona design).
+
+## Session 85 priorities — user picks scope
 
 | # | Priority | Scope | Effort | Blocked? |
 |---|---|---|---|---|
-| 1 | **Verify PR #143 + handoff PR merge state** | If PR #143 still open, surface for user to merge — it's the multi-canvas workflow restoration that unblocks P2. The handoff PR (this session's wrap docs) similarly needs landing. Quick state check; 2 minutes. | Trivial | No |
-| 2 | **Update PR #140's `Linked canvas:` to per-screen comma-separated files** | Replace single 10.8MB combined canvas with `o2-your-situation-expressive.html, o3-your-ex-and-safety-expressive.html, o4-employment-complexity-expressive.html, o5-partner-finances-expressive.html, o6-what-matters-to-you-expressive.html` (covers AC scope O2-O6). Re-quote the 4 ACs against per-screen line numbers — currently citing combined-canvas L941, L990, L1063-1066, L1079-1080. | Medium (read-heavy: locate the same elements in each per-screen file; line numbers differ) | Yes — depends on P1 |
-| 3 | **Re-fire PR #140 auto-review post-update** | Capture canvas-fidelity persona's first real verdict against per-screen content. The 4 ACs map to S-INFRA-canvas-fidelity-gate's calibration findings 1-4; this is the calibration moment session 81 promised. Also informs persona's category × default-label/blocking matrix tuning. | Light (re-fire is mechanical; reading the verdict is the substantive step) | Yes — depends on P2 |
-| 4 | **Workflow diagnostic-gate fix (small standalone PR)** | When `claude -p` fails the canvas-fidelity specialist job, the diagnostic block at L290-292 (`head -50 "/tmp/raw-${DIM}.json"`) never runs because `set -e` kills the shell first. Either (a) `|| true` on the npx call so the diagnostic always runs, or (b) also upload `/tmp/raw-${DIM}.json` as a debug artifact regardless of envelope status. Without this, the next failure is a black box. | Light (~10L workflow change) | No |
-| 5 | **(Inherited) Spec 65 amendment to capture quantitative profiling data** | Still parked from earlier sessions. Out of scope unless explicitly added. | Heavy | No |
+| 1 | **Impl session for S-PROTO-canvas-fidelity-rebuild** | The impl PR that lands the 4 calibration findings against actual `src/` changes. Scope per acceptance.md: `TitleShape` discriminated union + ScreenShell title rendering (bold pre-segment + italic non-bold accent + optional full stop) · SubQuestionCard label serif (14px 600 INK lh 1.2) · ScreenShell header chrome (top-left back-button + chevron + `borderBottom 1px solid #E5E3DC` divider) · ProgressChip → ProgressPill (96×3 geometry, INK fill on #E5E3DC). Plus the 4 calibration-report findings surface for the first time against actual diff. Per AC-as-canvas-quote discipline; preview-deploy 6-dim rubric per spec 72a. | Heavy (~700-800L est per acceptance.md §Pre-flight) | No |
+| 2 | **spec-citation-quote-check author-time hook (optional)** | Mirror `.claude/hooks/comment-review.sh` pattern (PostToolUse Write\|Edit, advisory exit-0). Catches "per spec X" without proximity quote at edit time, before the CI cycle. Small standalone PR. | Light (~50L of bash + a shellspec) | No |
+| 3 | **Comment-review hook §Status exemption fix (optional)** | Stub-mode hook flagged "session 82 P2" and "session 84 P2" provenance inside `## Status` sections of session-84 acceptance.md and verification.md edits, where CLAUDE.md `^## (§)?Status` exemption should apply. Investigate + repair. Stub-mode advisory only at v3b ship; not urgent. | Light (~20-30L bash) | No |
+| 4 | **(Inherited) Spec 65 amendment to capture quantitative profiling data** | Still parked from earlier sessions. Out of scope unless explicitly added. | Heavy | No |
 
-**Recommended sequence:** P1 (state-check) → P2 (slice update) → P3 (re-fire + verdict review) → P4 (diagnostic-gate fix opportunistically). P3 is the calibration moment that spec 81 has been pointing at since the gate slice merged.
+**Recommended sequence:** P1 alone (impl session is the calibration moment for findings 1-4 + the loveable visual fidelity rebuild). P2 + P3 are tractable side-quests but not on the critical path. Session 84's P4 (diagnostic-gate fix) shipped + landed cleanly, so the gate is reliably observable for P1's auto-review cycles.
 
-## Authoritative reading order at session 84 start
+## Authoritative reading order at session 85 start
 
 1. This file (you are here).
-2. `docs/HANDOFF-SESSION-83.md` (last session's retro — full diagnosis trail + decision rationale for the convention reversal).
-3. `docs/slices/S-INFRA-canvas-fidelity-gate/calibration-report.md` (durable record of user feedback feeding the rebuild AC list — 4 structured findings + 6 speculative findings the gate's first-run is expected to surface).
-4. `docs/slices/S-PROTO-canvas-fidelity-rebuild/acceptance.md` (PR #140's slice ACs that need re-quoting at per-screen line numbers — current line numbers cite combined-canvas).
-5. **Per-screen decoded canvases** (when re-quoting ACs in P2): grep first for the cited element patterns (`<title>`, `<h1>`, italic `<span>`, header chrome, step-pill geometry), then targeted reads only. Per-screen files are 10-26KB so full reads are within budget but grep-first is still cheaper.
+2. `docs/HANDOFF-SESSION-84.md` (last session's retro — HTML-vs-JSX discovery, calibration design framing).
+3. `docs/slices/S-PROTO-canvas-fidelity-rebuild/acceptance.md` (4 ACs with JSX line refs; locked at PR #140's `8dfe2a2`).
+4. `docs/slices/S-PROTO-canvas-fidelity-rebuild/{verification,security,test-plan}.md` (scoping + DoD pending).
+5. `docs/slices/S-INFRA-canvas-fidelity-gate/calibration-report.md` (durable user-feedback record + speculative findings list — the persona is expected to surface 1-4 and possibly 5-10 on the impl PR).
+6. **Per-screen JSX source files** (when implementing): grep first for cited patterns (StepRail at L36-45 · SubLabel at L83-94 · TopBar at L152-164 · Hero at L167-176 in jsx/o2-frames.jsx), then targeted reads. Files are 15-22KB each so full reads are within budget but grep-first is still cheaper.
 
-## Session 84 kickoff prompt (paste-ready)
+## Session 85 kickoff prompt (paste-ready)
 
 ```
-Kick off session 84.
+Kick off session 85.
 
 Read this file (SESSION-CONTEXT.md) first.
 
 Turn-0 verification:
 - SessionStart hook surfaces live branch state (current branch +
   HEAD vs origin/main + ahead/behind + tree state).
-- Branch convention: harness-suffixed (claude/<scope>-XXXXX). PR #142
-  merged at 2f8bc48; PR #143 + handoff PR may or may not be merged at
-  session 84 start — verify via mcp__github__list_pull_requests.
+- Branch convention: harness-suffixed (claude/<scope>-XXXXX).
+  Session 84 shipped PR #145 (merged at 56475b4) + PR #140 update
+  (3 commits; PR open + draft + approved at session wrap).
+  Session 85 starts from clean main if the wrap PR has merged.
 - If the harness landed you on a different base, follow CLAUDE.md
   §"Branch-resume check": git fetch origin main → git checkout -B
   <branch> origin/main.
 
 Read at session start (Tier 2 + Tier 3, in order):
 1. docs/SESSION-CONTEXT.md (this file).
-2. docs/HANDOFF-SESSION-83.md.
-3. docs/slices/S-INFRA-canvas-fidelity-gate/calibration-report.md.
-4. docs/slices/S-PROTO-canvas-fidelity-rebuild/acceptance.md.
+2. docs/HANDOFF-SESSION-84.md.
+3. docs/slices/S-PROTO-canvas-fidelity-rebuild/acceptance.md.
+4. docs/slices/S-INFRA-canvas-fidelity-gate/calibration-report.md.
 
-Confirm priority with user. SESSION-CONTEXT recommends sequence
-P1 (state-check) → P2 (PR #140 slice update) → P3 (re-fire + verdict)
-→ P4 (diagnostic-gate fix opportunistically). User may pick different
-scope.
+Confirm priority with user. SESSION-CONTEXT recommends P1 (impl
+session for S-PROTO-canvas-fidelity-rebuild) alone — the calibration
+moment for findings 1-4 against actual src/ changes. P2/P3 are
+tractable side-quests but not on the critical path.
 
 Definition of Done for the chosen priority:
-- All ACs met with evidence per AC in verification.md.
-- Tests written + passing where tractable.
-- Auto-review verdict: approve / nit-only on the new PR.
-- Preview-deploy verified in-browser if UI work.
+- All 4 ACs met with evidence per AC in verification.md.
+- Tests written + passing where tractable (TitleShape parser/renderer
+  + ProgressPill width-fill including (0, 0) boundary; visual-only
+  changes verified via preview-deploy 6-dim rubric).
+- Auto-review verdict: approve / nit-only on the impl PR.
+- Preview-deploy verified in-browser against spec 72a 6-dim rubric:
+  golden path · edge cases · prefers-reduced-motion · keyboard-only ·
+  mobile viewport (375×667) · screen-reader.
 - security.md item 12 stays Pending at PR open; closes Done
   post-verdict.
 
-If P2 (PR #140 slice update) is the pick: this is the slice-author
-work that completes the canvas-fidelity gate's first calibration
-cycle. The persona's verdict on per-screen content becomes the
-authoritative signal for whether the calibration-report's 4 findings
-are correctly captured.
-
-If P4 (diagnostic-gate fix) is the pick: small standalone PR. The
-fix unblocks future canvas-fidelity job-failure diagnosis. Worth
-shipping before the next persona's per-screen run so any new failure
-mode is observable from the start.
+If P1 (impl session) is the pick: read the acceptance.md ACs and
+the relevant JSX line refs (jsx/o2-frames.jsx L40-42 for AC-4 pill,
+L89 for AC-2 sub-Q label, L154-158 for AC-3 TopBar header chrome,
+L171-172 for AC-1 Hero title). Implement on a new slice-impl branch
+off main; PR #140 stays as the locked-AC scaffold.
 ```
 
 ## Product positioning (preserve across sessions)
@@ -88,15 +92,15 @@ Next.js 14 (app router) + TypeScript · Tailwind via CSS variables · S-F1 token
 
 ## Branch
 
-Session 84 branch: harness-suffixed off clean main. PR #142 merged at `2f8bc48`; PR #143 + handoff PR landing TBD at session 84 start. Session 83 working branches deletable post-merge.
+Session 85 branch: harness-suffixed off clean main. Session 84 shipped PR #145 (merged at `56475b4`); the wrap PR + PR #140 update landing TBD at session 85 start. Session 84 working branches deletable post-merge.
 
 ## Negative constraints (preserve)
 
-#1-#39 from prior sessions. No new constraints session 83.
+#1-#39 from prior sessions. No new constraints session 84.
 
 ## Scope ceiling
 
-Session 84 is most likely P1 (state-check) + P2 (PR #140 slice update) + P3 (re-fire + verdict capture) + P4 (diagnostic-gate fix opportunistically). Out of scope unless explicitly added: the public-pages nav-bar reconciliation (separate concern flagged session 81 turn 3) · `Decouple.zip` unpacking · spec 65 amendments to capture quantitative profiling data · O7-O8 fidelity rebuild (PR #140's slice scopes O2-O6 only per session 82 user-confirmed Scope-A).
+Session 85 is most likely P1 (impl session for S-PROTO-canvas-fidelity-rebuild) alone. Out of scope unless explicitly added: P2 (spec-citation-quote-check author-time hook) · P3 (comment-review §Status exemption fix) · public-pages nav-bar reconciliation (separate concern flagged session 81) · `Decouple.zip` unpacking · spec 65 amendments to capture quantitative profiling data · O7-O8 fidelity rebuild (PR #140's slice scopes O2-O6 only per session-82 user-confirmed Scope-A) · Welcome Tour · Mobile/Desktop responsive variants · Help Rail desktop.
 
 ## Current pre-signup prototype URL
 
