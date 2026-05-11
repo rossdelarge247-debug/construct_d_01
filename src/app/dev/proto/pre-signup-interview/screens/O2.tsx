@@ -2,6 +2,7 @@
 
 import type { CSSProperties, ReactNode } from 'react';
 import { tokens } from '@/styles/tokens';
+import { BrandBar } from '../components/BrandBar';
 import { useProto } from '../lib/proto-context';
 import { getCopy } from '../lib/copy/o2';
 import type {
@@ -297,7 +298,8 @@ export function O2() {
     (situation.home ? 1 : 0);
 
   return (
-    <div className="flex flex-col min-h-screen w-full max-w-[480px] mx-auto">
+    <div className="flex flex-col min-h-screen w-full max-w-[480px] mx-auto pt-12">
+      <BrandBar />
       <TopBar step={step} onBack={back} />
       <Hero eyebrow={copy.eyebrow} heading={copy.heading} />
       <div className="px-5 pt-2 pb-3 space-y-2.5 flex-1">
