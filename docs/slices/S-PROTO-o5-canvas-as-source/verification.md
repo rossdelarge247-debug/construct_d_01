@@ -45,7 +45,7 @@ Evidence:
   - CTA enter-bounce keyframe on state flip disabled → enabled.
   - `@media (prefers-reduced-motion: reduce)` fallback: all transitions + animations set to `none` / `0s`.
 
-## Preview-deploy verification (per spec 72a 6+1 rubric)
+## Preview-deploy verification (spec 72a 6+1-dimension rubric)
 
 | Dimension | Status | Evidence |
 |---|---|---|
@@ -62,7 +62,7 @@ Evidence:
 - 3-specialist auto-review (`reviewer-security`, `reviewer-prototype-readiness`, `reviewer-style`) on impl PR per `.github/workflows/auto-review.yml`. Pending verdict.
 - Findings addressed or deferred with reasoning recorded against the relevant AC above.
 
-## Definition of Done (prototype short-form per spec 76 §3)
+## Definition of Done (spec 76 §3 prototype short-form)
 
 DoD-14 short-form items applicable for `category: prototype`:
 
