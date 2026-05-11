@@ -1,9 +1,9 @@
-import type { Stage, RelationshipQuality, DevicePrivate, TitleShape } from '../types';
+import type { Stage, RelationshipQuality, DevicePrivate } from '../types';
 
 interface RelationshipOption {
   value: RelationshipQuality;
-  label: string;
-  helper?: string;
+  primary: string;
+  detail?: string;
 }
 
 interface DeviceOption {
@@ -13,7 +13,7 @@ interface DeviceOption {
 
 export interface O3Copy {
   eyebrow: string;
-  heading: TitleShape;
+  heading: string;
   relationship: {
     label: string;
     options: ReadonlyArray<RelationshipOption>;
@@ -23,28 +23,38 @@ export interface O3Copy {
     label: string;
     options: ReadonlyArray<DeviceOption>;
   };
+  captions: {
+    pickToContinue: string;
+    privacyOptional: string;
+    bothAnswered: string;
+  };
 }
 
 export function getCopy(_stage: Stage): O3Copy {
   return {
-    eyebrow: 'O3 · Your ex & safety',
-    heading: { kind: 'plain', text: 'How would you describe things between you?' },
+    eyebrow: 'Your ex',
+    heading: 'How would you describe things between you and your ex?',
     relationship: {
-      label: 'Your relationship right now',
+      label: 'How would you describe things between you and your ex?',
       options: [
-        { value: 'amicable', label: 'Amicable', helper: 'We want to sort this out together' },
-        { value: 'difficult', label: 'Difficult — but manageable' },
-        { value: 'high-conflict', label: 'High conflict', helper: 'Communication is very hard' },
-        { value: 'safety-concern', label: 'I have safety concerns' },
+        { value: 'amicable', primary: 'Amicable', detail: 'we want to sort this out together' },
+        { value: 'difficult', primary: 'Difficult', detail: 'but manageable' },
+        { value: 'high-conflict', primary: 'High conflict', detail: 'communication is very hard' },
+        { value: 'safety-concern', primary: 'I have safety concerns' },
       ],
     },
     privacy: {
-      preamble: 'Some people read these screens with a partner nearby.',
+      preamble: 'Some people read these screens with a partner nearby. We want to know whether you have privacy here.',
       label: 'Is this device private to you?',
       options: [
         { value: 'yes', label: 'Yes' },
         { value: 'not-sure', label: 'Not sure' },
       ],
+    },
+    captions: {
+      pickToContinue: 'Pick the option that fits best to continue.',
+      privacyOptional: "Device privacy is optional — skip if you'd like.",
+      bothAnswered: 'Both answered.',
     },
   };
 }
