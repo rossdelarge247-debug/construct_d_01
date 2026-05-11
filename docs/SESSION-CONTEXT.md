@@ -18,13 +18,15 @@ Session 85 shipped two PRs that closed the canvas-fidelity calibration cycle + p
 
 | # | Priority | Scope | Effort | Blocked? |
 |---|---|---|---|---|
-| 1 | **Pilot canvas-as-source on a chosen screen** | First src/ slice demonstrating the new pattern. User to confirm screen: O1 stage router (recommended — entry screen + introduces new header across the prototype), O7 your plan (untouched), or refactored O2 with new header (revisits the rebuild). Build under `src/app/dev/proto/pre-signup-interview/screens/`. Apply 5-step adapt per CLAUDE.md §"Visual direction" §"Canvas-as-source (prototype default)". Header source: session-81 Pre-signup Canvas Standalone (mobile, for un-authenticated screens). Preview-deploy → user feedback → iterate. No `Linked canvas:` field in `acceptance.md`; canvas-fidelity stays dormant. | Medium-Heavy (~300-500L est) | No |
+| 1 | **Pilot canvas-as-source by re-doing O2** | First src/ slice demonstrating the new pattern, against the highest-contrast target: refactor `src/app/dev/proto/pre-signup-interview/screens/o2.tsx` (the screen PR #147's rebuild just merged) to use canvas-as-source. Tear down the rebuild artefacts (TitleShape discriminated union · ScreenShell title rendering · SubQuestionCard label · ScreenShell header chrome · ProgressPill component) and replace with the canvas JSX adapted via the 5-step pattern per CLAUDE.md §"Visual direction" §"Canvas-as-source (prototype default)". Apply the new header from session-81 Pre-signup Canvas Standalone (mobile, un-authenticated). Preview-deploy → user feedback → iterate. No `Linked canvas:` field in `acceptance.md`; canvas-fidelity stays dormant. Comparing the two artefacts side-by-side is the loveable-demonstration: the rebuild work is the control; the canvas-as-source version is the new norm. | Medium-Heavy (~300-500L est, but a chunk is *deletion* of rebuild work) | No |
 | 2 | **Spec 76 §3 matrix clarification (optional)** | Add explicit note that prototype-default is `Linked canvas:`-field-absent. Spec 72c §4 (canvas-fidelity dimension) similarly. Small doc PR; not blocking the pilot. | Light (~20-40L doc) | No |
 | 3 | **(Inherited) spec-citation-quote-check author-time hook** | Mirror `.claude/hooks/comment-review.sh` pattern (PostToolUse Write\|Edit, advisory exit-0). Catches "per spec X" without proximity quote at edit time, before the CI cycle. Small standalone PR. | Light (~50L bash + shellspec) | No |
 | 4 | **(Inherited) Comment-review hook §Status exemption fix** | Stub-mode hook flags "session X" provenance inside `## Status` blocks where CLAUDE.md `^## (§)?Status` exemption should apply. Investigate + repair. Stub-mode advisory only at v3b ship; not urgent. | Light (~20-30L bash) | No |
 | 5 | **(Inherited) Spec 65 amendment for quantitative profiling data** | Still parked. Out of scope unless explicitly added. | Heavy | No |
 
-**Recommended sequence:** P1 alone — the pilot is where the canvas-as-source pattern proves itself in src/. P2 + P3 + P4 are tractable side-quests but not on the critical path.
+**Recommended sequence:** P1 alone — re-doing O2 with canvas-as-source is the highest-contrast pilot (replaces just-merged rebuild work on the same screen, demonstrating the cost-vs-value difference between the two patterns). P2 + P3 + P4 are tractable side-quests but not on the critical path.
+
+**Session 85 user-confirmed (durably here, not in the prompt):** O2 is the pilot target. O1 stage router and O7 your plan were the alternatives; user picked O2 explicitly for the side-by-side comparison value — the rebuild work is the control artefact, the canvas-as-source version is the new norm. Acknowledge the trade-off: O2 touches merged work (the TitleShape + ScreenShell + ProgressPill components shipped in PR #147), so the slice must explicitly call out which rebuild artefacts get removed and which (if any) survive. The header itself (session-81 Pre-signup Canvas Standalone, mobile) is new content not in the rebuild scope.
 
 ## Authoritative reading order at session 86 start
 
@@ -57,11 +59,18 @@ Read at session start (Tier 2 + Tier 3, in order):
 3. CLAUDE.md §"Visual direction" (new conduct — phase split +
    5-step canvas-as-source pattern).
 
-Confirm priority with user. SESSION-CONTEXT recommends P1 (pilot
-canvas-as-source on a chosen screen) alone. User picks which screen:
-- O1 stage router (recommended — entry screen + introduces new header)
-- O7 your plan (untouched, no rebuild artifact)
-- Refactored O2 with new header (revisits the rebuild)
+Confirm priority with user. SESSION-CONTEXT recommends P1 (re-do
+O2 with canvas-as-source) — user already picked O2 explicitly at
+session-85 wrap for the side-by-side comparison value. The rebuild
+work (TitleShape + ScreenShell + SubQuestionCard label + ScreenShell
+header chrome + ProgressPill) shipped in PR #147 is the control
+artefact; canvas-as-source O2 is the new norm. Scope decision needed
+at session-86 turn-1: which rebuild artefacts get removed, which (if
+any) survive as shared components for other screens.
+
+Header source: session-81 Pre-signup Canvas Standalone (mobile,
+un-authenticated). The new header design is not part of the rebuild
+scope — it's new content sourced from a different canvas.
 
 Definition of Done for the pilot (per CLAUDE.md §"Definition of Done"):
 - Slice acceptance.md + verification.md per the prototype category
