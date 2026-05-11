@@ -21,7 +21,12 @@ export function ProgressPill({ step, total = TOTAL_STEPS }: Props) {
     >
       <span
         aria-hidden="true"
-        style={{ font: `500 9.5px/1.2 ${tokens.font.sans}`, color: tokens.color.text.muted }}
+        style={{
+          font: `500 9.5px/1.2 ${tokens.font.mono}`,
+          color: tokens.color.text.muted,
+          textTransform: 'uppercase',
+          letterSpacing: '0.08em',
+        }}
       >
         Step {step} / {total}
       </span>
