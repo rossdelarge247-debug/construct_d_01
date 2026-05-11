@@ -36,16 +36,13 @@
   transition: background-color 120ms ease, color 120ms ease, border-color 120ms ease;
 }
 
-.pill:hover:not(.pillSelected) {
+.pill:has(input:not(:checked)):hover {
   border-color: #C9C5BD;
 }
 
 .pill:focus-within {
   outline: 2px solid #1A1A1A;
   outline-offset: 2px;
-}
-
-.pillSelected {
 }
 
 .cta {

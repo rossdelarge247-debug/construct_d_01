@@ -1,6 +1,6 @@
 'use client';
 
-import type { CSSProperties, ReactNode } from 'react';
+import { useEffect, useRef, type CSSProperties, type ReactNode } from 'react';
 import { tokens } from '@/styles/tokens';
 import { Arrow } from '../components/Arrow';
 import { BrandBar } from '../components/BrandBar';
@@ -203,7 +203,7 @@ function PrivPill({
 }) {
   return (
     <label
-      className={`${styles.pill}${selected ? ` ${styles.pillSelected}` : ''}`}
+      className={styles.pill}
       style={{
         display: 'inline-flex',
         alignItems: 'center',
@@ -241,6 +241,20 @@ function Footer({
   copy: O3Copy;
   onContinue: () => void;
 }) {
+  const ctaButtonRef = useRef<HTMLButtonElement>(null);
+  const prevEnabledRef = useRef(enabled);
+  useEffect(() => {
+    const wasEnabled = prevEnabledRef.current;
+    prevEnabledRef.current = enabled;
+    const node = ctaButtonRef.current;
+    if (enabled && !wasEnabled && node) {
+      node.classList.add(styles.ctaEnabled);
+      const t = setTimeout(() => {
+        node.classList.remove(styles.ctaEnabled);
+      }, 350);
+      return () => clearTimeout(t);
+    }
+  }, [enabled]);
   let caption: ReactNode;
   if (!enabled) {
     caption = (
@@ -290,10 +304,11 @@ function Footer({
         {caption}
       </div>
       <button
+        ref={ctaButtonRef}
         type="button"
         disabled={!enabled}
         onClick={onContinue}
-        className={`${styles.cta}${enabled ? ` ${styles.ctaEnabled}` : ''}`}
+        className={styles.cta}
         style={{
           width: '100%',
           background: enabled ? colors.ink : colors.line,
