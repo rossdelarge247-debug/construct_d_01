@@ -46,6 +46,19 @@ Unit tests assert (a) `screen.getByRole('radiogroup')` present, (b) `screen.getA
 
 Status: TBD pending impl.
 
+## AC-6 — Cross-screen header + footer chassis unification
+
+Evidence:
+
+- **AC-6.a — Shared `Arrow`:** `src/app/dev/proto/pre-signup-interview/components/Arrow.tsx` (NEW). Canvas-faithful shaft + arrowhead per decoded canvas L766-771; 4-direction rotation via CSS `transform`. O1 + O2 import from shared and no longer define local `Arrow` (verified by `grep -n 'function Arrow\|const Arrow' src/app/dev/proto/pre-signup-interview/`). O1's CTA `<Arrow dir="right" size={13} strokeWidth={2} />` matches canvas L1093 `<Arrow dir="right" size={13} sw={2}/>`.
+- **AC-6.b — `ProgressPill` canonical:** `O2.tsx` `TopBar` renders `<ProgressPill step={step} total={total} />` (no more local `StepRail`). `ProgressPill.tsx` visible-label span now uses `font: '500 9.5px/1.2 ${tokens.font.mono}'` + `textTransform: 'uppercase'` + `letterSpacing: '0.08em'`. DOM textContent + aria-label retain "Step X / Y" / "Step X of Y" — all 5 `progress-pill.test.tsx` assertions pass unchanged.
+- **AC-6.c — `ScreenShell` footer chassis:** `ScreenShell.tsx` footer block uses `borderTop`, `background: rgba(245,245,244,0.85)`, `backdropFilter: blur(8px)`, trust band renders by default (`DEFAULT_TRUST_BAND = { left: 'Free', right: 'Private until saved' }` at file head); `ctaCaption?` retained as caller-override. Button is inline (no more `PrimaryCTA`) with O1's exact spec — `14/18px` padding, `borderRadius: 999`, `fontSize: 14`, `fontWeight: 600`, ink/`#FFFFFF` enabled / border/`#9A968E` disabled, right-arrow `strokeWidth=2`. `PrimaryCTA.tsx` deleted (verified by `git status` — file removed).
+- **AC-6.d — `ScreenShell` outer:** `<main>` carries `paddingTop: 24` + `maxWidth: 480` only; horizontal padding moved to per-section (header `16px 20px 12px`, heading `20px 20px 16px`, children `0 20px`, footer `12px 20px 20px`). No `gap` on the main flex container.
+
+Verified by `npx vitest run tests/unit/proto-pre-signup/` (44 passed) + `npm run typecheck` (0 errors) + `npm run lint` (0 errors).
+
+Status: implemented; cross-screen preview-deploy verification pending eyeball (covered in §Preview-deploy verification below).
+
 ## AC-5 — Animations + reduced-motion
 
 Evidence: `screens/O1.module.css` with named selector blocks for each animation class. Card selector receives `.card`, `.card-hover`, `.card-selected`, `.card-focus`; CTA receives `.cta-enabled` with keyframe animation; outer container + radio cards receive `.entry` with staggered `animation-delay`. `@media (prefers-reduced-motion: reduce)` block resets all `transition` and `animation` properties to negligible durations.

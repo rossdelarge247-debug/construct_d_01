@@ -2,6 +2,7 @@
 
 import { type CSSProperties } from 'react';
 import { tokens } from '@/styles/tokens';
+import { Arrow } from '../components/Arrow';
 import { BrandBar } from '../components/BrandBar';
 import { ProgressPill } from '../components/ProgressPill';
 import { useProto } from '../lib/proto-context';
@@ -15,25 +16,6 @@ const colors = {
   muted: tokens.color.text.muted,
   line: tokens.color.border,
 };
-
-function Arrow({ size = 11, dir = 'left' }: { size?: number; dir?: 'left' | 'right' }) {
-  const points = dir === 'left' ? '7,2 3,5.5 7,9' : '4,2 8,5.5 4,9';
-  return (
-    <svg
-      width={size}
-      height={size}
-      viewBox="0 0 11 11"
-      aria-hidden="true"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth={1.5}
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    >
-      <polyline points={points} />
-    </svg>
-  );
-}
 
 function TopBar({ step }: { step: number }) {
   return (
@@ -258,7 +240,7 @@ export function O1() {
           }}
         >
           <span>{copy.cta}</span>
-          <Arrow dir="right" size={13} />
+          <Arrow dir="right" size={13} strokeWidth={2} />
         </button>
       </div>
     </div>
