@@ -78,7 +78,7 @@ function composePersonalisedNotes(answers: Answers): PlanContent['personalisedNo
         'Because you mentioned safety concerns, Decouple keeps your inputs private until you choose to share, and points you to specialist support if anything feels unsafe.',
     });
   }
-  if (answers.partnerFinances?.awareness === 'very-little' || answers.partnerFinances?.awareness === 'hiding') {
+  if (answers.partnerFinances?.awareness === 'little' || answers.partnerFinances?.awareness === 'suspect') {
     notes.push({
       trigger: 'partner-finance-unknown',
       body:

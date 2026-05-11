@@ -19,7 +19,7 @@ Canvas source: `docs/design-source/pre-signup-interview/jsx/o5-frames.jsx`. The 
 - `src/app/dev/proto/pre-signup-interview/lib/types.ts` — rename `PartnerAwareness` union literals to match canvas keys: `'good-idea' → 'full'`, `'some-things' → 'some'`, `'very-little' → 'little'`, `'hiding' → 'suspect'` (per `jsx/o5-frames.jsx` L96-L99 `OPT_*.key`).
 - `src/app/dev/proto/pre-signup-interview/lib/build-plan.ts` — line 81 literal updates (`'very-little' → 'little'`, `'hiding' → 'suspect'`).
 - `src/app/dev/proto/pre-signup-interview/lib/copy/o5.ts` — rewrite copy shape to match canvas (eyebrow + heading + helper + options-with-detail + captions + cta).
-- `tests/proto/o5-canvas.test.tsx` — new unit tests covering radio group + state shape + split layout + caption state machine.
+- `tests/unit/proto-pre-signup/o5-canvas-as-source.test.tsx` — new unit tests covering radio group + state shape + split layout + caption state machine.
 
 ## Out of scope
 

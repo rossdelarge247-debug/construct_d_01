@@ -56,7 +56,7 @@ export interface EmploymentAnswers {
   selfEmployment?: SelfEmployment;
 }
 
-export type PartnerAwareness = 'good-idea' | 'some-things' | 'very-little' | 'hiding';
+export type PartnerAwareness = 'full' | 'some' | 'little' | 'suspect';
 
 export interface PartnerFinancesAnswers {
   awareness?: PartnerAwareness;
