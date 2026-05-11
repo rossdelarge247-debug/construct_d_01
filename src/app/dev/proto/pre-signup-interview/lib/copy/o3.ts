@@ -1,4 +1,4 @@
-import type { Stage, RelationshipQuality, DevicePrivate } from '../types';
+import type { Stage, RelationshipQuality, DevicePrivate, TitleShape } from '../types';
 
 interface RelationshipOption {
   value: RelationshipQuality;
@@ -13,7 +13,7 @@ interface DeviceOption {
 
 export interface O3Copy {
   eyebrow: string;
-  heading: string;
+  heading: TitleShape;
   relationship: {
     label: string;
     options: ReadonlyArray<RelationshipOption>;
@@ -28,7 +28,7 @@ export interface O3Copy {
 export function getCopy(_stage: Stage): O3Copy {
   return {
     eyebrow: 'O3 · Your ex & safety',
-    heading: 'How would you describe things between you?',
+    heading: { kind: 'plain', text: 'How would you describe things between you?' },
     relationship: {
       label: 'Your relationship right now',
       options: [

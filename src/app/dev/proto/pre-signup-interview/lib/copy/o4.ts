@@ -1,4 +1,4 @@
-import type { Stage, SelfEmployment } from '../types';
+import type { Stage, SelfEmployment, TitleShape } from '../types';
 
 interface SelfEmploymentOption {
   value: SelfEmployment;
@@ -8,14 +8,14 @@ interface SelfEmploymentOption {
 
 export interface O4Copy {
   eyebrow: string;
-  heading: string;
+  heading: TitleShape;
   options: ReadonlyArray<SelfEmploymentOption>;
 }
 
 export function getCopy(_stage: Stage): O4Copy {
   return {
     eyebrow: 'O4 · Employment',
-    heading: 'How do you make money?',
+    heading: { kind: 'plain', text: 'How do you make money?' },
     options: [
       { value: 'neither', label: 'No, just the basics', helper: 'Both employed or not working' },
       { value: 'me', label: 'Yes — I am self-employed', helper: 'Sole trader, freelance, or company director' },

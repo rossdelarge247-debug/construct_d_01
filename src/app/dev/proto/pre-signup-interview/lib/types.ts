@@ -85,3 +85,7 @@ export type BgMode = 'expressive' | 'canvasChrome' | 'o7Surface' | 'standalone';
 export const BG_MODES: ReadonlyArray<BgMode> = ['expressive', 'canvasChrome', 'o7Surface', 'standalone'] as const;
 
 export const TOTAL_STEPS = 8;
+
+export type TitleShape =
+  | { kind: 'plain'; text: string }
+  | { kind: 'split'; bold: string; accent: string; period?: boolean };

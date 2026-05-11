@@ -1,4 +1,4 @@
-import type { Stage, Priority, Worry } from '../types';
+import type { Stage, Priority, Worry, TitleShape } from '../types';
 
 interface PriorityOption {
   value: Priority;
@@ -12,7 +12,7 @@ interface WorryOption {
 
 export interface O6Copy {
   eyebrow: string;
-  heading: string;
+  heading: TitleShape;
   hint: string;
   priorities: {
     label: string;
@@ -28,7 +28,7 @@ export interface O6Copy {
 export function getCopy(_stage: Stage): O6Copy {
   return {
     eyebrow: 'O6 · What matters',
-    heading: 'What matters most to you?',
+    heading: { kind: 'plain', text: 'What matters most to you?' },
     hint: 'Pick what matters most. There’s no wrong answer.',
     priorities: {
       label: 'What’s most important to you right now?',
