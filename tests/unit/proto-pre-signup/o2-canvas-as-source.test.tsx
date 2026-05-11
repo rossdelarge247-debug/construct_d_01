@@ -91,4 +91,20 @@ describe('O2 (canvas-as-source)', () => {
     const back = screen.getByRole('button', { name: /back/i });
     expect(back.tagName).toBe('BUTTON');
   });
+
+  it('hides decorative Arrow SVGs inside labelled buttons from screen readers (aria-hidden)', () => {
+    renderO2();
+    const back = screen.getByRole('button', { name: /back/i });
+    const continueBtn = screen.getByRole('button', { name: /continue/i });
+    expect(back.querySelector('svg')?.getAttribute('aria-hidden')).toBe('true');
+    expect(continueBtn.querySelector('svg')?.getAttribute('aria-hidden')).toBe('true');
+  });
+
+  it('carries focus-visible + motion-reduce utility classes on the Chip (a11y essentials)', () => {
+    renderO2();
+    const married = screen.getByRole('button', { name: 'Married' });
+    const cls = married.className;
+    expect(cls).toContain('focus-visible:outline');
+    expect(cls).toContain('motion-reduce:!transition-none');
+  });
 });

@@ -41,4 +41,4 @@ The page consumes the same `useProto()` context and updates the same `answers.si
 
 ## Verification
 
-See `verification.md`. Prototype-category DoD-14 short-form (items 1, 8, 12, 14 only) per spec 76 §3 + CLAUDE.md §"Definition of Done".
+See `verification.md`. Prototype-category DoD-14 short-form (items 1, 8, 12, 14 only) — spec 76 §3 short-form mapping; CLAUDE.md §"Definition of Done" enumerates the items.

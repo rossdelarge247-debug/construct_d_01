@@ -1,6 +1,6 @@
 # S-PROTO-o2-canvas-as-source · verification
 
-Prototype-category slice. DoD-14 short-form (items 1, 8, 12, 14) per spec 76 §3.
+Prototype-category slice. DoD-14 short-form (items 1, 8, 12, 14); spec 76 §3 short-form mapping.
 
 ## AC-1 — O2 page IS the canvas
 
@@ -34,7 +34,7 @@ Status: TBD pending impl.
 
 ## Preview-deploy verification
 
-Per spec 72a 6-dimension rubric (prototype category preserves full visual rigour per spec 76 §3).
+Six-dimension rubric (spec 72a) — prototype category preserves full visual rigour (spec 76 §3).
 
 | Dimension | Status | Evidence |
 |---|---|---|
@@ -54,7 +54,12 @@ Per spec 72a 6-dimension rubric (prototype category preserves full visual rigour
 
 ## Architectural deferrals
 
-(none expected at scaffold time — fill in if test-pain audit per CLAUDE.md §"Test-pain audit" surfaces seam concerns)
+Two canvas-faithful visual choices flagged by `reviewer-prototype-readiness` at PR-time auto-review against spec 72a 6-dim rubric (mobile-viewport + accessibility-visual dimensions). Both deferred to per-instance user feedback at preview-deploy rather than divergent-from-canvas fix:
+
+- **Footer caption font-size: 10px** — canvas A1 Footer renders `X of 4 answered` at `fontSize: 10`. WCAG AA prefers ≥12px for normal text contrast certainty. Canvas-as-source rule (CLAUDE.md §"Visual direction") makes the canvas the source; divergence raised to user at preview-deploy. Persona-flagged finding: `accessibility-visual` issue, non-blocking.
+- **Chip touch target: ~32px height; back button: ~13px** — canvas A1 Chip uses `padding: '9px 13px', fontSize: 12.5` (~32px rendered height); back button has `padding: 0` (~13px). Spec 72a mobile-viewport dimension expects ≥44×44 touch targets. Canvas-faithful values raised to user at preview-deploy. Persona-flagged finding: `mobile-viewport` issue, non-blocking.
+
+Test-pain audit cleared at impl: 8 tests written, 0 mocks required, well below the prototype-category threshold (>5 mocks per unit test triggers seam re-evaluation).
 
 ## Status
 

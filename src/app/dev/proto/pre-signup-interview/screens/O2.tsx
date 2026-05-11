@@ -13,7 +13,7 @@ import type {
   TitleShape,
 } from '../lib/types';
 
-const C = {
+const colors = {
   ink: tokens.color.ink,
   sub: tokens.color.text.sub,
   mute: tokens.color.text.muted,
@@ -24,7 +24,15 @@ const C = {
 
 type ArrowDir = 'right' | 'left' | 'up' | 'down';
 
-function Arrow({ size = 13, sw = 1.8, dir = 'right' }: { size?: number; sw?: number; dir?: ArrowDir }) {
+function Arrow({
+  size = 13,
+  strokeWidth = 1.8,
+  dir = 'right',
+}: {
+  size?: number;
+  strokeWidth?: number;
+  dir?: ArrowDir;
+}) {
   const r = { right: 0, left: 180, down: 90, up: 270 }[dir];
   return (
     <svg
@@ -33,10 +41,11 @@ function Arrow({ size = 13, sw = 1.8, dir = 'right' }: { size?: number; sw?: num
       viewBox="0 0 24 24"
       fill="none"
       stroke="currentColor"
-      strokeWidth={sw}
+      strokeWidth={strokeWidth}
       strokeLinecap="round"
       strokeLinejoin="round"
       style={{ transform: `rotate(${r}deg)` }}
+      aria-hidden="true"
     >
       <line x1="5" y1="12" x2="19" y2="12" />
       <polyline points="12 5 19 12 12 19" />
@@ -54,17 +63,17 @@ function StepRail({ current, total = 8 }: { current: number; total?: number }) {
       aria-valuemax={total}
       aria-label={`Step ${current} of ${total}`}
     >
-      <span style={{ color: C.mute, fontSize: 9.5, fontFamily: tokens.font.mono }}>
+      <span style={{ color: colors.mute, fontSize: 9.5, fontFamily: tokens.font.mono }}>
         Step {current} / {total}
       </span>
       <div
         className="relative rounded-full overflow-hidden"
-        style={{ width: 96, height: 3, background: C.line }}
+        style={{ width: 96, height: 3, background: colors.line }}
         aria-hidden="true"
       >
         <div
           className="absolute rounded-full"
-          style={{ top: 0, bottom: 0, left: 0, width: `${(current / total) * 100}%`, background: C.ink }}
+          style={{ top: 0, bottom: 0, left: 0, width: `${(current / total) * 100}%`, background: colors.ink }}
         />
       </div>
     </div>
@@ -88,10 +97,11 @@ function Chip({
       onClick={onClick}
       aria-pressed={selected}
       disabled={disabled}
+      className="focus-visible:outline focus-visible:outline-2 focus-visible:outline-current focus-visible:outline-offset-2 motion-reduce:!transition-none"
       style={{
-        background: selected ? C.ink : '#FFFFFF',
-        color: selected ? '#FFFFFF' : disabled ? C.disabled : C.ink,
-        border: `1px solid ${selected ? C.ink : disabled ? '#EBE9E2' : C.line}`,
+        background: selected ? colors.ink : '#FFFFFF',
+        color: selected ? '#FFFFFF' : disabled ? colors.disabled : colors.ink,
+        border: `1px solid ${selected ? colors.ink : disabled ? '#EBE9E2' : colors.line}`,
         borderRadius: 999,
         padding: '9px 13px',
         fontSize: 12.5,
@@ -134,7 +144,7 @@ function SubLabel({ children }: { children: ReactNode }) {
   return (
     <div
       className="mb-2"
-      style={{ fontFamily: tokens.font.serif, fontSize: 14, fontWeight: 600, color: C.ink, lineHeight: 1.2 }}
+      style={{ fontFamily: tokens.font.serif, fontSize: 14, fontWeight: 600, color: colors.ink, lineHeight: 1.2 }}
     >
       {children}
     </div>
@@ -145,14 +155,14 @@ function TopBar({ step, total = 8, onBack }: { step: number; total?: number; onB
   return (
     <div
       className="px-5 pt-3 pb-3 flex items-center justify-between"
-      style={{ borderBottom: `1px solid ${C.line}` }}
+      style={{ borderBottom: `1px solid ${colors.line}` }}
     >
       <button
         type="button"
         onClick={onBack}
-        className="inline-flex items-center gap-1.5"
+        className="inline-flex items-center gap-1.5 focus-visible:outline focus-visible:outline-2 focus-visible:outline-current focus-visible:outline-offset-2"
         style={{
-          color: C.sub,
+          color: colors.sub,
           fontSize: 11,
           background: 'transparent',
           border: 'none',
@@ -174,7 +184,7 @@ function Hero({ eyebrow, heading }: { eyebrow: string; heading: TitleShape }) {
     <div className="px-5 pt-4 pb-2">
       <div
         style={{
-          color: C.violet,
+          color: colors.violet,
           fontSize: 9.5,
           fontFamily: tokens.font.mono,
           letterSpacing: '0.1em',
@@ -223,14 +233,14 @@ function Footer({
     <div
       className="px-5 pt-3 pb-4"
       style={{
-        borderTop: `1px solid ${C.line}`,
+        borderTop: `1px solid ${colors.line}`,
         background: 'rgba(255,255,255,0.6)',
         backdropFilter: 'blur(10px)',
       }}
     >
       <div
         className="flex items-center justify-center mb-2.5"
-        style={{ color: C.mute, fontSize: 10 }}
+        style={{ color: colors.mute, fontSize: 10 }}
       >
         <span>{ctaCaption}</span>
       </div>
@@ -238,10 +248,11 @@ function Footer({
         type="button"
         onClick={onContinue}
         disabled={!enabled}
+        className="focus-visible:outline focus-visible:outline-2 focus-visible:outline-current focus-visible:outline-offset-2"
         style={{
           width: '100%',
-          background: enabled ? C.ink : C.line,
-          color: enabled ? '#FFFFFF' : C.disabled,
+          background: enabled ? colors.ink : colors.line,
+          color: enabled ? '#FFFFFF' : colors.disabled,
           padding: '13px 18px',
           borderRadius: 999,
           fontSize: 14,
@@ -255,7 +266,7 @@ function Footer({
         }}
       >
         <span>Continue</span>
-        <Arrow dir="right" size={13} sw={2} />
+        <Arrow dir="right" size={13} strokeWidth={2} />
       </button>
     </div>
   );
@@ -263,7 +274,7 @@ function Footer({
 
 const cardStyle: CSSProperties = {
   background: '#FFFFFF',
-  border: `1px solid ${C.line}`,
+  border: `1px solid ${colors.line}`,
   borderRadius: 14,
   padding: '14px 14px',
   boxShadow: '0 1px 0 rgba(26,26,26,0.02)',
@@ -322,8 +333,8 @@ export function O2() {
             }}
           />
           {situation.hasChildren === 'yes' && (
-            <div className="mt-2.5 pt-2.5" style={{ borderTop: `1px dashed ${C.line}` }}>
-              <div className="mb-1.5" style={{ color: C.sub, fontSize: 11 }}>
+            <div className="mt-2.5 pt-2.5" style={{ borderTop: `1px dashed ${colors.line}` }}>
+              <div className="mb-1.5" style={{ color: colors.sub, fontSize: 11 }}>
                 How many?
               </div>
               <ChipRow<ChildrenCount>
