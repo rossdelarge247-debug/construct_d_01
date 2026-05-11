@@ -399,11 +399,43 @@ Canonical sources: `docs/HANDOFF-SESSION-55.md` §"v3c carry-overs" + spec 72c �
 
 ## Visual direction
 
-**Canonical source:** the Claude AI Design tool outputs from session 22 wire batches. Exact visual treatment — colour system, typography, component design, screen layouts — to preserve and rebuild. Copy in the outputs is NOT final; visual treatment IS.
+**Phase scoping.** Two patterns, applied per phase:
 
-**Source files repo-committed, not URL-fetched.** Claude AI Design outputs must live at `docs/design-source/{slug}/`. The Anthropic-hosted URLs are auth-gated and unreachable from the agent sandbox; WebFetch on them returns nothing useful.
+- **Canvas-as-source (prototype default).** Used for screens under `src/app/dev/proto/<slug>/**`. Canvas JSX is the page with light adaptation. No canvas-fidelity gate; no per-AC verbatim quoting. Feedback via preview-deploy + user iteration.
+- **Preserve-and-rebuild (Phase C+ production).** Used for screens under `src/app/**` outside the proto namespace. Synthesise a design system from canvases per Build Map; audit drift via canvas-fidelity persona at PR review; lock per-AC verbatim canvas quotes.
+
+The original framing treated all canvas work as preserve-and-rebuild. The split emerged after the reconciliation overhead — slice-resolve plumbing, workflow gating, persona iteration, per-AC verbatim quoting — proved disproportionate to prototype-phase value, where the canvas JSX is already valid React and the user is the sole consumer until production hand-off. Canvas-as-source avoids the rebuild step's drift class entirely (per-screen typography variance, SVG shape mismatches, layout-chrome divergence) because the page IS the canvas.
+
+**Canonical source:** the Claude AI Design tool outputs from session 22 wire batches onward. Exact visual treatment — colour system, typography, component design, screen layouts — captured for both patterns. Copy in the outputs is NOT final; visual treatment IS.
+
+**Source files repo-committed, not URL-fetched.** Claude AI Design outputs must live at `docs/design-source/{slug}/`. The Anthropic-hosted URLs are auth-gated and unreachable from the agent sandbox.
 
 **Not reference points:** Airbnb, Emma, Habito. Legacy in-house visual language (spec 18 colour palette, spec 27 visual direction) is superseded.
+
+### Canvas-as-source (prototype default)
+
+The canvas JSX (`docs/design-source/<slug>/jsx/*.jsx`) or decoded HTML is real React/JSX. It becomes the page with a 5-step light adapt:
+
+1. **Tokenise hardcoded colours.** Canvas-top constants (`const INK = "#1A1A1A"` etc) → `tokens.color.ink` refs. Add `import { tokens } from '@/styles/tokens'`.
+2. **Replace placeholder data.** Canvas literals (`"Your situation"`, `current={2}`) → copy-resolver calls + real props.
+3. **Wire state.** Dummy values → context hooks (`useProto().step`, `setAnswer()` etc).
+4. **Add Next.js wrapping.** `'use client'` directive; page wrapper at `src/app/dev/proto/<slug>/screens/<screen>.tsx`.
+5. **Inline canvas-local helpers OR adapt.** Helpers like Arrow, StepRail can stay inline in the screen, become local components under `components/`, or replace with existing shared components — judgement call per screen.
+
+Feedback loop: build the screen → preview-deploy → user reviews → iterate. **No canvas-fidelity gate fires by default**; no AC-as-canvas-quote requirement; no rebuild reconciliation. The canvas-fidelity persona at `.claude/agents/reviewer-canvas-fidelity.md` stays in the rig but does NOT fire on prototype slices unless they explicitly opt in (see Linked canvas: field convention below).
+
+**Slice convention for canvas-as-source:** `acceptance.md` does NOT carry the `Linked canvas:` field (so canvas-fidelity stays dormant per CLAUDE.md §"Hard controls"). Per-AC evidence cites the source canvas path inline without verbatim quoting requirements. `**Category:** prototype` declared as usual.
+
+**Cross-canvas reconciliation (deferred per-instance to user).** Two concerns surface when more than one canvas variant exists for the same surface (e.g., mobile + desktop graceful enhancement; v1 + v2):
+
+- **Variant reconciliation** — which canvas wins for the build, or do both ship under a responsive switch? Decision is per-screen at scoping time.
+- **Mobile-to-desktop responsiveness** — canvases ship for specific viewports; intermediate breakpoints are not wired in the canvases themselves. Reconcile at preview-deploy feedback time, not at build time.
+
+**When canvas-as-source isn't enough.** Three cases promote a prototype screen to preserve-and-rebuild (below): cross-screen design-system extraction work · multi-author production hand-off · graceful-enhancement responsive variants requiring abstracted typography/layout primitives.
+
+### Preserve-and-rebuild (Phase C+ production)
+
+Phase C deliverables under `src/app/**` (outside the proto namespace) use the heavier pattern: extract design tokens + components from canvases per spec 70's Build Map (Anchor / Derived / Variant / Re-use / Preserve-with-reskin / Known-unknown tagging), audit drift via canvas-fidelity persona at PR review, lock per-AC verbatim canvas quotes via the AC-as-canvas-quote discipline.
 
 **Anchor components:** catalogued in `docs/workspace-spec/68g-visual-anchors.md` (C-V1 through C-V14) — the Phase C extraction shortlist. Includes phase colour system, welcome-carousel shell, stepper, keyboard affordance, demo cards per phase, dashboard components (5-phase stepper, task taxonomy chips, task rows, connected-data-source card, bank picker, trust band, locked-section treatment, accent-tint washes, time-estimate affordance).
 
@@ -411,13 +443,13 @@ Canonical sources: `docs/HANDOFF-SESSION-55.md` §"v3c carry-overs" + spec 72c �
 
 **Token inheritance:** Spec 18 tokens (spacing, typography, shadows) remain valid only where the Claude AI Design outputs have not superseded them. Colour palette + component designs come from Claude AI Design outputs exclusively.
 
-**AC-as-canvas-quote (per S-INFRA-canvas-fidelity-gate).** Every UI AC for a slice that names a `Linked canvas:` field must quote the canvas verbatim with `file:line` refs for any visual-treatment claim. Same discipline as §"Planning conduct" §"Quote, don't paraphrase" — extended to UI ACs. Worked example for an O2 title-typography AC:
+**AC-as-canvas-quote (per S-INFRA-canvas-fidelity-gate).** Every UI AC for a Phase C+ slice that names a `Linked canvas:` field must quote the canvas verbatim with `file:line` refs for any visual-treatment claim. Same discipline as §"Planning conduct" §"Quote, don't paraphrase" — extended to UI ACs. Worked example for an O2 title-typography AC:
 
 > *"H1: serif 26px lh 1.05 letterSpacing -0.02em fw 600. Pattern: `Your <span italic 400>situation</span>.` (canvas: `docs/design-source/pre-signup-interview/jsx/o2-frames.jsx` L171-172, verbatim)"*
 
 When the AC quotes the canvas line, the build can't ignore it; the canvas-fidelity gate (Hard controls table row) flags drift at PR review. Slice authors discover treatment-level claims at AC-freeze time, not after deploy.
 
-**Linked canvas: field convention.** Slices that ship UI surface against canonical canvases declare canvas paths via `**Linked canvas:** <path1>, <path2>, ...` in `acceptance.md` immediately after the slice header. Comma-separated; paths may contain spaces but must not contain commas (the field's only delimiter); paths are consumed verbatim. Single canvas = one-element list (e.g. `**Linked canvas:** path/foo.html`). Multi-canvas is the default for slices spanning multiple screens — large per-screen files concatenated under per-canvas `--- BEGIN/END <path> NONCE ---` delimiters fit within Anthropic API request limits where a single combined-canvas file (10MB+ inline-styled HTML) does not. Field-absent slices skip the canvas-fidelity dimension. Detection regex (auto-review.yml + persona harness): `^\*\*Linked canvas:\*\*[[:space:]]+`.
+**Linked canvas: field convention.** Phase C+ slices (or prototype slices explicitly opting in) that ship UI surface against canonical canvases declare canvas paths via `**Linked canvas:** <path1>, <path2>, ...` in `acceptance.md` immediately after the slice header. Comma-separated; paths may contain spaces but must not contain commas (the field's only delimiter); paths are consumed verbatim. Single canvas = one-element list (e.g. `**Linked canvas:** path/foo.html`). Multi-canvas is the default for slices spanning multiple screens — large per-screen files concatenated under per-canvas `--- BEGIN/END <path> NONCE ---` delimiters fit within Anthropic API request limits where a single combined-canvas file (10MB+ inline-styled HTML) does not. Field-absent slices (including all prototype slices using canvas-as-source by default) skip the canvas-fidelity dimension. Detection regex (auto-review.yml + persona harness): `^\*\*Linked canvas:\*\*[[:space:]]+`.
 
 ## Product rules
 
