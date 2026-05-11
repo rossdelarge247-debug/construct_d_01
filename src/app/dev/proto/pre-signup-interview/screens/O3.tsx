@@ -249,10 +249,10 @@ function Footer({
     const node = ctaButtonRef.current;
     if (enabled && !wasEnabled && node) {
       node.classList.add(styles.ctaEnabled);
-      const t = setTimeout(() => {
+      const bounceTimer = setTimeout(() => {
         node.classList.remove(styles.ctaEnabled);
       }, 350);
-      return () => clearTimeout(t);
+      return () => clearTimeout(bounceTimer);
     }
   }, [enabled]);
   let caption: ReactNode;
