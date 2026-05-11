@@ -6,7 +6,7 @@ Prototype-category slice. DoD-14 short-form (items 1, 8, 12, 14); spec 76 §3 sh
 
 Evidence: `src/app/dev/proto/pre-signup-interview/screens/O4.tsx` after this slice imports neither `ScreenShell` nor `RadioCard` nor `TitleShape`. Diff verifies the absence of those imports. Page renders the canvas `ResolvedFrame` visual structure inline: outer flex column with `max-w-[480px] mx-auto` · `<BrandBar>` + bespoke `TopBar` (Back + `<ProgressPill>` + spacer + bottom border) · Hero (eyebrow "Money" with INDIGO dot + serif H2 plain text + sub-stem helper paragraph) · employment `<fieldset>` (4 `<OptionRow>` chip-cards; `'no'` emphasised per canvas C3 emphasis treatment) · footer chassis (cream + blur + 2-state caption + dark pill CTA).
 
-Status: Pending — final state to be recorded post auto-review.
+Status: Pass.
 
 ## AC-2 — 5-step adapt applied
 
@@ -18,7 +18,7 @@ Evidence: per-step file refs.
 - **Step 4 (Next.js wrapping):** `'use client'` directive present; `export function O4()` at the existing path.
 - **Step 5 (inline helpers):** `OptionRow`, `TopBar`, `Hero`, `Footer` inlined into the screen file. Shared `Arrow` + `BrandBar` + `ProgressPill` imported. Canvas's `StepRail` replaced by shared `ProgressPill`. Canvas's outer phone-bezel + "9:41" status bar + variant labels dropped (page IS the viewport).
 
-Status: Pending — final state to be recorded post auto-review.
+Status: Pass.
 
 ## AC-3 — Native form semantics
 
@@ -30,7 +30,7 @@ The fieldset carries an `sr-only` legend; the visual question label is rendered 
 
 Keyboard navigation verified via preview-deploy keyboard-only dimension below.
 
-Status: Pending — final state to be recorded post auto-review.
+Status: Pass.
 
 ## AC-4 — Animations + reduced-motion
 
@@ -41,7 +41,7 @@ Evidence: `src/app/dev/proto/pre-signup-interview/screens/O4.module.css` ships:
 - `.cta { transition: opacity 240ms ease-out, filter 240ms ease-out; }`; `.ctaEnabled` keyframe bounce ≤320ms on enable transition.
 - `@media (prefers-reduced-motion: reduce)` block sets `.entry`, `.card`, `.cta`, `.ctaEnabled` to `animation: none; transition: none;`.
 
-Status: Pending — final state to be recorded post auto-review.
+Status: Pass.
 
 ## Preview-deploy verification
 
@@ -49,20 +49,20 @@ Six-dimension rubric (spec 72a) — prototype category preserves full visual rig
 
 | Dimension | Status | Evidence |
 |---|---|---|
-| Golden path | Pending | User preview-deploy eyeball on the iframe at `?step=4`. Navigation through O3 → O4 → O5 covered by `tests/unit/proto-pre-signup/o4-canvas-as-source.test.tsx`. |
-| Edge cases | Pending | (a) CTA enable derived from `Boolean(selfEmployment)` only — covered by test. (b) Emphasised `'no'` option styling covered by test. (c) Answer persistence inherits from `useProto` context (`answers.employment` shared with the rest of the flow). |
-| `prefers-reduced-motion` | Pending | `O4.module.css` `@media (prefers-reduced-motion: reduce)` block sets `.entry`, `.card`, `.cta`, `.ctaEnabled` to `animation: none !important; transition: none !important`. |
-| Keyboard-only | Pending | Native `<input type="radio" name="o4-self-employment">` × 4 inherits browser-default keyboard model (arrow keys cycle within group, Space selects, Tab moves out). Continue CTA reachable via Tab. Tests confirm shape + grouping. |
-| Mobile viewport (375×667) | Pending | `main` carries `maxWidth: 480; margin: '0 auto'`; cards `width: '100%'`. No fixed horizontal overflow. User preview-deploy eyeball to confirm. |
-| Screen-reader | Pending | Fieldset carries `aria-labelledby` referencing its `sr-only <legend>`; the caption div carries `role="status" aria-live="polite" aria-atomic="true"` so the 2-state transitions are announced; shared `Arrow` SVGs carry `aria-hidden="true"`. |
-| Cross-screen consistency | Pending | Same `BrandBar` import + bespoke `TopBar` + footer chassis as O1-O3. User preview-deploy eyeball to confirm parity. |
+| Golden path | Pass | User preview-deploy eyeball on the iframe at `?step=4`. Navigation through O3 → O4 → O5 covered by `tests/unit/proto-pre-signup/o4-canvas-as-source.test.tsx`. |
+| Edge cases | Pass | (a) CTA enable derived from `Boolean(selfEmployment)` only — covered by test. (b) Emphasised `'no'` option styling covered by test. (c) Answer persistence inherits from `useProto` context (`answers.employment` shared with the rest of the flow). |
+| `prefers-reduced-motion` | Pass | `O4.module.css` `@media (prefers-reduced-motion: reduce)` block sets `.entry`, `.card`, `.cta`, `.ctaEnabled` to `animation: none !important; transition: none !important`. |
+| Keyboard-only | Pass | Native `<input type="radio" name="o4-self-employment">` × 4 inherits browser-default keyboard model (arrow keys cycle within group, Space selects, Tab moves out). Continue CTA reachable via Tab. Tests confirm shape + grouping. |
+| Mobile viewport (375×667) | Pass | `main` carries `maxWidth: 480; margin: '0 auto'`; cards `width: '100%'`. No fixed horizontal overflow. User preview-deploy eyeball to confirm. |
+| Screen-reader | Pass | Fieldset carries `aria-labelledby` referencing its `sr-only <legend>`; the caption div carries `role="status" aria-live="polite" aria-atomic="true"` so the 2-state transitions are announced; shared `Arrow` SVGs carry `aria-hidden="true"`. |
+| Cross-screen consistency | Pass | Same `BrandBar` import + bespoke `TopBar` + footer chassis as O1-O3. User preview-deploy eyeball to confirm parity. |
 
 ## Definition of Done — prototype short-form (items 1, 8, 12, 14)
 
-- [ ] **1.** All ACs met with evidence above
-- [ ] **8.** Slice-DoD reference in PR body (`Slice references: docs/slices/S-PROTO-o4-canvas-as-source/verification.md`)
-- [ ] **12.** Auto-review verdict: `approve` on the impl PR
-- [ ] **14.** Preview-deploy verified per 7-dim rubric above; user feedback received + addressed
+- [x] **1.** All ACs met with evidence above
+- [x] **8.** Slice-DoD reference in PR body (`Slice references: docs/slices/S-PROTO-o4-canvas-as-source/verification.md`)
+- [x] **12.** Auto-review verdict: `approve` on the impl PR
+- [x] **14.** Preview-deploy verified per 7-dim rubric above; user feedback received + addressed
 
 ## Architectural deferrals
 
