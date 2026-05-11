@@ -15,32 +15,32 @@ describe('ProgressPill', () => {
 
   it('renders fill width as (step/total)*100 within the pill', () => {
     const { container } = render(<ProgressPill step={4} total={8} />);
-    const fill = container.querySelector('[aria-hidden="true"]') as HTMLElement;
+    const fill = container.querySelector('[data-testid="progress-pill-fill"]') as HTMLElement;
     expect(fill.style.width).toBe('50%');
   });
 
   it('renders 0% fill on the (0, 0) boundary without NaN', () => {
     const { container } = render(<ProgressPill step={0} total={0} />);
-    const fill = container.querySelector('[aria-hidden="true"]') as HTMLElement;
+    const fill = container.querySelector('[data-testid="progress-pill-fill"]') as HTMLElement;
     expect(fill.style.width).toBe('0%');
     expect(fill.style.width).not.toContain('NaN');
   });
 
   it('renders 0% fill when step is 0 and total is positive (no division-by-zero edge)', () => {
     const { container } = render(<ProgressPill step={0} total={8} />);
-    const fill = container.querySelector('[aria-hidden="true"]') as HTMLElement;
+    const fill = container.querySelector('[data-testid="progress-pill-fill"]') as HTMLElement;
     expect(fill.style.width).toBe('0%');
   });
 
   it('caps fill width at 100% when step >= total', () => {
     const { container } = render(<ProgressPill step={10} total={8} />);
-    const fill = container.querySelector('[aria-hidden="true"]') as HTMLElement;
+    const fill = container.querySelector('[data-testid="progress-pill-fill"]') as HTMLElement;
     expect(fill.style.width).toBe('100%');
   });
 
   it('clamps negative step to 0% fill', () => {
     const { container } = render(<ProgressPill step={-1} total={8} />);
-    const fill = container.querySelector('[aria-hidden="true"]') as HTMLElement;
+    const fill = container.querySelector('[data-testid="progress-pill-fill"]') as HTMLElement;
     expect(fill.style.width).toBe('0%');
   });
 

@@ -37,6 +37,7 @@ export function ProgressPill({ step, total = TOTAL_STEPS }: Props) {
         }}
       >
         <span
+          data-testid="progress-pill-fill"
           aria-hidden="true"
           style={{
             position: 'absolute',
