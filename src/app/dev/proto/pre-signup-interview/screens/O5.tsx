@@ -8,7 +8,7 @@ import type { PartnerFinancesAnswers, PartnerAwareness } from '../lib/types';
 
 export function O5() {
   const { answers, setAnswer, next, back, step } = useProto();
-  const stage = answers.stage ?? 'considering';
+  const stage = answers.stage ?? 'thinking';
   const copy = getCopy(stage);
   const partnerFinances = answers.partnerFinances ?? {};
 

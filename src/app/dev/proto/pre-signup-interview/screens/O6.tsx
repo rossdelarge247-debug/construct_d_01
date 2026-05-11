@@ -12,7 +12,7 @@ const CAP = 3;
 
 export function O6() {
   const { answers, setAnswer, next, back, step } = useProto();
-  const stage = answers.stage ?? 'considering';
+  const stage = answers.stage ?? 'thinking';
   const copy = getCopy(stage);
   const whatMatters = answers.whatMatters ?? {};
   const priorities = whatMatters.priorities ?? [];

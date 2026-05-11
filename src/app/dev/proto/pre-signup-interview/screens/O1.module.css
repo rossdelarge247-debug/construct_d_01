@@ -1,0 +1,61 @@
+/* page-entry stagger: 8px up + opacity 0→1, 320ms ease-out, 80ms stagger across direct children */
+.entry > * {
+  animation: o1-entry 320ms ease-out both;
+}
+
+.entry > *:nth-child(1) { animation-delay: 0ms; }
+.entry > *:nth-child(2) { animation-delay: 80ms; }
+.entry > *:nth-child(3) { animation-delay: 160ms; }
+.entry > *:nth-child(4) { animation-delay: 240ms; }
+
+@keyframes o1-entry {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* card hover lift + select transitions */
+.card {
+  transition: transform 160ms ease, border-color 160ms ease, box-shadow 200ms ease;
+}
+
+.card:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 2px 6px rgba(26, 26, 26, 0.04);
+}
+
+.card:focus-within {
+  outline: 2px solid var(--ds-color-ink);
+  outline-offset: 2px;
+}
+
+.cardSelected {
+  box-shadow: 0 6px 18px rgba(26, 26, 26, 0.06);
+}
+
+/* CTA enable bounce: single 1px upward bounce within 320ms when enable class flips on */
+.ctaEnabled {
+  animation: o1-cta-bounce 320ms ease-out;
+}
+
+@keyframes o1-cta-bounce {
+  0% { transform: translateY(0); }
+  40% { transform: translateY(-1px); }
+  100% { transform: translateY(0); }
+}
+
+/* prefers-reduced-motion override: instant outcome, no animation/transition */
+@media (prefers-reduced-motion: reduce) {
+  .entry > *,
+  .card,
+  .cardSelected,
+  .ctaEnabled {
+    animation: none !important;
+    transition: none !important;
+  }
+}

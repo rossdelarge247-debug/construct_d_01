@@ -8,7 +8,7 @@ import type { EmploymentAnswers } from '../lib/types';
 
 export function O4() {
   const { answers, setAnswer, next, back, step } = useProto();
-  const stage = answers.stage ?? 'considering';
+  const stage = answers.stage ?? 'thinking';
   const copy = getCopy(stage);
   const emp = answers.employment ?? {};
 

@@ -26,9 +26,9 @@ const STANDARD_DECOUPLE_HELPS: PlanContent['howDecoupleHelps'] = {
 
 function composeSituationSummary(answers: Answers): string {
   const parts: string[] = [];
-  if (answers.stage === 'considering') parts.push('You are considering separating from your partner.');
-  else if (answers.stage === 'starting') parts.push('You and your partner have decided to separate.');
-  else if (answers.stage === 'in-process') parts.push('You are already in the process of separating.');
+  if (answers.stage === 'thinking') parts.push('You are considering separating from your partner.');
+  else if (answers.stage === 'decided') parts.push('You and your partner have decided to separate.');
+  else if (answers.stage === 'in_process') parts.push('You are already in the process of separating.');
   else parts.push('You are thinking through your separation.');
 
   if (answers.situation?.living === 'yes') parts.push('You still live together.');
