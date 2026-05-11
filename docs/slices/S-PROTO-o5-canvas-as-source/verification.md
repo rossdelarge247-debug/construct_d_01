@@ -84,4 +84,9 @@ Full DoD per CLAUDE.md:
 
 ## Architectural deferrals
 
-(populate on slice ship; carry production-graduation items into the standing backlog)
+Findings from auto-review that are explicitly deferred with reasoning:
+
+- **`aria-labelledby` redundant when `<legend>` is present** (flagged by `prototype-readiness`, accessibility-essential, non-blocking). The `<fieldset aria-labelledby="o5-partner-legend">` + child `<legend id="o5-partner-legend">` pattern is sibling-identical to O4's `o4-emp-legend` chassis. Removing only on O5 introduces O4↔O5 divergence in the cross-screen radio chassis. Defer to a future sibling-sweep slice that touches both `O4.tsx` + `O5.tsx` (and any subsequent fieldset-bearing screens) atomically.
+- **Continue CTA ~40px below 44×44 touch-target floor** (flagged by `prototype-readiness`, mobile-viewport, non-blocking). Matches O3/O4 CTA dimensions (`padding: '13px 18px'`). Already covered in scope by acceptance.md §"Out of scope" production-graduation bundle (originally framed for Back; extending to Continue is consistent with the same sweep premise). Bundled with the sticky-CTA + safe-area-inset + 44×44 Back work when the pre-signup flow exits `/dev/proto/`.
+- **Unmapped hex literals in chip-card + footer** (flagged by `prototype-readiness`, ac-gap, non-blocking). Inlined values: `#FFFFFF` (chip-card background when unselected, inner dot when selected, selected primary text), `rgba(255,255,255,0.7)` (selected detail-suffix tint), `#C9C5BD` (unselected outer dot border), `rgba(245,245,244,0.85)` (footer backdrop). All four are sibling-pattern values present in O4's `OptionRow` + `Footer`. AC-2 in this slice forbids adding new tokens. A dedicated tokenisation slice would map all four across O3/O4/O5/O6 atomically (cross-screen chassis hygiene), not introduce divergence here.
+

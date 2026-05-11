@@ -65,7 +65,7 @@ function Hero({
   heading: string;
   helper: string;
 }) {
-  const accentColor = colors.indigo;
+  const accentColor = colors[eyebrow.accent];
   return (
     <div
       className={styles.entry}

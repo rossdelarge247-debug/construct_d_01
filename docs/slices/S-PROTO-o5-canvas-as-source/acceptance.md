@@ -50,7 +50,7 @@ The O5 page is the canvas-derived composition at `jsx/o5-frames.jsx` `FrameC var
    - 18×18 outer dot (1.5px border) + 8×8 inner dot (white) when selected.
    - Primary text fontSize 14, fontWeight 600.
    - If `detail` present (only `little` per `OPT_LITTLE.detail = "they managed the money"`), render `<span className="serif italic">— they managed the money</span>` inline-suffix, fontWeight 400, marginLeft 6.
-5. **Footer chassis** at `jsx/o5-frames.jsx` L185-L211: cream `rgba(255,255,255,0.6)` + `backdropFilter: blur(10px)` + 1px top border; caption row + dark pill CTA with `<Arrow dir="right" size={13} sw={2} />`.
+5. **Footer chassis** matches the cross-screen chassis established at O3/O4 ship (cream `rgba(245,245,244,0.85)` + `backdropFilter: blur(8px)` + 1px top border + caption row + dark pill CTA with right-arrow `strokeWidth=2`). The canvas footer at `jsx/o5-frames.jsx` L185-L211 uses `rgba(255,255,255,0.6)` + `blur(10px)`; the cross-screen chassis values supersede for sibling consistency across all pre-signup screens.
 6. **`<main>` wrapper** — sibling-parity with O3/O4 per session-88 lesson: `width: '100%', maxWidth: 480, margin: '0 auto', paddingTop: 24, minHeight: '100vh'`, flex column, **NO background** (let the page-level `<BackgroundShell mode="expressive">` gradient show through).
 
 ### AC-2 — Colour treatment uses design tokens; indigo accent reused
@@ -62,7 +62,7 @@ The O5 page is the canvas-derived composition at `jsx/o5-frames.jsx` `FrameC var
 
 - `PartnerAwareness` union (`lib/types.ts:59`) renamed to `'full' | 'some' | 'little' | 'suspect'` per canvas `OPT_*.key`. Update site: `lib/build-plan.ts:81` (`'very-little' | 'hiding'` → `'little' | 'suspect'`). No other production references.
 - Single `<fieldset>` with sr-only `<legend>` (heading text) wraps all four `<input type="radio" name="o5-partner-awareness">`. The C2 visual split is via two `<div>` wrappers inside the fieldset, not two fieldsets — semantically one radiogroup, one answer.
-- Each radio: `id`, `name="o5-partner-awareness"`, `value` matching the canvas key, `checked={selected}`, `onChange={() => onSelect(key)}`. Native radio is visually hidden (`position: absolute; opacity: 0; pointer-events: none`); the chip-card label receives focus + click.
+- Each radio: `name="o5-partner-awareness"`, `value` matching the canvas key, `checked={selected}`, `onChange={() => onSelect(key)}`. Native radio is visually hidden (`className="sr-only"`); the wrapping `<label>` provides implicit association (no explicit `id`/`htmlFor` needed in the label-wrapping pattern, matching O4 sibling chassis).
 - Continue CTA disabled until one option selected (`!partnerFinances.awareness`).
 
 ### AC-4 — Motion: transitions match canvas L113; entry stagger; reduced-motion fallback
