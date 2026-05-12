@@ -4,7 +4,7 @@ import type { CSSProperties, ReactNode } from 'react';
 import { tokens } from '@/styles/tokens';
 import { Arrow } from '../components/Arrow';
 import { BrandBar } from '../components/BrandBar';
-import { ProgressPill } from '../components/ProgressPill';
+import { TopBar } from '../components/TopBar';
 import { useProto } from '../lib/proto-context';
 import { getCopy } from '../lib/copy/o2';
 import type {
@@ -92,34 +92,6 @@ function SubLabel({ children }: { children: ReactNode }) {
       style={{ fontFamily: tokens.font.serif, fontSize: 14, fontWeight: 600, color: colors.ink, lineHeight: 1.2 }}
     >
       {children}
-    </div>
-  );
-}
-
-function TopBar({ step, total = 8, onBack }: { step: number; total?: number; onBack: () => void }) {
-  return (
-    <div
-      className="px-5 pt-3 pb-3 flex items-center justify-between"
-      style={{ borderBottom: `1px solid ${colors.line}` }}
-    >
-      <button
-        type="button"
-        onClick={onBack}
-        className="inline-flex items-center gap-1.5 focus-visible:outline focus-visible:outline-2 focus-visible:outline-current focus-visible:outline-offset-2"
-        style={{
-          color: colors.sub,
-          fontSize: 11,
-          background: 'transparent',
-          border: 'none',
-          cursor: 'pointer',
-          padding: 0,
-        }}
-      >
-        <Arrow dir="left" size={11} />
-        <span>Back</span>
-      </button>
-      <ProgressPill step={step} total={total} />
-      <div style={{ width: 36 }} aria-hidden="true" />
     </div>
   );
 }
