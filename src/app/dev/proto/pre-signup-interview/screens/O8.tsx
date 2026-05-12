@@ -4,6 +4,7 @@ import { useState, type CSSProperties, type ReactNode } from 'react';
 import { tokens } from '@/styles/tokens';
 import { Arrow } from '../components/Arrow';
 import { BrandBar } from '../components/BrandBar';
+import { Hero } from '../components/Hero';
 import { TopBar } from '../components/TopBar';
 import { useProto } from '../lib/proto-context';
 import styles from './O8.module.css';
@@ -151,46 +152,6 @@ function PlanRecall() {
   );
 }
 
-function Hero() {
-  return (
-    <div style={{ padding: '12px 20px 10px' }}>
-      <div style={{
-        display: 'inline-flex',
-        alignItems: 'center',
-        gap: 6,
-        fontFamily: FONT_MONO,
-        fontSize: 9.5,
-        letterSpacing: '0.08em',
-        textTransform: 'uppercase',
-        color: colors.magenta,
-      }}>
-        <span aria-hidden="true" style={{
-          width: 5, height: 5, borderRadius: 999, background: colors.magenta, display: 'inline-block',
-        }} />
-        <span>What&apos;s next · take it from here</span>
-      </div>
-      <h1 style={{
-        fontFamily: FONT_SERIF,
-        margin: '6px 0 0',
-        fontSize: 21,
-        lineHeight: 1.18,
-        letterSpacing: '-0.02em',
-        fontWeight: 600,
-        color: colors.ink,
-      }}>
-        What would you like to do next?
-      </h1>
-      <p style={{
-        margin: '6px 0 0',
-        fontSize: 12,
-        lineHeight: 1.45,
-        color: colors.sub,
-      }}>
-        There&apos;s no wrong answer. <span style={{ color: colors.muted }}>You can come back anytime.</span>
-      </p>
-    </div>
-  );
-}
 
 function OptionCard({ option, selected, onSelect, staggerIndex }: {
   option: OptionDef;
@@ -348,7 +309,18 @@ export function O8() {
       <BrandBar />
       <TopBar step={8} total={8} onBack={back} />
       <PlanRecall />
-      <Hero />
+      <Hero
+        eyebrow="What's next · take it from here"
+        eyebrowColor={colors.magenta}
+        heading="What would you like to do next?"
+        helper={
+          <>
+            There&apos;s no wrong answer.{' '}
+            <span style={{ color: colors.muted }}>You can come back anytime.</span>
+          </>
+        }
+        className={styles.entry}
+      />
       <fieldset className={styles.fieldset}>
         <legend className={styles.srOnly}>What would you like to do next?</legend>
         {OPTIONS.map((option, i) => (

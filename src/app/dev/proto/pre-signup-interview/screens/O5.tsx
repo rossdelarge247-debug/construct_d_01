@@ -4,6 +4,7 @@ import { useEffect, useRef, type CSSProperties } from 'react';
 import { tokens } from '@/styles/tokens';
 import { Arrow } from '../components/Arrow';
 import { BrandBar } from '../components/BrandBar';
+import { Hero } from '../components/Hero';
 import { TopBar } from '../components/TopBar';
 import { useProto } from '../lib/proto-context';
 import { getCopy, type O5Option } from '../lib/copy/o5';
@@ -20,66 +21,6 @@ const colors = {
 
 const PRIMARY_KEYS: ReadonlyArray<PartnerAwareness> = ['full', 'some', 'little'];
 
-function Hero({
-  eyebrow,
-  heading,
-  helper,
-}: {
-  eyebrow: { label: string; accent: 'indigo' };
-  heading: string;
-  helper: string;
-}) {
-  const accentColor = colors[eyebrow.accent];
-  return (
-    <div
-      className={styles.entry}
-      style={{ padding: '16px 20px 12px', '--stagger-index': 0 } as CSSProperties}
-    >
-      <div
-        style={{
-          display: 'inline-flex',
-          alignItems: 'center',
-          gap: 6,
-          font: `500 9.5px/1 ${tokens.font.sans}`,
-          letterSpacing: '0.04em',
-          textTransform: 'uppercase',
-          color: accentColor,
-        }}
-      >
-        <span
-          aria-hidden="true"
-          style={{
-            width: 5,
-            height: 5,
-            borderRadius: 999,
-            background: accentColor,
-            display: 'inline-block',
-          }}
-        />
-        <span>{eyebrow.label}</span>
-      </div>
-      <h2
-        style={{
-          margin: '8px 0 0',
-          font: `600 21px/1.18 ${tokens.font.serif}`,
-          letterSpacing: '-0.015em',
-          color: colors.ink,
-        }}
-      >
-        {heading}
-      </h2>
-      <p
-        style={{
-          margin: '8px 0 0',
-          font: `400 12px/1.45 ${tokens.font.sans}`,
-          color: colors.sub,
-        }}
-      >
-        {helper}
-      </p>
-    </div>
-  );
-}
 
 function OptionRow({
   opt,
@@ -278,7 +219,13 @@ export function O5() {
     >
       <BrandBar />
       <TopBar step={step} onBack={back} />
-      <Hero eyebrow={copy.eyebrow} heading={copy.heading} helper={copy.helper} />
+      <Hero
+        eyebrow={copy.eyebrow.label}
+        eyebrowColor={colors[copy.eyebrow.accent]}
+        heading={copy.heading}
+        helper={copy.helper}
+        className={styles.entry}
+      />
       <fieldset
         aria-labelledby="o5-partner-legend"
         style={{

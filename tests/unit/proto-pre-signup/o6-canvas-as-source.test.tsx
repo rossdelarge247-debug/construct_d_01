@@ -25,7 +25,7 @@ describe('O6 (canvas-as-source)', () => {
   it('renders the canvas eyebrow + heading from the copy resolver', () => {
     renderO6();
     expect(screen.getByText('What matters · last step before your plan')).toBeTruthy();
-    const heading = screen.getByRole('heading', { level: 2 });
+    const heading = screen.getByRole('heading', { level: 1 });
     expect(heading.textContent).toBe(
       "A few words on what matters to you, and what's worrying you.",
     );

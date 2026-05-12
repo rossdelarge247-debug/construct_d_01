@@ -4,6 +4,7 @@ import { type CSSProperties } from 'react';
 import { tokens } from '@/styles/tokens';
 import { Arrow } from '../components/Arrow';
 import { BrandBar } from '../components/BrandBar';
+import { Hero } from '../components/Hero';
 import { TopBar } from '../components/TopBar';
 import { useProto } from '../lib/proto-context';
 import { getCopy } from '../lib/copy/o1';
@@ -16,59 +17,6 @@ const colors = {
   muted: tokens.color.text.muted,
   line: tokens.color.border,
 };
-
-function Hero({
-  eyebrow,
-  heading,
-  subStem,
-}: {
-  eyebrow: string;
-  heading: { pre: string; italic: string; tail: string };
-  subStem: string;
-}) {
-  return (
-    <div className={`px-5 pt-5 pb-4 ${styles.entry}`}>
-      <div
-        style={{
-          color: colors.muted,
-          fontSize: 10.5,
-          fontFamily: tokens.font.mono,
-          letterSpacing: '0.14em',
-          textTransform: 'uppercase',
-        }}
-      >
-        {eyebrow}
-      </div>
-      <h2
-        style={{
-          fontFamily: tokens.font.serif,
-          fontSize: 30,
-          lineHeight: 1.08,
-          letterSpacing: '-0.02em',
-          fontWeight: 600,
-          margin: '12px 0 0 0',
-          color: colors.ink,
-        }}
-      >
-        {heading.pre}
-        <span style={{ fontStyle: 'italic', fontWeight: 400 }}>{heading.italic}</span>
-        {heading.tail}
-      </h2>
-      <p
-        style={{
-          fontFamily: tokens.font.serif,
-          fontStyle: 'italic',
-          fontSize: 14,
-          lineHeight: 1.5,
-          color: colors.sub,
-          marginTop: 12,
-        }}
-      >
-        {subStem}
-      </p>
-    </div>
-  );
-}
 
 function RadioCard({
   value,
@@ -157,7 +105,19 @@ export function O1() {
     <main className="flex flex-col min-h-screen w-full max-w-[480px] mx-auto pt-6">
       <BrandBar />
       <TopBar step={step} />
-      <Hero eyebrow={copy.eyebrow} heading={copy.heading} subStem={copy.subStem} />
+      <Hero
+        eyebrow={copy.eyebrow}
+        heading={
+          <>
+            {copy.heading.pre}
+            <span style={{ fontStyle: 'italic', fontWeight: 400 }}>{copy.heading.italic}</span>
+            {copy.heading.tail}
+          </>
+        }
+        helper={copy.subStem}
+        helperVariant="italic-serif"
+        className={styles.entry}
+      />
       <fieldset
         aria-labelledby="o1-legend"
         className="px-5 mt-5 space-y-2.5 flex-1"

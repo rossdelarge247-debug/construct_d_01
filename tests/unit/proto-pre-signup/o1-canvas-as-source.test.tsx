@@ -14,7 +14,7 @@ function renderO1() {
 describe('O1 (canvas-as-source)', () => {
   it('renders the canvas literal heading "Tell us where you\'re at."', () => {
     renderO1();
-    const heading = screen.getByRole('heading', { level: 2 });
+    const heading = screen.getByRole('heading', { level: 1 });
     expect(heading.textContent).toBe("Tell us where you're at.");
   });
 

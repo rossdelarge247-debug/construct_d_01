@@ -4,6 +4,7 @@ import { useEffect, useState, type CSSProperties, type ReactNode } from 'react';
 import { tokens } from '@/styles/tokens';
 import { Arrow } from '../components/Arrow';
 import { BrandBar } from '../components/BrandBar';
+import { Hero } from '../components/Hero';
 import { TopBar } from '../components/TopBar';
 import { useProto } from '../lib/proto-context';
 import { buildPlanFromAnswers } from '../lib/build-plan';
@@ -112,7 +113,6 @@ function BreathingHalo({ size = 180 }: { size?: number }) {
 function MobileHero() {
   return (
     <div style={{
-      padding: '26px 20px 22px 20px',
       background: EXPRESSIVE_HERO,
       borderBottom: `1px solid ${colors.border}`,
       position: 'relative',
@@ -125,49 +125,41 @@ function MobileHero() {
         pointerEvents: 'none',
       }} />
       <div style={{ position: 'relative' }}>
-        <Eyebrow color={colors.violet}>Your plan is ready</Eyebrow>
-        <h1 style={{
-          fontFamily: FONT_SERIF,
-          margin: '12px 0 0',
-          fontSize: 38,
-          lineHeight: 1.04,
-          letterSpacing: '-0.025em',
-          fontWeight: 600,
-          color: colors.ink,
-        }}>
-          Here&apos;s <span style={{ fontStyle: 'italic', fontWeight: 400, color: colors.magenta }}>your plan</span>.
-        </h1>
-        <p style={{
-          fontFamily: FONT_SERIF,
-          fontStyle: 'italic',
-          margin: '12px 0 0',
-          fontSize: 15,
-          lineHeight: 1.5,
-          color: colors.sub,
-          maxWidth: 320,
-        }}>
-          Built from your six answers — a warm picture of where you are, what&apos;s ahead, and what your options are.
-        </p>
-        <div style={{ marginTop: 20, display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap' }}>
-          <button type="button" style={{
-            display: 'inline-flex', alignItems: 'center', gap: 8,
-            padding: '8px 14px', borderRadius: 999,
-            background: '#FFFFFF', border: `1px solid ${colors.ink}`,
-            color: colors.ink, fontSize: 12, fontWeight: 600, cursor: 'pointer',
-          }}>
-            <DownloadIcon size={12} />
-            <span>Save as PDF</span>
-          </button>
-          <a href="#" style={{
-            display: 'inline-flex', alignItems: 'center', gap: 6,
-            fontSize: 12, padding: '6px 8px', color: colors.sub, textDecoration: 'none',
-          }}>
-            <MailIcon size={11} />
-            <span style={{ textDecoration: 'underline', textUnderlineOffset: 4 }}>Email it to me</span>
-          </a>
-        </div>
-        <div style={{ marginTop: 12, fontSize: 10.5, color: colors.muted }}>
-          ~5 min read · 4 pages · yours to keep
+        <Hero
+          eyebrow="Your plan is ready"
+          eyebrowColor={colors.violet}
+          heading={
+            <>
+              Here&apos;s{' '}
+              <span style={{ fontStyle: 'italic', fontWeight: 400, color: colors.magenta }}>your plan</span>
+              .
+            </>
+          }
+          helper="Built from your six answers — a warm picture of where you are, what's ahead, and what your options are."
+          helperVariant="italic-serif"
+        />
+        <div style={{ padding: '8px 20px 22px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap' }}>
+            <button type="button" style={{
+              display: 'inline-flex', alignItems: 'center', gap: 8,
+              padding: '8px 14px', borderRadius: 999,
+              background: '#FFFFFF', border: `1px solid ${colors.ink}`,
+              color: colors.ink, fontSize: 12, fontWeight: 600, cursor: 'pointer',
+            }}>
+              <DownloadIcon size={12} />
+              <span>Save as PDF</span>
+            </button>
+            <a href="#" style={{
+              display: 'inline-flex', alignItems: 'center', gap: 6,
+              fontSize: 12, padding: '6px 8px', color: colors.sub, textDecoration: 'none',
+            }}>
+              <MailIcon size={11} />
+              <span style={{ textDecoration: 'underline', textUnderlineOffset: 4 }}>Email it to me</span>
+            </a>
+          </div>
+          <div style={{ marginTop: 12, fontSize: 10.5, color: colors.muted }}>
+            ~5 min read · 4 pages · yours to keep
+          </div>
         </div>
       </div>
     </div>

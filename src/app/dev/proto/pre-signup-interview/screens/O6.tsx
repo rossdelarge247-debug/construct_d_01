@@ -4,6 +4,7 @@ import { useEffect, useRef, type CSSProperties } from 'react';
 import { tokens } from '@/styles/tokens';
 import { Arrow } from '../components/Arrow';
 import { BrandBar } from '../components/BrandBar';
+import { Hero } from '../components/Hero';
 import { TopBar } from '../components/TopBar';
 import { useProto } from '../lib/proto-context';
 import { getCopy, type O6PriorityOption, type O6WorryOption } from '../lib/copy/o6';
@@ -20,55 +21,6 @@ const colors = {
   magenta: tokens.color.accent.magenta,
 };
 
-function Hero({
-  eyebrow,
-  heading,
-}: {
-  eyebrow: { label: string; accent: 'magenta' };
-  heading: string;
-}) {
-  const accentColor = colors[eyebrow.accent];
-  return (
-    <div
-      className={styles.entry}
-      style={{ padding: '12px 20px 8px', '--stagger-index': 0 } as CSSProperties}
-    >
-      <div
-        style={{
-          display: 'inline-flex',
-          alignItems: 'center',
-          gap: 6,
-          font: `500 9.5px/1 ${tokens.font.sans}`,
-          letterSpacing: '0.04em',
-          textTransform: 'uppercase',
-          color: accentColor,
-        }}
-      >
-        <span
-          aria-hidden="true"
-          style={{
-            width: 5,
-            height: 5,
-            borderRadius: 999,
-            background: accentColor,
-            display: 'inline-block',
-          }}
-        />
-        <span>{eyebrow.label}</span>
-      </div>
-      <h2
-        style={{
-          margin: '6px 0 0',
-          font: `600 19px/1.2 ${tokens.font.serif}`,
-          letterSpacing: '-0.015em',
-          color: colors.ink,
-        }}
-      >
-        {heading}
-      </h2>
-    </div>
-  );
-}
 
 function Chip({
   label,
@@ -330,7 +282,12 @@ export function O6() {
     >
       <BrandBar />
       <TopBar step={step} onBack={back} />
-      <Hero eyebrow={copy.eyebrow} heading={copy.heading} />
+      <Hero
+        eyebrow={copy.eyebrow.label}
+        eyebrowColor={colors[copy.eyebrow.accent]}
+        heading={copy.heading}
+        className={styles.entry}
+      />
       <div
         style={{
           padding: '8px 16px 12px',
