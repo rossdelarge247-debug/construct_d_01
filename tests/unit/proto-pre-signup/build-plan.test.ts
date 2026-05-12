@@ -40,7 +40,7 @@ describe('buildPlanFromAnswers', () => {
   });
 
   it('adds a bank-evidenced note when partner finance is unknown', () => {
-    const a: Answers = { partnerFinances: { awareness: 'very-little' } };
+    const a: Answers = { partnerFinances: { awareness: 'little' } };
     const plan = buildPlanFromAnswers(a);
     expect(plan.personalisedNotes.some((n) => n.trigger === 'partner-finance-unknown')).toBe(true);
   });

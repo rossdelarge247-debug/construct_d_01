@@ -1,25 +1,45 @@
-import type { Stage, PartnerAwareness, TitleShape } from '../types';
+import type { Stage, PartnerAwareness } from '../types';
 
-interface AwarenessOption {
+export interface O5Option {
   value: PartnerAwareness;
-  label: string;
+  primary: string;
+  detail?: string;
 }
 
 export interface O5Copy {
-  eyebrow: string;
-  heading: TitleShape;
-  options: ReadonlyArray<AwarenessOption>;
+  eyebrow: {
+    label: string;
+    accent: 'indigo';
+  };
+  heading: string;
+  helper: string;
+  options: ReadonlyArray<O5Option>;
+  captions: {
+    pickToContinue: string;
+    oneAnswered: string;
+  };
+  cta: {
+    continue: string;
+  };
 }
 
 export function getCopy(_stage: Stage): O5Copy {
   return {
-    eyebrow: 'O5 · Partner finances',
-    heading: { kind: 'plain', text: 'How much do you know about your partner’s finances?' },
+    eyebrow: { label: 'Money · their side', accent: 'indigo' },
+    heading: "How much do you know about your partner's financial situation?",
+    helper: "There's no wrong answer. Many people don't know everything.",
     options: [
-      { value: 'good-idea', label: 'I have a good idea of everything' },
-      { value: 'some-things', label: 'I know some things but not all' },
-      { value: 'very-little', label: 'Very little — they managed the money' },
-      { value: 'hiding', label: 'I suspect they may be hiding things' },
+      { value: 'full', primary: 'I have a good idea of everything' },
+      { value: 'some', primary: 'I know some things but not all' },
+      { value: 'little', primary: 'Very little', detail: 'they managed the money' },
+      { value: 'suspect', primary: 'I suspect they may be hiding things' },
     ],
+    captions: {
+      pickToContinue: "Pick the answer closest to what's true today.",
+      oneAnswered: 'Answer recorded — continue when ready.',
+    },
+    cta: {
+      continue: 'Continue',
+    },
   };
 }
