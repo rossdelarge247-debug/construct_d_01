@@ -219,7 +219,7 @@ export function O2() {
     (situation.home ? 1 : 0);
 
   return (
-    <div className="flex flex-col min-h-screen w-full max-w-[480px] mx-auto pt-6">
+    <main className="flex flex-col min-h-screen w-full max-w-[480px] mx-auto pt-6">
       <BrandBar />
       <TopBar step={step} onBack={back} />
       <Hero eyebrow={copy.eyebrow} heading={copy.heading} />
@@ -284,6 +284,6 @@ export function O2() {
         ctaCaption={copy.ctaCaption(answered)}
         onContinue={next}
       />
-    </div>
+    </main>
   );
 }

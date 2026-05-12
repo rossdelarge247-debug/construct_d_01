@@ -154,7 +154,7 @@ export function O1() {
   const ctaEnabled = Boolean(stage);
 
   return (
-    <div className="flex flex-col min-h-screen w-full max-w-[480px] mx-auto pt-6">
+    <main className="flex flex-col min-h-screen w-full max-w-[480px] mx-auto pt-6">
       <BrandBar />
       <TopBar step={step} />
       <Hero eyebrow={copy.eyebrow} heading={copy.heading} subStem={copy.subStem} />
@@ -223,6 +223,6 @@ export function O1() {
           <Arrow dir="right" size={13} strokeWidth={2} />
         </button>
       </div>
-    </div>
+    </main>
   );
 }
