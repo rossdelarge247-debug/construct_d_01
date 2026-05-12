@@ -108,7 +108,7 @@ describe('O2 (canvas-as-source)', () => {
     expect(cls).toContain('motion-reduce:!transition-none');
   });
 
-  it('caps the page width at 480px and centers on desktop (matches ScreenShell convention)', () => {
+  it('caps the page width at 480px and centers on desktop (canonical mobile-cap pattern)', () => {
     const { container } = renderO2();
     const root = container.firstChild as HTMLElement;
     expect(root.className).toContain('max-w-[480px]');
