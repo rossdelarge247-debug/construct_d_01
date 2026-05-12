@@ -12,8 +12,15 @@ export interface O1Heading {
   tail: string;
 }
 
+export interface O1EntryCopy {
+  timeIntro: string;
+  outcomes: ReadonlyArray<string>;
+  reassurance: string;
+}
+
 export interface O1Copy {
   eyebrow: string;
+  entry: O1EntryCopy;
   heading: O1Heading;
   subStem: string;
   options: ReadonlyArray<O1StageOption>;
@@ -24,6 +31,15 @@ export interface O1Copy {
 export function getCopy(_stage: Stage): O1Copy {
   return {
     eyebrow: 'To start your plan…',
+    entry: {
+      timeIntro: 'In the next ~3 minutes, you\'ll:',
+      outcomes: [
+        'See the likely process for your specific situation',
+        'Shape a starting plan for children, housing, and finances',
+        'Know exactly what to focus on next',
+      ],
+      reassurance: 'You don\'t need to know everything. You just need to start.',
+    },
     heading: { pre: 'Tell us ', italic: 'where', tail: ' you\'re at.' },
     subStem: 'Your answer shapes the rest of the plan. There\'s no wrong choice.',
     options: [

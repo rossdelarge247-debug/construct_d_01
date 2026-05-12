@@ -1,0 +1,7 @@
+.scaffold {
+  padding: 12px 20px 4px;
+}
+
+.list > li + li {
+  margin-top: 6px;
+}
