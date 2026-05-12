@@ -89,4 +89,5 @@ Full DoD per CLAUDE.md:
 Findings deferred with reasoning (carried forward from O5 sibling-pattern):
 
 - **Continue CTA ~40px below 44×44 touch-target floor** (mobile-viewport). Matches O3/O4/O5 chassis (`padding: '13px 18px'`). Covered by the production-graduation bundle when the pre-signup flow exits `/dev/proto/`.
+- **Chip touch-targets ~29px tall** (mobile-viewport). Canvas chip `padding: '8px 12px'` + `fontSize 12.5` per `jsx/o6-frames.jsx` L147-L149. Below the 44×44 floor; matches canvas verbatim. Covered by the same production-graduation pass — a chip-height bump touches every chip across the flow (O6 here, O7/O8 likely) and any future chip-bearing surface.
 - **Unmapped hex literals in chip + footer** (ac-gap): `#FFFFFF` (chip bg, inner checkmark), `#C9C5BD` (outer dot border), `#EAE7DF` (disabled chip border), `#A8A29E` (disabled chip text — canvas FAINT; no `tokens.color.text.faint` exists, only `sub` + `muted`), `rgba(245,245,244,0.85)` (footer backdrop). All sibling-pattern values. A dedicated tokenisation slice would map across O3-O6 chassis atomically (plus add `tokens.color.text.faint` for the disabled-text case), not introduce divergence here.

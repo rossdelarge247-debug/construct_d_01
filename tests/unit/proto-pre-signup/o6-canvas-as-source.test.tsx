@@ -11,7 +11,7 @@ function renderO6() {
   );
 }
 
-function chip(name: RegExp | string): HTMLButtonElement {
+function getChip(name: RegExp | string): HTMLButtonElement {
   return screen.getByRole('button', { name, pressed: false }) as HTMLButtonElement;
 }
 
@@ -62,7 +62,7 @@ describe('O6 (canvas-as-source)', () => {
 
   it('toggles a priority chip to selected and announces aria-pressed=true', () => {
     renderO6();
-    const c = chip(/A fair split of everything/);
+    const c = getChip(/A fair split of everything/);
     expect(c.getAttribute('aria-pressed')).toBe('false');
     fireEvent.click(c);
     const after = screen.getByRole('button', { name: /A fair split of everything/ });
@@ -71,9 +71,9 @@ describe('O6 (canvas-as-source)', () => {
 
   it('disables unselected chips when 3 priorities are picked (B1 cap behaviour)', () => {
     renderO6();
-    fireEvent.click(chip(/A fair split of everything/));
-    fireEvent.click(chip(/Keeping the family home/));
-    fireEvent.click(chip(/Protecting my pension/));
+    fireEvent.click(getChip(/A fair split of everything/));
+    fireEvent.click(getChip(/Keeping the family home/));
+    fireEvent.click(getChip(/Protecting my pension/));
     // 4th priority chip should now be disabled
     const fourth = screen.getByRole('button', { name: /Stability for the children/ });
     expect((fourth as HTMLButtonElement).disabled).toBe(true);
@@ -84,9 +84,9 @@ describe('O6 (canvas-as-source)', () => {
 
   it('worries cap is independent of priorities cap', () => {
     renderO6();
-    fireEvent.click(chip(/A fair split of everything/));
-    fireEvent.click(chip(/Keeping the family home/));
-    fireEvent.click(chip(/Protecting my pension/));
+    fireEvent.click(getChip(/A fair split of everything/));
+    fireEvent.click(getChip(/Keeping the family home/));
+    fireEvent.click(getChip(/Protecting my pension/));
     // Worry chips should NOT be disabled — caps are per-group
     const firstWorry = screen.getByRole('button', { name: /Not having enough to live on/ });
     expect((firstWorry as HTMLButtonElement).disabled).toBe(false);
@@ -103,9 +103,9 @@ describe('O6 (canvas-as-source)', () => {
     expect(
       screen.getByText('You can continue without picking — your plan adapts either way.'),
     ).toBeTruthy();
-    fireEvent.click(chip(/A fair split of everything/));
+    fireEvent.click(getChip(/A fair split of everything/));
     expect(screen.getByText('1 thing noted — your plan will weight these.')).toBeTruthy();
-    fireEvent.click(chip(/Not having enough to live on/));
+    fireEvent.click(getChip(/Not having enough to live on/));
     expect(screen.getByText('2 things noted — your plan will weight these.')).toBeTruthy();
   });
 

@@ -18,7 +18,7 @@
 
 .chip {
   transition:
-    background-color 120ms ease-out,
+    background 120ms ease-out,
     border-color 120ms ease-out,
     opacity 160ms ease-out;
 }
@@ -68,7 +68,9 @@
   .ctaEnabled {
     animation: none !important;
     transition: none !important;
-    opacity: 1 !important;
     transform: none !important;
+  }
+  .entry {
+    opacity: 1 !important;
   }
 }

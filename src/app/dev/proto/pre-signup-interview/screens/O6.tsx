@@ -327,21 +327,21 @@ export function O6() {
   const worries: ReadonlyArray<Worry> = whatMatters.worries ?? [];
 
   const togglePriority = (value: Priority) => {
-    const next = priorities.includes(value)
+    const updated = priorities.includes(value)
       ? priorities.filter((v) => v !== value)
       : priorities.length < CAP
         ? [...priorities, value]
         : priorities;
-    setAnswer('whatMatters', { ...whatMatters, priorities: next });
+    setAnswer('whatMatters', { ...whatMatters, priorities: updated });
   };
 
   const toggleWorry = (value: Worry) => {
-    const next = worries.includes(value)
+    const updated = worries.includes(value)
       ? worries.filter((v) => v !== value)
       : worries.length < CAP
         ? [...worries, value]
         : worries;
-    setAnswer('whatMatters', { ...whatMatters, worries: next });
+    setAnswer('whatMatters', { ...whatMatters, worries: updated });
   };
 
   const total = priorities.length + worries.length;
