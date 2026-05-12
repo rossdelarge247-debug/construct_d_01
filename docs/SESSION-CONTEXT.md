@@ -16,7 +16,7 @@ Session 90 shipped two slices, completing the canvas-as-source migration for all
 
 | # | Priority | Scope | Effort | Blocked? |
 |---|---|---|---|---|
-| 1 | **Cross-screen homogenisation reconciliation pass** | User joint review of the full 8-screen surface (O1-O8). Identify inconsistencies in TopBar / Hero / Footer chassis · BrandBar usage · ProgressPill vs MobileTopBar mixed patterns · spacing / typography drift between screens. Open as `S-PROTO-cross-screen-homogenisation` (or similar). Re-walk O7 first to surface the "few small visual issues" user flagged at PR #161 merge but batched. | Medium-Heavy (~one cycle per finding; cumulative depends on count) | No |
+| 1 | **Cross-screen homogenisation audit + reconciliation pass** | Two-phase. **Phase 1 (Claude-solo, P0 of session 91):** pre-walk the 8 screens at `https://construct-dev.vercel.app/dev/proto/pre-signup-interview`, catalogue inconsistencies as a scope-only audit slice (`S-PROTO-cross-screen-homogenisation-audit` — acceptance.md only, no impl) covering TopBar / Hero / Footer chassis · BrandBar usage · ProgressPill vs MobileTopBar mixed patterns · spacing / typography drift · cross-screen colour palette uses. **Phase 2 (joint, user-led):** user reviews the punch list, re-prioritises, drops false positives, adds items I missed. **Phase 3 (impl batches):** ship the agreed-on changes in batches scoped by chassis surface (e.g., one PR for TopBar harmonisation, one for Footer, etc.). Re-walk O7 first under Phase 1 to surface the "few small visual issues" the user flagged at PR #161 merge but batched. | Phase 1 medium (one focused session); Phase 2 light; Phase 3 medium-heavy depending on punch-list size | No |
 | 2 | **Desktop-enhanced graceful enhancement** | `docs/design-source/pre-signup-interview/desktop/Desktop Enhanced - Help Rail - Standalone.html`. Help Rail integration + intermediate breakpoints + extra-space utilisation above 480px mobile cap. Constraint #41 unblocked (all 8 mobile screens migrated). Order against homogenisation TBD — homogenisation likely first to stabilise the mobile surface that desktop will extend. | Heavy | No (now unblocked) |
 | 3 | **Production graduation backlog** | Items parked across `verification.md §"Architectural deferrals"`: 44×44 tap targets (TopBar Back · Save · PlanFooter Back · TopBar Home · PlanRecall chip) · `100vh` → `100dvh` sweep · sticky CTA mechanism hardening · pending-disclosure contrast lift · INDIGO token reconciliation (canvas `#4338CA` vs existing `#4F46E5`) · token promotions for VIOLET_SOFT / MAGENTA_SOFT / SOFTMUTE / PAPER_WARM / ICON_BG_UNSELECTED. Bundle into a single production-graduation slice when pre-signup exits `/dev/proto/`. | Heavy | No, but premature until graduation timing decided |
 | 4 | **(Inherited)** spec-citation-quote-check author-time hook | Mirror `.claude/hooks/comment-review.sh` PostToolUse Write\|Edit advisory exit-0 pattern. Catches "per spec X" without proximity quote at edit time, before CI cycle. | Light (~50L bash + shellspec) | No |
@@ -65,9 +65,23 @@ Read at session start (Tier 2 + Tier 3, in order):
    work spans both — visual treatment + name-carries-the-design).
 
 Confirm priority with user. SESSION-CONTEXT recommends P1 (cross-
-screen homogenisation reconciliation pass on all 8 canvas-as-source
-screens now landed on main). This is a user-joint review — walk
-the preview deploy together first.
+screen homogenisation audit + reconciliation pass).
+
+**Phase 1 — Claude-solo pre-walk audit (start here, no user prompt
+needed):** walk the 8 screens at the preview URL below, catalogue
+inconsistencies in a scope-only audit slice
+(S-PROTO-cross-screen-homogenisation-audit — acceptance.md only,
+no impl). Cover: TopBar / Hero / Footer chassis · BrandBar usage ·
+ProgressPill vs MobileTopBar mixed patterns · spacing / typography
+drift · cross-screen colour palette uses. Re-walk O7 first to
+surface the "few small visual issues" the user flagged at PR #161
+merge but batched.
+
+**Phase 2 — joint review (user-led):** user reviews the punch list,
+re-prioritises, drops false positives, adds items missed.
+
+**Phase 3 — impl batches:** ship the agreed-on changes in batches
+scoped by chassis surface.
 
 All 8 screens live at:
   https://construct-dev.vercel.app/dev/proto/pre-signup-interview
