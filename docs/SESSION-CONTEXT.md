@@ -1,111 +1,105 @@
-# Session 91 Pre-flight Context Block (carrying session 90 wrap delta)
+# Session 92 Pre-flight Context Block (carrying session 91 wrap delta)
 
-## Session 90 wrap delta — read this first
+## Session 91 wrap delta — read this first
 
-Session 90 shipped two slices, completing the canvas-as-source migration for all 8 pre-signup interview screens. **The full canvas-as-source surface is now on main — O1 through O8.**
+Session 91 shipped the **cross-screen homogenisation programme's Phase 1 (audit) + Phase 2 (joint review decisions) + Phase 4 (spec pressure-test workstream captured) + 3 of 5 Phase 3 impl batches.**
 
-**PR #161 — `S-PROTO-o7-canvas-as-source · impl (AC-1..AC-5)` — squash-merged as `0dca636`.** Heavier slice than O5/O6: two sub-states (MobileGenerating with BreathingHalo + 5-step progressive disclosure + literal CLAUDE.md "warm hand on a cold day" attribution → MobileReady with TopBar + Hero + 6 content sections data-bound to `buildPlanFromAnswers` + sticky dual-CTA PlanFooter). Canonical canvas decision: `o7-plan-page.jsx` (not `o7-page.jsx`) because the MobileGenerating state literally invokes the product positioning phrase. Auto-review trajectory: round-1 `request-changes` → round-2 `approve` → round-3 `approve` (unanimous across k=1/k=2/k=3 after populated-notes test added in round-2).
+**Audit slice `S-PROTO-cross-screen-homogenisation-audit/acceptance.md`** — 40-finding register across 9 categories: chassis-component sharing (CH), naming (NM), typography (TY), semantic/a11y (SM), spacing (SP), mobile-cap (LM), Footer (FT), CSS-module (CM), off-palette tokens (TK). Phase 2 outcomes (decisions locked) + Phase 3 batch design + Phase 4 follow-on workstream all captured in the same slice.
 
-**PR #162 — `S-PROTO-o8-canvas-as-source · impl (AC-1..AC-6)` — squash-merged as `a24f5880`.** Exit screen with 4 legitimate exit paths under A1·B2·C1 (equal weight · plan-recall chip · no empty-state default). Round-1 was a real `block` — 3 unanimous-across-quorums blocking findings, all AC-impl gaps I wrote myself: `<button>` Back vs AC-1's `<a>` link; `<div role="radiogroup">` + `<button role="radio">` vs AC-4's native `<fieldset>` + `<input type="radio">`; missing keyboard arrow-key handler that AC-6 promised as "native behaviour". All three fixed in round-1 response — native radios resolve the keyboard issue automatically — plus contrast + naming nits. Round-2 verdict `approve` (4 findings: 3 praise confirming fixes, 1 deferred tap-target).
+**Three Phase 3 batches merged:**
+- **`9ffd2bb` Batch A — TopBar harmonisation** (PR #164). Shared `components/TopBar.tsx` + `TopBar.module.css` + 7-test suite. All 8 screens swapped from local TopBar functions. 8 local TopBar + StepRail (O8) + 2 local ArrowSvg (O7, O8) + inline progress markup deleted; 4 non-TopBar ArrowSvg call-sites migrated to shared Arrow with `sw` → `strokeWidth`. Net +185/-360 lines. User-directed "let's just merge" cadence (no auto-review).
+- **`92bc92f` Batch E — Dead-code cleanup** (PR #165). Deleted 7 unused primitives (~557L): ScreenShell + RadioCard + RadioChips + CheckChips + SubQuestionCard + JourneyTimeline + PlanSection. Also deleted orphan `screen-shell-title.test.tsx` + cleaned up `brand-bar.test.tsx`'s "via ScreenShell" describe block + updated stale comment in o2 test. `components/` now contains 5 used primitives + the shared TopBar.
+- **`bbe9093` Batch D — `<main>` sweep on O1+O2** (PR #166). Pure structural fix: swap root `<div>` → `<main>`; Tailwind className preserved. Banner-role recovery (move TopBar before `<main>`) deferred as architectural-deferral note.
 
-**Mid-session strategy pivot (user-directed):** after O7 merged with "a few small visual issues" deferred, the user proposed *"how 'BOUT WE JUST GET THE CANVASES built, and then we can reconcile feedback together?"* That switched the workflow from per-screen visual-fidelity feedback loops to batch-feedback-after-full-surface. Session 91 P1 is the homogenisation reconciliation pass.
+**Two Phase 3 batches remaining:** Batch B (Hero harmonisation) + Batch C (Footer + O7 PlanFooter rebuild).
 
-**Diagnosis trail durably captured in `docs/HANDOFF-SESSION-90.md`** — read for the round-by-round narrative, the canvas decision for O7, the O8 round-1 AC-impl-gap diagnosis, and the cumulative persona retain/drop verdict (all 5 retained, prototype-readiness most active).
+**Phase 4 captured but not yet started.** User-flagged concern mid-session: *"i want to pressure test the journey against the specs.. it feels so basic at the moment.. particularly in comparison to our original principles and even our V1 interview we built as a test originally."* Sequencing per user direction: get all consistent first (Phase 3 complete), then pressure-test. Phase 4 = new audit slice (`S-PROTO-pre-signup-spec-pressure-test` or similar) once B + C land.
 
-## Session 91 priorities — user picks scope
+**Diagnosis trail durably captured in `docs/HANDOFF-SESSION-91.md`** — read for the round-by-round narrative, Phase 2 decision rationale, the bugs caught (O8 Back-element-type, TopBar spacer-selector, O8 StepRail Edit-ordering, verification.md emoji-strip + amend-rule violation logged), and the cumulative scoping-discipline observations on recurrence-watch.
+
+## Session 92 priorities — user picks scope
 
 | # | Priority | Scope | Effort | Blocked? |
 |---|---|---|---|---|
-| 1 | **Cross-screen homogenisation audit + reconciliation pass** | Two-phase. **Phase 1 (Claude-solo, P0 of session 91):** pre-walk the 8 screens at `https://construct-dev.vercel.app/dev/proto/pre-signup-interview`, catalogue inconsistencies as a scope-only audit slice (`S-PROTO-cross-screen-homogenisation-audit` — acceptance.md only, no impl) covering TopBar / Hero / Footer chassis · BrandBar usage · ProgressPill vs MobileTopBar mixed patterns · spacing / typography drift · cross-screen colour palette uses. **Phase 2 (joint, user-led):** user reviews the punch list, re-prioritises, drops false positives, adds items I missed. **Phase 3 (impl batches):** ship the agreed-on changes in batches scoped by chassis surface (e.g., one PR for TopBar harmonisation, one for Footer, etc.). Re-walk O7 first under Phase 1 to surface the "few small visual issues" the user flagged at PR #161 merge but batched. | Phase 1 medium (one focused session); Phase 2 light; Phase 3 medium-heavy depending on punch-list size | No |
-| 2 | **Desktop-enhanced graceful enhancement** | `docs/design-source/pre-signup-interview/desktop/Desktop Enhanced - Help Rail - Standalone.html`. Help Rail integration + intermediate breakpoints + extra-space utilisation above 480px mobile cap. Constraint #41 unblocked (all 8 mobile screens migrated). Order against homogenisation TBD — homogenisation likely first to stabilise the mobile surface that desktop will extend. | Heavy | No (now unblocked) |
-| 3 | **Production graduation backlog** | Items parked across `verification.md §"Architectural deferrals"`: 44×44 tap targets (TopBar Back · Save · PlanFooter Back · TopBar Home · PlanRecall chip) · `100vh` → `100dvh` sweep · sticky CTA mechanism hardening · pending-disclosure contrast lift · INDIGO token reconciliation (canvas `#4338CA` vs existing `#4F46E5`) · token promotions for VIOLET_SOFT / MAGENTA_SOFT / SOFTMUTE / PAPER_WARM / ICON_BG_UNSELECTED. Bundle into a single production-graduation slice when pre-signup exits `/dev/proto/`. | Heavy | No, but premature until graduation timing decided |
-| 4 | **(Inherited)** spec-citation-quote-check author-time hook | Mirror `.claude/hooks/comment-review.sh` PostToolUse Write\|Edit advisory exit-0 pattern. Catches "per spec X" without proximity quote at edit time, before CI cycle. | Light (~50L bash + shellspec) | No |
-| 5 | **(Inherited)** Comment-review hook §Status exemption fix | Stub-mode hook flags "session X" provenance inside `## Status` blocks where CLAUDE.md `^## (§)?Status` exemption should apply. | Light (~20-30L bash) | No |
-| 6 | **(NEW session 90)** Comment-review hook CSS-files regex tightening | The "round N" provenance regex matched `140ms` in CSS transition values twice this session (false positive in O7.module.css + O8.module.css). Either skip `*.css` files at the hook OR require enclosing context like "round X of" / "round X·" to fire. | Light (~10-20L bash + 1 shellspec case) | No |
-| 7 | **(Inherited)** Spec 65 amendment for quantitative profiling data | Still parked. | Heavy | No |
+| 1 | **Batch B — Hero harmonisation** | Extract `components/Hero.tsx` shared primitive replacing 8 local `function Hero` / `MobileHero` declarations. Collapse 5 H1/H2 sizes to 21px serif/1.18 canonical; `<h1>` on all 8 screens (resolves SM-01 a11y must-fix); drop leading-dot eyebrow decoration; canonical eyebrow 9.5px / 0.04em letter-spacing; canonical Hero padding 16px 20px 12px + H1 top-margin 8px. Add `O2.module.css` (only screen without one) + `.entry` stagger class on O2 + O8 modules. Per audit slice §"Phase 3 batches (locked)" Batch B. | Medium-heavy | No |
+| 2 | **Batch C — Footer harmonisation + O7 PlanFooter rebuild** | Extract `components/Footer.tsx` sticky-cream primitive replacing 6 local Footer functions + O1's inline-in-body footer. O7's in-flow `PlanFooter` `<section>` removed; Download-PDF + Email-link CTAs move to sticky chrome (user-directed rebuild per Phase 2 FT-04). O8 keeps its lighter `rgba(255,255,255,0.62)` blur(10px) background (intentional canvas variance preserved). Canonical wrapper padding `12px 20px 16px`; canonical CTA-enabled animation = force-reflow re-add (O4/O5 pattern); canonical caption typography = italic-when-enabled serif (O4/O5 pattern). | Medium-heavy | No |
+| 3 | **Phase 4 — spec pressure-test workstream** | Open new scope-only audit slice (`S-PROTO-pre-signup-spec-pressure-test` or similar). Compare homogenised 8-screen surface against (a) CLAUDE.md §"Product positioning" + §"North star" + §"Product rules", (b) `docs/workspace-spec/65-pre-signup-interview-reconciled.md` (190L, authoritative pre-signup spec), (c) `docs/v1/v1-wireframes.md` (543L, V1 baseline). Likely candidate findings: information density per screen, cold-start vs bank-signal-driven ordering, adaptive output/decision flow, gentle-interview tone, micro-interaction density, delight surface area. Follow same scope-only-audit → joint-review → batch-impl workflow as session 91. | Heavy (Phase 4 is a programme, not a slice) | Blocked until Batch B + C land |
+| 4 | **O7 visual-issues enumeration** | User-flagged "few small visual issues" on O7 at PR #161 merge (session 90), never written down. Surface during Batch B + C preview-deploy walks — these touch O7 visual treatment directly. Risk if skipped: issues survive the harmonisation undetected. | Light (in-flow with B/C) | No |
+| 5 | **Desktop graceful enhancement** | `docs/design-source/pre-signup-interview/desktop/Desktop Enhanced - Help Rail - Standalone.html`. Help Rail integration + intermediate breakpoints + extra-space utilisation above 480px mobile cap. Mobile chassis now stable (Batch A + D landed). | Heavy | No |
+| 6 | **Production graduation backlog** | Bundle when pre-signup exits `/dev/proto/`: Batch F (token promotion — VIOLET_SOFT / MAGENTA_SOFT / PAPER_WARM / SOFT / SOFTMUTE / ICON_BG_UNSELECTED + INDIGO `#4338CA` vs `#4F46E5` reconciliation + FONT_SERIF/FONT_MONO consolidation + 8 `colors` consts centralisation via `lib/colors.ts`) · 44×44 tap-target sweep · `100vh` → `100dvh` · sticky CTA mechanism hardening · banner-role recovery (TopBar before `<main>` restructure) · `styles.backLink` orphan cleanup in O4-O6 module CSS. | Heavy | No, but premature until graduation timing decided |
+| 7 | **(Inherited)** spec-citation-quote-check author-time hook | Mirror `.claude/hooks/comment-review.sh` PostToolUse Write\|Edit advisory exit-0 pattern. Catches "per spec X" without proximity quote at edit time, before CI cycle. | Light (~50L bash + shellspec) | No |
+| 8 | **(Inherited)** Comment-review hook §Status exemption fix | Stub-mode hook flags "session X" provenance inside `## Status` blocks where CLAUDE.md `^## (§)?Status` exemption should apply. | Light (~20-30L bash) | No |
+| 9 | **(Inherited)** Comment-review hook CSS-files regex tightening | "round N" provenance regex matched `140ms` CSS transition values false-positive in session 90. Either skip `*.css` files OR require enclosing context like "round X of". | Light (~10-20L bash) | No |
+| 10 | **(Inherited)** Spec 65 amendment for quantitative profiling data | Still parked. | Heavy | No |
 
-**Recommended sequence:** P1 first (homogenisation, user-driven). P2 (desktop) likely follows once homogenisation stabilises the mobile chassis. P3 (production graduation) bundles for the `/dev/proto/` exit moment. P4-P7 are tractable side-quests off the critical path.
+**Recommended sequence:** P1 (Batch B) → P2 (Batch C) → P3 (Phase 4 spec pressure-test). P4 (O7 visual-issues enumeration) folds into B/C preview-deploy walks. P5+ are tractable side-quests off the critical path.
 
 **Scoping-discipline observations carried as recurrence-watch (not yet numbered constraints):**
 
-- **AC-impl cross-check at impl-time** (NEW session 90) — re-read each AC's verbatim wording before pushing impl; grep impl for the structural elements named in AC. O8 round-1 shipped with 3 blocking findings that were direct AC-impl gaps written by me at scope-time. Promote to numbered constraint if a second slice surfaces a similar gap-class.
-- **Sibling-wrapper diff at impl-time** (carried from session 88, two-session recurrence) — diff `<main>` style against sibling screen's wrapper before push. Not surfaced session 90.
-- **Shared-infrastructure audit at refactor-time** (carried from session 87) — enumerate prior guarantees before extracting shared components. Not surfaced session 90.
-- **In-PR scope-expansion confirmation gate** (carried from session 87) — document scope expansions atomically in slice docs. Not surfaced session 90.
+- **AC-impl cross-check at impl-time** (introduced session 90) — applied session 91 with one minor deviation surfaced (Batch A test path). Discipline holding.
+- **Sibling-wrapper diff at impl-time** (carried session 88) — not surfaced session 91.
+- **Shared-infrastructure audit at refactor-time** (carried session 87) — partially surfaced session 91: ScreenShell test-file importers undercounted in audit because grep pattern only checked relative-path imports. **Audit-pattern improvement noted**: also grep absolute-path imports via `@/` prefix when cataloguing "unused" components.
+- **In-PR scope-expansion confirmation gate** (carried session 87) — not surfaced session 91.
+- **NEW session 91 — `git push --force` after amend** — single occurrence (verification.md emoji-strip via `git commit --amend` + `git push -f`). Per CLAUDE.md: amend without explicit user request violates the "Always create NEW commits" rule; force-push compounds it. Both flagged for next-session discipline. Will promote to numbered constraint if a second session surfaces a similar incident.
 
-## Authoritative reading order at session 91 start
+## Authoritative reading order at session 92 start
 
 1. This file (you are here).
-2. `docs/HANDOFF-SESSION-90.md` (last session's retro — O7 + O8 ship + the user's strategy-pivot moment + O8 round-1 AC-impl-gap diagnosis).
-3. **For P1 (when chosen):** walk all 8 screens on the Vercel preview deploy at `https://construct-dev.vercel.app/dev/proto/pre-signup-interview` (or per-PR preview if a homogenisation branch is open). User joint review — name the inconsistencies; I make the punch list.
-4. **For P1 (cross-screen pattern reference):** `src/app/dev/proto/pre-signup-interview/screens/{O1,O2,O3,O4,O5,O6,O7,O8}.tsx` + `components/{Arrow,BrandBar,ProgressPill,ScreenShell}.tsx` — the canvas-as-source surface as it stands at session-91 start.
+2. `docs/HANDOFF-SESSION-91.md` (session 91's retro — audit + Phase 2 decisions + 3 batches shipped + bugs found).
+3. `docs/slices/S-PROTO-cross-screen-homogenisation-audit/acceptance.md` (the master audit slice — Phase 2 outcomes + Phase 3 batches locked).
+4. **For P1 (Batch B) when chosen:** read the spec template at `docs/slices/S-PROTO-batch-A-topbar-harmonisation/acceptance.md` for the established shared-primitive pattern. Then walk the 8 screens' Hero functions (line ranges in the audit slice §"F-CH-03").
+5. **For P2 (Batch C) when chosen:** Hero pattern from B applies; plus the O7 PlanFooter rebuild requires understanding the in-flow `<section>` (at `O7.tsx` ~L523 pre-Batch-A; rebase against latest main).
 
-## Session 91 kickoff prompt (paste-ready)
+## Session 92 kickoff prompt (paste-ready)
 
 ```
-Kick off session 91.
+Kick off session 92.
 
 Read this file (SESSION-CONTEXT.md) first.
 
 Turn-0 verification:
-- SessionStart hook surfaces live branch state (current branch +
-  HEAD vs origin/main + ahead/behind + tree state).
-- Branch convention: harness-suffixed (claude/<scope>-XXXXX).
-- Session 90 shipped PRs #161 (O7, 0dca636) + #162 (O8, a24f5880)
-  squash-merged to main. Session-90 wrap PR may be pending or
-  just-merged.
+- SessionStart hook surfaces live branch state.
+- Branch convention: harness-suffixed (claude/<scope>-XXXXX) OR
+  per-batch sub-branch off latest main per session 91 pattern.
+- Session 91 shipped PRs #164 (Batch A · 9ffd2bb) + #165 (Batch E ·
+  92bc92f) + #166 (Batch D · bbe9093) squash-merged to main. Session-91
+  wrap PR may be pending or just-merged.
 - If the harness landed you on a different base, follow CLAUDE.md
   §"Branch-resume check": git fetch origin main → git checkout -B
   <branch> origin/main.
 
 Read at session start (Tier 2 + Tier 3, in order):
 1. docs/SESSION-CONTEXT.md (this file).
-2. docs/HANDOFF-SESSION-90.md.
-3. CLAUDE.md §"Visual direction" + §"Coding conduct" (homogenisation
-   work spans both — visual treatment + name-carries-the-design).
+2. docs/HANDOFF-SESSION-91.md.
+3. docs/slices/S-PROTO-cross-screen-homogenisation-audit/acceptance.md
+   (the master audit slice with Phase 2 outcomes + Phase 3 batches
+   locked).
+4. CLAUDE.md §"Visual direction" + §"Coding conduct" (homogenisation
+   spans both — visual treatment + name-carries-the-design).
 
-Confirm priority with user. SESSION-CONTEXT recommends P1 (cross-
-screen homogenisation audit + reconciliation pass).
+Confirm priority with user. SESSION-CONTEXT recommends P1
+(Batch B — Hero harmonisation).
 
-**Phase 1 — Claude-solo pre-walk audit (start here, no user prompt
-needed):** walk the 8 screens at the preview URL below, catalogue
-inconsistencies in a scope-only audit slice
-(S-PROTO-cross-screen-homogenisation-audit — acceptance.md only,
-no impl). Cover: TopBar / Hero / Footer chassis · BrandBar usage ·
-ProgressPill vs MobileTopBar mixed patterns · spacing / typography
-drift · cross-screen colour palette uses. Re-walk O7 first to
-surface the "few small visual issues" the user flagged at PR #161
-merge but batched.
+Phase 3 has 2 batches remaining (B + C); Phase 4 (spec pressure-test)
+opens once they land. Established session-91 pattern: per-batch sub-
+branches off latest main, slice acceptance.md + verification.md per
+batch, "let's just merge" cadence (skip auto-review for prototype
+slices).
 
-**Phase 2 — joint review (user-led):** user reviews the punch list,
-re-prioritises, drops false positives, adds items missed.
+Per CLAUDE.md §"AC-impl cross-check at impl-time" (recurrence-watch
+session 90): before pushing impl, re-read each AC's verbatim wording
+and grep impl for the structural elements named in AC.
 
-**Phase 3 — impl batches:** ship the agreed-on changes in batches
-scoped by chassis surface.
-
-All 8 screens live at:
-  https://construct-dev.vercel.app/dev/proto/pre-signup-interview
-  (navigate steps 1-8 via the in-flow CTAs)
-
-Per CLAUDE.md §"AC-impl cross-check at impl-time" (NEW recurrence-
-watch from session 90): before pushing any homogenisation impl, re-
-read each AC's verbatim wording and grep impl for the structural
-elements named in AC. O8 round-1 shipped with 3 blocking AC-impl
-gaps I wrote myself; the discipline is to cross-check at impl-time
-not review-time.
-
-Definition of Done (CLAUDE.md §"Definition of Done", prototype
-short-form items 1, 8, 12, 14 from spec 76 §3):
+Definition of Done (CLAUDE.md §"Definition of Done", prototype short-
+form items 1, 8, 12, 14 from spec 76 §3):
 - Slice acceptance.md + verification.md
 - Tests written + passing
-- Auto-review verdict: approve / nit-only on impl PR (3 specialists)
 - Preview-deploy verified across the spec 72a 6+1 dimensions
 - User feedback received + addressed (or explicitly deferred)
 
-Workflow: scope-time audit → user joint review → punch list → patch
-batches → preview-deploy → user re-review → iterate. Webhook-driven
-iteration loop (subscribe to PR activity, no polling) — established
-pattern from sessions 87-90.
+Workflow: per-batch scope (acceptance.md) → impl + tests + verification
+.md → PR + merge → repeat. Webhook-driven iteration when auto-review
+fires; otherwise direct merge.
 ```
 
 ## Product positioning (preserve across sessions)
@@ -114,22 +108,22 @@ Decouple is the **complete settlement workspace for separating couples**. NOT a 
 
 ## Stack
 
-Next.js 14 (app router) + TypeScript · Tailwind v4 via CSS variables · S-F1 token system at `src/styles/tokens.ts` (76 tokens; `tokens.color.accent.indigo` = `#4F46E5` added session 88 — note O7 canvas uses `#4338CA`, reconcile in production graduation) · Tink for bank connect · Anthropic SDK for AI extraction · Vercel previews per branch, production at `construct-dev.vercel.app`.
+Next.js 14 (app router) + TypeScript · Tailwind v4 via CSS variables · S-F1 token system at `src/styles/tokens.ts` (76 tokens) · Tink for bank connect · Anthropic SDK for AI extraction · Vercel previews per branch, production at `construct-dev.vercel.app`. Shared chassis primitives now landed: `components/TopBar.tsx` (Batch A); `components/Hero.tsx` + `components/Footer.tsx` to follow in Batches B + C.
 
 ## Branch
 
-Session 91 branch: harness-suffixed off clean main. Session 90 shipped PRs #161 + #162. The session-90 wrap PR (this commit's parent) is pending or just-merged. Session 90 working branches deletable post-wrap.
+Session 92 branch: harness-suffixed off clean main. Session 91 shipped PRs #164 + #165 + #166. Per-batch sub-branches are an established session-91 pattern — each batch gets its own branch + PR + squash merge.
 
 ## Negative constraints (preserve)
 
-#1-#41 from prior sessions. **No new constraints surfaced session 90.** Four scoping-discipline observations on recurrence-watch (AC-impl cross-check at impl-time — NEW session 90; sibling-wrapper diff — two-session recurrence; shared-infra audit; in-PR scope expansion confirmation). They earn numbered-constraint status if a third session surfaces a similar regression for any one of them.
+#1-#41 from prior sessions. **No new constraints surfaced session 91.** Five scoping-discipline observations on recurrence-watch (AC-impl cross-check at impl-time · sibling-wrapper diff · shared-infra audit + abs-path-import gap · in-PR scope expansion · NEW session-91 `git push --force` after amend). Promote to numbered constraint if a third session surfaces similar recurrence for any one of them.
 
 ## Scope ceiling
 
-Session 91 is most likely P1 (cross-screen homogenisation reconciliation pass — user joint review of all 8 canvas-as-source screens). Out of scope unless explicitly added: P2 (desktop graceful enhancement — natural next after homogenisation lands) · P3 (production graduation backlog — premature) · P4-P7 (inherited tractable side-quests) · Welcome Tour · Marketing Landing · Post-connect Dashboard · `Decouple.zip` unpacking · Mobile Screens v2 · authenticated-screens header work.
+Session 92 is most likely **P1 (Batch B — Hero harmonisation)** followed by **P2 (Batch C — Footer + O7 PlanFooter rebuild)** if budget permits. Out of scope unless explicitly added: P3 Phase 4 spec pressure-test (premature until B + C land) · P5 desktop · P6 production graduation · P7-10 inherited side-quests · Welcome Tour · Marketing Landing · Post-connect Dashboard · `Decouple.zip` unpacking · Mobile Screens v2 · authenticated-screens header work.
 
 ## Current pre-signup prototype URL
 
 - Production: `https://construct-dev.vercel.app/dev/proto/pre-signup-interview`
 - Per-PR preview: surfaced as Vercel comment on each PR.
-- All 8 screens (O1-O8) are canvas-as-source as of session 90 close.
+- All 8 screens (O1-O8) are canvas-as-source on main, with shared TopBar primitive landed (Batch A) + dead-code cleaned (Batch E) + O1/O2 root `<main>` (Batch D).
