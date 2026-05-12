@@ -2,7 +2,9 @@
 
 import { useEffect, useState, type CSSProperties, type ReactNode } from 'react';
 import { tokens } from '@/styles/tokens';
+import { Arrow } from '../components/Arrow';
 import { BrandBar } from '../components/BrandBar';
+import { TopBar } from '../components/TopBar';
 import { useProto } from '../lib/proto-context';
 import { buildPlanFromAnswers } from '../lib/build-plan';
 import type { Answers } from '../lib/types';
@@ -32,27 +34,6 @@ const GENERATING_BG = 'linear-gradient(180deg, #F3EEFE 0%, #FCE7F3 360px, #FBFAF
 
 const FONT_SERIF = 'var(--ds-font-serif, "Source Serif Pro", "Source Serif 4", Georgia, serif)';
 const FONT_MONO = 'var(--ds-font-mono, "JetBrains Mono", ui-monospace, monospace)';
-
-function ArrowSvg({ size = 14, sw = 1.8, dir = 'right' }: { size?: number; sw?: number; dir?: 'left' | 'right' }) {
-  const rotate = dir === 'left' ? 180 : 0;
-  return (
-    <svg
-      width={size}
-      height={size}
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth={sw}
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      style={{ transform: `rotate(${rotate}deg)` }}
-      aria-hidden="true"
-    >
-      <line x1="5" y1="12" x2="19" y2="12" />
-      <polyline points="12 5 19 12 12 19" />
-    </svg>
-  );
-}
 
 function DownloadIcon({ size = 14, sw = 1.8 }: { size?: number; sw?: number }) {
   return (
@@ -124,46 +105,6 @@ function BreathingHalo({ size = 180 }: { size?: number }) {
         background: colors.magenta,
         boxShadow: `0 0 0 6px ${MAGENTA_SOFT}, 0 0 0 14px rgba(190,24,93,0.06)`,
       }} />
-    </div>
-  );
-}
-
-function MobileTopBar({ step = 7, total = 8, remaining = '~30s remaining' }: {
-  step?: number; total?: number; remaining?: string;
-}) {
-  const pct = (step / total) * 100;
-  return (
-    <div style={{
-      padding: '16px 20px 12px',
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'space-between',
-      borderBottom: `1px solid ${colors.border}`,
-      background: 'transparent',
-    }}>
-      <a href="#" style={{
-        display: 'inline-flex', alignItems: 'center', gap: 6,
-        fontSize: 12, color: colors.sub, textDecoration: 'none',
-      }}>
-        <ArrowSvg dir="left" size={11} />
-        <span>Home</span>
-      </a>
-      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4 }}>
-        <div style={{ position: 'relative', height: 3, borderRadius: 999, width: 110, background: colors.border }}>
-          <div style={{
-            position: 'absolute', top: 0, bottom: 0, left: 0,
-            borderRadius: 999, width: `${pct}%`, background: colors.ink,
-          }} />
-        </div>
-        <div style={{
-          fontFamily: FONT_MONO, fontSize: 9, color: colors.muted, letterSpacing: '0.04em',
-        }}>
-          STEP {step} / {total} · {remaining}
-        </div>
-      </div>
-      <a href="#" style={{
-        fontSize: 11, color: colors.sub, textDecoration: 'underline', textUnderlineOffset: 4,
-      }}>Save</a>
     </div>
   );
 }
@@ -597,7 +538,7 @@ function PlanFooter({ onNext, staggerIndex }: { onNext: () => void; staggerIndex
             display: 'inline-flex', alignItems: 'center', gap: 6,
             fontSize: 12.5, padding: '8px', color: colors.sub, textDecoration: 'none',
           }}>
-            <ArrowSvg dir="left" size={12} />
+            <Arrow dir="left" size={12} />
             <span>Back</span>
           </a>
           <button
@@ -613,7 +554,7 @@ function PlanFooter({ onNext, staggerIndex }: { onNext: () => void; staggerIndex
             }}
           >
             <span>What&apos;s next</span>
-            <ArrowSvg size={13} sw={2} />
+            <Arrow size={13} strokeWidth={2} />
           </button>
         </div>
       </div>
@@ -632,11 +573,12 @@ const DISCLOSURE_STEPS: ReadonlyArray<{ label: string; state: DisclosureState }>
 ];
 
 function MobileGeneratingView() {
+  const { back } = useProto();
   return (
     <div style={{ position: 'relative', minHeight: 'calc(100vh - 24px)', overflow: 'hidden' }}>
       <div style={{ position: 'absolute', inset: 0, background: GENERATING_BG }} aria-hidden="true" />
       <div style={{ position: 'relative', display: 'flex', flexDirection: 'column', minHeight: 'inherit' }}>
-        <MobileTopBar step={7} total={8} remaining="just a moment" />
+        <TopBar step={7} onBack={back} />
 
         <div style={{
           flex: 1,
@@ -750,10 +692,11 @@ function MobileReadyView({ onNext, answers }: {
   onNext: () => void;
   answers: Answers;
 }) {
+  const { back } = useProto();
   const plan = buildPlanFromAnswers(answers);
   return (
     <div className={styles.fadeIn} style={{ display: 'flex', flexDirection: 'column' }}>
-      <MobileTopBar step={7} total={8} remaining="~30s remaining" />
+      <TopBar step={7} onBack={back} />
       <MobileHero />
       <SituationSummary summary={plan.situationSummary} staggerIndex={1} />
       <DivorceJourney stages={plan.journeyStages} currentStageKey={answers.stage} staggerIndex={2} />
