@@ -1,56 +1,63 @@
-# Session 94 Pre-flight Context Block (carrying session 93 wrap delta)
+# Session 95 Pre-flight Context Block (carrying session 94 wrap delta)
 
-## Session 93 wrap delta — read this first
+## Session 94 wrap delta — read this first
 
-Session 93 resumed and **completed Phase 3 Batch C** (footer harmonisation), shipping the shared `Footer` primitive end-to-end across the pre-signup interview's 8 screens. The cross-screen homogenisation programme's Phase 3 is now **fully complete** (Batches A · B · C · D · E all merged); **Phase 4 (spec pressure-test) is unblocked**.
+Session 94 ran the recommended P1+P2 sequence cleanly.
 
-**Shipped this session:** PR #169 squash-merged to main as **`c3c5f88` — `S-PROTO-batch-C-footer-harmonisation · shared Footer primitive (AC-1..AC-6)`**. Resumption from session 92's PARTIAL state: O4 + O5 + O6 mechanical sweeps + O8 sweep (`variant="light"` + conditional caption + UX-shift to "both prompt + disabled CTA" rather than either/or) + O7 PlanFooter rebuild (AC-3, -100L deletion + sticky-cream chassis with Download-PDF + Email-link secondary actions alongside "What's next" primary) + 5 deferred AC-4 tests (12/12 final) + 2 `o7-canvas-as-source.test.tsx` updates for the AC-3 surface change + verification.md rewritten to full-state.
+**P1: Batch C AC-5 preview-deploy 6+1 walk.** Closed the deferred DoD item from session 93. Walked all 8 screens at `construct-dev.vercel.app/dev/proto/pre-signup-interview` per spec 72a's 6+1 dimensions. All 6 dimensions Pass; +1 visual diff N/A. `docs/slices/S-PROTO-batch-C-footer-harmonisation/verification.md` table flipped from `pending` to evidenced rows; DoD-4 closed; AC-5 row ✓. Commit `393e454`.
 
-**Net diff vs main:** +351 / -416 lines across 13 files. Tests + typecheck both clean (526/526 across 79 files; +5 from session 92).
+**P2: Density/delight Phase 1 audit slice.** New slice `S-PROTO-pre-signup-density-delight-audit` at `docs/slices/S-PROTO-pre-signup-density-delight-audit/acceptance.md` (~142 lines). Scope narrowed to a single lens (density + delight) after overlap-clarification. 10 findings: 4 density gaps (F-DEN-01..04), 3 delight gaps (F-DEL-01..03), 3 plan output gaps (F-OUT-01..03). References: V1 baseline + spec 26 §1+§5 + spec 65 + CLAUDE.md positioning. Phase 1 (audit) complete; Phase 2 (joint review) complete; Phase 3 (batch impl) deferred to session 95+. Commit `142ca52`.
 
-**Architectural deferrals captured in verification.md:** O6 always-on mount-fire animation NOT preserved · per-screen module-CSS `.cta` orphans in O4/O5/O6 (defer to Batch F production graduation) · `<footer>` banner-role recovery (carried from Batch D).
+**Net diff vs main:** +152 / -10 lines across 2 files. No `src/` touched. Tests + typecheck unchanged (526/526 across 79 files).
 
-**AC-5 preview-deploy 6+1 walk deferred** per user-directed "let's just merge" cadence — sits in verification.md as a known carry-over for session 94.
+**Diagnosis trail durably captured in `docs/HANDOFF-SESSION-94.md`** — read for per-dimension walk cadence reasoning, single-lens audit framing observation (new recurrence-watch item), pre-existing provenance opportunistic cleanup observation (new recurrence-watch item), and Phase 3 batch impl groupings sketch.
 
-**Diagnosis trail durably captured in `docs/HANDOFF-SESSION-93.md`** — read for the round-by-round narrative, the comment-review hook catch on "PR #169" provenance (caught at author-time, pre-commit), and the two new scoping-discipline observations on recurrence-watch (verification.md PARTIAL internal contradiction + read-cap accumulation during sweep cycles).
+## Session 95 priorities — user picks scope
 
-## Session 94 priorities — user picks scope
+The audit shipped session 94 sets up Phase 3 batch impl. Groupings sketched in audit §Workflow but TBD at impl-scoping time.
 
 | # | Priority | Scope | Effort | Blocked? |
 |---|---|---|---|---|
-| 1 | **AC-5 preview-deploy 6+1 walk for Batch C** | Closes Batch C DoD. Walk all 8 screens on the merged main's Vercel preview (golden path · edge cases · prefers-reduced-motion · keyboard-only · 375×667 mobile viewport · screen reader · visual diff against pre-batch). Update `docs/slices/S-PROTO-batch-C-footer-harmonisation/verification.md` §"Preview-deploy verification" table from "pending" → evidenced rows. | Light | No |
-| 2 | **Phase 4 spec pressure-test workstream** | The user-flagged concern from session 91 mid-session: *"i want to pressure test the journey against the specs.. it feels so basic at the moment.."*. Open new scope-only audit slice comparing the homogenised 8-screen surface against (a) CLAUDE.md §"Product positioning" + §"North star" + §"Product rules", (b) `docs/workspace-spec/65-pre-signup-interview-reconciled.md`, (c) `docs/v1/v1-wireframes.md`. Likely findings: information density · cold-start vs bank-signal-driven ordering · adaptive output/decision flow · gentle-interview tone · micro-interaction density · delight surface area. Same workflow as session 91: scope-only-audit → joint-review → batch-impl. | Heavy (programme, not slice) | No |
-| 3 | **Desktop graceful enhancement** | `docs/design-source/pre-signup-interview/desktop/Desktop Enhanced - Help Rail - Standalone.html`. Help Rail integration + intermediate breakpoints + extra-space utilisation above 480px mobile cap. Mobile chassis fully stable post-Batches A/B/C/D. | Heavy | No |
-| 4 | **Production graduation backlog** | Bundle when pre-signup exits `/dev/proto/`: Batch F (token promotion + `lib/colors.ts` palette centralisation + FONT_SERIF/FONT_MONO consolidation + off-palette token promotion + 44×44 tap-target sweep + `100vh` → `100dvh` + sticky CTA hardening + banner-role recovery + per-screen module-CSS `.cta` orphan cleanup from Batch C deferrals). | Heavy | No, but premature until graduation timing decided |
-| 5 | **(Inherited)** spec-citation-quote-check author-time hook | Mirror `.claude/hooks/comment-review.sh` PostToolUse Write\|Edit advisory exit-0 pattern. Catches "per spec X" without proximity quote at edit time, before CI cycle. | Light (~50L bash + shellspec) | No |
-| 6 | **(Inherited)** Comment-review hook §Status exemption fix | Stub-mode hook flags "session X" provenance inside `## Status` blocks where CLAUDE.md `^## (§)?Status` exemption should apply. | Light (~20-30L bash) | No |
-| 7 | **(Inherited)** Comment-review hook CSS-files regex tightening | "round N" provenance regex matched `140ms` CSS transition values false-positive (session 90 sighting). Skip `*.css` files OR require enclosing context like "round X of". | Light (~10-20L bash) | No |
-| 8 | **(Inherited)** Spec 65 amendment for quantitative profiling data | Still parked. | Heavy | No |
+| 1 | **Density-entry batch impl** | Likely shape: new shared `<EntryScaffold/>` primitive on O1 covering F-DEN-02 (outcome scaffolding "in next ~3 min you'll: A, B, C") + F-DEN-03 (time-commitment) + F-DEN-04 (reassurance "you don't need to know everything"). One screen, ~50-100 added lines, new primitive + 3 copy strings. First visible "feels less basic" delta. | Light-medium | No |
+| 2 | **Density-question batch impl** | Likely shape: new shared `<WhyWeAsk/>` primitive across O1-O6 with per-screen copy explaining WHY each question matters. Six screens, one new primitive, six new copy entries. F-DEN-01 only. | Light-medium | No |
+| 3 | **Tone audit (Phase 1)** | Separate audit slice using session-94's structural template. Compare current copy against CLAUDE.md "warm hand on a cold day" + "stressed, often alone, often late at night" + spec 65 per-screen tone notes (O1 stage → tone variant; O3 safety woven naturally). ~30-45 min if precedent reused. | Light | No |
+| 4 | **Delight batch impl** | Spec 26 §5 compliance pass: F-DEL-01 inter-screen 5-step cross-fade + F-DEL-02 `[Next]` press feedback (`scale(0.98) 100ms`) + F-DEL-03 radio-selection 150ms verification. Touches Footer.tsx + new page-transition layer. | Medium | No |
+| 5 | **Output batch impl** | O7 adaptivity + confidence + reassurance. F-OUT-01+02+03. 641-line O7.tsx; needs careful scoping. | Heavy | No |
+| 6 | **Adaptivity audit (Phase 1)** | Deeper than F-OUT-01 symptom finding. Tier 1/2/3/4 framework + all 8 data fields vs current branching surface. | Medium | No |
+| 7 | **Spec 65 literal coverage audit (Phase 1)** | Each O-screen vs spec 65 literal copy + question pattern + options + data captured. | Medium | No |
+| 8 | **Desktop graceful enhancement** | `docs/design-source/pre-signup-interview/desktop/Desktop Enhanced - Help Rail - Standalone.html`. Help Rail integration + intermediate breakpoints + extra-space utilisation above 480px mobile cap. Mobile chassis fully stable post-Batches A/B/C/D + session-94 AC-5 walk. | Heavy | No |
+| 9 | **(Inherited)** spec-citation-quote-check author-time hook | Light | No |
+| 10 | **(Inherited)** Comment-review hook §Status exemption fix | Light | No |
+| 11 | **(Inherited)** Comment-review hook CSS-files regex tightening | Light | No |
+| 12 | **(Inherited)** Spec 65 amendment for quantitative profiling data | Heavy | No |
 
-**Recommended sequence:** P1 (preview-deploy walk — closes Batch C DoD; 30-45 min) → P2 (Phase 4 audit, scope-only) → P3+ as time allows.
+**Recommended sequence:** P1 (density-entry batch — first visible delta from the audit) → P2 (density-question batch — extends F-DEN treatment across questions) → P3 (tone audit, leverages density+question primitives now built) as time allows.
 
 **Scoping-discipline observations carried as recurrence-watch (not yet numbered constraints):**
 
-- **AC-impl cross-check at impl-time** (introduced session 90) — applied session 93 without deviation. Discipline holding.
-- **Sibling-wrapper diff at impl-time** (carried session 88) — not surfaced session 93.
-- **Shared-infrastructure audit at refactor-time** (carried session 87) — not surfaced session 93.
-- **In-PR scope-expansion confirmation gate** (carried session 87) — not surfaced session 93.
-- **`git push --force` after amend** (carried session 91) — single occurrence at session 91; not triggered session 93. Promote to numbered constraint if a second session surfaces a similar incident.
-- **NEW session 93 — verification.md PARTIAL internal contradiction.** L41 ↔ L43 inconsistency in session 92's wrap-drafted PARTIAL verification.md (caught at full-state rewrite). Single occurrence. Promotion threshold: third PARTIAL-shipment with similar drafting bug. Mitigation in the meantime: walk PARTIAL verification.md end-to-end once before commit.
-- **NEW session 93 — read-cap accumulation during sweep cycles.** Slice-context reads (primitive 67 + acceptance 176 + verification 70 ≈ 313L) ate the 300L turn budget before screen reads landed; one O6 read was denied mid-flight. Mitigation candidates: line-range hints next to AC sweep targets in acceptance.md; defer acceptance re-read to per-AC impl-time; tighten grep-first habit. Promotion threshold: a second slice's sweep work significantly slowed by read-cap budget management.
+- **AC-impl cross-check at impl-time** (introduced session 90) — N/A session 94 (no AC impl).
+- **Sibling-wrapper diff at impl-time** (carried session 88) — N/A session 94.
+- **Shared-infrastructure audit at refactor-time** (carried session 87) — N/A session 94.
+- **In-PR scope-expansion confirmation gate** (carried session 87) — N/A; scope narrowing happened pre-impl mid-AskUserQuestion.
+- **`git push --force` after amend** (carried session 91) — not triggered session 94.
+- **verification.md PARTIAL internal contradiction** (carried session 93) — N/A session 94 (verification.md update was a status-flip on an already-complete slice).
+- **Read-cap accumulation during sweep cycles** (carried session 93) — not surfaced session 94. Mitigations applied successfully (offset+limit reads + bash grep/sed substitutes).
+- **NEW session 94 — Single-lens audit framing.** When a multi-lens audit menu is offered and the user picks a single-lens scope, the slice name + framing should match the chosen scope. Session 94 named correctly first try. Promotion threshold: future audit slice shipping under a multi-lens name but covering single-lens scope.
+- **NEW session 94 — Pre-existing provenance opportunistic cleanup at paragraph rewrite.** Comment-review hook flags fresh introductions of `PR #N` / `session N` / `slice S-XX AC-N` provenance but doesn't fire on pre-existing markers carried through a rewrite. Pattern: when editing a paragraph for unrelated reasons, scan its existing content for previously-permitted provenance and remove during the rewrite. Session 94 example: verification.md L76 intro paragraph carried `PR #169` from session 92's draft; AC-5 closure rewrote the paragraph and removed the reference. Promotion threshold: a second session surfacing pre-existing provenance carried untouched through a paragraph rewrite where opportunistic cleanup would have been right.
 
-## Authoritative reading order at session 94 start
+## Authoritative reading order at session 95 start
 
 1. This file (you are here).
-2. `docs/HANDOFF-SESSION-93.md` (session 93's retro — Batch C resumption + full-slice ship + bugs caught + 2 new recurrence-watch observations).
-3. `docs/HANDOFF-SESSION-92.md` (session 92's retro — Batch B ship + Batch C PARTIAL ship + wrap-at-warn rationale).
-4. **For P1 (preview-deploy walk):** read `docs/slices/S-PROTO-batch-C-footer-harmonisation/verification.md` §"Preview-deploy verification" + `docs/workspace-spec/72a-preview-deploy-rubric.md` (the 6-dim contract).
-5. **For P2 (Phase 4 audit):** read `docs/workspace-spec/65-pre-signup-interview-reconciled.md` (190L pre-signup spec, authoritative) + `docs/v1/v1-wireframes.md` (543L V1 baseline) selectively per section.
+2. `docs/HANDOFF-SESSION-94.md` (session 94's retro — P1 + P2 deliverables + 2 new recurrence-watch observations + Phase 3 batch impl sketch).
+3. `docs/HANDOFF-SESSION-93.md` (session 93's retro — Batch C resumption + full-slice ship).
+4. **For P1 (density-entry batch impl):** read `docs/slices/S-PROTO-pre-signup-density-delight-audit/acceptance.md` §F-DEN-02..04 + `docs/v1/v1-wireframes.md` L150-181 (V1 Welcome baseline) + `docs/workspace-spec/65-pre-signup-interview-reconciled.md` §O1.
+5. **For P2 (density-question batch impl):** read audit §F-DEN-01 + v1-wireframes L196-203 (V1 Why-we-ask pattern).
+6. **For P3 (tone audit Phase 1) or other audits:** use session-94 audit slice as structural precedent.
 
-## Session 94 kickoff prompt (paste-ready)
+## Session 95 kickoff prompt (paste-ready)
 
 ```
-Kick off session 94.
+Kick off session 95.
 
 Read this file (SESSION-CONTEXT.md) first.
 
@@ -58,25 +65,28 @@ Turn-0 verification:
 - SessionStart hook surfaces live branch state.
 - Branch convention: harness-suffixed (claude/<scope>-XXXXX) OR
   per-batch sub-branch off latest main.
-- Session 93 shipped PR #169 (Batch C · c3c5f88) squash-merged to main
-  + session-93 wrap PR pending or just-merged.
+- Session 94 shipped 2 commits: P1 verification.md update (393e454)
+  + P2 density/delight Phase 1 audit slice (142ca52); session-94 wrap
+  PR pending or just-merged.
 - If the harness landed you on a different base, follow CLAUDE.md
   §"Branch-resume check": git fetch origin main → git checkout -B
   <branch> origin/main.
 
 Read at session start (Tier 2 + Tier 3, in order):
 1. docs/SESSION-CONTEXT.md (this file).
-2. docs/HANDOFF-SESSION-93.md.
-3. docs/HANDOFF-SESSION-92.md.
-4. For P1 (preview-deploy walk): docs/slices/S-PROTO-batch-C-
-   footer-harmonisation/verification.md §"Preview-deploy verification"
-   + docs/workspace-spec/72a-preview-deploy-rubric.md.
-5. For P2 (Phase 4): docs/workspace-spec/65-pre-signup-interview-
-   reconciled.md + selected sections of docs/v1/v1-wireframes.md.
+2. docs/HANDOFF-SESSION-94.md.
+3. docs/HANDOFF-SESSION-93.md.
+4. For P1 (density-entry batch impl): docs/slices/S-PROTO-pre-signup-
+   density-delight-audit/acceptance.md §F-DEN-02..04 + docs/v1/
+   v1-wireframes.md L150-181 (V1 Welcome baseline) + docs/workspace-
+   spec/65-pre-signup-interview-reconciled.md §O1.
+5. For P2 (density-question batch impl): audit §F-DEN-01 + v1-
+   wireframes L196-203.
 
-Confirm priority with user. SESSION-CONTEXT recommends P1
-(preview-deploy 6+1 walk — closes Batch C DoD; 30-45 min) followed
-by P2 (Phase 4 spec pressure-test, scope-only audit).
+Confirm priority with user. SESSION-CONTEXT recommends P1 (density-
+entry batch — first visible delta from the density/delight audit;
+light-medium effort) followed by P2 (density-question batch) as time
+allows.
 
 Per CLAUDE.md §"AC-impl cross-check at impl-time" (recurrence-watch
 session 90): before pushing impl, re-read each AC's verbatim wording
@@ -86,7 +96,7 @@ Definition of Done (CLAUDE.md §"Definition of Done", prototype short-
 form items 1, 8, 12, 14 from spec 76 §3):
 - Slice acceptance.md + verification.md
 - Tests written + passing
-- Preview-deploy verified across the spec 72a 6+1 dimensions
+- Preview-deploy verified across spec 72a 6+1 dimensions
 - User feedback received + addressed (or explicitly deferred)
 ```
 
@@ -96,22 +106,22 @@ Decouple is the **complete settlement workspace for separating couples**. NOT a 
 
 ## Stack
 
-Next.js 14 (app router) + TypeScript · Tailwind v4 via CSS variables · S-F1 token system at `src/styles/tokens.ts` (76 tokens) · Tink for bank connect · Anthropic SDK for AI extraction · Vercel previews per branch, production at `construct-dev.vercel.app`. Shared chassis primitives all landed: `components/TopBar.tsx` (Batch A) · `components/Hero.tsx` (Batch B) · `components/Footer.tsx` (Batch C).
+Next.js 14 (app router) + TypeScript · Tailwind v4 via CSS variables · S-F1 token system at `src/styles/tokens.ts` (76 tokens) · Tink for bank connect · Anthropic SDK for AI extraction · Vercel previews per branch, production at `construct-dev.vercel.app`. Shared chassis primitives all landed: `components/TopBar.tsx` (Batch A) · `components/Hero.tsx` (Batch B) · `components/Footer.tsx` (Batch C, AC-5 preview-deploy walk evidenced session 94).
 
 ## Branch
 
-Session 94 branch: harness-suffixed off clean main, OR scope-named sub-branch per the established Phase 3 pattern. Session 93 shipped PR #169 (`c3c5f88`) + session-93 wrap PR bundling HANDOFF-92 + HANDOFF-93 + this SESSION-CONTEXT refresh.
+Session 95 branch: harness-suffixed off clean main, OR scope-named sub-branch per the established pattern. Session 94 shipped 2 commits + session-94 wrap PR bundling HANDOFF-94 + new SESSION-CONTEXT refresh.
 
 ## Negative constraints (preserve)
 
-#1-#41 from prior sessions. **No new numbered constraints surfaced session 93.** Seven scoping-discipline observations on recurrence-watch (5 carried + 2 new). Promote to numbered constraint if a third session surfaces similar recurrence for any one of them.
+#1-#41 from prior sessions. **No new numbered constraints surfaced session 94.** Nine scoping-discipline observations on recurrence-watch (7 carried + 2 new). Promote to numbered constraint if a third session surfaces similar recurrence for any one of them.
 
 ## Scope ceiling
 
-Session 94 is most likely **P1 (preview-deploy walk — closes Batch C DoD)** followed by **P2 (Phase 4 scope-only audit)** if budget permits. Out of scope unless explicitly added: P3 desktop · P4 production graduation · P5-8 inherited side-quests · Welcome Tour · Marketing Landing · Post-connect Dashboard · `Decouple.zip` unpacking · Mobile Screens v2 · authenticated-screens header work.
+Session 95 is most likely **P1 (density-entry batch impl — first visible delta from the density/delight audit)** followed by **P2 (density-question batch impl)** if budget permits. Out of scope unless explicitly added: P4 desktop · P5+ inherited side-quests · Welcome Tour · Marketing Landing · Post-connect Dashboard · `Decouple.zip` unpacking · Mobile Screens v2 · authenticated-screens header work.
 
 ## Current pre-signup prototype URL
 
 - Production: `https://construct-dev.vercel.app/dev/proto/pre-signup-interview`
 - Per-PR preview: surfaced as Vercel comment on each PR.
-- All 8 screens (O1-O8) are canvas-as-source on main, with three shared chassis primitives landed (TopBar + Hero + Footer) + dead-code cleaned + O1/O2 root `<main>` + O7 PlanFooter `<section>` removed.
+- All 8 screens (O1-O8) are canvas-as-source on main, three shared chassis primitives landed (TopBar + Hero + Footer) + dead-code cleaned + O1/O2 root `<main>` + O7 PlanFooter `<section>` removed + Batch C AC-5 preview-deploy walk evidenced. Density + delight Phase 1 audit catalogued (10 findings; Phase 3 batch impl pending).
