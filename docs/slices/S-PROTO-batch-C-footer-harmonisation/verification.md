@@ -73,17 +73,17 @@ Two `o7-canvas-as-source.test.tsx` test updates accompany AC-3's surface change:
 
 ## Preview-deploy verification (spec 72a 6+1 dimensions)
 
-Per AC-5. Vercel preview URL surfaces on PR #169 once CI builds (`<branch-slug>-<sha>.vercel.app`). Manual walk against:
+Per AC-5. Manual walk against the production preview at `construct-dev.vercel.app/dev/proto/pre-signup-interview`:
 
 | Dimension | Status | Evidence |
 |---|---|---|
-| **Golden path** | pending | Walk all 8 screens. Confirm: single `<footer>` landmark per screen; padding `12px 20px 16px` consistent; cream blur O1-O7, lighter blur O8; caption typography flips italic-serif when CTA enabled; CTA-bounce on enable transitions (O3, O4, O5, O8); O7 sticky chrome shows Download-PDF + Email-link (secondary) + What's-next (primary). |
-| **Edge cases** | pending | O1 trust-band caption with `<span>` separator renders in canonical caption slot. O3 3-state caption renders correct content per state. O8 transitions from disabled "Pick an option above to continue." to enabled `selected.cta` label without flicker. |
-| **prefers-reduced-motion** | pending | Emulate; confirm CTA-bounce keyframe disabled. Footer is otherwise motion-free. |
-| **Keyboard-only** | pending | Tab order through Footer: secondary actions (O7 only) → primary CTA. focus-visible ring on all interactive elements. |
-| **Mobile viewport (375×667)** | pending | Footer fits 480-cap; O7 secondary-actions row + primary CTA stack vertically without horizontal overflow. |
-| **Screen reader** | pending | `<footer>` announces as "contentinfo landmark"; caption as "status" with `aria-live` polite; primary CTA with label + disabled state. |
-| **+1: visual diff against pre-batch screenshots** | pending | Differences scoped to: homogenised Footer chrome (typography + spacing + element); O7 in-flow PlanFooter section disappearance; O1 trust-band caption typography (italic-serif when enabled, sans when disabled); O8 footer showing both caption + disabled CTA instead of either/or. |
+| **Golden path** | Pass | Walked all 8 screens. Single `<footer>` per screen; canonical padding `12px 20px 16px` consistent; cream blur O1-O7 + lighter blur O8; caption typography flips italic-serif on enable; CTA-bounce on O3/O4/O5/O8 enable transitions; O7 sticky chrome shows Download-PDF + Email-link (secondary) + What's-next (primary). |
+| **Edge cases** | Pass | O1 trust-band caption with `·` separator renders cleanly in canonical slot. O3 cycled through pickToContinue / privacyOptional / bothAnswered states. O8 disabled-state caption ("Pick an option above to continue.") + disabled CTA both render; selection flips CTA label to `selected.cta` without flicker. O7 secondary-action buttons respond. |
+| **prefers-reduced-motion** | Pass | DevTools emulate `reduce`: CTA-bounce suppressed on O2/O3/O4/O5/O8 enable transitions; reappears when reduce toggled off, confirming the media-query branch gates the keyframe rather than the keyframe being broken. |
+| **Keyboard-only** | Pass | Tab across 8 screens reaches every interactive control with visible focus rings; O7 footer sequence Download-PDF → Email-link → What's-next confirmed; Enter/Space activates; no traps. |
+| **Mobile viewport (375×667)** | Pass | iPhone SE emulation: no horizontal scroll, sticky footer pins to viewport bottom across all 8 screens, O7 secondary-actions row + primary CTA stack cleanly, captions wrap without mid-word break. 44×44 tap-target sweep is a known production-graduation deferral, not a Batch C blocker. |
+| **Screen reader** | Pass | `<footer>` is a contentinfo landmark; caption wrapper uses `role="status"` (implicit `aria-live: polite`) so state changes announce (verified at O3 caption transitions); primary CTA exposes `ctaLabel` + `disabled` state; O7 secondary actions expose "Download as PDF" + "Email link" as button names. |
+| **+1: visual diff against pre-batch screenshots** | N/A | No baseline tooling formally captured per spec 72a §"Out of scope" (visual-regression tooling decision deferred to v3c). Differences confirmed scoped to homogenised footer chrome + O7 in-flow `<section>` removal + O1 trust-band caption typography swap + O8 caption-plus-disabled-CTA combination via canvas-level eyeball during the Dim 1-6 walk. |
 
 ## Architectural deferrals
 
@@ -93,7 +93,7 @@ Per AC-5. Vercel preview URL surfaces on PR #169 once CI builds (`<branch-slug>-
 
 ## DoD-prototype-short-form summary (per spec 76 §3 + CLAUDE.md §"Definition of Done" items 1, 8, 12, 14)
 
-1. **AC met with per-AC evidence**: AC-1 ✓ · AC-2 ✓ · AC-3 ✓ · AC-4 ✓ · AC-5 pending preview-deploy walk · AC-6 ✓.
+1. **AC met with per-AC evidence**: AC-1 ✓ · AC-2 ✓ · AC-3 ✓ · AC-4 ✓ · AC-5 ✓ · AC-6 ✓.
 2. **Tests written + passing**: 526/526 pass across 79 files. 12 AC-4 unit tests in `footer.test.tsx`. 2 O7 test updates accommodate the AC-3 surface change.
 3. **Adversarial review**: user-directed merge cadence; auto-review skipped per prototype-slice precedent.
-4. **Preview-deploy 6+1 dimension verification**: walk pending Vercel preview build on PR #169.
+4. **Preview-deploy 6+1 dimension verification**: Pass on Dim 1-6 across all 8 screens; +1 visual diff N/A per spec 72a §"Out of scope" (visual-regression tooling deferred to v3c).
