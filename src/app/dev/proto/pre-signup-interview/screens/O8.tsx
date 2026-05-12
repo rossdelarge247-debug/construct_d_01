@@ -16,8 +16,7 @@ const colors = {
 };
 
 const VIOLET_SOFT = '#F3EEFE';
-const SOFT = '#FAFAF7';
-const DIS = '#A8A29E';
+const ICON_BG_UNSELECTED = '#FAFAF7';
 
 const FONT_SERIF = 'var(--ds-font-serif, "Source Serif Pro", "Source Serif 4", Georgia, serif)';
 const FONT_MONO = 'var(--ds-font-mono, "JetBrains Mono", ui-monospace, monospace)';
@@ -181,25 +180,25 @@ function TopBar({ onBack }: { onBack: () => void }) {
       justifyContent: 'space-between',
       borderBottom: `1px solid ${colors.border}`,
     }}>
-      <button
-        type="button"
-        onClick={onBack}
-        aria-label="Back to previous step"
+      <a
+        href="#"
+        onClick={(e) => {
+          e.preventDefault();
+          onBack();
+        }}
         style={{
           display: 'inline-flex',
           alignItems: 'center',
           gap: 6,
           fontSize: 11,
           color: colors.sub,
-          background: 'transparent',
-          border: 'none',
+          textDecoration: 'none',
           padding: '6px 4px',
-          cursor: 'pointer',
         }}
       >
         <ArrowSvg dir="left" size={11} />
         <span>Back</span>
-      </button>
+      </a>
       <StepRail current={8} total={8} />
       <div aria-hidden="true" style={{ width: 36 }} />
     </div>
@@ -294,78 +293,87 @@ function OptionCard({ option, selected, onSelect, staggerIndex }: {
   staggerIndex: number;
 }) {
   const Icon = ICONS[option.id];
+  const inputId = `o8-opt-${option.id}`;
   const entryStyle: CSSProperties = { ['--stagger-index' as string]: staggerIndex };
   return (
-    <button
-      type="button"
-      role="radio"
-      aria-checked={selected}
-      onClick={onSelect}
-      className={`${styles.entry} ${styles.card}`}
-      style={{
-        ...entryStyle,
-        display: 'block',
-        width: '100%',
-        background: selected ? '#FFFFFF' : 'rgba(255,255,255,0.78)',
-        border: selected ? `1.5px solid ${colors.ink}` : `1px solid ${colors.border}`,
-        boxShadow: selected
-          ? '0 1px 0 rgba(0,0,0,0.04), 0 6px 14px rgba(124,58,237,0.10)'
-          : '0 1px 0 rgba(0,0,0,0.02)',
-        borderRadius: 16,
-        padding: '12px 13px',
-        textAlign: 'left',
-        cursor: 'pointer',
-        transform: selected ? 'translateY(-0.5px)' : 'translateY(0)',
-      }}
-    >
-      <div style={{ display: 'flex', alignItems: 'flex-start', gap: 11 }}>
-        <span aria-hidden="true" style={{
-          flex: 'none',
-          width: 18, height: 18, borderRadius: 999,
-          border: `1.5px solid ${selected ? colors.ink : '#C9C5BD'}`,
-          background: selected ? colors.ink : 'transparent',
-          display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
-          marginTop: 1,
-        }}>
-          {selected && (
-            <span style={{
-              width: 6, height: 6, borderRadius: 999, background: '#FFFFFF',
-            }} />
-          )}
-        </span>
-        <div style={{ flex: 1, minWidth: 0 }}>
-          <div style={{
-            fontFamily: FONT_SERIF,
-            fontSize: 14,
-            lineHeight: 1.25,
-            letterSpacing: '-0.005em',
-            fontWeight: 600,
-            color: colors.ink,
+    <div className={styles.cardWrapper}>
+      <input
+        type="radio"
+        name="o8-next-step"
+        id={inputId}
+        value={option.id}
+        checked={selected}
+        onChange={onSelect}
+        className={styles.srInput}
+      />
+      <label
+        htmlFor={inputId}
+        className={`${styles.entry} ${styles.card}`}
+        style={{
+          ...entryStyle,
+          display: 'block',
+          width: '100%',
+          background: selected ? '#FFFFFF' : 'rgba(255,255,255,0.78)',
+          border: selected ? `1.5px solid ${colors.ink}` : `1px solid ${colors.border}`,
+          boxShadow: selected
+            ? '0 1px 0 rgba(0,0,0,0.04), 0 6px 14px rgba(124,58,237,0.10)'
+            : '0 1px 0 rgba(0,0,0,0.02)',
+          borderRadius: 16,
+          padding: '12px 13px',
+          textAlign: 'left',
+          cursor: 'pointer',
+          transform: selected ? 'translateY(-0.5px)' : 'translateY(0)',
+        }}
+      >
+        <div style={{ display: 'flex', alignItems: 'flex-start', gap: 11 }}>
+          <span aria-hidden="true" style={{
+            flex: 'none',
+            width: 18, height: 18, borderRadius: 999,
+            border: `1.5px solid ${selected ? colors.ink : '#C9C5BD'}`,
+            background: selected ? colors.ink : 'transparent',
+            display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
+            marginTop: 1,
           }}>
-            {option.title}
+            {selected && (
+              <span style={{
+                width: 6, height: 6, borderRadius: 999, background: '#FFFFFF',
+              }} />
+            )}
+          </span>
+          <div style={{ flex: 1, minWidth: 0 }}>
+            <div style={{
+              fontFamily: FONT_SERIF,
+              fontSize: 14,
+              lineHeight: 1.25,
+              letterSpacing: '-0.005em',
+              fontWeight: 600,
+              color: colors.ink,
+            }}>
+              {option.title}
+            </div>
+            <div style={{
+              fontSize: 11,
+              color: colors.sub,
+              lineHeight: 1.4,
+              marginTop: 3,
+            }}>
+              {option.sub}
+            </div>
           </div>
-          <div style={{
-            fontSize: 11,
-            color: colors.sub,
-            lineHeight: 1.4,
-            marginTop: 3,
+          <span aria-hidden="true" style={{
+            flex: 'none',
+            width: 32, height: 32, borderRadius: 10,
+            background: selected ? colors.ink : ICON_BG_UNSELECTED,
+            color: selected ? '#FFFFFF' : colors.muted,
+            border: selected ? 'none' : `1px solid ${colors.border}`,
+            display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
+            marginTop: 1,
           }}>
-            {option.sub}
-          </div>
+            <Icon size={17} />
+          </span>
         </div>
-        <span aria-hidden="true" style={{
-          flex: 'none',
-          width: 32, height: 32, borderRadius: 10,
-          background: selected ? colors.ink : SOFT,
-          color: selected ? '#FFFFFF' : colors.muted,
-          border: selected ? 'none' : `1px solid ${colors.border}`,
-          display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
-          marginTop: 1,
-        }}>
-          <Icon size={17} />
-        </span>
-      </div>
-    </button>
+      </label>
+    </div>
   );
 }
 
@@ -411,7 +419,7 @@ function Footer({ selected, onContinue }: { selected: OptionDef | undefined; onC
           <p style={{
             margin: 0,
             fontSize: 11,
-            color: DIS,
+            color: colors.sub,
             lineHeight: 1.45,
             textAlign: 'center',
             width: '100%',
@@ -435,24 +443,8 @@ export function O8() {
       <TopBar onBack={back} />
       <PlanRecall />
       <Hero />
-      <div
-        role="radiogroup"
-        aria-labelledby="o8-legend"
-        style={{ padding: '8px 20px 16px', display: 'flex', flexDirection: 'column', gap: 10 }}
-      >
-        <span id="o8-legend" style={{
-          position: 'absolute',
-          width: 1,
-          height: 1,
-          padding: 0,
-          margin: -1,
-          overflow: 'hidden',
-          clip: 'rect(0,0,0,0)',
-          whiteSpace: 'nowrap',
-          border: 0,
-        }}>
-          What would you like to do next?
-        </span>
+      <fieldset className={styles.fieldset}>
+        <legend className={styles.srOnly}>What would you like to do next?</legend>
         {OPTIONS.map((option, i) => (
           <OptionCard
             key={option.id}
@@ -462,7 +454,7 @@ export function O8() {
             staggerIndex={i + 1}
           />
         ))}
-      </div>
+      </fieldset>
       <Footer selected={selected} onContinue={next} />
     </main>
   );

@@ -12,9 +12,10 @@ function renderO8() {
 }
 
 describe('O8 (canvas-as-source)', () => {
-  it('renders the TopBar Back affordance and Step 8/8 terminal indicator', () => {
+  it('renders the TopBar Back link and Step 8/8 terminal indicator', () => {
     renderO8();
-    expect(screen.getByRole('button', { name: /Back to previous step/ })).toBeTruthy();
+    const back = screen.getByRole('link', { name: /Back/ });
+    expect(back.tagName).toBe('A');
     const rail = screen.getByRole('progressbar');
     expect(rail.getAttribute('aria-label')).toBe('Step 8 of 8');
     expect(rail.getAttribute('aria-valuenow')).toBe('8');
@@ -35,13 +36,18 @@ describe('O8 (canvas-as-source)', () => {
     expect(screen.getByText(/There's no wrong answer/)).toBeTruthy();
   });
 
-  it('renders 4 OptionCards as a radiogroup with sr-only legend', () => {
+  it('renders 4 native radio inputs grouped under a fieldset with sr-only legend', () => {
     renderO8();
-    const group = screen.getByRole('radiogroup');
-    expect(group.getAttribute('aria-labelledby')).toBe('o8-legend');
+    const group = screen.getByRole('group', { name: /What would you like to do next/ });
+    expect(group.tagName).toBe('FIELDSET');
     const radios = within(group).getAllByRole('radio');
     expect(radios).toHaveLength(4);
-    radios.forEach((r) => expect(r.getAttribute('aria-checked')).toBe('false'));
+    radios.forEach((r) => {
+      expect(r.tagName).toBe('INPUT');
+      expect((r as HTMLInputElement).type).toBe('radio');
+      expect((r as HTMLInputElement).name).toBe('o8-next-step');
+      expect((r as HTMLInputElement).checked).toBe(false);
+    });
   });
 
   it('renders all 4 option titles + sub copy verbatim from canvas', () => {
@@ -61,13 +67,13 @@ describe('O8 (canvas-as-source)', () => {
     expect(screen.queryByRole('button', { name: /Download my plan/ })).toBeNull();
   });
 
-  it('selecting an option flips aria-checked and surfaces the option-specific CTA', () => {
+  it('selecting an option flips the checked state and surfaces the option-specific CTA', () => {
     renderO8();
-    const signupRadio = screen.getByRole('radio', { name: /Create a free account/ });
-    expect(signupRadio.getAttribute('aria-checked')).toBe('false');
+    const signupRadio = screen.getByRole('radio', { name: /Create a free account/ }) as HTMLInputElement;
+    expect(signupRadio.checked).toBe(false);
     fireEvent.click(signupRadio);
-    const afterClick = screen.getByRole('radio', { name: /Create a free account/ });
-    expect(afterClick.getAttribute('aria-checked')).toBe('true');
+    const afterClick = screen.getByRole('radio', { name: /Create a free account/ }) as HTMLInputElement;
+    expect(afterClick.checked).toBe(true);
     expect(screen.getByRole('button', { name: /Create my account/ })).toBeTruthy();
     expect(screen.queryByText('Pick an option above to continue.')).toBeNull();
   });
@@ -81,15 +87,14 @@ describe('O8 (canvas-as-source)', () => {
     expect(screen.queryByRole('button', { name: /Create my account/ })).toBeNull();
   });
 
-  it('only one option is aria-checked at a time (radio mutual exclusion)', () => {
+  it('only one option is checked at a time (radio mutual exclusion via native name grouping)', () => {
     renderO8();
     fireEvent.click(screen.getByRole('radio', { name: /Create a free account/ }));
     fireEvent.click(screen.getByRole('radio', { name: /need to talk to someone/ }));
-    const radios = screen.getAllByRole('radio');
-    const checked = radios.filter((r) => r.getAttribute('aria-checked') === 'true');
+    const radios = screen.getAllByRole('radio') as HTMLInputElement[];
+    const checked = radios.filter((r) => r.checked);
     expect(checked).toHaveLength(1);
-    expect(checked[0].getAttribute('aria-checked')).toBe('true');
-    expect((checked[0].textContent ?? '')).toMatch(/talk to someone/);
+    expect(checked[0].value).toBe('support');
   });
 
   it('hides decorative SVGs from screen readers (aria-hidden=true)', () => {

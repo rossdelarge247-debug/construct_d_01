@@ -8,6 +8,46 @@
   flex-direction: column;
 }
 
+.fieldset {
+  margin: 0;
+  padding: 8px 20px 16px;
+  border: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.srOnly {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+.cardWrapper {
+  position: relative;
+}
+
+.srInput {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  opacity: 0;
+  pointer-events: none;
+  margin: 0;
+}
+
+.srInput:focus-visible ~ .card {
+  box-shadow:
+    0 0 0 2px var(--ds-color-accent-violet, #7C3AED),
+    0 1px 0 rgba(0, 0, 0, 0.02);
+}
+
 .entry {
   opacity: 0;
   transform: translateY(12px);
