@@ -20,7 +20,7 @@
 | What's next CTA invokes `useProto().next` | Pending | `O7.test.tsx` |
 | BreathingHalo respects `prefers-reduced-motion` | Pending | `O7.test.tsx` (CSS-class assertion; full visual under preview-deploy 6+1 rubric) |
 
-## Preview-deploy verification (per spec 72a 6+1 rubric)
+## Preview-deploy verification (spec 72a 6+1 rubric)
 
 | Dimension | Status | Evidence |
 |---|---|---|
@@ -31,11 +31,11 @@
 | Mobile viewport (375×667) | Pending | Devtools device-emulation iPhone-SE-class. Content fits at 375 wide; sticky CTA bottom-anchored within viewport. |
 | Screen reader | Pending | VoiceOver / NVDA pass: announces "Building your plan" eyebrow during generating; "Your plan is ready" heading + section heading hierarchy on ready; CTA labels readable. |
 
-## DoD-14 short-form (prototype category — items 1, 8, 12, 14 per spec 76 §3)
+## DoD-14 short-form (prototype category — items 1, 8, 12, 14 from spec 76 §3)
 
 - [ ] **1. All ACs met** with verification.md evidence per AC
 - [ ] **8. Unit/integration tests** written + passing (state transition · content render · a11y class assertions)
-- [ ] **12. Preview-deploy verified** per spec 72a 6+1 dimensions
+- [ ] **12. Preview-deploy verified** across the spec 72a 6+1 dimensions
 - [ ] **14. User feedback** received + addressed (or explicitly deferred)
 
 ## Architectural deferrals
@@ -45,7 +45,8 @@
 - **Functional Download / Email**: PlanFooter buttons render visual treatment only; PDF generation + email-send are post-MLP. Production-graduation backlog.
 - **Canvas-local token promotion**: VIOLET_SOFT (`#F3EEFE`), MAGENTA_SOFT (`#FCE7F3`), SOFTMUTE (`#9A968E`), PAPER_WARM (`#FBFAF6`), SOFT (`#FAFAF7`), INDIGO-dark (`#4338CA`) — inline at v1; promote to `tokens.color.*` once a second screen references the same value.
 - **`100vh` vs `100dvh`** for mobile-address-bar handling: cross-screen sweep deferred per prior slices' deferral.
-- **44×44 touch target** on TopBar Home/Save links: inherits from sibling O5/O6 deferral; production-graduation pass.
+- **44×44 touch target** on TopBar Home/Save links AND on PlanFooter sticky Back link (~28px tap height with the canvas's `padding: '8px'`): inherits from sibling O5/O6 deferral; production-graduation pass.
+- **Pending-disclosure-list contrast**: items use `color: colors.muted` (`#78716C`) at `opacity: 0.55`, giving ~1.4:1 effective contrast against the violet→pink generating background — below the 3:1 WCAG large-text threshold. Visual treatment matches the canvas's intentional "pending" subtlety. Production graduation: either darken to a less-grey base OR lift opacity to ~0.75 to clear 3:1; pair with prefers-contrast: more support if pursued.
 
 ## Status
 

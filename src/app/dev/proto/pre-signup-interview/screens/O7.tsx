@@ -5,6 +5,7 @@ import { tokens } from '@/styles/tokens';
 import { BrandBar } from '../components/BrandBar';
 import { useProto } from '../lib/proto-context';
 import { buildPlanFromAnswers } from '../lib/build-plan';
+import type { Answers } from '../lib/types';
 import styles from './O7.module.css';
 
 type O7State = 'generating' | 'ready';
@@ -25,7 +26,6 @@ const MAGENTA_SOFT = '#FCE7F3';
 const PAPER_WARM = '#FBFAF6';
 const SOFT = '#FAFAF7';
 const SOFTMUTE = '#9A968E';
-const LINE = colors.border;
 
 const EXPRESSIVE_HERO = 'linear-gradient(180deg, #F3EEFE 0%, #FCE7F3 200px, #FBFAF6 460px)';
 const GENERATING_BG = 'linear-gradient(180deg, #F3EEFE 0%, #FCE7F3 360px, #FBFAF6 720px)';
@@ -138,7 +138,7 @@ function MobileTopBar({ step = 7, total = 8, remaining = '~30s remaining' }: {
       display: 'flex',
       alignItems: 'center',
       justifyContent: 'space-between',
-      borderBottom: `1px solid ${LINE}`,
+      borderBottom: `1px solid ${colors.border}`,
       background: 'transparent',
     }}>
       <a href="#" style={{
@@ -149,7 +149,7 @@ function MobileTopBar({ step = 7, total = 8, remaining = '~30s remaining' }: {
         <span>Home</span>
       </a>
       <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4 }}>
-        <div style={{ position: 'relative', height: 3, borderRadius: 999, width: 110, background: LINE }}>
+        <div style={{ position: 'relative', height: 3, borderRadius: 999, width: 110, background: colors.border }}>
           <div style={{
             position: 'absolute', top: 0, bottom: 0, left: 0,
             borderRadius: 999, width: `${pct}%`, background: colors.ink,
@@ -173,7 +173,7 @@ function MobileHero() {
     <div style={{
       padding: '26px 20px 22px 20px',
       background: EXPRESSIVE_HERO,
-      borderBottom: `1px solid ${LINE}`,
+      borderBottom: `1px solid ${colors.border}`,
       position: 'relative',
       overflow: 'hidden',
     }}>
@@ -280,7 +280,7 @@ function SituationSummary({ summary, staggerIndex }: { summary: string; staggerI
       <MobileSectionHeader eyebrow="Section 1 · what you told us" title="Your situation" eyebrowColor={colors.violet} />
       <div style={{
         background: '#FFFFFF',
-        border: `1px solid ${LINE}`,
+        border: `1px solid ${colors.border}`,
         borderRadius: 16,
         padding: 16,
         fontSize: 14,
@@ -319,7 +319,7 @@ function DivorceJourney({ stages, currentStageKey, staggerIndex }: {
                 width: 22, height: 22, flexShrink: 0,
                 borderRadius: '50%',
                 background: isCurrent ? colors.magenta : '#FFFFFF',
-                border: isCurrent ? 'none' : `1.5px solid ${LINE}`,
+                border: isCurrent ? 'none' : `1.5px solid ${colors.border}`,
                 display: 'flex', alignItems: 'center', justifyContent: 'center',
                 fontFamily: FONT_MONO,
                 fontSize: 10,
@@ -369,7 +369,7 @@ function DivorceJourney({ stages, currentStageKey, staggerIndex }: {
   );
 }
 
-function WhatNeedsToHappen({ steps, staggerIndex }: { steps: ReadonlyArray<string>; staggerIndex: number }) {
+function WhatNeedsToHappen({ items, staggerIndex }: { items: ReadonlyArray<string>; staggerIndex: number }) {
   return (
     <section className={styles.entry} style={sectionEntryStyle(staggerIndex)}>
       <MobileSectionHeader eyebrow="Section 3 · tailored to you" title="What needs to happen" eyebrowColor={colors.violet} />
@@ -381,14 +381,14 @@ function WhatNeedsToHappen({ steps, staggerIndex }: { steps: ReadonlyArray<strin
         flexDirection: 'column',
         gap: 10,
       }}>
-        {steps.map((step, i) => (
-          <li key={`${i}-${step.slice(0, 16)}`} style={{
+        {items.map((item, i) => (
+          <li key={`${i}-${item.slice(0, 16)}`} style={{
             display: 'flex',
             alignItems: 'flex-start',
             gap: 10,
             padding: '12px 14px',
             background: SOFT,
-            border: `1px solid ${LINE}`,
+            border: `1px solid ${colors.border}`,
             borderRadius: 12,
             fontSize: 14,
             lineHeight: 1.5,
@@ -404,7 +404,7 @@ function WhatNeedsToHappen({ steps, staggerIndex }: { steps: ReadonlyArray<strin
             }}>
               {String(i + 1).padStart(2, '0')}
             </span>
-            <span>{step}</span>
+            <span>{item}</span>
           </li>
         ))}
       </ul>
@@ -420,7 +420,7 @@ function ConventionalPath({ path, staggerIndex }: { path: ConventionalPathData; 
       <MobileSectionHeader eyebrow="Section 4 · for comparison" title={path.headline} eyebrowColor={SOFTMUTE} />
       <div style={{
         background: PAPER_WARM,
-        border: `1px solid ${LINE}`,
+        border: `1px solid ${colors.border}`,
         borderRadius: 16,
         padding: 18,
         display: 'flex',
@@ -469,7 +469,7 @@ function DecoupleHelps({ help, staggerIndex }: { help: DecoupleHelpsData; stagge
           <li key={pillar} style={{
             padding: '12px 12px',
             background: VIOLET_SOFT,
-            border: `1px solid ${LINE}`,
+            border: `1px solid ${colors.border}`,
             borderRadius: 12,
             fontFamily: FONT_SERIF,
             fontSize: 13,
@@ -505,7 +505,7 @@ function PersonalisedNotes({ notes, staggerIndex }: {
           <li key={note.trigger} style={{
             padding: '14px 16px',
             background: '#FFFFFF',
-            border: `1px solid ${LINE}`,
+            border: `1px solid ${colors.border}`,
             borderLeft: `3px solid ${colors.magenta}`,
             borderRadius: 12,
             fontSize: 13.5,
@@ -575,7 +575,7 @@ function PlanFooter({ onNext, staggerIndex }: { onNext: () => void; staggerIndex
         <div style={{
           marginTop: 28, paddingTop: 24,
           display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-          borderTop: `1px solid ${LINE}`,
+          borderTop: `1px solid ${colors.border}`,
         }}>
           <a href="#" style={{ fontSize: 12.5, color: colors.sub, textDecoration: 'underline', textUnderlineOffset: 4 }}>
             Find out more about Decouple
@@ -590,7 +590,7 @@ function PlanFooter({ onNext, staggerIndex }: { onNext: () => void; staggerIndex
         padding: '14px 20px 20px',
         background: 'rgba(255,255,255,0.92)',
         backdropFilter: 'blur(10px)',
-        borderTop: `1px solid ${LINE}`,
+        borderTop: `1px solid ${colors.border}`,
       }}>
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12 }}>
           <a href="#" style={{
@@ -621,12 +621,14 @@ function PlanFooter({ onNext, staggerIndex }: { onNext: () => void; staggerIndex
   );
 }
 
-const DISCLOSURE_STEPS: ReadonlyArray<readonly [string, boolean]> = [
-  ['Listening to your situation', true],
-  ['Mapping the journey', true],
-  ['Tailoring next steps', true],
-  ['Comparing the conventional path', false],
-  ['Writing your specific notes', false],
+type DisclosureState = 'done' | 'working' | 'pending';
+
+const DISCLOSURE_STEPS: ReadonlyArray<{ label: string; state: DisclosureState }> = [
+  { label: 'Listening to your situation', state: 'done' },
+  { label: 'Mapping the journey', state: 'done' },
+  { label: 'Tailoring next steps', state: 'done' },
+  { label: 'Comparing the conventional path', state: 'working' },
+  { label: 'Writing your specific notes', state: 'pending' },
 ];
 
 function MobileGeneratingView() {
@@ -689,37 +691,41 @@ function MobileGeneratingView() {
               textAlign: 'left',
             }}
           >
-            {DISCLOSURE_STEPS.map(([label, done], i) => (
-              <li key={label} style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: 10,
-                fontSize: 13,
-                color: done ? colors.ink : colors.muted,
-                opacity: done ? 1 : 0.55,
-              }}>
-                <span aria-hidden="true" style={{
-                  width: 14, height: 14, borderRadius: '50%',
-                  background: done ? colors.violet : 'transparent',
-                  border: done ? 'none' : `1.5px solid ${colors.muted}`,
-                  display: 'flex', alignItems: 'center', justifyContent: 'center',
-                  flexShrink: 0,
+            {DISCLOSURE_STEPS.map(({ label, state }) => {
+              const isDone = state === 'done';
+              const isWorking = state === 'working';
+              return (
+                <li key={label} style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 10,
+                  fontSize: 13,
+                  color: isDone ? colors.ink : colors.muted,
+                  opacity: isDone ? 1 : 0.55,
                 }}>
-                  {done && <CheckIcon size={8} />}
-                </span>
-                <span style={{ flex: 1 }}>{label}</span>
-                {!done && i === 3 && (
-                  <span style={{
-                    fontFamily: FONT_MONO,
-                    fontSize: 10,
-                    color: colors.violet,
-                    letterSpacing: '0.04em',
+                  <span aria-hidden="true" style={{
+                    width: 14, height: 14, borderRadius: '50%',
+                    background: isDone ? colors.violet : 'transparent',
+                    border: isDone ? 'none' : `1.5px solid ${colors.muted}`,
+                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    flexShrink: 0,
                   }}>
-                    working…
+                    {isDone && <CheckIcon size={8} />}
                   </span>
-                )}
-              </li>
-            ))}
+                  <span style={{ flex: 1 }}>{label}</span>
+                  {isWorking && (
+                    <span style={{
+                      fontFamily: FONT_MONO,
+                      fontSize: 10,
+                      color: colors.violet,
+                      letterSpacing: '0.04em',
+                    }}>
+                      working…
+                    </span>
+                  )}
+                </li>
+              );
+            })}
           </ul>
         </div>
 
@@ -742,7 +748,7 @@ function MobileGeneratingView() {
 
 function MobileReadyView({ onNext, answers }: {
   onNext: () => void;
-  answers: Parameters<typeof buildPlanFromAnswers>[0];
+  answers: Answers;
 }) {
   const plan = buildPlanFromAnswers(answers);
   return (
@@ -751,7 +757,7 @@ function MobileReadyView({ onNext, answers }: {
       <MobileHero />
       <SituationSummary summary={plan.situationSummary} staggerIndex={1} />
       <DivorceJourney stages={plan.journeyStages} currentStageKey={answers.stage} staggerIndex={2} />
-      <WhatNeedsToHappen steps={plan.whatNeedsToHappen} staggerIndex={3} />
+      <WhatNeedsToHappen items={plan.whatNeedsToHappen} staggerIndex={3} />
       <ConventionalPath path={plan.conventionalPath} staggerIndex={4} />
       <DecoupleHelps help={plan.howDecoupleHelps} staggerIndex={5} />
       <PersonalisedNotes notes={plan.personalisedNotes} staggerIndex={6} />

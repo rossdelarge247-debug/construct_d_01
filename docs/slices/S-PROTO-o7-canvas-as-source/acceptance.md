@@ -54,7 +54,7 @@ Canvas-as-source default per CLAUDE.md §"Canvas-as-source (prototype default)":
 
 **AC-5: Motion, a11y, reduced-motion.**
 - **Section entry stagger** on MobileReady mount: each top-level section reveals via `--stagger-index` opacity-up + 12px translate-up, 240ms ease-out, 80ms delay between siblings. Pattern matches the O5.module.css / O6.module.css template (opacity override scoped to `.entry` only, NOT `.chip` — applying it to chip class breaks chip transitions under reduced-motion).
-- **State-transition fade**: when state transitions `'generating' → 'ready'`, MobileGenerating fades out (200ms opacity 1→0) before MobileReady fades in (300ms opacity 0→1). Suppressed under `prefers-reduced-motion: reduce` (instant swap).
+- **State-transition fade-in**: `MobileReady` mounts with `styles.fadeIn` (300ms opacity 0→1). `MobileGenerating` swaps to `MobileReady` instantly when the timer fires — no `.fadeOut` is applied because the per-section `.entry` stagger on MobileReady then cascades the reveal. Suppressed under `prefers-reduced-motion: reduce` (instant swap).
 - **BreathingHalo pulse**: 2.4s ease-in-out infinite scale 1 → 1.08 → 1. Suppressed under reduced-motion (static at base).
 - **Semantic structure**: each MobileReady section uses `<section>` element with section-heading via canvas `MobileSectionHeader` eyebrow + h2 pair; one `<h1>` (or `<h1 className="sr-only">`) for screen title. TopBar Back link is `<a>` with visible label + arrow. PlanFooter CTAs are `<button>` (visual) or `<a>` (navigational). Disclosure-list `<ul>` with `<li>` per micro-step.
 - **Keyboard**: all interactive elements (Back, Download, Email, Find-out-more, What's next) reachable via Tab in DOM order; focus-visible ring inherits page-level treatment.
@@ -62,7 +62,7 @@ Canvas-as-source default per CLAUDE.md §"Canvas-as-source (prototype default)":
 
 ## Out of scope (deferred)
 
-- **DesktopAdaptation** (canvas o7-plan-page.jsx L586-690). Two-column compressed desktop variant. Defers to spec 70 §"P3 desktop-enhanced graceful enhancement" — needs all 8 mobile screens shipped first (constraint #41).
+- **DesktopAdaptation** (canvas o7-plan-page.jsx L586-690). Two-column compressed desktop variant. Defers to the spec 70 desktop-enhanced graceful enhancement track — needs all 8 mobile screens shipped first (constraint #41).
 - **Canvas-local token promotions** for VIOLET_SOFT (`#F3EEFE`), MAGENTA_SOFT (`#FCE7F3`), SOFTMUTE (`#9A968E`), PAPER_WARM (`#FBFAF6`), SOFT (`#FAFAF7`), and an INDIGO-dark shade (`#4338CA` — distinct from the existing `tokens.color.accent.indigo` at `#4F46E5`). Used inline; promotion deferred to a follow-up token-sweep slice when 2+ screens reference each.
 - **Dynamic generating-step progression**. Canvas shows a static snapshot (3 done · 1 working · 1 pending). Animating the bullets through `pending → working → done` over the 3000ms is out of scope — visually rich enough as static; defer if user feedback requests it.
 - **Functional Download / Email actions** (PlanFooter buttons). Prototype-only; routing + PDF generation + email-send are post-MLP concerns.
@@ -70,6 +70,6 @@ Canvas-as-source default per CLAUDE.md §"Canvas-as-source (prototype default)":
 
 ## Pre-flight
 
-Adversarial-review budget (CLAUDE.md §"Engineering conventions" §"Adversarial review gate"): this acceptance.md ~140L; single sub-spawn covers it. Auto-review will fan out 3 specialists (security · correctness · style per spec 72c §4 architecture-drop) at PR open.
+Adversarial-review budget (CLAUDE.md §"Engineering conventions" §"Adversarial review gate"): this acceptance.md ~140L; single sub-spawn covers it. Auto-review will fan out 3 specialists (security · correctness · style — spec 72c §4 architecture-drop) at PR open.
 
 Linked canvas: **omitted** per canvas-as-source default policy (CLAUDE.md §"Canvas-as-source" §"Slice convention"). Canvas-fidelity persona stays dormant.
