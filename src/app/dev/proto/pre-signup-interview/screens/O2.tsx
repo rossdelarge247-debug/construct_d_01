@@ -4,6 +4,7 @@ import type { CSSProperties, ReactNode } from 'react';
 import { tokens } from '@/styles/tokens';
 import { Arrow } from '../components/Arrow';
 import { BrandBar } from '../components/BrandBar';
+import { Footer } from '../components/Footer';
 import { Hero } from '../components/Hero';
 import { TopBar } from '../components/TopBar';
 import { useProto } from '../lib/proto-context';
@@ -94,66 +95,6 @@ function SubLabel({ children }: { children: ReactNode }) {
       style={{ fontFamily: tokens.font.serif, fontSize: 14, fontWeight: 600, color: colors.ink, lineHeight: 1.2 }}
     >
       {children}
-    </div>
-  );
-}
-
-function Footer({
-  answered,
-  total = 4,
-  ctaCaption,
-  onContinue,
-}: {
-  answered: number;
-  total?: number;
-  ctaCaption: string;
-  onContinue: () => void;
-}) {
-  const enabled = answered === total;
-  return (
-    <div
-      className="px-5 pt-3 pb-5"
-      style={{
-        borderTop: `1px solid ${colors.line}`,
-        background: 'rgba(245,245,244,0.85)',
-        backdropFilter: 'blur(8px)',
-      }}
-    >
-      <div
-        className="flex items-center justify-center mb-2.5"
-        style={{
-          color: colors.mute,
-          font: `500 10.5px/1.3 ${tokens.font.mono}`,
-          textTransform: 'uppercase',
-          letterSpacing: '0.08em',
-        }}
-      >
-        <span>{ctaCaption}</span>
-      </div>
-      <button
-        type="button"
-        onClick={onContinue}
-        disabled={!enabled}
-        className="focus-visible:outline focus-visible:outline-2 focus-visible:outline-current focus-visible:outline-offset-2"
-        style={{
-          width: '100%',
-          background: enabled ? colors.ink : colors.line,
-          color: enabled ? '#FFFFFF' : colors.disabled,
-          padding: '14px 18px',
-          borderRadius: 999,
-          fontSize: 14,
-          fontWeight: 600,
-          border: 'none',
-          display: 'inline-flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          gap: 8,
-          cursor: enabled ? 'pointer' : 'not-allowed',
-        }}
-      >
-        <span>Continue</span>
-        <Arrow dir="right" size={13} strokeWidth={2} />
-      </button>
     </div>
   );
 }
@@ -258,9 +199,9 @@ export function O2() {
         </div>
       </div>
       <Footer
-        answered={answered}
-        total={4}
-        ctaCaption={copy.ctaCaption(answered)}
+        caption={copy.ctaCaption(answered)}
+        ctaLabel="Continue"
+        enabled={answered === 4}
         onContinue={next}
       />
     </main>

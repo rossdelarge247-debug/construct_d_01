@@ -4,6 +4,7 @@ import { type CSSProperties } from 'react';
 import { tokens } from '@/styles/tokens';
 import { Arrow } from '../components/Arrow';
 import { BrandBar } from '../components/BrandBar';
+import { Footer } from '../components/Footer';
 import { Hero } from '../components/Hero';
 import { TopBar } from '../components/TopBar';
 import { useProto } from '../lib/proto-context';
@@ -142,47 +143,18 @@ export function O1() {
           </div>
         ))}
       </fieldset>
-      <div
-        className="px-5 pt-3 pb-5"
-        style={{
-          borderTop: `1px solid ${colors.line}`,
-          background: 'rgba(245,245,244,0.85)',
-          backdropFilter: 'blur(8px)',
-        }}
-      >
-        <div
-          className="flex items-center justify-center gap-2 mb-2.5 flex-wrap"
-          style={{ color: colors.muted, fontSize: 10.5 }}
-        >
-          <span>{copy.trustBand.left}</span>
-          <span style={{ color: '#C9C5BD' }}>·</span>
-          <span>{copy.trustBand.right}</span>
-        </div>
-        <button
-          type="button"
-          disabled={!ctaEnabled}
-          onClick={next}
-          className={`${styles.cta}${ctaEnabled ? ' ' + styles.ctaEnabled : ''}`}
-          style={{
-            width: '100%',
-            background: ctaEnabled ? colors.ink : colors.line,
-            color: ctaEnabled ? '#FFFFFF' : '#9A968E',
-            padding: '14px 18px',
-            borderRadius: 999,
-            fontSize: 14,
-            fontWeight: 600,
-            border: 'none',
-            display: 'inline-flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            gap: 8,
-            cursor: ctaEnabled ? 'pointer' : 'not-allowed',
-          }}
-        >
-          <span>{copy.cta}</span>
-          <Arrow dir="right" size={13} strokeWidth={2} />
-        </button>
-      </div>
+      <Footer
+        caption={
+          <>
+            <span>{copy.trustBand.left}</span>{' '}
+            <span style={{ color: '#C9C5BD' }}>·</span>{' '}
+            <span>{copy.trustBand.right}</span>
+          </>
+        }
+        ctaLabel={copy.cta}
+        enabled={ctaEnabled}
+        onContinue={next}
+      />
     </main>
   );
 }
