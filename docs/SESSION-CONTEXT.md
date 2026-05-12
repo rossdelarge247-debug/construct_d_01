@@ -1,105 +1,97 @@
-# Session 92 Pre-flight Context Block (carrying session 91 wrap delta)
+# Session 93 Pre-flight Context Block (carrying session 92 wrap delta)
 
-## Session 91 wrap delta — read this first
+## Session 92 wrap delta — read this first
 
-Session 91 shipped the **cross-screen homogenisation programme's Phase 1 (audit) + Phase 2 (joint review decisions) + Phase 4 (spec pressure-test workstream captured) + 3 of 5 Phase 3 impl batches.**
+Session 92 shipped **Phase 3 Batch B (Hero harmonisation, full) + Phase 3 Batch C (Footer harmonisation, PARTIAL — primitive + 3 of 7 screens + 7 of 12 tests).**
 
-**Audit slice `S-PROTO-cross-screen-homogenisation-audit/acceptance.md`** — 40-finding register across 9 categories: chassis-component sharing (CH), naming (NM), typography (TY), semantic/a11y (SM), spacing (SP), mobile-cap (LM), Footer (FT), CSS-module (CM), off-palette tokens (TK). Phase 2 outcomes (decisions locked) + Phase 3 batch design + Phase 4 follow-on workstream all captured in the same slice.
+**Batch B merged:** PR #168 squash-merged to main as `d49da6e`. Net +540/-399 across 20 files. Shared `components/Hero.tsx` (73L) + `Hero.module.css` (3L) extracted; all 8 screens flip `<h2>` → `<h1>` (F-SM-01 a11y must-fix); 5 H1/H2 sizes (19/21/26/30/38) collapse to canonical 21px serif/1.18/-0.02em/600; eyebrow 9.5px sans / 0.04em; leading-dot dropped on O4/O5/O6/O8; canonical Hero padding `16px 20px 12px` + H1 top-margin 8px; O2.module.css created (`.entry` stagger + reduced-motion fallback); 9 new Hero unit tests; 514/514 cross-suite pass. O7 mood-band wrapper retained around shared Hero (canvas-distinctive preservation honoured).
 
-**Three Phase 3 batches merged:**
-- **`9ffd2bb` Batch A — TopBar harmonisation** (PR #164). Shared `components/TopBar.tsx` + `TopBar.module.css` + 7-test suite. All 8 screens swapped from local TopBar functions. 8 local TopBar + StepRail (O8) + 2 local ArrowSvg (O7, O8) + inline progress markup deleted; 4 non-TopBar ArrowSvg call-sites migrated to shared Arrow with `sw` → `strokeWidth`. Net +185/-360 lines. User-directed "let's just merge" cadence (no auto-review).
-- **`92bc92f` Batch E — Dead-code cleanup** (PR #165). Deleted 7 unused primitives (~557L): ScreenShell + RadioCard + RadioChips + CheckChips + SubQuestionCard + JourneyTimeline + PlanSection. Also deleted orphan `screen-shell-title.test.tsx` + cleaned up `brand-bar.test.tsx`'s "via ScreenShell" describe block + updated stale comment in o2 test. `components/` now contains 5 used primitives + the shared TopBar.
-- **`bbe9093` Batch D — `<main>` sweep on O1+O2** (PR #166). Pure structural fix: swap root `<div>` → `<main>`; Tailwind className preserved. Banner-role recovery (move TopBar before `<main>`) deferred as architectural-deferral note.
+**Batch C open as draft PR #169 (PARTIAL):** branch `claude/S-PROTO-batch-C-footer-harmonisation`. Net +500/-207 across 8 files. Shared `components/Footer.tsx` (67L) + `Footer.module.css` (93L) extracted with sticky `<footer>` landmark, canonical padding `12px 20px 16px`, cream + light variants (variant="light" preserves O8 lighter blur), italic-when-enabled / sans-when-disabled caption typography, force-reflow CTA-bounce on `false → true` transition, optional secondaryActions slot for the O7 rebuild, prefers-reduced-motion fallback. O1 (inline-in-body footer markup) + O2 + O3 swept to shared Footer. 7 of 12 AC-4 unit tests shipped. 521/521 cross-suite pass.
 
-**Two Phase 3 batches remaining:** Batch B (Hero harmonisation) + Batch C (Footer + O7 PlanFooter rebuild).
+**Wrap reason:** session churn warn surfaced at 1,500; rather than push past the 2,000 hard-stop, partial state shipped clean. Resumption checklist in PR #169's `verification.md`.
 
-**Phase 4 captured but not yet started.** User-flagged concern mid-session: *"i want to pressure test the journey against the specs.. it feels so basic at the moment.. particularly in comparison to our original principles and even our V1 interview we built as a test originally."* Sequencing per user direction: get all consistent first (Phase 3 complete), then pressure-test. Phase 4 = new audit slice (`S-PROTO-pre-signup-spec-pressure-test` or similar) once B + C land.
-
-**Diagnosis trail durably captured in `docs/HANDOFF-SESSION-91.md`** — read for the round-by-round narrative, Phase 2 decision rationale, the bugs caught (O8 Back-element-type, TopBar spacer-selector, O8 StepRail Edit-ordering, verification.md emoji-strip + amend-rule violation logged), and the cumulative scoping-discipline observations on recurrence-watch.
-
-## Session 92 priorities — user picks scope
+## Session 93 priorities — user picks scope
 
 | # | Priority | Scope | Effort | Blocked? |
 |---|---|---|---|---|
-| 1 | **Batch B — Hero harmonisation** | Extract `components/Hero.tsx` shared primitive replacing 8 local `function Hero` / `MobileHero` declarations. Collapse 5 H1/H2 sizes to 21px serif/1.18 canonical; `<h1>` on all 8 screens (resolves SM-01 a11y must-fix); drop leading-dot eyebrow decoration; canonical eyebrow 9.5px / 0.04em letter-spacing; canonical Hero padding 16px 20px 12px + H1 top-margin 8px. Add `O2.module.css` (only screen without one) + `.entry` stagger class on O2 + O8 modules. Per audit slice §"Phase 3 batches (locked)" Batch B. | Medium-heavy | No |
-| 2 | **Batch C — Footer harmonisation + O7 PlanFooter rebuild** | Extract `components/Footer.tsx` sticky-cream primitive replacing 6 local Footer functions + O1's inline-in-body footer. O7's in-flow `PlanFooter` `<section>` removed; Download-PDF + Email-link CTAs move to sticky chrome (user-directed rebuild per Phase 2 FT-04). O8 keeps its lighter `rgba(255,255,255,0.62)` blur(10px) background (intentional canvas variance preserved). Canonical wrapper padding `12px 20px 16px`; canonical CTA-enabled animation = force-reflow re-add (O4/O5 pattern); canonical caption typography = italic-when-enabled serif (O4/O5 pattern). | Medium-heavy | No |
-| 3 | **Phase 4 — spec pressure-test workstream** | Open new scope-only audit slice (`S-PROTO-pre-signup-spec-pressure-test` or similar). Compare homogenised 8-screen surface against (a) CLAUDE.md §"Product positioning" + §"North star" + §"Product rules", (b) `docs/workspace-spec/65-pre-signup-interview-reconciled.md` (190L, authoritative pre-signup spec), (c) `docs/v1/v1-wireframes.md` (543L, V1 baseline). Likely candidate findings: information density per screen, cold-start vs bank-signal-driven ordering, adaptive output/decision flow, gentle-interview tone, micro-interaction density, delight surface area. Follow same scope-only-audit → joint-review → batch-impl workflow as session 91. | Heavy (Phase 4 is a programme, not a slice) | Blocked until Batch B + C land |
-| 4 | **O7 visual-issues enumeration** | User-flagged "few small visual issues" on O7 at PR #161 merge (session 90), never written down. Surface during Batch B + C preview-deploy walks — these touch O7 visual treatment directly. Risk if skipped: issues survive the harmonisation undetected. | Light (in-flow with B/C) | No |
-| 5 | **Desktop graceful enhancement** | `docs/design-source/pre-signup-interview/desktop/Desktop Enhanced - Help Rail - Standalone.html`. Help Rail integration + intermediate breakpoints + extra-space utilisation above 480px mobile cap. Mobile chassis now stable (Batch A + D landed). | Heavy | No |
-| 6 | **Production graduation backlog** | Bundle when pre-signup exits `/dev/proto/`: Batch F (token promotion — VIOLET_SOFT / MAGENTA_SOFT / PAPER_WARM / SOFT / SOFTMUTE / ICON_BG_UNSELECTED + INDIGO `#4338CA` vs `#4F46E5` reconciliation + FONT_SERIF/FONT_MONO consolidation + 8 `colors` consts centralisation via `lib/colors.ts`) · 44×44 tap-target sweep · `100vh` → `100dvh` · sticky CTA mechanism hardening · banner-role recovery (TopBar before `<main>` restructure) · `styles.backLink` orphan cleanup in O4-O6 module CSS. | Heavy | No, but premature until graduation timing decided |
-| 7 | **(Inherited)** spec-citation-quote-check author-time hook | Mirror `.claude/hooks/comment-review.sh` PostToolUse Write\|Edit advisory exit-0 pattern. Catches "per spec X" without proximity quote at edit time, before CI cycle. | Light (~50L bash + shellspec) | No |
-| 8 | **(Inherited)** Comment-review hook §Status exemption fix | Stub-mode hook flags "session X" provenance inside `## Status` blocks where CLAUDE.md `^## (§)?Status` exemption should apply. | Light (~20-30L bash) | No |
-| 9 | **(Inherited)** Comment-review hook CSS-files regex tightening | "round N" provenance regex matched `140ms` CSS transition values false-positive in session 90. Either skip `*.css` files OR require enclosing context like "round X of". | Light (~10-20L bash) | No |
-| 10 | **(Inherited)** Spec 65 amendment for quantitative profiling data | Still parked. | Heavy | No |
+| 1 | **Resume Batch C — sweep O4/O5/O6/O8 + rebuild O7 PlanFooter + finish AC-4 tests** | Mechanical sweep on O4/O5/O6 (call-site shape mostly matches Footer API; O6 loses always-on mount-fire animation per canonical). O8 needs `variant="light"` + conditional caption/CTA-label per `selected` state. O7 PlanFooter rebuild: delete in-flow `<section>` (heading + helper + Find-out-more + pricing links all gone) + delete sticky `<div>` + replace `<PlanFooter/>` call-site with `<Footer ctaLabel="What's next" onContinue={onNext} secondaryActions={<Download-PDF + Email-link>}/>`. 5 remaining AC-4 tests. Full preview-deploy 6-dim walk. Then update PR #169 (or close + open fresh PR if cleaner) and merge. Session-locked sub-decisions captured in PR #169 body + Batch C acceptance.md. | Medium | No — fresh churn budget |
+| 2 | **Phase 4 — spec pressure-test workstream** | Open `S-PROTO-pre-signup-spec-pressure-test` audit slice once Batch C fully lands. Compare homogenised 8-screen surface against CLAUDE.md §"Product positioning" + §"North star" + §"Product rules", `docs/workspace-spec/65-pre-signup-interview-reconciled.md` (190L), `docs/v1/v1-wireframes.md` (543L). User-flagged: *"feels basic"* relative to V1 baseline. Same scope-only-audit → joint-review → batch-impl workflow as the homogenisation programme. | Heavy (Phase 4 is a programme, not a slice) | Blocked until Batch C fully lands |
+| 3 | **O7 visual-issues enumeration** | Inherited from session 90: user-flagged "few small visual issues" on O7 at PR #161 merge, never written down. Surface during Batch C resumption preview-deploy walk — that walk touches O7 visual treatment directly (mood-band Hero + rebuilt Footer). | Light (in-flow with Batch C preview-deploy) | No |
+| 4 | **Desktop graceful enhancement** | `docs/design-source/pre-signup-interview/desktop/Desktop Enhanced - Help Rail - Standalone.html`. Help Rail integration + intermediate breakpoints + extra-space utilisation above 480px mobile cap. Mobile chassis fully stable post-Batch-C (TopBar + Hero + Footer + `<main>` all canonical). | Heavy | Blocked until Batch C fully lands |
+| 5 | **Production graduation backlog** | Bundle when pre-signup exits `/dev/proto/`: Batch F (token promotion — VIOLET_SOFT / MAGENTA_SOFT / PAPER_WARM / SOFT / SOFTMUTE / ICON_BG_UNSELECTED + INDIGO `#4338CA` vs `#4F46E5` reconciliation + FONT_SERIF/FONT_MONO consolidation + 8 `colors` consts centralisation via `lib/colors.ts`) · 44×44 tap-target sweep · `100vh` → `100dvh` · sticky CTA mechanism hardening · banner-role recovery (TopBar before `<main>` restructure) · `styles.backLink` orphan cleanup in O4-O6 module CSS. | Heavy | Not blocked but premature until graduation timing decided |
+| 6 | **(Inherited)** spec-citation-quote-check author-time hook | Mirror `.claude/hooks/comment-review.sh` PostToolUse Write\|Edit advisory exit-0 pattern. Catches "per spec X" without proximity quote at edit time. | Light (~50L bash + shellspec) | No |
+| 7 | **(Inherited)** Comment-review hook §Status exemption fix | Stub-mode hook flags "session X" provenance inside `## Status` blocks where CLAUDE.md `^## (§)?Status` exemption should apply. | Light (~20-30L bash) | No |
+| 8 | **(Inherited)** Comment-review hook CSS-files regex tightening | "round N" provenance regex matched `140ms` CSS transition values false-positive in session 90. Either skip `*.css` files OR require enclosing context like "round X of". | Light (~10-20L bash) | No |
+| 9 | **(Inherited)** Spec 65 amendment for quantitative profiling data | Still parked. | Heavy | No |
 
-**Recommended sequence:** P1 (Batch B) → P2 (Batch C) → P3 (Phase 4 spec pressure-test). P4 (O7 visual-issues enumeration) folds into B/C preview-deploy walks. P5+ are tractable side-quests off the critical path.
+**Recommended sequence:** P1 (resume + finish Batch C) → P2 (Phase 4 spec pressure-test workstream). P3 (O7 visual-issues enumeration) folds into P1 preview-deploy walk. P4+ are tractable side-quests off the critical path.
 
 **Scoping-discipline observations carried as recurrence-watch (not yet numbered constraints):**
 
-- **AC-impl cross-check at impl-time** (introduced session 90) — applied session 91 with one minor deviation surfaced (Batch A test path). Discipline holding.
-- **Sibling-wrapper diff at impl-time** (carried session 88) — not surfaced session 91.
-- **Shared-infrastructure audit at refactor-time** (carried session 87) — partially surfaced session 91: ScreenShell test-file importers undercounted in audit because grep pattern only checked relative-path imports. **Audit-pattern improvement noted**: also grep absolute-path imports via `@/` prefix when cataloguing "unused" components.
-- **In-PR scope-expansion confirmation gate** (carried session 87) — not surfaced session 91.
-- **NEW session 91 — `git push --force` after amend** — single occurrence (verification.md emoji-strip via `git commit --amend` + `git push -f`). Per CLAUDE.md: amend without explicit user request violates the "Always create NEW commits" rule; force-push compounds it. Both flagged for next-session discipline. Will promote to numbered constraint if a second session surfaces a similar incident.
+- **AC-impl cross-check at impl-time** (introduced session 90) — applied this session; discipline holding.
+- **Sibling-wrapper diff at impl-time** (carried session 88) — not surfaced this session.
+- **Shared-infrastructure audit at refactor-time** (carried session 87 + 91) — pattern improvement noted in session 91 (abs-path imports) not surfaced this session.
+- **In-PR scope-expansion confirmation gate** (carried session 87) — not surfaced this session.
+- **`git push --force` after amend** (logged session 91) — not surfaced this session.
+- **NEW this session — Wrap at the warn threshold rather than push to hard-stop.** When the line-count hook surfaced the 1,500 warn mid-batch, the right call was to checkpoint as a PARTIAL PR + wrap, not push to 2,000. Cleaner state on resume than half-built work in working memory.
+- **NEW this session — Read-cap discipline holding under sustained sweep.** Two hits on the 300-line read-cap during the Batch B + Batch C surveys (both during O5/O7 inspection where the 8-screen survey lookups stacked up). Both worked-around via grep + remembered-from-survey patterns; no need to re-Read full files. The cap is doing its job.
 
-## Authoritative reading order at session 92 start
+## Authoritative reading order at session 93 start
 
 1. This file (you are here).
-2. `docs/HANDOFF-SESSION-91.md` (session 91's retro — audit + Phase 2 decisions + 3 batches shipped + bugs found).
-3. `docs/slices/S-PROTO-cross-screen-homogenisation-audit/acceptance.md` (the master audit slice — Phase 2 outcomes + Phase 3 batches locked).
-4. **For P1 (Batch B) when chosen:** read the spec template at `docs/slices/S-PROTO-batch-A-topbar-harmonisation/acceptance.md` for the established shared-primitive pattern. Then walk the 8 screens' Hero functions (line ranges in the audit slice §"F-CH-03").
-5. **For P2 (Batch C) when chosen:** Hero pattern from B applies; plus the O7 PlanFooter rebuild requires understanding the in-flow `<section>` (at `O7.tsx` ~L523 pre-Batch-A; rebase against latest main).
+2. `docs/HANDOFF-SESSION-92.md` (session 92's retro — Batch B full + Batch C partial + wrap rationale).
+3. `docs/slices/S-PROTO-batch-C-footer-harmonisation/acceptance.md` (full slice scope, including the AC-3 O7 rebuild deferred this session + the 4 remaining screen sweeps).
+4. `docs/slices/S-PROTO-batch-C-footer-harmonisation/verification.md` (current PARTIAL state + resumption checklist).
+5. **For P1 (Batch C resume) when chosen:** read the Footer primitive at `src/app/dev/proto/pre-signup-interview/components/Footer.tsx` to internalise the API; then sweep O4/O5/O6/O8 + rebuild O7 PlanFooter.
 
-## Session 92 kickoff prompt (paste-ready)
+## Session 93 kickoff prompt (paste-ready)
 
 ```
-Kick off session 92.
+Kick off session 93.
 
 Read this file (SESSION-CONTEXT.md) first.
 
 Turn-0 verification:
 - SessionStart hook surfaces live branch state.
-- Branch convention: harness-suffixed (claude/<scope>-XXXXX) OR
-  per-batch sub-branch off latest main per session 91 pattern.
-- Session 91 shipped PRs #164 (Batch A · 9ffd2bb) + #165 (Batch E ·
-  92bc92f) + #166 (Batch D · bbe9093) squash-merged to main. Session-91
-  wrap PR may be pending or just-merged.
+- Session 92 shipped PR #168 (Batch B · d49da6e) squash-merged to main.
+- PR #169 (Batch C PARTIAL) open as draft on branch
+  claude/S-PROTO-batch-C-footer-harmonisation.
+- Session-92 wrap PR pending or just-merged.
 - If the harness landed you on a different base, follow CLAUDE.md
-  §"Branch-resume check": git fetch origin main → git checkout -B
-  <branch> origin/main.
+  §"Branch-resume check": git fetch origin <branch> → git checkout -B
+  <branch> origin/<branch>.
 
 Read at session start (Tier 2 + Tier 3, in order):
 1. docs/SESSION-CONTEXT.md (this file).
-2. docs/HANDOFF-SESSION-91.md.
-3. docs/slices/S-PROTO-cross-screen-homogenisation-audit/acceptance.md
-   (the master audit slice with Phase 2 outcomes + Phase 3 batches
-   locked).
-4. CLAUDE.md §"Visual direction" + §"Coding conduct" (homogenisation
-   spans both — visual treatment + name-carries-the-design).
+2. docs/HANDOFF-SESSION-92.md.
+3. docs/slices/S-PROTO-batch-C-footer-harmonisation/acceptance.md
+   (full slice scope).
+4. docs/slices/S-PROTO-batch-C-footer-harmonisation/verification.md
+   (PARTIAL state + resumption checklist).
+5. src/app/dev/proto/pre-signup-interview/components/Footer.tsx
+   (the primitive to consume).
 
 Confirm priority with user. SESSION-CONTEXT recommends P1
-(Batch B — Hero harmonisation).
+(resume Batch C: sweep O4/O5/O6/O8 + rebuild O7 PlanFooter +
+finish AC-4 tests + preview-deploy walk + merge PR #169).
 
-Phase 3 has 2 batches remaining (B + C); Phase 4 (spec pressure-test)
-opens once they land. Established session-91 pattern: per-batch sub-
-branches off latest main, slice acceptance.md + verification.md per
-batch, "let's just merge" cadence (skip auto-review for prototype
-slices).
+Resumption mechanics: branch is already open at
+claude/S-PROTO-batch-C-footer-harmonisation; pull latest;
+continue committing on that branch + push back to PR #169;
+flip PR from draft to ready when AC-3 + remaining sweeps land.
 
-Per CLAUDE.md §"AC-impl cross-check at impl-time" (recurrence-watch
-session 90): before pushing impl, re-read each AC's verbatim wording
-and grep impl for the structural elements named in AC.
+Per CLAUDE.md §"AC-impl cross-check at impl-time"
+(recurrence-watch session 90): before pushing impl, re-read
+each AC's verbatim wording and grep impl for the structural
+elements named in AC.
 
-Definition of Done (CLAUDE.md §"Definition of Done", prototype short-
-form items 1, 8, 12, 14 from spec 76 §3):
-- Slice acceptance.md + verification.md
-- Tests written + passing
+Definition of Done (CLAUDE.md §"Definition of Done", prototype
+short-form items 1, 8, 12, 14 from spec 76 §3):
+- Slice acceptance.md + verification.md (acceptance already
+  drafted; verification.md updates from PARTIAL → full)
+- Tests written + passing (AC-4: 7 done, 5 deferred)
 - Preview-deploy verified across the spec 72a 6+1 dimensions
 - User feedback received + addressed (or explicitly deferred)
-
-Workflow: per-batch scope (acceptance.md) → impl + tests + verification
-.md → PR + merge → repeat. Webhook-driven iteration when auto-review
-fires; otherwise direct merge.
 ```
 
 ## Product positioning (preserve across sessions)
@@ -108,22 +100,22 @@ Decouple is the **complete settlement workspace for separating couples**. NOT a 
 
 ## Stack
 
-Next.js 14 (app router) + TypeScript · Tailwind v4 via CSS variables · S-F1 token system at `src/styles/tokens.ts` (76 tokens) · Tink for bank connect · Anthropic SDK for AI extraction · Vercel previews per branch, production at `construct-dev.vercel.app`. Shared chassis primitives now landed: `components/TopBar.tsx` (Batch A); `components/Hero.tsx` + `components/Footer.tsx` to follow in Batches B + C.
+Next.js 16 (app router) + TypeScript · Tailwind v4 via CSS variables · S-F1 token system at `src/styles/tokens.ts` (76 tokens) · Tink for bank connect · Anthropic SDK for AI extraction · Vercel previews per branch, production at `construct-dev.vercel.app`. Shared chassis primitives landed: `components/TopBar.tsx` (Batch A) + `components/Hero.tsx` (Batch B) + `components/Footer.tsx` (Batch C, primitive shipped + 3 of 7 screens swept).
 
 ## Branch
 
-Session 92 branch: harness-suffixed off clean main. Session 91 shipped PRs #164 + #165 + #166. Per-batch sub-branches are an established session-91 pattern — each batch gets its own branch + PR + squash merge.
+Session 93 branch: harness-suffixed off latest main, OR (recommended) continue on `claude/S-PROTO-batch-C-footer-harmonisation` to finish PR #169. Per-batch sub-branches off main remains the established pattern.
 
 ## Negative constraints (preserve)
 
-#1-#41 from prior sessions. **No new constraints surfaced session 91.** Five scoping-discipline observations on recurrence-watch (AC-impl cross-check at impl-time · sibling-wrapper diff · shared-infra audit + abs-path-import gap · in-PR scope expansion · NEW session-91 `git push --force` after amend). Promote to numbered constraint if a third session surfaces similar recurrence for any one of them.
+#1-#41 from prior sessions. **No new constraints surfaced session 92.** Five scoping-discipline observations on recurrence-watch (AC-impl cross-check at impl-time · sibling-wrapper diff · shared-infra audit + abs-path-import gap · in-PR scope expansion · `git push --force` after amend) plus 2 NEW session-92 observations (wrap-at-warn-not-hard-stop · read-cap holding under sustained sweep).
 
 ## Scope ceiling
 
-Session 92 is most likely **P1 (Batch B — Hero harmonisation)** followed by **P2 (Batch C — Footer + O7 PlanFooter rebuild)** if budget permits. Out of scope unless explicitly added: P3 Phase 4 spec pressure-test (premature until B + C land) · P5 desktop · P6 production graduation · P7-10 inherited side-quests · Welcome Tour · Marketing Landing · Post-connect Dashboard · `Decouple.zip` unpacking · Mobile Screens v2 · authenticated-screens header work.
+Session 93 is most likely **P1 (resume + finish Batch C)** followed by **P2 (Phase 4 spec pressure-test workstream)** if budget permits. Out of scope unless explicitly added: P4 desktop · P5 production graduation · P6-9 inherited side-quests · Welcome Tour · Marketing Landing · Post-connect Dashboard · `Decouple.zip` unpacking · Mobile Screens v2 · authenticated-screens header work.
 
 ## Current pre-signup prototype URL
 
 - Production: `https://construct-dev.vercel.app/dev/proto/pre-signup-interview`
 - Per-PR preview: surfaced as Vercel comment on each PR.
-- All 8 screens (O1-O8) are canvas-as-source on main, with shared TopBar primitive landed (Batch A) + dead-code cleaned (Batch E) + O1/O2 root `<main>` (Batch D).
+- All 8 screens (O1-O8) are canvas-as-source on main, with shared TopBar (Batch A) + shared Hero (Batch B) + partial shared Footer (Batch C — primitive shipped, 3 of 7 screens swept on PR #169).
