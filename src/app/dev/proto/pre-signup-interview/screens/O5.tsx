@@ -1,9 +1,9 @@
 'use client';
 
-import { useEffect, useRef, type CSSProperties } from 'react';
+import { type CSSProperties } from 'react';
 import { tokens } from '@/styles/tokens';
-import { Arrow } from '../components/Arrow';
 import { BrandBar } from '../components/BrandBar';
+import { Footer } from '../components/Footer';
 import { Hero } from '../components/Hero';
 import { TopBar } from '../components/TopBar';
 import { useProto } from '../lib/proto-context';
@@ -108,84 +108,6 @@ function OptionRow({
         </span>
       </span>
     </label>
-  );
-}
-
-function Footer({
-  enabled,
-  caption,
-  ctaLabel,
-  onContinue,
-}: {
-  enabled: boolean;
-  caption: string;
-  ctaLabel: string;
-  onContinue: () => void;
-}) {
-  const ctaRef = useRef<HTMLButtonElement>(null);
-  const prevEnabledRef = useRef(enabled);
-
-  useEffect(() => {
-    const node = ctaRef.current;
-    if (!node) return;
-    if (!prevEnabledRef.current && enabled) {
-      node.classList.remove(styles.ctaEnabled);
-      void node.offsetWidth;
-      node.classList.add(styles.ctaEnabled);
-    }
-    prevEnabledRef.current = enabled;
-  }, [enabled]);
-
-  return (
-    <div
-      style={{
-        padding: '12px 20px 16px',
-        borderTop: `1px solid ${colors.border}`,
-        background: 'rgba(245,245,244,0.85)',
-        backdropFilter: 'blur(8px)',
-      }}
-    >
-      <div
-        role="status"
-        aria-live="polite"
-        aria-atomic="true"
-        style={{
-          textAlign: 'center',
-          font: enabled
-            ? `italic 400 10.5px/1.35 ${tokens.font.serif}`
-            : `400 10.5px/1.35 ${tokens.font.sans}`,
-          color: enabled ? colors.sub : colors.muted,
-          marginBottom: 10,
-          minHeight: 14,
-        }}
-      >
-        {caption}
-      </div>
-      <button
-        ref={ctaRef}
-        type="button"
-        onClick={onContinue}
-        disabled={!enabled}
-        className={`${styles.cta}${enabled ? ` ${styles.ctaEnabled}` : ''}`}
-        style={{
-          width: '100%',
-          background: enabled ? colors.ink : '#E5E3DC',
-          color: enabled ? '#FFFFFF' : '#A8A29E',
-          padding: '13px 18px',
-          borderRadius: 999,
-          font: `600 14px/1 ${tokens.font.sans}`,
-          border: 'none',
-          display: 'inline-flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          gap: 8,
-          cursor: enabled ? 'pointer' : 'not-allowed',
-        }}
-      >
-        <span>{ctaLabel}</span>
-        <Arrow dir="right" size={13} strokeWidth={2} />
-      </button>
-    </div>
   );
 }
 

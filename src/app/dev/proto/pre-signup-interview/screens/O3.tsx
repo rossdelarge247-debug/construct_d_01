@@ -4,6 +4,7 @@ import { useEffect, useRef, type CSSProperties, type ReactNode } from 'react';
 import { tokens } from '@/styles/tokens';
 import { Arrow } from '../components/Arrow';
 import { BrandBar } from '../components/BrandBar';
+import { Footer } from '../components/Footer';
 import { Hero } from '../components/Hero';
 import { TopBar } from '../components/TopBar';
 import { useProto } from '../lib/proto-context';
@@ -153,107 +154,6 @@ function PrivPill({
   );
 }
 
-function Footer({
-  enabled,
-  hasPrivacy,
-  copy,
-  onContinue,
-}: {
-  enabled: boolean;
-  hasPrivacy: boolean;
-  copy: O3Copy;
-  onContinue: () => void;
-}) {
-  const ctaButtonRef = useRef<HTMLButtonElement>(null);
-  const prevEnabledRef = useRef(enabled);
-  useEffect(() => {
-    const wasEnabled = prevEnabledRef.current;
-    prevEnabledRef.current = enabled;
-    const node = ctaButtonRef.current;
-    if (enabled && !wasEnabled && node) {
-      node.classList.add(styles.ctaEnabled);
-      const bounceTimer = setTimeout(() => {
-        node.classList.remove(styles.ctaEnabled);
-      }, 350);
-      return () => clearTimeout(bounceTimer);
-    }
-  }, [enabled]);
-  let caption: ReactNode;
-  if (!enabled) {
-    caption = (
-      <span style={{ color: colors.muted }}>{copy.captions.pickToContinue}</span>
-    );
-  } else if (!hasPrivacy) {
-    caption = (
-      <span
-        style={{
-          font: `400 10.5px/1.35 ${tokens.font.serif}`,
-          fontStyle: 'italic',
-          color: colors.sub,
-        }}
-      >
-        {copy.captions.privacyOptional}
-      </span>
-    );
-  } else {
-    caption = (
-      <span style={{ color: colors.muted }}>{copy.captions.bothAnswered}</span>
-    );
-  }
-  return (
-    <footer
-      style={{
-        padding: '12px 20px 20px',
-        borderTop: `1px solid ${colors.line}`,
-        background: 'rgba(245,245,244,0.85)',
-        backdropFilter: 'blur(8px)',
-        WebkitBackdropFilter: 'blur(8px)',
-        marginTop: 'auto',
-      }}
-    >
-      <div
-        role="status"
-        aria-live="polite"
-        aria-atomic="true"
-        style={{
-          textAlign: 'center',
-          font: `400 10.5px/1.35 ${tokens.font.sans}`,
-          color: colors.sub,
-          minHeight: 14,
-          marginBottom: 10,
-          padding: '0 8px',
-        }}
-      >
-        {caption}
-      </div>
-      <button
-        ref={ctaButtonRef}
-        type="button"
-        disabled={!enabled}
-        onClick={onContinue}
-        className={styles.cta}
-        style={{
-          width: '100%',
-          background: enabled ? colors.ink : colors.line,
-          color: enabled ? '#FFFFFF' : '#A8A29E',
-          padding: '13px 18px',
-          borderRadius: 999,
-          font: `600 14px/1.2 ${tokens.font.sans}`,
-          border: 'none',
-          display: 'inline-flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          gap: 8,
-          cursor: enabled ? 'pointer' : 'not-allowed',
-        }}
-      >
-        <span>Continue</span>
-        <Arrow dir="right" size={13} strokeWidth={2} />
-      </button>
-    </footer>
-  );
-}
-
 export function O3() {
   const { answers, setAnswer, next, back, step } = useProto();
   const exAndSafety = answers.exAndSafety ?? {};
@@ -379,9 +279,15 @@ export function O3() {
         </fieldset>
       </section>
       <Footer
+        caption={
+          !enabled
+            ? copy.captions.pickToContinue
+            : !Boolean(devicePrivate)
+              ? copy.captions.privacyOptional
+              : copy.captions.bothAnswered
+        }
+        ctaLabel="Continue"
         enabled={enabled}
-        hasPrivacy={Boolean(devicePrivate)}
-        copy={copy}
         onContinue={next}
       />
     </main>

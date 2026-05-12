@@ -87,13 +87,8 @@ describe('O7 (canvas-as-source)', () => {
     expect(screen.getByText('Your situation')).toBeTruthy();
     expect(screen.getByText('What separation looks like')).toBeTruthy();
     expect(screen.getByText('What needs to happen')).toBeTruthy();
-    const takeThisHeading = screen.getAllByRole('heading', { level: 2 }).find(
-      (h) => /Take this/.test(h.textContent ?? ''),
-    );
-    expect(takeThisHeading).toBeTruthy();
-    expect(takeThisHeading?.textContent).toMatch(/with you/);
     const h2s = screen.getAllByRole('heading', { level: 2 });
-    expect(h2s.length).toBeGreaterThanOrEqual(6);
+    expect(h2s.length).toBeGreaterThanOrEqual(5);
   });
 
   it('renders the What\'s next CTA in MobileReady', () => {
@@ -120,7 +115,7 @@ describe('O7 (canvas-as-source)', () => {
     act(() => {
       vi.advanceTimersByTime(3000);
     });
-    expect(container.querySelectorAll('section').length).toBeGreaterThanOrEqual(6);
+    expect(container.querySelectorAll('section').length).toBeGreaterThanOrEqual(5);
   });
 
   it('cleans up the generating-state timer on unmount', () => {

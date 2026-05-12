@@ -4,6 +4,7 @@ import { useState, type CSSProperties, type ReactNode } from 'react';
 import { tokens } from '@/styles/tokens';
 import { Arrow } from '../components/Arrow';
 import { BrandBar } from '../components/BrandBar';
+import { Footer } from '../components/Footer';
 import { Hero } from '../components/Hero';
 import { TopBar } from '../components/TopBar';
 import { useProto } from '../lib/proto-context';
@@ -244,61 +245,6 @@ function OptionCard({ option, selected, onSelect, staggerIndex }: {
   );
 }
 
-function Footer({ selected, onContinue }: { selected: OptionDef | undefined; onContinue: () => void }) {
-  return (
-    <div
-      style={{
-        position: 'sticky',
-        bottom: 0,
-        marginTop: 'auto',
-        padding: '10px 20px 14px',
-        borderTop: `1px solid ${colors.border}`,
-        background: 'rgba(255,255,255,0.62)',
-        backdropFilter: 'blur(10px)',
-      }}
-    >
-      <div style={{ minHeight: 46, display: 'flex', alignItems: 'center' }}>
-        {selected ? (
-          <button
-            type="button"
-            onClick={onContinue}
-            className={styles.cta}
-            style={{
-              width: '100%',
-              background: colors.ink,
-              color: '#FFFFFF',
-              padding: '12px 18px',
-              borderRadius: 999,
-              fontSize: 14,
-              fontWeight: 600,
-              border: 'none',
-              display: 'inline-flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              gap: 8,
-              cursor: 'pointer',
-            }}
-          >
-            <span>{selected.cta}</span>
-            <Arrow dir="right" size={13} strokeWidth={2} />
-          </button>
-        ) : (
-          <p style={{
-            margin: 0,
-            fontSize: 11,
-            color: colors.sub,
-            lineHeight: 1.45,
-            textAlign: 'center',
-            width: '100%',
-          }}>
-            Pick an option above to continue.
-          </p>
-        )}
-      </div>
-    </div>
-  );
-}
-
 export function O8() {
   const { back, next } = useProto();
   const [selectedId, setSelectedId] = useState<OptionId | null>(null);
@@ -333,7 +279,13 @@ export function O8() {
           />
         ))}
       </fieldset>
-      <Footer selected={selected} onContinue={next} />
+      <Footer
+        caption={selected ? '' : 'Pick an option above to continue.'}
+        ctaLabel={selected?.cta ?? 'Continue'}
+        enabled={!!selected}
+        onContinue={next}
+        variant="light"
+      />
     </main>
   );
 }
