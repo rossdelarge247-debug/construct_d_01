@@ -1,9 +1,9 @@
 'use client';
 
-import { useEffect, useRef, type CSSProperties } from 'react';
+import { type CSSProperties } from 'react';
 import { tokens } from '@/styles/tokens';
-import { Arrow } from '../components/Arrow';
 import { BrandBar } from '../components/BrandBar';
+import { Footer } from '../components/Footer';
 import { Hero } from '../components/Hero';
 import { TopBar } from '../components/TopBar';
 import { useProto } from '../lib/proto-context';
@@ -163,73 +163,6 @@ function CardPlate<V extends string>({
           );
         })}
       </div>
-    </div>
-  );
-}
-
-function Footer({
-  caption,
-  ctaLabel,
-  onContinue,
-}: {
-  caption: string;
-  ctaLabel: string;
-  onContinue: () => void;
-}) {
-  const ctaRef = useRef<HTMLButtonElement>(null);
-  useEffect(() => {
-    const node = ctaRef.current;
-    if (!node) return;
-    node.classList.remove(styles.ctaEnabled);
-    void node.offsetWidth;
-    node.classList.add(styles.ctaEnabled);
-  }, []);
-  return (
-    <div
-      style={{
-        padding: '12px 20px 16px',
-        borderTop: `1px solid ${colors.border}`,
-        background: 'rgba(245,245,244,0.85)',
-        backdropFilter: 'blur(8px)',
-      }}
-    >
-      <div
-        role="status"
-        aria-live="polite"
-        aria-atomic="true"
-        style={{
-          textAlign: 'center',
-          font: `400 10.5px/1.35 ${tokens.font.sans}`,
-          color: colors.sub,
-          marginBottom: 10,
-          minHeight: 14,
-        }}
-      >
-        {caption}
-      </div>
-      <button
-        ref={ctaRef}
-        type="button"
-        onClick={onContinue}
-        className={`${styles.cta} ${styles.ctaEnabled}`}
-        style={{
-          width: '100%',
-          background: colors.ink,
-          color: '#FFFFFF',
-          padding: '13px 18px',
-          borderRadius: 999,
-          font: `600 14px/1 ${tokens.font.sans}`,
-          border: 'none',
-          display: 'inline-flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          gap: 8,
-          cursor: 'pointer',
-        }}
-      >
-        <span>{ctaLabel}</span>
-        <Arrow dir="right" size={13} strokeWidth={2} />
-      </button>
     </div>
   );
 }
