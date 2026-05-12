@@ -1,37 +1,48 @@
-import type { Stage, Priority, Worry, TitleShape } from '../types';
+import type { Stage, Priority, Worry } from '../types';
 
-interface PriorityOption {
+export interface O6PriorityOption {
   value: Priority;
   label: string;
 }
 
-interface WorryOption {
+export interface O6WorryOption {
   value: Worry;
   label: string;
 }
 
 export interface O6Copy {
-  eyebrow: string;
-  heading: TitleShape;
-  hint: string;
-  priorities: {
+  eyebrow: {
     label: string;
-    options: ReadonlyArray<PriorityOption>;
+    accent: 'magenta';
+  };
+  heading: string;
+  priorities: {
+    title: string;
+    caption: string;
+    options: ReadonlyArray<O6PriorityOption>;
   };
   worries: {
-    label: string;
-    options: ReadonlyArray<WorryOption>;
+    title: string;
+    caption: string;
+    options: ReadonlyArray<O6WorryOption>;
   };
-  ctaLabel: (priorityCount: number, worryCount: number) => string;
+  captions: {
+    empty: string;
+    notedSingular: string;
+    notedPlural: (count: number) => string;
+  };
+  cta: {
+    label: string;
+  };
 }
 
 export function getCopy(_stage: Stage): O6Copy {
   return {
-    eyebrow: 'O6 · What matters',
-    heading: { kind: 'plain', text: 'What matters most to you?' },
-    hint: 'Pick what matters most. There’s no wrong answer.',
+    eyebrow: { label: 'What matters · last step before your plan', accent: 'magenta' },
+    heading: "A few words on what matters to you, and what's worrying you.",
     priorities: {
-      label: 'What’s most important to you right now?',
+      title: "What's most important to you right now?",
+      caption: 'Pick up to 3.',
       options: [
         { value: 'fair-split', label: 'A fair split of everything' },
         { value: 'keep-home', label: 'Keeping the family home' },
@@ -44,7 +55,8 @@ export function getCopy(_stage: Stage): O6Copy {
       ],
     },
     worries: {
-      label: 'What worries you most?',
+      title: 'What worries you most?',
+      caption: 'Pick up to 3.',
       options: [
         { value: 'enough-to-live', label: 'Not having enough to live on' },
         { value: 'hidden-assets', label: 'Hidden assets or dishonesty' },
@@ -53,10 +65,16 @@ export function getCopy(_stage: Stage): O6Copy {
         { value: 'process-cost', label: 'The cost of the process itself' },
         { value: 'emotional-toll', label: 'The emotional toll' },
         { value: 'ex-cooperation', label: 'My ex not cooperating' },
-        { value: 'fairness-unknown', label: 'Not knowing what’s fair' },
+        { value: 'fairness-unknown', label: "Not knowing what's fair" },
       ],
     },
-    ctaLabel: (priorityCount, worryCount) =>
-      `Continue${priorityCount + worryCount > 0 ? ` (${priorityCount + worryCount} chosen)` : ''}`,
+    captions: {
+      empty: 'You can continue without picking — your plan adapts either way.',
+      notedSingular: '1 thing noted — your plan will weight these.',
+      notedPlural: (count) => `${count} things noted — your plan will weight these.`,
+    },
+    cta: {
+      label: 'Build my plan',
+    },
   };
 }
