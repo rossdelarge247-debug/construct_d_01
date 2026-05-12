@@ -1,6 +1,7 @@
+import { useEffect } from 'react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { act, render, screen } from '@testing-library/react';
-import { ProtoProvider } from '@/app/dev/proto/pre-signup-interview/lib/proto-context';
+import { ProtoProvider, useProto } from '@/app/dev/proto/pre-signup-interview/lib/proto-context';
 import { O7 } from '@/app/dev/proto/pre-signup-interview/screens/O7';
 
 function renderO7() {
@@ -9,6 +10,14 @@ function renderO7() {
       <O7 />
     </ProtoProvider>,
   );
+}
+
+function SeedChildrenYes() {
+  const { setAnswer } = useProto();
+  useEffect(() => {
+    setAnswer('situation', { hasChildren: 'yes' });
+  }, [setAnswer]);
+  return null;
 }
 
 describe('O7 (canvas-as-source)', () => {
@@ -120,5 +129,19 @@ describe('O7 (canvas-as-source)', () => {
     expect(() => {
       vi.advanceTimersByTime(3000);
     }).not.toThrow();
+  });
+
+  it('renders the PersonalisedNotes section when seeded answers trigger a note', () => {
+    render(
+      <ProtoProvider>
+        <SeedChildrenYes />
+        <O7 />
+      </ProtoProvider>,
+    );
+    act(() => {
+      vi.advanceTimersByTime(3000);
+    });
+    expect(screen.getByText('Things to bear in mind')).toBeTruthy();
+    expect(screen.getByText('Section 6 · your specific notes')).toBeTruthy();
   });
 });
