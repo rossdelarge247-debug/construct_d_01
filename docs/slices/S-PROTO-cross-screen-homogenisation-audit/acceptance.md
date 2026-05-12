@@ -203,20 +203,79 @@ Already flagged in SESSION-CONTEXT P3 as production-graduation candidates; this 
 
 **F-TK-03 — Gradient backgrounds in O7.** `EXPRESSIVE_HERO` and `GENERATING_BG` are O7-only inline gradient constants (O7.tsx:30-31). If any other screen ships a similar mood-band hero, the gradient pattern would need design-system promotion.
 
-## For Phase 2 (user joint review)
+## Phase 2 outcomes (decisions locked)
 
-The user reviews this findings register and:
+Joint review complete across all 9 finding categories. Per-category decisions captured below; Phase 3 batches inherit these as the spec for shared primitives.
 
-1. **Validates** each finding — real drift vs intentional canvas variance vs false positive.
-2. **Adds** items I missed. **Highest priority for the joint walk:** the "few small visual issues" the user flagged verbally on O7 at merge time but batched without enumeration. User re-walks O7 first on the preview deploy to surface these.
-3. **Re-prioritises** — must-fix-before-production-graduation vs nice-to-have vs correct-as-shipped vs token-sweep-slice candidates.
-4. **Groups** findings into Phase 3 impl batches. Suggested batch shape:
-   - **Batch A — TopBar harmonisation:** F-CH-01 + F-NM-01/02 + F-SP-01/02/03 + F-SM-04/05 + F-CM-02 + F-FT-01 (the border-token-naming portion). Extracts one shared `TopBar` primitive with consistent prop API.
-   - **Batch B — Hero harmonisation:** F-CH-03 + F-TY-01/02/03/04 + F-SP-04/05 + F-SM-01 (h1 vs h2 a11y) + F-CM-03 (stagger consistency). Extracts one shared `Hero` primitive.
-   - **Batch C — Footer harmonisation:** F-CH-04 + F-FT-01/02/03/05/06. Extracts one shared `Footer` primitive (sticky-cream chassis); O7's `PlanFooter` content-block stays bespoke.
-   - **Batch D — Semantic landmarks + a11y:** F-SM-02 + F-SM-03 (add `<header>` / `<main>` / `<footer>` consistently). Could fold into A/B/C above.
-   - **Batch E — Dead-code cleanup:** F-CH-05 + F-CH-06 (delete ScreenShell + 6 unused primitives; ~557L).
-   - **Batch F — Token promotion (production-graduation timing):** F-TK-01/02/03 + F-NM-03 (FONT_SERIF/FONT_MONO consolidation) + F-NM-05 (collapse 8 `colors` consts into one shared palette). Per SESSION-CONTEXT P3, bundle for the `/dev/proto/` exit moment.
+**CH (chassis-component sharing):**
+- Extract `components/TopBar.tsx` (one shared primitive replacing 8 local `function TopBar` declarations) — prop API includes `step? · total? · onBack? · leftAction: 'back'|'home' · rightAction: 'spacer'|'save'`.
+- Extract `components/Hero.tsx` (one shared primitive replacing 8 local `function Hero` / `MobileHero` declarations).
+- Extract `components/Footer.tsx` (one shared sticky-cream primitive replacing 6 local Footers + 1 O1 inline-in-screen-body + O7's PlanFooter rebuilt — see FT-04 below).
+- Dead-code cleanup is Batch E.
+
+**NM (naming):**
+- Centralise palette into `lib/colors.ts` (one shared `colors` const for the prototype directory).
+- `colors.line` → `colors.border` canonical name (O1-O4 rename).
+- `colors.mute` → `colors.muted` (O2 rename).
+- Delete local `FONT_SERIF` / `FONT_MONO` constants in O7+O8; replace with `tokens.font.serif` / `tokens.font.mono`.
+- Delete local `ArrowSvg` in O7+O8; replace with shared `components/Arrow.tsx` (prop rename `sw` → `strokeWidth` at call-site).
+
+**TY (typography) — collapse all to canonical:**
+- Hero H1: serif **21px / lineHeight 1.18 / letterSpacing -0.02em / fontWeight 600**. Applies to all 8 screens (O1 30px and O7 38px collapse to 21px; canvas-distinctive treatment is dropped per "collapse" decision).
+- Eyebrow: **9.5px / letter-spacing 0.04em**. No leading-dot decoration (O4/O5/O6/O8 dot is dropped).
+- Heading element: `<h1>` (per SM-01).
+
+**SM (semantic / a11y) — all must-fix:**
+- All 8 screens use `<h1>` for Hero heading.
+- Shared TopBar wraps in `<header>` semantic landmark.
+- Shared Footer wraps in `<footer>` semantic landmark.
+- All screens use `<main>` wrapper (sweep O1+O2).
+- Focus-visible ring on every interactive primitive in shared chassis.
+- Back action: `<button>` on O2-O8; O1's "Home" stays `<a>` (conceptually links to marketing home, not a JS action).
+
+**SP (spacing) — collapse all to canonical:**
+- Canonical TopBar padding: **`8px 20px 12px`** (modal: O3/O4/O5/O6).
+- Canonical TopBar right-spacer: **36px `<div>`** (drop O1's 44 outlier; drop O4/O5/O6's `<span>` variant).
+- Canonical Hero padding: **`16px 20px 12px`** (modal: O3/O4/O5).
+- Canonical Hero H1 top-margin: **8px** (modal: O2/O3/O4/O5).
+- All screens collapse to canonical (no per-screen exceptions — O1 welcome and O7 bespoke also harmonise on padding).
+
+**LM (mobile-cap):**
+- Scenario (a) confirmed: O7.module.css L3 + O8.module.css L3 both apply `max-width: 480px` to `.main`. All 8 screens visually capped at 480px via 3 different mechanisms (Tailwind / inline / CSS-module). Implementation-only drift, no visual bug.
+- Centralise via shared chassis primitive (CSS-module `.main { max-width: 480px }`).
+
+**FT (footer):**
+- All 6 footer-bearing screens (O1/O2/O4/O5/O6/O8) + O7 use shared Footer primitive (sticky-cream chrome).
+- **FT-04: O7 rebuilds** — in-flow PlanFooter `<section>` removed; Download-PDF + Email-link CTAs move to always-visible sticky-cream Footer chrome at the bottom. Chassis-aligns with the standard family.
+- Canonical Footer background: **cream `rgba(245,245,244,0.85)` blur(8px)** EXCEPT O8 (intentionally lighter `rgba(255,255,255,0.62)` blur(10px), preserved — exit-screen visual variance).
+- Canonical Footer padding: **`12px 20px 16px`** (modal: O4/O5/O6).
+- Canonical CTA-enabled animation: **force-reflow re-add pattern** (O4/O5 — `void node.offsetWidth` + class re-add on enable).
+- Canonical caption typography: **italic-when-enabled serif** (O4/O5 pattern).
+- FT-01 collapses via NM (single `colors.border` token).
+
+**CM (CSS-module presence):**
+- Add `O2.module.css` (O2 currently has none) with at minimum `.entry` stagger class.
+- Add `.entry` to `O8.module.css` (Hero stagger parity).
+- `styles.backLink` collapses into shared TopBar primitive.
+
+**IS (inline-style density):** Observation only; collapses naturally as chassis primitives extract.
+
+**TK (off-palette tokens):** All defer to **Batch F at production graduation** per SESSION-CONTEXT P3. O7 gradients (`EXPRESSIVE_HERO`, `GENERATING_BG`) stay O7-only unless another screen ships a similar mood-band hero.
+
+## Phase 3 batches (locked)
+
+Each batch is its own slice with its own `acceptance.md` + `verification.md`. Suggested ordering: A → D-folded → B → C → E → F (deferred).
+
+- **Batch A — TopBar harmonisation:** Extract `components/TopBar.tsx`. Resolves F-CH-01 + F-CH-02 (ProgressPill-as-child) + F-NM-01/02/04 (border + mute + ArrowSvg consolidation) + F-SP-01/02/03 + F-SM-02 (header landmark) + F-SM-04/05 (Back element + focus-visible) + F-CM-02 + F-FT-01 (border-token).
+- **Batch B — Hero harmonisation:** Extract `components/Hero.tsx`. Resolves F-CH-03 + F-TY-01/02/03/04 (typography canonical) + F-SP-04/05 + F-SM-01 (h1 a11y) + F-CM-01 (O2 module) + F-CM-03 (entry stagger).
+- **Batch C — Footer harmonisation + O7 PlanFooter rebuild:** Extract `components/Footer.tsx`. Resolves F-CH-04 + F-FT-02/03/05/06 + F-FT-04 (O7 rebuild — CTAs from in-flow section to sticky chrome).
+- **Batch D — Semantic landmarks (`<main>` sweep):** Resolves F-SM-03 (O1+O2 add `<main>`). Could fold into Batch A or B if those touch the wrapper anyway.
+- **Batch E — Dead-code cleanup:** Delete `components/ScreenShell.tsx` + `RadioCard.tsx` + `RadioChips.tsx` + `CheckChips.tsx` + `SubQuestionCard.tsx` + `JourneyTimeline.tsx` + `PlanSection.tsx`. ~557L removed.
+- **Batch F — Token promotion at production graduation (deferred):** F-TK-01/02/03 + F-NM-03 (FONT_SERIF/FONT_MONO) + F-NM-05 (centralise `colors` const). Bundle for `/dev/proto/` exit moment per SESSION-CONTEXT P3.
+
+## Still open (pre-Phase-3 prerequisites)
+
+- **User to enumerate O7 visual issues** flagged verbally on O7 at merge time but never written down. The chassis-level audit captured drift in source code; visual treatment specifics that don't surface from source (colour rendering, glyph positioning, alignment, motion timing, etc.) need a preview-deploy walk. Recommended timing: enumerate before Batch B (Hero) and Batch C (Footer) since those touch O7 visual treatment directly. Lazy fallback: surface during Batch B/C preview-deploy iteration.
 
 ## Out of scope (deferred)
 
