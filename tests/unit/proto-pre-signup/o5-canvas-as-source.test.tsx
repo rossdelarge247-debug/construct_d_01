@@ -25,7 +25,7 @@ describe('O5 (canvas-as-source)', () => {
   it('renders the canvas eyebrow + heading + helper sub-stem from the copy resolver', () => {
     renderO5();
     expect(screen.getByText('Money · their side')).toBeTruthy();
-    const heading = screen.getByRole('heading', { level: 2 });
+    const heading = screen.getByRole('heading', { level: 1 });
     expect(heading.textContent).toBe(
       "How much do you know about your partner's financial situation?",
     );

@@ -4,9 +4,11 @@ import type { CSSProperties, ReactNode } from 'react';
 import { tokens } from '@/styles/tokens';
 import { Arrow } from '../components/Arrow';
 import { BrandBar } from '../components/BrandBar';
+import { Hero } from '../components/Hero';
 import { TopBar } from '../components/TopBar';
 import { useProto } from '../lib/proto-context';
 import { getCopy } from '../lib/copy/o2';
+import styles from './O2.module.css';
 import type {
   ChildrenCount,
   Home,
@@ -92,44 +94,6 @@ function SubLabel({ children }: { children: ReactNode }) {
       style={{ fontFamily: tokens.font.serif, fontSize: 14, fontWeight: 600, color: colors.ink, lineHeight: 1.2 }}
     >
       {children}
-    </div>
-  );
-}
-
-function Hero({ eyebrow, heading }: { eyebrow: string; heading: TitleShape }) {
-  return (
-    <div className="px-5 pt-4 pb-2">
-      <div
-        style={{
-          color: colors.violet,
-          fontSize: 9.5,
-          fontFamily: tokens.font.mono,
-          letterSpacing: '0.1em',
-          textTransform: 'uppercase',
-        }}
-      >
-        {eyebrow}
-      </div>
-      <h2
-        style={{
-          fontFamily: tokens.font.serif,
-          fontSize: 26,
-          lineHeight: 1.05,
-          letterSpacing: '-0.02em',
-          fontWeight: 600,
-          margin: '8px 0 0 0',
-        }}
-      >
-        {heading.kind === 'plain' ? (
-          heading.text
-        ) : (
-          <>
-            {heading.bold}{' '}
-            <span style={{ fontStyle: 'italic', fontWeight: 400 }}>{heading.accent}</span>
-            {heading.period ? '.' : ''}
-          </>
-        )}
-      </h2>
     </div>
   );
 }
@@ -222,7 +186,22 @@ export function O2() {
     <main className="flex flex-col min-h-screen w-full max-w-[480px] mx-auto pt-6">
       <BrandBar />
       <TopBar step={step} onBack={back} />
-      <Hero eyebrow={copy.eyebrow} heading={copy.heading} />
+      <Hero
+        eyebrow={copy.eyebrow}
+        eyebrowColor={colors.violet}
+        heading={
+          copy.heading.kind === 'plain' ? (
+            copy.heading.text
+          ) : (
+            <>
+              {copy.heading.bold}{' '}
+              <span style={{ fontStyle: 'italic', fontWeight: 400 }}>{copy.heading.accent}</span>
+              {copy.heading.period ? '.' : ''}
+            </>
+          )
+        }
+        className={styles.entry}
+      />
       <div className="px-5 pt-2 pb-3 space-y-2.5 flex-1">
         <div style={cardStyle}>
           <SubLabel>{copy.relationship.label}</SubLabel>

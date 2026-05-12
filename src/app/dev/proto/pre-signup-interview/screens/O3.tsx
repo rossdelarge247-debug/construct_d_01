@@ -4,6 +4,7 @@ import { useEffect, useRef, type CSSProperties, type ReactNode } from 'react';
 import { tokens } from '@/styles/tokens';
 import { Arrow } from '../components/Arrow';
 import { BrandBar } from '../components/BrandBar';
+import { Hero } from '../components/Hero';
 import { TopBar } from '../components/TopBar';
 import { useProto } from '../lib/proto-context';
 import { getCopy, type O3Copy } from '../lib/copy/o3';
@@ -20,49 +21,6 @@ const colors = {
   line: tokens.color.border,
   violet: tokens.color.accent.violet,
 };
-
-function Hero({
-  eyebrow,
-  heading,
-  staggerIndex,
-}: {
-  eyebrow: string;
-  heading: string;
-  staggerIndex: number;
-}) {
-  return (
-    <header
-      className={styles.entry}
-      style={
-        {
-          padding: '16px 20px 12px',
-          '--stagger-index': staggerIndex,
-        } as CSSProperties
-      }
-    >
-      <div
-        style={{
-          font: `500 9.5px/1.3 ${tokens.font.sans}`,
-          color: colors.violet,
-          letterSpacing: '0.08em',
-          textTransform: 'uppercase',
-        }}
-      >
-        {eyebrow}
-      </div>
-      <h2
-        style={{
-          margin: '8px 0 0',
-          font: `600 21px/1.18 ${tokens.font.serif}`,
-          letterSpacing: '-0.015em',
-          color: colors.ink,
-        }}
-      >
-        {heading}
-      </h2>
-    </header>
-  );
-}
 
 type RelOption = O3Copy['relationship']['options'][number];
 
@@ -328,8 +286,10 @@ export function O3() {
       <TopBar step={step} onBack={back} />
       <Hero
         eyebrow={copy.eyebrow}
+        eyebrowColor={colors.violet}
         heading={copy.heading}
         staggerIndex={0}
+        className={styles.entry}
       />
       <fieldset
         aria-labelledby="o3-rel-legend"

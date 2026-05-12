@@ -25,7 +25,7 @@ describe('O4 (canvas-as-source)', () => {
   it('renders the canvas eyebrow + plain heading + helper sub-stem from the copy resolver', () => {
     renderO4();
     expect(screen.getByText('Money')).toBeTruthy();
-    const heading = screen.getByRole('heading', { level: 2 });
+    const heading = screen.getByRole('heading', { level: 1 });
     expect(heading.textContent).toBe(
       'Does either of you work for yourself, or run a limited company?',
     );

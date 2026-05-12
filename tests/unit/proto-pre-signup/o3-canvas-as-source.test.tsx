@@ -25,7 +25,7 @@ describe('O3 (canvas-as-source)', () => {
   it('renders the canvas eyebrow + plain heading from the copy resolver', () => {
     renderO3();
     expect(screen.getByText('Your ex')).toBeTruthy();
-    const heading = screen.getByRole('heading', { level: 2 });
+    const heading = screen.getByRole('heading', { level: 1 });
     expect(heading.textContent).toBe(
       'How would you describe things between you and your ex?',
     );
