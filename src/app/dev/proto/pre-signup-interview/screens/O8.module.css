@@ -1,0 +1,66 @@
+.main {
+  width: 100%;
+  max-width: 480px;
+  margin: 0 auto;
+  padding-top: 24px;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.entry {
+  opacity: 0;
+  transform: translateY(12px);
+  animation: o8-entry 240ms ease-out forwards;
+  animation-delay: calc(var(--stagger-index, 0) * 80ms);
+}
+
+@keyframes o8-entry {
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.cta {
+  animation: o8-cta-in 220ms ease-out forwards;
+}
+
+@keyframes o8-cta-in {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.card {
+  transition:
+    background 140ms ease-out,
+    border-color 140ms ease-out,
+    box-shadow 140ms ease-out,
+    transform 140ms ease-out;
+}
+
+.card:active {
+  transform: translateY(1px);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .entry {
+    animation: none;
+    opacity: 1;
+    transform: none;
+  }
+
+  .cta {
+    animation: none;
+  }
+
+  .card {
+    transition: none;
+  }
+}

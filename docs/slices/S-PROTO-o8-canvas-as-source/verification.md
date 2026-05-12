@@ -8,7 +8,7 @@
 | AC-2 PlanRecall chip (B2) | Pending | `O8.tsx` `PlanRecall` component rendered between TopBar and Hero: pill `<a>` with violet-soft mini-check badge + "Your plan is ready" + MUTE divider + "← back to plan" affordance. |
 | AC-3 Hero | Pending | `O8.tsx` `Hero` component: magenta-dot eyebrow "What's next · take it from here" + serif H2 "What would you like to do next?" + sub-helper "There's no wrong answer. You can come back anytime." |
 | AC-4 4 OptionCards (A1) | Pending | `O8.tsx` `<fieldset>` with 4 native `<input type="radio" name="o8-next-step">` styled as cards. Each card: icon (line-weight 1.6, viewBox 24×24, from inlined IconWorkspace/IconDownload/IconExternal/IconSupport) + serif fontWeight-600 title + SUB 12px sub + circular radio indicator. A1 equal-weight treatment — all 4 cards visually identical until selected. |
-| AC-5 Footer (sticky CTA) | Pending | `O8.tsx` sticky cream-blur footer matches O5/O6 chassis. Single dark pill CTA. Label reflects selected option's `cta` (default "Continue" with no selection — C1 no-default). `useProto().next` wired (no-op at step 8 cap). |
+| AC-5 Footer (sticky CTA) | Pending | `O8.tsx` sticky cream-blur footer matches O5/O6 chassis. C1 empty-state: no CTA — instead a centred MUTE "Pick an option above to continue." caption. Post-selection: full-width dark pill CTA labelled per selected option's `cta` field + right-arrow; `useProto().next` wired (no-op at step 8 cap); 220ms opacity-in mount animation suppressed under reduced-motion. |
 | AC-6 Motion + a11y + reduced-motion | Pending | `O8.module.css` declares `.entry` stagger via `--stagger-index` + card transitions 120ms ease-out + reduced-motion fallback (suppress stagger; suppress card transitions). Semantic markup: `<fieldset>`, native radios, sr-only legend, `<h1>` for screen title, `<button>` CTA, `<a>` for Back / PlanRecall. |
 
 ## Tests
@@ -20,7 +20,7 @@
 | Renders Hero eyebrow + serif H2 + helper | Pending | `o8-canvas-as-source.test.tsx` |
 | Renders 4 OptionCards with native radio role + sr-only legend | Pending | `o8-canvas-as-source.test.tsx` |
 | Selecting an option updates aria-pressed/aria-checked + reflects CTA label | Pending | `o8-canvas-as-source.test.tsx` |
-| CTA label defaults to "Continue" with nothing selected (C1) | Pending | `o8-canvas-as-source.test.tsx` |
+| C1 empty-state: shows "Pick an option above to continue." caption + no CTA when nothing selected | Pending | `o8-canvas-as-source.test.tsx` |
 | Decorative SVGs hidden from screen readers (aria-hidden=true) | Pending | `o8-canvas-as-source.test.tsx` |
 
 ## Preview-deploy verification (spec 72a 6+1 rubric)

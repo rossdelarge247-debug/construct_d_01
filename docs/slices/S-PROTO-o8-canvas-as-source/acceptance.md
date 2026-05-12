@@ -44,12 +44,13 @@ Canvas-as-source default per CLAUDE.md §"Canvas-as-source (prototype default)":
 - Evidence: canvas L37-124 (OPTIONS + ICONS + 4 SVG icon defs), L297+ (OptionCard render).
 
 **AC-5: Footer (sticky CTA reflecting selected option).**
-- Sticky bottom-fixed footer (cream `rgba(245,245,244,0.85)` + `backdrop-filter: blur(8px)` + 1px LINE top-border) — matches O5/O6 chassis pattern.
-- Single dark pill CTA, label reflects the selected option's `cta` (e.g., "Create my account" / "Download my plan" / "See helpful links" / "See support resources"); default label *"Continue"* when nothing selected (C1 no-default-selection: button is enabled with the generic "Continue" label but doesn't navigate).
-- CTA right-arrow strokeWidth=2 per O5/O6 convention.
-- When selected: CTA's `onClick` invokes `useProto().next` for routing visibility — at v1 step 8 is the end of the interview, so `next` is a no-op (TOTAL_STEPS=8 cap); functional routing to signup/download/conventional/support flows is out of scope.
-- Caption above CTA: subtle italic-serif "Take your time. There's no clock." (or similar — exact copy resolved at impl-time from canvas Footer definition).
-- Evidence: canvas L417+ (Footer definition).
+- Sticky bottom-fixed footer (`rgba(255,255,255,0.62)` + `backdrop-filter: blur(10px)` + 1px LINE top-border + `paddingTop: 10`, `paddingBottom: 14`) matches the O5/O6 cream-blur chassis convention.
+- Footer holds a `minHeight: 46` flex row containing EITHER (a) the CTA button OR (b) the empty-state caption — never both.
+- **C1 empty-state behaviour** (per canvas o8-frames.jsx L420-422): when no option is selected, the CTA is hidden; in its place renders an 11px MUTE-coloured centred caption *"Pick an option above to continue."*
+- **Post-selection behaviour**: full-width dark pill CTA, label is the selected option's `cta` field (e.g., *"Create my account"* / *"Download my plan"* / *"See helpful links"* / *"See support resources"*) + right-arrow strokeWidth=2 (matches O5/O6 footer chassis).
+- CTA mount animation: `o8-cta-in 220ms ease-out` opacity-in (canvas L449); suppressed under `prefers-reduced-motion: reduce`.
+- CTA `onClick` invokes `useProto().next` for routing visibility — at v1 step 8 is the end of the interview, so `next` is a no-op (TOTAL_STEPS=8 cap); functional routing to signup/download/conventional/support flows is out of scope.
+- Evidence: canvas L417-462 (Footer definition).
 
 **AC-6: Motion + a11y + reduced-motion.**
 - Card entry stagger on mount via `--stagger-index` opacity-up + 12px translate-up, 240ms ease-out, 80ms delay between siblings (4 cards = 4 staggered reveals). Pattern matches O5/O6 module.css template (opacity override scoped to `.entry` only, NOT `.chip` — applying it to chip class breaks chip transitions under reduced-motion).
