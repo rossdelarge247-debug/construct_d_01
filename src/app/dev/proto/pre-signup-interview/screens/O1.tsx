@@ -4,7 +4,7 @@ import { type CSSProperties } from 'react';
 import { tokens } from '@/styles/tokens';
 import { Arrow } from '../components/Arrow';
 import { BrandBar } from '../components/BrandBar';
-import { ProgressPill } from '../components/ProgressPill';
+import { TopBar } from '../components/TopBar';
 import { useProto } from '../lib/proto-context';
 import { getCopy } from '../lib/copy/o1';
 import type { Stage } from '../lib/types';
@@ -16,26 +16,6 @@ const colors = {
   muted: tokens.color.text.muted,
   line: tokens.color.border,
 };
-
-function TopBar({ step }: { step: number }) {
-  return (
-    <div
-      className="px-5 pt-4 pb-3 flex items-center justify-between"
-      style={{ borderBottom: `1px solid ${colors.line}` }}
-    >
-      <a
-        href="#"
-        className="inline-flex items-center gap-1.5"
-        style={{ color: colors.sub, fontSize: 12 }}
-      >
-        <Arrow dir="left" size={11} />
-        <span>Home</span>
-      </a>
-      <ProgressPill step={step} />
-      <div style={{ width: 44 }} aria-hidden="true" />
-    </div>
-  );
-}
 
 function Hero({
   eyebrow,

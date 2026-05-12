@@ -4,7 +4,7 @@ import { useEffect, useRef, type CSSProperties, type ReactNode } from 'react';
 import { tokens } from '@/styles/tokens';
 import { Arrow } from '../components/Arrow';
 import { BrandBar } from '../components/BrandBar';
-import { ProgressPill } from '../components/ProgressPill';
+import { TopBar } from '../components/TopBar';
 import { useProto } from '../lib/proto-context';
 import { getCopy, type O3Copy } from '../lib/copy/o3';
 import type {
@@ -20,41 +20,6 @@ const colors = {
   line: tokens.color.border,
   violet: tokens.color.accent.violet,
 };
-
-function TopBar({ step, onBack }: { step: number; onBack: () => void }) {
-  return (
-    <div
-      style={{
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'space-between',
-        padding: '8px 20px 12px',
-        borderBottom: `1px solid ${colors.line}`,
-      }}
-    >
-      <button
-        type="button"
-        onClick={onBack}
-        style={{
-          display: 'inline-flex',
-          alignItems: 'center',
-          gap: 6,
-          padding: 0,
-          background: 'transparent',
-          border: 'none',
-          color: colors.sub,
-          font: `400 11px/1.3 ${tokens.font.sans}`,
-          cursor: 'pointer',
-        }}
-      >
-        <Arrow dir="left" size={11} />
-        <span>Back</span>
-      </button>
-      <ProgressPill step={step} total={8} />
-      <div style={{ width: 36 }} aria-hidden="true" />
-    </div>
-  );
-}
 
 function Hero({
   eyebrow,

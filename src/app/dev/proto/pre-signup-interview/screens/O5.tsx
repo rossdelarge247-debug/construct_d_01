@@ -4,7 +4,7 @@ import { useEffect, useRef, type CSSProperties } from 'react';
 import { tokens } from '@/styles/tokens';
 import { Arrow } from '../components/Arrow';
 import { BrandBar } from '../components/BrandBar';
-import { ProgressPill } from '../components/ProgressPill';
+import { TopBar } from '../components/TopBar';
 import { useProto } from '../lib/proto-context';
 import { getCopy, type O5Option } from '../lib/copy/o5';
 import type { PartnerAwareness, PartnerFinancesAnswers } from '../lib/types';
@@ -19,42 +19,6 @@ const colors = {
 };
 
 const PRIMARY_KEYS: ReadonlyArray<PartnerAwareness> = ['full', 'some', 'little'];
-
-function TopBar({ step, onBack }: { step: number; onBack: () => void }) {
-  return (
-    <div
-      style={{
-        padding: '8px 20px 12px',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'space-between',
-        borderBottom: `1px solid ${colors.border}`,
-      }}
-    >
-      <button
-        type="button"
-        onClick={onBack}
-        className={styles.backLink}
-        style={{
-          display: 'inline-flex',
-          alignItems: 'center',
-          gap: 6,
-          font: `400 11px/1 ${tokens.font.sans}`,
-          color: colors.sub,
-          background: 'none',
-          border: 'none',
-          padding: 0,
-          cursor: 'pointer',
-        }}
-      >
-        <Arrow dir="left" size={11} />
-        <span>Back</span>
-      </button>
-      <ProgressPill step={step} total={8} />
-      <span aria-hidden="true" style={{ width: 36, display: 'inline-block' }} />
-    </div>
-  );
-}
 
 function Hero({
   eyebrow,

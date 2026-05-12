@@ -12,10 +12,10 @@ function renderO8() {
 }
 
 describe('O8 (canvas-as-source)', () => {
-  it('renders the TopBar Back link and Step 8/8 terminal indicator', () => {
+  it('renders the TopBar Back button and Step 8/8 terminal indicator', () => {
     renderO8();
-    const back = screen.getByRole('link', { name: /Back/ });
-    expect(back.tagName).toBe('A');
+    const back = screen.getByRole('button', { name: /Back/ });
+    expect(back.tagName).toBe('BUTTON');
     const rail = screen.getByRole('progressbar');
     expect(rail.getAttribute('aria-label')).toBe('Step 8 of 8');
     expect(rail.getAttribute('aria-valuenow')).toBe('8');

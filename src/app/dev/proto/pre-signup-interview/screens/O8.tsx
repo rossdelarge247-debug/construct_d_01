@@ -2,7 +2,9 @@
 
 import { useState, type CSSProperties, type ReactNode } from 'react';
 import { tokens } from '@/styles/tokens';
+import { Arrow } from '../components/Arrow';
 import { BrandBar } from '../components/BrandBar';
+import { TopBar } from '../components/TopBar';
 import { useProto } from '../lib/proto-context';
 import styles from './O8.module.css';
 
@@ -57,27 +59,6 @@ const OPTIONS: ReadonlyArray<OptionDef> = [
   },
 ];
 
-function ArrowSvg({ size = 13, sw = 1.8, dir = 'right' }: { size?: number; sw?: number; dir?: 'left' | 'right' }) {
-  const rotate = dir === 'left' ? 180 : 0;
-  return (
-    <svg
-      width={size}
-      height={size}
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth={sw}
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      style={{ transform: `rotate(${rotate}deg)` }}
-      aria-hidden="true"
-    >
-      <line x1="5" y1="12" x2="19" y2="12" />
-      <polyline points="12 5 19 12 12 19" />
-    </svg>
-  );
-}
-
 function IconWorkspace({ size = 17 }: { size?: number }) {
   return (
     <svg width={size} height={size} viewBox="0 0 24 24" fill="none"
@@ -130,81 +111,6 @@ const ICONS: Record<OptionId, ({ size }: { size?: number }) => ReactNode> = {
   support: IconSupport,
 };
 
-function StepRail({ current = 8, total = 8 }: { current?: number; total?: number }) {
-  const pct = (current / total) * 100;
-  return (
-    <div
-      role="progressbar"
-      aria-valuenow={current}
-      aria-valuemin={1}
-      aria-valuemax={total}
-      aria-label={`Step ${current} of ${total}`}
-      style={{ display: 'flex', alignItems: 'center', gap: 10 }}
-    >
-      <span style={{
-        fontFamily: FONT_MONO,
-        fontSize: 9.5,
-        color: colors.muted,
-        letterSpacing: '0.04em',
-      }}>
-        Step {current} / {total}
-      </span>
-      <div style={{
-        position: 'relative',
-        borderRadius: 999,
-        overflow: 'hidden',
-        width: 96,
-        height: 3,
-        background: colors.border,
-      }}>
-        <div style={{
-          position: 'absolute',
-          top: 0,
-          bottom: 0,
-          left: 0,
-          width: `${pct}%`,
-          background: colors.ink,
-          borderRadius: 999,
-        }} />
-      </div>
-    </div>
-  );
-}
-
-function TopBar({ onBack }: { onBack: () => void }) {
-  return (
-    <div style={{
-      padding: '8px 20px 10px',
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'space-between',
-      borderBottom: `1px solid ${colors.border}`,
-    }}>
-      <a
-        href="#"
-        onClick={(e) => {
-          e.preventDefault();
-          onBack();
-        }}
-        style={{
-          display: 'inline-flex',
-          alignItems: 'center',
-          gap: 6,
-          fontSize: 11,
-          color: colors.sub,
-          textDecoration: 'none',
-          padding: '6px 4px',
-        }}
-      >
-        <ArrowSvg dir="left" size={11} />
-        <span>Back</span>
-      </a>
-      <StepRail current={8} total={8} />
-      <div aria-hidden="true" style={{ width: 36 }} />
-    </div>
-  );
-}
-
 function PlanRecall() {
   return (
     <div style={{ padding: '12px 20px 0' }}>
@@ -237,7 +143,7 @@ function PlanRecall() {
         <span style={{ fontWeight: 500 }}>Your plan is ready</span>
         <span style={{ color: colors.muted, fontSize: 10.5 }}>·</span>
         <span style={{ color: colors.muted, fontSize: 10.5, display: 'inline-flex', alignItems: 'center', gap: 3 }}>
-          <ArrowSvg dir="left" size={9} sw={2} />
+          <Arrow dir="left" size={9} strokeWidth={2} />
           <span>back to plan</span>
         </span>
       </a>
@@ -413,7 +319,7 @@ function Footer({ selected, onContinue }: { selected: OptionDef | undefined; onC
             }}
           >
             <span>{selected.cta}</span>
-            <ArrowSvg dir="right" size={13} sw={2} />
+            <Arrow dir="right" size={13} strokeWidth={2} />
           </button>
         ) : (
           <p style={{
@@ -440,7 +346,7 @@ export function O8() {
   return (
     <main className={styles.main}>
       <BrandBar />
-      <TopBar onBack={back} />
+      <TopBar step={8} total={8} onBack={back} />
       <PlanRecall />
       <Hero />
       <fieldset className={styles.fieldset}>
