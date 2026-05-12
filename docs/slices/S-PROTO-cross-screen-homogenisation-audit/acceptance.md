@@ -277,6 +277,21 @@ Each batch is its own slice with its own `acceptance.md` + `verification.md`. Su
 
 - **User to enumerate O7 visual issues** flagged verbally on O7 at merge time but never written down. The chassis-level audit captured drift in source code; visual treatment specifics that don't surface from source (colour rendering, glyph positioning, alignment, motion timing, etc.) need a preview-deploy walk. Recommended timing: enumerate before Batch B (Hero) and Batch C (Footer) since those touch O7 visual treatment directly. Lazy fallback: surface during Batch B/C preview-deploy iteration.
 
+## Phase 4 (follow-on workstream after Phase 3 lands) — spec pressure-test
+
+User-flagged concern raised after Phase 2 walk: **the canvas-as-source surface "feels basic" relative to the original principles and the V1 interview built as an early test.** Chassis homogenisation (Phase 3) addresses *consistency* — it does not address whether the homogenised pattern itself delivers the experience the product vision calls for.
+
+Sequencing per user direction: *"get it all consistent, and then pressure test the journey against the specs"* — Phase 3 ships first, Phase 4 follows on a clean surface.
+
+**Scope (to be specced in its own slice):** compare the homogenised 8-screen surface against:
+- CLAUDE.md §"Product positioning" / §"North star" / §"Product rules" — *"warm hand on a cold day"* · MLP-not-MVP quality bar · *"every question must map to a Form E field"* · *"connect-first, confirm-by-exception"* · *"show, don't ask"* · *"delight matters"*.
+- `docs/workspace-spec/65-pre-signup-interview-reconciled.md` (190L) — authoritative pre-signup spec.
+- `docs/v1/v1-wireframes.md` (543L) — V1 baseline that the user references as "richer than current".
+
+**Likely candidate findings** (intuition pre-audit; concrete catalogue in the Phase 4 slice): information density per screen · cold-start vs bank-signal-driven question ordering · adaptive output / decision-flow patterns from v1-wireframes.md §"Adaptive output decision flow" not present in current canvas-as-source · gentle-interview tone preserved or lost · micro-interaction density · "delight" surface area.
+
+**Output:** a new audit slice (`S-PROTO-pre-signup-spec-pressure-test` or similar) — same scope-only audit pattern as this one, joint-review-then-batch-impl workflow.
+
 ## Out of scope (deferred)
 
 - **All implementation.** This slice is acceptance.md only. Phase 3 ships changes via dedicated slices.
