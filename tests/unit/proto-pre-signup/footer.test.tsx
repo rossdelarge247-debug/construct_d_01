@@ -65,4 +65,44 @@ describe('Footer', () => {
     const lightFooter = lightContainer.querySelector('footer');
     expect(lightFooter?.className).toMatch(/footerLight/);
   });
+
+  it('enables the CTA by default when enabled prop is omitted', () => {
+    render(<Footer ctaLabel="Continue" onContinue={() => {}} />);
+    const button = screen.getByRole('button', { name: /continue/i }) as HTMLButtonElement;
+    expect(button.disabled).toBe(false);
+  });
+
+  it('applies captionEnabled class when enabled and captionDisabled class when not', () => {
+    const { rerender } = render(
+      <Footer caption="status" ctaLabel="Continue" enabled onContinue={() => {}} />,
+    );
+    expect(screen.getByRole('status').className).toMatch(/captionEnabled/);
+    rerender(
+      <Footer caption="status" ctaLabel="Continue" enabled={false} onContinue={() => {}} />,
+    );
+    expect(screen.getByRole('status').className).toMatch(/captionDisabled/);
+  });
+
+  it('renders no secondaryActions row when prop is omitted', () => {
+    const { container } = render(<Footer ctaLabel="Continue" onContinue={() => {}} />);
+    expect(container.querySelector('[class*="secondaryRow"]')).toBeNull();
+  });
+
+  it('focuses the primary CTA when programmatically focused', () => {
+    render(<Footer ctaLabel="Continue" onContinue={() => {}} />);
+    const button = screen.getByRole('button', { name: /continue/i });
+    button.focus();
+    expect(document.activeElement).toBe(button);
+  });
+
+  it('adds the ctaEnabled class on enabled false → true transition', () => {
+    const { rerender } = render(
+      <Footer ctaLabel="Continue" enabled={false} onContinue={() => {}} />,
+    );
+    let button = screen.getByRole('button', { name: /continue/i });
+    expect(button.className).not.toMatch(/ctaEnabled/);
+    rerender(<Footer ctaLabel="Continue" enabled onContinue={() => {}} />);
+    button = screen.getByRole('button', { name: /continue/i });
+    expect(button.className).toMatch(/ctaEnabled/);
+  });
 });

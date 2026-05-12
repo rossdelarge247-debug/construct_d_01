@@ -2,8 +2,8 @@
 
 import { useEffect, useState, type CSSProperties, type ReactNode } from 'react';
 import { tokens } from '@/styles/tokens';
-import { Arrow } from '../components/Arrow';
 import { BrandBar } from '../components/BrandBar';
+import { Footer } from '../components/Footer';
 import { Hero } from '../components/Hero';
 import { TopBar } from '../components/TopBar';
 import { useProto } from '../lib/proto-context';
@@ -453,107 +453,6 @@ function PersonalisedNotes({ notes, staggerIndex }: {
   );
 }
 
-function PlanFooter({ onNext, staggerIndex }: { onNext: () => void; staggerIndex: number }) {
-  return (
-    <>
-      <section
-        className={styles.entry}
-        style={{ padding: '40px 20px 28px', ['--stagger-index' as string]: staggerIndex }}
-      >
-        <h2 style={{
-          fontFamily: FONT_SERIF,
-          margin: 0,
-          fontSize: 22,
-          lineHeight: 1.15,
-          fontWeight: 600,
-          letterSpacing: '-0.02em',
-          color: colors.ink,
-        }}>
-          Take this <span style={{ fontStyle: 'italic', fontWeight: 400, color: colors.magenta }}>with you</span>.
-        </h2>
-        <p style={{
-          fontFamily: FONT_SERIF,
-          fontStyle: 'italic',
-          margin: '10px 0 0',
-          fontSize: 13.5,
-          color: colors.sub,
-          lineHeight: 1.5,
-        }}>
-          Yours, whether you go further or not. No account, no email needed.
-        </p>
-
-        <div style={{ marginTop: 20, display: 'flex', flexDirection: 'column', gap: 10 }}>
-          <button type="button" className={styles.ctaButton} style={{
-            width: '100%',
-            display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: 8,
-            padding: '14px 20px', borderRadius: 999,
-            background: '#FFFFFF', color: colors.ink, border: `1px solid ${colors.ink}`,
-            fontSize: 13.5, fontWeight: 600, cursor: 'pointer',
-          }}>
-            <DownloadIcon size={13} />
-            <span>Download your plan as PDF</span>
-          </button>
-          <button type="button" style={{
-            width: '100%',
-            display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: 8,
-            padding: '12px 20px', borderRadius: 999,
-            background: 'transparent', color: colors.sub, border: 'none',
-            fontSize: 13, cursor: 'pointer',
-          }}>
-            <MailIcon size={12} />
-            <span style={{ textDecoration: 'underline', textUnderlineOffset: 4 }}>Email me the link instead</span>
-          </button>
-        </div>
-
-        <div style={{
-          marginTop: 28, paddingTop: 24,
-          display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-          borderTop: `1px solid ${colors.border}`,
-        }}>
-          <a href="#" style={{ fontSize: 12.5, color: colors.sub, textDecoration: 'underline', textUnderlineOffset: 4 }}>
-            Find out more about Decouple
-          </a>
-          <span style={{ fontSize: 11, color: colors.muted }}>pricing · how it works</span>
-        </div>
-      </section>
-
-      <div style={{
-        position: 'sticky',
-        bottom: 0,
-        padding: '14px 20px 20px',
-        background: 'rgba(255,255,255,0.92)',
-        backdropFilter: 'blur(10px)',
-        borderTop: `1px solid ${colors.border}`,
-      }}>
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12 }}>
-          <a href="#" style={{
-            display: 'inline-flex', alignItems: 'center', gap: 6,
-            fontSize: 12.5, padding: '8px', color: colors.sub, textDecoration: 'none',
-          }}>
-            <Arrow dir="left" size={12} />
-            <span>Back</span>
-          </a>
-          <button
-            type="button"
-            className={styles.ctaButton}
-            onClick={onNext}
-            style={{
-              display: 'inline-flex', alignItems: 'center', gap: 8,
-              padding: '14px 24px', borderRadius: 999,
-              background: colors.ink, color: '#FFFFFF', border: 'none',
-              fontSize: 14, fontWeight: 600, cursor: 'pointer',
-              flex: 1, justifyContent: 'center',
-            }}
-          >
-            <span>What&apos;s next</span>
-            <Arrow size={13} strokeWidth={2} />
-          </button>
-        </div>
-      </div>
-    </>
-  );
-}
-
 type DisclosureState = 'done' | 'working' | 'pending';
 
 const DISCLOSURE_STEPS: ReadonlyArray<{ label: string; state: DisclosureState }> = [
@@ -696,7 +595,30 @@ function MobileReadyView({ onNext, answers }: {
       <ConventionalPath path={plan.conventionalPath} staggerIndex={4} />
       <DecoupleHelps help={plan.howDecoupleHelps} staggerIndex={5} />
       <PersonalisedNotes notes={plan.personalisedNotes} staggerIndex={6} />
-      <PlanFooter onNext={onNext} staggerIndex={7} />
+      <Footer
+        ctaLabel="What's next"
+        onContinue={onNext}
+        secondaryActions={
+          <>
+            <button type="button" style={{
+              display: 'inline-flex', alignItems: 'center', gap: 8,
+              padding: '10px 14px', borderRadius: 999,
+              background: '#FFFFFF', color: colors.ink, border: `1px solid ${colors.ink}`,
+              fontSize: 12.5, fontWeight: 600, cursor: 'pointer',
+            }}>
+              <DownloadIcon size={12} />
+              <span>Download as PDF</span>
+            </button>
+            <a href="#" style={{
+              display: 'inline-flex', alignItems: 'center', gap: 6,
+              fontSize: 12.5, padding: '6px 8px', color: colors.sub, textDecoration: 'none',
+            }}>
+              <MailIcon size={11} />
+              <span style={{ textDecoration: 'underline', textUnderlineOffset: 4 }}>Email link</span>
+            </a>
+          </>
+        }
+      />
     </div>
   );
 }
