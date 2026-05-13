@@ -453,6 +453,25 @@ function PersonalisedNotes({ notes, staggerIndex }: {
   );
 }
 
+function Reassurance({ staggerIndex }: { staggerIndex: number }) {
+  return (
+    <section className={styles.entry} style={sectionEntryStyle(staggerIndex)}>
+      <p style={{
+        margin: 0,
+        padding: '8px 16px',
+        textAlign: 'center',
+        fontFamily: FONT_SERIF,
+        fontSize: 17,
+        lineHeight: 1.45,
+        fontStyle: 'italic',
+        color: colors.sub,
+      }}>
+        You&rsquo;ve built a strong starting position.
+      </p>
+    </section>
+  );
+}
+
 type DisclosureState = 'done' | 'working' | 'pending';
 
 const DISCLOSURE_STEPS: ReadonlyArray<{ label: string; state: DisclosureState }> = [
@@ -595,6 +614,7 @@ function MobileReadyView({ onNext, answers }: {
       <ConventionalPath path={plan.conventionalPath} staggerIndex={4} />
       <DecoupleHelps help={plan.howDecoupleHelps} staggerIndex={5} />
       <PersonalisedNotes notes={plan.personalisedNotes} staggerIndex={6} />
+      <Reassurance staggerIndex={7} />
       <Footer
         ctaLabel="What's next"
         onContinue={onNext}
