@@ -14,6 +14,7 @@ export interface O4Copy {
   };
   heading: string;
   helper: string;
+  whyWeAsk: string;
   options: ReadonlyArray<O4Option>;
   captions: {
     pickToContinue: string;
@@ -29,6 +30,7 @@ export function getCopy(_stage: Stage): O4Copy {
     eyebrow: { label: 'Money', accent: 'indigo' },
     heading: 'Does either of you work for yourself, or run a limited company?',
     helper: 'This affects how we handle income evidence later.',
+    whyWeAsk: "Salaries, self-employment, and limited-company finances are evidenced differently in settlement. Knowing this early shapes what we'll need to gather.",
     options: [
       { value: 'no', primary: 'No', detail: 'both employed, or not working', emphasised: true },
       { value: 'me', primary: 'Yes', detail: 'I am' },

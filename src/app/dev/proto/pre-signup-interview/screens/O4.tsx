@@ -6,6 +6,7 @@ import { BrandBar } from '../components/BrandBar';
 import { Footer } from '../components/Footer';
 import { Hero } from '../components/Hero';
 import { TopBar } from '../components/TopBar';
+import { WhyWeAsk } from '../components/WhyWeAsk';
 import { useProto } from '../lib/proto-context';
 import { getCopy, type O4Option } from '../lib/copy/o4';
 import type { EmploymentAnswers, SelfEmployment } from '../lib/types';
@@ -146,6 +147,7 @@ export function O4() {
         helper={copy.helper}
         className={styles.entry}
       />
+      <WhyWeAsk body={copy.whyWeAsk} className={styles.entry} />
       <fieldset
         aria-labelledby="o4-emp-legend"
         style={{

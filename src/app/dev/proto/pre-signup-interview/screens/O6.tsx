@@ -6,6 +6,7 @@ import { BrandBar } from '../components/BrandBar';
 import { Footer } from '../components/Footer';
 import { Hero } from '../components/Hero';
 import { TopBar } from '../components/TopBar';
+import { WhyWeAsk } from '../components/WhyWeAsk';
 import { useProto } from '../lib/proto-context';
 import { getCopy, type O6PriorityOption, type O6WorryOption } from '../lib/copy/o6';
 import type { Priority, WhatMattersAnswers, Worry } from '../lib/types';
@@ -221,6 +222,7 @@ export function O6() {
         heading={copy.heading}
         className={styles.entry}
       />
+      <WhyWeAsk body={copy.whyWeAsk} className={styles.entry} />
       <div
         style={{
           padding: '8px 16px 12px',

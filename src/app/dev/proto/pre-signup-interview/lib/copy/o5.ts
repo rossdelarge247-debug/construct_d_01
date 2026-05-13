@@ -13,6 +13,7 @@ export interface O5Copy {
   };
   heading: string;
   helper: string;
+  whyWeAsk: string;
   options: ReadonlyArray<O5Option>;
   captions: {
     pickToContinue: string;
@@ -28,6 +29,7 @@ export function getCopy(_stage: Stage): O5Copy {
     eyebrow: { label: 'Money · their side', accent: 'indigo' },
     heading: "How much do you know about your partner's financial situation?",
     helper: "There's no wrong answer. Many people don't know everything.",
+    whyWeAsk: "This isn't about catching you out. The less you know now, the more time we'll need for reconciliation later — it's better to be honest up-front.",
     options: [
       { value: 'full', primary: 'I have a good idea of everything' },
       { value: 'some', primary: 'I know some things but not all' },

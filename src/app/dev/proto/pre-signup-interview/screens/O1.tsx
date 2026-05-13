@@ -7,6 +7,7 @@ import { BrandBar } from '../components/BrandBar';
 import { Footer } from '../components/Footer';
 import { Hero } from '../components/Hero';
 import { TopBar } from '../components/TopBar';
+import { WhyWeAsk } from '../components/WhyWeAsk';
 import { useProto } from '../lib/proto-context';
 import { getCopy } from '../lib/copy/o1';
 import type { Stage } from '../lib/types';
@@ -119,6 +120,7 @@ export function O1() {
         helperVariant="italic-serif"
         className={styles.entry}
       />
+      <WhyWeAsk body={copy.whyWeAsk} className={styles.entry} />
       <fieldset
         aria-labelledby="o1-legend"
         className="px-5 mt-5 space-y-2.5 flex-1"

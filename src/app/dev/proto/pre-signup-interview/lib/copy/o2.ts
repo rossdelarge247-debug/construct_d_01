@@ -30,6 +30,7 @@ export interface O2Copy {
   eyebrow: string;
   heading: TitleShape;
   helper?: string;
+  whyWeAsk: string;
   relationship: QuestionRelationship;
   living: QuestionLiving;
   children: QuestionChildren;
@@ -41,6 +42,7 @@ export function getCopy(_stage: Stage): O2Copy {
   return {
     eyebrow: 'O2 · Your situation',
     heading: { kind: 'split', bold: 'Your', accent: 'situation', period: true },
+    whyWeAsk: 'Civil partnerships, marriages, and cohabiting unions each have their own legal process. Children and housing change what the plan needs to cover.',
     relationship: {
       key: 'relationship',
       label: 'Relationship',

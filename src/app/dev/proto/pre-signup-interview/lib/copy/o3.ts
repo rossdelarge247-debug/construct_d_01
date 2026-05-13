@@ -14,6 +14,7 @@ interface DeviceOption {
 export interface O3Copy {
   eyebrow: string;
   heading: string;
+  whyWeAsk: string;
   relationship: {
     label: string;
     options: ReadonlyArray<RelationshipOption>;
@@ -34,6 +35,7 @@ export function getCopy(_stage: Stage): O3Copy {
   return {
     eyebrow: 'Your ex',
     heading: 'How would you describe things between you and your ex?',
+    whyWeAsk: 'How things stand between you shapes whether you\'ll work through this together or apart. We also ask about safety so we can adjust the rest of the conversation.',
     relationship: {
       label: 'How would you describe things between you and your ex?',
       options: [

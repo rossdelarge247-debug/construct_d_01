@@ -16,6 +16,7 @@ export interface O1Copy {
   eyebrow: string;
   heading: O1Heading;
   subStem: string;
+  whyWeAsk: string;
   options: ReadonlyArray<O1StageOption>;
   cta: string;
   trustBand: { left: string; right: string };
@@ -26,6 +27,7 @@ export function getCopy(_stage: Stage): O1Copy {
     eyebrow: 'To start your plan…',
     heading: { pre: 'Tell us ', italic: 'where', tail: ' you\'re at.' },
     subStem: 'Your answer shapes the rest of the plan. There\'s no wrong choice.',
+    whyWeAsk: 'This shapes the tone and pace of your plan. People who\'ve already decided need next-action language; people exploring need more space to weigh things up.',
     options: [
       { value: 'decided', label: 'We\'ve decided to separate', sub: 'You want to get the finances sorted.' },
       { value: 'thinking', label: 'I\'m thinking about separating', sub: 'You want to understand what\'s involved.' },

@@ -16,6 +16,7 @@ export interface O6Copy {
     accent: 'magenta';
   };
   heading: string;
+  whyWeAsk: string;
   priorities: {
     title: string;
     caption: string;
@@ -40,6 +41,7 @@ export function getCopy(_stage: Stage): O6Copy {
   return {
     eyebrow: { label: 'What matters · last step before your plan', accent: 'magenta' },
     heading: "A few words on what matters to you, and what's worrying you.",
+    whyWeAsk: "Your plan should reflect what actually matters to you, not a generic best-practice. These priorities decide which recommendations come up first.",
     priorities: {
       title: "What's most important to you right now?",
       caption: 'Pick up to 3.',
