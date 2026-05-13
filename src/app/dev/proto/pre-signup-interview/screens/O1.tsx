@@ -4,6 +4,7 @@ import { type CSSProperties } from 'react';
 import { tokens } from '@/styles/tokens';
 import { Arrow } from '../components/Arrow';
 import { BrandBar } from '../components/BrandBar';
+import { EntryScaffold } from '../components/EntryScaffold';
 import { Footer } from '../components/Footer';
 import { Hero } from '../components/Hero';
 import { TopBar } from '../components/TopBar';
@@ -106,6 +107,12 @@ export function O1() {
     <main className="flex flex-col min-h-screen w-full max-w-[480px] mx-auto pt-6">
       <BrandBar />
       <TopBar step={step} />
+      <EntryScaffold
+        timeIntro={copy.entry.timeIntro}
+        outcomes={copy.entry.outcomes}
+        reassurance={copy.entry.reassurance}
+        className={styles.entry}
+      />
       <Hero
         eyebrow={copy.eyebrow}
         heading={
