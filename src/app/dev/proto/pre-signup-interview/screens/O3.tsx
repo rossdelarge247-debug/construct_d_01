@@ -7,6 +7,7 @@ import { BrandBar } from '../components/BrandBar';
 import { Footer } from '../components/Footer';
 import { Hero } from '../components/Hero';
 import { TopBar } from '../components/TopBar';
+import { WhyWeAsk } from '../components/WhyWeAsk';
 import { useProto } from '../lib/proto-context';
 import { getCopy, type O3Copy } from '../lib/copy/o3';
 import type {
@@ -191,6 +192,7 @@ export function O3() {
         staggerIndex={0}
         className={styles.entry}
       />
+      <WhyWeAsk body={copy.whyWeAsk} className={styles.entry} />
       <fieldset
         aria-labelledby="o3-rel-legend"
         style={{

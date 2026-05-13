@@ -6,6 +6,7 @@ import { BrandBar } from '../components/BrandBar';
 import { Footer } from '../components/Footer';
 import { Hero } from '../components/Hero';
 import { TopBar } from '../components/TopBar';
+import { WhyWeAsk } from '../components/WhyWeAsk';
 import { useProto } from '../lib/proto-context';
 import { getCopy, type O5Option } from '../lib/copy/o5';
 import type { PartnerAwareness, PartnerFinancesAnswers } from '../lib/types';
@@ -148,12 +149,13 @@ export function O5() {
         helper={copy.helper}
         className={styles.entry}
       />
+      <WhyWeAsk body={copy.whyWeAsk} className={styles.entry} />
       <fieldset
         aria-labelledby="o5-partner-legend"
         style={{
           border: 'none',
           margin: 0,
-          padding: '4px 20px 12px',
+          padding: '0 20px 12px',
           display: 'flex',
           flexDirection: 'column',
         }}

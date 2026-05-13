@@ -1,0 +1,7 @@
+.callout {
+  margin: 16px 20px;
+  padding: 12px 14px;
+  border-radius: 10px;
+  background: var(--ds-color-surface-canvas);
+  border: 1px solid var(--ds-color-border);
+}
