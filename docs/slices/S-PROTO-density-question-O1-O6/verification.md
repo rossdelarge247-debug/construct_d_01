@@ -21,14 +21,22 @@ Closes density-audit finding F-DEN-01 from `docs/slices/S-PROTO-pre-signup-densi
 
 ## Preview-deploy verification (spec 72a 6+1)
 
+### Pre-walk evidence (resolved without browser)
+
+- **WCAG contrast on WhyWeAsk eyebrow** (auto-review finding `accessibility-visual`, non-blocking): `--ds-color-text-muted` (#78716C) on `--ds-color-surface-canvas` (#FAFAF7) at 10px = **4.59:1**, passes WCAG AA 4.5:1 threshold for normal text. Measured via WCAG-formula computation against the token hex values in `src/app/globals.css`.
+- **WCAG contrast on WhyWeAsk body** (preemptive at 13px): `--ds-color-text-sub` (#57534E) on `--ds-color-surface-canvas` (#FAFAF7) = **7.30:1**, passes AA comfortably.
+- **`prefers-reduced-motion` inheritance**: WhyWeAsk receives the consumer screen's `styles.entry` className. Each of O1-O6's `*.module.css` `.entry` rule chain already includes a `@media (prefers-reduced-motion: reduce)` block disabling the entry animation; WhyWeAsk inherits this behaviour without its own override.
+
+### 6+1 walk (in-browser)
+
 | Dimension | Status | Evidence |
 |---|---|---|
 | Golden path | pending | Each of O1-O6 renders WhyWeAsk between Hero and the options block; user reads heading + the supporting helper/subStem (where present) + the "Why we ask" callout before encountering the choice. |
 | Edge cases | pending | First load · already-answered round-trip preserves selection + WhyWeAsk render · narrow viewport stagger order; O2's multi-section layout + O3's two-question stack (relationship + privacy) need particular scrutiny for visual rhythm. |
-| `prefers-reduced-motion` | pending | WhyWeAsk uses each screen's existing `styles.entry` className → inherits `@media (prefers-reduced-motion: reduce)` block disabling stagger animation. |
+| `prefers-reduced-motion` | partially | Token-level inheritance verified (see pre-walk evidence above). Visual confirmation pending. |
 | Keyboard-only | pending | WhyWeAsk has no interactive elements; no new focusable nodes. Tab order on each screen unchanged. |
 | 375×667 mobile | pending | Verify WhyWeAsk fits within max-w-[480px] chassis on iPhone-SE viewport without horizontal overflow; longest copy body is O3's (~33 words). |
-| Screen reader | pending | WhyWeAsk wrapper is a plain `<div>` (no landmark) carrying two `<p>` paragraphs. Eyebrow reads "Why we ask"; body reads the per-screen explanation. Insertion point sits before the options fieldset so screen-reader users hear context before encountering choices. |
+| Screen reader | partially | Token-level contrast verified for eyebrow + body (see pre-walk evidence above). VoiceOver/NVDA reading-order verification pending. |
 | +1 visual diff | N/A | Per spec 72a §"Out of scope" — no visual-regression baseline tooling shipped. |
 
 ## Security checklist (prototype short-form per spec 72 §11)
