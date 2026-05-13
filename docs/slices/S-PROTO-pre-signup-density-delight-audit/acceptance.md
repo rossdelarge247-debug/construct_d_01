@@ -22,7 +22,7 @@ Per CLAUDE.md §"Canvas-as-source (prototype default)": canvas-as-source slices 
 
 **NOT covered:**
 - Gentle-interview tone — different lens, candidate for a separate audit slice
-- Adaptive output as branching-structure question — F-OUT-01 below catches the most visible symptom (O7 personalisation absent) but does not fully audit V1's Tier 1/2/3/4 framework; deeper adaptivity audit is a separate lens
+- Adaptive output as branching-structure question — F-OUT-01 surfaces a cross-spec design conflict (V1's Tier framework was deliberately dropped in spec 65 reconciliation; spec 67 §Gap 1 chose routing-not-grading post-signup; no upstream confidence-derivation source). Deeper adaptivity audit + the upstream spec amendment work remain separate lenses
 - Spec 65 literal coverage (each O-screen vs spec 65 literal copy + question pattern + data captured) — structural lens, candidate for separate audit
 - Per-screen module-CSS animation specifics beyond inter-screen + CTA — `.module.css` drift is its own audit; Batch F production-graduation backlog covers part of it
 - O7 mid-screen content rendering on preview — visual rendering checks require user walk (out of Claude-solo scope)
@@ -92,12 +92,12 @@ Per CLAUDE.md §"Canvas-as-source (prototype default)": canvas-as-source slices 
 - Spec 65 O7 (L138-148) describes the plan output as *"Contains: Situation summary (reflecting O1-O6) · The divorce journey (visual timeline) · What needs to happen · The conventional path · How Decouple helps · Personalised notes (based on their specific situation)"* — promises personalisation but does not specify the Tier framework.
 - Current O7.tsx (641 lines) renders 6 fixed sections. Only one element adapts to user input: `<DivorceJourney currentStageKey={answers.stage}/>` at O7.tsx:593 highlights the current divorce-journey stage from O1's `stage` answer.
 - Negative grep: `grep -niE "relationship_quality|safety_concerns|amicable|difficult|high_conflict|hiding|adaptive|tier" src/app/dev/proto/pre-signup-interview/screens/O7.tsx` returns only generic `JourneyStage`-type matches; no branching by relationship-quality, partner-awareness, priorities, or worries.
-- Effect: spec 65's "personalised notes" promise is structurally undelivered. V1's adaptive framework lost in reconciliation. Plan output feels static-prose-with-stage-highlight rather than tailored output.
+- Effect: V1's adaptive Tier 1-4 framework was deliberately dropped in reconciliation, not lost. Spec 65 §O7 (L138-148, verbatim) lists 7 plan-output elements with no Tier framework and no CONFIDENCE MAP; *"Personalised notes (based on their specific situation)"* (L146, verbatim) is the only adaptivity hook. Spec 67 §Gap 1 (L86, verbatim, RESOLVED) chose a routing-not-grading post-signup architecture: *"Moment 1 (immediate post-signup) acknowledges what we already know. Post-signup profiling skips what's answered and goes direct to follow-ups based on pre-signup state."* **Status: blocked pending spec amendment work** — a separate spec 65 amendment slice must decide whether pre-signup O7 needs an adaptive tier framework at all given the routing-not-grading post-signup architecture, and what confidence-derivation source the framework would draw on.
 
 **F-OUT-02 — Confidence indicators absent.**
 - V1 plan output (`docs/v1/v1-wireframes.md` L267-294) shows per-domain confidence indicators alongside each plan card (`CHILDREN — Confidence: ● Strong` · `HOUSING — Confidence: ◐ Mixed` · `FINANCES — Confidence: ○ Gaps`) and closes with a `CONFIDENCE MAP` summary card (Known: 4 · Estimated: 2 · Unsure: 2 · Unknown: 2 + visual progress bar).
 - Reconciled spec 65 O7 does not specify confidence-grading; impl matches.
-- Effect: V1's confidence-mapping visual language — which honestly communicates uncertainty per CLAUDE.md §"Product positioning" pillar 2 (*"Evidenced, not asserted"*) — is structurally absent from the pre-signup plan output. The "complete picture" claim relies on honestly graded confidence, not just narrative coverage.
+- Effect: V1's confidence-mapping visual language — which honestly communicates uncertainty per CLAUDE.md §"Product positioning" pillar 2 (*"Evidenced, not asserted"*) — is structurally absent from spec 65 §O7's plan-output description (L138-148, verbatim — no confidence-grading column). Spec 67 §Gap 1 (L86, verbatim, RESOLVED) chose a routing-not-grading post-signup architecture, so the per-domain confidence-derivation source that would feed any visual indicator is itself unresolved upstream. **Status: blocked pending spec amendment work** — sibling to F-OUT-01; the same spec 65 amendment slice would resolve (a) the Tier framework question + (b) the confidence-derivation source.
 
 **F-OUT-03 — Reassurance footer copy absent on O7.**
 - V1 plan output (`docs/v1/v1-wireframes.md` L298) closes with *"You've built a strong starting position."* just before the Continue CTA — affirms the user's effort at the end-of-journey moment.
@@ -109,7 +109,7 @@ Per CLAUDE.md §"Canvas-as-source (prototype default)": canvas-as-source slices 
 
 Implementation status by finding (live; updated as Phase 3 batches ship).
 
-| Finding | Shipped | Slice | Merge sha | PR |
+| Finding | Status | Slice | Merge sha | PR |
 |---|---|---|---|---|
 | F-DEN-01 | ✓ | S-PROTO-density-question-O1-O6 | `a07b376` | #174 |
 | F-DEN-02 | ✓ | S-PROTO-density-entry-O1 | `bccfd31` | #173 |
@@ -118,11 +118,11 @@ Implementation status by finding (live; updated as Phase 3 batches ship).
 | F-DEL-01 | ✓ | S-PROTO-delight-spec26-compliance | `05ba359` | #175 |
 | F-DEL-02 | ✓ | S-PROTO-delight-spec26-compliance | `05ba359` | #175 |
 | F-DEL-03 | ✓ | S-PROTO-delight-spec26-compliance | `05ba359` | #175 |
-| F-OUT-01 | open | — | — | — |
-| F-OUT-02 | open | — | — | — |
-| F-OUT-03 | open | — | — | — |
+| F-OUT-01 | blocked | — | — | — |
+| F-OUT-02 | blocked | — | — | — |
+| F-OUT-03 | ✓ | S-PROTO-output-reassurance-O7 | `c2e2633` | #178 |
 
-Phase 3 batch impl pending for F-OUT-01 + F-OUT-02 + F-OUT-03 (the O7 adaptivity + confidence + reassurance pass per `## Workflow` L118 batching).
+F-OUT-03 shipped as `S-PROTO-output-reassurance-O7` (the reassurance-copy pass; `c2e2633` / #178). F-OUT-01 + F-OUT-02 marked blocked pending spec 65 amendment — see §F-OUT-01 + §F-OUT-02 Effect paragraphs for the cross-spec design conflict against spec 65 §O7 (no Tier framework, no CONFIDENCE MAP) + spec 67 §Gap 1 (routing-not-grading post-signup architecture).
 
 ## Workflow
 
