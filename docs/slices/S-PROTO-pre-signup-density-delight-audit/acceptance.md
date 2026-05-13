@@ -105,6 +105,25 @@ Per CLAUDE.md §"Canvas-as-source (prototype default)": canvas-as-source slices 
 - Current O7 Footer (post-Batch-C-rebuild) shows Download-PDF + Email-link (secondary actions) + What's-next (primary); no reassurance text.
 - Effect: warm-hand-on-a-cold-day positioning loses its concrete expression at the journey-completion moment, sibling to F-DEN-04's gap at the entry moment.
 
+## Status
+
+Implementation status by finding (live; updated as Phase 3 batches ship).
+
+| Finding | Shipped | Slice | Merge sha | PR |
+|---|---|---|---|---|
+| F-DEN-01 | ✓ | S-PROTO-density-question-O1-O6 | `a07b376` | #174 |
+| F-DEN-02 | ✓ | S-PROTO-density-entry-O1 | `bccfd31` | #173 |
+| F-DEN-03 | ✓ | S-PROTO-density-entry-O1 | `bccfd31` | #173 |
+| F-DEN-04 | ✓ | S-PROTO-density-entry-O1 | `bccfd31` | #173 |
+| F-DEL-01 | ✓ | S-PROTO-delight-spec26-compliance | `05ba359` | #175 |
+| F-DEL-02 | ✓ | S-PROTO-delight-spec26-compliance | `05ba359` | #175 |
+| F-DEL-03 | ✓ | S-PROTO-delight-spec26-compliance | `05ba359` | #175 |
+| F-OUT-01 | open | — | — | — |
+| F-OUT-02 | open | — | — | — |
+| F-OUT-03 | open | — | — | — |
+
+Phase 3 batch impl pending for F-OUT-01 + F-OUT-02 + F-OUT-03 (the O7 adaptivity + confidence + reassurance pass per `## Workflow` L118 batching).
+
 ## Workflow
 
 **Phase 1 — this slice.** Claude-solo source-level audit. No implementation. Output: this `acceptance.md`.
