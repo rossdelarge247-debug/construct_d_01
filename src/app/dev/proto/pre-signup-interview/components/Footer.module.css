@@ -57,6 +57,7 @@
   justify-content: center;
   gap: 8px;
   cursor: pointer;
+  transition: transform 100ms ease;
 }
 
 .cta:disabled {
@@ -68,6 +69,10 @@
 .cta:focus-visible {
   outline: 2px solid var(--ds-color-ink, #1A1A1A);
   outline-offset: 2px;
+}
+
+.cta:active:not(:disabled) {
+  transform: scale(0.98);
 }
 
 .ctaEnabled {
@@ -89,5 +94,11 @@
 @media (prefers-reduced-motion: reduce) {
   .ctaEnabled {
     animation: none;
+  }
+  .cta {
+    transition: none;
+  }
+  .cta:active:not(:disabled) {
+    transform: none;
   }
 }

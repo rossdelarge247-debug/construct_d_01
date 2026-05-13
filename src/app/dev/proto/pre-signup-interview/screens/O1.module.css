@@ -33,7 +33,7 @@
 }
 
 .cta {
-  transition: background-color 240ms ease-out, color 240ms ease-out;
+  transition: background-color 150ms ease, color 240ms ease-out;
 }
 
 .ctaEnabled {
