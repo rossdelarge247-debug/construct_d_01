@@ -37,11 +37,27 @@
   outline-offset: 2px;
 }
 
+.transitionLayer {
+  opacity: 1;
+  transition: opacity 200ms ease-in;
+}
+
+.transitionLayer[data-phase="leaving"] {
+  opacity: 0;
+  transition: opacity 200ms ease-out;
+  pointer-events: none;
+}
+
 @media (prefers-reduced-motion: reduce) {
   .expressive, .canvasChrome, .o7Surface, .standalone,
   .expressive *, .canvasChrome *, .o7Surface *, .standalone *,
   .toggle {
     transition: none !important;
     animation-duration: 0.01ms !important;
+  }
+  .transitionLayer,
+  .transitionLayer[data-phase="leaving"] {
+    opacity: 1 !important;
+    pointer-events: auto !important;
   }
 }

@@ -15,7 +15,7 @@
 }
 
 .card {
-  transition: background-color 160ms ease, border-color 160ms ease, transform 160ms ease, box-shadow 200ms ease;
+  transition: background-color 150ms ease, border-color 160ms ease, transform 160ms ease, box-shadow 200ms ease;
 }
 
 .card:hover:not(.cardSelected) {
@@ -33,7 +33,7 @@
 }
 
 .pill {
-  transition: background-color 120ms ease, color 120ms ease, border-color 120ms ease;
+  transition: background-color 150ms ease, color 120ms ease, border-color 120ms ease;
 }
 
 .pill:has(input:not(:checked)):hover {
@@ -46,7 +46,7 @@
 }
 
 .cta {
-  transition: opacity 240ms ease-out, filter 240ms ease-out, background-color 240ms ease-out, color 240ms ease-out;
+  transition: opacity 240ms ease-out, filter 240ms ease-out, background-color 150ms ease, color 240ms ease-out;
 }
 
 .ctaEnabled {

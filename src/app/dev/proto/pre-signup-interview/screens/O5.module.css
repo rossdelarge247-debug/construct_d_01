@@ -18,7 +18,7 @@
 
 .card {
   transition:
-    background-color 120ms ease-out,
+    background-color 150ms ease,
     border-color 120ms ease-out;
 }
 
