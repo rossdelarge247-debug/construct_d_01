@@ -21,14 +21,21 @@ Closes density-audit findings F-DEN-02, F-DEN-03, F-DEN-04 from `docs/slices/S-P
 
 ## Preview-deploy verification (spec 72a 6+1)
 
+### Pre-walk evidence (resolved without browser)
+
+- **WCAG contrast on EntryScaffold timeIntro** (auto-review finding `accessibility-visual`, non-blocking): `--ds-color-text-sub` (#57534E) on `--ds-color-surface-page` (#F5F5F4) at 11.5px = **6.99:1**, passes WCAG AA 4.5:1 threshold for normal text. Measured via WCAG-formula computation against the token hex values in `src/app/globals.css`.
+- **`prefers-reduced-motion` fallback on O1** (auto-review finding `motion`, non-blocking): `src/app/dev/proto/pre-signup-interview/screens/O1.module.css` L49-57 contains `@media (prefers-reduced-motion: reduce) { .entry { animation: none !important; transition: none !important; } }`. EntryScaffold renders with `className={styles.entry}` and inherits the fallback. The reviewer flagged it because the `.module.css` was outside the PR's net-diff (the chassis was already on `origin/main`); the rule exists in tree.
+
+### 6+1 walk (in-browser)
+
 | Dimension | Status | Evidence |
 |---|---|---|
 | Golden path | pending | O1 entry renders with EntryScaffold above Hero; user can read framing, select a stage option, hit Continue, navigate to O2. |
 | Edge cases | pending | First load · already-selected-stage round-trip (back from O2 preserves selection + EntryScaffold) · narrow viewport `--stagger-index` animation order. |
-| `prefers-reduced-motion` | pending | EntryScaffold uses `O1.module.css .entry` className → existing `@media (prefers-reduced-motion: reduce)` block disables the entry animation. Inherits chassis fallback. |
+| `prefers-reduced-motion` | partially | Fallback rule verified in tree (see pre-walk evidence above). Visual confirmation pending. |
 | Keyboard-only | pending | EntryScaffold has no interactive elements; no new focusable nodes — Hero radio cards still receive focus first. |
 | 375×667 mobile | pending | Verify EntryScaffold + Hero + 3 RadioCards + Footer all visible within viewport at iPhone SE width with no horizontal overflow. |
-| Screen reader | pending | EntryScaffold is a plain `<div>` (no landmark) carrying `<p>` + `<ul>`/`<li>` + `<p>` semantics. Checkmark spans are `aria-hidden="true"` (decorative). VoiceOver / TalkBack should read: time intro → 3 list items → reassurance, before reaching the Hero heading. |
+| Screen reader | partially | Token-level contrast verified for timeIntro at 11.5px (see pre-walk evidence above). VoiceOver/NVDA reading-order verification (time intro → 3 list items → reassurance, before Hero heading) pending. |
 | +1 visual diff | N/A | Per spec 72a §"Out of scope" — no visual-regression baseline tooling shipped. |
 
 ## Security checklist (prototype short-form per spec 72 §11)
