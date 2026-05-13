@@ -123,7 +123,7 @@ export function O1() {
       <WhyWeAsk body={copy.whyWeAsk} className={styles.entry} />
       <fieldset
         aria-labelledby="o1-legend"
-        className="px-5 mt-5 space-y-2.5 flex-1"
+        className="px-5 space-y-2.5 flex-1"
         style={{ border: 'none' }}
       >
         <legend id="o1-legend" className="sr-only">

@@ -155,7 +155,7 @@ export function O5() {
         style={{
           border: 'none',
           margin: 0,
-          padding: '4px 20px 12px',
+          padding: '0 20px 12px',
           display: 'flex',
           flexDirection: 'column',
         }}

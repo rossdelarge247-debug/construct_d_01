@@ -225,7 +225,7 @@ export function O6() {
       <WhyWeAsk body={copy.whyWeAsk} className={styles.entry} />
       <div
         style={{
-          padding: '8px 16px 12px',
+          padding: '0 16px 12px',
           display: 'flex',
           flexDirection: 'column',
           gap: 12,

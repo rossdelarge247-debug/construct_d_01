@@ -145,7 +145,7 @@ export function O2() {
         className={styles.entry}
       />
       <WhyWeAsk body={copy.whyWeAsk} className={styles.entry} />
-      <div className="px-5 pt-2 pb-3 space-y-2.5 flex-1">
+      <div className="px-5 pb-3 space-y-2.5 flex-1">
         <div style={cardStyle}>
           <SubLabel>{copy.relationship.label}</SubLabel>
           <ChipRow<RelationshipStatus>
