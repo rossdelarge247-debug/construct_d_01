@@ -33,6 +33,16 @@ No Tier framework. No per-domain confidence column. No CONFIDENCE MAP card. *"Pe
 
 The post-signup architecture routes via state — `property_status = mortgage` → P1 asks who the mortgage is with; `has_children = true, count = N` → children section loops N times — and does not assign per-domain confidence scores. Spec 67 §Distribution map (L14-83, verbatim) places confidence-style consideration only at Moment 3 (section-by-section confirmation post-bank) via spec 34's transaction-matching tiers, which act on resolved transactions rather than pre-signup self-report.
 
+**What spec 74 sets as the value bar.** Spec 74 §"Free-plan framing" (L30-55, verbatim) sets the standalone-artefact bar the amendment must clear:
+
+> *"The pre-signup interview is a free, public, no-account-required experience. The plan it generates IS the product at this stage — not a marketing wrapper around an upsell."* (L32)
+>
+> *"A user who reads the plan and chooses the conventional path has been genuinely served."* (L42)
+>
+> *"The plan succeeds when a user who chooses NOT to continue still feels they got something genuinely useful for free."* (L55)
+
+Spec 74 also explicitly REJECTS conversion-mechanic framings (L47-53 anti-patterns: *"Don't go it alone — Decouple makes this easy"* / urgency / scarcity / social-proof — all banned). The amendment cannot argue structural depth is for conversion; the argument must be value-delivery to a user who may never sign up. This bar is load-bearing for AC-2's resolution: current spec 65 §O7's 7 generic elements + single *"Personalised notes (based on their specific situation)"* (L146) adaptivity hook may not clear the L55 *"genuinely useful for free"* threshold.
+
 **The current state.** O7.tsx (641 lines) renders 6 fixed sections with one adaptive element: `<DivorceJourney currentStageKey={answers.stage}/>` at O7.tsx:593 highlights the current divorce-journey stage from O1's `stage` answer. Negative grep on O7.tsx for `relationship_quality|safety_concerns|amicable|difficult|high_conflict|hiding|adaptive|tier` returns only generic `JourneyStage` matches — no branching by relationship-quality, partner-awareness, priorities, or worries. The audit slice §F-OUT-01 + §F-OUT-02 §Effect paragraphs (session-97-amended) capture this state and explicitly mark both findings as **blocked pending spec amendment**.
 
 **Three design questions block resolution.** Each requires user-led design conversation; this slice frames them as ACs and ships resolution one at a time across sessions.
@@ -63,9 +73,10 @@ The §Context section above (this file) embeds verbatim quotes from:
 
 1. Spec 65 §O7 L138-148 — the 7-element list lacking Tier framework + confidence column.
 2. Spec 67 §Gap 1 L84-86 — the RESOLVED routing-not-grading commitment.
-3. V1 wireframes L40-56 + L267-294 — the deliberately-dropped plan-output Tier framework + per-domain confidence indicators.
+3. V1 wireframes L40-56 + L267-294 — the plan-output Tier framework + per-domain confidence indicators dropped in spec 65 reconciliation (architectural-fit reasons evident in V1's `chapters_completed × confidence_distribution` input requirements which pre-signup does not collect; no recorded decision-log entry — the "deliberate" framing is inferred from spec architecture, not from explicit deliberation).
 4. O7.tsx structural state — fixed 6 sections + single adaptive element (`DivorceJourney currentStageKey={answers.stage}` at O7.tsx:593) + negative-grep on adaptivity vocab.
 5. Distinction from spec 34 §Tier 1-3 transaction-matching (L188-250) — unrelated post-bank machinery, explicitly not the F-OUT subject.
+6. Spec 74 §"Free-plan framing" L30-55 — the standalone-artefact value bar the amendment must clear; explicitly rejects conversion-mechanic framings at L47-53.
 
 **Evidence:** §Context paragraphs above; each quote cites file:line.
 
@@ -73,21 +84,34 @@ The §Context section above (this file) embeds verbatim quotes from:
 
 Three resolution branches enumerated:
 
-- **(a) No.** *"Personalised notes (based on their specific situation)"* (spec 65 §O7 L146, verbatim) is the adaptivity floor; any further per-domain grading conflicts with spec 67 §Gap 1's routing-not-grading post-signup commitment when O7 sits structurally just *before* the architecture spec 67 governs. Amendment: clarifying paragraph appended to spec 65 §O7 explaining the deliberate omission + linking to spec 67 §Gap 1 for the routing-not-grading downstream. F-OUT-01/02 close as out-of-scope-by-design; audit slice §Status rows flip from `blocked` to `closed-by-design` with link to amended spec 65 §O7.
-- **(b) Yes — full Tier framework.** Adopt V1's Tier 1-4 plan-output framework (with or without V1's exact thresholds), augmented with per-domain confidence indicators + CONFIDENCE MAP summary card. Amendment: spec 65 §O7 gains new sub-section *"Adaptive output shape"* describing Tier framework + confidence-derivation source (per AC-3 resolution). F-OUT-01/02 unblock; new impl slice `S-PROTO-O7-adaptive-output` ships impl per AC-as-canvas-quote discipline.
-- **(c) Partial.** Categorical adaptivity hooks (e.g., a relationship-quality switch that swaps one O7 paragraph; a partner-awareness switch that adds/removes one section; safety-concerns flag that softens framing) without numeric tiers or per-domain confidence grading. Amendment: spec 65 §O7 gains 2-3 specific adaptivity hooks named explicitly. F-OUT-01 unblocks at "partial fulfilment"; F-OUT-02 remains closed-by-design (no confidence-grading visual language).
+- **(a) No.** *"Personalised notes (based on their specific situation)"* (spec 65 §O7 L146, verbatim) is the adaptivity floor; any further per-domain grading conflicts with spec 67 §Gap 1's routing-not-grading post-signup commitment when O7 sits structurally just *before* the architecture spec 67 governs. Amendment: clarifying paragraph appended to spec 65 §O7 explaining the deliberate omission + linking to spec 67 §Gap 1 for the routing-not-grading downstream. F-OUT-01/02 close as out-of-scope-by-design; audit slice §Status rows flip from `blocked` to `closed-by-design` with link to amended spec 65 §O7. **Likely fails spec 74 L55 standalone-artefact bar — 7 generic elements + single *"Personalised notes"* hook may not clear *"genuinely useful for free"* threshold.**
+- **(b) Yes — full Tier framework.** Adopt V1's Tier 1-4 plan-output framework (with or without V1's exact thresholds), augmented with per-domain confidence indicators + CONFIDENCE MAP summary card. Amendment: spec 65 §O7 gains new sub-section *"Adaptive output shape"* describing Tier framework + confidence-derivation source. F-OUT-01/02 unblock; new impl slice ships per AC-as-canvas-quote discipline. **Architecturally wrong: V1's Tier 1-4 mechanism requires `chapters_completed × confidence_distribution` inputs (V1 wireframes L40-56) — financial-domain depth that pre-signup, by design, does not collect (spec 65a L57 verbatim: *"defers depth to AFTER bank connection ... Spec 65 keeps only what's needed pre-bank"*). The mechanism's data shape does not exist pre-bank.**
+- **(c) Pre-signup-specific adaptivity dimension.** Introduce adaptivity grounded in inputs that exist pre-signup (12 O1-O6 typed answers + derived signals: stage, complexity, safety, partner-awareness, vocab calibration, example anchoring, lead-ordering) rather than V1's `chapters_completed × confidence_distribution` mechanism. Amendment: spec 65 §O7 gains new sub-section *"Adaptive plan shape"* naming 2-4 adaptivity dimensions (specifics resolved in AC-3) + per-dimension mapping from pre-signup state to plan-output variation. F-OUT-01 closes via the new sub-section; F-OUT-02 closes-by-design (per-domain confidence grading is the wrong mechanism for pre-signup state shape — V1's CONFIDENCE MAP needed bank data the pre-signup surface does not have). **Aligns with spec 74 L55 standalone-artefact bar; respects spec 67 §Gap 1 post-signup scope; sits alongside V1.5 progressive-disclosure pattern per spec 67 L788.**
 
-**Resolution:** OPEN. Awaits user choice from (a) / (b) / (c). Reasoning must cite spec 65 §O7 and spec 67 §Gap 1 verbatim.
+**Resolution:** RESOLVED → (c). Reasoning: V1's Tier 1-4 framework requires `chapters_completed × confidence_distribution` inputs (V1 wireframes L40-56) — financial-domain depth pre-signup does not collect (spec 65a L57, verbatim: *"defers depth to AFTER bank connection (Moment 3 per-section confirmation, where bank signals do most of the work — 'show, don't ask' per CLAUDE.md §'Product rules'). Spec 65 keeps only what's needed pre-bank to drive the AI plan + tone gating + safety branching."*). Spec 74 §"Free-plan framing" (L30-55, verbatim) sets a standalone-artefact value bar current spec 65 §O7's *"Personalised notes (based on their specific situation)"* (L146) alone may not clear: spec 74 L55 — *"The plan succeeds when a user who chooses NOT to continue still feels they got something genuinely useful for free."* (a) likely fails L55 bar; (b) mechanically wrong for pre-signup data shape; (c) introduces a different adaptivity dimension grounded in pre-signup-available signal. AC-3 names which dimensions specifically.
 
-### AC-3: Design question 2 framed — if (b) or (c) above, what confidence-derivation source feeds the framework?
+### AC-3: Design question 2 framed — what adaptivity dimensions does the new O7 actually need?
 
-Three resolution branches enumerated, conditional on AC-2 resolving to (b) or (c):
+Per AC-2 → (c) RESOLVED, the next active question is which dimensions of pre-signup-available state (12 O1-O6 typed answers + derived signals) drive plan-output adaptivity, and how each dimension maps to plan-output variation.
 
-- **(α) Pre-signup O1-O6 categorical answers.** Derive per-domain confidence from O1-O6 answer combinations via heuristic mapping (e.g., `partner_awareness = "hiding"` → finances confidence = "Gaps"; `has_children = true + relationship_quality = "amicable"` → children confidence = "Strong"). Requires explicit mapping table in spec 65 amendment. Pro: works pre-signup with data already captured. Con: introduces a per-domain coverage-score derivation language pre-signup that spec 67 §Gap 1 explicitly chose not to use post-signup.
-- **(β) Pre-bank profiling P1-P6 (spec 67 Moment 2) backfeed.** Confidence derives post-bank profiling; O7 confidence indicators populate only after pre-bank profiling completes. Pro: aligns with spec 67's architecture. Con: O7 is pre-signup; post-signup data isn't available when O7 renders. Resolution path: defer O7 confidence rendering to post-signup re-display; OR drop confidence indicators from pre-signup O7 entirely and place them only on a post-signup re-display (collapsing back toward AC-2 → (a) or (c)).
-- **(γ) Hybrid — pre-signup heuristic at O7, refined post-bank.** Pre-signup O7 shows initial heuristic-derived confidence per (α); post-bank re-display refines per actual disclosure coverage. Requires both: spec 65 amendment (initial state) + spec 67 amendment-NOT-ALLOWED-PER-AC-4 (refined state). Resolution path: only viable if AC-4 carve-out permits a sibling-note in spec 67 §Gap 1 acknowledging the refined-state hand-off without re-opening §Gap 1's RESOLVED commitment.
+**Candidate dimensions** (not mutually exclusive — final mix is the design output of this AC):
 
-**Resolution:** OPEN. Awaits user choice from (α) / (β) / (γ), conditional on AC-2 resolving to (b) or (c). If AC-2 → (a), this AC closes as N/A.
+- **Stage** (O1 `stage` enum: thinking / decided / starting / in-progress / late) — already wired (`<DivorceJourney currentStageKey={answers.stage}/>` at O7.tsx:593). Sets pacing + tense of plan ("If you're still thinking about whether to separate, here's what to consider..." vs "If you've started the process, here's where you are..."). **Low effort — extension of existing wire.**
+- **Complexity** (derived from O2 finances + O3 housing + O5 priorities count) — drives plan depth + section count. Heuristic mapping required (e.g., `housing == "joint-mortgage" && children > 0 && self_employment == true` → high-complexity render with all 7 sections; `housing == "renting-jointly" && children == 0` → compact render with 4-5 sections).
+- **Safety / conflict signals** (O4 `safety_concerns` + O5 `priorities` + O6 `partner_awareness`) — gates safety-conscious framing (e.g., mediator-routing soft mention; "talking to your partner" sections suppressed if `partner_awareness = "hiding"`; decoy-mode language hooks per spec 67 L788 V1.5 reservation). Per CLAUDE.md §Product positioning pillar 2 *"Evidenced, not asserted"* — surface what we know to surface, suppress what would harm.
+- **Partner awareness** (O6 `partner_awareness` enum: aware-collaborating / aware-uncooperative / unaware / hiding) — gates references to joint actions, shared accounts, partner-side framing. If `aware-collaborating`, plan includes joint-steps; if `hiding`, plan emphasises solo prep + privacy.
+- **Vocab calibration** (derived from O1-O6 overall tone signals) — formal vs casual; legal-terminology-friendly vs plain-English-only; high-net-worth idioms vs benefit-eligible idioms. **High effort — may be V1.5 reservation.**
+- **Example anchoring** — plan body uses actual O1-O6 answers as anchors: children's names + ages (from O3); partner name (from O4); stated top concern (from O5.priorities[0]). Per CLAUDE.md §"North star": *"Your salary is £3,218/month from ACME Ltd. ... Amelia and Jack are with you during the week. Here's the picture taking shape."* **Highest user-perceived value per archive sweep.**
+- **Lead-ordering** — first section of the plan leads with the user's top stated concern from O5, not a generic situation summary. Adapts which of the 7 spec 65 §O7 elements appears first (e.g., for `priorities[0] = "kids"`, "Children's living arrangements" leads; for `priorities[0] = "house"`, "Housing decisions" leads).
+
+**Open questions to resolve in design conversation:**
+
+1. **Which 2-4 of the above dimensions ship in v1 of the amendment?** Shipping all 7 risks bloat + over-engineering; shipping 1 risks under-delivery against spec 74 L55 standalone-artefact bar. Suggested floor for value-delivery: stage + example anchoring + lead-ordering (the 3 lowest-effort highest-perceived-value dimensions).
+2. **For each shipped dimension: what's the specific mapping from O1-O6 state to plan-output variation?** Concrete enum-to-render table per dimension. Required for AC-as-canvas-quote discipline at impl stage.
+3. **Are any dimensions deferred to V1.5 per spec 67 L788 progressive-disclosure pattern?** Candidates: vocab calibration (high effort); safety/conflict adaptive framing (overlaps with spec 67 L788's "Full adaptive safeguarding architecture ... deferred to V1.5 backlog" reservation).
+4. **Does any dimension require new pre-signup data collection in O1-O6?** Strong default = NO (would re-open spec 65a L61-67 absorbed-with-simplification decisions). If YES for a dimension, escalate as a separate amendment slice scope (not within this slice).
+
+**Resolution:** OPEN. Awaits user dimension-shortlist + per-dimension mapping table. Reasoning must cite spec 65 §O7 + spec 74 L55 standalone-artefact bar + CLAUDE.md §"North star" quality bar.
 
 ### AC-4: Design question 3 framed — pre/post-signup vocab autonomy boundary
 
@@ -164,8 +188,9 @@ Multi-stage sequence:
 - `docs/workspace-spec/65-pre-signup-interview-reconciled.md` — pre-signup interview spec, locked. §O7 at L138-148 is the primary amendment target.
 - `docs/workspace-spec/67-post-signup-profiling-progress.md` — post-signup profiling progress, with §Gap 1 (L84-122) RESOLVED. Boundary policed by AC-4.
 - `docs/workspace-spec/34-upfront-profiling-design.md` — upfront profiling spec, with §Tier 1-3 (L188-250) describing transaction-matching framework unrelated to F-OUT subject.
-- `docs/v1/v1-wireframes.md` L40-56 — V1's plan-output Tier 1-4 framework (deliberately dropped in reconciliation).
-- `docs/v1/v1-wireframes.md` L267-294 — V1's per-domain confidence indicators + CONFIDENCE MAP card (deliberately dropped in reconciliation).
+- `docs/workspace-spec/74-ai-plan-generation.md` — AI plan generation spec, with §"Free-plan framing" (L30-55) setting the standalone-artefact value bar the amendment must clear; anti-patterns at L47-53 ban conversion-mechanic framings.
+- `docs/v1/v1-wireframes.md` L40-56 — V1's plan-output Tier 1-4 framework (dropped in spec 65 reconciliation).
+- `docs/v1/v1-wireframes.md` L267-294 — V1's per-domain confidence indicators + CONFIDENCE MAP card (dropped in spec 65 reconciliation).
 - `docs/slices/S-PROTO-pre-signup-density-delight-audit/acceptance.md` — audit slice with §F-OUT-01 + §F-OUT-02 marking the conflict as blocked pending this amendment.
 - `src/app/dev/proto/pre-signup-interview/screens/O7.tsx` — current impl (641 lines, 6 fixed sections, 1 adaptive element at L593).
 - CLAUDE.md §"Quote, don't paraphrase, when invoking a spec" — verbatim discipline for amendment text.
@@ -173,13 +198,13 @@ Multi-stage sequence:
 
 ## Status
 
-- AC-1: drafted (§Context section above). Awaits AC-8 verifiability pass.
-- AC-2: OPEN — awaits user resolution from (a) / (b) / (c).
-- AC-3: OPEN — conditional on AC-2 → (b) or (c).
+- AC-1: drafted (§Context section above; 6 quoted sources including spec 74 §"Free-plan framing"). Awaits AC-8 verifiability pass.
+- AC-2: RESOLVED → (c) — pre-signup-specific adaptivity dimension grounded in O1-O6 + derived signals. Reasoning: V1 Tier 1-4 mechanism requires inputs pre-signup does not collect (spec 65a L57); spec 74 L55 standalone-artefact value bar may not be met by current spec 65 §O7's single *"Personalised notes"* hook.
+- AC-3: OPEN — reframed per AC-2 → (c) from confidence-derivation question to adaptivity-dimensions catalogue. 7 candidate dimensions named (stage / complexity / safety / partner-awareness / vocab / example-anchoring / lead-ordering); awaits user dimension-shortlist + per-dimension mapping.
 - AC-4: OPEN — boundary statement drafted at amendment-text stage.
-- AC-5: OPEN — specific edits drafted once AC-2/3/4 resolve.
-- AC-6: OPEN — downstream slice plan drafted once AC-2 resolves.
+- AC-5: OPEN — (c) branch active per AC-2; specific edits drafted once AC-3 resolves.
+- AC-6: OPEN — (c) branch active per AC-2 (provisional slice `S-PROTO-O7-adaptive-hooks`); scope sharpened once AC-3 resolves.
 - AC-7: OPEN — audit slice §Status update plan drafted once AC-5 amendment text lands.
-- AC-8: pending — first verifiability pass runs at scaffold-ship time.
+- AC-8: pending — first verifiability pass runs at scaffold-tighten ship.
 
 Slice is **multi-stage**. Scaffold-ship state delivers acceptance.md only (cross-spec conflict statement + 8-AC frame). Resolution iterates across subsequent design conversations + amendment-text drafting + impl.
