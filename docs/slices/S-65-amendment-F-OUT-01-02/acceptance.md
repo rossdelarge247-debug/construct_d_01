@@ -222,7 +222,7 @@ Secondary landing (conditional on AC-2 → (b)/(c) + AC-3 → (γ)): `docs/works
 
 Audit slice update target: `docs/slices/S-PROTO-pre-signup-density-delight-audit/acceptance.md` §F-OUT-01 + §F-OUT-02 §Effect paragraphs + §Status table rows L121-122. Edit type per AC-2 resolution (flips `blocked` to `✓` with new slice ref, or `closed-by-design` with amendment link).
 
-**Resolution:** OPEN. Specific edits drafted once AC-2/3/4 resolve.
+**Resolution:** RESOLVED. Per AC-2 → (c) RESOLVED, the (c) edit type was implemented: new sub-sections *"Adaptive plan shape"* + *"Boundary"* + *"Out of scope (V1.5 reservations)"* inserted at `docs/workspace-spec/65-pre-signup-interview-reconciled.md` between L148 (end of existing 7-element list) and L149 (`---` separator). Secondary spec 67 sibling-note NOT required (AC-3 → (c) does not introduce post-bank refined-state per AC-3 Q3 V1.5 deferrals; AC-4 boundary statement landed inside the same insert). Audit slice update target unchanged — flip happens inline with downstream impl slice PR per AC-7.
 
 ### AC-6: Downstream slice plan defined
 
@@ -230,9 +230,9 @@ Conditional on AC-2 resolution:
 
 - AC-2 → (a): No new impl slice required. Audit slice §Status update lands inline with the amendment PR (per session 97 recurrence-watch on post-batch §Status sweep). Single PR closes the loop.
 - AC-2 → (b): New impl slice `S-PROTO-O7-adaptive-output-tier-framework` ships impl per AC-as-canvas-quote discipline if a linked canvas exists for the Tier framework; if no canvas, ACs cite spec 65 amended §O7 verbatim.
-- AC-2 → (c): New impl slice `S-PROTO-O7-adaptive-hooks` ships impl per the 2-3 named hooks; smaller scope than (b) — likely 1 session shipping ~50-100 lines diff to O7.tsx.
+- AC-2 → (c): New impl slice `S-PROTO-O7-adaptive-hooks` ships impl per the 4 dimension mappings locked in AC-3. Scope: ~75-120 LoC across `src/app/dev/proto/pre-signup-interview/lib/build-plan.ts` (extensions of existing `composeXXX` functions; no new infrastructure; no `PlanContent` shape change). Trigger copy strings for new `personalisedNotes` triggers (`partner-finance-full` / `partner-finance-some` / `priority-{value}` / `worry-{value}`) drafted at impl time. Stage 4 of this slice's downstream landing plan.
 
-**Resolution:** OPEN. Provisional slice name + scope drafted once AC-2 resolves.
+**Resolution:** PROVISIONAL. Slice name + scope locked. Awaits creation of `S-PROTO-O7-adaptive-hooks` impl slice + impl shipping. Slice's full ship-state requires AC-6 impl ship + AC-7 audit-flip landed; until then, the amendment is on `main` but the F-OUT-01/02 audit findings remain in `blocked` status per audit slice §F-OUT-01/02.
 
 ### AC-7: Audit slice §F-OUT-01 + §F-OUT-02 §Status update plan
 
@@ -284,9 +284,9 @@ Multi-stage sequence:
 - AC-2: RESOLVED → (c) — pre-signup-specific adaptivity dimension grounded in O1-O6 + derived signals. Reasoning: V1 Tier 1-4 mechanism requires inputs pre-signup does not collect (spec 65a L57); spec 74 L55 standalone-artefact value bar may not be met by current spec 65 §O7's single *"Personalised notes"* hook.
 - AC-3: All sub-questions RESOLVED. Q1 (4-dim shortlist) + Q2 (per-dimension mappings for all 4) + Q3 (3-dim V1.5 deferrals) + Q4 (no new pre-signup data collection). Combined v1 impl scope: ~75-120 LoC across build-plan.ts. No new infrastructure; no PlanContent shape changes.
 - AC-4: RESOLVED. All 4 boundary conditions verified ✓ against locked AC-3 mappings (no §Gap 1 re-open; no confidence-grading vocabulary; no Moment 3 conflict; no spec 34 Tier vocabulary bleed). Boundary statement drafted; final form lands in spec 65 amendment text at AC-5.
-- AC-5: OPEN — (c) branch active per AC-2; specific edits drafted once AC-3 resolves.
-- AC-6: OPEN — (c) branch active per AC-2 (provisional slice `S-PROTO-O7-adaptive-hooks`); scope sharpened once AC-3 resolves.
-- AC-7: OPEN — audit slice §Status update plan drafted once AC-5 amendment text lands.
-- AC-8: pending — first verifiability pass runs at scaffold-tighten ship.
+- AC-5: ✓ RESOLVED — amendment landed at `docs/workspace-spec/65-pre-signup-interview-reconciled.md` §O7. Three new sub-sections inserted between L148 and L149: *"Adaptive plan shape"* (4 dimensions) + *"Boundary"* + *"Out of scope (V1.5 reservations)"*. Net +54 lines into spec 65.
+- AC-6: PROVISIONAL — provisional slice `S-PROTO-O7-adaptive-hooks` named; scope locked at ~75-120 LoC across `build-plan.ts` (no infrastructure changes). Awaits creation of impl slice + impl ship.
+- AC-7: OPEN — audit slice §Status update happens inline with downstream impl slice PR; `S-PROTO-pre-signup-density-delight-audit/acceptance.md` §F-OUT-01/02 rows remain in `blocked` status until impl ships.
+- AC-8: ✓ AC-5 verifiability pass completed — amendment placement verified (L149/L187/L191 in spec 65); new citations resolve verbatim: spec 65a §"Spec 58 — Profiling (Pre-Bank-Connection)" L61-67 ABSORBED-with-simplification table; spec 67 §"Gap 11: Safeguarding carry-through" L788 *"Full adaptive safeguarding architecture..."* quote; spec 34 §"Tier 1-3" L188+ framework. Final passes re-run at AC-6 impl ship + audit slice flip.
 
 Slice is **multi-stage**. Scaffold-ship state delivers acceptance.md only (cross-spec conflict statement + 8-AC frame). Resolution iterates across subsequent design conversations + amendment-text drafting + impl.
