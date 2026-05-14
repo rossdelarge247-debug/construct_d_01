@@ -131,7 +131,7 @@ Per AC-2 → (c) RESOLVED, the next active question is which dimensions of pre-s
 
 **Q4 (new pre-signup data collection) RESOLVED — NO new collection.** Every shortlisted dimension uses signal already in O1-O6 per types.ts. Reversing spec 65a L61-67 absorbed-with-simplification decisions is OUT-OF-SCOPE for this slice (would re-open the post-pivot collapse from V1's 28 screens → spec 65's 8 screens).
 
-**Q2 (per-dimension mapping) PARTIALLY RESOLVED — Stage + Partner-finances locked; Example anchoring + Lead-ordering OPEN.**
+**Q2 (per-dimension mapping) RESOLVED — all 4 dimension mappings locked.**
 
 **Stage mapping (locked):**
 - `PlanContent.situationSummary` opening — EXISTS at build-plan.ts L29-31 (3-branch composition matching shortlisted `Stage` enum); retain verbatim.
@@ -150,11 +150,41 @@ Per AC-2 → (c) RESOLVED, the next active question is which dimensions of pre-s
 - Surfaces NOT adapted: `situationSummary` (surfacing awareness in summary risks feeling judgmental; note framing carries it more sensitively).
 - Impl scope: ~10-15 LoC extension to `composePersonalisedNotes` in build-plan.ts (two new branches matching existing pattern).
 
-**Combined Stage + Partner-finances impl scope: ~15-25 LoC across build-plan.ts; no new infrastructure (extensions of existing `composeXXX` functions).**
+**Example anchoring mapping (locked):**
 
-**Example anchoring + Lead-ordering mappings: OPEN — next active conversation.**
+Anchor shortlist (4 of 6 missing in current build-plan.ts):
+- `situation.childrenCount` (1-4) → `situationSummary` extension; replace existing *"You have children together."* (L37) with *"You have <N> children together."* where N = childrenCount.
+- `situation.home` (mortgage | own-outright | rent | other) → `situationSummary` new sentence, e.g., *"Your home is mortgaged."* / *"You own your home outright."* / *"You rent your home."* (skip if `other`).
+- `whatMatters.priorities` → `personalisedNotes` NEW trigger pattern `priority-{value}` (e.g., `priority-keep-home`). Cap: max 1 (first selected proxy: `priorities[0]`).
+- `whatMatters.worries` → `personalisedNotes` NEW trigger pattern `worry-{value}` (e.g., `worry-hidden-assets`). Cap: max 1 (first selected proxy: `worries[0]`).
 
-**Resolution:** Q1 + Q3 + Q4 RESOLVED. Q2 PARTIALLY RESOLVED (Stage + Partner-finances locked; Example anchoring + Lead-ordering OPEN).
+Note-overload cap (locked): max 1 priority-driven + 1 worry-driven note (combined max 2 new notes per render). Existing 4 trigger notes unaffected.
+
+Deferrals to V1.5: `situation.relationship` (low practical-impact); `exAndSafety.relationshipQuality` beyond `safety-concern` (sensitive; needs careful tone work); `employment.selfEmployment` as situationSummary anchor (duplicative — already triggers note at L67-72).
+
+Impl scope: ~30-50 LoC across build-plan.ts. Per-priority + per-worry copy strings draft in AC-5.
+
+**Lead-ordering mapping (locked):**
+
+Approach B (locked): bake the lead into `situationSummary` first sentence + reorder `whatNeedsToHappen` items so lead-relevant step appears at position 0. NO PlanContent shape change.
+
+4 lead categories:
+- `children` if `situation.hasChildren=yes` OR `whatMatters.priorities` includes `children-stability`
+- `housing` if `situation.home != rent` OR `whatMatters.priorities` includes `keep-home`
+- `pensions` if `whatMatters.priorities` includes `protect-pension` OR `whatMatters.worries` includes `losing-pension`
+- `general` (default fallback)
+
+Tie-handling (locked): coverage-weighted (count evidence per category from priorities + worries + situational signals); tied → hardcoded fallback order: children > housing > pensions > general.
+
+Surfaces affected: `situationSummary` first sentence (new lead phrase prepended BEFORE stage-conditional opening at build-plan.ts L29-32); `whatNeedsToHappen` items (reorder so lead-relevant item at position 0; existing items at L48-53 already include children-arrangements + housing decisions).
+
+Categories deferred to V1.5: `clean-break`, `ongoing-support`, `low-cost`, `speed`, `fair-split` — no obvious leading section in spec 65 §O7's 7 elements.
+
+Impl scope: ~30-45 LoC across build-plan.ts. Lead-phrase copy strings draft in AC-5.
+
+**Combined v1 impl scope across all 4 dimensions: ~75-120 LoC in build-plan.ts. No new infrastructure (extensions of existing `composeXXX` functions); no PlanContent shape changes.**
+
+**Resolution:** Q1 + Q2 + Q3 + Q4 RESOLVED. AC-3 fully closed. AC-4 (boundary statement) + AC-5 (amendment-text drafting) are next active.
 
 ### AC-4: Design question 3 framed — pre/post-signup vocab autonomy boundary
 
@@ -243,7 +273,7 @@ Multi-stage sequence:
 
 - AC-1: drafted (§Context section above; 6 quoted sources including spec 74 §"Free-plan framing"). Awaits AC-8 verifiability pass.
 - AC-2: RESOLVED → (c) — pre-signup-specific adaptivity dimension grounded in O1-O6 + derived signals. Reasoning: V1 Tier 1-4 mechanism requires inputs pre-signup does not collect (spec 65a L57); spec 74 L55 standalone-artefact value bar may not be met by current spec 65 §O7's single *"Personalised notes"* hook.
-- AC-3: Q1 + Q3 + Q4 RESOLVED. Q2 PARTIALLY RESOLVED — Stage + Partner-finances mappings locked (extensions of existing build-plan.ts `composeXXX` wires; ~15-25 LoC combined impl scope). Example anchoring + Lead-ordering mappings OPEN (next active conversation). v1 shortlist + V1.5 deferrals + no-new-data-collection unchanged.
+- AC-3: All sub-questions RESOLVED. Q1 (4-dim shortlist) + Q2 (per-dimension mappings for all 4) + Q3 (3-dim V1.5 deferrals) + Q4 (no new pre-signup data collection). Combined v1 impl scope: ~75-120 LoC across build-plan.ts. No new infrastructure; no PlanContent shape changes.
 - AC-4: OPEN — boundary statement drafted at amendment-text stage.
 - AC-5: OPEN — (c) branch active per AC-2; specific edits drafted once AC-3 resolves.
 - AC-6: OPEN — (c) branch active per AC-2 (provisional slice `S-PROTO-O7-adaptive-hooks`); scope sharpened once AC-3 resolves.
