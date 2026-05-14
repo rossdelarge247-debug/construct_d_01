@@ -195,11 +195,20 @@ Amendment text MUST NOT:
 3. Conflict with spec 67 §Distribution map's Moment 3 "section-by-section confirmation" (L41) by introducing pre-signup confidence-grading that would mechanically conflict with post-signup section-by-section flow.
 4. Introduce vocabulary that bleeds into spec 34 §Tier 1-3's transaction-matching language (L188-250) — keep "Tier" reserved for spec 34's post-bank transaction machinery; use a distinct word for pre-signup adaptive plan output (e.g., "Plan shape", "Plan depth", or no Tier-class term at all).
 
-**Boundary statement to land in amendment:**
+**Verification of locked AC-3 mappings against the 4 conditions:**
 
-> *(Stub — drafted at amendment-text stage per AC-5.)* "This amendment governs pre-signup O7 only. Spec 67 §Gap 1's routing-not-grading post-signup architecture (L84-86) is unchanged. Spec 34 §Tier 1-3's transaction-matching framework (L188-250) is unchanged and uses 'Tier' in a different sense from any vocabulary this amendment introduces."
+| # | Condition | Verdict | Evidence |
+|---|---|---|---|
+| 1 | NOT re-open §Gap 1 RESOLVED | ✓ | All 4 dimension mappings (Stage / Partner-finances / Example anchoring / Lead-ordering) are categorical adaptivity hooks producing pre-signup-only `PlanContent` variation; no per-domain scoring; no grading vocabulary introduced |
+| 2 | NOT imply confidence-grading | ✓ | Zero "confidence" / "score" / "grade" language anywhere in locked mappings |
+| 3 | NOT conflict with Moment 3 section-by-section | ✓ | All 4 mappings extend pre-signup `composeXXX` functions; no post-signup section-grading machinery introduced; pre-signup composition is independent of post-signup confirmation flow |
+| 4 | NOT bleed into spec 34 Tier 1-3 vocabulary | ✓ | Zero "Tier" vocabulary in locked mappings. Named instead: "adaptivity dimensions" (the 4 mapping categories), "lead categories" (children/housing/pensions/general), "trigger pattern" (`priority-{value}` / `worry-{value}` for personalisedNotes) |
 
-**Resolution:** OPEN. Boundary statement drafted once AC-2 + AC-3 resolve; this AC verifies the drafted statement satisfies all four conditions above.
+**Boundary statement to land in spec 65 amendment text** (final form drafted at AC-5):
+
+> *"This amendment governs pre-signup O7 only. Spec 67 §Gap 1's routing-not-grading post-signup architecture (L84-86) is unchanged — pre-signup `PlanContent` adaptivity is composed from pre-signup state only and does not introduce confidence-scoring vocabulary that would conflict with post-signup section-by-section confirmation at Moment 3. Spec 34 §Tier 1-3's transaction-matching framework (L188-250) is unchanged and uses 'Tier' in a different sense from any vocabulary introduced here — the 4 adaptivity dimensions (stage, partner-finances-awareness, example anchoring, lead-ordering) and 4 lead categories (children, housing, pensions, general) are categorical hooks, not Tier-class quantitative grading."*
+
+**Resolution:** RESOLVED. All 4 boundary conditions verified ✓ against locked AC-3 mappings. Boundary statement drafted; final form lands in spec 65 amendment text at AC-5.
 
 ### AC-5: Amendment landing target identified
 
@@ -274,7 +283,7 @@ Multi-stage sequence:
 - AC-1: drafted (§Context section above; 6 quoted sources including spec 74 §"Free-plan framing"). Awaits AC-8 verifiability pass.
 - AC-2: RESOLVED → (c) — pre-signup-specific adaptivity dimension grounded in O1-O6 + derived signals. Reasoning: V1 Tier 1-4 mechanism requires inputs pre-signup does not collect (spec 65a L57); spec 74 L55 standalone-artefact value bar may not be met by current spec 65 §O7's single *"Personalised notes"* hook.
 - AC-3: All sub-questions RESOLVED. Q1 (4-dim shortlist) + Q2 (per-dimension mappings for all 4) + Q3 (3-dim V1.5 deferrals) + Q4 (no new pre-signup data collection). Combined v1 impl scope: ~75-120 LoC across build-plan.ts. No new infrastructure; no PlanContent shape changes.
-- AC-4: OPEN — boundary statement drafted at amendment-text stage.
+- AC-4: RESOLVED. All 4 boundary conditions verified ✓ against locked AC-3 mappings (no §Gap 1 re-open; no confidence-grading vocabulary; no Moment 3 conflict; no spec 34 Tier vocabulary bleed). Boundary statement drafted; final form lands in spec 65 amendment text at AC-5.
 - AC-5: OPEN — (c) branch active per AC-2; specific edits drafted once AC-3 resolves.
 - AC-6: OPEN — (c) branch active per AC-2 (provisional slice `S-PROTO-O7-adaptive-hooks`); scope sharpened once AC-3 resolves.
 - AC-7: OPEN — audit slice §Status update plan drafted once AC-5 amendment text lands.
