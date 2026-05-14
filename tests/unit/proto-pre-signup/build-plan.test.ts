@@ -229,7 +229,7 @@ describe('buildPlanFromAnswers', () => {
       const plan = buildPlanFromAnswers({ whatMatters: { priorities: ['protect-pension'] } });
       expect(plan.situationSummary.startsWith('Protecting pensions')).toBe(true);
       // No pensions step exists in v1 whatNeedsToHappen → default substantive order.
-      expect(plan.whatNeedsToHappen[1]).toMatch(/Each of you opens up/);
+      expect(plan.whatNeedsToHappen[1]).toMatch(/Each of you shares/);
     });
 
     it('no signal → general lead, no lead phrase prepended', () => {
@@ -286,7 +286,7 @@ describe('buildPlanFromAnswers', () => {
       });
       expect(plan.situationSummary.startsWith('Keeping things steady for the children')).toBe(true);
       // no children step exists → substantive items unchanged
-      expect(plan.whatNeedsToHappen[1]).toMatch(/Each of you opens up/);
+      expect(plan.whatNeedsToHappen[1]).toMatch(/Each of you shares/);
     });
   });
 });
