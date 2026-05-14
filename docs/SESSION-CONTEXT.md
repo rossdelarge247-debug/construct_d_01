@@ -2,7 +2,7 @@
 
 ## Session 100 wrap delta — read this first
 
-Session 100 was merge-only closure of all 4 session-99 in-flight PRs (no impl work, no spec work, no new slices). All 4 PRs landed clean on `main` in declared sequence #185 → #186 → #184 → #187. Post-merge housekeeping filled the F-OUT-01 + F-OUT-02 §Status placeholders on the audit slice inline with this wrap (per recurrence-watch on §Status sweep inline with finding-impl slice).
+Session 100 closed all 4 session-99 in-flight PRs + post-merge housekeeping + one stretch tone-pass slice (`S-PROTO-O7-copy-tone-pass`, PR #189) surfaced by a structured post-merge retro on `S-PROTO-O7-adaptive-hooks` copy strings. All landed on `main` via the same solo-operator admin-bypass case.
 
 **Squash-merge sequence:**
 
@@ -12,6 +12,8 @@ Session 100 was merge-only closure of all 4 session-99 in-flight PRs (no impl wo
 | #186 | `S-INFRA-comment-review-css-skip` | `398dba1` |
 | #184 | `S-PROTO-O7-adaptive-hooks` | `68544f7` |
 | #187 | `docs(session-99-wrap)` | `f0db502` |
+| #188 | `docs(session-100-wrap)` first cut | `2491f30` |
+| #189 | `S-PROTO-O7-copy-tone-pass` | `af37209` |
 
 **Detailed retro durably captured in `docs/HANDOFF-SESSION-100.md`** — per-PR merge sequence, what-went-well + what-could-improve (wrap-PR-immediately-stale-after-merge pattern; pre-walk evidence calibration line for prototype vs production category), key decisions, recurrence-watch hits.
 
@@ -20,6 +22,7 @@ Session 100 was merge-only closure of all 4 session-99 in-flight PRs (no impl wo
 - 10/10 findings closed on `S-PROTO-pre-signup-density-delight-audit` (F-OUT-01 → ✓ via impl; F-OUT-02 → closed-by-design; F-OUT-03 → ✓ via PR #178; density + delight + output-reassurance all closed earlier).
 - `S-65-amendment-F-OUT-01-02` AC-1..AC-8 all ✓ (impl + audit-flip closed inline with PR #184).
 - `S-PROTO-O7-adaptive-hooks` shipped (4 categorical adaptivity dimensions: stage / partner-finances awareness / example anchoring / lead-ordering); `build-plan.ts` extended from 101 → 232 lines; 42 unit tests green.
+- `S-PROTO-O7-copy-tone-pass` shipped (5 copy-string fixes addressing 3 strong tone findings: clean-break parenthetical no longer lists children with financial ties · solicitor-jab framing removed from 3 personalised notes · `"opens up"` → `"shares"` substantive[0] verb swap). 592/592 tests still green; auto-review 3-specialist fan-out all `success`. 4 mild findings parked for the inherited tone audit Phase 1 priority.
 - `spec-citation-quote.sh` author-time hook now registered in `.claude/settings.json` PostToolUse chain (stub-mode default; opt-in `SPEC_QUOTE_ENFORCE=1` for blocking).
 - `comment-review.sh` skip-list extended to skip `.css` files (covering `.module.css`).
 
@@ -31,12 +34,13 @@ All session-100 work is now on `main`. No carry-over in-flight PRs.
 
 | # | Priority | Scope | Effort | Blocked? |
 |---|---|---|---|---|
-| 1 | **(Inherited)** P2 Tone audit Phase 1 | Structural review on O1-O8 copy + visual treatments + emotional calibration vs CLAUDE.md *"warm hand on a cold day"*. Now naturally next after merge-only closure. | Light-medium | No |
+| 1 | **(Inherited)** P2 Tone audit Phase 1 | Structural review on O1-O8 copy + visual treatments + emotional calibration vs CLAUDE.md *"warm hand on a cold day"*. The 4 mild findings parked from session 100's tone-pass retro feed in as concrete candidates: `primaryCTAForStage('decided') = 'Continue'` anodyne · `leadPhrase('housing'\|'pensions')` flatter than `children` · `homeDescription('mortgage')` clinical · `ongoing-support` priority-note analyst-jargon. The broader cross-screen lens is still owed (session-100 tone-pass closed only the 3 strong findings on `S-PROTO-O7-adaptive-hooks` copy). | Light-medium | No |
 | 2 | **(Inherited)** P3 Desktop graceful enhancement | Help Rail integration + intermediate breakpoints + extra-space utilisation above 480px. | Heavy | No |
 | 3 | **(Inherited)** P6 Spec 65 amendment for quantitative profiling data | Heavy | No |
-| 4 | **Optional retro on PR #184 copy** | Walk preview deploy on production URL now that impl is on main; surface any tone iteration as a follow-up slice if needed. Housing-rule conservatism widening (named in `S-PROTO-O7-adaptive-hooks/acceptance.md` §"Design decisions" item 2) is the most concrete candidate if walk surfaces it. | Light | No |
 
-**Recommended:** P1 (tone audit Phase 1) as the natural next move — closes the session-99 + session-100 in-flight thread and pivots to a different lens. Alternative: P4 (retro on PR #184 copy) if user wants visual confirmation before moving to broader audit.
+The session-100 first-cut priority "Optional retro on PR #184 copy" closed this session as `S-PROTO-O7-copy-tone-pass` (PR #189). Housing-rule conservatism widening (named in `S-PROTO-O7-adaptive-hooks/acceptance.md` §"Design decisions" item 2) remains a candidate if a subsequent walk surfaces it; not currently on the priority list.
+
+**Recommended:** P1 (tone audit Phase 1) as the natural next move — the session-100 tone-pass is a partial deliverable on this surface; the broader cross-screen lens completes it.
 
 ## Scoping-discipline observations carried as recurrence-watch (13 items)
 
@@ -47,6 +51,11 @@ All 13 from session 99 carried forward + 0 new this session.
 - Distrust your own summaries ✓ (kickoff PR numbers verified against live state, not taken on trust).
 - Path options carry spec refs ✓ (merge plan options at turn 1 cited CLAUDE.md §"Hard controls" CODEOWNERS bypass + session-99 P3 housekeeping).
 - Post-batch §Status sweep inline with finding-impl slice ✓ (F-OUT-01/02 §Status fill landed inline with this wrap).
+- Think before coding (name uncertainty) ✓ (housing-rule conservatism decision call from PR #184 explicitly named at turn 0; user picked merge-only path).
+- AC-impl cross-check at impl-time ✓ (every PRIORITY_NOTES + WORRY_NOTES + substantive[0] edit in PR #189 verified against the tone-finding analysis before pushing).
+
+**New observation (one session; promote to numbered recurrence-watch if a second session repeats):**
+- **Skip-walk + structured retro pattern**: `prototype`-category slices that ship with comprehensive pre-walk evidence + user-picked merge-only path should NOT be considered closed without a structured copy/tone retro pass against CLAUDE.md §"Product positioning" + §"Product rules" + §"North star". Preview deploy doesn't tone-check copy; only a structured pass does. Session 100 surfaced 3 strong tone findings on shipped copy this way; without the retro pattern, those findings would have aged into the codebase as silent regressions.
 
 **Active recurrence-watch items unchanged:**
 - AC-impl cross-check at impl-time.
@@ -104,7 +113,7 @@ Decouple is the **complete settlement workspace for separating couples**. NOT a 
 
 ## Stack
 
-Next.js 14 (app router) + TypeScript · Tailwind v4 via CSS variables · S-F1 token system at `src/styles/tokens.ts` (76 tokens) · Tink for bank connect · Anthropic SDK for AI extraction · Vercel previews per branch, production at `construct-dev.vercel.app`. Pre-signup-interview prototype: 8 canvas-as-source screens (O1-O8) on main with shared chassis primitives (TopBar / Hero / Footer) + density-entry (EntryScaffold on O1) + density-question (WhyWeAsk on O1-O6) + delight (spec-26 compliance) + output-reassurance (Reassurance on O7) + spec 65 §O7 *"Adaptive plan shape"* amendment + 4-dimension adaptive-plan impl all merged to main (sessions 98 + 99 + 100).
+Next.js 14 (app router) + TypeScript · Tailwind v4 via CSS variables · S-F1 token system at `src/styles/tokens.ts` (76 tokens) · Tink for bank connect · Anthropic SDK for AI extraction · Vercel previews per branch, production at `construct-dev.vercel.app`. Pre-signup-interview prototype: 8 canvas-as-source screens (O1-O8) on main with shared chassis primitives (TopBar / Hero / Footer) + density-entry (EntryScaffold on O1) + density-question (WhyWeAsk on O1-O6) + delight (spec-26 compliance) + output-reassurance (Reassurance on O7) + spec 65 §O7 *"Adaptive plan shape"* amendment + 4-dimension adaptive-plan impl + tone-pass on `build-plan.ts` copy strings (5 fixes) all merged to main (sessions 98 + 99 + 100).
 
 ## Branch
 
