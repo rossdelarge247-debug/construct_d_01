@@ -63,6 +63,13 @@ Describe '.claude/hooks/comment-review.sh'
       The stdout should equal ""
     End
 
+    It 'exits 0 silently for .css files (sibling-step false positive on CSS comment)'
+      Data <<< "$(envelope_write 'src/components/Footer.module.css' '/* Mirrors the entry stagger from Hero */ .footer { opacity: 1; }')"
+      When run "$HOOK"
+      The status should equal 0
+      The stdout should equal ""
+    End
+
     It 'exits 0 silently for docs/HANDOFF-SESSION-*.md (lineage-purpose doc)'
       Data <<< "$(envelope_write 'docs/HANDOFF-SESSION-67.md' 'session 67 P1a round 2: 5 findings addressed')"
       When run "$HOOK"

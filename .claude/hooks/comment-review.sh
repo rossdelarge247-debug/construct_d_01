@@ -82,6 +82,12 @@ case "$FILE_PATH" in
   docs/HANDOFF-SESSION-*.md) exit 0 ;;
   docs/SESSION-CONTEXT.md) exit 0 ;;
   *.lock|*.json|*.yaml|*.yml) exit 0 ;;
+  # Stylesheets: CSS comments are typically structural section markers
+  # (`/* === Hero === */`), descriptive (`/* fade in */`), or vendor-
+  # prefix shims (`/* IE10 fix */`) — none of the prose-level anti-
+  # patterns this hook protects against. Covers both plain `.css` and
+  # `.module.css` (the trailing extension is what bash globs match).
+  *.css) exit 0 ;;
   *.png|*.jpg|*.jpeg|*.gif|*.webp|*.ico|*.svg) exit 0 ;;
   *.woff|*.woff2|*.ttf|*.otf|*.eot|*.pdf|*.zip|*.tar|*.gz|*.bz2) exit 0 ;;
 esac
