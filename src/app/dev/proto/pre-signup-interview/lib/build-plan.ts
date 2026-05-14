@@ -84,9 +84,9 @@ function homeDescription(home: Home | undefined): string | null {
 const PRIORITY_NOTES: Record<Priority, string> = {
   'fair-split': 'Because a fair split matters most to you, Decouple shows the full picture so neither of you walks away feeling shortchanged.',
   'keep-home': 'Because keeping the home matters most to you, Decouple helps you model what you can afford solo and the trade-offs that come with it.',
-  'protect-pension': 'Because protecting pensions matters most to you, Decouple surfaces pension valuations and sharing options often missed in DIY divorces.',
+  'protect-pension': 'Because protecting pensions matters most to you, Decouple surfaces pension valuations and sharing options clearly, so nothing important slips past.',
   'children-stability': 'Because keeping things steady for the children matters most to you, Decouple builds the parenting plan alongside the financial picture.',
-  'clean-break': 'Because a clean break matters most to you, Decouple shows where ongoing ties (joint accounts, pensions, children) need definite resolution.',
+  'clean-break': 'Because a clean break matters most to you, Decouple shows where ongoing financial ties — joint accounts, pensions, shared liabilities — need definite resolution.',
   'speed': 'Because resolving this quickly matters most to you, Decouple removes the back-and-forth of solicitor letters — both sides see the same picture in real time.',
   'low-cost': 'Because keeping costs low matters most to you, Decouple replaces the £14,561 average solicitor journey with a £800-1,100 collaborative path.',
   'ongoing-support': 'Because future financial support matters most to you, Decouple helps you map maintenance scenarios against bank-evidenced income.',
@@ -95,7 +95,7 @@ const PRIORITY_NOTES: Record<Priority, string> = {
 const WORRY_NOTES: Record<Worry, string> = {
   'enough-to-live': 'Your worry about having enough to live on is one Decouple addresses head-on — affordability modelling is built in, not bolted on.',
   'hidden-assets': 'Your concern about hidden assets is one Decouple was built around — bank-evidenced disclosure means both sides start from facts, not assertions.',
-  'losing-pension': 'Your concern about pensions is one Decouple takes seriously — valuations and sharing options surface clearly, not buried in solicitor jargon.',
+  'losing-pension': 'Your concern about pensions is one Decouple takes seriously — valuations and sharing options surface clearly, so you can see them yourself.',
   'mortgage-alone': 'Your worry about mortgage payments alone is one Decouple helps model — affordability scenarios sit alongside the picture.',
   'process-cost': 'Your worry about process costs is one Decouple replaces by design — the £800-1,100 collaborative path stands in for the £14,561 solicitor journey.',
   'emotional-toll': 'Your worry about the emotional toll matters here — Decouple lets you set the pace, with no adversarial back-and-forth between solicitors.',
@@ -138,7 +138,7 @@ function composeWhatNeedsToHappen(answers: Answers): ReadonlyArray<string> {
   const closingStep = 'A judge approves the financial agreement (a consent order) so it is binding.';
 
   const substantive: string[] = [
-    'Each of you opens up about what you own, owe, earn and spend.',
+    'Each of you shares what you own, owe, earn and spend.',
     'You both look at the picture together and talk through what feels fair.',
     'You write down what you have agreed.',
   ];
@@ -175,7 +175,7 @@ function composePersonalisedNotes(answers: Answers): PlanContent['personalisedNo
     notes.push({
       trigger: 'self-employed',
       body:
-        'Because you (or your partner) are self-employed, Decouple surfaces business income and asset valuations clearly — often the part of disclosure that solicitors charge most for.',
+        'Because you (or your partner) are self-employed, Decouple surfaces business income and asset valuations clearly — often the part of disclosure that gets most easily overlooked.',
     });
   }
   if (answers.exAndSafety?.relationshipQuality === 'safety-concern' || answers.exAndSafety?.devicePrivate === 'not-sure') {
