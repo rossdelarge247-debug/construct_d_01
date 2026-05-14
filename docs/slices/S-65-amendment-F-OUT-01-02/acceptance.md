@@ -138,7 +138,7 @@ Per AC-2 → (c) RESOLVED, the next active question is which dimensions of pre-s
 - `PlanContent.whatNeedsToHappen` intro/framing — NEW. Per-stage intro phrase prepended to items array (or rendered as conditional section header):
   - `thinking` → conditional framing ("If you go ahead, here's what would need to happen")
   - `decided` → immediate framing ("Here's what needs to happen now")
-  - `in_process` → progress framing ("Here's where you are and what's still ahead")
+  - `in_process` → progress framing ("You're already in the process — here's what's coming next and where to focus")
 - `PlanContent.links.primaryCTA` — copy iteration deferred to AC-5 amendment-text drafting (minor decision; current hardcoded `'Continue'` is functional).
 - Surfaces NOT adapted: `conventionalPath` (cost + timeline are facts), `howDecoupleHelps` (value-prop is constant), `journeyStages` (already adaptive via DivorceJourney render at O7.tsx:593).
 - Impl scope: ~5-10 LoC extension to `composeWhatNeedsToHappen` in build-plan.ts.

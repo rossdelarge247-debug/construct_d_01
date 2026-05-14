@@ -156,7 +156,7 @@ The 7 elements above compose adaptively from pre-signup-available state via 4 ad
 - `whatNeedsToHappen` intro/framing — per-stage prepended phrase:
   - `thinking` → *"If you go ahead, here's what would need to happen"*
   - `decided` → *"Here's what needs to happen now"*
-  - `in_process` → *"Here's where you are and what's still ahead"*
+  - `in_process` → *"You're already in the process — here's what's coming next and where to focus"*
 - `links.primaryCTA` — copy iteration follows the same stage signal; final strings drafted at impl time.
 
 **Dimension 2 — Partner-finances awareness** (`Answers.partnerFinances.awareness` enum: `full` | `some` | `little` | `suspect`):
