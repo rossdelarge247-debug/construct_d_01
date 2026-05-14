@@ -92,26 +92,48 @@ Three resolution branches enumerated:
 
 ### AC-3: Design question 2 framed — what adaptivity dimensions does the new O7 actually need?
 
-Per AC-2 → (c) RESOLVED, the next active question is which dimensions of pre-signup-available state (12 O1-O6 typed answers + derived signals) drive plan-output adaptivity, and how each dimension maps to plan-output variation.
+Per AC-2 → (c) RESOLVED, the next active question is which dimensions of pre-signup-available state drive plan-output adaptivity, and how each dimension maps to plan-output variation. Schema grounded against `src/app/dev/proto/pre-signup-interview/lib/types.ts`.
 
-**Candidate dimensions** (not mutually exclusive — final mix is the design output of this AC):
+**Sub-questions Q1 + Q3 + Q4 RESOLVED; Q2 OPEN.**
 
-- **Stage** (O1 `stage` enum: thinking / decided / starting / in-progress / late) — already wired (`<DivorceJourney currentStageKey={answers.stage}/>` at O7.tsx:593). Sets pacing + tense of plan ("If you're still thinking about whether to separate, here's what to consider..." vs "If you've started the process, here's where you are..."). **Low effort — extension of existing wire.**
-- **Complexity** (derived from O2 finances + O3 housing + O5 priorities count) — drives plan depth + section count. Heuristic mapping required (e.g., `housing == "joint-mortgage" && children > 0 && self_employment == true` → high-complexity render with all 7 sections; `housing == "renting-jointly" && children == 0` → compact render with 4-5 sections).
-- **Safety / conflict signals** (O4 `safety_concerns` + O5 `priorities` + O6 `partner_awareness`) — gates safety-conscious framing (e.g., mediator-routing soft mention; "talking to your partner" sections suppressed if `partner_awareness = "hiding"`; decoy-mode language hooks per spec 67 L788 V1.5 reservation). Per CLAUDE.md §Product positioning pillar 2 *"Evidenced, not asserted"* — surface what we know to surface, suppress what would harm.
-- **Partner awareness** (O6 `partner_awareness` enum: aware-collaborating / aware-uncooperative / unaware / hiding) — gates references to joint actions, shared accounts, partner-side framing. If `aware-collaborating`, plan includes joint-steps; if `hiding`, plan emphasises solo prep + privacy.
-- **Vocab calibration** (derived from O1-O6 overall tone signals) — formal vs casual; legal-terminology-friendly vs plain-English-only; high-net-worth idioms vs benefit-eligible idioms. **High effort — may be V1.5 reservation.**
-- **Example anchoring** — plan body uses actual O1-O6 answers as anchors: children's names + ages (from O3); partner name (from O4); stated top concern (from O5.priorities[0]). Per CLAUDE.md §"North star": *"Your salary is £3,218/month from ACME Ltd. ... Amelia and Jack are with you during the week. Here's the picture taking shape."* **Highest user-perceived value per archive sweep.**
-- **Lead-ordering** — first section of the plan leads with the user's top stated concern from O5, not a generic situation summary. Adapts which of the 7 spec 65 §O7 elements appears first (e.g., for `priorities[0] = "kids"`, "Children's living arrangements" leads; for `priorities[0] = "house"`, "Housing decisions" leads).
+**Q1 (v1 shortlist) RESOLVED — 4 dimensions ship in v1:**
 
-**Open questions to resolve in design conversation:**
+1. **Stage** (top-level `stage`: 'thinking' | 'decided' | 'in_process') — already wired at O7.tsx:593 (DivorceJourney). Extend to opening summary + "what needs to happen" section tense + pacing:
+   - `thinking` → exploratory tone (*"If you're still considering whether to separate, here's what to think about..."*)
+   - `decided` → action-oriented tone (*"Now that you've decided, here's what comes next..."*)
+   - `in_process` → progress-oriented tone (*"You're in the middle of this. Here's what's coming and where to focus..."*)
+   **Low effort — extension of existing wire.**
 
-1. **Which 2-4 of the above dimensions ship in v1 of the amendment?** Shipping all 7 risks bloat + over-engineering; shipping 1 risks under-delivery against spec 74 L55 standalone-artefact bar. Suggested floor for value-delivery: stage + example anchoring + lead-ordering (the 3 lowest-effort highest-perceived-value dimensions).
-2. **For each shipped dimension: what's the specific mapping from O1-O6 state to plan-output variation?** Concrete enum-to-render table per dimension. Required for AC-as-canvas-quote discipline at impl stage.
-3. **Are any dimensions deferred to V1.5 per spec 67 L788 progressive-disclosure pattern?** Candidates: vocab calibration (high effort); safety/conflict adaptive framing (overlaps with spec 67 L788's "Full adaptive safeguarding architecture ... deferred to V1.5 backlog" reservation).
-4. **Does any dimension require new pre-signup data collection in O1-O6?** Strong default = NO (would re-open spec 65a L61-67 absorbed-with-simplification decisions). If YES for a dimension, escalate as a separate amendment slice scope (not within this slice).
+2. **Partner finances awareness** (O5 `partnerFinances.awareness` enum: 'full' | 'some' | 'little' | 'suspect') — semantic: the USER's awareness of PARTNER's finances (NOT partner's awareness of user — different from V1's `partner_awareness` semantics). Gates plan-output around joint-action confidence. If `full` or `some`, plan includes joint-prep steps + transparency language. If `little` or `suspect`, plan emphasises solo prep + privacy + steps to surface partner-side finances safely. The `suspect` case hooks into safety-conscious framing without re-opening spec 67 L788's V1.5 adaptive safeguarding architecture. **Simple categorical switch.**
 
-**Resolution:** OPEN. Awaits user dimension-shortlist + per-dimension mapping table. Reasoning must cite spec 65 §O7 + spec 74 L55 standalone-artefact bar + CLAUDE.md §"North star" quality bar.
+3. **Example anchoring** — plan body uses descriptive O1-O6 signals as anchors. NOT names — children's names + partner names are not collected (spec 65a L61-67 absorbed-with-simplification decisions are not re-opened by this slice; Q4 below). Available anchors:
+   - Relationship + living state (O2 `situation.relationship` + `living`): *"As a cohabiting couple living apart..."*
+   - Children count (O2 `situation.childrenCount` 1-4): *"...with 2 children..."*
+   - Home situation (O2 `situation.home`: mortgage / own-outright / rent / other): *"...in your mortgaged home"*
+   - Relationship quality (O3 `exAndSafety.relationshipQuality`: amicable / difficult / high-conflict / safety-concern): *"Given the [amicable/difficult] state of your relationship..."*
+   - Self-employment (O4 `employment.selfEmployment`: no / me / ex / both): *"As a self-employed person, your finances..."*
+   - Top priorities (O6 `whatMatters.priorities` array of `Priority`): *"Since fair-split and children-stability matter most to you..."*
+   - Worries (O6 `whatMatters.worries` array of `Worry`): *"Your concern about hidden-assets means..."*
+   **Highest user-perceived value per CLAUDE.md §"North star" quality bar** — plan feels deeply personal without requiring names.
+
+4. **Lead-ordering** — first plan section after situation-summary adapts to selected priorities + worries + situational signals (NOT `priorities[0]` — `priorities` is unordered multi-select per types.ts L24). Coverage-based heuristic stub:
+   - If `priorities` includes `children-stability` OR `situation.hasChildren = "yes"` → children's stability section leads
+   - Else if `priorities` includes `keep-home` OR `situation.home != "rent"` → housing decisions section leads
+   - Else if `priorities` includes `protect-pension` OR `worries` includes `losing-pension` → pensions section leads
+   - Else → default situation-summary lead
+   **Simple wire; coverage-based, not ranking-based.**
+
+**Q3 (V1.5 deferrals) RESOLVED — 3 dimensions deferred:**
+
+- **Complexity** (multi-factor heuristic across O2 + O3 + O4 + O5) — needs more design work; defer per spec 67 L788 progressive-disclosure pattern.
+- **Vocab calibration** (formal/casual tone derivation from O1-O6 overall signals) — high effort, low per-unit-effort value; defer.
+- **Safety / conflict signals beyond the `suspect` hook in dimension 2** — overlaps with spec 67 L788's existing *"Full adaptive safeguarding architecture (coercive control detection, mediator routing, decoy mode, adaptive pacing) deferred to V1.5 backlog"* reservation. Cleaner to bundle there. (Note: `partnerFinances.awareness = "suspect"` + `exAndSafety.relationshipQuality = "safety-concern"` + `exAndSafety.devicePrivate = "not-sure"` are minimum hooks shipped via dimension 2 + the existing `hasSafetyFlag` helper at types.ts L49 — without full safeguarding architecture.)
+
+**Q4 (new pre-signup data collection) RESOLVED — NO new collection.** Every shortlisted dimension uses signal already in O1-O6 per types.ts. Reversing spec 65a L61-67 absorbed-with-simplification decisions is OUT-OF-SCOPE for this slice (would re-open the post-pivot collapse from V1's 28 screens → spec 65's 8 screens).
+
+**Q2 (per-dimension mapping) OPEN.** For each shortlisted dimension, the full mapping table from input state to plan-output variation is the next iteration. Required for amendment-text drafting at AC-5 + AC-as-canvas-quote discipline at impl stage. Likely shape: 4 mini-tables in spec 65 amendment (one per dimension) + corresponding adaptive-rendering logic in O7.tsx.
+
+**Resolution:** Q1 + Q3 + Q4 RESOLVED. Q2 OPEN — awaits user-led per-dimension mapping conversation.
 
 ### AC-4: Design question 3 framed — pre/post-signup vocab autonomy boundary
 
@@ -200,7 +222,7 @@ Multi-stage sequence:
 
 - AC-1: drafted (§Context section above; 6 quoted sources including spec 74 §"Free-plan framing"). Awaits AC-8 verifiability pass.
 - AC-2: RESOLVED → (c) — pre-signup-specific adaptivity dimension grounded in O1-O6 + derived signals. Reasoning: V1 Tier 1-4 mechanism requires inputs pre-signup does not collect (spec 65a L57); spec 74 L55 standalone-artefact value bar may not be met by current spec 65 §O7's single *"Personalised notes"* hook.
-- AC-3: OPEN — reframed per AC-2 → (c) from confidence-derivation question to adaptivity-dimensions catalogue. 7 candidate dimensions named (stage / complexity / safety / partner-awareness / vocab / example-anchoring / lead-ordering); awaits user dimension-shortlist + per-dimension mapping.
+- AC-3: Q1 + Q3 + Q4 RESOLVED. Q2 OPEN. v1 shortlist locked: stage (O1) + partner-finances-awareness (O5) + example-anchoring (descriptive O2-O6 signals, NOT names) + lead-ordering (coverage-based, not ranking-based). V1.5 deferrals: complexity + vocab-calibration + safety-conflict-beyond-`suspect`-hook. No new pre-signup data collection. Per-dimension mapping tables (Q2) await next iteration.
 - AC-4: OPEN — boundary statement drafted at amendment-text stage.
 - AC-5: OPEN — (c) branch active per AC-2; specific edits drafted once AC-3 resolves.
 - AC-6: OPEN — (c) branch active per AC-2 (provisional slice `S-PROTO-O7-adaptive-hooks`); scope sharpened once AC-3 resolves.
