@@ -25,6 +25,11 @@
             "type": "command",
             "command": ".claude/hooks/comment-review.sh",
             "timeout": 30
+          },
+          {
+            "type": "command",
+            "command": ".claude/hooks/spec-citation-quote.sh",
+            "timeout": 30
           }
         ]
       }
