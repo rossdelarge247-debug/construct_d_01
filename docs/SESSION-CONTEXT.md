@@ -1,141 +1,105 @@
-# Session 99 Pre-flight Context Block (carrying session 98 wrap delta)
+# Session 100 Pre-flight Context Block (carrying session 99 wrap delta)
 
-## Session 98 wrap delta — read this first
+## Session 99 wrap delta — read this first
 
-Session 98 over-delivered the recommended P1 (spec 65 amendment scaffold). Kickoff scoped scaffold + AC list only with impl deferring to session 99+; session 98 instead carried through the full design conversation across 7 commits and shipped the actual spec 65 §O7 amendment text. Slice `S-65-amendment-F-OUT-01-02` reaches Stage 3 of its downstream landing plan (amendment shipped); Stage 4 (impl) is the next session's natural priority.
+Session 99 over-delivered the recommended P1 (impl slice `S-PROTO-O7-adaptive-hooks`) AND closed two inherited side-quests (P4 spec-citation-quote-check hook registration + P5 comment-review CSS skip). Three PRs in flight at wrap, all with `approve` verdicts from the 3-specialist auto-review fan-out.
 
-**Branch state:** `claude/S-65-amendment-F-OUT-01-02` @ `c84689e` (7 commits ahead of `main`; not yet merged at wrap time — see PR question below).
+**Branches + PRs at wrap:**
 
-**Seven commits this session (ordered):**
+| Branch | PR | Status |
+|---|---|---|
+| `claude/S-PROTO-O7-adaptive-hooks` @ `37b75dc` | [#184](https://github.com/rossdelarge247-debug/construct_d_01/pull/184) | approve verdict; 5 findings (1 actionable addressed via `37b75dc` test rename; 4 informational); awaiting user browser walk + merge |
+| `claude/S-INFRA-spec-citation-quote-hook-register` @ `adf70c3` | [#185](https://github.com/rossdelarge247-debug/construct_d_01/pull/185) | approve verdict; 2 informational findings (security audit-prompt confirmed clean; praise on 14-item checklist); awaiting merge |
+| `claude/S-INFRA-comment-review-css-skip` @ `4e4a6bb` | [#186](https://github.com/rossdelarge247-debug/construct_d_01/pull/186) | approve verdict; 0 findings across all 3 specialists; awaiting merge |
+| `claude/session-99-wrap` (this branch) | — | HANDOFF-99 + SESSION-CONTEXT refresh for session 100; wrap PR opens at session 100 start |
 
-- **`67565aa`** scaffold + 8-AC frame — cross-spec conflict statement (4 verbatim sources) + 8 ACs.
-- **`c1deb0e`** scaffold tighten + AC-2 RESOLVED → (c) — added spec 74 §"Free-plan framing" L30-55 as 5th load-bearing source (surfaced by archive-sweep agent); softened "deliberately-dropped" framing (no recorded decision-log); reframed AC-3 from confidence-derivation to adaptivity-dimensions.
-- **`c2eedbf`** AC-3 Q1+Q3+Q4 RESOLVED — 4-dim shortlist locked + 3-dim V1.5 deferrals + no-new-data-collection. Schema verification surfaced 3 corrections (Stage 3-valued not 5; partner-finances on O5 not O6; example anchoring is descriptive-labels-only no names).
-- **`f523fee`** AC-3 Q2 partial (Stage + Partner-finances mappings) — bundled wrap-up of two dimensions with existing build-plan.ts partial wires (~15-25 LoC combined).
-- **`54b1d61`** AC-3 Q2 full close (Example anchoring + Lead-ordering mappings) — locked per 5 tactical decisions. AC-3 fully closed.
-- **`5bae7d6`** AC-4 RESOLVED — 4 boundary conditions verified ✓ against locked AC-3 mappings.
-- **`c84689e`** AC-5 RESOLVED — spec 65 §O7 amendment shipped (3 new sub-sections; +54 lines into spec 65). Impl slice provisional name `S-PROTO-O7-adaptive-hooks` (~75-120 LoC scope).
+**What the impl PR closes:** Stage 4 of `S-65-amendment-F-OUT-01-02` downstream landing plan (the session-98 amendment-impl loop). Audit-slice `S-PROTO-pre-signup-density-delight-audit` §F-OUT-01 (→ `✓`) + §F-OUT-02 (→ `closed-by-design`) flipped inline with the impl PR per recurrence-watch on post-batch §Status sweep. `S-65-amendment-F-OUT-01-02` AC-6 + AC-7 closed inline.
 
-**Slice acceptance.md status:**
+**Detailed retro durably captured in `docs/HANDOFF-SESSION-99.md`** — per-branch narrative, all 7 auto-review findings + handling, key decisions, meta-loop bug surface on PR #186 slice doc, and 1 new recurrence-watch observation.
 
-| AC | Status |
-|---|---|
-| AC-1 | drafted ✓ (6 quoted sources) |
-| AC-2 | RESOLVED → (c) ✓ |
-| AC-3 | RESOLVED ✓ (Q1+Q2+Q3+Q4 all closed) |
-| AC-4 | RESOLVED ✓ |
-| AC-5 | RESOLVED ✓ (amendment landed) |
-| AC-6 | PROVISIONAL (impl slice scope locked) |
-| AC-7 | OPEN — happens at impl ship |
-| AC-8 | ✓ for current scope |
+**Net diff session 99:** ~115 LoC substantive src/ code + 35 new unit tests + 1 new shellspec test + 4 new slice docs + 4 audit/amendment AC closures + 1 hook registration + 1 CLAUDE.md skip-list line.
 
-Slice's downstream landing plan: Stage 3 (Amendment-text) complete. Stage 4 (Impl) is next session's primary work.
-
-**Diagnosis trail durably captured in `docs/HANDOFF-SESSION-98.md`** — read for the archive-sweep finding (spec 74 surfacing), the 3 schema-verification bugs caught pre-ship, the existing-infra finding that course-corrected mapping-conversation sequencing, and per-commit narrative.
-
-**Net diff vs main this session:** ~234 lines slice docs + 54 lines spec 65 amendment-text.
-
-## Session 99 priorities — user picks scope
+## Session 100 priorities — user picks scope
 
 | # | Priority | Scope | Effort | Blocked? |
 |---|---|---|---|---|
-| 1 | **Impl slice `S-PROTO-O7-adaptive-hooks`** (Stage 4 of `S-65-amendment-F-OUT-01-02`) | Implements the 4 dimension mappings locked in AC-3 → ~75-120 LoC across `src/app/dev/proto/pre-signup-interview/lib/build-plan.ts`. Extensions of existing `composeXXX` functions; no infrastructure changes; no `PlanContent` shape change. Trigger copy strings for new `personalisedNotes` triggers (`partner-finance-full` / `partner-finance-some` / `priority-{value}` / `worry-{value}`) drafted at impl time. + AC-7 audit-slice §F-OUT-01/02 §Status flip inline with this PR (per session 97 recurrence-watch). | Medium (~60-90 min impl + verification) | No |
-| 2 | **Tone audit Phase 1** | Same as session 98's P2 (deferred). Structural review on O1-O8 copy + visual treatments + emotional calibration vs CLAUDE.md "warm hand on a cold day". | Light-medium | No |
-| 3 | **Desktop graceful enhancement** | Same as session 98's P3 (deferred). Help Rail integration + intermediate breakpoints + extra-space utilisation above 480px. | Heavy | No |
-| 4 | **(Inherited)** spec-citation-quote-check author-time hook | Light | No |
-| 5 | **(Inherited)** Comment-review hook CSS-files regex tightening | Light | No |
-| 6 | **(Inherited)** Spec 65 amendment for quantitative profiling data | Heavy | No |
+| 1 | **Browser-walk PR #184 + merge** | Preview deploy at https://construct-dev-git-claude-e32c0a-rossdelarge247-debugs-projects.vercel.app. Walk 6+1 dims per spec 72a (golden path + edge cases + prefers-reduced-motion + keyboard-only + 375×667 mobile + screen reader). Real-feel check on per-stage tone + per-trigger note copy + lead phrases + per-stage primaryCTA. Address any copy iteration needed, push to PR branch, merge. | Light (~30-60 min depending on iteration depth) | No |
+| 2 | **Merge PR #185 + #186** | Both have approve verdicts + remaining CI completed (verify at session 100 start). Squash-merge to main. | Trivial | No |
+| 3 | **Post-merge housekeeping** | Fill in `merge-sha` + `PR` placeholders in `docs/slices/S-PROTO-pre-signup-density-delight-audit/acceptance.md` §Status table (currently `— (pending merge)` / `— (pending PR)` for F-OUT-01 + F-OUT-02 rows). Small docs follow-up; can ride a future wrap commit. | Trivial | Blocks on P1 + P2 merge |
+| 4 | **(Inherited)** P2 Tone audit Phase 1 | Structural review on O1-O8 copy + visual treatments + emotional calibration vs CLAUDE.md *"warm hand on a cold day"*. | Light-medium | No |
+| 5 | **(Inherited)** P3 Desktop graceful enhancement | Help Rail integration + intermediate breakpoints + extra-space utilisation above 480px. | Heavy | No |
+| 6 | **(Inherited)** P6 Spec 65 amendment for quantitative profiling data | Heavy | No |
 
-**Recommended:** P1 (impl slice `S-PROTO-O7-adaptive-hooks`) as the natural next step. The spec 65 §O7 amendment landed on the `claude/S-65-amendment-F-OUT-01-02` branch session 98; the impl slice closes the loop by making the AI plan output actually adaptive per the dimensions specced. AC-6 + AC-7 close inline with the impl PR. Alternative: P2 (tone audit Phase 1) if user wants a different lens before impl-loop closure.
+**Recommended:** P1 + P2 + P3 as the natural next sequence — close the session-99 in-flight PRs, then pick a new priority from P4-P6. Alternative: P4 tone-audit-first if user wants a different lens.
 
-## Scoping-discipline observations carried as recurrence-watch (12 items)
+## Scoping-discipline observations carried as recurrence-watch (13 items)
 
-All 12 from session 97 carried forward + 0 new this session.
+All 12 from session 98 carried forward + 1 new this session.
 
-**Session 98 applied:**
-- Pre-priority spec-gate verification ✓ (cross-spec citations verbatim throughout).
-- Quote-don't-paraphrase ✓ (every cross-spec citation in amendment text carries verbatim text + file:line refs).
-- Schema-verify-before-planning ✓ (caught 3 dimension-description bugs).
-- Existing-infra check before scoping mapping work ✓ (read build-plan.ts before drafting mapping decisions; course-corrected sequencing).
+**Session 99 applied:**
+- AC-impl cross-check at impl-time ✓ (grepped all 4 dimension mappings' structural elements before pushing impl)
+- Pre-existing provenance opportunistic cleanup at paragraph rewrite ✓ (caught "session N" temporal references in own slice docs pre-commit)
+- Post-batch §Status sweep inline with finding-impl slice ✓ (audit-slice flip landed inline with PR #184, not separate docs PR)
+- Quote-don't-paraphrase ✓ (every spec citation in new slice acceptance.md files carries verbatim text + line refs)
+- Think-before-coding (name uncertainty) ✓ (housing-rule conservatism documented in acceptance.md §"Design decisions" item 2 rather than silent-decided)
 
 **Active recurrence-watch items unchanged:**
-- AC-impl cross-check at impl-time (session 90).
-- Sibling-wrapper diff at impl-time (session 88).
-- Shared-infrastructure audit at refactor-time (session 87).
-- In-PR scope-expansion confirmation gate (session 87).
-- `git push --force` after amend (session 91).
-- verification.md PARTIAL internal contradiction (session 93).
-- Read-cap accumulation during sweep cycles (session 93).
-- Single-lens audit framing (session 94).
-- Pre-existing provenance opportunistic cleanup at paragraph rewrite (session 94) — session 98 example: comment-review hook flagged "session-19" in `c1deb0e` edit; corrected inline before commit.
-- Audit findings need active-spec cross-reference at audit time (session 96).
-- Pre-existing CI noise should be queued, not deferred indefinitely (session 96).
-- Post-batch §Status sweep inline with finding-impl slice (session 97) — will apply session 99 P1 (audit-slice §F-OUT-01/02 flip MUST land inline with impl PR).
+- AC-impl cross-check at impl-time.
+- Sibling-wrapper diff at impl-time.
+- Shared-infrastructure audit at refactor-time.
+- In-PR scope-expansion confirmation gate.
+- `git push --force` after amend.
+- verification.md PARTIAL internal contradiction.
+- Read-cap accumulation during sweep cycles.
+- Single-lens audit framing.
+- Pre-existing provenance opportunistic cleanup at paragraph rewrite.
+- Audit findings need active-spec cross-reference at audit time.
+- Pre-existing CI noise should be queued, not deferred indefinitely.
+- Post-batch §Status sweep inline with finding-impl slice.
 
-## Authoritative reading order at session 99 start
+**New observation (one session; promote to numbered recurrence-watch if a second session repeats):**
+- **Documentation-meta-loop on guard-rule prose**: when documenting a regex's failure mode (or any guard rule's catch surface), the prose used to illustrate the catch can itself trip the regex. Escape-via-rephrase (describe by category, not verbatim trigger) cleanly avoids it. Surfaced in PR #186 author-time hook fire on own slice doc.
+
+## Authoritative reading order at session 100 start
 
 1. This file (you are here).
-2. `docs/HANDOFF-SESSION-98.md` (session 98's retro — 7 shipped commits + archive-sweep finding + schema-verification corrections + course-corrected mapping sequencing).
-3. `docs/HANDOFF-SESSION-97.md` (session 97's retro for prior context).
-4. **For P1 (impl slice):**
-   - `docs/slices/S-65-amendment-F-OUT-01-02/acceptance.md` §AC-3 mappings (the spec for impl).
-   - `docs/workspace-spec/65-pre-signup-interview-reconciled.md` §O7 *"Adaptive plan shape"* (amendment lives there from L149+).
-   - `src/app/dev/proto/pre-signup-interview/lib/build-plan.ts` (existing 101 LoC infrastructure to extend; `composeXXX` functions).
-   - `src/app/dev/proto/pre-signup-interview/lib/types.ts` (schema).
-   - `docs/slices/S-PROTO-pre-signup-density-delight-audit/acceptance.md` §F-OUT-01 + §F-OUT-02 (audit-slice rows to flip inline with impl PR).
-5. **For P2 (tone audit Phase 1):** as session 98's reading order.
+2. `docs/HANDOFF-SESSION-99.md` (session 99's retro — 4 branches, 3 PRs, 9 specialist runs, 7 findings + handling).
+3. `docs/HANDOFF-SESSION-98.md` (session 98's retro for prior context).
+4. **For P1 (browser walk on PR #184):**
+   - `docs/slices/S-PROTO-O7-adaptive-hooks/verification.md` §"Preview-deploy verification (spec 72a 6+1)" — pre-walk evidence to confirm against browser
+   - `docs/workspace-spec/72a-preview-deploy-rubric.md` (if not already in head; 6-dim rubric)
+5. **For P2 (merge PR #185 + #186):** light scan of CI status; no spec reading needed.
+6. **For inherited P4-P6:** as session 99's reading order.
 
-## Session 99 kickoff prompt (paste-ready)
+## Session 100 kickoff prompt (paste-ready)
 
 ```
-Kick off session 99.
+Kick off session 100.
 
 Read this file (SESSION-CONTEXT.md) first.
 
 Turn-0 verification:
 - SessionStart hook surfaces live branch state.
-- Branch convention: harness-suffixed (claude/<scope>-XXXXX) OR
-  per-slice sub-branch (claude/S-PROTO-O7-adaptive-hooks for P1).
-- The claude/S-65-amendment-F-OUT-01-02 branch is 7 commits ahead
-  of main (session 98 amendment work). PR open or pending per
-  session 98 wrap.
+- Branch convention: harness-suffixed off clean main, OR scope-named
+  sub-branch (e.g. claude/session-100-tone-audit for P4).
+- Session 99 left 3 PRs in flight: #184 (S-PROTO-O7-adaptive-hooks)
+  + #185 (S-INFRA-spec-citation-quote-hook-register) + #186
+  (S-INFRA-comment-review-css-skip). Wrap docs PR opens at session
+  100 start.
 - If the harness landed you on a different base, follow CLAUDE.md
   §"Branch-resume check": git fetch / git checkout -B / per per-slice
   branch resume.
 
 Read at session start (Tier 2 + Tier 3, in order):
 1. docs/SESSION-CONTEXT.md (this file).
-2. docs/HANDOFF-SESSION-98.md.
-3. For P1 (impl slice S-PROTO-O7-adaptive-hooks):
-   - docs/slices/S-65-amendment-F-OUT-01-02/acceptance.md §AC-3
-   - docs/workspace-spec/65-pre-signup-interview-reconciled.md §O7
-     "Adaptive plan shape" (from L149)
-   - src/app/dev/proto/pre-signup-interview/lib/build-plan.ts
-   - src/app/dev/proto/pre-signup-interview/lib/types.ts
+2. docs/HANDOFF-SESSION-99.md.
+3. For P1 (browser walk PR #184):
+   - docs/slices/S-PROTO-O7-adaptive-hooks/verification.md
+     §"Preview-deploy verification" — pre-walk evidence to verify
+     against browser.
 
-Confirm priority with user. SESSION-CONTEXT recommends P1 (impl slice)
-as the natural Stage 4 of the spec 65 amendment landing plan, which
-closes F-OUT-01 + F-OUT-02 from the density/delight audit slice.
-
-Per CLAUDE.md §"AC-impl cross-check at impl-time" (recurrence-watch
-session 90): before pushing impl, re-read each AC-3 dimension mapping's
-verbatim wording and grep impl for the structural elements named in
-the mapping.
-
-Per CLAUDE.md §"Quote, don't paraphrase, when invoking a spec":
-amendment cross-refs in code comments use file:line refs.
-
-Per CLAUDE.md §"Post-batch §Status sweep inline with finding-impl slice"
-(recurrence-watch session 97): the audit slice §F-OUT-01/02 §Status
-flip MUST land inline with the impl PR — not in a separate docs PR.
-
-Definition of Done (CLAUDE.md §"Definition of Done", prototype short-
-form items 1, 8, 12, 14 from spec 76 §3):
-- Slice acceptance.md + verification.md
-- Tests written + passing
-- Preview-deploy verified across spec 72a 6+1 dimensions (UI surface
-  applies — O7 renders different content per dimension state)
-- User feedback received + addressed (or explicitly deferred)
+Confirm priority with user. SESSION-CONTEXT recommends P1+P2 (browser
+walk + merge in-flight PRs) before picking a new priority from P4-P6.
 ```
 
 ## Product positioning (preserve across sessions)
@@ -144,25 +108,25 @@ Decouple is the **complete settlement workspace for separating couples**. NOT a 
 
 ## Stack
 
-Next.js 14 (app router) + TypeScript · Tailwind v4 via CSS variables · S-F1 token system at `src/styles/tokens.ts` (76 tokens) · Tink for bank connect · Anthropic SDK for AI extraction · Vercel previews per branch, production at `construct-dev.vercel.app`. Shared chassis primitives all landed (TopBar / Hero / Footer) + density-entry (EntryScaffold on O1) + density-question (WhyWeAsk on O1-O6) + delight (spec-26 compliance pass) + output-reassurance (Reassurance on O7) all merged to main. Spec 65 §O7 *"Adaptive plan shape"* amendment shipped session 98 (on branch `claude/S-65-amendment-F-OUT-01-02`; not yet merged at session 98 wrap).
+Next.js 14 (app router) + TypeScript · Tailwind v4 via CSS variables · S-F1 token system at `src/styles/tokens.ts` (76 tokens) · Tink for bank connect · Anthropic SDK for AI extraction · Vercel previews per branch, production at `construct-dev.vercel.app`. Pre-signup-interview prototype: 8 canvas-as-source screens (O1-O8) on main with shared chassis primitives (TopBar / Hero / Footer) + density-entry (EntryScaffold on O1) + density-question (WhyWeAsk on O1-O6) + delight (spec-26 compliance) + output-reassurance (Reassurance on O7) + spec 65 §O7 *"Adaptive plan shape"* amendment (4 categorical adaptivity dimensions) shipped session 98 (parent) + session 99 (impl via PR #184 awaiting merge).
 
 ## Branch
 
-Session 99 branch: harness-suffixed off clean main, OR scope-named sub-branch (`claude/S-PROTO-O7-adaptive-hooks` for P1, `claude/session-99-tone-audit` for P2, etc).
+Session 100 branch: harness-suffixed off clean main, OR scope-named sub-branch (e.g. `claude/session-100-tone-audit` for P4 scope).
 
 ## Negative constraints (preserve)
 
-#1-#41 from prior sessions. **No new numbered constraints surfaced session 98.** Twelve scoping-discipline observations on recurrence-watch (all carried from session 97). Promote to numbered constraint if a second session surfaces the same recurrence for any new item.
+#1-#41 from prior sessions. **No new numbered constraints surfaced session 99.** Thirteen scoping-discipline observations on recurrence-watch (12 carried from session 98 + 1 new). Promote to numbered constraint if a second session surfaces the same recurrence.
 
 **Active pre-existing CI failures (carry forward):**
-- `spec-citation-quote-check` — fires on newly-added slice docs; gate workflow's comment acknowledges *"Pragmatic scope: gate fires on Added files, not Modified. Pre-existing per-cite citations across the corpus would block every spec-modifying PR otherwise."* Acceptable carry; track for eventual line-level diff filtering improvement.
+- `spec-citation-quote-check` — fires on newly-added slice docs; gate workflow's comment acknowledges *"Pragmatic scope: gate fires on Added files, not Modified. Pre-existing per-cite citations across the corpus would block every spec-modifying PR otherwise."* Acceptable carry; track for eventual line-level diff filtering improvement. PR #184 surfaced this once again; PR #185 + PR #186 passed cleanly (the slice docs use proper verbatim quotes throughout).
 
 ## Scope ceiling
 
-Session 99 is most likely **P1 (impl slice `S-PROTO-O7-adaptive-hooks`)** alone given its medium size + AC-7 audit-slice-flip inline. Out of scope unless explicitly added: P2-6 alternative directions · Welcome Tour · Marketing Landing · Post-connect Dashboard · `Decouple.zip` unpacking · Mobile Screens v2 · authenticated-screens header work.
+Session 100 is most likely **P1 + P2 + P3 (close session-99 in-flight PRs) → then one of P4-P6 if budget allows**. Out of scope unless explicitly added: post-signup work · Welcome Tour · Marketing Landing · Post-connect Dashboard · `Decouple.zip` unpacking · Mobile Screens v2 · authenticated-screens header work.
 
 ## Current pre-signup prototype URL
 
 - Production: `https://construct-dev.vercel.app/dev/proto/pre-signup-interview`
-- Per-PR preview: surfaced as Vercel comment on each PR.
-- All 8 screens (O1-O8) are canvas-as-source on main. Three shared chassis primitives (TopBar + Hero + Footer) + EntryScaffold (O1) + WhyWeAsk (O1-O6) + spec-26 delight compliance + Reassurance (O7) all merged. Density + delight + output-reassurance audit findings closed (8 of 10); F-OUT-01 + F-OUT-02 explicitly blocked pending spec amendment → **amendment shipped session 98** on branch `claude/S-65-amendment-F-OUT-01-02` (impl + audit-flip in session 99).
+- Per-PR preview for #184: `https://construct-dev-git-claude-e32c0a-rossdelarge247-debugs-projects.vercel.app/dev/proto/pre-signup-interview` (use this for the 6+1 walk at session 100 P1).
+- All 8 screens (O1-O8) canvas-as-source on main. Three shared chassis primitives (TopBar + Hero + Footer) + EntryScaffold (O1) + WhyWeAsk (O1-O6) + spec-26 delight compliance + Reassurance (O7) merged. Density + delight + output-reassurance audit findings closed (10 of 10 — last 2 closed inline with PR #184). Spec 65 §O7 *"Adaptive plan shape"* amendment landed on `main` session 98 (PR #183); impl shipped session 99 (PR #184 awaiting browser walk + merge).
