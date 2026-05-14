@@ -118,8 +118,8 @@ Implementation status by finding (live; updated as Phase 3 batches ship).
 | F-DEL-01 | ✓ | S-PROTO-delight-spec26-compliance | `05ba359` | #175 |
 | F-DEL-02 | ✓ | S-PROTO-delight-spec26-compliance | `05ba359` | #175 |
 | F-DEL-03 | ✓ | S-PROTO-delight-spec26-compliance | `05ba359` | #175 |
-| F-OUT-01 | ✓ | S-PROTO-O7-adaptive-hooks | — (pending merge) | — (pending PR) |
-| F-OUT-02 | closed-by-design | S-PROTO-O7-adaptive-hooks | — (pending merge) | — (pending PR) |
+| F-OUT-01 | ✓ | S-PROTO-O7-adaptive-hooks | `68544f7` | #184 |
+| F-OUT-02 | closed-by-design | S-PROTO-O7-adaptive-hooks | `68544f7` | #184 |
 | F-OUT-03 | ✓ | S-PROTO-output-reassurance-O7 | `c2e2633` | #178 |
 
 F-OUT-03 shipped as `S-PROTO-output-reassurance-O7` (the reassurance-copy pass; `c2e2633` / #178). F-OUT-01 + F-OUT-02 resolved via parent slice `S-65-amendment-F-OUT-01-02` (spec 65 §O7 *"Adaptive plan shape"* amendment) + impl slice `S-PROTO-O7-adaptive-hooks` — see §F-OUT-01 + §F-OUT-02 Effect paragraphs for the cross-spec resolution path + verbatim quotes from the amendment text. F-OUT-01 → ✓ (4 categorical adaptivity dimensions implemented); F-OUT-02 → closed-by-design (spec amendment explicitly declines confidence-grading vocabulary in pre-signup `PlanContent`).
