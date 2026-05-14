@@ -237,14 +237,14 @@ describe('buildPlanFromAnswers', () => {
       expect(plan.situationSummary.startsWith('You are considering separating')).toBe(true);
     });
 
-    it('tied children + housing → children fallback (hardcoded order)', () => {
+    it('home=mortgage + keep-home priority → housing wins outright (not tied)', () => {
       const plan = buildPlanFromAnswers({
         situation: { hasChildren: 'yes', living: 'yes', home: 'mortgage' },
         whatMatters: { priorities: ['keep-home'] },
       });
       // children: hasChildren=yes (1) → 1
-      // housing: home=mortgage (1) + keep-home (1) → 2
-      // not actually tied → housing wins outright
+      // housing: home=mortgage (1) + keep-home priority (1) → 2
+      // housing > children → housing wins, no fallback needed
       expect(plan.situationSummary.startsWith('Decisions about your home')).toBe(true);
     });
 
