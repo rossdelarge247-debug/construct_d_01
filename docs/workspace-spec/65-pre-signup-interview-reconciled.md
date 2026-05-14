@@ -146,6 +146,60 @@ Contains:
 - Personalised notes (based on their specific situation)
 - Links: find out more → pricing
 
+#### Adaptive plan shape
+
+The 7 elements above compose adaptively from pre-signup-available state via 4 adaptivity dimensions (categorical hooks, not confidence-grading; not Tier-class quantitative scoring). Schema grounded in `src/app/dev/proto/pre-signup-interview/lib/types.ts`; composition logic in `lib/build-plan.ts`.
+
+**Dimension 1 — Stage** (`Answers.stage` enum: `thinking` | `decided` | `in_process`):
+
+- `situationSummary` opening — existing 3-branch composition at `build-plan.ts` L29-31 (thinking → exploratory; decided → action-oriented; in_process → progress-oriented).
+- `whatNeedsToHappen` intro/framing — per-stage prepended phrase:
+  - `thinking` → *"If you go ahead, here's what would need to happen"*
+  - `decided` → *"Here's what needs to happen now"*
+  - `in_process` → *"You're already in the process — here's what's coming next and where to focus"*
+- `links.primaryCTA` — copy iteration follows the same stage signal; final strings drafted at impl time.
+
+**Dimension 2 — Partner-finances awareness** (`Answers.partnerFinances.awareness` enum: `full` | `some` | `little` | `suspect`):
+
+- `personalisedNotes` for `little` || `suspect` — existing `partner-finance-unknown` trigger at `build-plan.ts` L81-87 (retained).
+- `personalisedNotes` for `full` — new trigger `partner-finance-full`: joint-prep language emphasising head-start advantage + bank-evidenced verification.
+- `personalisedNotes` for `some` — new trigger `partner-finance-some`: caveated joint-prep emphasising partial picture + bank-evidenced fill-in.
+
+**Dimension 3 — Example anchoring** (descriptive O1-O6 signals woven into plan body; not names — children's names + partner name are not collected pre-signup, per spec 65a §"Spec 58 — Profiling (Pre-Bank-Connection)" L61-67 ABSORBED-with-simplification table):
+
+- `situation.childrenCount` (1-4) → `situationSummary` extension: *"You have <N> children together."*
+- `situation.home` (mortgage | own-outright | rent | other) → `situationSummary` new sentence: *"Your home is mortgaged."* / *"You own your home outright."* / *"You rent your home."* (skip if `other`).
+- `whatMatters.priorities` → `personalisedNotes` trigger pattern `priority-{value}` (e.g., `priority-keep-home`). Cap: max 1 priority-driven note (first selected proxy).
+- `whatMatters.worries` → `personalisedNotes` trigger pattern `worry-{value}` (e.g., `worry-hidden-assets`). Cap: max 1 worry-driven note (first selected proxy).
+- Combined note cap: max 2 new anchor-driven notes per render; existing 4 trigger notes unaffected.
+
+**Dimension 4 — Lead-ordering** (which content focus appears first):
+
+Lead category derived from selected priorities + worries + situational signals (coverage-weighted; tied → hardcoded fallback `children > housing > pensions > general`):
+
+- `children` if `situation.hasChildren=yes` OR `whatMatters.priorities` includes `children-stability`
+- `housing` if `situation.home != rent` OR `whatMatters.priorities` includes `keep-home`
+- `pensions` if `whatMatters.priorities` includes `protect-pension` OR `whatMatters.worries` includes `losing-pension`
+- `general` (default fallback)
+
+Effect: lead phrase prepended to `situationSummary` BEFORE the stage-conditional opening (`build-plan.ts` L29-32 sits AFTER the new lead phrase); `whatNeedsToHappen` items reorder so the lead-relevant step appears at position 0.
+
+#### Boundary
+
+This amendment governs pre-signup O7 only. Spec 67 §"Gap 1: Data bridge from pre-signup — RESOLVED" (L84-86) post-signup routing-not-grading architecture is unchanged — pre-signup `PlanContent` adaptivity is composed from pre-signup state only and does not introduce confidence-scoring vocabulary that would conflict with post-signup section-by-section confirmation at Moment 3. Spec 34 §"Tier 1-3" (L188-250) transaction-matching framework is unchanged and uses "Tier" in a different sense from the vocabulary introduced here — the 4 adaptivity dimensions (stage, partner-finances-awareness, example anchoring, lead-ordering) and 4 lead categories (children, housing, pensions, general) are categorical hooks, not Tier-class quantitative grading.
+
+#### Out of scope (V1.5 reservations)
+
+Deferred to V1.5 per spec 67 §"Gap 11: Safeguarding carry-through" L788 progressive-disclosure pattern (*"Full adaptive safeguarding architecture (coercive control detection, mediator routing, decoy mode, adaptive pacing) deferred to V1.5 backlog"*):
+
+- **Complexity** as a multi-factor adaptivity dimension (cross-cutting heuristic across O2 + O3 + O4 + O5).
+- **Vocab calibration** (formal/casual tone derivation from O1-O6 overall signals).
+- **Safety / conflict signals** beyond the `suspect` hook in Dimension 2 — bundled with the spec 67 L788 reservation above.
+- **Additional anchor surfaces**: `situation.relationship` type (low practical impact); `exAndSafety.relationshipQuality` beyond `safety-concern` (sensitive tone work); `employment.selfEmployment` as `situationSummary` anchor (duplicative — already triggers note).
+- **Additional lead categories**: `clean-break`, `ongoing-support`, `low-cost`, `speed`, `fair-split` (no obvious leading section in this spec's 7-element `PlanContent` structure).
+
+Implementation slice: per `docs/slices/S-65-amendment-F-OUT-01-02/` AC-6 — `S-PROTO-O7-adaptive-hooks` ships impl (~75-120 LoC across `build-plan.ts`).
+
 ---
 
 ### O8 — What's next
