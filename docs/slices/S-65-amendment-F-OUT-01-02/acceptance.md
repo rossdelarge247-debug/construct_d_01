@@ -131,9 +131,30 @@ Per AC-2 → (c) RESOLVED, the next active question is which dimensions of pre-s
 
 **Q4 (new pre-signup data collection) RESOLVED — NO new collection.** Every shortlisted dimension uses signal already in O1-O6 per types.ts. Reversing spec 65a L61-67 absorbed-with-simplification decisions is OUT-OF-SCOPE for this slice (would re-open the post-pivot collapse from V1's 28 screens → spec 65's 8 screens).
 
-**Q2 (per-dimension mapping) OPEN.** For each shortlisted dimension, the full mapping table from input state to plan-output variation is the next iteration. Required for amendment-text drafting at AC-5 + AC-as-canvas-quote discipline at impl stage. Likely shape: 4 mini-tables in spec 65 amendment (one per dimension) + corresponding adaptive-rendering logic in O7.tsx.
+**Q2 (per-dimension mapping) PARTIALLY RESOLVED — Stage + Partner-finances locked; Example anchoring + Lead-ordering OPEN.**
 
-**Resolution:** Q1 + Q3 + Q4 RESOLVED. Q2 OPEN — awaits user-led per-dimension mapping conversation.
+**Stage mapping (locked):**
+- `PlanContent.situationSummary` opening — EXISTS at build-plan.ts L29-31 (3-branch composition matching shortlisted `Stage` enum); retain verbatim.
+- `PlanContent.whatNeedsToHappen` intro/framing — NEW. Per-stage intro phrase prepended to items array (or rendered as conditional section header):
+  - `thinking` → conditional framing ("If you go ahead, here's what would need to happen")
+  - `decided` → immediate framing ("Here's what needs to happen now")
+  - `in_process` → progress framing ("Here's where you are and what's still ahead")
+- `PlanContent.links.primaryCTA` — copy iteration deferred to AC-5 amendment-text drafting (minor decision; current hardcoded `'Continue'` is functional).
+- Surfaces NOT adapted: `conventionalPath` (cost + timeline are facts), `howDecoupleHelps` (value-prop is constant), `journeyStages` (already adaptive via DivorceJourney render at O7.tsx:593).
+- Impl scope: ~5-10 LoC extension to `composeWhatNeedsToHappen` in build-plan.ts.
+
+**Partner-finances-awareness mapping (locked):**
+- `personalisedNotes` for `little` || `suspect` — EXISTS at build-plan.ts L81-87 with `partner-finance-unknown` trigger; retain verbatim (tone-aware framing already established).
+- `personalisedNotes` for `full` — NEW trigger e.g., `partner-finance-full`. Body: joint-prep language emphasising head-start advantage + bank-evidenced verification. Draft text lands in AC-5.
+- `personalisedNotes` for `some` — NEW trigger e.g., `partner-finance-some`. Body: caveated joint-prep emphasising partial picture + bank-evidenced fill-in. Draft text lands in AC-5.
+- Surfaces NOT adapted: `situationSummary` (surfacing awareness in summary risks feeling judgmental; note framing carries it more sensitively).
+- Impl scope: ~10-15 LoC extension to `composePersonalisedNotes` in build-plan.ts (two new branches matching existing pattern).
+
+**Combined Stage + Partner-finances impl scope: ~15-25 LoC across build-plan.ts; no new infrastructure (extensions of existing `composeXXX` functions).**
+
+**Example anchoring + Lead-ordering mappings: OPEN — next active conversation.**
+
+**Resolution:** Q1 + Q3 + Q4 RESOLVED. Q2 PARTIALLY RESOLVED (Stage + Partner-finances locked; Example anchoring + Lead-ordering OPEN).
 
 ### AC-4: Design question 3 framed — pre/post-signup vocab autonomy boundary
 
@@ -222,7 +243,7 @@ Multi-stage sequence:
 
 - AC-1: drafted (§Context section above; 6 quoted sources including spec 74 §"Free-plan framing"). Awaits AC-8 verifiability pass.
 - AC-2: RESOLVED → (c) — pre-signup-specific adaptivity dimension grounded in O1-O6 + derived signals. Reasoning: V1 Tier 1-4 mechanism requires inputs pre-signup does not collect (spec 65a L57); spec 74 L55 standalone-artefact value bar may not be met by current spec 65 §O7's single *"Personalised notes"* hook.
-- AC-3: Q1 + Q3 + Q4 RESOLVED. Q2 OPEN. v1 shortlist locked: stage (O1) + partner-finances-awareness (O5) + example-anchoring (descriptive O2-O6 signals, NOT names) + lead-ordering (coverage-based, not ranking-based). V1.5 deferrals: complexity + vocab-calibration + safety-conflict-beyond-`suspect`-hook. No new pre-signup data collection. Per-dimension mapping tables (Q2) await next iteration.
+- AC-3: Q1 + Q3 + Q4 RESOLVED. Q2 PARTIALLY RESOLVED — Stage + Partner-finances mappings locked (extensions of existing build-plan.ts `composeXXX` wires; ~15-25 LoC combined impl scope). Example anchoring + Lead-ordering mappings OPEN (next active conversation). v1 shortlist + V1.5 deferrals + no-new-data-collection unchanged.
 - AC-4: OPEN — boundary statement drafted at amendment-text stage.
 - AC-5: OPEN — (c) branch active per AC-2; specific edits drafted once AC-3 resolves.
 - AC-6: OPEN — (c) branch active per AC-2 (provisional slice `S-PROTO-O7-adaptive-hooks`); scope sharpened once AC-3 resolves.
