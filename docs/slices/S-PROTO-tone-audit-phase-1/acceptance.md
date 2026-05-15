@@ -174,6 +174,7 @@ These are surfaces that already exemplify the analyst-by-your-side register. Log
 - O6 priority CTA (`lib/copy/o6.ts:79`) — `label: 'Build my plan'` — meaningful, action-anchored.
 - O7 loading heading (`screens/O7.tsx:515`) — *"Take a breath."* — gold-standard embodied warmth.
 - O8 OPTIONS (`screens/O8.tsx:37-62`) — first-person titles + CTAs (`'my picture'`, `'my plan'`, `'my account'`) anchor user agency; permission-giving helper *"There's no wrong answer. You can come back anytime."*
+- `WhyWeAsk` chassis primitive (`components/WhyWeAsk.tsx:29`) — hardcoded `'Why we ask'` ALL-CAPS eyebrow above the per-question body text. Analyst-pattern callout consistent with the V1 educational-callout convention; passed the audit unchanged. Phase 3 batches should preserve the label verbatim when adjusting surrounding copy.
 
 ## Status
 
