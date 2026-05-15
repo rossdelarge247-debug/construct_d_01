@@ -4,63 +4,28 @@ import { getCopy as o4GetCopy } from '@/app/dev/proto/pre-signup-interview/lib/c
 import { getCopy as o5GetCopy } from '@/app/dev/proto/pre-signup-interview/lib/copy/o5';
 
 describe('chassis caption invariants', () => {
-  describe('O4 oneAnswered', () => {
-    it("is 'Noted — keep going when you're ready.'", () => {
-      const copy = o4GetCopy('decided');
-      expect(copy.captions.oneAnswered).toBe("Noted — keep going when you're ready.");
-    });
-
-    it('does not use admin-panel form-system vocabulary', () => {
-      const copy = o4GetCopy('decided');
-      expect(copy.captions.oneAnswered).not.toMatch(/Answer recorded/);
-    });
+  it("O4 oneAnswered is 'Noted — keep going when you're ready.'", () => {
+    const copy = o4GetCopy('decided');
+    expect(copy.captions.oneAnswered).toBe("Noted — keep going when you're ready.");
   });
 
-  describe('O5 oneAnswered', () => {
-    it("is 'Noted — keep going when you're ready.'", () => {
-      const copy = o5GetCopy('decided');
-      expect(copy.captions.oneAnswered).toBe("Noted — keep going when you're ready.");
-    });
-
-    it('does not use admin-panel form-system vocabulary', () => {
-      const copy = o5GetCopy('decided');
-      expect(copy.captions.oneAnswered).not.toMatch(/Answer recorded/);
-    });
+  it("O5 oneAnswered is 'Noted — keep going when you're ready.'", () => {
+    const copy = o5GetCopy('decided');
+    expect(copy.captions.oneAnswered).toBe("Noted — keep going when you're ready.");
   });
 
-  describe('O3 pickToContinue', () => {
-    it("is 'Pick the one closest to how things feel right now.'", () => {
-      const copy = o3GetCopy('decided');
-      expect(copy.captions.pickToContinue).toBe('Pick the one closest to how things feel right now.');
-    });
-
-    it('does not use instructional vocabulary ("Pick the option that fits")', () => {
-      const copy = o3GetCopy('decided');
-      expect(copy.captions.pickToContinue).not.toMatch(/Pick the option that fits/);
-    });
+  it("O3 pickToContinue is 'Pick the one closest to how things feel right now.' (emotional-frame, fits relationship-quality question)", () => {
+    const copy = o3GetCopy('decided');
+    expect(copy.captions.pickToContinue).toBe('Pick the one closest to how things feel right now.');
   });
 
-  describe('O4 pickToContinue', () => {
-    it("is 'Pick the one closest to how things feel right now.'", () => {
-      const copy = o4GetCopy('decided');
-      expect(copy.captions.pickToContinue).toBe('Pick the one closest to how things feel right now.');
-    });
-
-    it('does not use instructional vocabulary', () => {
-      const copy = o4GetCopy('decided');
-      expect(copy.captions.pickToContinue).not.toMatch(/Pick the option that fits/);
-    });
+  it("O4 pickToContinue is 'Pick the answer closest to what's true today.' (factual-frame, fits employment-categorization question)", () => {
+    const copy = o4GetCopy('decided');
+    expect(copy.captions.pickToContinue).toBe("Pick the answer closest to what's true today.");
   });
 
-  describe('O3 bothAnswered', () => {
-    it("is 'Both noted — ready when you are.'", () => {
-      const copy = o3GetCopy('decided');
-      expect(copy.captions.bothAnswered).toBe('Both noted — ready when you are.');
-    });
-
-    it('does not use bare two-word system-state', () => {
-      const copy = o3GetCopy('decided');
-      expect(copy.captions.bothAnswered).not.toBe('Both answered.');
-    });
+  it("O3 bothAnswered is 'Both noted — ready when you are.'", () => {
+    const copy = o3GetCopy('decided');
+    expect(copy.captions.bothAnswered).toBe('Both noted — ready when you are.');
   });
 });

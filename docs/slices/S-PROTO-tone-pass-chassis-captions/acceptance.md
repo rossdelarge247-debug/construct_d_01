@@ -60,14 +60,14 @@ Same change as AC-1; O5 carries an identical literal value, so the same edit app
 
 Rationale per F-TONE-09: BEFORE is instructional ("Pick the option that fits best"). AFTER anchors in the user's actual experience (how things feel right now) and respects judgement.
 
-### AC-4 — O4 `pickToContinue` drops form-instructional register
+### AC-4 — O4 `pickToContinue` drops form-instructional register (factual-frame variant)
 
 `o4.ts:41` changes from:
 
 - BEFORE: `pickToContinue: 'Pick the option that fits to continue.',`
-- AFTER: `pickToContinue: 'Pick the one closest to how things feel right now.',`
+- AFTER: `pickToContinue: "Pick the answer closest to what's true today.",`
 
-Audit-extension for cross-screen consistency. Same anti-pattern as AC-3; not flagged separately in Phase 1 but surfaced at batch implementation.
+Audit-extension. Same form-instructional anti-pattern as AC-3 but O4 is a factual employment-categorization question, not an emotional one; the AFTER uses O5's existing factual-frame reframe (already in the codebase) rather than O3's emotional-frame rewrite. Per-screen register match: O3 (relationship-quality emotional) → "how things feel right now"; O4/O5 (factual situational) → "what's true today".
 
 ### AC-5 — O3 `bothAnswered` drops bare system-state
 

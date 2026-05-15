@@ -83,7 +83,7 @@ describe('O4 (canvas-as-source)', () => {
 
   it('toggles the footer caption between pickToContinue and oneAnswered when an option is picked', () => {
     renderO4();
-    expect(screen.getByText('Pick the one closest to how things feel right now.')).toBeTruthy();
+    expect(screen.getByText("Pick the answer closest to what's true today.")).toBeTruthy();
     fireEvent.click(radio(/Yes.*we both are/));
     expect(screen.getByText("Noted — keep going when you're ready.")).toBeTruthy();
   });

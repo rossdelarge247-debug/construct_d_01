@@ -26,16 +26,18 @@ Tests under `'O4 oneAnswered'` describe (positive + negative).
 
 Tests under `'O3 pickToContinue'` describe.
 
-## AC-4 — O4 `pickToContinue` (audit-extension)
+## AC-4 — O4 `pickToContinue` (audit-extension, factual-frame)
 
 **Status:** met. `o4.ts:41`:
 
 ```diff
 -      pickToContinue: 'Pick the option that fits to continue.',
-+      pickToContinue: 'Pick the one closest to how things feel right now.',
++      pickToContinue: "Pick the answer closest to what's true today.",
 ```
 
-Tests under `'O4 pickToContinue'` describe.
+Differentiated from AC-3: O4 is a factual employment-categorization question, so the AFTER uses O5's existing factual-frame reframe (already in the codebase). O3 keeps the emotional-frame rewrite because its question is about relationship quality.
+
+Test under `chassis caption invariants` describe (single positive `.toBe()` assertion).
 
 ## AC-5 — O3 `bothAnswered`
 

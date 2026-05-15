@@ -38,7 +38,7 @@ export function getCopy(_stage: Stage): O4Copy {
       { value: 'both', primary: 'Yes', detail: 'we both are' },
     ],
     captions: {
-      pickToContinue: 'Pick the one closest to how things feel right now.',
+      pickToContinue: "Pick the answer closest to what's true today.",
       oneAnswered: 'Noted — keep going when you\'re ready.',
     },
     cta: {
