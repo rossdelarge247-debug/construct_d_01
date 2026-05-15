@@ -57,7 +57,7 @@ function leadPhrase(lead: LeadCategory): string {
 function primaryCTAForStage(stage: Stage | undefined): string {
   switch (stage) {
     case 'thinking': return 'See what comes next';
-    case 'decided': return 'Continue';
+    case 'decided': return 'Begin the plan';
     case 'in_process': return 'Pick up from here';
     default: return 'Continue';
   }

@@ -184,10 +184,10 @@ Phase 1 lands this register. Phase 2 user-review prunes / re-frames / prioritise
 
 | Finding | Severity | Status | Slice | Merge sha | PR |
 |---|---|---|---|---|---|
-| F-TONE-01 | STRONG | shipped | S-PROTO-tone-pass-positioning-batch | pending | pending |
-| F-TONE-02 | STRONG | shipped | S-PROTO-tone-pass-positioning-batch | pending | pending |
-| F-TONE-03 | STRONG | shipped | S-PROTO-tone-pass-positioning-batch | pending | pending |
-| F-TONE-04 | STRONG | ready for Phase 3 (CTA pass) | — | — | — |
+| F-TONE-01 | STRONG | shipped | S-PROTO-tone-pass-positioning-batch | c3ee0cc | #193 |
+| F-TONE-02 | STRONG | shipped | S-PROTO-tone-pass-positioning-batch | c3ee0cc | #193 |
+| F-TONE-03 | STRONG | shipped | S-PROTO-tone-pass-positioning-batch | c3ee0cc | #193 |
+| F-TONE-04 | STRONG | shipped | S-PROTO-tone-pass-cta-batch | pending | pending |
 | F-TONE-05 | STRONG | ready for Phase 3 (plan-output warmth) | — | — | — |
 | F-TONE-06 | STRONG | ready for Phase 3 (plan-output warmth) | — | — | — |
 | F-TONE-07 | STRONG | ready for Phase 3 (eyebrow + referent consistency) | — | — | — |

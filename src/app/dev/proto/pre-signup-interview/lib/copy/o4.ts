@@ -42,7 +42,7 @@ export function getCopy(_stage: Stage): O4Copy {
       oneAnswered: 'Answer recorded — continue when ready.',
     },
     cta: {
-      continue: 'Continue',
+      continue: 'Next: their side',
     },
   };
 }

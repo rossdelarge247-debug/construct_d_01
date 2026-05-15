@@ -41,7 +41,7 @@ export function getCopy(_stage: Stage): O5Copy {
       oneAnswered: 'Answer recorded — continue when ready.',
     },
     cta: {
-      continue: 'Continue',
+      continue: 'Next: what matters to you',
     },
   };
 }

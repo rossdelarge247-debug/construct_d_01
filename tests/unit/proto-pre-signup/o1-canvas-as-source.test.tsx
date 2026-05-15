@@ -32,9 +32,9 @@ describe('O1 (canvas-as-source)', () => {
     expect(screen.getByText("We're already in the process")).toBeTruthy();
   });
 
-  it('keeps Continue CTA disabled until a stage is selected', () => {
+  it('keeps the primary CTA disabled until a stage is selected', () => {
     renderO1();
-    const cta = screen.getByRole('button', { name: /continue/i });
+    const cta = screen.getByRole('button', { name: 'Set up your situation' });
     expect((cta as HTMLButtonElement).disabled).toBe(true);
     fireEvent.click(screen.getAllByRole('radio')[0]);
     expect((cta as HTMLButtonElement).disabled).toBe(false);
