@@ -54,9 +54,9 @@ export function getCopy(_stage: Stage): O3Copy {
       ],
     },
     captions: {
-      pickToContinue: 'Pick the option that fits best to continue.',
+      pickToContinue: 'Pick the one closest to how things feel right now.',
       privacyOptional: "Device privacy is optional — skip if you'd like.",
-      bothAnswered: 'Both answered.',
+      bothAnswered: 'Both noted — ready when you are.',
     },
   };
 }

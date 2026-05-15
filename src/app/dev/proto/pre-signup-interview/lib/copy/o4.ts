@@ -38,8 +38,8 @@ export function getCopy(_stage: Stage): O4Copy {
       { value: 'both', primary: 'Yes', detail: 'we both are' },
     ],
     captions: {
-      pickToContinue: 'Pick the option that fits to continue.',
-      oneAnswered: 'Answer recorded — continue when ready.',
+      pickToContinue: "Pick the answer closest to what's true today.",
+      oneAnswered: 'Noted — keep going when you\'re ready.',
     },
     cta: {
       continue: 'Next: their side',

@@ -66,7 +66,7 @@ describe('O3 (canvas-as-source)', () => {
   it('shows the "pick to continue" caption initially', () => {
     renderO3();
     expect(
-      screen.getByText('Pick the option that fits best to continue.'),
+      screen.getByText('Pick the one closest to how things feel right now.'),
     ).toBeTruthy();
   });
 
@@ -80,11 +80,11 @@ describe('O3 (canvas-as-source)', () => {
     ).toBeTruthy();
   });
 
-  it('shows the "Both answered" caption after picking both relationship + privacy', () => {
+  it('shows the both-answered caption after picking both relationship + privacy', () => {
     renderO3();
     fireEvent.click(radio(/Difficult/));
     fireEvent.click(radio('Yes'));
-    expect(screen.getByText('Both answered.')).toBeTruthy();
+    expect(screen.getByText('Both noted — ready when you are.')).toBeTruthy();
   });
 
   it('marks the selected radio as checked (controlled state)', () => {
