@@ -57,9 +57,9 @@ describe('O4 (canvas-as-source)', () => {
     expect(fieldset?.getAttribute('aria-labelledby')).toBe('o4-emp-legend');
   });
 
-  it('disables the Continue CTA until any self-employment option is picked', () => {
+  it('disables the primary CTA until any self-employment option is picked', () => {
     renderO4();
-    const cta = screen.getByRole('button', { name: /Continue/ }) as HTMLButtonElement;
+    const cta = screen.getByRole('button', { name: 'Next: their side' }) as HTMLButtonElement;
     expect(cta.disabled).toBe(true);
     fireEvent.click(radio(/Yes.*I am/));
     expect(cta.disabled).toBe(false);

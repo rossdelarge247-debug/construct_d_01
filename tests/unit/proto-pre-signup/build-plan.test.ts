@@ -85,7 +85,7 @@ describe('buildPlanFromAnswers', () => {
 
     it('primaryCTA varies per stage', () => {
       expect(buildPlanFromAnswers({ stage: 'thinking' }).links.primaryCTA).toBe('See what comes next');
-      expect(buildPlanFromAnswers({ stage: 'decided' }).links.primaryCTA).toBe('Continue');
+      expect(buildPlanFromAnswers({ stage: 'decided' }).links.primaryCTA).toBe('Begin the plan');
       expect(buildPlanFromAnswers({ stage: 'in_process' }).links.primaryCTA).toBe('Pick up from here');
       expect(buildPlanFromAnswers({}).links.primaryCTA).toBe('Continue');
     });

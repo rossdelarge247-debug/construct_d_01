@@ -103,9 +103,9 @@ describe('O5 (canvas-as-source)', () => {
     expect(littleRadio.getAttribute('value')).toBe('little');
   });
 
-  it('disables the Continue CTA until any awareness option is picked', () => {
+  it('disables the primary CTA until any awareness option is picked', () => {
     renderO5();
-    const cta = screen.getByRole('button', { name: /Continue/ }) as HTMLButtonElement;
+    const cta = screen.getByRole('button', { name: 'Next: what matters to you' }) as HTMLButtonElement;
     expect(cta.disabled).toBe(true);
     fireEvent.click(radio(/I know some things but not all/));
     expect(cta.disabled).toBe(false);
