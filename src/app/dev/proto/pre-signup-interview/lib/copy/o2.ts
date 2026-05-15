@@ -40,7 +40,7 @@ export interface O2Copy {
 
 export function getCopy(_stage: Stage): O2Copy {
   return {
-    eyebrow: 'O2 · Your situation',
+    eyebrow: 'Your situation',
     heading: { kind: 'split', bold: 'Your', accent: 'situation', period: true },
     whyWeAsk: 'Civil partnerships, marriages, and cohabiting unions each have their own legal process. Children and housing change what the plan needs to cover.',
     relationship: {

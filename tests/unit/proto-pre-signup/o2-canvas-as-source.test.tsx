@@ -27,7 +27,7 @@ describe('O2 (canvas-as-source)', () => {
 
   it('renders the eyebrow + heading from the copy resolver (TitleShape split)', () => {
     renderO2();
-    expect(screen.getByText('O2 · Your situation')).toBeTruthy();
+    expect(screen.getByText('Your situation')).toBeTruthy();
     const heading = screen.getByRole('heading', { level: 1 });
     expect(heading.textContent).toBe('Your situation.');
     const accent = within(heading).getByText('situation');
