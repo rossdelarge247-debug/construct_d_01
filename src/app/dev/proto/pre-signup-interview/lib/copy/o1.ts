@@ -49,7 +49,7 @@ export function getCopy(_stage: Stage): O1Copy {
       { value: 'thinking', label: 'I\'m thinking about separating', sub: 'You want to understand what\'s involved.' },
       { value: 'in_process', label: 'We\'re already in the process', sub: 'You want to get things moving faster.' },
     ],
-    cta: 'Continue',
+    cta: 'Set up your situation',
     trustBand: { left: 'Free', right: 'Private until saved' },
   };
 }
