@@ -202,7 +202,7 @@ export function O2() {
       </div>
       <Footer
         caption={copy.ctaCaption(answered)}
-        ctaLabel="Continue"
+        ctaLabel={copy.cta.label}
         enabled={answered === 4}
         onContinue={next}
       />

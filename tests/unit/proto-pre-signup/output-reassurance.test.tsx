@@ -41,7 +41,7 @@ describe('O7 reassurance copy', () => {
     const text = document.body.textContent ?? '';
     const situationIdx = text.indexOf('Your situation');
     const reassuranceMatch = text.search(/ve built a strong starting position/);
-    const footerCtaIdx = text.indexOf("What's next");
+    const footerCtaIdx = text.lastIndexOf('Continue');
 
     expect(situationIdx).toBeGreaterThanOrEqual(0);
     expect(reassuranceMatch).toBeGreaterThanOrEqual(0);

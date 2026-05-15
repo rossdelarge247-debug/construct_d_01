@@ -1,70 +1,57 @@
-# Session 102 Pre-flight Context Block (carrying session 101 wrap delta)
+# Session 103 Pre-flight Context Block (carrying session 102 wrap delta)
 
-## Session 101 wrap delta — read this first
+## Session 102 wrap delta — read this first
 
-Session 101 closed P1 (Tone audit Phase 1) end-to-end. **All 14 audit findings shipped to `main`** across 8 PRs spanning the audit lifecycle: register → calibration → 5 implementation slices → 1 housekeeping.
+Session 102 closed P1 (Copy-resolver-completeness sweep) + P2 (`primaryCTA` dead-code resolution) in **one combined slice** — both priorities shared the same surface (O7 + `lib/copy/*` + `screens/*.tsx`), so bundled into a single PR.
 
-**Squash-merge sequence:**
+**Squash-merge target (pending at session-102 wrap):**
 
-| PR | Title | Squash sha |
-|---|---|---|
-| #191 | `S-PROTO-tone-audit-phase-1` (audit register, 14 findings) | `8ff2edc` |
-| #192 | `S-PROTO-tone-audit-phase-1 · Phase 2 amendment` (all → STRONG) | `7b68d4b` |
-| #193 | `S-PROTO-tone-pass-positioning-batch` (F-TONE-01/02/03) | `c3ee0cc` |
-| #194 | `S-PROTO-tone-pass-cta-batch` (F-TONE-04) | `917af25` |
-| #195 | `S-PROTO-tone-pass-plan-output-warmth` (F-TONE-05/06/13 + F-TONE-03 cascade) | `a6401eb` |
-| #196 | `S-PROTO-tone-pass-chassis-captions` (F-TONE-08/09/10 + audit-extension) | `9b8a522` |
-| #197 | `S-PROTO-tone-pass-eyebrow-referent-and-o7-polish` (F-TONE-07/11/12/14 + audit-extension, bundled batches 5+6) | `d9937e4` |
-| #198 | `docs(audit-register): housekeep F-TONE-07/11/12/14 sha + PR` | `ddbe040` |
+| PR | Title | Head sha | State |
+|---|---|---|---|
+| #200 | `S-PROTO-copy-resolver-sweep · close audit-walk gap + wire primaryCTA` | `26013d9` | Open · 25/25 CI green · auto-review ✅ approve · CODEOWNERS admin-bypass merge pending |
 
-**Detailed retro durably captured in `docs/HANDOFF-SESSION-101.md`** — per-PR merge sequence, what-went-well + what-could-improve (test-description provenance anti-pattern repeated across 3 batches · severity-tier collapse with strict user · per-batch test cascade pattern), key decisions, recurrence-watch hits, persona retention recommendations.
+**Detailed retro durably captured in `docs/HANDOFF-SESSION-102.md`** — mid-flight scope-expansion gate (attribute hardcodes → JSX-text hardcodes), 42-string sweep mechanics, persona findings round-by-round, retain/drop tracking progress.
 
-**State on `main` at session 101 wrap:**
+**State on branch at session 102 wrap (pre-merge):**
 
-- **14/14 audit findings shipped** with complete sha + PR provenance per row in `docs/slices/S-PROTO-tone-audit-phase-1/acceptance.md` §Status table.
-- Audit register's §Severity ladder carries a "Phase 2 calibration result" annotation (all 11 initially-MILD findings upgraded by user review; lesson durably recorded for future audits).
-- 5 new tests/unit/proto-pre-signup/ test files added (one per Phase 3 batch); ~35 new test cases.
-- ~10 pre-existing test files updated for cascading string changes (23 assertions total).
-- All 8 pre-signup interview screens (O1-O8) carry tone-pass-corrected copy. Cross-screen referent consistency: `'partner'` used pre-decision (per F-TONE-14); `'ex'` reserved for stage-specific contexts.
-- Two discoveries flagged for follow-up: O2.tsx `ctaLabel="Continue"` hardcoded outside copy resolver (escaped Phase 1 audit) + `primaryCTA` dead code in `links.primaryCTA` (computed but unrendered).
+- **42 hardcoded user-facing strings** moved from `screens/*.tsx` into `lib/copy/*.ts` resolvers (O2 + O3 + O7 + O8 surfaces; new `lib/copy/o7.ts` + `lib/copy/o8.ts` authored).
+- **`primaryCTA` wired** — O7's Footer ctaLabel reads `plan.links.primaryCTA` (stage-specific per `primaryCTAForStage`). F-TONE-04 audit intent now reaches the user.
+- **Regression invariant** — `tests/unit/proto-pre-signup/copy-resolver-invariant.test.ts` scans all 8 screen files for both attribute hardcodes AND JSX text content hardcodes; empty allowlist at slice ship; CI gate guards against re-introduction.
+- 3 new test files added (43 new test cases); 2 pre-existing test cascades resolved (`o7-canvas-as-source` + `output-reassurance` flipped from `"What's next"` to `'Continue'` default-stage assertion).
+- 673/673 tests pass on slice ship (was 632/632 at session 101 wrap).
 
-**Session 101 net diff vs origin/main pre-session:** the 8 merged PRs landed ~30 LoC src/ string-literal edits + ~35 new tests + ~23 updated assertions + 5 new slice docs (acceptance + verification per batch) + 1 audit register doc + 1 audit-register §Status table populated through 14/14 + 1 HANDOFF + 1 SESSION-CONTEXT refresh.
+**Pending user-actions on PR #200 before merge:**
 
-## Session 102 priorities — user picks scope
+- Mobile-viewport preview check at 375px (confirm `'See what comes next'` — stage `thinking` primaryCTA, 20 chars — renders cleanly in Footer button without overflow/wrap). Preview URL: https://construct-dev-git-claude-b3a2d3-rossdelarge247-debugs-projects.vercel.app/dev/proto/pre-signup-interview
+- CODEOWNERS admin-bypass merge click (solo-operator pattern).
+- Update `verification.md` mobile-viewport row from "pending" to "confirmed" with preview-deploy evidence.
 
-All session-101 work is now on `main`. No carry-over in-flight PRs.
+## Session 103 priorities — user picks scope
+
+PR #200 may still be open at session 103 kickoff (pending user-action above). Verify state via `mcp__github__pull_request_read` on PR #200 before treating it as merged.
 
 | # | Priority | Scope | Effort | Blocked? |
 |---|---|---|---|---|
-| 1 | **(New, from session 101 discovery)** Copy-resolver-completeness sweep | Walk all `screens/*.tsx` files for hardcoded user-facing strings outside the copy resolver. O2.tsx `ctaLabel="Continue"` is the surfaced instance (escaped Phase 1 audit because audit walked `lib/copy/*.ts` files only). Outcome: either move strings into the copy resolver OR document why they're locally-hardcoded. Could pair with P2 if user wants O7 wired or pruned in one pass. | Light-medium | No |
-| 2 | **(New, optional)** `primaryCTA` dead-code resolution | `links.primaryCTA` computed by `primaryCTAForStage` and stored in `PlanContent.links` but not rendered by any screen. Decision call: wire into O7's rendering (per F-TONE-04 audit intent — `'Begin the plan'`) OR remove the dead computation + the type field. | Light | No |
-| 3 | **(Inherited)** Desktop graceful enhancement | Help Rail integration + intermediate breakpoints + extra-space utilisation above 480px. | Heavy | No |
-| 4 | **(Inherited)** Spec 65 amendment for quantitative profiling data | Heavy | No |
+| 1 | **(Inherited)** Desktop graceful enhancement | Help Rail integration + intermediate breakpoints + extra-space utilisation above 480px. | Heavy | No |
+| 2 | **(Inherited)** Spec 65 amendment for quantitative profiling data | Capture the structured profiling rows beyond the qualitative stage axis. | Heavy | No |
 
-P1 (tone audit Phase 1) closed this session in full. Removed from priority list.
+P1 + P2 (copy-resolver-completeness sweep + `primaryCTA` dead-code) closed in full this session. Removed from priority list.
 
-**Recommended:** P1 (copy-resolver-completeness sweep) as the natural next move — closes the audit-walk gap exposed by session 101's batch 2 discovery. Could pair with P2 if user wants the same surface (O7 + `primaryCTA`) addressed in one pass.
+**Recommended:** either P1 or P2 is fine for session 103 — both Heavy items that would fit a fresh session window. P1 (desktop graceful enhancement) is the natural visual continuation now that all 8 mobile screens are tone-pass + copy-resolver-complete; P2 (spec 65 amendment) is a spec-layer task with no src/ overlap.
 
-## Scoping-discipline observations carried as recurrence-watch (13 + 1 + 3 = 17 items, mostly one-session-observed)
+## Scoping-discipline observations carried as recurrence-watch (13 + 1 + 3 + 1 = 18 items, mostly one-session-observed)
 
-**Session 101 applied:**
-- Verify before planning ✓ (live-state grep on `lib/copy/*.ts` literals before each batch's AC freeze).
-- Quote, don't paraphrase, when invoking a spec ✓ (every audit register row carried the BEFORE literal as a verbatim quote; every batch's AC carried the BEFORE/AFTER pair verbatim).
-- Plan-vs-spec cross-check before the first actionable step ✓ (each batch's acceptance.md cross-checked against the audit register's row).
-- Path options carry spec refs ✓ (batch 4 audit-extension call cited CLAUDE.md §"Surgical changes" tension explicitly).
-- Think before coding (name uncertainty) ✓ (F-TONE-13 label register call escalated to user before commit when persona finding hit; user-confirmed `'us'` positioning lean).
-- AC-impl cross-check at impl-time ✓ (each batch's AC quoted BEFORE/AFTER verbatim).
-- In-PR scope-expansion confirmation gate ✓ (audit-extensions in batches 2/4/5 all named in §AC rationale).
-- Audit findings need active-spec cross-reference at audit time ✓.
-- Post-batch §Status sweep inline with finding-impl slice ✓ (5/5 Phase 3 batches inline; #198 closed final-batch residual).
+**Session 102 applied:**
+- Verify before planning ✓ (live grep on `screens/*.tsx` hardcodes before AC freeze; second-pass grep surfaced JSX-text-content gap that triggered scope-expansion gate).
+- Mid-flight scope-expansion confirmation gate ✓ (user-confirmed Option A "full broad" before AC-3/AC-5 expanded inline; documented in `acceptance.md` as a §"Mid-flight scope-expansion note").
+- Quote, don't paraphrase, when invoking a spec ✓ (acceptance.md cites CLAUDE.md §"Names carry the design" + §"Simplicity first" verbatim for both style nitpicks; verification.md cites spec 72b §"Decision criteria" row 1 verbatim for adversarial-review budget choice).
+- Plan-vs-spec cross-check before the first actionable step ✓ (AC-1..AC-6 cross-checked against CLAUDE.md §"Coding conduct" + §"Engineering conventions" before any code edit).
 
-**New observations this session (one-session; promote to numbered recurrence-watch if a second session repeats):**
+**New observation this session (one-session; promote to numbered recurrence-watch if a second session repeats):**
 
-- **Test-description provenance anti-pattern**: across 5 Phase 3 slices, finding-IDs + slice-names + temporal-project-state landed in describe + it text on 3 of them, even after auto-review style persona flagged it on the first one. Pattern: persona findings on common anti-patterns aren't one-PR lessons; they're rules to lift into subsequent batches. Likely candidate for promotion given the failure-mode pattern (rule clarity ≠ rule internalisation).
-- **Severity-tier collapse with strict user**: Phase 2 calibration upgraded all 11 MILD to STRONG. The MILD severity tier wasn't carrying value for this product's quality bar. Future audits should default STRONG when in doubt; MILD reserved for surfaces that meet the bar but could be sharpened. Documented in audit register's §Severity ladder annotation.
-- **Per-batch test cascade pattern**: when copy-only batches edit string literals referenced by existing screen tests, expect 3-8 pre-existing assertions to break per batch. Test cascade is part of the batch scope, not surprise work. Budget that into the batch.
+- **Audit-walk regex coverage**: the original session-101 audit walked `lib/copy/*.ts` only and missed `screens/*.tsx`; session-102's slice initially also focused on attribute-style hardcodes and missed JSX text content. **Two regex passes** were needed before the sweep was complete. Pattern: audit-walk completeness is an active design surface, not a one-shot grep. Worth considering whether the invariant test pattern (regex scan over the target surface family) should also run at audit time as a discovery aid, not just as a regression guard.
 
-**Active recurrence-watch items unchanged:**
+**Active recurrence-watch items unchanged (carried from session 101):**
 - AC-impl cross-check at impl-time
 - Sibling-wrapper diff at impl-time
 - Shared-infrastructure audit at refactor-time
@@ -78,41 +65,45 @@ P1 (tone audit Phase 1) closed this session in full. Removed from priority list.
 - Pre-existing CI noise should be queued, not deferred indefinitely
 - Post-batch §Status sweep inline with finding-impl slice
 - Documentation-meta-loop on guard-rule prose
-- Skip-walk + structured retro pattern (from session 100; one-session-observed)
+- Skip-walk + structured retro pattern (from session 100)
+- Test-description provenance anti-pattern (from session 101)
+- Severity-tier collapse with strict user (from session 101)
+- Per-batch test cascade pattern (from session 101)
 
-## Authoritative reading order at session 102 start
+## Authoritative reading order at session 103 start
 
 1. This file (you are here).
-2. `docs/HANDOFF-SESSION-101.md` (session 101's retro — 8-PR audit lifecycle).
-3. `docs/HANDOFF-SESSION-100.md` (session 100's retro — merge closure + tone-pass slice that surfaced 4 mild findings feeding into Phase 1 audit).
-4. **For P1 (copy-resolver-completeness sweep):** start with `grep -rn "ctaLabel\|aria-label\|placeholder" src/app/dev/proto/pre-signup-interview/screens/*.tsx` to enumerate hardcoded strings. Audit walked `lib/copy/*.ts` only; the sweep extends to JSX-embedded strings.
-5. **For P2 (`primaryCTA` cleanup):** `src/app/dev/proto/pre-signup-interview/lib/build-plan.ts:57-64` (function) + `lib/types.ts:81` (type field) + `screens/O7.tsx` (no current usage to remove — would need to add usage to keep the field).
+2. `docs/HANDOFF-SESSION-102.md` (session 102's retro — copy-resolver sweep + primaryCTA wire + persona round-by-round).
+3. `docs/HANDOFF-SESSION-101.md` (session 101's retro — 8-PR tone-audit lifecycle).
+4. **Before treating PR #200 as merged:** verify state via `mcp__github__pull_request_read` (method `get`); if `merged: false`, session 103 work must NOT collide with the unmerged surface (O7 + O8 + `lib/copy/o7.ts` + `lib/copy/o8.ts` + 3 new test files + 2 cascade-updated test files).
+5. **For P1 (desktop graceful enhancement):** start with `docs/workspace-spec/` for any existing desktop-shell specs; spec 71 §4 hexagonal architecture; `src/components/document-shell/` for breakpoint primitives. Help Rail is the central component — spec ref pending.
+6. **For P2 (spec 65 amendment):** `docs/workspace-spec/65-pre-signup-interview-reconciled.md` for the existing reconciled doc; quantitative profiling rows complement the qualitative stage axis already captured.
 
-## Session 102 kickoff prompt (paste-ready)
+## Session 103 kickoff prompt (paste-ready)
 
 ```
-Kick off session 102.
+Kick off session 103.
 
 Read this file (SESSION-CONTEXT.md) first.
 
 Turn-0 verification:
 - SessionStart hook surfaces live branch state.
 - Branch convention: harness-suffixed off clean main, OR scope-named
-  sub-branch (e.g. claude/session-102-copy-resolver-sweep for P1).
-- Session 101 wrap closed all 8 PRs. No carry-over in-flight PRs
-  into session 102.
+  sub-branch (e.g. claude/session-103-desktop-enhancement for P1).
+- Session 102 wrap closed P1 + P2; PR #200 may or may not be merged
+  at kickoff — verify via mcp__github__pull_request_read before
+  treating as on main.
 - If the harness landed you on a different base, follow CLAUDE.md
-  §"Branch-resume check": git fetch / git checkout -B / per per-slice
-  branch resume.
+  §"Branch-resume check": git fetch / git checkout -B.
 
 Read at session start (Tier 2 + Tier 3, in order):
 1. docs/SESSION-CONTEXT.md (this file).
-2. docs/HANDOFF-SESSION-101.md.
-3. docs/HANDOFF-SESSION-100.md.
+2. docs/HANDOFF-SESSION-102.md.
+3. docs/HANDOFF-SESSION-101.md.
 
-Confirm priority with user. SESSION-CONTEXT recommends P1
-(copy-resolver-completeness sweep) as the natural next move — closes
-the audit-walk gap exposed by session 101's batch 2 discovery.
+Confirm priority with user. SESSION-CONTEXT recommends either P1
+(desktop graceful enhancement) or P2 (spec 65 amendment) — both
+Heavy, both fresh-session-sized.
 ```
 
 ## Product positioning (preserve across sessions)
@@ -121,25 +112,25 @@ Decouple is the **complete settlement workspace for separating couples**. NOT a 
 
 ## Stack
 
-Next.js 14 (app router) + TypeScript · Tailwind v4 via CSS variables · S-F1 token system at `src/styles/tokens.ts` (76 tokens) · Tink for bank connect · Anthropic SDK for AI extraction · Vercel previews per branch, production at `construct-dev.vercel.app`. Pre-signup-interview prototype: 8 canvas-as-source screens (O1-O8) on main with shared chassis primitives (TopBar / Hero / Footer) + density-entry (EntryScaffold on O1) + density-question (WhyWeAsk on O1-O6) + delight (spec-26 compliance) + output-reassurance (Reassurance on O7) + spec 65 §O7 *"Adaptive plan shape"* amendment + 4-dimension adaptive-plan impl + tone-pass on `build-plan.ts` copy strings (5 fixes from session 100) + **14-finding cross-screen Tone audit Phase 1 fully shipped (session 101: 14/14 findings closed)**.
+Next.js 14 (app router) + TypeScript · Tailwind v4 via CSS variables · S-F1 token system at `src/styles/tokens.ts` (76 tokens) · Tink for bank connect · Anthropic SDK for AI extraction · Vercel previews per branch, production at `construct-dev.vercel.app`. Pre-signup-interview prototype: 8 canvas-as-source screens (O1-O8) on main with shared chassis primitives (TopBar / Hero / Footer) + density-entry (EntryScaffold on O1) + density-question (WhyWeAsk on O1-O6) + delight (spec-26 compliance) + output-reassurance (Reassurance on O7) + spec 65 §O7 *"Adaptive plan shape"* amendment + 4-dimension adaptive-plan impl + tone-pass on `build-plan.ts` copy strings (5 fixes from session 100) + **14-finding cross-screen Tone audit Phase 1 fully shipped (session 101)** + **42-string copy-resolver-completeness sweep + primaryCTA wire + invariant test (session 102, PR #200 pending merge)**.
 
 ## Branch
 
-Session 102 branch: harness-suffixed off clean main, OR scope-named sub-branch (e.g. `claude/session-102-copy-resolver-sweep` for P1 scope).
+Session 103 branch: harness-suffixed off clean main once PR #200 lands, OR scope-named sub-branch (e.g. `claude/session-103-desktop-enhancement` for P1 scope).
 
 ## Negative constraints (preserve)
 
-#1-#41 from prior sessions. **No new numbered constraints surfaced session 101.** Thirteen-plus-four scoping-discipline observations on recurrence-watch (all from earlier sessions plus 3 new from session 101). Promote to numbered constraint if a second session surfaces the same recurrence for any item.
+#1-#41 from prior sessions. **No new numbered constraints surfaced session 102.** Eighteen scoping-discipline observations on recurrence-watch (1 new from session 102 — audit-walk regex coverage; promote to numbered constraint if a second session surfaces the same recurrence).
 
 **Active pre-existing CI failures (carry forward):**
-- `spec-citation-quote-check` — fires on newly-added slice docs; gate workflow's comment acknowledges *"Pragmatic scope: gate fires on Added files, not Modified. Pre-existing per-cite citations across the corpus would block every spec-modifying PR otherwise."* Acceptable carry; track for eventual line-level diff filtering improvement. Session 101 found two further hook-regex limitations worth noting: (a) indented blockquotes inside list-item continuations don't satisfy the `^>` regex; (b) the hook flags `per spec X` patterns even when the literal sentence appears in an adjacent file (the regex doesn't follow cross-file references). Workaround: outdent block-quote or drop spec attribution.
+- `spec-citation-quote-check` — fires on newly-added slice docs; gate workflow's comment acknowledges *"Pragmatic scope: gate fires on Added files, not Modified. Pre-existing per-cite citations across the corpus would block every spec-modifying PR otherwise."* Acceptable carry; session 102's PR #200 passed the gate cleanly. Session 101 found two further hook-regex limitations: (a) indented blockquotes inside list-item continuations don't satisfy the `^>` regex; (b) the hook flags `per spec X` patterns even when the literal sentence appears in an adjacent file. Workaround: outdent block-quote or drop spec attribution.
 
 ## Scope ceiling
 
-Session 102 is most likely **P1 (copy-resolver-completeness sweep)** alone given its light-medium size + surface-walk nature. Could pair with P2 (`primaryCTA` dead-code resolution) if user wants to address all O7 surface gaps in one pass. Out of scope unless explicitly added: post-signup work · Welcome Tour · Marketing Landing · Post-connect Dashboard · `Decouple.zip` unpacking · Mobile Screens v2 · authenticated-screens header work.
+Session 103 is most likely **either P1 (desktop graceful enhancement) OR P2 (spec 65 amendment)** alone given the Heavy effort tier of both. Both fit a fresh session window. Out of scope unless explicitly added: post-signup work · Welcome Tour · Marketing Landing · Post-connect Dashboard · `Decouple.zip` unpacking · Mobile Screens v2 · authenticated-screens header work.
 
 ## Current pre-signup prototype URL
 
 - Production: `https://construct-dev.vercel.app/dev/proto/pre-signup-interview`
 - Per-PR preview: surfaced as Vercel comment on each PR.
-- All 8 screens (O1-O8) canvas-as-source on main. All chassis primitives + density-entry + density-question + delight compliance + output-reassurance + 4-dimension adaptive plan all merged. Density + delight + output-reassurance audit findings closed (10 of 10). **Cross-screen tone audit Phase 1 closed (14 of 14, session 101).**
+- All 8 screens (O1-O8) canvas-as-source on main. All chassis primitives + density-entry + density-question + delight compliance + output-reassurance + 4-dimension adaptive plan all merged. Density + delight + output-reassurance audit findings closed (10 of 10). **Cross-screen tone audit Phase 1 closed (14 of 14, session 101).** **Copy-resolver-completeness sweep + primaryCTA wire (session 102, PR #200 pending merge).**

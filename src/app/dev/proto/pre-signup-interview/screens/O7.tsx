@@ -9,6 +9,7 @@ import { TopBar } from '../components/TopBar';
 import { useProto } from '../lib/proto-context';
 import { buildPlanFromAnswers } from '../lib/build-plan';
 import type { Answers } from '../lib/types';
+import { getCopy, type O7Copy } from '../lib/copy/o7';
 import styles from './O7.module.css';
 
 type O7State = 'generating' | 'ready';
@@ -110,7 +111,7 @@ function BreathingHalo({ size = 180 }: { size?: number }) {
   );
 }
 
-function MobileHero() {
+function MobileHero({ copy }: { copy: O7Copy }) {
   return (
     <div style={{
       background: EXPRESSIVE_HERO,
@@ -126,16 +127,16 @@ function MobileHero() {
       }} />
       <div style={{ position: 'relative' }}>
         <Hero
-          eyebrow="Your plan is ready"
+          eyebrow={copy.hero.eyebrow}
           eyebrowColor={colors.violet}
           heading={
             <>
-              Here&apos;s{' '}
-              <span style={{ fontStyle: 'italic', fontWeight: 400, color: colors.magenta }}>your plan</span>
-              .
+              {copy.hero.heading.prefix}{' '}
+              <span style={{ fontStyle: 'italic', fontWeight: 400, color: colors.magenta }}>{copy.hero.heading.accent}</span>
+              {copy.hero.heading.suffix}
             </>
           }
-          helper="Built from your six answers — a warm picture of where you are, what's ahead, and what your options are."
+          helper={copy.hero.helper}
           helperVariant="italic-serif"
         />
         <div style={{ padding: '8px 20px 22px' }}>
@@ -147,18 +148,18 @@ function MobileHero() {
               color: colors.ink, fontSize: 12, fontWeight: 600, cursor: 'pointer',
             }}>
               <DownloadIcon size={12} />
-              <span>Download as PDF</span>
+              <span>{copy.actions.downloadAsPdf}</span>
             </button>
             <a href="#" style={{
               display: 'inline-flex', alignItems: 'center', gap: 6,
               fontSize: 12, padding: '6px 8px', color: colors.sub, textDecoration: 'none',
             }}>
               <MailIcon size={11} />
-              <span style={{ textDecoration: 'underline', textUnderlineOffset: 4 }}>Email it to me</span>
+              <span style={{ textDecoration: 'underline', textUnderlineOffset: 4 }}>{copy.actions.emailToMe}</span>
             </a>
           </div>
           <div style={{ marginTop: 12, fontSize: 10.5, color: colors.muted }}>
-            ~5 min read · 4 pages · yours to keep
+            {copy.hero.meta}
           </div>
         </div>
       </div>
@@ -207,10 +208,14 @@ function sectionEntryStyle(staggerIndex: number): CSSProperties {
   return { ...SECTION_PAD, ['--stagger-index' as string]: staggerIndex };
 }
 
-function SituationSummary({ summary, staggerIndex }: { summary: string; staggerIndex: number }) {
+function SituationSummary({ headerCopy, summary, staggerIndex }: {
+  headerCopy: { eyebrow: string; title: string };
+  summary: string;
+  staggerIndex: number;
+}) {
   return (
     <section className={styles.entry} style={sectionEntryStyle(staggerIndex)}>
-      <MobileSectionHeader eyebrow="Section 1 · what you told us" title="Your situation" eyebrowColor={colors.violet} />
+      <MobileSectionHeader eyebrow={headerCopy.eyebrow} title={headerCopy.title} eyebrowColor={colors.violet} />
       <div style={{
         background: '#FFFFFF',
         border: `1px solid ${colors.border}`,
@@ -228,14 +233,15 @@ function SituationSummary({ summary, staggerIndex }: { summary: string; staggerI
 
 type JourneyStage = { key: string; label: string; sub: string };
 
-function DivorceJourney({ stages, currentStageKey, staggerIndex }: {
+function DivorceJourney({ headerCopy, stages, currentStageKey, staggerIndex }: {
+  headerCopy: { eyebrow: string; title: string };
   stages: ReadonlyArray<JourneyStage>;
   currentStageKey: string | undefined;
   staggerIndex: number;
 }) {
   return (
     <section className={styles.entry} style={sectionEntryStyle(staggerIndex)}>
-      <MobileSectionHeader eyebrow="Section 2 · the journey" title="What separation looks like" eyebrowColor={colors.violet} />
+      <MobileSectionHeader eyebrow={headerCopy.eyebrow} title={headerCopy.title} eyebrowColor={colors.violet} />
       <ol style={{
         margin: 0,
         padding: 0,
@@ -302,10 +308,14 @@ function DivorceJourney({ stages, currentStageKey, staggerIndex }: {
   );
 }
 
-function WhatNeedsToHappen({ items, staggerIndex }: { items: ReadonlyArray<string>; staggerIndex: number }) {
+function WhatNeedsToHappen({ headerCopy, items, staggerIndex }: {
+  headerCopy: { eyebrow: string; title: string };
+  items: ReadonlyArray<string>;
+  staggerIndex: number;
+}) {
   return (
     <section className={styles.entry} style={sectionEntryStyle(staggerIndex)}>
-      <MobileSectionHeader eyebrow="Section 3 · tailored to you" title="What needs to happen" eyebrowColor={colors.violet} />
+      <MobileSectionHeader eyebrow={headerCopy.eyebrow} title={headerCopy.title} eyebrowColor={colors.violet} />
       <ul style={{
         margin: 0,
         padding: 0,
@@ -347,10 +357,14 @@ function WhatNeedsToHappen({ items, staggerIndex }: { items: ReadonlyArray<strin
 
 type ConventionalPathData = { headline: string; cost: string; timeline: string; body: string };
 
-function ConventionalPath({ path, staggerIndex }: { path: ConventionalPathData; staggerIndex: number }) {
+function ConventionalPath({ headerCopy, path, staggerIndex }: {
+  headerCopy: { eyebrow: string };
+  path: ConventionalPathData;
+  staggerIndex: number;
+}) {
   return (
     <section className={styles.entry} style={sectionEntryStyle(staggerIndex)}>
-      <MobileSectionHeader eyebrow="Section 4 · for comparison" title={path.headline} eyebrowColor={SOFTMUTE} />
+      <MobileSectionHeader eyebrow={headerCopy.eyebrow} title={path.headline} eyebrowColor={SOFTMUTE} />
       <div style={{
         background: PAPER_WARM,
         border: `1px solid ${colors.border}`,
@@ -383,10 +397,14 @@ function ConventionalPath({ path, staggerIndex }: { path: ConventionalPathData; 
 
 type DecoupleHelpsData = { headline: string; body: string; pillars: ReadonlyArray<string> };
 
-function DecoupleHelps({ help, staggerIndex }: { help: DecoupleHelpsData; staggerIndex: number }) {
+function DecoupleHelps({ headerCopy, help, staggerIndex }: {
+  headerCopy: { eyebrow: string };
+  help: DecoupleHelpsData;
+  staggerIndex: number;
+}) {
   return (
     <section className={styles.entry} style={sectionEntryStyle(staggerIndex)}>
-      <MobileSectionHeader eyebrow="Section 5 · how decouple helps" title={help.headline} eyebrowColor={colors.violet} />
+      <MobileSectionHeader eyebrow={headerCopy.eyebrow} title={help.headline} eyebrowColor={colors.violet} />
       <p style={{ margin: '0 0 14px', fontSize: 14, lineHeight: 1.55, color: colors.ink }}>
         {help.body}
       </p>
@@ -420,7 +438,8 @@ function DecoupleHelps({ help, staggerIndex }: { help: DecoupleHelpsData; stagge
 
 type PersonalisedNote = { trigger: string; body: string };
 
-function PersonalisedNotes({ notes, staggerIndex }: {
+function PersonalisedNotes({ headerCopy, notes, staggerIndex }: {
+  headerCopy: { eyebrow: string; title: string; sub: string };
   notes: ReadonlyArray<PersonalisedNote>;
   staggerIndex: number;
 }) {
@@ -428,9 +447,9 @@ function PersonalisedNotes({ notes, staggerIndex }: {
   return (
     <section className={styles.entry} style={sectionEntryStyle(staggerIndex)}>
       <MobileSectionHeader
-        eyebrow="Section 6 · your specific notes"
-        title="Things to bear in mind"
-        sub="Drawn from the corners of your situation that need extra care."
+        eyebrow={headerCopy.eyebrow}
+        title={headerCopy.title}
+        sub={headerCopy.sub}
         eyebrowColor={colors.magenta}
       />
       <ul style={{ margin: 0, padding: 0, listStyle: 'none', display: 'flex', flexDirection: 'column', gap: 12 }}>
@@ -453,7 +472,7 @@ function PersonalisedNotes({ notes, staggerIndex }: {
   );
 }
 
-function Reassurance({ staggerIndex }: { staggerIndex: number }) {
+function Reassurance({ body, staggerIndex }: { body: string; staggerIndex: number }) {
   return (
     <section className={styles.entry} style={sectionEntryStyle(staggerIndex)}>
       <p style={{
@@ -466,23 +485,13 @@ function Reassurance({ staggerIndex }: { staggerIndex: number }) {
         fontStyle: 'italic',
         color: colors.sub,
       }}>
-        You&rsquo;ve built a strong starting position.
+        {body}
       </p>
     </section>
   );
 }
 
-type DisclosureState = 'done' | 'working' | 'pending';
-
-const DISCLOSURE_STEPS: ReadonlyArray<{ label: string; state: DisclosureState }> = [
-  { label: 'Listening to your situation', state: 'done' },
-  { label: 'Mapping the journey', state: 'done' },
-  { label: 'Tailoring next steps', state: 'done' },
-  { label: 'Comparing the conventional path', state: 'working' },
-  { label: 'Writing your specific notes', state: 'pending' },
-];
-
-function MobileGeneratingView() {
+function MobileGeneratingView({ copy }: { copy: O7Copy['generating'] }) {
   const { back } = useProto();
   return (
     <div style={{ position: 'relative', minHeight: 'calc(100vh - 24px)', overflow: 'hidden' }}>
@@ -502,7 +511,7 @@ function MobileGeneratingView() {
           <BreathingHalo size={180} />
 
           <div style={{ marginTop: 28 }}>
-            <Eyebrow color={colors.violet}>Drawing it together</Eyebrow>
+            <Eyebrow color={colors.violet}>{copy.eyebrow}</Eyebrow>
             <h1 style={{
               fontFamily: FONT_SERIF,
               margin: '12px 0 0',
@@ -512,7 +521,7 @@ function MobileGeneratingView() {
               letterSpacing: '-0.02em',
               color: colors.ink,
             }}>
-              Take a <span style={{ fontStyle: 'italic', fontWeight: 400, color: colors.magenta }}>breath</span>.
+              {copy.heading.prefix} <span style={{ fontStyle: 'italic', fontWeight: 400, color: colors.magenta }}>{copy.heading.accent}</span>{copy.heading.suffix}
             </h1>
             <p style={{
               fontFamily: FONT_SERIF,
@@ -523,14 +532,14 @@ function MobileGeneratingView() {
               color: colors.sub,
               maxWidth: 280,
             }}>
-              We&apos;re shaping this around the six things you&apos;ve told us. There&apos;s no clock here — we&apos;ll be ready when you are.
+              {copy.helper}
             </p>
           </div>
 
           <ul
             role="status"
             aria-live="polite"
-            aria-label="Plan generation progress"
+            aria-label={copy.ariaLabel}
             style={{
               marginTop: 28,
               padding: 0,
@@ -543,7 +552,7 @@ function MobileGeneratingView() {
               textAlign: 'left',
             }}
           >
-            {DISCLOSURE_STEPS.map(({ label, state }) => {
+            {copy.steps.map(({ label, state }) => {
               const isDone = state === 'done';
               const isWorking = state === 'working';
               return (
@@ -572,7 +581,7 @@ function MobileGeneratingView() {
                       color: colors.violet,
                       letterSpacing: '0.04em',
                     }}>
-                      working…
+                      {copy.workingIndicator}
                     </span>
                   )}
                 </li>
@@ -590,7 +599,7 @@ function MobileGeneratingView() {
             color: colors.muted,
             lineHeight: 1.5,
           }}>
-            &ldquo;A warm hand on a cold day.&rdquo;
+            {copy.quote}
           </div>
         </div>
       </div>
@@ -598,25 +607,26 @@ function MobileGeneratingView() {
   );
 }
 
-function MobileReadyView({ onNext, answers }: {
+function MobileReadyView({ onNext, answers, copy }: {
   onNext: () => void;
   answers: Answers;
+  copy: O7Copy;
 }) {
   const { back } = useProto();
   const plan = buildPlanFromAnswers(answers);
   return (
     <div className={styles.fadeIn} style={{ display: 'flex', flexDirection: 'column' }}>
       <TopBar step={7} onBack={back} />
-      <MobileHero />
-      <SituationSummary summary={plan.situationSummary} staggerIndex={1} />
-      <DivorceJourney stages={plan.journeyStages} currentStageKey={answers.stage} staggerIndex={2} />
-      <WhatNeedsToHappen items={plan.whatNeedsToHappen} staggerIndex={3} />
-      <ConventionalPath path={plan.conventionalPath} staggerIndex={4} />
-      <DecoupleHelps help={plan.howDecoupleHelps} staggerIndex={5} />
-      <PersonalisedNotes notes={plan.personalisedNotes} staggerIndex={6} />
-      <Reassurance staggerIndex={7} />
+      <MobileHero copy={copy} />
+      <SituationSummary headerCopy={copy.sections.situation} summary={plan.situationSummary} staggerIndex={1} />
+      <DivorceJourney headerCopy={copy.sections.journey} stages={plan.journeyStages} currentStageKey={answers.stage} staggerIndex={2} />
+      <WhatNeedsToHappen headerCopy={copy.sections.whatNeeds} items={plan.whatNeedsToHappen} staggerIndex={3} />
+      <ConventionalPath headerCopy={copy.sections.conventional} path={plan.conventionalPath} staggerIndex={4} />
+      <DecoupleHelps headerCopy={copy.sections.decoupleHelps} help={plan.howDecoupleHelps} staggerIndex={5} />
+      <PersonalisedNotes headerCopy={copy.sections.notes} notes={plan.personalisedNotes} staggerIndex={6} />
+      <Reassurance body={copy.reassurance} staggerIndex={7} />
       <Footer
-        ctaLabel="What's next"
+        ctaLabel={plan.links.primaryCTA}
         onContinue={onNext}
         secondaryActions={
           <>
@@ -627,14 +637,14 @@ function MobileReadyView({ onNext, answers }: {
               fontSize: 12.5, fontWeight: 600, cursor: 'pointer',
             }}>
               <DownloadIcon size={12} />
-              <span>Download as PDF</span>
+              <span>{copy.actions.downloadAsPdf}</span>
             </button>
             <a href="#" style={{
               display: 'inline-flex', alignItems: 'center', gap: 6,
               fontSize: 12.5, padding: '6px 8px', color: colors.sub, textDecoration: 'none',
             }}>
               <MailIcon size={11} />
-              <span style={{ textDecoration: 'underline', textUnderlineOffset: 4 }}>Email link</span>
+              <span style={{ textDecoration: 'underline', textUnderlineOffset: 4 }}>{copy.actions.emailLink}</span>
             </a>
           </>
         }
@@ -646,6 +656,7 @@ function MobileReadyView({ onNext, answers }: {
 export function O7() {
   const { answers, next } = useProto();
   const [state, setState] = useState<O7State>('generating');
+  const copy = getCopy(answers.stage ?? 'thinking');
 
   useEffect(() => {
     const timer = setTimeout(() => setState('ready'), GENERATING_DURATION_MS);
@@ -655,7 +666,7 @@ export function O7() {
   return (
     <main className={styles.main}>
       <BrandBar />
-      {state === 'generating' ? <MobileGeneratingView /> : <MobileReadyView onNext={next} answers={answers} />}
+      {state === 'generating' ? <MobileGeneratingView copy={copy.generating} /> : <MobileReadyView onNext={next} answers={answers} copy={copy} />}
     </main>
   );
 }
