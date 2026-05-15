@@ -24,7 +24,7 @@ describe('O4 (canvas-as-source)', () => {
 
   it('renders the canvas eyebrow + plain heading + helper sub-stem from the copy resolver', () => {
     renderO4();
-    expect(screen.getByText('Money')).toBeTruthy();
+    expect(screen.getByText('Money · your side')).toBeTruthy();
     const heading = screen.getByRole('heading', { level: 1 });
     expect(heading.textContent).toBe(
       'Does either of you work for yourself, or run a limited company?',
@@ -67,8 +67,8 @@ describe('O4 (canvas-as-source)', () => {
 
   it('marks the selected radio as checked (controlled state)', () => {
     renderO4();
-    fireEvent.click(radio(/Yes.*my ex is/));
-    expect(radio(/Yes.*my ex is/).checked).toBe(true);
+    fireEvent.click(radio(/Yes.*my partner is/));
+    expect(radio(/Yes.*my partner is/).checked).toBe(true);
     expect(radio(/Yes.*I am/).checked).toBe(false);
   });
 
