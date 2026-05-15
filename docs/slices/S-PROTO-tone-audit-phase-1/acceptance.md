@@ -190,14 +190,14 @@ Phase 1 lands this register. Phase 2 user-review prunes / re-frames / prioritise
 | F-TONE-04 | STRONG | shipped | S-PROTO-tone-pass-cta-batch | 917af25 | #194 |
 | F-TONE-05 | STRONG | shipped | S-PROTO-tone-pass-plan-output-warmth | a6401eb | #195 |
 | F-TONE-06 | STRONG | shipped | S-PROTO-tone-pass-plan-output-warmth | a6401eb | #195 |
-| F-TONE-07 | STRONG | shipped | S-PROTO-tone-pass-eyebrow-referent-and-o7-polish | pending | pending |
+| F-TONE-07 | STRONG | shipped | S-PROTO-tone-pass-eyebrow-referent-and-o7-polish | d9937e4 | #197 |
 | F-TONE-08 | STRONG | shipped | S-PROTO-tone-pass-chassis-captions | 9b8a522 | #196 |
 | F-TONE-09 | STRONG | shipped | S-PROTO-tone-pass-chassis-captions | 9b8a522 | #196 |
 | F-TONE-10 | STRONG | shipped | S-PROTO-tone-pass-chassis-captions | 9b8a522 | #196 |
-| F-TONE-11 | STRONG | shipped | S-PROTO-tone-pass-eyebrow-referent-and-o7-polish | pending | pending |
-| F-TONE-12 | STRONG | shipped | S-PROTO-tone-pass-eyebrow-referent-and-o7-polish | pending | pending |
+| F-TONE-11 | STRONG | shipped | S-PROTO-tone-pass-eyebrow-referent-and-o7-polish | d9937e4 | #197 |
+| F-TONE-12 | STRONG | shipped | S-PROTO-tone-pass-eyebrow-referent-and-o7-polish | d9937e4 | #197 |
 | F-TONE-13 | STRONG | shipped | S-PROTO-tone-pass-plan-output-warmth | a6401eb | #195 |
-| F-TONE-14 | STRONG | shipped | S-PROTO-tone-pass-eyebrow-referent-and-o7-polish | pending | pending |
+| F-TONE-14 | STRONG | shipped | S-PROTO-tone-pass-eyebrow-referent-and-o7-polish | d9937e4 | #197 |
 
 ## Workflow
 
