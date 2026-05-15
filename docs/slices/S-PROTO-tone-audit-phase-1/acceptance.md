@@ -22,6 +22,8 @@ Per CLAUDE.md §"Canvas-as-source (prototype default)": this audit slice doesn't
 - **STRONG** — actively misaligned with positioning; reader could feel framed-against, narrowed to a sub-product (e.g. financial-disclosure-only), or coldly handled. Should land in the next impl batch.
 - **MILD** — flat / anodyne / clinical / form-system register; not actively wrong but a missed warm-moment. Address opportunistically; batch with adjacent strong findings where the surface overlaps.
 
+**Phase 2 calibration result.** Joint user review upgraded all 11 initially-MILD findings to STRONG (verdicts captured in §Status table below). The CLAUDE.md North Star + Product Rules quality bar admits no "missed warm-moment" tier in practice — anything that fails the analyst-by-your-side test against an anchor quote is positioning-miss-level. Future audits should default to STRONG when in doubt; MILD survives only for surfaces that meet the bar but could be sharpened (none in this audit qualify).
+
 ## What this audit covers vs doesn't
 
 **Covered:**
@@ -61,7 +63,7 @@ Per CLAUDE.md §"Canvas-as-source (prototype default)": this audit slice doesn't
 - **Observation:** The Decouple-half of the note uses systems-vocabulary — *"map maintenance scenarios against bank-evidenced income"* reads as analyst-writing-to-analyst, not analyst-speaking-to-user. The user asked an emotional question (will I be okay financially after separation?); the answer should speak to that anxiety in everyday language. Compare the sibling `'low-cost'` note (`build-plan.ts:91`): `'Because keeping costs low matters most to you, Decouple replaces the £14,561 average solicitor journey with a £800-1,100 collaborative path.'` — same template, plain numerals, no jargon. Carried from `S-PROTO-O7-copy-tone-pass` parked-findings list as mild; reclassified strong here because cross-screen comparison surfaces the register-mismatch sharpness.
 - **Direction (Phase 3 candidate):** rewrite the Decouple-half in plain language anchored on the user's question, e.g. *"...Decouple maps what's coming in and going out for both of you — so you can see what's actually workable."* Or shorter: *"...Decouple shows you what's affordable for both of you, evidenced from real bank data."*
 
-### F-TONE-04 [MILD] — `'Continue'` CTA repeated bare across O1/O4/O5 + `primaryCTAForStage('decided')`.
+### F-TONE-04 [STRONG] — `'Continue'` CTA repeated bare across O1/O4/O5 + `primaryCTAForStage('decided')`.
 
 - **Surfaces:**
   - `src/app/dev/proto/pre-signup-interview/lib/copy/o1.ts:52` — `cta: 'Continue'`.
@@ -76,7 +78,7 @@ Per CLAUDE.md §"Canvas-as-source (prototype default)": this audit slice doesn't
   - O5 (their-side question): *"Next: what matters to you"* (since O6 is priorities/worries).
   - `primaryCTAForStage('decided')`: e.g. *"Begin the plan"* or *"Start building"* — matches sibling warmth + action anchoring.
 
-### F-TONE-05 [MILD] — `leadPhrase('housing')` + `leadPhrase('pensions')` flatter than `'children'`.
+### F-TONE-05 [STRONG] — `leadPhrase('housing')` + `leadPhrase('pensions')` flatter than `'children'`.
 
 - **Surface:** `src/app/dev/proto/pre-signup-interview/lib/build-plan.ts:48-55`.
 - **Current copy:**
@@ -88,21 +90,21 @@ Per CLAUDE.md §"Canvas-as-source (prototype default)": this audit slice doesn't
   - `'housing'`: *"Where each of you lives next sits at the heart of your plan."*
   - `'pensions'`: *"What you've each built up for later — your plan keeps that in view."*
 
-### F-TONE-06 [MILD] — `homeDescription('mortgage')` clinical.
+### F-TONE-06 [STRONG] — `homeDescription('mortgage')` clinical.
 
 - **Surface:** `src/app/dev/proto/pre-signup-interview/lib/build-plan.ts:77`.
 - **Current copy:** `'mortgage' → 'Your home is mortgaged.'`
 - **Observation:** Be-verb predicate frames the home as a financial label (`is mortgaged`). The sibling cases (`'own-outright' → 'You own your home outright.'`, `'rent' → 'You rent your home.'`) frame the user as the subject — *you own*, *you rent*. The mortgage case alone flips to the home as subject. Subtle register-mismatch. Carried from `S-PROTO-O7-copy-tone-pass` parked-findings.
 - **Direction (Phase 3 candidate):** restructure to keep the user as subject, e.g. *"You're paying off a mortgage on your home."* — preserves the fact, restores the subject-verb register-match with siblings.
 
-### F-TONE-07 [MILD] — O4 eyebrow `'Money'` most clinical eyebrow across screens.
+### F-TONE-07 [STRONG] — O4 eyebrow `'Money'` most clinical eyebrow across screens.
 
 - **Surface:** `src/app/dev/proto/pre-signup-interview/lib/copy/o4.ts:30`.
 - **Current copy:** `eyebrow: { label: 'Money', accent: 'indigo' }`.
 - **Observation:** `'Money'` is a single-word category label. Compare warmer siblings: O1 `'To start your plan…'`, O3 `'Your ex'`, O5 `'Money · their side'`, O6 `'What matters · last step before your plan'`. O5's `'Money · their side'` shows the pattern that would warm O4 — anchor on the conversational frame ("your side" vs "their side").
 - **Direction (Phase 3 candidate):** `eyebrow: { label: 'Money · your side', accent: 'indigo' }` — mirrors O5's frame and pre-announces the O4/O5 pairing.
 
-### F-TONE-08 [MILD] — O4/O5 `'Answer recorded — continue when ready.'` reads form-system.
+### F-TONE-08 [STRONG] — O4/O5 `'Answer recorded — continue when ready.'` reads form-system.
 
 - **Surfaces:**
   - `src/app/dev/proto/pre-signup-interview/lib/copy/o4.ts:42`.
@@ -111,28 +113,28 @@ Per CLAUDE.md §"Canvas-as-source (prototype default)": this audit slice doesn't
 - **Observation:** *"Answer recorded"* is system-feedback vocabulary (admin panels say that; an analyst-by-your-side doesn't). The companion `pickToContinue` captions on the same screens are conversational; this one breaks register.
 - **Direction (Phase 3 candidate):** *"Noted — keep going when you're ready."* Or simpler: *"Got it — move on when you're ready."*
 
-### F-TONE-09 [MILD] — O3 `'Pick the option that fits best to continue.'` form-instructional.
+### F-TONE-09 [STRONG] — O3 `'Pick the option that fits best to continue.'` form-instructional.
 
 - **Surface:** `src/app/dev/proto/pre-signup-interview/lib/copy/o3.ts:57`.
 - **Current copy:** `pickToContinue: 'Pick the option that fits best to continue.'`
 - **Observation:** Instruction-y register; reads as form-helper text. Compare O5's caption-pair which uses the warmer reframe `"Pick the answer closest to what's true today."` — same instructional purpose, but the phrasing acknowledges the user is making a judgement call rather than performing a procedural step.
 - **Direction (Phase 3 candidate):** align O3's `pickToContinue` with O5's warmer reframe, e.g. *"Pick the one closest to how things feel right now."*
 
-### F-TONE-10 [MILD] — O3 `'Both answered.'` flat acknowledgement.
+### F-TONE-10 [STRONG] — O3 `'Both answered.'` flat acknowledgement.
 
 - **Surface:** `src/app/dev/proto/pre-signup-interview/lib/copy/o3.ts:59`.
 - **Current copy:** `bothAnswered: 'Both answered.'`
 - **Observation:** Bare two-word system-state. Compare O6's `notedSingular: '1 thing noted — your plan will weight these.'` — warmth + functional explanation. O3's caption misses the moment.
 - **Direction (Phase 3 candidate):** *"Both noted — ready when you are."* Or *"Both done — continue when ready."*
 
-### F-TONE-11 [MILD] — O7 `'Building your plan'` eyebrow under-pairs with `'Take a breath.'` heading.
+### F-TONE-11 [STRONG] — O7 `'Building your plan'` eyebrow under-pairs with `'Take a breath.'` heading.
 
 - **Surface:** `src/app/dev/proto/pre-signup-interview/screens/O7.tsx:505`.
 - **Current copy:** `<Eyebrow color={colors.violet}>Building your plan</Eyebrow>`.
 - **Observation:** The heading `'Take a breath.'` (L515) is the gold-standard warm-loading-copy moment on this surface — direct, embodied, permission-giving. The eyebrow that pairs with it is system-generic ("Building your plan"). Eyebrow + heading should share warmth-register; here they don't.
 - **Direction (Phase 3 candidate):** e.g. *"Drawing it together"* or *"Almost there"* — matches the embodied register of `'Take a breath.'`
 
-### F-TONE-12 [MILD] — O7 secondary actions: `'Save as PDF'` vs `'Download as PDF'` inconsistency.
+### F-TONE-12 [STRONG] — O7 secondary actions: `'Save as PDF'` vs `'Download as PDF'` inconsistency.
 
 - **Surfaces:**
   - `src/app/dev/proto/pre-signup-interview/screens/O7.tsx:150` — `'Save as PDF'` (one render state).
@@ -140,7 +142,7 @@ Per CLAUDE.md §"Canvas-as-source (prototype default)": this audit slice doesn't
 - **Observation:** Two button labels for what appears to be the same action (PDF export) in different render states of O7. Either both should say `'Download as PDF'` (the more accurate consumer-facing verb for "click → file appears in Downloads") or both `'Save as PDF'`; inconsistency reads as drift. Cross-reference: O8 has a sibling `'Download my plan'` CTA (`screens/O8.tsx:48`) using the same verb.
 - **Direction (Phase 3 candidate):** standardise on `'Download as PDF'` to align with O8's `'Download my plan'`. If the two states genuinely need different verbs (e.g. one is pre-completion save-progress; one is post-completion final), name them distinctly enough that the difference reads.
 
-### F-TONE-13 [MILD] — O6 priority option `'Ongoing financial support'` register-flat next to siblings.
+### F-TONE-13 [STRONG] — O6 priority option `'Ongoing financial support'` register-flat next to siblings.
 
 - **Surface:** `src/app/dev/proto/pre-signup-interview/lib/copy/o6.ts:56`.
 - **Current copy:** `{ value: 'ongoing-support', label: 'Ongoing financial support' }`.
@@ -154,7 +156,7 @@ Per CLAUDE.md §"Canvas-as-source (prototype default)": this audit slice doesn't
 - This option's clinical register cascades: F-TONE-03's priority-note inherits the same systems-vocabulary because the option label sets the frame.
 - **Direction (Phase 3 candidate):** rewrite to plain-language equivalent, e.g. *"Maintenance going one way or the other"* or *"Knowing one of us will still need support"* — keeps the operational meaning (maintenance / ongoing support arrangements) but uses everyday phrasing matching the siblings. F-TONE-03's note rewrite should follow whatever this label settles on.
 
-### F-TONE-14 [MILD] — Inconsistent use of "ex" vs "partner" across O3/O5.
+### F-TONE-14 [STRONG] — Inconsistent use of "ex" vs "partner" across O3/O5.
 
 - **Surfaces:**
   - `src/app/dev/proto/pre-signup-interview/lib/copy/o3.ts:36-44` — "ex" used 4 times (`eyebrow: 'Your ex'`, `heading: 'How would you describe things between you and your ex?'`, `relationship.label: 'How would you describe things between you and your ex?'`, `whyWeAsk: 'How things stand between you...'`).
@@ -182,20 +184,20 @@ Phase 1 lands this register. Phase 2 user-review prunes / re-frames / prioritise
 
 | Finding | Severity | Status | Slice | Merge sha | PR |
 |---|---|---|---|---|---|
-| F-TONE-01 | STRONG | pending Phase 2 review | — | — | — |
-| F-TONE-02 | STRONG | pending Phase 2 review | — | — | — |
-| F-TONE-03 | STRONG | pending Phase 2 review | — | — | — |
-| F-TONE-04 | MILD | pending Phase 2 review | — | — | — |
-| F-TONE-05 | MILD | pending Phase 2 review | — | — | — |
-| F-TONE-06 | MILD | pending Phase 2 review | — | — | — |
-| F-TONE-07 | MILD | pending Phase 2 review | — | — | — |
-| F-TONE-08 | MILD | pending Phase 2 review | — | — | — |
-| F-TONE-09 | MILD | pending Phase 2 review | — | — | — |
-| F-TONE-10 | MILD | pending Phase 2 review | — | — | — |
-| F-TONE-11 | MILD | pending Phase 2 review | — | — | — |
-| F-TONE-12 | MILD | pending Phase 2 review | — | — | — |
-| F-TONE-13 | MILD | pending Phase 2 review | — | — | — |
-| F-TONE-14 | MILD | pending Phase 2 review | — | — | — |
+| F-TONE-01 | STRONG | ready for Phase 3 (positioning batch) | — | — | — |
+| F-TONE-02 | STRONG | ready for Phase 3 (positioning batch) | — | — | — |
+| F-TONE-03 | STRONG | ready for Phase 3 (positioning batch) | — | — | — |
+| F-TONE-04 | STRONG | ready for Phase 3 (CTA pass) | — | — | — |
+| F-TONE-05 | STRONG | ready for Phase 3 (plan-output warmth) | — | — | — |
+| F-TONE-06 | STRONG | ready for Phase 3 (plan-output warmth) | — | — | — |
+| F-TONE-07 | STRONG | ready for Phase 3 (eyebrow + referent consistency) | — | — | — |
+| F-TONE-08 | STRONG | ready for Phase 3 (chassis caption pass) | — | — | — |
+| F-TONE-09 | STRONG | ready for Phase 3 (chassis caption pass) | — | — | — |
+| F-TONE-10 | STRONG | ready for Phase 3 (chassis caption pass) | — | — | — |
+| F-TONE-11 | STRONG | ready for Phase 3 (O7 inline polish) | — | — | — |
+| F-TONE-12 | STRONG | ready for Phase 3 (O7 inline polish) | — | — | — |
+| F-TONE-13 | STRONG | ready for Phase 3 (plan-output warmth) | — | — | — |
+| F-TONE-14 | STRONG | ready for Phase 3 (eyebrow + referent consistency) | — | — | — |
 
 ## Workflow
 
@@ -203,12 +205,12 @@ Phase 1 lands this register. Phase 2 user-review prunes / re-frames / prioritise
 
 **Phase 2 — next session.** User joint review of findings. Pruning / re-scoping / prioritisation. Decision per finding: address, defer, drop. Findings the user disagrees with get removed or re-framed in this `acceptance.md` before Phase 3.
 
-**Phase 3 — subsequent sessions.** Batch implementation slices. Likely shape (TBD at impl-scoping time):
-- Batch (positioning fixes — STRONG): F-TONE-01 + F-TONE-02 + F-TONE-03. Three quick string edits on three different files; could ship as one tone-positioning patch slice.
-- Batch (CTA pass — MILD): F-TONE-04. Touches `lib/copy/o1.ts`, `o4.ts`, `o5.ts`, and `lib/build-plan.ts`. Coherent surface.
-- Batch (build-plan.ts mild residuals): F-TONE-05 + F-TONE-06 + F-TONE-13. Adjacency in one file + cascade into F-TONE-03's note.
-- Batch (chassis caption pass — MILD): F-TONE-08 + F-TONE-09 + F-TONE-10. O3-O5 caption surfaces.
-- Batch (O4 eyebrow + ex/partner consistency): F-TONE-07 + F-TONE-14. Cross-screen consistency fixes.
+**Phase 3 — subsequent sessions.** Batch implementation slices. Phase 2 calibration shows all 14 findings are positioning-priority; batching is by surface coherence, not severity. Likely shape (TBD at impl-scoping time):
+- Batch (positioning fixes): F-TONE-01 + F-TONE-02 + F-TONE-03. Three quick string edits on three different files; could ship as one tone-positioning patch slice.
+- Batch (CTA pass): F-TONE-04. Touches `lib/copy/o1.ts`, `o4.ts`, `o5.ts`, and `lib/build-plan.ts`. Coherent surface.
+- Batch (build-plan.ts plan-output warmth): F-TONE-05 + F-TONE-06 + F-TONE-13. Adjacency in one file + cascade into F-TONE-03's note.
+- Batch (chassis caption pass): F-TONE-08 + F-TONE-09 + F-TONE-10. O3-O5 caption surfaces.
+- Batch (eyebrow + referent consistency): F-TONE-07 + F-TONE-14. Cross-screen consistency fixes.
 - Batch (O7 inline polish): F-TONE-11 + F-TONE-12.
 
 Each Phase 3 batch carries a structured copy/tone retro pass per CLAUDE.md §"Skip-walk + structured retro pattern" before declaring closure, applying the same lens this audit applies.
