@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 import { getCopy as o3GetCopy } from '@/app/dev/proto/pre-signup-interview/lib/copy/o3';
 import { getCopy as o4GetCopy } from '@/app/dev/proto/pre-signup-interview/lib/copy/o4';
 
-describe('eyebrow + referent + O7 polish invariants', () => {
+describe('copy: eyebrow labels and partner referent', () => {
   it("O4 eyebrow names the side: 'Money · your side'", () => {
     const copy = o4GetCopy('decided');
     expect(copy.eyebrow.label).toBe('Money · your side');

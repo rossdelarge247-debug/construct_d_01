@@ -29,7 +29,7 @@ describe('O7 (canvas-as-source)', () => {
     vi.useRealTimers();
   });
 
-  it('renders MobileGenerating state initially with the loading-moment eyebrow', () => {
+  it('renders MobileGenerating state initially with "Drawing it together" eyebrow', () => {
     renderO7();
     expect(screen.getByText('Drawing it together')).toBeTruthy();
     const heading = screen.getByRole('heading', { level: 1 });

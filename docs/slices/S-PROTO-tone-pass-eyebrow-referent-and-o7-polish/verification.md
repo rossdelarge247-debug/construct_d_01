@@ -60,6 +60,8 @@ Tested via existing `o7-canvas-as-source.test.tsx:32-34` (assertion updated as p
 
 Aligns with `O7.tsx:630` (already `'Download as PDF'`) + O8's `'Download my plan'`.
 
+**Test deferral noted:** the L150 `<span>` lives in a post-generation render state (not the `MobileGenerating` initial state covered by `o7-canvas-as-source.test.tsx`). Driving the state-machine to that render branch from the test setup is non-trivial and adds test scaffolding disproportionate to a pure-string copy edit. Per the `pure-visual-ui` rubric in `docs/tdd-exemption-allowlist.txt` header — visual-regression coverage is the test seam for this surface. Preview-deploy 6-dim §Golden path will catch it pre-merge.
+
 ## AC-6 — Audit-register §Status table sync
 
 **Status:** met. `docs/slices/S-PROTO-tone-audit-phase-1/acceptance.md` diff:
