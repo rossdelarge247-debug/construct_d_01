@@ -89,7 +89,7 @@ const PRIORITY_NOTES: Record<Priority, string> = {
   'clean-break': 'Because a clean break matters most to you, Decouple shows where ongoing financial ties — joint accounts, pensions, shared liabilities — need definite resolution.',
   'speed': 'Because resolving this quickly matters most to you, Decouple removes the back-and-forth of solicitor letters — both sides see the same picture in real time.',
   'low-cost': 'Because keeping costs low matters most to you, Decouple replaces the £14,561 average solicitor journey with a £800-1,100 collaborative path.',
-  'ongoing-support': 'Because future financial support matters most to you, Decouple helps you map maintenance scenarios against bank-evidenced income.',
+  'ongoing-support': 'Because future financial support matters most to you, Decouple maps what\'s coming in and going out for both of you — so you can see what\'s actually workable.',
 };
 
 const WORRY_NOTES: Record<Worry, string> = {

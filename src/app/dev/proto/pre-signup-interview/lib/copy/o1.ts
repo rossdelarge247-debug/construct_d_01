@@ -45,7 +45,7 @@ export function getCopy(_stage: Stage): O1Copy {
     subStem: 'Your answer shapes the rest of the plan. There\'s no wrong choice.',
     whyWeAsk: 'This shapes the tone and pace of your plan. People who\'ve already decided need next-action language; people exploring need more space to weigh things up.',
     options: [
-      { value: 'decided', label: 'We\'ve decided to separate', sub: 'You want to get the finances sorted.' },
+      { value: 'decided', label: 'We\'ve decided to separate', sub: 'You want to make a clear plan.' },
       { value: 'thinking', label: 'I\'m thinking about separating', sub: 'You want to understand what\'s involved.' },
       { value: 'in_process', label: 'We\'re already in the process', sub: 'You want to get things moving faster.' },
     ],
