@@ -33,11 +33,11 @@ export interface O3Copy {
 
 export function getCopy(_stage: Stage): O3Copy {
   return {
-    eyebrow: 'Your ex',
-    heading: 'How would you describe things between you and your ex?',
+    eyebrow: 'Your partner',
+    heading: 'How would you describe things between you and your partner?',
     whyWeAsk: 'How things stand between you shapes whether you\'ll work through this together or apart. We also ask about safety so we can adjust the rest of the conversation.',
     relationship: {
-      label: 'How would you describe things between you and your ex?',
+      label: 'How would you describe things between you and your partner?',
       options: [
         { value: 'amicable', primary: 'Amicable', detail: 'we want to sort this out together' },
         { value: 'difficult', primary: 'Difficult', detail: 'but manageable' },

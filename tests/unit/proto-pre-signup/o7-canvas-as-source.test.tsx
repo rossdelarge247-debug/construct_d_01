@@ -29,9 +29,9 @@ describe('O7 (canvas-as-source)', () => {
     vi.useRealTimers();
   });
 
-  it('renders MobileGenerating state initially with "Building your plan" eyebrow', () => {
+  it('renders MobileGenerating state initially with the loading-moment eyebrow', () => {
     renderO7();
-    expect(screen.getByText('Building your plan')).toBeTruthy();
+    expect(screen.getByText('Drawing it together')).toBeTruthy();
     const heading = screen.getByRole('heading', { level: 1 });
     expect(heading.textContent).toMatch(/Take a/);
     expect(heading.textContent).toMatch(/breath/);

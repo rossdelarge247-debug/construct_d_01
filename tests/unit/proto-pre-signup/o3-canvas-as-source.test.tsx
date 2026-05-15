@@ -24,10 +24,10 @@ describe('O3 (canvas-as-source)', () => {
 
   it('renders the canvas eyebrow + plain heading from the copy resolver', () => {
     renderO3();
-    expect(screen.getByText('Your ex')).toBeTruthy();
+    expect(screen.getByText('Your partner')).toBeTruthy();
     const heading = screen.getByRole('heading', { level: 1 });
     expect(heading.textContent).toBe(
-      'How would you describe things between you and your ex?',
+      'How would you describe things between you and your partner?',
     );
   });
 
@@ -104,7 +104,7 @@ describe('O3 (canvas-as-source)', () => {
     expect(relLegend?.className).toContain('sr-only');
     expect(privLegend?.className).toContain('sr-only');
     expect(relLegend?.textContent).toBe(
-      'How would you describe things between you and your ex?',
+      'How would you describe things between you and your partner?',
     );
     expect(privLegend?.textContent).toBe('Is this device private to you?');
   });

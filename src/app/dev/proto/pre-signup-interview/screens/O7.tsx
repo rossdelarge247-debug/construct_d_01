@@ -147,7 +147,7 @@ function MobileHero() {
               color: colors.ink, fontSize: 12, fontWeight: 600, cursor: 'pointer',
             }}>
               <DownloadIcon size={12} />
-              <span>Save as PDF</span>
+              <span>Download as PDF</span>
             </button>
             <a href="#" style={{
               display: 'inline-flex', alignItems: 'center', gap: 6,
@@ -502,7 +502,7 @@ function MobileGeneratingView() {
           <BreathingHalo size={180} />
 
           <div style={{ marginTop: 28 }}>
-            <Eyebrow color={colors.violet}>Building your plan</Eyebrow>
+            <Eyebrow color={colors.violet}>Drawing it together</Eyebrow>
             <h1 style={{
               fontFamily: FONT_SERIF,
               margin: '12px 0 0',
