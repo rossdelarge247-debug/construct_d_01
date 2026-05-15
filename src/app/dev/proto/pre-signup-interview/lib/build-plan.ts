@@ -48,8 +48,8 @@ function deriveLeadCategory(answers: Answers): LeadCategory {
 function leadPhrase(lead: LeadCategory): string {
   switch (lead) {
     case 'children': return 'Keeping things steady for the children comes first in your plan.';
-    case 'housing': return 'Decisions about your home shape what comes next.';
-    case 'pensions': return 'Protecting pensions matters in this picture.';
+    case 'housing': return 'Where each of you lives next sits at the heart of your plan.';
+    case 'pensions': return 'What you\'ve each built up for later — your plan keeps that in view.';
     case 'general': return '';
   }
 }
@@ -74,7 +74,7 @@ function whatNeedsIntroForStage(stage: Stage | undefined): string {
 
 function homeDescription(home: Home | undefined): string | null {
   switch (home) {
-    case 'mortgage': return 'Your home is mortgaged.';
+    case 'mortgage': return 'You\'re paying off a mortgage on your home.';
     case 'own-outright': return 'You own your home outright.';
     case 'rent': return 'You rent your home.';
     default: return null;
@@ -89,7 +89,7 @@ const PRIORITY_NOTES: Record<Priority, string> = {
   'clean-break': 'Because a clean break matters most to you, Decouple shows where ongoing financial ties — joint accounts, pensions, shared liabilities — need definite resolution.',
   'speed': 'Because resolving this quickly matters most to you, Decouple removes the back-and-forth of solicitor letters — both sides see the same picture in real time.',
   'low-cost': 'Because keeping costs low matters most to you, Decouple replaces the £14,561 average solicitor journey with a £800-1,100 collaborative path.',
-  'ongoing-support': 'Because future financial support matters most to you, Decouple maps what\'s coming in and going out for both of you — so you can see what\'s actually workable.',
+  'ongoing-support': 'Because ongoing support matters most to you, Decouple maps what\'s coming in and going out for both of you — so you can see what\'s actually workable.',
 };
 
 const WORRY_NOTES: Record<Worry, string> = {
