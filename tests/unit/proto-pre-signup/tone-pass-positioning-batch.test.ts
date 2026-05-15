@@ -42,7 +42,7 @@ describe('pre-signup interview copy invariants — positioning safeguards', () =
       const plan = buildPlanFromAnswers({ whatMatters: { priorities: ['ongoing-support'] } });
       const note = plan.personalisedNotes.find((n) => n.trigger === 'priority-ongoing-support');
       expect(note?.body).toBe(
-        "Because future financial support matters most to you, Decouple maps what's coming in and going out for both of you — so you can see what's actually workable.",
+        "Because ongoing support matters most to you, Decouple maps what's coming in and going out for both of you — so you can see what's actually workable.",
       );
     });
 
@@ -52,10 +52,10 @@ describe('pre-signup interview copy invariants — positioning safeguards', () =
       expect(note?.body).not.toMatch(/map maintenance scenarios|bank-evidenced income/);
     });
 
-    it("preserves the standard lead phrase 'Because future financial support matters most to you,'", () => {
+    it("uses the priority-note lead-phrase pattern 'Because <X> matters most to you,'", () => {
       const plan = buildPlanFromAnswers({ whatMatters: { priorities: ['ongoing-support'] } });
       const note = plan.personalisedNotes.find((n) => n.trigger === 'priority-ongoing-support');
-      expect(note?.body.startsWith('Because future financial support matters most to you,')).toBe(true);
+      expect(note?.body.startsWith('Because ongoing support matters most to you,')).toBe(true);
     });
   });
 });

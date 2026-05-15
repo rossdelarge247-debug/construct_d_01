@@ -137,7 +137,7 @@ describe('buildPlanFromAnswers', () => {
 
     it('home=mortgage → mortgage sentence', () => {
       const plan = buildPlanFromAnswers({ situation: { home: 'mortgage' } });
-      expect(plan.situationSummary).toContain('Your home is mortgaged.');
+      expect(plan.situationSummary).toContain("You're paying off a mortgage on your home.");
     });
 
     it('home=own-outright → own-outright sentence', () => {
@@ -214,7 +214,7 @@ describe('buildPlanFromAnswers', () => {
         situation: { living: 'yes', home: 'mortgage' },
         whatMatters: { priorities: ['keep-home'] },
       });
-      expect(plan.situationSummary.startsWith('Decisions about your home')).toBe(true);
+      expect(plan.situationSummary.startsWith('Where each of you lives next')).toBe(true);
     });
 
     it('housing lead with living=yes reorders housing step to substantive position 0', () => {
@@ -227,7 +227,7 @@ describe('buildPlanFromAnswers', () => {
 
     it('priorities=[protect-pension] → pensions lead phrase, no whatNeedsToHappen reorder', () => {
       const plan = buildPlanFromAnswers({ whatMatters: { priorities: ['protect-pension'] } });
-      expect(plan.situationSummary.startsWith('Protecting pensions')).toBe(true);
+      expect(plan.situationSummary.startsWith("What you've each built up for later")).toBe(true);
       // No pensions step exists in v1 whatNeedsToHappen → default substantive order.
       expect(plan.whatNeedsToHappen[1]).toMatch(/Each of you shares/);
     });
@@ -245,7 +245,7 @@ describe('buildPlanFromAnswers', () => {
       // children: hasChildren=yes (1) → 1
       // housing: home=mortgage (1) + keep-home priority (1) → 2
       // housing > children → housing wins, no fallback needed
-      expect(plan.situationSummary.startsWith('Decisions about your home')).toBe(true);
+      expect(plan.situationSummary.startsWith('Where each of you lives next')).toBe(true);
     });
 
     it('genuine children-vs-housing tie → children fallback wins', () => {
@@ -262,7 +262,7 @@ describe('buildPlanFromAnswers', () => {
         whatMatters: { priorities: ['protect-pension'] },
       });
       // housing score = 0, pensions = 1 → pensions wins
-      expect(plan.situationSummary.startsWith('Protecting pensions')).toBe(true);
+      expect(plan.situationSummary.startsWith("What you've each built up for later")).toBe(true);
     });
 
     it('home=other does not contribute to housing score', () => {
@@ -270,12 +270,12 @@ describe('buildPlanFromAnswers', () => {
         situation: { home: 'other' },
         whatMatters: { priorities: ['protect-pension'] },
       });
-      expect(plan.situationSummary.startsWith('Protecting pensions')).toBe(true);
+      expect(plan.situationSummary.startsWith("What you've each built up for later")).toBe(true);
     });
 
     it('losing-pension worry contributes to pensions score', () => {
       const plan = buildPlanFromAnswers({ whatMatters: { worries: ['losing-pension'] } });
-      expect(plan.situationSummary.startsWith('Protecting pensions')).toBe(true);
+      expect(plan.situationSummary.startsWith("What you've each built up for later")).toBe(true);
     });
 
     it('children lead with hasChildren=no does not reorder (no children step exists)', () => {

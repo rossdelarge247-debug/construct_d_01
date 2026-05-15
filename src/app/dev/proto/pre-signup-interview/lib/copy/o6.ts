@@ -53,7 +53,7 @@ export function getCopy(_stage: Stage): O6Copy {
         { value: 'clean-break', label: 'A clean break — no ongoing ties' },
         { value: 'speed', label: 'Getting this done quickly' },
         { value: 'low-cost', label: 'Keeping costs low' },
-        { value: 'ongoing-support', label: 'Ongoing financial support' },
+        { value: 'ongoing-support', label: 'Knowing one of us will still need support' },
       ],
     },
     worries: {

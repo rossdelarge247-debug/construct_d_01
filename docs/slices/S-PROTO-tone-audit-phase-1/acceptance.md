@@ -187,16 +187,16 @@ Phase 1 lands this register. Phase 2 user-review prunes / re-frames / prioritise
 | F-TONE-01 | STRONG | shipped | S-PROTO-tone-pass-positioning-batch | c3ee0cc | #193 |
 | F-TONE-02 | STRONG | shipped | S-PROTO-tone-pass-positioning-batch | c3ee0cc | #193 |
 | F-TONE-03 | STRONG | shipped | S-PROTO-tone-pass-positioning-batch | c3ee0cc | #193 |
-| F-TONE-04 | STRONG | shipped | S-PROTO-tone-pass-cta-batch | pending | pending |
-| F-TONE-05 | STRONG | ready for Phase 3 (plan-output warmth) | — | — | — |
-| F-TONE-06 | STRONG | ready for Phase 3 (plan-output warmth) | — | — | — |
+| F-TONE-04 | STRONG | shipped | S-PROTO-tone-pass-cta-batch | 917af25 | #194 |
+| F-TONE-05 | STRONG | shipped | S-PROTO-tone-pass-plan-output-warmth | pending | pending |
+| F-TONE-06 | STRONG | shipped | S-PROTO-tone-pass-plan-output-warmth | pending | pending |
 | F-TONE-07 | STRONG | ready for Phase 3 (eyebrow + referent consistency) | — | — | — |
 | F-TONE-08 | STRONG | ready for Phase 3 (chassis caption pass) | — | — | — |
 | F-TONE-09 | STRONG | ready for Phase 3 (chassis caption pass) | — | — | — |
 | F-TONE-10 | STRONG | ready for Phase 3 (chassis caption pass) | — | — | — |
 | F-TONE-11 | STRONG | ready for Phase 3 (O7 inline polish) | — | — | — |
 | F-TONE-12 | STRONG | ready for Phase 3 (O7 inline polish) | — | — | — |
-| F-TONE-13 | STRONG | ready for Phase 3 (plan-output warmth) | — | — | — |
+| F-TONE-13 | STRONG | shipped | S-PROTO-tone-pass-plan-output-warmth | pending | pending |
 | F-TONE-14 | STRONG | ready for Phase 3 (eyebrow + referent consistency) | — | — | — |
 
 ## Workflow
