@@ -29,6 +29,7 @@ export interface O3Copy {
     privacyOptional: string;
     bothAnswered: string;
   };
+  cta: { label: string };
 }
 
 export function getCopy(_stage: Stage): O3Copy {
@@ -58,5 +59,6 @@ export function getCopy(_stage: Stage): O3Copy {
       privacyOptional: "Device privacy is optional — skip if you'd like.",
       bothAnswered: 'Both noted — ready when you are.',
     },
+    cta: { label: 'Continue' },
   };
 }

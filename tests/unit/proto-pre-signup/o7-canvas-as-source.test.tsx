@@ -91,12 +91,12 @@ describe('O7 (canvas-as-source)', () => {
     expect(h2s.length).toBeGreaterThanOrEqual(5);
   });
 
-  it('renders the What\'s next CTA in MobileReady', () => {
+  it('renders the primary CTA in MobileReady', () => {
     renderO7();
     act(() => {
       vi.advanceTimersByTime(3000);
     });
-    const cta = screen.getByRole('button', { name: /What's next/ });
+    const cta = screen.getByRole('button', { name: /Continue/ });
     expect(cta).toBeTruthy();
   });
 

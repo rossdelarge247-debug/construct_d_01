@@ -8,6 +8,7 @@ import { Footer } from '../components/Footer';
 import { Hero } from '../components/Hero';
 import { TopBar } from '../components/TopBar';
 import { useProto } from '../lib/proto-context';
+import { getCopy, type O8Copy, type O8Option, type O8OptionId } from '../lib/copy/o8';
 import styles from './O8.module.css';
 
 const colors = {
@@ -24,42 +25,6 @@ const ICON_BG_UNSELECTED = '#FAFAF7';
 
 const FONT_SERIF = 'var(--ds-font-serif, "Source Serif Pro", "Source Serif 4", Georgia, serif)';
 const FONT_MONO = 'var(--ds-font-mono, "JetBrains Mono", ui-monospace, monospace)';
-
-type OptionId = 'signup' | 'download' | 'conventional' | 'support';
-
-type OptionDef = {
-  id: OptionId;
-  title: string;
-  sub: string;
-  cta: string;
-};
-
-const OPTIONS: ReadonlyArray<OptionDef> = [
-  {
-    id: 'signup',
-    title: 'Create a free account and start building my picture',
-    sub: 'Free to start; no card needed.',
-    cta: 'Create my account',
-  },
-  {
-    id: 'download',
-    title: 'Download my plan and come back later',
-    sub: "We'll keep your answers for 30 days if you want to come back.",
-    cta: 'Download my plan',
-  },
-  {
-    id: 'conventional',
-    title: 'I want to go the conventional route',
-    sub: "We'll point you to good starting places.",
-    cta: 'See helpful links',
-  },
-  {
-    id: 'support',
-    title: 'I need to talk to someone first',
-    sub: 'Here are people who can help.',
-    cta: 'See support resources',
-  },
-];
 
 function IconWorkspace({ size = 17 }: { size?: number }) {
   return (
@@ -106,14 +71,14 @@ function IconSupport({ size = 17 }: { size?: number }) {
   );
 }
 
-const ICONS: Record<OptionId, ({ size }: { size?: number }) => ReactNode> = {
+const ICONS: Record<O8OptionId, ({ size }: { size?: number }) => ReactNode> = {
   signup: IconWorkspace,
   download: IconDownload,
   conventional: IconExternal,
   support: IconSupport,
 };
 
-function PlanRecall() {
+function PlanRecall({ copy }: { copy: O8Copy['planRecall'] }) {
   return (
     <div style={{ padding: '12px 20px 0' }}>
       <a
@@ -142,11 +107,11 @@ function PlanRecall() {
             <path d="M2 5.2 L4.2 7.4 L8 3.2" stroke={colors.violet} strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" />
           </svg>
         </span>
-        <span style={{ fontWeight: 500 }}>Your plan is ready</span>
+        <span style={{ fontWeight: 500 }}>{copy.label}</span>
         <span style={{ color: colors.muted, fontSize: 10.5 }}>·</span>
         <span style={{ color: colors.muted, fontSize: 10.5, display: 'inline-flex', alignItems: 'center', gap: 3 }}>
           <Arrow dir="left" size={9} strokeWidth={2} />
-          <span>back to plan</span>
+          <span>{copy.backToPlan}</span>
         </span>
       </a>
     </div>
@@ -155,7 +120,7 @@ function PlanRecall() {
 
 
 function OptionCard({ option, selected, onSelect, staggerIndex }: {
-  option: OptionDef;
+  option: O8Option;
   selected: boolean;
   onSelect: () => void;
   staggerIndex: number;
@@ -246,30 +211,32 @@ function OptionCard({ option, selected, onSelect, staggerIndex }: {
 }
 
 export function O8() {
-  const { back, next } = useProto();
-  const [selectedId, setSelectedId] = useState<OptionId | null>(null);
-  const selected = OPTIONS.find((o) => o.id === selectedId);
+  const { back, next, answers } = useProto();
+  const [selectedId, setSelectedId] = useState<O8OptionId | null>(null);
+  const stage = answers.stage ?? 'thinking';
+  const copy = getCopy(stage);
+  const selected = copy.options.find((o) => o.id === selectedId);
 
   return (
     <main className={styles.main}>
       <BrandBar />
       <TopBar step={8} total={8} onBack={back} />
-      <PlanRecall />
+      <PlanRecall copy={copy.planRecall} />
       <Hero
-        eyebrow="What's next · take it from here"
+        eyebrow={copy.hero.eyebrow}
         eyebrowColor={colors.magenta}
-        heading="What would you like to do next?"
+        heading={copy.hero.heading}
         helper={
           <>
-            There&apos;s no wrong answer.{' '}
-            <span style={{ color: colors.muted }}>You can come back anytime.</span>
+            {copy.hero.helper.primary}{' '}
+            <span style={{ color: colors.muted }}>{copy.hero.helper.secondary}</span>
           </>
         }
         className={styles.entry}
       />
       <fieldset className={styles.fieldset}>
-        <legend className={styles.srOnly}>What would you like to do next?</legend>
-        {OPTIONS.map((option, i) => (
+        <legend className={styles.srOnly}>{copy.hero.heading}</legend>
+        {copy.options.map((option, i) => (
           <OptionCard
             key={option.id}
             option={option}
@@ -280,8 +247,8 @@ export function O8() {
         ))}
       </fieldset>
       <Footer
-        caption={selected ? '' : 'Pick an option above to continue.'}
-        ctaLabel={selected?.cta ?? 'Continue'}
+        caption={selected ? '' : copy.footer.captionFallback}
+        ctaLabel={selected?.cta ?? copy.footer.ctaFallback}
         enabled={!!selected}
         onContinue={next}
         variant="light"

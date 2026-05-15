@@ -36,6 +36,7 @@ export interface O2Copy {
   children: QuestionChildren;
   home: QuestionHome;
   ctaCaption: (answeredCount: number) => string;
+  cta: { label: string };
 }
 
 export function getCopy(_stage: Stage): O2Copy {
@@ -85,5 +86,6 @@ export function getCopy(_stage: Stage): O2Copy {
       ],
     },
     ctaCaption: (n) => `${n} of 4 answered`,
+    cta: { label: 'Continue' },
   };
 }

@@ -288,7 +288,7 @@ export function O3() {
               ? copy.captions.privacyOptional
               : copy.captions.bothAnswered
         }
-        ctaLabel="Continue"
+        ctaLabel={copy.cta.label}
         enabled={enabled}
         onContinue={next}
       />
