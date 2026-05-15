@@ -23,13 +23,13 @@ const ATTR_SINGLE_REGEX = new RegExp(
 const JSX_TEXT_CAPITAL_REGEX = /(?<=>)[A-Z][a-zA-Z][a-zA-Z'.,!?: \-]+(?=<)/g;
 const JSX_TEXT_LOWERCASE_REGEX = /(?<=>)[a-z]+\s[a-z]+\s[a-z]+[a-zA-Z'.,!?: \-]*(?=<)/g;
 
-const ALLOWLIST_SUBSTRINGS: ReadonlyArray<{ file: string; match: string; reason: string }> = [];
+const ALLOWLIST_SUBSTRINGS: ReadonlyArray<{ file: string; match: string }> = [];
 
 function findLine(content: string, matchIndex: number): number {
   return content.slice(0, matchIndex).split('\n').length;
 }
 
-type Hit = { file: string; line: number; match: string; family: string };
+type Hit = { file: string; line: number; match: string; family: 'attribute' | 'jsx-text' };
 
 function scan(file: string): ReadonlyArray<Hit> {
   const content = readFileSync(resolve(SCREENS_DIR, file), 'utf8');
