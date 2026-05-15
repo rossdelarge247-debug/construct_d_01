@@ -83,9 +83,9 @@ describe('O4 (canvas-as-source)', () => {
 
   it('toggles the footer caption between pickToContinue and oneAnswered when an option is picked', () => {
     renderO4();
-    expect(screen.getByText('Pick the option that fits to continue.')).toBeTruthy();
+    expect(screen.getByText('Pick the one closest to how things feel right now.')).toBeTruthy();
     fireEvent.click(radio(/Yes.*we both are/));
-    expect(screen.getByText('Answer recorded — continue when ready.')).toBeTruthy();
+    expect(screen.getByText("Noted — keep going when you're ready.")).toBeTruthy();
   });
 
   it('hides decorative Arrow SVGs from screen readers (aria-hidden=true)', () => {

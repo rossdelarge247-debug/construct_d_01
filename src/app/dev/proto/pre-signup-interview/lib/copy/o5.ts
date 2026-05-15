@@ -38,7 +38,7 @@ export function getCopy(_stage: Stage): O5Copy {
     ],
     captions: {
       pickToContinue: "Pick the answer closest to what's true today.",
-      oneAnswered: 'Answer recorded — continue when ready.',
+      oneAnswered: 'Noted — keep going when you\'re ready.',
     },
     cta: {
       continue: 'Next: what matters to you',

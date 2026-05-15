@@ -122,7 +122,7 @@ describe('O5 (canvas-as-source)', () => {
     renderO5();
     expect(screen.getByText("Pick the answer closest to what's true today.")).toBeTruthy();
     fireEvent.click(radio(/I suspect they may be hiding things/));
-    expect(screen.getByText('Answer recorded — continue when ready.')).toBeTruthy();
+    expect(screen.getByText("Noted — keep going when you're ready.")).toBeTruthy();
   });
 
   it('hides decorative Arrow SVGs from screen readers (aria-hidden=true)', () => {
