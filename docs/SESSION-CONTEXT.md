@@ -32,6 +32,72 @@ Session 103's spec lands a Build Map's worth of follow-on:
 
 **Recommended:** P2 (build-plan.ts hooks) is the lightest follow-on and lands the spec-65b logic without touching the UI surface. It can ship before P3, since the hooks are `null`-tolerant. P1 (desktop graceful enhancement) is still on the board if the user prefers a visual stream over a logic stream.
 
+### P2 detail — `S-PROTO-O7-quantitative-hooks` (Recommended)
+
+**Slice candidate:** `docs/slices/S-PROTO-O7-quantitative-hooks/` (not yet scaffolded — spec 65b §Status row 9 names the slice as candidate).
+
+**Spec anchors** (read at session start):
+
+- `docs/workspace-spec/65b-pre-signup-quantitative-layer.md` §"Plan-output usage (O7 adaptivity extension)" — defines Dimensions 5, 6, 7 (sharing-principle weighting, consent-tier complexity, timeline pressure framing).
+- `docs/workspace-spec/65b-pre-signup-quantitative-layer.md` §"Data captured (state extension)" — `preSignupState.quantitative` shape extension.
+- `docs/workspace-spec/65-pre-signup-interview-reconciled.md` §"Adaptive plan shape" L149-203 — existing 4 categorical dimensions to compose alongside.
+- `src/app/dev/proto/pre-signup-interview/lib/build-plan.ts` L29-90 — existing composition logic.
+
+**First actions at session start:**
+
+1. `ls docs/slices/ | grep S-PROTO-O7-quantitative-hooks` — expect no match (fresh slice).
+2. `git log --grep="S-PROTO-O7-quantitative-hooks"` — expect no commits (confirms not shipped).
+3. Read `lib/build-plan.ts` existing 4-dimension composition.
+4. Read spec 65b §"Plan-output usage" + §"Data captured" verbatim.
+5. Author AC + test-first per CLAUDE.md §"Engineering conventions" §"TDD where tractable".
+
+**Spec-gate check:** `grep -n "^## \|Out of scope" docs/workspace-spec/65b-pre-signup-quantitative-layer.md` — spec 65b §"What this does NOT cover" lists out-of-scope items; none gate this slice.
+
+**Canvas-fidelity:** N/A (logic slice, no UI surface; no `Linked canvas:` field).
+
+### P3 detail — UI for O6.5 / O6.6 / O6.7 (Heavy)
+
+**Slice candidates:** Possibly 1 combined slice (`S-PROTO-pre-signup-quantitative-screens`) or 3 per-screen slices — decide at scoping time.
+
+**Spec anchors:**
+
+- `docs/workspace-spec/65b-pre-signup-quantitative-layer.md` §"The 3 new screens" — O6.5/O6.6/O6.7 scaffolds with field sets + bucket definitions + rationale copy.
+- `docs/workspace-spec/65b-pre-signup-quantitative-layer.md` §"Progressive expansion mechanics" — per-screen toggle/skip patterns.
+- `docs/workspace-spec/65b-pre-signup-quantitative-layer.md` §"Placement in the existing 8 screens" — transition copy from O6.
+- `src/app/dev/proto/pre-signup-interview/screens/O6.tsx` + `O7.tsx` — chassis-primitive reference patterns (TopBar / Hero / Footer / Eyebrow / SplitHeading).
+
+**First actions at session start:**
+
+1. `ls docs/slices/` for any `S-PROTO-O6.5` / `O6.6` / `O6.7` / `quantitative-screens` directories (expect none).
+2. `ls docs/design-source/ | grep -i "pre-signup\|quantitative\|o6"` — if no canvases, prototype slice with no `Linked canvas:` field (canvas-fidelity persona dormant per CLAUDE.md §"Hard controls").
+3. Read spec 65b §"The 3 new screens" + §"Progressive expansion mechanics" verbatim.
+4. Read existing chassis primitives in O6.tsx for the pattern to replicate.
+5. P2 should ideally have shipped first — the hooks compose on `null`-tolerant state, so P3 wiring will not crash even before users see the new screens.
+
+**Spec-gate check:** No gating IF-clause; spec 65b §"What this does NOT cover" lists implementation deferrals (free numeric input, individual asset breakdowns, etc.) that are out-of-scope for this slice — confirm AC scope respects them.
+
+**Canvas-fidelity:** Canvas-as-source default per CLAUDE.md §"Visual direction" §"Canvas-as-source (prototype default)" — no `Linked canvas:` field unless canvases ship before this session's scoping.
+
+### P1 detail — Desktop graceful enhancement (Inherited)
+
+**Slice candidate:** TBD — Help Rail integration is the headline; spec ref pending per session-101 note: *"Help Rail is the central component — spec ref pending."*
+
+**Spec anchors:**
+
+- *(pending)* — locate or scope a Help Rail spec at session start.
+- `src/components/document-shell/` (if exists) — for breakpoint primitives.
+- `docs/workspace-spec/71-rebuild-strategy.md` §4 — hexagonal architecture reference shape.
+
+**First actions at session start:**
+
+1. `grep -rn "help.rail\|HelpRail" docs/workspace-spec/` — locate Help Rail spec.
+2. `ls src/components/help-rail/ 2>/dev/null && ls src/components/document-shell/ 2>/dev/null` — check existing scaffolds.
+3. If no Help Rail spec, scope a design phase first before AC freeze.
+
+**Spec-gate check:** Help Rail spec absent at session-103 wrap; pre-condition: a spec must exist OR be scoped in-session before this priority is treated as authorized.
+
+**Canvas-fidelity:** TBD per spec ref.
+
 ## Scoping-discipline observations carried as recurrence-watch (19 items)
 
 **Session 103 applied:**
@@ -100,10 +166,50 @@ Read at session start (Tier 2 + Tier 3, in order):
 2. docs/HANDOFF-SESSION-103.md.
 3. docs/HANDOFF-SESSION-102.md.
 
+Pre-priority verifications (run BEFORE treating any priority as
+authorized, per CLAUDE.md §"Planning conduct"):
+
+For P2 (`S-PROTO-O7-quantitative-hooks`, build-plan.ts impl):
+- Shipped-artifact check (§"Pre-priority shipped-artifact verification"):
+  `ls docs/slices/ | grep S-PROTO-O7-quantitative-hooks`
+  → expect no match. If a directory exists, treat as continuation.
+- Spec-gate check (§"Pre-priority spec-gate verification"):
+  `grep -n "^## \|Out of scope" docs/workspace-spec/65b-pre-signup-quantitative-layer.md`
+  → §"What this does NOT cover" lists exclusions; verify none gate
+  this slice. Spec 65b has no gating IF-clause (new spec, no
+  prerequisites).
+- Canvas-fidelity check (§"Pre-priority canvas-fidelity verification"):
+  N/A (logic slice, no UI surface; no `Linked canvas:` field).
+
+For P3 (UI slice for O6.5 / O6.6 / O6.7):
+- Shipped-artifact check:
+  `ls docs/slices/` for `S-PROTO-O6.5` / `O6.6` / `O6.7` /
+  `quantitative-screens` directories → expect none.
+- Spec-gate check: spec 65b §"The 3 new screens" defines screen
+  content; no gating IF-clause. Verify AC scope respects §"What this
+  does NOT cover" (free numeric input out of scope, etc.).
+- Canvas-fidelity check:
+  `ls docs/design-source/ | grep -i "pre-signup\|quantitative\|o6"`
+  → if no canvases, prototype slice ships with no `Linked canvas:`
+  field. If canvases exist, decode per
+  `scripts/decode-bundler-canvas.sh` BEFORE AC-quoting per
+  §"Pre-priority canvas-fidelity verification".
+
+For P1 (Desktop graceful enhancement, inherited):
+- Shipped-artifact check:
+  `ls src/components/help-rail/ 2>/dev/null` and
+  `ls src/components/document-shell/ 2>/dev/null` → check existing
+  scaffolds.
+- Spec-gate check:
+  `grep -rn "help.rail\|HelpRail" docs/workspace-spec/` → Help Rail
+  spec ref pending per session-101 note. If no spec exists, scope a
+  design phase BEFORE AC freeze.
+- Canvas-fidelity check: TBD per Help Rail spec ref.
+
 Confirm priority with user. SESSION-CONTEXT recommends either P1
-(desktop graceful enhancement), P2 (spec 65b impl — build-plan.ts
-hooks), or P3 (UI slice for the 3 new screens) — P2 is the lightest
-follow-on from session 103's spec work.
+(desktop graceful enhancement), P2 (`S-PROTO-O7-quantitative-hooks`
+build-plan.ts impl), or P3 (UI slice for the 3 new screens) — P2 is the
+lightest follow-on from session 103's spec work.
 ```
 
 ## Product positioning (preserve across sessions)
