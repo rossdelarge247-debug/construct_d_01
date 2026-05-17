@@ -98,6 +98,7 @@ Positioning + architecture
 docs/workspace-spec/42-strategic-synthesis.md       — Authoritative positioning (5-phase amended session 22)
 docs/workspace-spec/44-the-document-structure.md    — Document-as-spine (four-document lifecycle, amended)
 docs/workspace-spec/65-pre-signup-interview-reconciled.md  — Pre-signup locked
+docs/workspace-spec/65b-pre-signup-quantitative-layer.md   — Quantitative extension (3 new screens O6.5/O6.6/O6.7; buckets; Replace bridge to spec 67; AI-coach full access)
 docs/workspace-spec/67-post-signup-profiling-progress.md   — 12 gaps resolved + Gap 7 resolved session 22
 
 Build Map (spec 70 suite — the Phase B deliverable)
