@@ -292,7 +292,7 @@ The AI coach (specs 68a §AI-coach cross-cutting + 68d §Settle-phase coach) rec
 |---|---|---|
 | Own demographics (`your_age`, `relationship_length`) + own financials (`combined_monthly_income`, `savings_cash`, `debts_non_mortgage`, `pension_value`, `property_equity`, `total_assets`) + timeline (`target_timeline`, `timeline_drivers`) | Verbatim | Personalises coach tone and recommendations against the user's own data |
 | Children's age bands (`child_age_youngest`, `child_age_oldest`) | Aggregated to a single band label (e.g. "youngest under 12") | Child-safety: avoid age-precise re-identification at the LLM boundary |
-| Ex-partner-derived fields (`ex_age_relative`) | Omitted from egress payload entirely | Third-party personal data under UK GDPR — collected from user about ex without ex's consent; not sent to Anthropic. Used locally by plan-engine for relative-age sharing-principle framing only. |
+| Ex-partner-derived fields (`ex_age_relative`) | Omitted from egress payload entirely | Third-party personal data under UK GDPR — collected from user about ex without ex's consent; not sent to Anthropic. Plan-engine does not consume this field; retained in state for future trigger extension when D5 rules are amended. |
 
 `null` values are treated as "not disclosed yet" and trigger no egress reference. Used for personalised recommendations, tone calibration, and prioritisation hints from the dashboard moment forward.
 

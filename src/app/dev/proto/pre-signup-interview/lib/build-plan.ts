@@ -226,7 +226,71 @@ export function buildPlanFromAnswers(answers: Answers): PlanContent {
     whatNeedsToHappen: composeWhatNeedsToHappen(answers),
     conventionalPath: STANDARD_CONVENTIONAL_PATH,
     howDecoupleHelps: STANDARD_DECOUPLE_HELPS,
-    personalisedNotes: composePersonalisedNotes(answers),
+    personalisedNotes: [...composePersonalisedNotes(answers), ...composeQuantitativeNotes(answers)],
     links: { findOutMoreHref: '/about', primaryCTA: primaryCTAForStage(answers.stage) },
   };
+}
+
+type SharingWeight = 'full' | 'light';
+type ConsentTier = 'complex' | 'light' | 'standard';
+type TimelineFraming = 'deadline-pressure' | 'unanchored-urgency' | 'patient';
+
+const SHARING_NOTES: Record<SharingWeight, string> = {
+  full: 'Because you and your ex have been together for some time, the courts will likely treat what each of you has built up as joint — regardless of whose name it sits in. Decouple shows the full picture so you can both see what fair looks like from a sharing-principle starting point.',
+  light: 'Because your relationship has been relatively short, contribution-based claims often carry more weight than a straight 50/50 split. Decouple maps out who brought what in — so the picture stays honest and the framing fits the facts.',
+};
+
+const CONSENT_TIER_NOTES: Record<ConsentTier, string> = {
+  complex: 'Because the assets in play are substantial, your consent order will likely need bespoke drafting — and pension valuations will be worth doing properly. Decouple flags where to get specialist sign-off before either of you signs.',
+  light: 'Because the financial picture is relatively contained, your consent order can take a streamlined path — Decouple guides you through the simpler version, with fewer moving parts and faster sign-off.',
+  standard: 'Decouple walks you through the standard consent-order shape — what gets included, what each side confirms, and where a judge needs to see specific figures. Most couples land here.',
+};
+
+const TIMELINE_NOTES: Record<TimelineFraming, string> = {
+  'deadline-pressure': 'Because you have a specific deadline driving the timeline, Decouple maps the court-deadline pathway and where MIAM acceleration is lawful — so the timing fits the trigger.',
+  'unanchored-urgency': 'You want this resolved quickly, and that\'s understandable. Decouple gently asks what\'s really driving the urgency — naming the real driver often opens up the right path more than chasing speed does.',
+  patient: 'Because you have time to do this properly, Decouple lets you take the disclosure work seriously — bank-connected facts, both sides confirming the picture, no rushed corners that need redoing later.',
+};
+
+function deriveSharingWeight(answers: Answers): SharingWeight | null {
+  const quant = answers.quantitative;
+  if (!quant) return null;
+  const len = quant.relationship_length;
+  if (len === '10-20y' || len === '20+y') return 'full';
+  if (len === '<2y' || len === '2-5y') return 'light';
+  return null;
+}
+
+function deriveConsentTier(answers: Answers): ConsentTier | null {
+  const quant = answers.quantitative;
+  if (!quant) return null;
+  const totalAssets = quant.total_assets;
+  const pensionValue = quant.pension_value;
+  if (totalAssets == null && pensionValue == null) return null;
+  if (totalAssets === '500k-1M' || totalAssets === '>1M' || pensionValue === '300k+') return 'complex';
+  if ((totalAssets === '<10k' || totalAssets === '10-50k') && (pensionValue === 'none' || pensionValue === '<25k')) return 'light';
+  return 'standard';
+}
+
+function deriveTimelineFraming(answers: Answers): TimelineFraming | null {
+  const quant = answers.quantitative;
+  if (!quant) return null;
+  const targetTimeline = quant.target_timeline;
+  const drivers = quant.timeline_drivers ?? [];
+  if ((targetTimeline === 'asap' || targetTimeline === '3m') && drivers.includes('deadline')) return 'deadline-pressure';
+  if (targetTimeline === 'asap' && drivers.length === 0) return 'unanchored-urgency';
+  if (targetTimeline === '18m+' || targetTimeline === 'unsure' || targetTimeline == null) return 'patient';
+  return null;
+}
+
+function composeQuantitativeNotes(answers: Answers): PlanContent['personalisedNotes'] {
+  const notes: Array<{ trigger: string; body: string }> = [];
+  const sharing = deriveSharingWeight(answers);
+  if (sharing) notes.push({ trigger: `sharing-${sharing}-weight`, body: SHARING_NOTES[sharing] });
+  const tier = deriveConsentTier(answers);
+  if (tier) notes.push({ trigger: `consent-tier-${tier}`, body: CONSENT_TIER_NOTES[tier] });
+  if (notes.length >= 2) return notes;
+  const framing = deriveTimelineFraming(answers);
+  if (framing) notes.push({ trigger: `timeline-${framing}`, body: TIMELINE_NOTES[framing] });
+  return notes;
 }

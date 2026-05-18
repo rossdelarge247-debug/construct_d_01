@@ -62,6 +62,35 @@ export interface PartnerFinancesAnswers {
   awareness?: PartnerAwareness;
 }
 
+export type ChildAge = '0-4' | '5-11' | '12-15' | '16-17' | '18+';
+export type AdultAge = '<30' | '30-39' | '40-49' | '50-59' | '60+';
+export type ExAgeRelative = 'same' | 'older' | 'younger' | 'unknown';
+export type RelationshipLength = '<2y' | '2-5y' | '5-10y' | '10-20y' | '20+y';
+export type IncomeBracket = '<2k' | '2-4k' | '4-6k' | '6-10k' | '>10k';
+export type TotalAssetsBracket = '<10k' | '10-50k' | '50-200k' | '200-500k' | '500k-1M' | '>1M';
+export type PropertyEquityBracket = '<50k' | '50-150k' | '150-300k' | '300-500k' | '500k+';
+export type SavingsCashBracket = '<5k' | '5-20k' | '20-50k' | '50-100k' | '100k+';
+export type DebtsBracket = 'none' | '<5k' | '5-15k' | '15-30k' | '30k+';
+export type PensionValueBracket = 'none' | '<25k' | '25-100k' | '100-300k' | '300k+';
+export type TargetTimeline = 'asap' | '3m' | '6m' | '12m' | '18m+' | 'unsure';
+export type TimelineDriver = 'deadline' | 'new_relationship' | 'housing' | 'children' | 'financial' | 'emotional' | 'none';
+
+export interface Quantitative {
+  child_age_youngest?: ChildAge | null;
+  child_age_oldest?: ChildAge | null;
+  your_age?: AdultAge | null;
+  ex_age_relative?: ExAgeRelative | null;
+  relationship_length?: RelationshipLength | null;
+  combined_monthly_income?: IncomeBracket | null;
+  total_assets?: TotalAssetsBracket | null;
+  property_equity?: PropertyEquityBracket | null;
+  savings_cash?: SavingsCashBracket | null;
+  debts_non_mortgage?: DebtsBracket | null;
+  pension_value?: PensionValueBracket | null;
+  target_timeline?: TargetTimeline | null;
+  timeline_drivers?: ReadonlyArray<TimelineDriver>;
+}
+
 export interface Answers {
   stage?: Stage;
   situation?: SituationAnswers;
@@ -69,6 +98,7 @@ export interface Answers {
   employment?: EmploymentAnswers;
   partnerFinances?: PartnerFinancesAnswers;
   whatMatters?: WhatMattersAnswers;
+  quantitative?: Quantitative;
 }
 
 export interface PlanContent {
