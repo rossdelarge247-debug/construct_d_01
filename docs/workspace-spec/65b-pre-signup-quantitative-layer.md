@@ -357,4 +357,4 @@ Locked architectural decisions (session 103):
 8. AI-coach access: per-field policy from session 1 — own data verbatim, child ages aggregated to a band, ex-partner fields omitted from Anthropic egress; origin-disclosed phrasing convention applied to any reference.
 9. O7 adaptivity model extended with 3 numeric-derived dimensions (sharing-principle weighting, consent-tier complexity, timeline pressure framing); max 2 quantitative-derived notes per render; total max 8 notes per render (4 categorical + 2 anchor + 2 quantitative).
 10. Bucket retention: archived bucket values persist for the lifetime of the user's account and are deleted at account close; user-initiated erasure honours UK GDPR right-to-erasure earlier.
-11. Ex-partner data minimisation: `ex_age` captured as a relative chip (same / older / younger / unknown), not an absolute age band, to minimise third-party personal data collection under UK GDPR.
+11. Ex-partner data minimisation: `ex_age_relative` captured as a relative chip (same / older / younger / unknown), not an absolute age band, to minimise third-party personal data collection under UK GDPR.
