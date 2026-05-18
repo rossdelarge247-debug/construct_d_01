@@ -158,7 +158,9 @@ describe('ExpansionToggle', () => {
     );
     expect(screen.getByText('Why it matters')).toBeTruthy();
     expect(screen.queryByText('Hidden field')).toBeNull();
-    expect(screen.getByRole('button', { name: /Show more/ }).getAttribute('aria-expanded')).toBe('false');
+    const toggle = screen.getByRole('button', { name: /Show more/ });
+    expect(toggle.getAttribute('aria-expanded')).toBe('false');
+    expect(toggle.getAttribute('aria-controls')).toBeNull();
   });
 
   it('shows children when open and aria-expanded is true', () => {
@@ -174,7 +176,9 @@ describe('ExpansionToggle', () => {
       </ExpansionToggle>,
     );
     expect(screen.getByText('Visible field')).toBeTruthy();
-    expect(screen.getByRole('button', { name: /Show more/ }).getAttribute('aria-expanded')).toBe('true');
+    const toggle = screen.getByRole('button', { name: /Show more/ });
+    expect(toggle.getAttribute('aria-expanded')).toBe('true');
+    expect(toggle.getAttribute('aria-controls')).toBe('test-content');
   });
 
   it('fires onToggle when the toggle button is clicked', () => {

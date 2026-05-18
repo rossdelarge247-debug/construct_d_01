@@ -91,12 +91,35 @@ Per-slice DoD:
 
 None. State-wire logic stays inline in each screen's `update` closure (simple object-spread setter); not extracted to a separate module because the abstraction has no other consumers and the code is small enough to read at the call site.
 
+## Auto-review responses
+
+Verdict: `request-changes` (advisory at v3b ship; 9 findings, none `blocking: true`). 3 fixed in-PR; 6 deferred-with-reasoning.
+
+**Fixed:**
+
+- **#2 ExpansionToggle aria-controls void when closed.** `aria-controls={open ? contentId : undefined}` — omits the attribute when the content region isn't rendered. Trivial 1-line change.
+- **#3 Unchecked Pill / CheckPill indicator border contrast.** `#C9C5BD` → `#767676` (relative luminance ~0.46 → contrast ~4:1 against white, clears WCAG 1.4.11 3:1 minimum).
+- **#5 Touch targets <44px at 375×667.** `minHeight: 44` added to Pill (BucketPicker), CheckPill (MultiPicker), ExpansionToggle button (plus `padding: '12px 0'`), and the four Skip buttons in QuantBridge / O6_5 / O6_6 / O6_7 (`padding: '12px 16px'` + `minHeight: 44`). Clears WCAG 2.5.5 and iOS HIG 44pt minimum.
+
+**Deferred-with-reasoning:**
+
+- **#1 `:focus-visible` custom styles.** Browser-default focus outlines apply (no inline-style `outline` override anywhere in the new components). Custom focus-visible polish would require a `.module.css` per component and adds visual-design work that belongs in a later canvas pass. Functional keyboard accessibility (focusable + visible focus ring via browser default) is preserved.
+- **#4 Roving tabindex on BucketPicker.** Strict ARIA `radiogroup` pattern (single tab stop + ArrowLeft/Right keyboard navigation) is the canonical pattern; current impl is non-canonical (each pill independently tabbable). Each pill remains keyboard-operable via Tab — accessibility floor met; canonical pattern compliance deferred to production-promotion when these components migrate out of `src/app/dev/proto/**`. Alternative: switch to native `<input type='radio'>` in `<fieldset>` — also a significant refactor; same deferral.
+- **#6 `SkipScreenButton` extraction (3-way dup).** Per CLAUDE.md §"Simplicity first": *"No unrequested features, no speculative abstractions"* and *"three similar lines is better than a premature abstraction"*. Three copies is the boundary where extraction starts to make sense; extracting now means an extra component file maintained for marginal saving. Reconsider at the 4th call site.
+- **#7 `update` helper (3-way dup).** Same reasoning as #6. Three identical 3-line closures don't yet warrant a custom hook.
+- **#8 Bucket data egress / persistence security note.** Informational — no code change required for this prototype slice (data stays in client-side React memory; no backend route, no persistence, no third-party egress). Captured here so the production-promotion review of this surface picks it up: data-classification review + retention policy needed when these screens move under `src/app/**` outside `dev/proto`.
+- **#9 D-9 ac-gap on partial-fill + Skip-this-screen.** D-9's named uncertainty (acceptance.md L108-110) explicitly grounds skip-screen state semantics in spec 65b L217:
+  > "Skip-screen vs skip-fields. 'Skip this screen' sets all that screen's fields to empty and advances. 'Prefer not to say' on a single field leaves the rest answerable. Both are equivalent for plan-engine consumption."
+
+  Spec says *"both are equivalent for plan-engine consumption"*. If the user partially fills O6.5 (`child_age_youngest = '5-11'`) then taps Skip, that partial value persists. The plan-engine consumption of `{ child_age_youngest: '5-11' }` is identical to `{ child_age_youngest: '5-11', child_age_oldest: null }` (the spec-strict "set all to empty" interpretation) — neither triggers a D5/D6/D7 note because none of those derive functions reference child age. D-9 covers this edge by not writing on skip; partial values are part of the user's expressed answer set.
+
 ## §Status
 
-Slice impl shipped on branch `claude/session-105-O6-quantitative-screens` at `ecf2d43`.
+Slice impl shipped on branch `claude/session-105-O6-quantitative-screens`. Initial impl at `ecf2d43`; auto-review responses at the head of the branch (PR #204).
 
 | Round | Action | Date |
 |---|---|---|
 | Scaffold | acceptance.md drafted; 11 ACs + 9 design decisions; user sign-off received | 2026-05-18 |
 | Impl | 4 screens + 3 shared components + dispatcher wire + 11 unit tests; 318/318 pass; typecheck clean; lint 0 new warnings | 2026-05-18 |
-| Verification | verification.md drafted (this file); preview-deploy review + adversarial review pending | 2026-05-18 |
+| Verification | verification.md drafted | 2026-05-18 |
+| Auto-review round 1 | PR #204 opened; 9 findings (all advisory `blocking: false`); 3 fixed in-PR (aria-controls + contrast + touch-targets) + 6 deferred-with-reasoning above; tests still 11/11 | 2026-05-18 |

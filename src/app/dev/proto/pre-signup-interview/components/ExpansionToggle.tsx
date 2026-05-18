@@ -37,7 +37,7 @@ export function ExpansionToggle({
       <button
         type="button"
         aria-expanded={open}
-        aria-controls={contentId}
+        aria-controls={open ? contentId : undefined}
         onClick={onToggle}
         style={{
           display: 'inline-flex',
@@ -46,7 +46,8 @@ export function ExpansionToggle({
           background: 'transparent',
           color: tokens.color.ink,
           border: 'none',
-          padding: 0,
+          padding: '12px 0',
+          minHeight: 44,
           font: `600 13.5px/1.3 ${tokens.font.sans}`,
           textAlign: 'left',
           cursor: 'pointer',
