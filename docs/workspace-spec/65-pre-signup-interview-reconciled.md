@@ -242,3 +242,9 @@ This data must bridge to post-signup without re-asking.
 - Bank connection flow (spec 59)
 - The AI plan generation logic (needs own spec)
 - The Claude Design wireframes for this section (Action 2)
+
+---
+
+## Extensions
+
+- **Spec 65b — Pre-Signup Quantitative Layer.** Adds 3 themed screens between O6 and O7 (demographics / financials / time-intent) with bucket inputs, all-optional with explicit skip, and progressive rationale-led expansion. Extends the O7 adaptivity model with 3 numeric-derived dimensions (sharing-principle weighting, consent-tier complexity, timeline pressure framing) composed alongside the 4 categorical dimensions in §"Adaptive plan shape" L149-203.

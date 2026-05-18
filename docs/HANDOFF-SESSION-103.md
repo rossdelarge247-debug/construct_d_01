@@ -1,0 +1,107 @@
+# Handoff — Session 103
+
+**Branch shipped:** Spec-layer work only on `claude/session-103-setup-68WaJ` — `docs/workspace-spec/65b-pre-signup-quantitative-layer.md` (new, 340L) + cross-spec pointers in 65 and 67.
+**Scope shipped:** New spec defining the pre-signup quantitative layer (3 themed screens, all-optional buckets, progressive opt-in expansion, Replace bridge to spec 67, full AI-coach access) + bidirectional discoverability pointers in parent specs.
+
+## What happened
+
+Session 103 picked up P2 from session 102's carry-forward — "Spec 65 amendment for quantitative profiling data". Worked entirely at the spec layer; no `src/` touched.
+
+**Decision capture via AskUserQuestion (4 rounds, 9 architectural decisions locked):**
+
+| Round | Decisions |
+|---|---|
+| 1 | Length ceiling (loose 5min / 10-12 screens) · Financial framing (optional with explicit skip) |
+| 2 | Placement (concentrated between O6 and O7) · Demo/time framing (all optional with skip) |
+| 3 | Field scope (progressive opt-in expansion, staggered through to 11 fields) · Screen partition (3 themed) · Input granularity (buckets everywhere) |
+| 4 | Post-signup bridge (Replace pattern — bank data overwrites buckets) · AI-coach access (full from session 1, origin-disclosed phrasing) |
+
+**Spec drafted in a single Write.** 340L following spec 65's structure (Date / Status / Context / Principles / Placement / 3 new screens / Progressive expansion mechanics / Data captured / Plan-output usage / AI-coach integration / Bridge to spec 67 / What this does NOT cover / Status).
+
+**Hook flags addressed during drafting.** Two `comment-review` + `spec-citation-quote` stub flags surfaced:
+
+- Provenance ("session 103") removed from body and front-matter; preserved in §Status footer per CLAUDE.md *"Spec §Status footers ARE the right place for lineage tracking (lineage IS the section's purpose); code comments and persistent test descriptions are not."*
+- Spec citations refactored to include literal verbatim alongside the citation per CLAUDE.md §"Planning conduct" §"Quote, don't paraphrase, when invoking a spec" — spec 65 L151 (*"The 7 elements above compose adaptively..."*) + L174 (*"Combined note cap: max 2 new anchor-driven notes per render..."*) + spec 67 L86 (*"Moment 1 (immediate post-signup) acknowledges what we already know..."*) all literal-quoted at the body invocation.
+
+**Cross-spec pointers.** Spec 65 gained a §"Extensions" section pointing at 65b. Spec 67 §Gap 1 gained a "See also" line below the bridge-examples table noting bucket-replacement rows in 65b.
+
+**Slice ship.**
+
+| # | Commit | Description |
+|---|---|---|
+| 1 | `7c3e771` | `docs(spec-65b): pre-signup quantitative layer between O6 and O7` |
+| 2 | `2bd57c6` | `docs(spec-65,67): cross-link spec 65b quantitative layer` |
+
+Branch `claude/session-103-setup-68WaJ` — 2 ahead / 0 behind main. PR to be opened at wrap step 6.
+
+## What went well
+
+- **AskUserQuestion progressive refinement.** 9 architectural decisions captured cleanly in 4 rounds. Each round's options carried preview rationale (what each path unlocks; what it sacrifices); user could redirect at any point. No premature spec drafting; no silent assumptions.
+- **Spec drafted as one Write rather than incremental edits.** Lower transactional cost; cleaner internal cross-references; easier to review as a single artifact at the §Status footer.
+- **Verbatim quote discipline applied at body-cite time.** Spec 65 L151, L174 and spec 67 L86 all literal-quoted alongside the citation. The substance follows CLAUDE.md §"Planning conduct" §"Quote, don't paraphrase" even though the regex-level stub still pings on the cite pattern.
+- **Cross-spec pointers added bidirectionally.** Both parent specs (65 + 67) now point at 65b. Future-session readers landing on either parent will discover the extension without grep.
+
+## What could improve
+
+- **`spec-citation-quote` CI gate requires blockquote or fenced markup.** Initially mis-framed as "stub-mode noise" in the recurrence-watch carried from session 101. PR #201's CI gate failed twice on this rule before the actual cause was diagnosed: the proximity-rule check only recognises verbatim quotes in blockquote (`> "..."`) or fenced-code form, not inline italic (`*"..."*`). My spec 65b drafted L253 and L298 with inline italic quotes — substantively verbatim from the source spec, but structurally invisible to the gate. Fixed in `64f760b` by converting to blockquote form. The author-time stub hook is more permissive than the CI gate; bring quote markup to blockquote form to satisfy both.
+- **No draft-time adversarial pass on the spec.** Spec 65b was written in one pass without an intermediate `/review` or persona spawn against the draft. For a 340L spec defining UI flow + state shape + cross-spec semantics, a draft-time review would be cheap and high-value. v3b's discipline is PR-time review via `auto-review.yml` — but no `src/` touch means no specialist fan-out triggers. Consider adopting a manual `Agent → reviewer-correctness` spawn for spec-only PRs in future sessions.
+
+## Key decisions
+
+The 9 architectural decisions captured in spec 65b §Status (replicated here as the durable record):
+
+1. Length ceiling: **loose** — 5 min / 10-12 screens (was 3 min / 8 screens in spec 65).
+2. Field framing: **all optional** with per-field "Prefer not to say" + per-screen "Skip this section".
+3. Placement: **concentrated between O6 and O7** (not distributed by theme, not single dense screen, not at the start).
+4. Field scope: **progressive opt-in expansion** with rationale, staggered through to 11 fields (4 core + 7 expansion).
+5. Screen partition: **3 themed screens** (O6.5 demographics / O6.6 financials / O6.7 time-intent).
+6. Input granularity: **buckets everywhere**; free numeric reserved for post-signup bank-confirmed values.
+7. Post-signup bridge: **Replace pattern** — bank-extracted figures supersede bucket selections at Moment 3.
+8. AI-coach access: **full** from session 1, with origin-disclosed phrasing convention (*"Based on what you shared before signing up..."*).
+9. O7 adaptivity model extended with **3 new numeric-derived dimensions** (sharing-principle weighting, consent-tier complexity, timeline pressure framing) composed alongside spec 65's 4 categorical dimensions; max 2 quantitative-derived notes per render; total max 8 notes per render.
+
+## Persona findings recorded
+
+**Auto-review fired on PR #201 despite the spec-only diff.** Earlier in this handoff (before the PR opened) I claimed spec-only sessions don't trigger the multi-agent reviewer suite — that's wrong. Auto-review runs on every PR open/synchronize regardless of `src/` touch. Three rounds across the PR lifecycle:
+
+| Round | Head sha | Verdict | Findings | Resolution |
+|---|---|---|---|---|
+| 1 | `6e5ec1d` | request-changes (5 findings) | 2 spec-citation `suggestion` (correctness) + 3 security `suggestion` (PII egress, retention, ex_age UK-GDPR) | Spec-citation findings addressed in `f2c8518` |
+| 2 | `f2c8518` | request-changes (3 findings) | 3 security `suggestion` persisting | Surfaced to user via AskUserQuestion; decisions captured |
+| 3 | `64f760b` | request-changes (3 findings) | Same 3 security `suggestion` | All 3 addressed in `83e2b0a` with per-field PII policy + account-close retention + ex_age relative-chip coarsening |
+
+**Issues main session missed:** 2 spec-citation findings (correctness specialist) — claiming "9 decisions in §Status" when only 8 were there, and citing "§Status row 9" for a slice candidate that lived in §"Plan-output usage". Both factual errors I introduced; both resolved. 3 security findings (PII egress posture, GDPR retention ceiling, ex-partner third-party data) — substantive architectural concerns not surfaced in main conversation. Routed via AskUserQuestion; resolutions added to spec 65b §AI-coach integration, §Bridge to spec 67, §Status (new rows 10 + 11), and O6.5 demographics screen.
+
+**Retain/drop tracking (per CLAUDE.md §"Persona retain/drop metric"):** session 103 is a spec-only session; it does NOT count as one of the first 3 `src/` slices for the v3b persona retain/drop verdict. Counter remains at **2 of 3** (S-F1 design-tokens shipped session 29 via session-35 wrap PR #23 + session-102 copy-resolver-sweep PR #200). The third `src/` slice — most likely session 104 P2 (`S-PROTO-O7-quantitative-hooks` build-plan.ts impl) or P3 (UI slice for O6.5/O6.6/O6.7) — will trigger the verdict. That said: session 103's spec-only PR DID surface 5 findings the main conversation missed, two of which would have shipped factual errors. Worth re-evaluating whether the retain/drop metric should also count spec-only PRs where specialists catch issues.
+
+## Next session priorities
+
+P2 closed by this session. Remaining + new:
+
+| # | Priority | Effort | Notes |
+|---|---|---|---|
+| 1 | **(Inherited)** Desktop graceful enhancement — Help Rail integration + intermediate breakpoints + extra-space utilisation above 480px | Heavy | Carried from sessions 101 + 102 |
+| 2 | **(New from session 103)** `S-PROTO-O7-quantitative-hooks` impl — 3 new numeric-derived adaptivity dimensions in `build-plan.ts` | Medium | ~75-120 LoC; mirrors S-F1 hook pattern; degrades gracefully on `null`-tolerant bucket inputs |
+| 3 | **(New from session 103)** UI slice for 3 new pre-signup screens (O6.5 / O6.6 / O6.7) | Heavy | New screen scaffolds + state shape extension + per-screen Skip + progressive expansion toggles + bucket pickers; canvas-as-source if/when canvases ship |
+
+**Recommended:** P2 (build-plan.ts hooks) is the lightest follow-on and lands the spec-65b logic without touching the UI surface. It can ship before P3 since the hooks compose adaptively from `null`-tolerant state. P1 (desktop graceful enhancement) is still on the board if the user prefers a visual stream over the logic stream.
+
+## Session 103 metrics
+
+- **Lines added:** 348 across 3 files (1 new spec 340L + spec 65 +6L + spec 67 +2L).
+- **Lines deleted:** 0.
+- **Tests added:** 0 (pure spec work).
+- **CI checks:** none triggered by docs-only commits in this corpus.
+- **Session churn (this CLAUDE.md session):** ~348L author time at handoff start.
+- **Spec deliverables:** 1 new spec (65b) + 2 modified specs (65 + 67).
+- **Architectural decisions captured:** 9 via 4 AskUserQuestion rounds.
+
+## Recurrence-watch (carried + new)
+
+Carried 18 items from session 102. New observation this session:
+
+- **Spec-only sessions don't increment v3b persona retain/drop counter.** No `src/` touch → no specialist fan-out at PR review. The 3-slice evaluation window stays at 2 of 3 entries (S-F1 + session-102 sweep). One-session-observed; promote to numbered constraint if a second session confirms the same recurrence. Worth noting: spec-only PRs may benefit from a manual `Agent → reviewer-correctness` spawn against the draft, even though the v3b workflow doesn't auto-fire for them.
+
+Second-session-observed (was new in session 101, repeated session 103):
+
+- **`spec-citation-quote` CI gate markup-form rule (corrects "stub-mode noise" framing).** The gate requires blockquote (`> "..."`) or fenced-code markup for the verbatim quote within 5 lines of any `[Ss]pec NN §"..."` trigger. Inline italic (`*"..."*`) is NOT recognised, even if the quoted text is verbatim from the cited spec. Session 103 confirmed this twice on PR #201 before diagnosis. The author-time stub hook is more permissive than the CI gate; the recurrence-watch entry inherited from session 101 mis-framed this as "noise" rather than a structural markup requirement.

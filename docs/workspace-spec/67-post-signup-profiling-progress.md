@@ -101,6 +101,8 @@ COUNTER → AGREE → FINALISE → SUBMIT → IMPLEMENT
 | `device_private = not_sure` | Moment 1 explains quick-exit feature, offers discreet mode |
 | `partner_awareness = hiding` | Credit check strongly recommended later (pre-share) |
 
+**See also:** Spec 65b §"Bridge to spec 67 (Replace pattern)" extends this table with bucket-field replacement rows for the pre-signup quantitative layer (combined income, total assets, property equity, savings, debts, pension). Bucket values supersede self-reported selections at Moment 3 bank-confirmation; biographical/categorical fields (ages, relationship length, timeline) persist as user-confirmable facts.
+
 **What Moment 1 looks like:**
 
 ```
