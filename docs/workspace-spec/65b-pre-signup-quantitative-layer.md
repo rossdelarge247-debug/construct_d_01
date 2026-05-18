@@ -250,7 +250,11 @@ preSignupState.quantitative = {
 
 ## Plan-output usage (O7 adaptivity extension)
 
-Spec 65 §"Adaptive plan shape" L151 states: *"The 7 elements above compose adaptively from pre-signup-available state via 4 adaptivity dimensions (categorical hooks, not confidence-grading; not Tier-class quantitative scoring). Schema grounded in `src/app/dev/proto/pre-signup-interview/lib/types.ts`; composition logic in `lib/build-plan.ts`."* The quantitative layer adds 3 numeric-derived dimensions that compose alongside, not in place of, the categorical hooks:
+Spec 65 §"Adaptive plan shape" L151 states:
+
+> "The 7 elements above compose adaptively from pre-signup-available state via 4 adaptivity dimensions (categorical hooks, not confidence-grading; not Tier-class quantitative scoring). Schema grounded in `src/app/dev/proto/pre-signup-interview/lib/types.ts`; composition logic in `lib/build-plan.ts`."
+
+The quantitative layer adds 3 numeric-derived dimensions that compose alongside, not in place of, the categorical hooks:
 
 **Dimension 5 — Sharing-principle weighting** (derived from `relationship_length` + ages):
 
@@ -295,7 +299,11 @@ The coach MUST disclose the pre-signup origin of any quantitative reference when
 
 ## Bridge to spec 67 (Replace pattern)
 
-Spec 67 §"Gap 1: Data bridge from pre-signup" L86 sets the approach: *"Moment 1 (immediate post-signup) acknowledges what we already know. Post-signup profiling skips what's answered and goes direct to follow-ups based on pre-signup state."* The quantitative layer extends that bridge with a **Replace** semantics specifically for bucket fields, applied at Moment 3 bank-confirmation:
+Spec 67 §"Gap 1: Data bridge from pre-signup" L86 sets the approach:
+
+> "Moment 1 (immediate post-signup) acknowledges what we already know. Post-signup profiling skips what's answered and goes direct to follow-ups based on pre-signup state."
+
+The quantitative layer extends that bridge with a **Replace** semantics specifically for bucket fields, applied at Moment 3 bank-confirmation:
 
 | Pre-signup quantitative field | Post-signup behaviour |
 |---|---|
