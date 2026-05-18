@@ -253,33 +253,33 @@ const TIMELINE_NOTES: Record<TimelineFraming, string> = {
 };
 
 function deriveSharingWeight(answers: Answers): SharingWeight | null {
-  const q = answers.quantitative;
-  if (!q) return null;
-  const len = q.relationship_length;
+  const quant = answers.quantitative;
+  if (!quant) return null;
+  const len = quant.relationship_length;
   if (len === '10-20y' || len === '20+y') return 'full';
   if (len === '<2y' || len === '2-5y') return 'light';
   return null;
 }
 
 function deriveConsentTier(answers: Answers): ConsentTier | null {
-  const q = answers.quantitative;
-  if (!q) return null;
-  const ta = q.total_assets;
-  const pv = q.pension_value;
-  if (ta == null && pv == null) return null;
-  if (ta === '500k-1M' || ta === '>1M' || pv === '300k+') return 'complex';
-  if ((ta === '<10k' || ta === '10-50k') && (pv === 'none' || pv === '<25k')) return 'light';
+  const quant = answers.quantitative;
+  if (!quant) return null;
+  const totalAssets = quant.total_assets;
+  const pensionValue = quant.pension_value;
+  if (totalAssets == null && pensionValue == null) return null;
+  if (totalAssets === '500k-1M' || totalAssets === '>1M' || pensionValue === '300k+') return 'complex';
+  if ((totalAssets === '<10k' || totalAssets === '10-50k') && (pensionValue === 'none' || pensionValue === '<25k')) return 'light';
   return 'standard';
 }
 
 function deriveTimelineFraming(answers: Answers): TimelineFraming | null {
-  const q = answers.quantitative;
-  if (!q) return null;
-  const tt = q.target_timeline;
-  const drivers = q.timeline_drivers ?? [];
-  if ((tt === 'asap' || tt === '3m') && drivers.includes('deadline')) return 'deadline-pressure';
-  if (tt === 'asap' && drivers.length === 0) return 'unanchored-urgency';
-  if (tt === '18m+' || tt === 'unsure' || tt == null) return 'patient';
+  const quant = answers.quantitative;
+  if (!quant) return null;
+  const targetTimeline = quant.target_timeline;
+  const drivers = quant.timeline_drivers ?? [];
+  if ((targetTimeline === 'asap' || targetTimeline === '3m') && drivers.includes('deadline')) return 'deadline-pressure';
+  if (targetTimeline === 'asap' && drivers.length === 0) return 'unanchored-urgency';
+  if (targetTimeline === '18m+' || targetTimeline === 'unsure' || targetTimeline == null) return 'patient';
   return null;
 }
 
@@ -287,7 +287,6 @@ function composeQuantitativeNotes(answers: Answers): PlanContent['personalisedNo
   const notes: Array<{ trigger: string; body: string }> = [];
   const sharing = deriveSharingWeight(answers);
   if (sharing) notes.push({ trigger: `sharing-${sharing}-weight`, body: SHARING_NOTES[sharing] });
-  if (notes.length >= 2) return notes;
   const tier = deriveConsentTier(answers);
   if (tier) notes.push({ trigger: `consent-tier-${tier}`, body: CONSENT_TIER_NOTES[tier] });
   if (notes.length >= 2) return notes;

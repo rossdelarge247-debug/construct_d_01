@@ -84,7 +84,7 @@ D-5. **New test file `build-plan-quantitative.test.ts`.** Existing `build-plan.t
 
 **AC-3.** `deriveConsentTier(answers: Answers): 'complex' | 'light' | 'standard' | null` implemented per spec D6 triggers. Returns `'complex'` when `total_assets ∈ {'500k-1M', '>1M'}` OR `pension_value = '300k+'`; `'light'` when `total_assets ∈ {'<10k', '10-50k'}` AND `pension_value ∈ {'none', '<25k'}`; `'standard'` for any other non-null combination; `null` only when both `total_assets` and `pension_value` are null (or quantitative is absent).
 
-**AC-4.** `deriveTimelineFraming(answers: Answers): 'deadline-pressure' | 'unanchored-urgency' | 'patient' | null` implemented per spec D7 triggers. Returns `'deadline-pressure'` when `target_timeline ∈ {'asap', '3m'}` AND `timeline_drivers` includes `'deadline'`; `'unanchored-urgency'` when `target_timeline = 'asap'` AND `timeline_drivers` is empty or null; `'patient'` when `target_timeline ∈ {'18m+', 'unsure'}` or `target_timeline` is null; `null` when quantitative is absent.
+**AC-4.** `deriveTimelineFraming(answers: Answers): 'deadline-pressure' | 'unanchored-urgency' | 'patient' | null` implemented per spec D7 triggers. Returns `'deadline-pressure'` when `target_timeline ∈ {'asap', '3m'}` AND `timeline_drivers` includes `'deadline'`; `'unanchored-urgency'` when `target_timeline = 'asap'` AND `timeline_drivers` is empty or null; `'patient'` when `target_timeline ∈ {'18m+', 'unsure'}` or `target_timeline` is null; `null` when quantitative is absent OR when `target_timeline ∈ {'6m', '12m'}` with no `deadline` driver. Mid-range timeline values are not specced for D7 (spec L273-277 lists no rule for them); falling through to no D7 note is the documented behaviour.
 
 **AC-5.** `composePersonalisedNotes(answers)` in `build-plan.ts` extended to append up to 2 quantitative-derived notes after the existing categorical/anchor notes. Iterate D5 → D6 → D7 in spec order; first 2 firing triggers added; third dropped (per D-3). `null` returns from the derive functions are skipped (no note added for that dimension).
 
@@ -99,13 +99,11 @@ D-5. **New test file `build-plan-quantitative.test.ts`.** Existing `build-plan.t
 - Cap + ordering integration: when all 3 dimensions fire, first 2 in D5 → D6 → D7 order win; third dropped.
 - Backward compat: existing `tests/unit/proto-pre-signup/build-plan.test.ts` runs unchanged and passes.
 
-**AC-9. Paired spec patch.** Spec 65b §"AI-coach integration" `ex_age_relative` row updated per D-2 in same PR. Current row text:
-
-> "Used locally by plan-engine for relative-age sharing-principle framing only"
-
-Replacement row text:
+**AC-9. Paired spec patch.** Spec 65b §"AI-coach integration" `ex_age_relative` row patched per D-2 in same PR. The row's amended text reads:
 
 > "Plan-engine does not consume this field; retained in state for future trigger extension when D5 rules are amended"
+
+Replaces the prior row text "Used locally by plan-engine for relative-age sharing-principle framing only" (promise-without-delivery per slice D-1).
 
 ## Out of scope
 

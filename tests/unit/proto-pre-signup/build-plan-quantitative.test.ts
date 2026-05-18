@@ -55,6 +55,10 @@ describe('buildPlanFromAnswers — quantitative layer', () => {
     it('emits no consent note when total_assets and pension_value are both null', () => {
       expect(triggers(q({ total_assets: null, pension_value: null })).some((s) => s.startsWith('consent-tier-'))).toBe(false);
     });
+    it('emits no complex trigger when property_equity is provided alone', () => {
+      const t = triggers(q({ property_equity: '500k+', total_assets: null, pension_value: null }));
+      expect(t.some((s) => s.startsWith('consent-tier-'))).toBe(false);
+    });
   });
 
   describe('D7 timeline pressure framing', () => {
@@ -78,6 +82,12 @@ describe('buildPlanFromAnswers — quantitative layer', () => {
     });
     it('triggers timeline-patient when target_timeline is null and quantitative is provided', () => {
       expect(triggers(q({ target_timeline: null }))).toContain('timeline-patient');
+    });
+    it('emits no timeline note for mid-range target_timeline 6m without deadline driver', () => {
+      expect(triggers(q({ target_timeline: '6m' })).some((s) => s.startsWith('timeline-'))).toBe(false);
+    });
+    it('emits no timeline note for mid-range target_timeline 12m without deadline driver', () => {
+      expect(triggers(q({ target_timeline: '12m' })).some((s) => s.startsWith('timeline-'))).toBe(false);
     });
   });
 
@@ -121,7 +131,7 @@ describe('buildPlanFromAnswers — quantitative layer', () => {
     });
   });
 
-  describe('body copy (AC-7)', () => {
+  describe('quantitative note bodies', () => {
     it('every quantitative note has a non-empty body of substantive length', () => {
       const a = q({ relationship_length: '10-20y', total_assets: '>1M' });
       const out = quantOnly(a);
