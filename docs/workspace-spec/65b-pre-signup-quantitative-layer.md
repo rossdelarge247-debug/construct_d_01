@@ -338,3 +338,4 @@ Locked architectural decisions (session 103):
 6. Input granularity: buckets everywhere; free numeric reserved for post-signup bank-confirmed values.
 7. Post-signup bridge: Replace pattern — bank data overwrites buckets at Moment 3.
 8. AI-coach access: full from session 1, with origin-disclosed phrasing convention.
+9. O7 adaptivity model extended with 3 numeric-derived dimensions (sharing-principle weighting, consent-tier complexity, timeline pressure framing); max 2 quantitative-derived notes per render; total max 8 notes per render (4 categorical + 2 anchor + 2 quantitative).

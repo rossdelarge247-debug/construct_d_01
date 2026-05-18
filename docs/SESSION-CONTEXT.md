@@ -34,7 +34,7 @@ Session 103's spec lands a Build Map's worth of follow-on:
 
 ### P2 detail — `S-PROTO-O7-quantitative-hooks` (Recommended)
 
-**Slice candidate:** `docs/slices/S-PROTO-O7-quantitative-hooks/` (not yet scaffolded — spec 65b §Status row 9 names the slice as candidate).
+**Slice candidate:** `docs/slices/S-PROTO-O7-quantitative-hooks/` (not yet scaffolded — spec 65b §"Plan-output usage" names the slice as candidate).
 
 **Spec anchors** (read at session start):
 
