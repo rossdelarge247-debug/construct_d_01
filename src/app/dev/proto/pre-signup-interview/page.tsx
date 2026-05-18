@@ -13,8 +13,12 @@ import { O3 } from './screens/O3';
 import { O4 } from './screens/O4';
 import { O5 } from './screens/O5';
 import { O6 } from './screens/O6';
+import { O6_5 } from './screens/O6_5';
+import { O6_6 } from './screens/O6_6';
+import { O6_7 } from './screens/O6_7';
 import { O7 } from './screens/O7';
 import { O8 } from './screens/O8';
+import { QuantBridge } from './screens/QuantBridge';
 import styles from './page.module.css';
 
 function renderScreen(step: number) {
@@ -25,8 +29,12 @@ function renderScreen(step: number) {
     case 4: return <O4 />;
     case 5: return <O5 />;
     case 6: return <O6 />;
-    case 7: return <O7 />;
-    case 8: return <O8 />;
+    case 7: return <QuantBridge />;
+    case 8: return <O6_5 />;
+    case 9: return <O6_6 />;
+    case 10: return <O6_7 />;
+    case 11: return <O7 />;
+    case 12: return <O8 />;
     default: return <O1 />;
   }
 }
