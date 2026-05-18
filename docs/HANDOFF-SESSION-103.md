@@ -43,7 +43,7 @@ Branch `claude/session-103-setup-68WaJ` — 2 ahead / 0 behind main. PR to be op
 
 ## What could improve
 
-- **`spec-citation-quote` stub-mode false-positive recurrence.** Already on recurrence-watch from session 101 hook-regex limitation list. Session 103 confirmed the pattern again: the hook flags any `Spec X §"..."` pattern regardless of whether the literal sentence is appended in the same breath. Substance was correct this session, but the stub noise distracts from real flags. Promote to numbered constraint if a third session confirms.
+- **`spec-citation-quote` CI gate requires blockquote or fenced markup.** Initially mis-framed as "stub-mode noise" in the recurrence-watch carried from session 101. PR #201's CI gate failed twice on this rule before the actual cause was diagnosed: the proximity-rule check only recognises verbatim quotes in blockquote (`> "..."`) or fenced-code form, not inline italic (`*"..."*`). My spec 65b drafted L253 and L298 with inline italic quotes — substantively verbatim from the source spec, but structurally invisible to the gate. Fixed in `64f760b` by converting to blockquote form. The author-time stub hook is more permissive than the CI gate; bring quote markup to blockquote form to satisfy both.
 - **No draft-time adversarial pass on the spec.** Spec 65b was written in one pass without an intermediate `/review` or persona spawn against the draft. For a 340L spec defining UI flow + state shape + cross-spec semantics, a draft-time review would be cheap and high-value. v3b's discipline is PR-time review via `auto-review.yml` — but no `src/` touch means no specialist fan-out triggers. Consider adopting a manual `Agent → reviewer-correctness` spawn for spec-only PRs in future sessions.
 
 ## Key decisions
@@ -62,9 +62,17 @@ The 9 architectural decisions captured in spec 65b §Status (replicated here as 
 
 ## Persona findings recorded
 
-None this session. No `src/` touch; no `Linked canvas:` field; no AC; no preview deploy. Spec-only sessions don't trigger the multi-agent reviewer suite at PR review time.
+**Auto-review fired on PR #201 despite the spec-only diff.** Earlier in this handoff (before the PR opened) I claimed spec-only sessions don't trigger the multi-agent reviewer suite — that's wrong. Auto-review runs on every PR open/synchronize regardless of `src/` touch. Three rounds across the PR lifecycle:
 
-**Retain/drop tracking (per CLAUDE.md §"Persona retain/drop metric"):** session 103 is a spec-only session; it does NOT count as one of the first 3 `src/` slices for the v3b persona retain/drop verdict. Counter remains at **2 of 3** (S-F1 design-tokens shipped session 29 via session-35 wrap PR #23 + session-102 copy-resolver-sweep PR #200). The third `src/` slice — most likely session 104 P2 (`S-PROTO-O7-quantitative-hooks` build-plan.ts impl) or P3 (UI slice for O6.5/O6.6/O6.7) — will trigger the verdict.
+| Round | Head sha | Verdict | Findings | Resolution |
+|---|---|---|---|---|
+| 1 | `6e5ec1d` | request-changes (5 findings) | 2 spec-citation `suggestion` (correctness) + 3 security `suggestion` (PII egress, retention, ex_age UK-GDPR) | Spec-citation findings addressed in `f2c8518` |
+| 2 | `f2c8518` | request-changes (3 findings) | 3 security `suggestion` persisting | Surfaced to user via AskUserQuestion; decisions captured |
+| 3 | `64f760b` | request-changes (3 findings) | Same 3 security `suggestion` | All 3 addressed in `83e2b0a` with per-field PII policy + account-close retention + ex_age relative-chip coarsening |
+
+**Issues main session missed:** 2 spec-citation findings (correctness specialist) — claiming "9 decisions in §Status" when only 8 were there, and citing "§Status row 9" for a slice candidate that lived in §"Plan-output usage". Both factual errors I introduced; both resolved. 3 security findings (PII egress posture, GDPR retention ceiling, ex-partner third-party data) — substantive architectural concerns not surfaced in main conversation. Routed via AskUserQuestion; resolutions added to spec 65b §AI-coach integration, §Bridge to spec 67, §Status (new rows 10 + 11), and O6.5 demographics screen.
+
+**Retain/drop tracking (per CLAUDE.md §"Persona retain/drop metric"):** session 103 is a spec-only session; it does NOT count as one of the first 3 `src/` slices for the v3b persona retain/drop verdict. Counter remains at **2 of 3** (S-F1 design-tokens shipped session 29 via session-35 wrap PR #23 + session-102 copy-resolver-sweep PR #200). The third `src/` slice — most likely session 104 P2 (`S-PROTO-O7-quantitative-hooks` build-plan.ts impl) or P3 (UI slice for O6.5/O6.6/O6.7) — will trigger the verdict. That said: session 103's spec-only PR DID surface 5 findings the main conversation missed, two of which would have shipped factual errors. Worth re-evaluating whether the retain/drop metric should also count spec-only PRs where specialists catch issues.
 
 ## Next session priorities
 
@@ -96,4 +104,4 @@ Carried 18 items from session 102. New observation this session:
 
 Second-session-observed (was new in session 101, repeated session 103):
 
-- **`spec-citation-quote` hook stub-mode noise.** Fires on `Spec X §"..."` text even when the literal sentence is in the same sentence. Substance follows the rule; stub regex is overly broad. Promote to numbered constraint if a third session confirms.
+- **`spec-citation-quote` CI gate markup-form rule (corrects "stub-mode noise" framing).** The gate requires blockquote (`> "..."`) or fenced-code markup for the verbatim quote within 5 lines of any `[Ss]pec NN §"..."` trigger. Inline italic (`*"..."*`) is NOT recognised, even if the quoted text is verbatim from the cited spec. Session 103 confirmed this twice on PR #201 before diagnosis. The author-time stub hook is more permissive than the CI gate; the recurrence-watch entry inherited from session 101 mis-framed this as "noise" rather than a structural markup requirement.

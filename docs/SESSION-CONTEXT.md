@@ -111,7 +111,7 @@ Session 103's spec lands a Build Map's worth of follow-on:
 
 **Second-session-observed (was new in session 101, repeated session 103):**
 
-- **`spec-citation-quote` hook stub-mode noise.** Fires on `Spec X §"..."` text even when the literal sentence is in the same sentence. Substance follows the rule; stub regex is overly broad. Promote to numbered constraint if a third session confirms.
+- **`spec-citation-quote` CI gate markup-form rule.** The gate requires blockquote (`> "..."`) or fenced-code markup for the verbatim quote within 5 lines of any `[Ss]pec NN §"..."` trigger. Inline italic (`*"..."*`) is NOT recognised, even with verbatim text. Session 103 diagnosed this on PR #201 (failed twice before the fix). The author-time stub hook is more permissive than the CI gate; bring quote markup to blockquote form to satisfy both.
 
 **Active recurrence-watch items unchanged (carried from session 102):**
 
@@ -230,7 +230,7 @@ Session 104 branch: harness-suffixed off clean main once session-103 PR lands, O
 
 **Active pre-existing CI failures (carry forward):**
 
-- `spec-citation-quote-check` — fires on Added files; second-session limitation observed (fires on `Spec X §"..."` patterns even with verbatim quote attached). Pragmatic carry; session 103's commits passed despite stub-mode false positives at author time.
+- `spec-citation-quote-check` — fires on Added files. Session 103 diagnosed the actual rule: the gate requires blockquote or fenced-code markup for the verbatim quote within 5 lines of the citation, not inline italic. PR #201 failed twice on this before the fix in `64f760b`. Bring inline italic quotes to blockquote form to satisfy both author-time stub and CI gate.
 
 ## Scope ceiling
 
