@@ -82,14 +82,16 @@ When toggled open:
 
 ```
 "Your age"                ○ <30   ○ 30-39   ○ 40-49   ○ 50-59   ○ 60+   ○ Prefer not to say
-"Your ex's age"           ○ <30   ○ 30-39   ○ 40-49   ○ 50-59   ○ 60+   ○ Don't know   ○ Prefer not to say
+"Your ex's age (relative to yours)"   ○ Same age as you   ○ Older   ○ Younger   ○ Don't know   ○ Prefer not to say
 "Length of relationship"  ○ <2y   ○ 2-5y    ○ 5-10y   ○ 10-20y  ○ 20+y  ○ Prefer not to say
 ```
 
 **Why these matter (shown beside the toggle in plain language):**
 
-- Ages near 50+ shift pension considerations into the foreground.
+- Your age + how your ex's age compares to yours shifts pension considerations into the foreground. The older partner's pension is often the central asset; relative age matters most for sharing-rights calculations.
 - Length of relationship weights the sharing-principle calculation courts use.
+
+**Note on ex's age framing.** Captured as a relative chip rather than an absolute band to minimise the collection of third-party personal data under UK GDPR. Sufficient for pension-relevance framing; not detailed enough to re-identify the ex-partner from this data alone.
 
 **Screen actions:**
 
@@ -226,7 +228,7 @@ preSignupState.quantitative = {
   child_age_youngest:     '0-4' | '5-11' | '12-15' | '16-17' | '18+' | null
   child_age_oldest:       '0-4' | '5-11' | '12-15' | '16-17' | '18+' | null
   your_age:               '<30' | '30-39' | '40-49' | '50-59' | '60+' | null
-  ex_age:                 '<30' | '30-39' | '40-49' | '50-59' | '60+' | 'unknown' | null
+  ex_age_relative:        'same' | 'older' | 'younger' | 'unknown' | null
   relationship_length:    '<2y' | '2-5y' | '5-10y' | '10-20y' | '20+y' | null
 
   // Financials (O6.6)
@@ -282,18 +284,23 @@ Implementation extends `lib/build-plan.ts`, the composition-logic location quote
 
 ## AI-coach integration
 
-The AI coach (specs 68a §AI-coach cross-cutting + 68d §Settle-phase coach) receives the full `preSignupState.quantitative` payload from session 1. No additional opt-in toggle.
+The AI coach (specs 68a §AI-coach cross-cutting + 68d §Settle-phase coach) receives a **per-field-scoped** subset of `preSignupState.quantitative` from session 1, applying a documented egress posture at the Anthropic API boundary. No additional opt-in toggle.
 
-**Coach access scope:**
+**Coach access scope (per-field policy):**
 
-- Full read of all 13 quantitative fields, including `null` (treated as "not disclosed yet").
-- Used for personalised recommendations, tone calibration, and prioritisation hints from the dashboard moment forward.
+| Field family | Anthropic egress posture | Rationale |
+|---|---|---|
+| Own demographics (`your_age`, `relationship_length`) + own financials (`combined_monthly_income`, `savings_cash`, `debts_non_mortgage`, `pension_value`, `property_equity`, `total_assets`) + timeline (`target_timeline`, `timeline_drivers`) | Verbatim | Personalises coach tone and recommendations against the user's own data |
+| Children's age bands (`child_age_youngest`, `child_age_oldest`) | Aggregated to a single band label (e.g. "youngest under 12") | Child-safety: avoid age-precise re-identification at the LLM boundary |
+| Ex-partner-derived fields (`ex_age_relative`) | Omitted from egress payload entirely | Third-party personal data under UK GDPR — collected from user about ex without ex's consent; not sent to Anthropic. Used locally by plan-engine for relative-age sharing-principle framing only. |
+
+`null` values are treated as "not disclosed yet" and trigger no egress reference. Used for personalised recommendations, tone calibration, and prioritisation hints from the dashboard moment forward.
 
 **Coach prompt convention (illustrative):**
 
-The coach MUST disclose the pre-signup origin of any quantitative reference when speaking to the user — *"Based on what you shared before signing up, your timeline of 6-12 months..."* — rather than presenting bucket figures as confirmed facts. This preserves the trust-band distinction between self-reported buckets and bank-evidenced post-signup figures.
+The coach MUST disclose the pre-signup origin of any quantitative reference when speaking to the user — "Based on what you shared before signing up, your timeline of 6-12 months..." — rather than presenting bucket figures as confirmed facts. This preserves the trust-band distinction between self-reported buckets and bank-evidenced post-signup figures.
 
-**Replacement at Moment 3.** Once bank-extracted figures replace buckets (see next section), the coach switches all references from "what you shared before" to the bank-confirmed source — *"Your salary from ACME Ltd is £3,218/month..."*. The bucket version is no longer referenced.
+**Replacement at Moment 3.** Once bank-extracted figures replace buckets (see next section), the coach switches all references from "what you shared before" to the bank-confirmed source — "Your salary from ACME Ltd is £3,218/month...". The bucket version is no longer referenced.
 
 ---
 
@@ -313,11 +320,13 @@ The quantitative layer extends that bridge with a **Replace** semantics specific
 | `pension_value` bucket | At Moment 3 confirmation: bucket replaced if pension provider connects OR remains as self-reported anchor with explicit "you said" framing until valuation step. |
 | `property_equity` bucket | At Moment 3: remains self-reported until valuation step (no bank source for equity); transitions to a confirmation-needed task in the post-bank task list. |
 | `total_assets` bucket | Computed quantity, not asked again post-bank. Derived from bank-extracted facts at Moment 3. |
-| `child_age_*`, `your_age`, `ex_age`, `relationship_length`, `target_timeline`, `timeline_drivers` | Categorical/biographical — NOT replaced by bank data. Persist as user-confirmable facts; surfaced for edit-on-demand in profile settings. |
+| `child_age_*`, `your_age`, `ex_age_relative`, `relationship_length`, `target_timeline`, `timeline_drivers` | Categorical/biographical — NOT replaced by bank data. Persist as user-confirmable facts; surfaced for edit-on-demand in profile settings. |
 
 Spec 67 §Gap 1 bridge examples table (L90-102) is unchanged; this layer adds the bucket-replacement rows above without conflicting.
 
 **Audit trail.** Until Moment 3, the bucket value is the source of truth for plan-output + coach. After Moment 3, the bucket value is archived (not deleted — kept for completeness audit) and the bank-extracted figure becomes the live source.
+
+**Retention ceiling.** Archived bucket values persist for the lifetime of the user's account; deleted at account close. User-initiated erasure requests honour the UK GDPR right-to-erasure earlier than account close. No indefinite retention.
 
 ---
 
@@ -345,5 +354,7 @@ Locked architectural decisions (session 103):
 5. Screen partition: 3 themed screens (demographics / financials / time-intent).
 6. Input granularity: buckets everywhere; free numeric reserved for post-signup bank-confirmed values.
 7. Post-signup bridge: Replace pattern — bank data overwrites buckets at Moment 3.
-8. AI-coach access: full from session 1, with origin-disclosed phrasing convention.
+8. AI-coach access: per-field policy from session 1 — own data verbatim, child ages aggregated to a band, ex-partner fields omitted from Anthropic egress; origin-disclosed phrasing convention applied to any reference.
 9. O7 adaptivity model extended with 3 numeric-derived dimensions (sharing-principle weighting, consent-tier complexity, timeline pressure framing); max 2 quantitative-derived notes per render; total max 8 notes per render (4 categorical + 2 anchor + 2 quantitative).
+10. Bucket retention: archived bucket values persist for the lifetime of the user's account and are deleted at account close; user-initiated erasure honours UK GDPR right-to-erasure earlier.
+11. Ex-partner data minimisation: `ex_age` captured as a relative chip (same / older / younger / unknown), not an absolute age band, to minimise third-party personal data collection under UK GDPR.
