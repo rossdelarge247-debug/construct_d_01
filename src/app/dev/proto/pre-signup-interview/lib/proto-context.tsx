@@ -2,7 +2,7 @@
 
 import { createContext, useCallback, useContext, useMemo, useState, type ReactNode } from 'react';
 import type { Answers } from './types';
-import { TOTAL_STEPS } from './types';
+import { SCREEN_COUNT } from './types';
 
 interface ProtoState {
   answers: Answers;
@@ -23,9 +23,9 @@ export function ProtoProvider({ children }: { children: ReactNode }) {
     setAnswers((prev) => ({ ...prev, [key]: value }));
   }, []);
 
-  const next = useCallback(() => setStep((s) => Math.min(TOTAL_STEPS, s + 1)), []);
+  const next = useCallback(() => setStep((s) => Math.min(SCREEN_COUNT, s + 1)), []);
   const back = useCallback(() => setStep((s) => Math.max(1, s - 1)), []);
-  const goTo = useCallback((s: number) => setStep(Math.max(1, Math.min(TOTAL_STEPS, s))), []);
+  const goTo = useCallback((s: number) => setStep(Math.max(1, Math.min(SCREEN_COUNT, s))), []);
 
   const value = useMemo<ProtoState>(
     () => ({ answers, setAnswer, step, next, back, goTo }),
