@@ -7,26 +7,20 @@
 - Adversarial review budget: standard single-pass (acceptance <300L per `docs/workspace-spec/72b-adversarial-review-budget.md`)
 - Linked canvas: N/A (no UI surface)
 - Control-change label required at PR (hook scripts + spec amendment)
-- Persona suite per spec 76 §3 row 4 (Multi-agent specialists / infrastructure column):
-
-  > *"security · correctness · style (control-plane scrutiny)"*
-
-  Maps to `reviewer-security`, `reviewer-correctness`, `reviewer-style`.
+- Persona suite (spec 76 §3 row 4 Multi-agent specialists / infrastructure column reads *"security · correctness · style (control-plane scrutiny)"*): `reviewer-security`, `reviewer-correctness`, `reviewer-style`
 
 ## In scope
 
 - `.claude/hooks/tdd-first-every-commit.sh` — add prototype path-default skip
 - `.claude/hooks/comment-review.sh` — fix §Status exemption awk regex
 - `docs/workspace-spec/76-prototype-mode-rigour.md` §2 — update implementation-list footnote
-- `CLAUDE.md` §"Hard controls" gate-table — TDD-first row parenthetical
+- `CLAUDE.md` §"Slice categories" §"Sweep discipline" paragraph — add `tdd-first-every-commit.sh` to implementing-files list
 - `tests/shellspec/` — new spec files exercising both fixes
 
 ## Out of scope
 
 - Explicit-override (slice `**Category:**` line) honor at commit-time — requires branch-name → slice-lookup machinery; path-default only at V1
-- `tdd-guard.sh` unchanged — per spec 76 §2 L41:
-
-  > *"Implementations sharing this logic include `.claude/hooks/tdd-guard.sh` (path-default-skip)"*
+- `tdd-guard.sh` unchanged — spec 76 §2 L41 lists it as *"Implementations sharing this logic include `.claude/hooks/tdd-guard.sh` (path-default-skip)"*
 - Other awk regex patterns in `comment-review.sh` (the §Status fix is targeted)
 
 ## Acceptance criteria
@@ -39,13 +33,11 @@ The hook auto-exempts `src/` paths matching the prototype path-default pattern. 
 
 Implementation re-uses `tdd-guard.sh` L85's regex form `^src/app/dev/proto/[^/[]+/.+\.(ts|tsx)$` verbatim to prevent semantic drift between the two hooks.
 
-**Evidence:** `tests/shellspec/tdd-first-every-commit-category_spec.sh` — three scenarios:
+**Evidence:** `tests/shellspec/tdd-first-every-commit.spec.sh` — 3 new It blocks:
 
 1. Staged: prototype-only src/ → exits 0 (no block)
-2. Staged: production-only src/ → exits 2 (block)
-3. Staged: mixed (prototype + production) → exits 2 — per spec 76 §2 L24:
-
-   > *"For multi-path slices, the most-restrictive applicable category wins (`production` > `prototype` > `infrastructure`)."*
+2. Staged: mixed (prototype + production) → exits 2; spec 76 §2 L24 rule applies — *"For multi-path slices, the most-restrictive applicable category wins (`production` > `prototype` > `infrastructure`)."*
+3. Staged: parametric route (`src/app/dev/proto/[slug]/page.tsx`) → exits 2 (production path-default; parametric routes excluded from prototype regex via `[^/[]+` character class)
 
 ### AC-2 — `comment-review.sh` §Status exemption matches both `## Status` and `## §Status`
 
@@ -55,13 +47,10 @@ The hook's fence-aware awk filter honors the documented `^## §?Status` semantic
 
 Current `/^## §?Status/` ambiguously handles the multi-byte `§` (UTF-8 `0xC2 0xA7`) under POSIX awk; replacement `/^## (§)?Status/` groups the multi-byte character so the `?` quantifier applies to the whole group.
 
-**Evidence:** `tests/shellspec/comment-review-status-exemption_spec.sh` — five scenarios:
+**Evidence:** `tests/shellspec/comment-review.spec.sh` — 2 new It blocks (existing tests at L182/L190 cover the §-present and out-of-block cases):
 
-1. `## Status` literal header → exemption fires (content below not flagged)
-2. `## §Status` literal header → exemption fires
-3. `## §Status` inside fenced code block → exemption does NOT fire (fence-aware logic intact)
-4. `## Status` inside fenced code block → exemption does NOT fire
-5. Content before any `## §?Status` heading → flagged normally (anti-pattern regex still triggers)
+1. `## Status` literal header (no §) → exemption fires (the bug-fix case — was non-matching pre-regex-fix)
+2. `## Status` inside fenced code block → exemption does NOT fire (regression guard: fence-aware logic intact under the new regex)
 
 ### AC-3 — Spec 76 §2 L41 + §6 L84 implementation lists add `tdd-first-every-commit.sh`
 

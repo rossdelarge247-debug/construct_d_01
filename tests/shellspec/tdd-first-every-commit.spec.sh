@@ -105,5 +105,7 @@ Describe 'tdd-first-every-commit.sh'
     git -C "$REPO" add 'src/app/dev/proto/[slug]/page.tsx'
     When call invoke_hook 'git commit -m parametric'
     The status should be failure
+    The stderr should include 'BLOCKED'
+    The stderr should include 'src/app/dev/proto/[slug]/page.tsx'
   End
 End

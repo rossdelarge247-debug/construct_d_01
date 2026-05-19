@@ -49,7 +49,6 @@ while IFS= read -r path; do
     src/*)
       EXEMPT=0
       # Spec 76 §2 prototype-mode rigour path-default skip.
-      # Match src/app/dev/proto/<literal-slug>/<...>.{ts,tsx} files.
       # Hub bare files (src/app/dev/proto/page.tsx) and parametric routes
       # (src/app/dev/proto/[slug]/...) fall through to the allowlist check.
       if [[ "$path" =~ ^src/app/dev/proto/[^/[]+/.+\.(ts|tsx)$ ]]; then
