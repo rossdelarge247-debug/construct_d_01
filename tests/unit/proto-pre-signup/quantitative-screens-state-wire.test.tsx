@@ -86,6 +86,108 @@ describe('BucketPicker', () => {
       screen.getByRole('radio', { name: 'Prefer not to say' }).getAttribute('aria-checked'),
     ).toBe('false');
   });
+
+  it('makes the selected pill the sole tab-stop in the radiogroup', () => {
+    render(
+      <BucketPicker
+        id="test"
+        label="Test"
+        options={[
+          { value: 'a', label: 'Apple' },
+          { value: 'b', label: 'Banana' },
+        ]}
+        selected="b"
+        onChange={vi.fn()}
+      />,
+    );
+    expect(screen.getByRole('radio', { name: 'Apple' }).tabIndex).toBe(-1);
+    expect(screen.getByRole('radio', { name: 'Banana' }).tabIndex).toBe(0);
+    expect(screen.getByRole('radio', { name: 'Prefer not to say' }).tabIndex).toBe(-1);
+  });
+
+  it('makes the first pill the tab-stop when no selection has been made', () => {
+    render(
+      <BucketPicker
+        id="test"
+        label="Test"
+        options={[
+          { value: 'a', label: 'Apple' },
+          { value: 'b', label: 'Banana' },
+        ]}
+        selected={undefined}
+        onChange={vi.fn()}
+      />,
+    );
+    expect(screen.getByRole('radio', { name: 'Apple' }).tabIndex).toBe(0);
+    expect(screen.getByRole('radio', { name: 'Banana' }).tabIndex).toBe(-1);
+    expect(screen.getByRole('radio', { name: 'Prefer not to say' }).tabIndex).toBe(-1);
+  });
+
+  it('moves selection and focus to the next pill on ArrowRight', () => {
+    const onChange = vi.fn();
+    render(
+      <BucketPicker
+        id="test"
+        label="Test"
+        options={[
+          { value: 'a', label: 'Apple' },
+          { value: 'b', label: 'Banana' },
+        ]}
+        selected="a"
+        onChange={onChange}
+      />,
+    );
+    const apple = screen.getByRole('radio', { name: 'Apple' });
+    apple.focus();
+    fireEvent.keyDown(apple, { key: 'ArrowRight' });
+    expect(onChange).toHaveBeenCalledWith('b');
+    expect(document.activeElement).toBe(screen.getByRole('radio', { name: 'Banana' }));
+  });
+
+  it('wraps to the last pill on ArrowLeft from the first pill', () => {
+    const onChange = vi.fn();
+    render(
+      <BucketPicker
+        id="test"
+        label="Test"
+        options={[
+          { value: 'a', label: 'Apple' },
+          { value: 'b', label: 'Banana' },
+        ]}
+        selected="a"
+        onChange={onChange}
+      />,
+    );
+    const apple = screen.getByRole('radio', { name: 'Apple' });
+    apple.focus();
+    fireEvent.keyDown(apple, { key: 'ArrowLeft' });
+    expect(onChange).toHaveBeenCalledWith(null);
+    expect(document.activeElement).toBe(screen.getByRole('radio', { name: 'Prefer not to say' }));
+  });
+
+  it('jumps to the first pill on Home and the last on End', () => {
+    const onChange = vi.fn();
+    render(
+      <BucketPicker
+        id="test"
+        label="Test"
+        options={[
+          { value: 'a', label: 'Apple' },
+          { value: 'b', label: 'Banana' },
+        ]}
+        selected="b"
+        onChange={onChange}
+      />,
+    );
+    const banana = screen.getByRole('radio', { name: 'Banana' });
+    banana.focus();
+    fireEvent.keyDown(banana, { key: 'Home' });
+    expect(onChange).toHaveBeenCalledWith('a');
+    expect(document.activeElement).toBe(screen.getByRole('radio', { name: 'Apple' }));
+    fireEvent.keyDown(screen.getByRole('radio', { name: 'Apple' }), { key: 'End' });
+    expect(onChange).toHaveBeenCalledWith(null);
+    expect(document.activeElement).toBe(screen.getByRole('radio', { name: 'Prefer not to say' }));
+  });
 });
 
 describe('MultiPicker', () => {

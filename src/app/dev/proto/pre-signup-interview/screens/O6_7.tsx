@@ -7,8 +7,10 @@ import { BucketPicker } from '../components/BucketPicker';
 import { ExpansionToggle } from '../components/ExpansionToggle';
 import { Footer } from '../components/Footer';
 import { MultiPicker } from '../components/MultiPicker';
+import { SkipScreenButton } from '../components/SkipScreenButton';
 import { TopBar } from '../components/TopBar';
 import { useProto } from '../lib/proto-context';
+import { useQuantitativeUpdate } from '../lib/use-quantitative-update';
 import type { Quantitative, TargetTimeline, TimelineDriver } from '../lib/types';
 
 const TIMELINE_OPTIONS: ReadonlyArray<{ value: TargetTimeline; label: string }> = [
@@ -31,15 +33,13 @@ const DRIVER_OPTIONS: ReadonlyArray<{ value: TimelineDriver; label: string }> = 
 ];
 
 export function O6_7() {
-  const { answers, setAnswer, next, back } = useProto();
+  const { answers, next, back } = useProto();
   const [expanded, setExpanded] = useState(false);
 
   const quantitative: Quantitative = answers.quantitative ?? {};
   const drivers: ReadonlyArray<TimelineDriver> = quantitative.timeline_drivers ?? [];
 
-  const update = <K extends keyof Quantitative>(key: K, value: Quantitative[K]) => {
-    setAnswer('quantitative', { ...quantitative, [key]: value });
-  };
+  const update = useQuantitativeUpdate();
 
   return (
     <main
@@ -123,24 +123,7 @@ export function O6_7() {
       <Footer
         ctaLabel="Continue to your plan"
         onContinue={next}
-        secondaryActions={
-          <button
-            type="button"
-            onClick={next}
-            style={{
-              background: 'transparent',
-              color: tokens.color.text.sub,
-              border: 'none',
-              padding: '12px 16px',
-              minHeight: 44,
-              font: `500 13.5px/1.3 ${tokens.font.sans}`,
-              textDecoration: 'underline',
-              cursor: 'pointer',
-            }}
-          >
-            Skip this screen
-          </button>
-        }
+        secondaryActions={<SkipScreenButton onSkip={next} />}
       />
     </main>
   );

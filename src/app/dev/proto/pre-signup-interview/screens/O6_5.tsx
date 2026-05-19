@@ -6,8 +6,10 @@ import { BrandBar } from '../components/BrandBar';
 import { BucketPicker } from '../components/BucketPicker';
 import { ExpansionToggle } from '../components/ExpansionToggle';
 import { Footer } from '../components/Footer';
+import { SkipScreenButton } from '../components/SkipScreenButton';
 import { TopBar } from '../components/TopBar';
 import { useProto } from '../lib/proto-context';
+import { useQuantitativeUpdate } from '../lib/use-quantitative-update';
 import type {
   AdultAge,
   ChildAge,
@@ -48,16 +50,14 @@ const RELATIONSHIP_LENGTH_OPTIONS: ReadonlyArray<{ value: RelationshipLength; la
 ];
 
 export function O6_5() {
-  const { answers, setAnswer, next, back } = useProto();
+  const { answers, next, back } = useProto();
   const [expanded, setExpanded] = useState(false);
 
   const quantitative: Quantitative = answers.quantitative ?? {};
   const showChildrenSection = answers.situation?.hasChildren === 'yes';
   const isSingleChild = answers.situation?.childrenCount === 1;
 
-  const update = <K extends keyof Quantitative>(key: K, value: Quantitative[K]) => {
-    setAnswer('quantitative', { ...quantitative, [key]: value });
-  };
+  const update = useQuantitativeUpdate();
 
   return (
     <main
@@ -194,24 +194,7 @@ export function O6_5() {
       <Footer
         ctaLabel="Continue"
         onContinue={next}
-        secondaryActions={
-          <button
-            type="button"
-            onClick={next}
-            style={{
-              background: 'transparent',
-              color: tokens.color.text.sub,
-              border: 'none',
-              padding: '12px 16px',
-              minHeight: 44,
-              font: `500 13.5px/1.3 ${tokens.font.sans}`,
-              textDecoration: 'underline',
-              cursor: 'pointer',
-            }}
-          >
-            Skip this screen
-          </button>
-        }
+        secondaryActions={<SkipScreenButton onSkip={next} />}
       />
     </main>
   );

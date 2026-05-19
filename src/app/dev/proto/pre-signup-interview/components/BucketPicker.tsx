@@ -1,6 +1,8 @@
 'use client';
 
+import { type KeyboardEvent } from 'react';
 import { tokens } from '@/styles/tokens';
+import styles from './focus-visible.module.css';
 
 interface Option<V extends string> {
   value: V;
@@ -16,6 +18,7 @@ interface BucketPickerProps<V extends string> {
 }
 
 const PREFER_NOT_TO_SAY_LABEL = 'Prefer not to say';
+const ROVING_KEYS = new Set(['ArrowRight', 'ArrowLeft', 'ArrowDown', 'ArrowUp', 'Home', 'End']);
 
 export function BucketPicker<V extends string>({
   id,
@@ -24,8 +27,37 @@ export function BucketPicker<V extends string>({
   selected,
   onChange,
 }: BucketPickerProps<V>) {
-  const isPreferNotToSay = selected === null;
   const headingId = `${id}-label`;
+
+  const allOptions: ReadonlyArray<{ value: V | null; label: string }> = [
+    ...options,
+    { value: null, label: PREFER_NOT_TO_SAY_LABEL },
+  ];
+
+  const selectedIndex = allOptions.findIndex((o) => o.value === selected);
+  const tabStopIndex = selectedIndex === -1 ? 0 : selectedIndex;
+
+  const handleKeyDown = (event: KeyboardEvent<HTMLDivElement>) => {
+    if (!ROVING_KEYS.has(event.key)) return;
+    event.preventDefault();
+
+    const current = tabStopIndex;
+    const last = allOptions.length - 1;
+    let next: number;
+    if (event.key === 'ArrowRight' || event.key === 'ArrowDown') {
+      next = current === last ? 0 : current + 1;
+    } else if (event.key === 'ArrowLeft' || event.key === 'ArrowUp') {
+      next = current === 0 ? last : current - 1;
+    } else if (event.key === 'Home') {
+      next = 0;
+    } else {
+      next = last;
+    }
+
+    onChange(allOptions[next].value as V | null);
+    const buttons = event.currentTarget.querySelectorAll<HTMLButtonElement>('button[role="radio"]');
+    buttons[next]?.focus();
+  };
 
   return (
     <div
@@ -47,28 +79,22 @@ export function BucketPicker<V extends string>({
       <div
         role="radiogroup"
         aria-labelledby={headingId}
+        onKeyDown={handleKeyDown}
         style={{
           display: 'flex',
           flexWrap: 'wrap',
           gap: 6,
         }}
       >
-        {options.map((opt) => {
-          const checked = selected === opt.value;
-          return (
-            <Pill
-              key={opt.value}
-              label={opt.label}
-              checked={checked}
-              onClick={() => onChange(opt.value)}
-            />
-          );
-        })}
-        <Pill
-          label={PREFER_NOT_TO_SAY_LABEL}
-          checked={isPreferNotToSay}
-          onClick={() => onChange(null)}
-        />
+        {allOptions.map((opt, i) => (
+          <Pill
+            key={opt.value ?? PREFER_NOT_TO_SAY_LABEL}
+            label={opt.label}
+            checked={selected === opt.value}
+            tabIndex={i === tabStopIndex ? 0 : -1}
+            onClick={() => onChange(opt.value as V | null)}
+          />
+        ))}
       </div>
     </div>
   );
@@ -77,16 +103,19 @@ export function BucketPicker<V extends string>({
 interface PillProps {
   label: string;
   checked: boolean;
+  tabIndex: number;
   onClick: () => void;
 }
 
-function Pill({ label, checked, onClick }: PillProps) {
+function Pill({ label, checked, tabIndex, onClick }: PillProps) {
   return (
     <button
       type="button"
       role="radio"
       aria-checked={checked}
+      tabIndex={tabIndex}
       onClick={onClick}
+      className={styles.focusable}
       style={{
         display: 'inline-flex',
         alignItems: 'center',
