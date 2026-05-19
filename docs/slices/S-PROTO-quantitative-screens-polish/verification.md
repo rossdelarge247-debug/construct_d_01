@@ -77,12 +77,14 @@
 
 ## Definition of Done check (`category: prototype` short-form)
 
-| Item | Status |
-|---|---|
-| 1. AC met with evidence | ✓ above |
-| 8. No secrets in src or commit messages | ✓ |
-| 12. No console errors in browser dev console | Deferred — inherits SESSION-CONTEXT P1 deferral |
-| 14. Preview-deploy 6-dimension rubric | Deferred — inherits SESSION-CONTEXT P1 deferral; table above records 6 deferred rows with code-evidence per dimension |
+Items 1, 8, 12, 14 of the spec 72 §11 14-item security checklist (prototype short-form per CLAUDE.md §"Slice categories"):
+
+| # | Item | Status |
+|---|---|---|
+| 1 | Data classification per AC | T0 — static UI state (underlying `Quantitative` shape on main is T1 prototype, unchanged here) |
+| 8 | Error handling (no leaks) | N/A — pure presentation + keyboard handling; no error surface added |
+| 12 | Adversarial review | ✓ — auto-review fan-out on PR landed `nit-only` verdict (7 findings: 3 actionable nitpicks/notes addressed in follow-up commit; 4 informational including 2 praise + 1 deferred-suggestion + 1 native-pattern note) |
+| 14 | Secrets hygiene | ✓ — CI `Gitleaks scan` workflow green; no secrets introduced |
 
 Per-slice DoD:
 
@@ -100,7 +102,19 @@ Test-pain audit per CLAUDE.md §"Engineering conventions": no unit test in this 
 
 ## Auto-review responses
 
-PENDING — auto-review fan-out fires at PR open (`pull_request:opened/synchronize`). Verdict + finding triage will land here at PR-review time.
+Verdict on `1a968b5`: **`nit-only`** (informational at v3b ship; 7 findings, none `blocking: true`).
+
+| # | Specialist | Label | Category | Action | Reasoning |
+|---|---|---|---|---|---|
+| 1 | style | nitpick | naming | **Fix** | `key={opt.value ?? '__pnts__'}` → `key={opt.value ?? PREFER_NOT_TO_SAY_LABEL}` — use the in-scope constant rather than an opaque sentinel string. |
+| 2 | style | nitpick | simplicity | **Fix** | Duplicate ternary `selectedIndex === -1 ? 0 : selectedIndex` in `handleKeyDown` re-derives `tabStopIndex`; replaced with `const current = tabStopIndex;`. |
+| 3 | prototype-readiness | note | interaction-pattern | Skip | Space activates the focused pill via native `<button>` click behaviour; no explicit Space handler needed per WAI-ARIA APG 3.16. Reviewer affirmed pattern correct. |
+| 4 | security | note | security | **Fix** | Label drift: acceptance.md + verification.md DoD short-form table cargo-culted item labels from the prior `S-PROTO-quantitative-screens` slice (which itself mis-labelled). security.md was already correct against spec 72 §11. Re-aligned acceptance.md + verification.md labels to match the spec verbatim (1=Data classification · 8=Error handling · 12=Adversarial review · 14=Secrets hygiene). Note: reviewer's stated claim that "item 8 in the full 14-item list is 'No secrets in src or commit messages'" was actually incorrect (item 8 is "Error handling"; item 14 is "Secrets hygiene") — but the finding's substance (drift between docs) was right, and the fix harmonises both correctly. |
+| 5 | prototype-readiness | praise | accessibility-essential | Skip | Affirmation of WAI-ARIA radiogroup roving-tabindex impl. |
+| 6 | prototype-readiness | praise | accessibility-visual | Skip | Affirmation of shared focus-visible module + token fallback contrast margin. |
+| 7 | prototype-readiness | suggestion | accessibility-essential | Defer | Future call sites may benefit from visually-hidden SR context outside screen headings; defer to system-wide SR pass per accepted SESSION-CONTEXT P1 deferral. |
+
+Net: 3 fixed in follow-up commit; 4 informational/deferred. No blocking findings.
 
 ## §Status
 
@@ -115,3 +129,4 @@ Slice impl shipped on branch `claude/session-107-preview-3s8EE`. Commit lineage:
 | AC-3 impl | focus-visible.module.css + 4-component className wiring (`669ff65`) | 2026-05-19 |
 | AC-4 impl | Roving tabindex on BucketPicker + 5 tests (`cd50a28`) | 2026-05-19 |
 | Verification | verification.md drafted (this file) | 2026-05-19 |
+| Auto-review on `1a968b5` | Verdict `nit-only` (7 findings, none blocking); 3 actionable fixed in follow-up; 4 informational/deferred (see §"Auto-review responses" above) | 2026-05-19 |

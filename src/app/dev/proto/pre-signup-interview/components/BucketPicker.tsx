@@ -41,7 +41,7 @@ export function BucketPicker<V extends string>({
     if (!ROVING_KEYS.has(event.key)) return;
     event.preventDefault();
 
-    const current = selectedIndex === -1 ? 0 : selectedIndex;
+    const current = tabStopIndex;
     const last = allOptions.length - 1;
     let next: number;
     if (event.key === 'ArrowRight' || event.key === 'ArrowDown') {
@@ -88,7 +88,7 @@ export function BucketPicker<V extends string>({
       >
         {allOptions.map((opt, i) => (
           <Pill
-            key={opt.value ?? '__pnts__'}
+            key={opt.value ?? PREFER_NOT_TO_SAY_LABEL}
             label={opt.label}
             checked={selected === opt.value}
             tabIndex={i === tabStopIndex ? 0 : -1}

@@ -78,12 +78,14 @@ Roving tabindex tests added to existing `quantitative-screens-state-wire.test.ts
 
 ## Definition of Done (per `category: prototype`, short-form from CLAUDE.md §"Slice categories")
 
-DoD items 1, 8, 12, 14 of the 14-item security checklist (spec 72 §11 short-form for prototype):
+Items 1, 8, 12, 14 of the 14-item security checklist (spec 72 §11 short-form for prototype):
 
-1. **AC met with evidence per AC in `verification.md`** — final-state record assembled at slice ship.
-8. **No secrets in src or commit messages** — verified by `git diff` review pre-push + CI secret-scanning check.
-12. **No console errors in browser dev console** — **DEFERRED** to system-wide pass per SESSION-CONTEXT P1 deferral note.
-14. **Preview-deploy verification rubric** — **DEFERRED** to system-wide pass per SESSION-CONTEXT P1 deferral note. Future system-wide pass covers this and all prior prototype slices.
+1. **Data classification per AC** — T0 (static UI state; underlying `Quantitative` shape on main is T1 prototype and unchanged here).
+8. **Error handling (no leaks)** — N/A (pure presentation + keyboard handling; no error surface added).
+12. **Adversarial review** — auto-review fan-out on PR (3 specialists: prototype-readiness substitutes for correctness in prototype category, plus security + style).
+14. **Secrets hygiene** — no secrets introduced; CI `Gitleaks scan` workflow gates independently.
+
+Plus the per-slice 6-item DoD listed below.
 
 Plus the per-slice DoD (CLAUDE.md §"Engineering conventions"):
 
