@@ -2,6 +2,7 @@
 
 import { type ReactNode } from 'react';
 import { tokens } from '@/styles/tokens';
+import styles from './focus-visible.module.css';
 
 interface ExpansionToggleProps {
   id: string;
@@ -39,6 +40,7 @@ export function ExpansionToggle({
         aria-expanded={open}
         aria-controls={open ? contentId : undefined}
         onClick={onToggle}
+        className={styles.focusable}
         style={{
           display: 'inline-flex',
           alignItems: 'center',

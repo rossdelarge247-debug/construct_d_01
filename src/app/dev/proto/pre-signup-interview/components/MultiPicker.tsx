@@ -1,6 +1,7 @@
 'use client';
 
 import { tokens } from '@/styles/tokens';
+import styles from './focus-visible.module.css';
 
 interface Option<V extends string> {
   value: V;
@@ -84,6 +85,7 @@ function CheckPill({ label, checked, onClick }: CheckPillProps) {
       role="checkbox"
       aria-checked={checked}
       onClick={onClick}
+      className={styles.focusable}
       style={{
         display: 'inline-flex',
         alignItems: 'center',

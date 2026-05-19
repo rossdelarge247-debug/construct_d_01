@@ -1,6 +1,7 @@
 'use client';
 
 import { tokens } from '@/styles/tokens';
+import styles from './focus-visible.module.css';
 
 interface SkipScreenButtonProps {
   onSkip: () => void;
@@ -11,6 +12,7 @@ export function SkipScreenButton({ onSkip }: SkipScreenButtonProps) {
     <button
       type="button"
       onClick={onSkip}
+      className={styles.focusable}
       style={{
         background: 'transparent',
         color: tokens.color.text.sub,

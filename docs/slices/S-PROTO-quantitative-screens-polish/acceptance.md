@@ -40,15 +40,8 @@ New component at `src/app/dev/proto/pre-signup-interview/components/SkipScreenBu
 **AC-2 — `useQuantitativeUpdate` hook extraction.**
 New hook file at `src/app/dev/proto/pre-signup-interview/lib/use-quantitative-update.ts` exporting `useQuantitativeUpdate(): <K extends keyof Quantitative>(key: K, value: Quantitative[K]) => void`. Hook reads from `useProto()` once; returns the closure-bound update function. Three screens replace inline `const update = ...` declarations with `const update = useQuantitativeUpdate()`. Per-screen behavior identical; existing tests in `tests/unit/proto-pre-signup/quantitative-screens-state-wire.test.tsx` continue to pass without modification.
 
-**AC-3 — `:focus-visible` CSS modules for keyboard focus indication.**
-New CSS module files alongside each interactive component:
-
-- `src/app/dev/proto/pre-signup-interview/components/BucketPicker.module.css`
-- `src/app/dev/proto/pre-signup-interview/components/MultiPicker.module.css`
-- `src/app/dev/proto/pre-signup-interview/components/ExpansionToggle.module.css`
-- `src/app/dev/proto/pre-signup-interview/components/SkipScreenButton.module.css`
-
-Each defines a `.focusable:focus-visible` rule with `outline: 2px solid` (token-resolved colour) + `outline-offset: 2px` for visible keyboard-only focus ring per WCAG 2.4.7. Each component's interactive element gets `className={styles.focusable}` (added alongside existing inline `style={{}}` — no migration of other styles per D-2). Pseudo-class indication is only expressible via CSS file (not inline CSS-in-JS).
+**AC-3 — `:focus-visible` CSS module for keyboard focus indication.**
+New shared module at `src/app/dev/proto/pre-signup-interview/components/focus-visible.module.css` defining a `.focusable:focus-visible` rule with `outline: 2px solid var(--ds-color-ink, #1A1A1A)` + `outline-offset: 2px` for visible keyboard-only focus ring per WCAG 2.4.7. Matches the existing pattern at `Footer.module.css:69-72`. Four interactive components (`BucketPicker` pill, `MultiPicker` checkpill, `ExpansionToggle` button, `SkipScreenButton` button) import the shared module and add `className={styles.focusable}` alongside existing inline `style={{}}` — no migration of other styles per D-2. Pseudo-class indication is only expressible via CSS file (not inline CSS-in-JS). Shared single source of truth over 4 byte-identical per-component modules (anti-DRY).
 
 **AC-4 — Roving tabindex on `BucketPicker` (ARIA radio-group convention).**
 `BucketPicker` becomes single-tab-stop per WAI-ARIA Authoring Practices for `radiogroup`. The selected pill has `tabIndex={0}`; all other pills have `tabIndex={-1}`. When `selected === undefined`, the first pill is the tab-stop. Arrow keys (ArrowLeft / ArrowRight / ArrowUp / ArrowDown) move focus AND selection to the previous/next pill (wraps at ends). Home/End jump to first/last pill. Space/click selection behavior preserved. `MultiPicker` is NOT changed (checkboxes are independent-focusable per ARIA convention). `ExpansionToggle` is NOT changed (single-button element, naturally one Tab stop).
@@ -71,7 +64,7 @@ Roving tabindex tests added to existing `quantitative-screens-state-wire.test.ts
 
 **D-4.** `useQuantitativeUpdate` return shape: returns the update function directly (closure over store setter) over returning a `{ update }` object. Matches the existing inline-function pattern in the 3 screens; reduces refactor diff. Per CLAUDE.md §"Simplicity first".
 
-**D-5.** Focus-ring colour: token-resolved via the existing `--ds-color-*` design-token palette (S-F1 token system at `src/styles/tokens.ts`). Specific token picked at impl time to clear WCAG 1.4.11 non-text contrast 3:1 against pill default, pill selected, and screen backgrounds. Recorded in `verification.md` AC-3 evidence.
+**D-5.** Focus-ring colour: `var(--ds-color-ink, #1A1A1A)` per the existing `Footer.module.css:69-72` pattern (S-F1 token system at `src/styles/tokens.ts` exposes `--ds-color-ink: #1A1A1A`). Ink clears WCAG 1.4.11 non-text contrast 3:1 against panel white (#FFFFFF: ~17:1), page cream (#F5F5F4: ~16:1), and pill backgrounds with wide margin. Consistent with the existing focus-ring convention rather than introducing a second accent token for the same purpose.
 
 ## Out of scope (this slice)
 
