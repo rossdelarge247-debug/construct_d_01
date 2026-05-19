@@ -26,7 +26,11 @@ Session 106 closed P4 + P5 from session-105's priority list — `S-INFRA-rigour-
 
 ## Session 107 priorities — user picks scope
 
-Session 106 closed P4 + P5; P1 (preview-deploy hands-on review) remains the lightest recommended path.
+**P1 DEFERRED (session 107 in-session decision).** Per-prototype-slice rubric exercises (reduced-motion · mobile viewport · screen-reader · console-error check) defer to a single system-wide accessibility + responsive + SR pass post-prototype-lock-down. Reasoning: prototype journeys still in flux; interest-payment quality work compounds badly when applied per-slice across an iterating prototype. Future prototype slices' DoD-4 (preview-deploy verification) + DoD-14 (rubric) inherit this deferral by reference. Wrap will fully refresh SESSION-CONTEXT for session 108.
+
+**P3 active.** `S-PROTO-quantitative-screens-polish` — bundles all 4 deferred items from session 105 auto-review (focus-visible · roving tabindex · SkipScreenButton extract · useQuantitativeUpdate helper).
+
+Session 106 closed P4 + P5; session 107 follows on with P3 polish after deferring P1.
 
 | # | Priority | Scope | Effort | Blocked? |
 |---|---|---|---|---|
@@ -34,7 +38,7 @@ Session 106 closed P4 + P5; P1 (preview-deploy hands-on review) remains the ligh
 | 2 | **(Inherited from sessions 101-106)** Desktop graceful enhancement — Help Rail integration + intermediate breakpoints + extra-space utilisation above 480px | Heavy | Yes (Help Rail spec ref still pending — would need a scoping design phase before AC freeze) |
 | 3 | **(Inherited from session 105)** Quant-screens polish — focus-visible CSS module · roving tabindex on BucketPicker · SkipScreenButton extraction · update-helper hook | Medium | No |
 
-**Recommended:** P1 (preview-deploy hands-on review). Lightest follow-on; closes the remaining DoD rows for S-PROTO-quantitative-screens cleanly. Vercel preview URL for the merged tip: `construct-dev.vercel.app/dev/proto/pre-signup-interview`.
+**Active:** P3 (quant-screens polish). P1 deferred this session per note above; wrap will refresh recommendation for session 108.
 
 ### P1 detail — Preview-deploy hands-on review (Light)
 
