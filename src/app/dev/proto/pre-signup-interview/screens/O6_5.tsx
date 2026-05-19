@@ -6,6 +6,7 @@ import { BrandBar } from '../components/BrandBar';
 import { BucketPicker } from '../components/BucketPicker';
 import { ExpansionToggle } from '../components/ExpansionToggle';
 import { Footer } from '../components/Footer';
+import { SkipScreenButton } from '../components/SkipScreenButton';
 import { TopBar } from '../components/TopBar';
 import { useProto } from '../lib/proto-context';
 import type {
@@ -194,24 +195,7 @@ export function O6_5() {
       <Footer
         ctaLabel="Continue"
         onContinue={next}
-        secondaryActions={
-          <button
-            type="button"
-            onClick={next}
-            style={{
-              background: 'transparent',
-              color: tokens.color.text.sub,
-              border: 'none',
-              padding: '12px 16px',
-              minHeight: 44,
-              font: `500 13.5px/1.3 ${tokens.font.sans}`,
-              textDecoration: 'underline',
-              cursor: 'pointer',
-            }}
-          >
-            Skip this screen
-          </button>
-        }
+        secondaryActions={<SkipScreenButton onSkip={next} />}
       />
     </main>
   );
