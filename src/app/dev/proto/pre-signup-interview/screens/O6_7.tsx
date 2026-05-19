@@ -10,6 +10,7 @@ import { MultiPicker } from '../components/MultiPicker';
 import { SkipScreenButton } from '../components/SkipScreenButton';
 import { TopBar } from '../components/TopBar';
 import { useProto } from '../lib/proto-context';
+import { useQuantitativeUpdate } from '../lib/use-quantitative-update';
 import type { Quantitative, TargetTimeline, TimelineDriver } from '../lib/types';
 
 const TIMELINE_OPTIONS: ReadonlyArray<{ value: TargetTimeline; label: string }> = [
@@ -32,15 +33,13 @@ const DRIVER_OPTIONS: ReadonlyArray<{ value: TimelineDriver; label: string }> = 
 ];
 
 export function O6_7() {
-  const { answers, setAnswer, next, back } = useProto();
+  const { answers, next, back } = useProto();
   const [expanded, setExpanded] = useState(false);
 
   const quantitative: Quantitative = answers.quantitative ?? {};
   const drivers: ReadonlyArray<TimelineDriver> = quantitative.timeline_drivers ?? [];
 
-  const update = <K extends keyof Quantitative>(key: K, value: Quantitative[K]) => {
-    setAnswer('quantitative', { ...quantitative, [key]: value });
-  };
+  const update = useQuantitativeUpdate();
 
   return (
     <main

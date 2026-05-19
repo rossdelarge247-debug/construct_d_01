@@ -9,6 +9,7 @@ import { Footer } from '../components/Footer';
 import { SkipScreenButton } from '../components/SkipScreenButton';
 import { TopBar } from '../components/TopBar';
 import { useProto } from '../lib/proto-context';
+import { useQuantitativeUpdate } from '../lib/use-quantitative-update';
 import type {
   DebtsBracket,
   IncomeBracket,
@@ -69,15 +70,13 @@ const PENSION_OPTIONS: ReadonlyArray<{ value: PensionValueBracket; label: string
 ];
 
 export function O6_6() {
-  const { answers, setAnswer, next, back } = useProto();
+  const { answers, next, back } = useProto();
   const [expanded, setExpanded] = useState(false);
 
   const quantitative: Quantitative = answers.quantitative ?? {};
   const showPropertyEquity = answers.situation?.home !== 'rent';
 
-  const update = <K extends keyof Quantitative>(key: K, value: Quantitative[K]) => {
-    setAnswer('quantitative', { ...quantitative, [key]: value });
-  };
+  const update = useQuantitativeUpdate();
 
   return (
     <main
