@@ -278,7 +278,7 @@ Every slice carries a category — `production` · `prototype` · `infrastructur
 - `prototype` — UI/UX rigour preserved (preview-deploy 6-dim runs in full · `reviewer-prototype-readiness` post-PR persona **substitutes** `reviewer-correctness`); code rigour relaxed (TDD-guard skips · coverage excludes · test-pain audit threshold raises from >2 to >5 mocks · DoD-14 short-form to items 1, 8, 12, 14 only). Used for `/dev/proto/*` static-data dev-mode UI; T0 metadata only.
 - `infrastructure` — full production-grade rigour for control-plane changes (hooks · workflows · ESLint config · persona files); the surface that gates the rest of the rig.
 
-**Sweep discipline (spec 76 §6).** Constraint #38 applies recursively: any amendment to spec 76 §3 matrix that changes a per-category rule MUST sweep all implementing files in the same PR (`vitest.config.ts` · `.claude/hooks/tdd-guard.sh` · `.github/workflows/auto-review.yml` · `.github/PULL_REQUEST_TEMPLATE.md` · any slice's overriding `acceptance.md`).
+**Sweep discipline (spec 76 §6).** Constraint #38 applies recursively: any amendment to spec 76 §3 matrix that changes a per-category rule MUST sweep all implementing files in the same PR (`vitest.config.ts` · `.claude/hooks/tdd-guard.sh` · `.claude/hooks/tdd-first-every-commit.sh` · `.github/workflows/auto-review.yml` · `.github/PULL_REQUEST_TEMPLATE.md` · any slice's overriding `acceptance.md`).
 
 ## Hard controls (in development)
 

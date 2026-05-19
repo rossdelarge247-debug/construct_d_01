@@ -80,4 +80,30 @@ Describe 'tdd-first-every-commit.sh'
     The stderr should match pattern '*acceptance.md AC-5*'
     The stderr should match pattern '*Actionable alternatives*'
   End
+
+  It 'exits 0 when only src/app/dev/proto/<slug>/ paths staged (prototype path-default)'
+    mkdir -p "$REPO/src/app/dev/proto/onboarding/screens"
+    printf 'export const X = 1\n' > "$REPO/src/app/dev/proto/onboarding/screens/foo.tsx"
+    git -C "$REPO" add src/app/dev/proto/onboarding/screens/foo.tsx
+    When call invoke_hook 'git commit -m proto-only'
+    The status should be success
+  End
+
+  It 'exits non-zero when prototype src/ paths mixed with non-prototype src/ paths'
+    mkdir -p "$REPO/src/app/dev/proto/onboarding/screens"
+    printf 'export const X = 1\n' > "$REPO/src/app/dev/proto/onboarding/screens/foo.tsx"
+    printf 'export const Y = 2\n' > "$REPO/src/lib/y.ts"
+    git -C "$REPO" add src/app/dev/proto/onboarding/screens/foo.tsx src/lib/y.ts
+    When call invoke_hook 'git commit -m mixed'
+    The status should be failure
+    The stderr should match pattern '*src/lib/y.ts*'
+  End
+
+  It 'enforces on parametric route paths (src/app/dev/proto/[slug]/) — production path-default'
+    mkdir -p "$REPO/src/app/dev/proto/[slug]"
+    printf 'export const X = 1\n' > "$REPO/src/app/dev/proto/[slug]/page.tsx"
+    git -C "$REPO" add 'src/app/dev/proto/[slug]/page.tsx'
+    When call invoke_hook 'git commit -m parametric'
+    The status should be failure
+  End
 End

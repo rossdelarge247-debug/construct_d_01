@@ -48,12 +48,21 @@ while IFS= read -r path; do
   case "$path" in
     src/*)
       EXEMPT=0
-      for pat in "${ALLOWLIST[@]}"; do
-        # shellcheck disable=SC2254  # intentional glob match
-        case "$path" in
-          $pat) EXEMPT=1; break ;;
-        esac
-      done
+      # Spec 76 §2 prototype-mode rigour path-default skip.
+      # Match src/app/dev/proto/<literal-slug>/<...>.{ts,tsx} files.
+      # Hub bare files (src/app/dev/proto/page.tsx) and parametric routes
+      # (src/app/dev/proto/[slug]/...) fall through to the allowlist check.
+      if [[ "$path" =~ ^src/app/dev/proto/[^/[]+/.+\.(ts|tsx)$ ]]; then
+        EXEMPT=1
+      fi
+      if [ "$EXEMPT" -eq 0 ]; then
+        for pat in "${ALLOWLIST[@]}"; do
+          # shellcheck disable=SC2254  # intentional glob match
+          case "$path" in
+            $pat) EXEMPT=1; break ;;
+          esac
+        done
+      fi
       [ "$EXEMPT" -eq 0 ] && NON_EXEMPT_SRC+=("$path")
       ;;
     tests/*)

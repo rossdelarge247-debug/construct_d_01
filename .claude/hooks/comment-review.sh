@@ -116,7 +116,7 @@ fi
 # triple-backtick blocks don't trigger suppression.
 SCAN_CONTENT=$(printf '%s' "$CONTENT" | awk '
   /^```/ { fence = !fence }
-  /^## §?Status/ && !fence { in_status = 1; next }
+  /^## (§)?Status/ && !fence { in_status = 1; next }
   /^## / && !fence && in_status { in_status = 0 }
   !in_status { print }
 ')

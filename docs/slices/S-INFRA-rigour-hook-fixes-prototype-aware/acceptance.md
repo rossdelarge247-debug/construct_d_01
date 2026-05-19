@@ -63,17 +63,17 @@ Current `/^## §?Status/` ambiguously handles the multi-byte `§` (UTF-8 `0xC2 0
 4. `## Status` inside fenced code block → exemption does NOT fire
 5. Content before any `## §?Status` heading → flagged normally (anti-pattern regex still triggers)
 
-### AC-3 — Spec 76 §2 L41 implementation list adds `tdd-first-every-commit.sh`
+### AC-3 — Spec 76 §2 L41 + §6 L84 implementation lists add `tdd-first-every-commit.sh`
 
-Spec 76 §2 L41 currently lists `tdd-guard.sh` as the path-default-skip implementation. Amendment adds `tdd-first-every-commit.sh` to the same list, reflecting both hooks now honor the path-default.
+Spec 76 §2 L41 and §6 L84 each carry a list of implementing files sharing the path-default-skip logic. Amendment adds `tdd-first-every-commit.sh` to both lists, reflecting that both hooks now honor the path-default.
 
-**Evidence:** Doc diff in PR; single-line addition to the implementation list.
+**Evidence:** Doc diff in PR; one-token additions to two lists.
 
-### AC-4 — CLAUDE.md §"Hard controls" gate-table TDD-first row parenthetical
+### AC-4 — CLAUDE.md §"Sweep discipline" implementing-files list adds `tdd-first-every-commit.sh`
 
-The gate-table row for the TDD-first-every-commit gate adds the parenthetical "(category-aware path-default skip)" to surface the new behaviour to slice authors at the always-loaded tier.
+The CLAUDE.md §"Slice categories" §"Sweep discipline" paragraph at L281 mirrors spec 76 §6's list of implementing files that must sweep when §3 matrix rules change. Amendment adds `.claude/hooks/tdd-first-every-commit.sh` to the implementing-files list.
 
-**Evidence:** Doc diff in PR; single-line edit.
+**Evidence:** Doc diff in PR; one-token addition.
 
 ## Design decisions
 
@@ -86,3 +86,4 @@ The gate-table row for the TDD-first-every-commit gate adds the parenthetical "(
 | Date | Event |
 |---|---|
 | 2026-05-19 | Drafted; AC-1..AC-4 frozen; impl + tests pending |
+| 2026-05-19 | AC-4 refined at impl-time: target surface is CLAUDE.md L281 Sweep-discipline paragraph (no gate-table row exists for this hook). AC-3 expanded to also amend spec 76 §6 L84 (sibling sweep-discipline self-reference) per constraint #38 recursive-application. |
