@@ -4,9 +4,9 @@ import { registryRowSchema } from '@/app/dev/proto/registry-schema';
 import type { Section } from '@/app/dev/proto/registry-schema';
 
 describe('registry data', () => {
-  describe('section counts total 61', () => {
+  describe('section counts total 62', () => {
     it('contains exactly 61 rows', () => {
-      expect(registry).toHaveLength(61);
+      expect(registry).toHaveLength(62);
     });
 
     it('section counts match acceptance.md AC-1', () => {
@@ -21,7 +21,7 @@ describe('registry data', () => {
         settle: 5,
         finalise: 5,
         'cross-cutting': 5,
-        'dev-tools': 6,
+        'dev-tools': 7,
       };
       const actual = registry.reduce<Record<string, number>>((counts, row) => {
         counts[row.section] = (counts[row.section] ?? 0) + 1;
@@ -30,14 +30,14 @@ describe('registry data', () => {
       expect(actual).toEqual(expected);
     });
 
-    it('Σ section counts equals 61', () => {
+    it('Σ section counts equals 62', () => {
       const sum = Object.values(
         registry.reduce<Record<string, number>>((counts, row) => {
           counts[row.section] = (counts[row.section] ?? 0) + 1;
           return counts;
         }, {}),
       ).reduce((a, b) => a + b, 0);
-      expect(sum).toBe(61);
+      expect(sum).toBe(62);
     });
   });
 

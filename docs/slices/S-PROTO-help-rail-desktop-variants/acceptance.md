@@ -73,7 +73,7 @@ A registry row at `src/app/dev/proto/registry.ts` records the new dev tool under
 
 **Evidence:** `src/app/dev/control/page.dev.tsx` renders without error in dev mode; toggling a variant updates localStorage and triggers re-render of consumers; registry row appears in the proto hub at `/dev/proto`.
 
-### AC-4 — Five Help Rail components extracted from canvas
+### AC-4 — Three Help Rail components extracted from canvas (V4 + V5 deferred)
 
 Each rail is a standalone React component under `src/app/dev/proto/pre-signup-interview/components/rails/`:
 
@@ -82,8 +82,8 @@ Each rail is a standalone React component under `src/app/dev/proto/pre-signup-in
 | `RailGlossary.tsx` | decoded canvas — `RailGlossary` (search by name) | Contextual glossary; current term highlighted; surrounding terms visible |
 | `RailCoach.tsx` | decoded canvas — `RailCoach` | AI-coach chat affordance with scope-copy ("not legal advice") |
 | `RailWhy.tsx` | decoded canvas — `RailWhy` | "Why we ask" trust panel; per-field rationale |
-| `RailHuman.tsx` | decoded canvas — `RailHuman` | Talk-to-a-human menu; channels (chat / phone / email) |
-| `RailHybrid.tsx` | decoded canvas — `RailHybrid` | Tab strip across the four rails above; first-tab default |
+
+The manifest declares all five canvas variants (`v1`-`v5`) plus `off`; V4 (Talk to a human) and V5 (Hybrid tabbed) are listed but render a "Variant deferred to follow-up slice" placeholder when selected. This keeps the dev control surface honest about which canvas variants are live vs. parked.
 
 Five-step light adapt per CLAUDE.md §"Canvas-as-source":
 1. Tokenise canvas-top constants (e.g. `const INK = "#1A1A1A"` → `tokens.color.ink`)
@@ -165,11 +165,11 @@ CLAUDE.md §"Coding conduct" §"Effects behind interfaces":
 
 ## Status
 
-- [ ] AC-1 — Variant manifest pattern
-- [ ] AC-2 — Variant context + `useVariant` hook  
-- [ ] AC-3 — Dev control surface
-- [ ] AC-4 — Five Help Rail components extracted from canvas
-- [ ] AC-5 — Integration with 1280px graceful enhancement
-- [ ] AC-6 — Tests
+- [x] AC-1 — Variant manifest pattern
+- [x] AC-2 — Variant context + `useVariant` hook  
+- [x] AC-3 — Dev control surface
+- [x] AC-4 — Five Help Rail components extracted from canvas
+- [x] AC-5 — Integration with 1280px graceful enhancement
+- [x] AC-6 — Tests
 
 Slice scaffolded; implementation in progress. Verification.md assembled at slice ship.
