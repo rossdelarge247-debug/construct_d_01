@@ -61,3 +61,33 @@
     pointer-events: auto !important;
   }
 }
+
+.helpRailWrapper {
+  display: block;
+  width: 100%;
+  min-height: 100%;
+}
+
+.helpRailContent {
+  width: 100%;
+}
+
+.helpRailColumn {
+  display: none;
+}
+
+@media (min-width: 1280px) {
+  .helpRailWrapper {
+    display: flex;
+    flex-direction: row;
+    align-items: stretch;
+  }
+  .helpRailContent {
+    flex: 1;
+    min-width: 0;
+  }
+  .helpRailColumn {
+    display: block;
+    flex-shrink: 0;
+  }
+}

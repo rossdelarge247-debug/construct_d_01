@@ -93,6 +93,7 @@ export const registry: RegistryRow[] = [
   // §11 · Dev tools
   row({ id: 'dev-root-landing', title: 'Dev root landing', section: 'dev-tools', status: 'shipped', confidence: 'high', tags: ['dev-only'], links: { prototype: 'src/app/dev/' } }),
   row({ id: 'dev-heroes', title: 'Dev hero variant gallery', section: 'dev-tools', status: 'shipped', confidence: 'high', links: { prototype: 'src/app/dev/heroes/' } }),
+  row({ id: 'dev-variant-control', title: 'Prototype variant control', section: 'dev-tools', status: 'shipped', confidence: 'high', tags: ['dev-only'], links: { prototype: 'src/app/dev/control/' } }),
   row({ id: 'dev-scenarios', title: 'Dev scenario picker', section: 'dev-tools', status: 'shipped', confidence: 'high', tags: ['dev-only'], links: { prototype: 'src/app/dev/scenarios/' } }),
   row({ id: 'dev-state-inspector', title: 'Dev state inspector', section: 'dev-tools', status: 'shipped', confidence: 'high', tags: ['dev-only'], links: { prototype: 'src/app/dev/state-inspector/' } }),
   row({ id: 'dev-reset', title: 'Dev state reset', section: 'dev-tools', status: 'shipped', confidence: 'high', tags: ['dev-only'], links: { prototype: 'src/app/dev/reset/' } }),

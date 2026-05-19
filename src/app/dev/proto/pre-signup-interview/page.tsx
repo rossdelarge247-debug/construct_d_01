@@ -2,8 +2,11 @@
 
 import { Suspense } from 'react';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
+import { VariantProvider } from '@/lib/dev/variant-context';
+import { VARIANT_REGISTRY } from '@/lib/dev/variants-registry';
 import { BackgroundShell } from './components/BackgroundShell';
 import { BgToggle } from './components/BgToggle';
+import { HelpRailLayout } from './components/HelpRailLayout';
 import { ProtoProvider, useProto } from './lib/proto-context';
 import { type BgMode, BG_MODES } from './lib/types';
 import { useScreenTransition } from './lib/use-screen-transition';
@@ -62,9 +65,13 @@ function Inner() {
   return (
     <BackgroundShell mode={bgMode}>
       <BgToggle mode={bgMode} onToggle={handleToggle} />
-      <ProtoProvider>
-        <ScreenSwitch />
-      </ProtoProvider>
+      <VariantProvider registry={VARIANT_REGISTRY}>
+        <ProtoProvider>
+          <HelpRailLayout>
+            <ScreenSwitch />
+          </HelpRailLayout>
+        </ProtoProvider>
+      </VariantProvider>
     </BackgroundShell>
   );
 }
