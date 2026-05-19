@@ -1,3 +1,4 @@
+// Canvas source: docs/design-source/pre-signup-interview/desktop/decoded/Desktop Enhanced - Help Rail - Standalone.html L1765-1824
 import type { CSSProperties } from 'react';
 import {
   INK,

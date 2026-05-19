@@ -4,9 +4,8 @@ import {
   createContext,
   useCallback,
   useContext,
-  useEffect,
   useMemo,
-  useState,
+  useSyncExternalStore,
   type ReactNode,
 } from 'react';
 import {
@@ -18,16 +17,36 @@ import {
 const STORAGE_PREFIX = 'dev:variant:';
 const URL_PREFIX = 'variant.';
 
-type ActiveState = Record<string, Record<string, string>>;
-
 type VariantContextValue = {
   registry: VariantRegistry;
-  active: ActiveState;
-  setVariant: (prototypeId: string, variantKey: string, variantId: string) => void;
-  resetVariant: (prototypeId: string, variantKey: string) => void;
 };
 
 const VariantContext = createContext<VariantContextValue | null>(null);
+
+const subscribers = new Set<() => void>();
+
+function notifyAll(): void {
+  subscribers.forEach((cb) => {
+    try {
+      cb();
+    } catch {
+      // subscriber threw; continue notifying others
+    }
+  });
+}
+
+function subscribe(callback: () => void): () => void {
+  subscribers.add(callback);
+  if (typeof window !== 'undefined') {
+    window.addEventListener('storage', callback);
+  }
+  return () => {
+    subscribers.delete(callback);
+    if (typeof window !== 'undefined') {
+      window.removeEventListener('storage', callback);
+    }
+  };
+}
 
 function storageKey(prototypeId: string, variantKey: string): string {
   return `${STORAGE_PREFIX}${prototypeId}:${variantKey}`;
@@ -43,14 +62,6 @@ function lookupSet(
   variantKey: string,
 ): VariantSet | undefined {
   return registry[prototypeId]?.manifest[variantKey];
-}
-
-function readDefault(
-  registry: VariantRegistry,
-  prototypeId: string,
-  variantKey: string,
-): string {
-  return lookupSet(registry, prototypeId, variantKey)?.default ?? '';
 }
 
 function readStored(prototypeId: string, variantKey: string): string | null {
@@ -85,17 +96,6 @@ function resolveActive(
   return set?.default ?? '';
 }
 
-function initialDefaults(registry: VariantRegistry): ActiveState {
-  const out: ActiveState = {};
-  for (const [prototypeId, entry] of Object.entries(registry)) {
-    out[prototypeId] = {};
-    for (const [variantKey, set] of Object.entries(entry.manifest)) {
-      out[prototypeId][variantKey] = set.default;
-    }
-  }
-  return out;
-}
-
 export function VariantProvider({
   registry,
   children,
@@ -103,70 +103,21 @@ export function VariantProvider({
   registry: VariantRegistry;
   children: ReactNode;
 }) {
-  const [active, setActive] = useState<ActiveState>(() => initialDefaults(registry));
-
-  useEffect(() => {
-    const next: ActiveState = {};
-    for (const [prototypeId, entry] of Object.entries(registry)) {
-      next[prototypeId] = {};
-      for (const variantKey of Object.keys(entry.manifest)) {
-        next[prototypeId][variantKey] = resolveActive(registry, prototypeId, variantKey);
-      }
-    }
-    setActive(next);
-  }, [registry]);
-
-  const setVariant = useCallback(
-    (prototypeId: string, variantKey: string, variantId: string) => {
-      const set = lookupSet(registry, prototypeId, variantKey);
-      if (!isValidVariantId(set, variantId)) return;
-      if (typeof window !== 'undefined') {
-        try {
-          window.localStorage.setItem(storageKey(prototypeId, variantKey), variantId);
-        } catch {
-          // storage unavailable; state update still proceeds
-        }
-      }
-      setActive((prev) => ({
-        ...prev,
-        [prototypeId]: { ...(prev[prototypeId] ?? {}), [variantKey]: variantId },
-      }));
-    },
-    [registry],
-  );
-
-  const resetVariant = useCallback(
-    (prototypeId: string, variantKey: string) => {
-      if (typeof window !== 'undefined') {
-        try {
-          window.localStorage.removeItem(storageKey(prototypeId, variantKey));
-        } catch {
-          // storage unavailable; state update still proceeds
-        }
-      }
-      setActive((prev) => ({
-        ...prev,
-        [prototypeId]: {
-          ...(prev[prototypeId] ?? {}),
-          [variantKey]: readDefault(registry, prototypeId, variantKey),
-        },
-      }));
-    },
-    [registry],
-  );
-
-  const value = useMemo<VariantContextValue>(
-    () => ({ registry, active, setVariant, resetVariant }),
-    [registry, active, setVariant, resetVariant],
-  );
-
+  const value = useMemo<VariantContextValue>(() => ({ registry }), [registry]);
   return <VariantContext.Provider value={value}>{children}</VariantContext.Provider>;
 }
 
 export function useVariant(prototypeId: string, variantKey: string): string {
   const ctx = useContext(VariantContext);
-  if (!ctx) return '';
-  return ctx.active[prototypeId]?.[variantKey] ?? '';
+  const getSnapshot = useCallback(() => {
+    if (!ctx) return '';
+    return resolveActive(ctx.registry, prototypeId, variantKey);
+  }, [ctx, prototypeId, variantKey]);
+  const getServerSnapshot = useCallback(() => {
+    if (!ctx) return '';
+    return lookupSet(ctx.registry, prototypeId, variantKey)?.default ?? '';
+  }, [ctx, prototypeId, variantKey]);
+  return useSyncExternalStore(subscribe, getSnapshot, getServerSnapshot);
 }
 
 export function useSetVariant(
@@ -176,7 +127,17 @@ export function useSetVariant(
   const ctx = useContext(VariantContext);
   return useCallback(
     (variantId: string) => {
-      ctx?.setVariant(prototypeId, variantKey, variantId);
+      if (!ctx) return;
+      const set = lookupSet(ctx.registry, prototypeId, variantKey);
+      if (!isValidVariantId(set, variantId)) return;
+      if (typeof window !== 'undefined') {
+        try {
+          window.localStorage.setItem(storageKey(prototypeId, variantKey), variantId);
+        } catch {
+          // storage unavailable; notify subscribers anyway in case they re-resolve from URL
+        }
+      }
+      notifyAll();
     },
     [ctx, prototypeId, variantKey],
   );
@@ -188,11 +149,15 @@ export function useResetVariant(
 ): () => void {
   const ctx = useContext(VariantContext);
   return useCallback(() => {
-    ctx?.resetVariant(prototypeId, variantKey);
+    if (!ctx) return;
+    if (typeof window !== 'undefined') {
+      try {
+        window.localStorage.removeItem(storageKey(prototypeId, variantKey));
+      } catch {
+        // storage unavailable
+      }
+    }
+    notifyAll();
   }, [ctx, prototypeId, variantKey]);
 }
 
-export function useVariantRegistry(): VariantRegistry | null {
-  const ctx = useContext(VariantContext);
-  return ctx?.registry ?? null;
-}

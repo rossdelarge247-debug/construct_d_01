@@ -1,3 +1,4 @@
+// Canvas source: docs/design-source/pre-signup-interview/desktop/decoded/Desktop Enhanced - Help Rail - Standalone.html L1876-1920
 import type { CSSProperties } from 'react';
 import {
   INK,
@@ -116,7 +117,7 @@ export function RailWhy() {
           sold, or shown to your partner. You decide what to share, later, when you&apos;re ready.
           {' '}
           <a
-            href="#"
+            href="/privacy"
             style={{ color: INK, textDecoration: 'underline', textUnderlineOffset: 2 }}
           >
             Privacy note →
