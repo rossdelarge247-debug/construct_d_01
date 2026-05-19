@@ -187,6 +187,22 @@ Describe '.claude/hooks/comment-review.sh'
       The stdout should equal ""
     End
 
+    It 'suppresses regex hits inside ## Status footer block (no § prefix)'
+      status_only_content=$(printf '## Status\n\nShipped session 75; PR #125; verdict ✅ approve.\n\n## Some other section\n\nClean prose with no anti-patterns here.')
+      Data <<< "$(envelope_write 'docs/workspace-spec/77-something.md' "$status_only_content")"
+      When run "$HOOK"
+      The status should equal 0
+      The stdout should equal ""
+    End
+
+    It 'does NOT suppress regex hits when ## Status header is inside a fenced code block'
+      fenced_content=$(printf 'PR #123 mention.\n\n```\n## Status\n\nMentioned session 75 inside the fenced block.\n```\n\nMore prose.')
+      Data <<< "$(envelope_write 'docs/workspace-spec/77-something.md' "$fenced_content")"
+      When run "$HOOK"
+      The status should equal 0
+      The stdout should include "provenance"
+    End
+
     It 'still fires when emoji is outside §Status block in the same file'
       mixed_content=$(printf '## §Status\n\nShipped session 75 — clean lineage location.\n\n## Body section\n\nVerdict: ✅ approve — emoji outside §Status, this should fire.')
       Data <<< "$(envelope_write 'docs/workspace-spec/77-something.md' "$mixed_content")"

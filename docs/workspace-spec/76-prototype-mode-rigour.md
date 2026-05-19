@@ -38,7 +38,7 @@ case "$path" in
 esac
 ```
 
-Implementations sharing this logic include `.claude/hooks/tdd-guard.sh` (path-default-skip), `.github/workflows/auto-review.yml` (specialist routing via slice-category grep), and any future fitness function asserting matrix consistency (deferred per §8).
+Implementations sharing this logic include `.claude/hooks/tdd-guard.sh` (path-default-skip), `.claude/hooks/tdd-first-every-commit.sh` (path-default-skip), `.github/workflows/auto-review.yml` (specialist routing via slice-category grep), and any future fitness function asserting matrix consistency (deferred per §8).
 
 ## §3 — Per-category gate-behaviour matrix (canonical)
 
@@ -81,7 +81,7 @@ Items 2-7, 9-11, 13 auto-N/A for static-data dev-mode hubs (no DB tables, no API
 
 Constraint #38 from `docs/HANDOFF-SESSION-74.md` L55 verbatim: *"Slice doc drift after refactor. Refactors that change file paths / API surface need a sweep of acceptance.md + verification.md + test-plan.md + security.md in the same commit, or auto-review will catch the drift post-PR."*
 
-This constraint applies recursively to spec 76 itself: any future amendment to the §3 gate-behaviour matrix that changes a per-category rule MUST sweep all the implementing files in the same PR — `vitest.config.ts` `coverage.exclude`, `.claude/hooks/tdd-guard.sh` path-default-skip block, `.github/workflows/auto-review.yml` matrix routing, `.github/PULL_REQUEST_TEMPLATE.md` DoD-14 reference, and any slice's `acceptance.md` that overrides via `**Category:**`. The deferred fitness function (§8) would automate this sweep verification.
+This constraint applies recursively to spec 76 itself: any future amendment to the §3 gate-behaviour matrix that changes a per-category rule MUST sweep all the implementing files in the same PR — `vitest.config.ts` `coverage.exclude`, `.claude/hooks/tdd-guard.sh` path-default-skip block, `.claude/hooks/tdd-first-every-commit.sh` path-default-skip block, `.github/workflows/auto-review.yml` matrix routing, `.github/PULL_REQUEST_TEMPLATE.md` DoD-14 reference, and any slice's `acceptance.md` that overrides via `**Category:**`. The deferred fitness function (§8) would automate this sweep verification.
 
 ## §7 — Why "Path B" (slice-category metadata) over alternatives
 
