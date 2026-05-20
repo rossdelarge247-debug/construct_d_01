@@ -88,9 +88,9 @@ const SUGGESTIONS = [
   'Why do you ask about my home so early?',
 ];
 
-export function RailCoach() {
+export function RailCoachBody() {
   return (
-    <aside style={railContainerStyle} aria-label="Decouple AI coach help rail">
+    <>
       <div>
         <div style={{ ...railEyebrowStyle, display: 'inline-flex', alignItems: 'center', gap: 6 }}>
           <span style={{ color: VIOLET }}>
@@ -159,6 +159,14 @@ export function RailCoach() {
         <LockIcon size={11} />
         Conversations are private to you. Not used for training.
       </div>
+    </>
+  );
+}
+
+export function RailCoach() {
+  return (
+    <aside style={railContainerStyle} aria-label="Decouple AI coach help rail">
+      <RailCoachBody />
     </aside>
   );
 }

@@ -80,9 +80,9 @@ const privacyBoxStyle: CSSProperties = {
   gap: 10,
 };
 
-export function RailWhy() {
+export function RailWhyBody() {
   return (
-    <aside style={railContainerStyle} aria-label="Why we ask help rail">
+    <>
       <div>
         <div style={railEyebrowStyle}>Transparency</div>
         <h2 style={{ ...railHeadingStyle, marginTop: 4 }}>Why we ask.</h2>
@@ -124,6 +124,14 @@ export function RailWhy() {
           </a>
         </div>
       </div>
+    </>
+  );
+}
+
+export function RailWhy() {
+  return (
+    <aside style={railContainerStyle} aria-label="Why we ask help rail">
+      <RailWhyBody />
     </aside>
   );
 }
