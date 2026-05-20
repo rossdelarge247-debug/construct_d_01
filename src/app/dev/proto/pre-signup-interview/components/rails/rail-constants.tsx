@@ -131,6 +131,7 @@ export const tabButtonStyle: CSSProperties = {
   color: SUB,
   cursor: 'pointer',
   borderBottom: '2px solid transparent',
+  borderBottomColor: 'transparent',
   marginBottom: -1,
   fontFamily: 'inherit',
 };

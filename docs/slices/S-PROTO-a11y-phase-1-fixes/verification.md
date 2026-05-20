@@ -120,6 +120,8 @@ Five swaps in `components/rails/rail-constants.tsx`:
   - `ArrowLeft cycles tabs backward, wrapping at the start` — PASS.
   - `non-arrow keys leave the tab selection unchanged` — PASS.
 
+**Visual bug surfaced during preview-deploy walk (and fixed in this slice):** the inactive-tab underline persisted after switching tabs. Root cause was React's inline-style diff with a CSS shorthand-vs-longhand mix: `tabButtonStyle` set `borderBottom: '2px solid transparent'` (shorthand); `tabActiveButtonStyle` added `borderBottomColor: INK` (longhand override). On the active → inactive transition React diffs the style objects, sees `borderBottom` unchanged, sees `borderBottomColor` removed, sets `element.style.borderBottomColor = ''`. That clears the override but does NOT re-apply the shorthand's transparent colour — the cascade falls back to the CSS initial value `currentcolor`, which with `color: SUB` paints the underline gray. Fix: declare `borderBottomColor: 'transparent'` explicitly in `tabButtonStyle` (`components/rails/rail-constants.tsx:150`) so React always diffs that longhand on every transition (INK ↔ transparent), never clearing it. Pre-existing condition before this slice's V5 ship; not a regression introduced by AC-18, but surfaced and resolved during this slice's preview-deploy walk.
+
 ## Test plan
 
 Final test set landed:
