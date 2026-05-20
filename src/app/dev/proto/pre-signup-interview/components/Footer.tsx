@@ -41,16 +41,16 @@ export function Footer({
 
   return (
     <footer className={wrapperClass}>
-      {hasCaption && (
-        <div
-          role="status"
-          aria-live="polite"
-          aria-atomic="true"
-          className={enabled ? styles.captionEnabled : styles.captionDisabled}
-        >
-          {caption}
-        </div>
-      )}
+      <div
+        role="status"
+        aria-live="polite"
+        aria-atomic="true"
+        className={
+          hasCaption ? (enabled ? styles.captionEnabled : styles.captionDisabled) : undefined
+        }
+      >
+        {hasCaption ? caption : null}
+      </div>
       {secondaryActions && <div className={styles.secondaryRow}>{secondaryActions}</div>}
       <button
         ref={ctaRef}

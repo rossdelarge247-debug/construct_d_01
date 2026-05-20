@@ -1,0 +1,24 @@
+.optRow {
+  background: #FFFFFF;
+  border: 1px solid #E5E3DC;
+  border-radius: 12px;
+  padding: 14px 16px;
+  cursor: pointer;
+  display: grid;
+  grid-template-columns: 32px 1fr auto;
+  gap: 14px;
+  align-items: center;
+  text-align: left;
+  font-family: inherit;
+  color: inherit;
+  width: 100%;
+}
+
+.optRow:hover {
+  border-color: var(--ds-color-ink, #1A1A1A);
+}
+
+.optRow:focus-visible {
+  outline: 2px solid var(--ds-color-ink, #1A1A1A);
+  outline-offset: 2px;
+}

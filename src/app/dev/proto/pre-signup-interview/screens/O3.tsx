@@ -15,6 +15,7 @@ import type {
   DevicePrivate,
 } from '../lib/types';
 import styles from './O3.module.css';
+import focusVisibleStyles from '../components/focus-visible.module.css';
 
 const colors = {
   ink: tokens.color.ink,
@@ -39,7 +40,7 @@ function RelRow({
 }) {
   return (
     <label
-      className={`${styles.entry} ${styles.card}${selected ? ` ${styles.cardSelected}` : ''}`}
+      className={`${styles.entry} ${styles.card}${selected ? ` ${styles.cardSelected}` : ''} ${focusVisibleStyles.focusable}`}
       style={
         {
           display: 'flex',
@@ -128,7 +129,7 @@ function PrivPill({
 }) {
   return (
     <label
-      className={styles.pill}
+      className={`${styles.pill} ${focusVisibleStyles.focusable}`}
       style={{
         display: 'inline-flex',
         alignItems: 'center',

@@ -11,6 +11,7 @@ import { useProto } from '../lib/proto-context';
 import { getCopy, type O4Option } from '../lib/copy/o4';
 import type { EmploymentAnswers, SelfEmployment } from '../lib/types';
 import styles from './O4.module.css';
+import focusVisibleStyles from '../components/focus-visible.module.css';
 
 const colors = {
   ink: tokens.color.ink,
@@ -37,7 +38,7 @@ function OptionRow({
   const fontSize = emphasised ? 15 : 14;
   return (
     <label
-      className={`${styles.entry} ${styles.card}${emphasised ? ` ${styles.cardEmphasised}` : ''}${selected ? ` ${styles.cardSelected}` : ''}`}
+      className={`${styles.entry} ${styles.card}${emphasised ? ` ${styles.cardEmphasised}` : ''}${selected ? ` ${styles.cardSelected}` : ''} ${focusVisibleStyles.focusable}`}
       style={
         {
           display: 'flex',

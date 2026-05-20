@@ -3,7 +3,6 @@ import type { CSSProperties } from 'react';
 import {
   INK,
   LINE,
-  MUTE,
   PANEL_BG,
   SUB,
   LockIcon,
@@ -48,7 +47,7 @@ const rowStyle: CSSProperties = {
 const numStyle: CSSProperties = {
   fontFamily: 'ui-monospace, SFMono-Regular, Menlo, monospace',
   fontSize: 11,
-  color: MUTE,
+  color: SUB,
   letterSpacing: '0.08em',
   flexShrink: 0,
   marginTop: 3,

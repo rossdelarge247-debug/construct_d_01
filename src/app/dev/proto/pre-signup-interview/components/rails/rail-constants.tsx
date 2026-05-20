@@ -32,7 +32,7 @@ export const railEyebrowStyle: CSSProperties = {
   fontWeight: 600,
   letterSpacing: '0.12em',
   textTransform: 'uppercase',
-  color: MUTE,
+  color: SUB,
 };
 
 export const railHeadingStyle: CSSProperties = {
@@ -55,26 +55,10 @@ export const monoFooterStyle: CSSProperties = {
   fontFamily: 'ui-monospace, SFMono-Regular, Menlo, monospace',
   fontSize: 10.5,
   letterSpacing: '0.08em',
-  color: MUTE,
+  color: SUB,
   marginTop: 'auto',
   paddingTop: 12,
   borderTop: `1px solid ${LINE}`,
-};
-
-export const optRowStyle: CSSProperties = {
-  background: '#FFFFFF',
-  border: `1px solid ${LINE}`,
-  borderRadius: 12,
-  padding: '14px 16px',
-  cursor: 'pointer',
-  display: 'grid',
-  gridTemplateColumns: '32px 1fr auto',
-  gap: 14,
-  alignItems: 'center',
-  textAlign: 'left',
-  fontFamily: 'inherit',
-  color: 'inherit',
-  width: '100%',
 };
 
 export const optIconStyle: CSSProperties = {
@@ -98,7 +82,7 @@ export const optTitleStyle: CSSProperties = {
 
 export const optMetaStyle: CSSProperties = {
   fontSize: 11.5,
-  color: MUTE,
+  color: SUB,
   margin: '1px 0 0 0',
 };
 
@@ -116,7 +100,7 @@ export const optPillStyle: CSSProperties = {
 
 export const optPillGreyStyle: CSSProperties = {
   ...optPillStyle,
-  color: MUTE,
+  color: SUB,
   background: PANEL_BG,
 };
 
@@ -144,7 +128,7 @@ export const tabButtonStyle: CSSProperties = {
   padding: '8px 12px',
   fontSize: 12,
   fontWeight: 600,
-  color: MUTE,
+  color: SUB,
   cursor: 'pointer',
   borderBottom: '2px solid transparent',
   marginBottom: -1,

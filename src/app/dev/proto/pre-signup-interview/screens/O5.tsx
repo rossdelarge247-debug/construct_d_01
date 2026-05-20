@@ -11,6 +11,7 @@ import { useProto } from '../lib/proto-context';
 import { getCopy, type O5Option } from '../lib/copy/o5';
 import type { PartnerAwareness, PartnerFinancesAnswers } from '../lib/types';
 import styles from './O5.module.css';
+import focusVisibleStyles from '../components/focus-visible.module.css';
 
 const colors = {
   ink: tokens.color.ink,
@@ -36,7 +37,7 @@ function OptionRow({
 }) {
   return (
     <label
-      className={`${styles.entry} ${styles.card}`}
+      className={`${styles.entry} ${styles.card} ${focusVisibleStyles.focusable}`}
       style={
         {
           display: 'flex',

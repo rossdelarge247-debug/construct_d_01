@@ -10,6 +10,7 @@ import { TopBar } from '../components/TopBar';
 import { useProto } from '../lib/proto-context';
 import { getCopy, type O8Copy, type O8Option, type O8OptionId } from '../lib/copy/o8';
 import styles from './O8.module.css';
+import focusVisibleStyles from '../components/focus-visible.module.css';
 
 const colors = {
   ink: tokens.color.ink,
@@ -141,7 +142,7 @@ function OptionCard({ option, selected, onSelect, staggerIndex }: {
       />
       <label
         htmlFor={inputId}
-        className={`${styles.entry} ${styles.card}`}
+        className={`${styles.entry} ${styles.card} ${focusVisibleStyles.focusable}`}
         style={{
           ...entryStyle,
           display: 'block',

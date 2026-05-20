@@ -11,6 +11,7 @@ import { buildPlanFromAnswers } from '../lib/build-plan';
 import type { Answers } from '../lib/types';
 import { getCopy, type O7Copy } from '../lib/copy/o7';
 import styles from './O7.module.css';
+import focusVisibleStyles from '../components/focus-visible.module.css';
 
 type O7State = 'generating' | 'ready';
 
@@ -141,7 +142,7 @@ function MobileHero({ copy }: { copy: O7Copy }) {
         />
         <div style={{ padding: '8px 20px 22px' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap' }}>
-            <button type="button" style={{
+            <button type="button" className={focusVisibleStyles.focusable} style={{
               display: 'inline-flex', alignItems: 'center', gap: 8,
               padding: '8px 14px', borderRadius: 999,
               background: '#FFFFFF', border: `1px solid ${colors.ink}`,
@@ -630,7 +631,7 @@ function MobileReadyView({ onNext, answers, copy }: {
         onContinue={onNext}
         secondaryActions={
           <>
-            <button type="button" style={{
+            <button type="button" className={focusVisibleStyles.focusable} style={{
               display: 'inline-flex', alignItems: 'center', gap: 8,
               padding: '10px 14px', borderRadius: 999,
               background: '#FFFFFF', color: colors.ink, border: `1px solid ${colors.ink}`,

@@ -3,7 +3,6 @@ import type { CSSProperties } from 'react';
 import {
   INK,
   LINE,
-  MUTE,
   SUB,
   VIOLET,
   railContainerStyle,
@@ -130,7 +129,7 @@ export function RailGlossaryBody({ focused }: { focused?: string }) {
         })}
       </div>
       <div style={monoFooterStyle}>
-        GLOSSARY · UPDATED MAY 2026 · <span style={{ color: MUTE }}>NOT LEGAL ADVICE</span>
+        GLOSSARY · UPDATED MAY 2026 · <span style={{ color: SUB }}>NOT LEGAL ADVICE</span>
       </div>
     </>
   );

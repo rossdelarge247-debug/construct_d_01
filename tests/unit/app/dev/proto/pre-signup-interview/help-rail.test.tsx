@@ -175,3 +175,93 @@ describe('HelpRailLayout — URL override', () => {
     expect(screen.getByLabelText('Decouple AI coach help rail')).toBeTruthy();
   });
 });
+
+describe('HelpRailLayout — aria-live region unconditional mount', () => {
+  it('mounts the rail-column aria-live region even when no variant is selected', () => {
+    const { container } = render(
+      <VariantProvider registry={VARIANT_REGISTRY}>
+        <HelpRailLayout>
+          <div data-testid="content">Form</div>
+        </HelpRailLayout>
+      </VariantProvider>,
+    );
+    const liveRegion = container.querySelector('[aria-live="polite"]');
+    expect(liveRegion).not.toBeNull();
+    expect(screen.queryByLabelText(/help rail/i)).toBeNull();
+  });
+
+  it('keeps the live region as a stable host across variant toggles', () => {
+    const { container, rerender } = render(
+      <VariantProvider registry={VARIANT_REGISTRY}>
+        <HelpRailLayout>
+          <div data-testid="content">Form</div>
+        </HelpRailLayout>
+      </VariantProvider>,
+    );
+    const before = container.querySelector('[aria-live="polite"]');
+    expect(before).not.toBeNull();
+    localStorage.setItem(STORAGE_KEY, 'v1');
+    rerender(
+      <VariantProvider registry={VARIANT_REGISTRY}>
+        <HelpRailLayout>
+          <div data-testid="content">Form</div>
+        </HelpRailLayout>
+      </VariantProvider>,
+    );
+    const after = container.querySelector('[aria-live="polite"]');
+    expect(after).toBe(before);
+    expect(screen.getByLabelText('Glossary help rail')).toBeTruthy();
+  });
+});
+
+describe('RailHybrid — keyboard navigation (WAI-ARIA Tabs APG)', () => {
+  it('ArrowRight cycles tabs forward, wrapping at the end', () => {
+    render(<RailHybrid />);
+    const tablist = screen.getByRole('tablist');
+
+    expect(screen.getByRole('tab', { name: 'Ask Decouple' }).getAttribute('aria-selected')).toBe('true');
+
+    fireEvent.keyDown(tablist, { key: 'ArrowRight' });
+    expect(screen.getByRole('tab', { name: 'What this means' }).getAttribute('aria-selected')).toBe('true');
+
+    fireEvent.keyDown(tablist, { key: 'ArrowRight' });
+    expect(screen.getByRole('tab', { name: 'Why we ask' }).getAttribute('aria-selected')).toBe('true');
+
+    fireEvent.keyDown(tablist, { key: 'ArrowRight' });
+    expect(screen.getByRole('tab', { name: 'Human' }).getAttribute('aria-selected')).toBe('true');
+
+    fireEvent.keyDown(tablist, { key: 'ArrowRight' });
+    expect(screen.getByRole('tab', { name: 'Ask Decouple' }).getAttribute('aria-selected')).toBe('true');
+  });
+
+  it('ArrowLeft cycles tabs backward, wrapping at the start', () => {
+    render(<RailHybrid />);
+    const tablist = screen.getByRole('tablist');
+
+    fireEvent.keyDown(tablist, { key: 'ArrowLeft' });
+    expect(screen.getByRole('tab', { name: 'Human' }).getAttribute('aria-selected')).toBe('true');
+
+    fireEvent.keyDown(tablist, { key: 'ArrowLeft' });
+    expect(screen.getByRole('tab', { name: 'Why we ask' }).getAttribute('aria-selected')).toBe('true');
+  });
+
+  it('non-arrow keys leave the tab selection unchanged', () => {
+    render(<RailHybrid />);
+    const tablist = screen.getByRole('tablist');
+    fireEvent.keyDown(tablist, { key: 'Enter' });
+    expect(screen.getByRole('tab', { name: 'Ask Decouple' }).getAttribute('aria-selected')).toBe('true');
+    fireEvent.keyDown(tablist, { key: ' ' });
+    expect(screen.getByRole('tab', { name: 'Ask Decouple' }).getAttribute('aria-selected')).toBe('true');
+  });
+});
+
+describe('RailCoach — suggested-button semantics', () => {
+  it('suggested buttons declare aria-disabled="true" (no onClick wired yet)', () => {
+    render(<RailCoach />);
+    const disabledButtons = screen
+      .getAllByRole('button')
+      .filter((b) => b.getAttribute('aria-disabled') === 'true');
+    expect(disabledButtons.length).toBeGreaterThanOrEqual(3);
+    expect(disabledButtons.some((b) => b.textContent?.includes('cohabiting'))).toBe(true);
+  });
+});
