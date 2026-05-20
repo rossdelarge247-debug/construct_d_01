@@ -1,10 +1,12 @@
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
-import { render, screen } from '@testing-library/react';
+import { fireEvent, render, screen } from '@testing-library/react';
 import { VariantProvider } from '@/lib/dev/variant-context';
 import { VARIANT_REGISTRY } from '@/lib/dev/variants-registry';
 import { RailGlossary } from '@/app/dev/proto/pre-signup-interview/components/rails/RailGlossary';
 import { RailCoach } from '@/app/dev/proto/pre-signup-interview/components/rails/RailCoach';
 import { RailWhy } from '@/app/dev/proto/pre-signup-interview/components/rails/RailWhy';
+import { RailHuman } from '@/app/dev/proto/pre-signup-interview/components/rails/RailHuman';
+import { RailHybrid } from '@/app/dev/proto/pre-signup-interview/components/rails/RailHybrid';
 import { HelpRailLayout } from '@/app/dev/proto/pre-signup-interview/components/HelpRailLayout';
 
 const STORAGE_KEY = 'dev:variant:pre-signup-interview:helpRail';
@@ -45,6 +47,42 @@ describe('Help Rail components — smoke', () => {
     expect(screen.getByText('Why we ask.')).toBeTruthy();
     expect(screen.getByText('Relationship')).toBeTruthy();
     expect(screen.getByText('Your home')).toBeTruthy();
+  });
+
+  it('RailHuman renders with safety footer + founder note', () => {
+    render(<RailHuman />);
+    expect(screen.getByLabelText('Talk to a human help rail')).toBeTruthy();
+    expect(screen.getByText("We're here.")).toBeTruthy();
+    expect(screen.getByText('Decouple Listen')).toBeTruthy();
+    expect(screen.getByText('A note from Sarah, founder.')).toBeTruthy();
+    expect(screen.getByTestId('rail-human-safety').textContent).toMatch(
+      /999 OR REFUGE 0808 2000 247/,
+    );
+  });
+
+  it('RailHybrid renders with default Ask Decouple tab active', () => {
+    render(<RailHybrid />);
+    expect(screen.getByLabelText('Help options rail')).toBeTruthy();
+    expect(screen.getByText('Stuck? Here.')).toBeTruthy();
+    const askTab = screen.getByRole('tab', { name: 'Ask Decouple' });
+    expect(askTab.getAttribute('aria-selected')).toBe('true');
+    expect(screen.getByText('Ask anything.')).toBeTruthy();
+    expect(screen.getByPlaceholderText('Type your question…')).toBeTruthy();
+  });
+
+  it('RailHybrid tab-switch reveals different rail bodies', () => {
+    render(<RailHybrid />);
+    const humanTab = screen.getByRole('tab', { name: 'Human' });
+    fireEvent.click(humanTab);
+    expect(humanTab.getAttribute('aria-selected')).toBe('true');
+    expect(screen.getByTestId('rail-human-safety')).toBeTruthy();
+    expect(screen.queryByText('Ask anything.')).toBeNull();
+
+    const meanTab = screen.getByRole('tab', { name: 'What this means' });
+    fireEvent.click(meanTab);
+    expect(meanTab.getAttribute('aria-selected')).toBe('true');
+    expect(screen.getByText('What this means.')).toBeTruthy();
+    expect(screen.queryByTestId('rail-human-safety')).toBeNull();
   });
 });
 
@@ -97,7 +135,7 @@ describe('HelpRailLayout — variant selection', () => {
     expect(screen.getByLabelText('Why we ask help rail')).toBeTruthy();
   });
 
-  it('renders deferred placeholder when variant is v4 (RailHuman parked)', () => {
+  it('renders RailHuman when variant is v4', () => {
     localStorage.setItem(STORAGE_KEY, 'v4');
     render(
       <VariantProvider registry={VARIANT_REGISTRY}>
@@ -106,10 +144,11 @@ describe('HelpRailLayout — variant selection', () => {
         </HelpRailLayout>
       </VariantProvider>,
     );
-    expect(screen.getByLabelText(/Talk to a human/i)).toBeTruthy();
+    expect(screen.getByLabelText('Talk to a human help rail')).toBeTruthy();
+    expect(screen.getByText("We're here.")).toBeTruthy();
   });
 
-  it('renders deferred placeholder when variant is v5 (RailHybrid parked)', () => {
+  it('renders RailHybrid when variant is v5', () => {
     localStorage.setItem(STORAGE_KEY, 'v5');
     render(
       <VariantProvider registry={VARIANT_REGISTRY}>
@@ -118,7 +157,8 @@ describe('HelpRailLayout — variant selection', () => {
         </HelpRailLayout>
       </VariantProvider>,
     );
-    expect(screen.getByLabelText(/Hybrid \(tabbed\)/i)).toBeTruthy();
+    expect(screen.getByLabelText('Help options rail')).toBeTruthy();
+    expect(screen.getByRole('tab', { name: 'Ask Decouple' })).toBeTruthy();
   });
 });
 
