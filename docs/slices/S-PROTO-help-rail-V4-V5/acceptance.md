@@ -18,6 +18,7 @@ Canvas-as-source per CLAUDE.md §"Visual direction" §"Canvas-as-source" — 5-s
 - New rail components under `src/app/dev/proto/pre-signup-interview/components/rails/`:
   - `RailHuman.tsx` (V4 — three contact options + founder note + safety footer)
   - `RailHybrid.tsx` (V5 — tabbed wrapper switching between V1/V2/V3/V4)
+- Refactor of V1/V2/V3 (`RailGlossary` / `RailCoach` / `RailWhy`) to expose `*Body` named exports alongside the existing `<aside>`-wrapped defaults (mechanical extraction; no behaviour change for direct consumers — `HelpRailLayout.tsx` continues to import the wrapped variants). This emerged as an impl detail of parent-slice D-7 (see D-8 below).
 - Extensions to `rail-constants.tsx` (additive only, no rename/rearrange):
   - `MAGENTA` colour constant (canvas L1645)
   - `ChatIcon` / `PhoneIcon` / `HeartIcon` SVG components (canvas `Ico` set L1659-1673)
@@ -57,19 +58,19 @@ Wrapper layout uses `railContainerStyle` from `rail-constants.tsx`.
 
 ### AC-2 — RailHybrid (V5) component per locked D-7
 
-`RailHybrid.tsx` imports `RailGlossary` / `RailCoach` / `RailWhy` / `RailHuman` and renders one inside a tabbed panel. Per parent-slice D-7 (verbatim):
+`RailHybrid.tsx` provides its own outer `<aside style={railContainerStyle}>` (rail container) and composes the four child rails' `*Body` named exports inside a tabbed panel (per D-8). Per parent-slice D-7 (verbatim):
 
 > *"Hybrid (V5) tabs the other 4 rails as-is, not re-renders. V5 imports `RailGlossary`/`RailCoach`/`RailWhy`/`RailHuman` and switches via tab state. Avoids duplication; lets V5 evolve as the four components evolve."*
 
 Structure (canvas L1983-2086):
 - Eyebrow (`Help · choose how`) + heading (`Stuck? Here.`)
-- Tab row with four buttons: `Ask Decouple` (active by default) / `What this means` / `Why we ask` / `Human`
+- Tab row with four `role="tab"` buttons: `Ask Decouple` (active by default) / `What this means` / `Why we ask` / `Human` — wrapped in `role="tablist"` for assistive-tech identification
 - Tab state via local `useState`; active tab gets visual treatment per canvas L1991-1996
-- Active tab body renders the corresponding full rail component:
-  - `Ask Decouple` → `<RailCoach />`
-  - `What this means` → `<RailGlossary focused="relationship" />` (preserves V1's default-focus prop)
-  - `Why we ask` → `<RailWhy />`
-  - `Human` → `<RailHuman />`
+- Active tab body renders the corresponding rail's `*Body` content (single rail container, no nesting):
+  - `Ask Decouple` → `<RailCoachBody />`
+  - `What this means` → `<RailGlossaryBody focused="relationship" />` (preserves V1's default-focus prop)
+  - `Why we ask` → `<RailWhyBody />`
+  - `Human` → `<RailHumanBody />`
 
 **Evidence:** smoke test asserts initial render shows the `Ask Decouple` tab body (RailCoach text); clicking the `Human` tab reveals RailHuman content (`999 OR REFUGE`); clicking `What this means` reveals RailGlossary content.
 
@@ -126,6 +127,7 @@ Net test delta: +3 new tests, 2 amended.
 - **D-5: V5 tab state is local React `useState`.** Component-local; no persistence, no cross-component leakage, resets on remount. Storage-free by design — V5 doesn't expose a "remember my tab" affordance and the canvas doesn't include one.
 - **D-6: No `Linked canvas:` field; canvas-fidelity gate stays dormant.** Per-AC evidence cites canvas line ranges inline; verbatim canvas-quote discipline is not invoked for prototype-category slices.
 - **D-7: `RailHybrid` renders `RailGlossary` with `focused="relationship"`.** The canvas anchors O2 ("Your situation") whose first card is the relationship question; the explicit `focused="relationship"` prop encodes that anchor. If V5 ever surfaces from O-screens other than O2, the `focused` prop will need plumbing — deferred (per-step rail-content variation stays out of scope).
+- **D-8: V1/V2/V3/V4 expose `*Body` sub-components for V5 composition (AC mid-impl amendment).** Parent-slice D-7's "imports the 4 rails as-is" framing didn't anticipate that each rail wraps its content in its own `<aside style={railContainerStyle}>` (480px width, padding 24, background tint, border-left). Naive nesting (V5's `<aside>` containing a child rail's `<aside>`) produces double padding, double background, width clipping. Three resolution paths surfaced at impl time: (a) `*Body` named-export extraction from V1-V4 — V5 composes the body content inside its own single `<aside>` (chosen); (b) reopen D-7, inline canvas-literal compact tab content — would touch the parent-slice's locked decision; (c) accept the double-wrap visual — would ship broken. The Body extraction is mechanical (the inner JSX moves to a `*Body` function that returns a fragment; the original `RailX` export becomes a thin `<aside>` wrapper around `<RailXBody {...props} />`); no behaviour change for `HelpRailLayout.tsx`'s direct consumers of `RailX`. Re-reading parent-slice D-7 ("V5 imports `RailGlossary`/`RailCoach`/`RailWhy`/`RailHuman` and switches via tab state. Avoids duplication; lets V5 evolve as the four components evolve") — the Body extraction preserves D-7's spirit (V5 composes rail content, no duplication, auto-tracks rail evolution) while resolving the container-nesting impl detail.
 
 ## Risk / blast radius
 

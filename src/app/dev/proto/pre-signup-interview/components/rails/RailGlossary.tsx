@@ -98,9 +98,9 @@ const ddStyle: CSSProperties = {
   lineHeight: 1.5,
 };
 
-export function RailGlossary({ focused }: { focused?: string }) {
+export function RailGlossaryBody({ focused }: { focused?: string }) {
   return (
-    <aside style={railContainerStyle} aria-label="Glossary help rail">
+    <>
       <div>
         <div style={railEyebrowStyle}>Reference</div>
         <h2 style={{ ...railHeadingStyle, marginTop: 4 }}>What this means.</h2>
@@ -132,6 +132,14 @@ export function RailGlossary({ focused }: { focused?: string }) {
       <div style={monoFooterStyle}>
         GLOSSARY · UPDATED MAY 2026 · <span style={{ color: MUTE }}>NOT LEGAL ADVICE</span>
       </div>
+    </>
+  );
+}
+
+export function RailGlossary({ focused }: { focused?: string }) {
+  return (
+    <aside style={railContainerStyle} aria-label="Glossary help rail">
+      <RailGlossaryBody focused={focused} />
     </aside>
   );
 }
