@@ -86,4 +86,19 @@ describe('WelcomeTourPage — step state machine (AC-11)', () => {
     expect(localStorage.getItem(STORAGE_KEY)).toBe('3');
     expect(screen.getByText('Phase 3 · Settle')).toBeTruthy();
   });
+
+  it('non-integer localStorage value falls back to default step 0', () => {
+    localStorage.setItem(STORAGE_KEY, 'abc');
+    render(<WelcomeTourPage />);
+    expect(screen.getByText('Take the tour')).toBeTruthy();
+    expect(localStorage.getItem(STORAGE_KEY)).toBe('0');
+  });
+
+  it('Escape at DASH_STEP is a no-op (canvas handler returns early)', () => {
+    render(<WelcomeTourPage />);
+    fireEvent.click(screen.getByText('Skip to dashboard'));
+    expect(localStorage.getItem(STORAGE_KEY)).toBe('5');
+    fireEvent.keyDown(window, { key: 'Escape' });
+    expect(localStorage.getItem(STORAGE_KEY)).toBe('5');
+  });
 });

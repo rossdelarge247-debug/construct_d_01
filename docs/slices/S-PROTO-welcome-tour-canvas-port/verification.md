@@ -69,12 +69,15 @@ Note: AC-5 narrative says *"ArrowLeft retreats (capped at 0)"* — at `DASH_STEP
 - `src/app/dev/proto/registry.ts` `welcome-tour` row remains at its prior status (no registry change in scope this slice).
 
 ### AC-11 — Unit test for step state machine
-- `tests/unit/proto-welcome-tour/step-state.test.tsx` exercises:
-  - Initial state at `INTRO_STEP = 0` (intro CTAs visible).
-  - `ArrowRight` keydown advances state — localStorage value increments.
-  - `ArrowLeft` keydown retreats — capped at 0.
-  - At `DASH_STEP`, keyboard handler is disabled (canvas-verbatim behaviour).
-  - "Skip to dashboard" CTA click from intro → state jumps to `DASH_STEP`.
+- `tests/unit/proto-welcome-tour/step-state.test.tsx` — 12 specs covering:
+  - Initial state at `INTRO_STEP = 0` (intro CTAs visible; localStorage persisted post-mount).
+  - `ArrowRight` / `Enter` keydown advances state — localStorage value increments.
+  - 5× `ArrowRight` reaches `DASH_STEP`; further `ArrowRight` is no-op.
+  - `ArrowLeft` retreats; capped at 0.
+  - `Escape` jumps to `DASH_STEP` from non-dashboard step; no-op at DASH_STEP (canvas-verbatim).
+  - "Skip to dashboard" CTA click jumps to `DASH_STEP`.
+  - Hydrates step from localStorage on mount when value is finite.
+  - Non-integer localStorage value falls back to default step 0 (exercises the `Number.isFinite` guard cited in `security.md`).
 - Run: `npm test -- tests/unit/proto-welcome-tour/step-state.test.tsx`.
 
 ## Preview-deploy verification
