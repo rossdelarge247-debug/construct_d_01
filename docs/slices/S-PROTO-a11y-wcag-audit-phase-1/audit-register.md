@@ -35,10 +35,10 @@ WCAG 2.1 AA audit walk across the pre-signup-interview prototype surfaces (12 sc
 
 | Category | Count | Disposition |
 |---|---|---|
-| Focus-visible (WCAG 2.4.7) | F-A11Y-01..08 (8 sites) | fix-this-slice → AC-2 |
-| ARIA live regions (WCAG 4.1.3) | F-A11Y-09..11 (3 sites) | fix-this-slice → AC-3 |
-| Colour contrast (WCAG 1.4.3) | F-A11Y-12..15 (4 sites · multiple lines each) | fix-this-slice → AC-4 |
-| Rail-component specific (WCAG 4.1.2 · 2.1.1 · Tabs APG) | F-A11Y-16..18 (3 fixes) | fix-this-slice → AC-5 |
+| Focus-visible (WCAG 2.4.7) | F-A11Y-01..08 (8 sites) | follow-up → `S-PROTO-a11y-focus-visible-sweep` |
+| ARIA live regions (WCAG 4.1.3) | F-A11Y-09..11 (3 sites) | follow-up → `S-PROTO-a11y-aria-live-regions` |
+| Colour contrast (WCAG 1.4.3) | F-A11Y-12..15 (4 sites · multiple lines each) | follow-up → `S-PROTO-a11y-contrast-mute` |
+| Rail-component specific (WCAG 4.1.2 · 2.1.1 · Tabs APG) | F-A11Y-16..18 (3 fixes) | follow-up → `S-PROTO-a11y-rail-specifics` |
 | Non-a11y deferrals | F-A11Y-19..20 (2 items) | defer-out-of-scope |
 
 ## Walk coverage notes
