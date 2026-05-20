@@ -5,6 +5,7 @@ import { BrandBar } from '../components/BrandBar';
 import { Footer } from '../components/Footer';
 import { TopBar } from '../components/TopBar';
 import { useProto } from '../lib/proto-context';
+import focusVisibleStyles from '../components/focus-visible.module.css';
 
 export function QuantBridge() {
   const { next, back, goTo } = useProto();
@@ -75,6 +76,7 @@ export function QuantBridge() {
         secondaryActions={
           <button
             type="button"
+            className={focusVisibleStyles.focusable}
             onClick={() => goTo(11)}
             style={{
               background: 'transparent',

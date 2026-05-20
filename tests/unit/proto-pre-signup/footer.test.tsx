@@ -35,9 +35,22 @@ describe('Footer', () => {
     expect(status.getAttribute('aria-live')).toBe('polite');
   });
 
-  it('renders no caption region when caption prop is omitted', () => {
+  it('mounts the status region unconditionally; text content is empty when caption prop is omitted', () => {
     render(<Footer ctaLabel="Continue" onContinue={() => {}} />);
-    expect(screen.queryByRole('status')).toBeNull();
+    const status = screen.getByRole('status');
+    expect(status).toBeTruthy();
+    expect(status.textContent).toBe('');
+    expect(status.getAttribute('aria-live')).toBe('polite');
+  });
+
+  it('keeps the status region mounted across the caption-toggles-on transition', () => {
+    const { rerender } = render(<Footer ctaLabel="Continue" onContinue={() => {}} />);
+    const before = screen.getByRole('status');
+    expect(before.textContent).toBe('');
+    rerender(<Footer caption="Now visible." ctaLabel="Continue" onContinue={() => {}} />);
+    const after = screen.getByRole('status');
+    expect(after).toBe(before);
+    expect(after.textContent).toBe('Now visible.');
   });
 
   it('renders secondaryActions row between caption and primary CTA when provided', () => {

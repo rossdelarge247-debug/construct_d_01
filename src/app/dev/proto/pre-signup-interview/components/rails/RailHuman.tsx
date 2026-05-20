@@ -13,13 +13,13 @@ import {
   optMetaStyle,
   optPillGreyStyle,
   optPillStyle,
-  optRowStyle,
   optTitleStyle,
   railContainerStyle,
   railEyebrowStyle,
   railHeadingStyle,
   railSubStyle,
 } from './rail-constants';
+import styles from './rail-constants.module.css';
 
 const optionsListStyle: CSSProperties = {
   display: 'flex',
@@ -56,7 +56,7 @@ export function RailHumanBody() {
       </div>
 
       <div style={optionsListStyle}>
-        <button type="button" style={optRowStyle}>
+        <button type="button" className={styles.optRow}>
           <span style={optIconStyle}>
             <ChatIcon />
           </span>
@@ -67,7 +67,7 @@ export function RailHumanBody() {
           <span style={optPillStyle}>Online</span>
         </button>
 
-        <button type="button" style={optRowStyle}>
+        <button type="button" className={styles.optRow}>
           <span style={optIconStyle}>
             <PhoneIcon />
           </span>
@@ -78,7 +78,7 @@ export function RailHumanBody() {
           <span style={optPillGreyStyle}>Slots open</span>
         </button>
 
-        <button type="button" style={optRowStyle}>
+        <button type="button" className={styles.optRow}>
           <span style={heartIconBgStyle}>
             <HeartIcon />
           </span>

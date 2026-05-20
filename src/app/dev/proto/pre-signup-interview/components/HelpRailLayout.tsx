@@ -27,11 +27,9 @@ export function HelpRailLayout({ children }: { children: ReactNode }) {
   return (
     <div className={styles.helpRailWrapper} data-rail-active={showRail ? 'true' : 'false'}>
       <div className={styles.helpRailContent}>{children}</div>
-      {showRail ? (
-        <div className={styles.helpRailColumn} aria-live="polite">
-          <ActiveRail />
-        </div>
-      ) : null}
+      <div className={styles.helpRailColumn} aria-live="polite">
+        {showRail ? <ActiveRail /> : null}
+      </div>
     </div>
   );
 }

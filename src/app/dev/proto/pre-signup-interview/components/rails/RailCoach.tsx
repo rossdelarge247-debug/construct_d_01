@@ -3,7 +3,6 @@ import type { CSSProperties } from 'react';
 import {
   INK,
   LINE,
-  MUTE,
   SUB,
   VIOLET,
   LockIcon,
@@ -14,6 +13,7 @@ import {
   railHeadingStyle,
   railSubStyle,
 } from './rail-constants';
+import styles from '../focus-visible.module.css';
 
 const bubbleUserStyle: CSSProperties = {
   alignSelf: 'flex-end',
@@ -46,7 +46,6 @@ const suggestButtonStyle: CSSProperties = {
   background: '#FFFFFF',
   color: SUB,
   fontSize: 12.5,
-  cursor: 'pointer',
 };
 
 const inputRowStyle: CSSProperties = {
@@ -126,7 +125,7 @@ export function RailCoachBody() {
             fontFamily: 'ui-monospace, SFMono-Regular, Menlo, monospace',
             fontSize: 9.5,
             letterSpacing: '0.12em',
-            color: MUTE,
+            color: SUB,
             marginBottom: 8,
             textTransform: 'uppercase',
             fontWeight: 600,
@@ -136,7 +135,13 @@ export function RailCoachBody() {
         </div>
         <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
           {SUGGESTIONS.map((q) => (
-            <button key={q} type="button" style={suggestButtonStyle}>
+            <button
+              key={q}
+              type="button"
+              style={suggestButtonStyle}
+              className={styles.focusable}
+              aria-disabled="true"
+            >
               {q}
             </button>
           ))}
@@ -150,12 +155,17 @@ export function RailCoachBody() {
           style={inputStyle}
           aria-label="Type your question"
         />
-        <button type="button" style={sendButtonStyle} aria-label="Send question">
+        <button
+          type="button"
+          style={sendButtonStyle}
+          className={styles.focusable}
+          aria-label="Send question"
+        >
           <SendIcon size={13} />
         </button>
       </div>
 
-      <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 11, color: MUTE }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 11, color: SUB }}>
         <LockIcon size={11} />
         Conversations are private to you. Not used for training.
       </div>
