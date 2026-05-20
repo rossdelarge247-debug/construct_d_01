@@ -51,7 +51,8 @@ Final-state evidence per AC. Round-by-round multi-agent audit detail lives in th
 ### AC-9 — F-A11Y-09 — `components/HelpRailLayout.tsx` rail-region mount unconditionally
 
 - `components/HelpRailLayout.tsx:27-33` — refactored. `<div className={styles.helpRailColumn} aria-live="polite">` now mounts unconditionally; `{showRail ? <ActiveRail /> : null}` is the conditional child.
-- Verified visually safe: `page.module.css:75-77` `.helpRailColumn { display: none; }` keeps the column hidden on viewports <1280px (the no-rail-content case is still invisible).
+- Visual safety, <1280px: `page.module.css:75-77` `.helpRailColumn { display: none; }` keeps the column hidden on small viewports (no-rail-content case is invisible).
+- Visual safety, ≥1280px: `page.module.css:79-93` `.helpRailColumn { display: block; flex-shrink: 0 }` — at desktop the column always renders, but when `showRail` is false the only child is `null`. With no content the flex item defaults to `flex-basis: auto`, which resolves to content-size 0; the column takes 0 horizontal space and the wrapper layout is unchanged from pre-fix. The `aria-live="polite"` region exists in the accessibility tree, ready to announce when the user toggles a rail variant via `/dev/control`.
 - Test: `tests/unit/app/dev/proto/pre-signup-interview/help-rail.test.tsx` describe-block `HelpRailLayout — aria-live region unconditional mount` asserts the region is present even when no variant is selected and remains as a stable host across variant toggles. PASS.
 
 ### AC-10 — F-A11Y-10 — `components/Footer.tsx` caption region mount unconditionally
@@ -78,6 +79,10 @@ Five swaps in `components/rails/rail-constants.tsx`:
 - `optMetaStyle:101` — `color: SUB`.
 - `optPillGreyStyle:119` — `color: SUB`.
 - `tabButtonStyle:147` — `color: SUB`.
+
+**Contrast verification:**
+- SUB `#57534E` on white `#FFFFFF` ≈ 8.59:1 — passes WCAG AA 4.5:1. Covers `railEyebrowStyle` · `monoFooterStyle` · `optMetaStyle` · `tabButtonStyle` (all on rail container background `#FAFAF7` which is essentially white).
+- SUB `#57534E` on PANEL_BG `#F5F3EE` ≈ 6.86:1 (relative luminance L_SUB ≈ 0.0883 vs L_PANEL ≈ 0.8988 → (0.8988 + 0.05) / (0.0883 + 0.05) = 6.86) — passes WCAG AA 4.5:1 even at the 9.5px font-size used in `optPillGreyStyle`. Covers `optPillGreyStyle` whose background is PANEL_BG.
 
 ### AC-14 — F-A11Y-14 — `components/rails/RailCoach.tsx` MUTE captions
 
@@ -140,7 +145,11 @@ Verification commands:
 
 ## Architectural deferrals
 
-None. All 18 fixes landed within their target files without seam-extraction or interface changes.
+### Roving `tabIndex` for RailHybrid V5 tabs (raised by auto-review prototype-readiness specialist)
+
+AC-18's text explicitly excludes roving tabindex (*"Existing Tab-key navigation unchanged (no roving `tabIndex`)"*). The WAI-ARIA Authoring Practices Tabs pattern recommends `tabIndex={isActive ? 0 : -1}` so Tab key moves focus to the panel rather than between tab buttons; this slice ships ArrowLeft/ArrowRight nav per the audit register's text, but Tab-key behaviour is unchanged.
+
+Defer to a follow-up slice — `S-PROTO-a11y-rail-tabs-roving-tabindex` or equivalent — once Phase 2/3 a11y audit re-walks the V5 tabs. The reviewer agrees: *"raise as a follow-up slice rather than blocking this PR."*
 
 ### Adjacent observation noted (out of slice scope per surgical-changes principle)
 
@@ -148,7 +157,12 @@ None. All 18 fixes landed within their target files without seam-extraction or i
 
 ## Auto-review responses
 
-Multi-agent auto-review fires on PR open via `.github/workflows/auto-review.yml`. Verdict + finding triage recorded here at PR-review time.
+Multi-agent auto-review fired at commit `615983f`; 3 specialists (security · style · prototype-readiness) fanned out under the auto-review.yml matrix strategy. Verdict: `request-changes` (informational at v3b ship; merge not gated). 4 findings:
+
+- `praise` (no action) — prototype-readiness commends `.focusable:has(:focus-visible)` pattern, ArrowLeft/Right wrap math, and aria-live mount-unconditionally consistency between HelpRailLayout and Footer.
+- `issue` non-blocking — RailHybrid tabs missing roving `tabIndex`. Addressed in `## Architectural deferrals` §"Roving `tabIndex` for RailHybrid V5 tabs"; reviewer's own remediation: *"raise as a follow-up slice rather than blocking this PR."*
+- `question` non-blocking — ≥1280px empty column behaviour. Addressed by extending AC-9 evidence with the flex-basis: auto reasoning + `.helpRailColumn` selector ref.
+- `suggestion` non-blocking — SUB on PANEL_BG contrast not explicitly evidenced. Addressed by extending AC-13 evidence with the computed 6.86:1 ratio.
 
 ## DoD-14 short-form (prototype category)
 
