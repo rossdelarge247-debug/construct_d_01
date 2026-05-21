@@ -817,13 +817,12 @@ export default function WelcomeTourPage() {
   const [tw, setTw] = useState<Tweaks>(TWEAK_DEFAULTS);
   const [editOn, setEditOn] = useState(false);
   // SSR-safe init: start with the default; hydrate from localStorage after mount.
-  const [step, setStep] = useState<number>(TWEAK_DEFAULTS.start_step || 0);
-  const [connected, setConnected] = useState<string[]>([]);
-
-  useEffect(() => {
+  const [step, setStep] = useState<number>(() => {
+    if (typeof window === 'undefined') return TWEAK_DEFAULTS.start_step || 0;
     const saved = parseInt(localStorage.getItem('decouple_tour_step') || '');
-    if (Number.isFinite(saved)) setStep(saved);
-  }, []);
+    return Number.isFinite(saved) ? saved : (TWEAK_DEFAULTS.start_step || 0);
+  });
+  const [connected, setConnected] = useState<string[]>([]);
 
   useEffect(() => { localStorage.setItem('decouple_tour_step', String(step)); }, [step]);
 
