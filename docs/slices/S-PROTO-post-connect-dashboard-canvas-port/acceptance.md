@@ -52,7 +52,7 @@ Phase tints declared inline at the top of the page as `const PHASE = { build, re
 
 ### Component ports (canvas L1186–1727)
 
-**AC-4.** `JourneyRail` (canvas L1259–1325) renders as a left-side nav fixed to the dashboard layout, listing the 5-phase journey items per the `JOURNEY` const declared at canvas L1259. Each item shows a step number + label + state (current/locked/etc). *Evidence:* visual matches canvas at both variants.
+**AC-4.** `JourneyRail` (canvas L1259–1325) is defined in the canvas as a left-sidebar nav component but is NOT rendered by the canvas `Dashboard` wrapper (canvas L1628–1717 — layout is `flex flex-col` with `TopBar` + `main` only, no left rail; no `<JourneyRail/>` reference inside `Dashboard`). This slice does NOT port JourneyRail. Logged here as an explicit deferral so a future iteration can revive the rail (e.g. if a multi-section dashboard variant calls for it). *Evidence:* `grep -n "<JourneyRail" docs/design-source/post-connect-dashboard/decoded/Post-connect\\ Dashboard\\ -\\ Standalone.html` returns no matches.
 
 **AC-5.** `PhaseStrip` (canvas L1327–1370) renders a horizontal 5-phase strip across the top of the dashboard body. Locked phases dimmed per canvas treatment. Receives `variant` prop. *Evidence:* visual matches canvas at both variants.
 

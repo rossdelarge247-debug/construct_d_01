@@ -4,18 +4,18 @@
 
 | AC | Status | Evidence |
 |---|---|---|
-| AC-1 Route + variant routing | TBD | `/dev/proto/post-connect-dashboard` resolves; `?variant=expressive` query toggles render path. Visible page-bg difference between conservative (`#FFF`) and expressive (`#F5F1EB`) confirms the gate fires. |
-| AC-2 Tokenisation | TBD | `grep -E '#1A1A1A\|#78716C\|#E5E3DC\|#FAFAF7' src/app/dev/proto/post-connect-dashboard/page.tsx` returns no canonical-canvas-token literals; expressive-only one-offs remain inline. |
-| AC-3 SignedInHeader integration | TBD | Page imports `SignedInHeader` from `@/components/layout/signed-in-header` with `mode="app"`; chrome renders above dashboard body in both variants. |
-| AC-4 JourneyRail | TBD | Left sidebar renders 5 journey items with state badges; matches canvas L1259–1325. |
-| AC-5 PhaseStrip | TBD | Horizontal 5-phase strip with locked-state dimming; matches canvas L1327–1370. |
-| AC-6 ConnectedBanner | TBD | Bank-connected banner with toggle; click expands/collapses; `aria-expanded` reflects state. Smoke test in AC-12 asserts behaviour. |
-| AC-7 DisclosureCard | TBD | 3-row disclosure card with progress indicator; matches canvas L1455–1485. |
-| AC-8 PrepTasksCard | TBD | 3-task card via `PREP_TASKS` + `TaskRow`; last row no border; matches canvas L1486–1552. |
-| AC-9 LockedSection×2 | TBD | Two parametric locked phase cards (Reconcile + Settle/Finalise); matches canvas L1554–1614 + Dashboard composition. |
-| AC-10 Dashboard wrapper | TBD | Composed layout matches canvas L1619–1727; variant prop threads to children. |
-| AC-11 Variant gate | TBD | `isExpressive` derivation present in each component receiving `variant`; only inline style values diverge per variant. |
-| AC-12 Unit test | TBD | `tests/unit/proto-post-connect-dashboard/dashboard.test.tsx` written; assertions: invalid `?variant=foo` falls back to conservative; `ConnectedBanner` toggle flips `aria-expanded`. |
+| AC-1 Route + variant routing | Met (build) | `src/app/dev/proto/post-connect-dashboard/page.tsx` exists; default export wraps `DashboardContent` in `Suspense` and reads `?variant` via `useSearchParams`; `resolveVariant()` (lines 25–27) maps `'expressive'` to `'expressive'` and everything else to `'conservative'`. Visible page-bg difference between conservative (BG token) and expressive (`linear-gradient(180deg, #F3EEFE 0%, #F5F5F4 360px)`) confirms the gate fires (Dashboard lines 651–656). |
+| AC-2 Tokenisation | Met (build) | `grep -c "#1A1A1A\\|#78716C\\|#E5E3DC" src/app/dev/proto/post-connect-dashboard/page.tsx` returns `0`. All 6 canonical canvas constants (INK/SUB/MUTE/LINE/CANVAS/BG) reference `tokens.color.*`. Expressive-only literals retained inline (`#F5F1EB`, `#4338CA`, `#9D174D`, `#F3EEFE`, etc) per slice intent. |
+| AC-3 SignedInHeader integration | Met (build) | Page imports `SignedInHeader` from `@/components/layout/signed-in-header`; renders at top of Dashboard wrapper with `mode="app"`, `pageLabel="Dashboard"`, and `user={{ name: 'Sarah', initial: 'S', status: 'Just joined' }}` (matches canvas TopBar's user trio). |
+| AC-4 JourneyRail | Met (deferred) | Canvas defines JourneyRail (L1259–1325) but Dashboard wrapper (L1628–1717) does not render it; port reflects that decision. Grep on decoded canvas for `<JourneyRail` returns no matches. |
+| AC-5 PhaseStrip | Met (build) | `PhaseStrip` function (lines 102–157) maps 5 phase entries; active phase (Preparation) styled with INK background + CANVAS surface, locked phases at 0.42 opacity. Title tooltip per canvas L1348. |
+| AC-6 ConnectedBanner | Met (build) | `ConnectedBanner` (lines 161–270) renders bank banner with toggle; primary toggle `<button>` carries `aria-expanded`, `aria-controls="connected-bank-accounts"`, `aria-label`. The chevron is a visual companion (`aria-hidden="true"`, `tabIndex={-1}`) so keyboard + screen-reader focus stays on the labelled primary. AC-12 test asserts toggle state. |
+| AC-7 DisclosureCard | Met (build) | `DisclosureCard` (lines 272–325) renders "Your private area" kicker + italic-serif H3 + body copy + 32% progress bar + INK CTA with right-arrow. |
+| AC-8 PrepTasksCard | Met (build) | `PrepTasksCard` (lines 411–453) renders 7 PREP_TASKS via `TaskRow`; last row `borderBottom: 'none'`. Special-task style (`Upload now`) uses Upload icon + expressive `#7C3AED` / conservative INK. |
+| AC-9 LockedSection×2 | Met (build) | `LockedSection` (lines 461–625) parametric: title + Lock chip + unlockReason + primary card + locked-task list. Two instances composed in `Dashboard` (lines 737–786) for Reconcile (`phaseColor="#9D174D"`) and Settle (`phaseColor="#0369A1"`). Outer wrapper at `opacity: 0.55`; inner content has `pointer-events-none`. |
+| AC-10 Dashboard wrapper | Met (build) | `Dashboard` (lines 650–791) composes greeting + PhaseStrip + Preparation block (ConnectedBanner + DisclosureCard + PrepTasksCard) + two LockedSection blocks. `data-variant` attribute on outer div exposes the variant for verification. |
+| AC-11 Variant gate | Met (build) | `isExpressive` derived independently in `ConnectedBanner` (L177), `DisclosureCard` (L274), `TaskRow` (L341), `PrepTasksCard` (L412), `LockedSection` (L470), `Dashboard` (L652). Only inline style values diverge per variant. |
+| AC-12 Unit test | Met (build) | `tests/unit/proto-post-connect-dashboard/dashboard.test.tsx` written: 4 cases for `resolveVariant` (null / undefined / expressive / fallback) + 6 cases for `ConnectedBanner` (initial state · expand on click · collapse on second click · panel reveal when expanded · panel hidden when collapsed · `onToggle` invocation). 10 cases total. Execution deferred to CI (sandbox blocks `npm install`). |
 
 ## Preview-deploy verification (per spec 72a + CLAUDE.md §"Engineering conventions" §"Preview-deploy verification rubric")
 
