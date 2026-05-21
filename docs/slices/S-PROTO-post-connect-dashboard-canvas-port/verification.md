@@ -10,16 +10,16 @@
 | AC-4 JourneyRail | Met (deferred) | Canvas defines JourneyRail (L1259–1325) but Dashboard wrapper (L1628–1717) does not render it; port reflects that decision. Grep on decoded canvas for `<JourneyRail` returns no matches. |
 | AC-5 PhaseStrip | Met (build) | `PhaseStrip` function (lines 102–157) maps 5 phase entries; active phase (Preparation) styled with INK background + CANVAS surface, locked phases at 0.42 opacity. Title tooltip per canvas L1348. |
 | AC-6 ConnectedBanner | Met (build) | `ConnectedBanner` (lines 161–270) renders bank banner with toggle; primary toggle `<button>` carries `aria-expanded`, `aria-controls="connected-bank-accounts"`, `aria-label`. The chevron is a visual companion (`aria-hidden="true"`, `tabIndex={-1}`) so keyboard + screen-reader focus stays on the labelled primary. AC-12 test asserts toggle state. |
-| AC-7 DisclosureCard | Met (build) | `DisclosureCard` (lines 272–325) renders "Your private area" kicker + italic-serif H3 + body copy + 32% progress bar + INK CTA with right-arrow. |
+| AC-7 DisclosureCard | Met (build) | `DisclosureCard` (lines 272–325) renders "Your private area" kicker + italic-serif H3 ("View your disclosure picture") + body copy + 32% progress bar + INK CTA ("Go to your picture") with right-arrow. Single-section layout — no row primitives. |
 | AC-8 PrepTasksCard | Met (build) | `PrepTasksCard` (lines 411–453) renders 7 PREP_TASKS via `TaskRow`; last row `borderBottom: 'none'`. Special-task style (`Upload now`) uses Upload icon + expressive `#7C3AED` / conservative INK. |
 | AC-9 LockedSection×2 | Met (build) | `LockedSection` (lines 461–625) parametric: title + Lock chip + unlockReason + primary card + locked-task list. Two instances composed in `Dashboard` (lines 737–786) for Reconcile (`phaseColor="#9D174D"`) and Settle (`phaseColor="#0369A1"`). Outer wrapper at `opacity: 0.55`; inner content has `pointer-events-none`. |
 | AC-10 Dashboard wrapper | Met (build) | `Dashboard` (lines 650–791) composes greeting + PhaseStrip + Preparation block (ConnectedBanner + DisclosureCard + PrepTasksCard) + two LockedSection blocks. `data-variant` attribute on outer div exposes the variant for verification. |
 | AC-11 Variant gate | Met (build) | `isExpressive` derived independently in `ConnectedBanner` (L177), `DisclosureCard` (L274), `TaskRow` (L341), `PrepTasksCard` (L412), `LockedSection` (L470), `Dashboard` (L652). Only inline style values diverge per variant. |
 | AC-12 Unit test | Met (build) | `tests/unit/proto-post-connect-dashboard/dashboard.test.tsx` written: 4 cases for `resolveVariant` (null / undefined / expressive / fallback) + 6 cases for `ConnectedBanner` (initial state · expand on click · collapse on second click · panel reveal when expanded · panel hidden when collapsed · `onToggle` invocation). 10 cases total. Execution deferred to CI (sandbox blocks `npm install`). |
 
-## Preview-deploy verification (per spec 72a + CLAUDE.md §"Engineering conventions" §"Preview-deploy verification rubric")
+## Preview-deploy verification
 
-`prototype` category; dormant gates as documented in spec 76 §3. The 6-dim rubric below is filled by the user side; this slice's preview-deploy lives at `https://<branch-preview>.vercel.app/dev/proto/post-connect-dashboard` (URL surfaced on the PR by Vercel).
+`prototype` category. The 6-dim rubric below is filled by the user side; this slice's preview-deploy lives at `https://<branch-preview>.vercel.app/dev/proto/post-connect-dashboard` (URL surfaced on the PR by Vercel).
 
 | Dimension | Status | Evidence |
 |---|---|---|
@@ -45,7 +45,7 @@ After this slice's port, smoke-walk:
 - Variant switcher UI in-page (currently URL-driven). Deferred until user-feedback after preview-walk picks a winner; the loser may be removed entirely.
 - Real data wiring (auth check, bank API, task status persistence). Out of slice scope; production-port will reintegrate.
 - Mobile responsive scaffolding. Canvas authors desktop only; mobile reconciliation deferred per canvas-as-source pattern.
-- A11y holistic pass. Deferred to the system-wide Phase 2/3 a11y slice once all prototype surfaces ship.
+- A11y holistic pass. Deferred to the system-wide Phase 2/3 a11y slice once all prototype surfaces ship. Specific known issue: `PhaseStrip` locked-state cells render text at `opacity: 0.42` over MUTE (`#78716C`) on a near-white background — composite effective contrast falls below 4.5:1 AA at 12.5px. The remedy (explicit locked-state colours rather than blanket opacity) is in scope for the a11y pass, not this slice.
 
 ## Status
 

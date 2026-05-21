@@ -2,7 +2,7 @@
 
 ## Test surfaces
 
-`Category: prototype` — TDD-guard skips per spec 76 §3. Test-pain audit threshold raises from >2 mocks to >5 mocks. Manual visual review is the primary verification channel for canvas-as-source ports; unit tests cover state-bearing behaviour only.
+`Category: prototype`. TDD-guard skips for this slice; test-pain audit threshold raises from >2 mocks to >5 mocks. Manual visual review is the primary verification channel for canvas-as-source ports; unit tests cover state-bearing behaviour only.
 
 ## Tests authored
 
@@ -33,7 +33,7 @@ Covers AC-12 (variant routing + ConnectedBanner toggle).
 
 ## Test-pain audit
 
-Per CLAUDE.md §"Engineering conventions" §"Test-pain audit" (spec 72d §3): count mock setups per unit test. `prototype` threshold = 5 mocks.
+Count mock setups per unit test (`prototype` threshold = 5 mocks).
 
 - Case 1-3: 0 mocks (prop-driven render).
 - Case 4: 1 mock (`vi.fn()` for `onToggle` callback).

@@ -80,7 +80,7 @@ const Arrow = (p: IcSlot) => (
     <polyline points="13 6 19 12 13 18" />
   </Ic>
 );
-const UploadIc = (p: IcSlot) => (
+const UploadIcon = (p: IcSlot) => (
   <Ic {...p}>
     <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
     <polyline points="17 8 12 3 7 8" />
@@ -95,7 +95,7 @@ const Sync = (p: IcSlot) => (
   </Ic>
 );
 
-function PhaseStrip({ variant: _variant }: { variant: Variant }) {
+function PhaseStrip() {
   const phases = [
     { n: 1, l: 'Preparation', state: 'active' as const, sub: 'in progress' },
     { n: 2, l: 'Disclose', state: 'locked' as const, sub: undefined },
@@ -172,8 +172,8 @@ export function ConnectedBanner({ variant, expanded, onToggle }: ConnectedBanner
       style={{ background: '#FFF', border: `1px solid ${LINE}` }}
     >
       <div
-        className="w-full flex items-center gap-4 px-5 py-4"
-        style={{ background: isExpressive ? '#F5F1EB' : '#FFF', transition: 'background 140ms' }}
+        className="w-full flex items-center gap-4 px-5 py-4 transition-[background] duration-[140ms] motion-reduce:transition-none"
+        style={{ background: isExpressive ? '#F5F1EB' : '#FFF' }}
       >
         <button
           type="button"
@@ -229,11 +229,10 @@ export function ConnectedBanner({ variant, expanded, onToggle }: ConnectedBanner
             onClick={onToggle}
             aria-hidden="true"
             tabIndex={-1}
-            className="w-7 h-7 rounded-md flex items-center justify-center"
+            className="w-7 h-7 rounded-md flex items-center justify-center transition-transform duration-[180ms] motion-reduce:transition-none"
             style={{
               color: MUTE,
               transform: expanded ? 'rotate(180deg)' : 'none',
-              transition: 'transform 180ms',
             }}
           >
             <Chev size={14} />
@@ -403,7 +402,7 @@ function TaskRow({ task, variant }: { task: Task; variant: Variant }) {
         className="h-8 px-3 rounded-md text-[12px] font-medium flex-shrink-0 flex items-center gap-1 whitespace-nowrap"
         style={{ background: a.bg, color: a.fg, border: a.border }}
       >
-        {task.actionKind === 'special' && <UploadIc size={12} />}
+        {task.actionKind === 'special' && <UploadIcon size={12} />}
         {task.action}
       </button>
     </div>
@@ -582,7 +581,7 @@ function LockedSection({
             </div>
             <button
               type="button"
-              aria-disabled="true"
+              disabled
               className="h-9 px-3.5 rounded-lg text-[12.5px] font-medium flex items-center gap-1.5 flex-shrink-0"
               style={{ background: '#FFF', color: MUTE, border: `1px solid ${LINE}` }}
             >
@@ -650,7 +649,7 @@ function LockedSection({
 export function Dashboard({ variant = 'conservative' }: { variant?: Variant }) {
   const [expanded, setExpanded] = useState(false);
   const isExpressive = variant === 'expressive';
-  const pageBg = isExpressive
+  const mainBg = isExpressive
     ? 'linear-gradient(180deg, #F3EEFE 0%, #F5F5F4 360px)'
     : BG;
 
@@ -665,7 +664,7 @@ export function Dashboard({ variant = 'conservative' }: { variant?: Variant }) {
         pageLabel="Dashboard"
         user={{ name: 'Sarah', initial: 'S', status: 'Just joined' }}
       />
-      <main role="main" id="main" className="flex-1" style={{ background: pageBg }}>
+      <main role="main" id="main" className="flex-1" style={{ background: mainBg }}>
         <div className="mx-auto" style={{ maxWidth: 960, padding: '36px 40px 80px' }}>
           <div>
             <div className="label-xs" style={{ color: MUTE }}>
@@ -690,7 +689,7 @@ export function Dashboard({ variant = 'conservative' }: { variant?: Variant }) {
           </div>
 
           <div className="mt-7">
-            <PhaseStrip variant={variant} />
+            <PhaseStrip />
           </div>
 
           <div className="mt-9">
