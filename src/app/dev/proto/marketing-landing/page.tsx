@@ -389,55 +389,55 @@ type CardProps = {
   accent: string;
 };
 
-function HeroComposition() {
-  const Card = ({ label, sub, x, y, rot, w = 180, accent }: CardProps) => (
-    <div className="absolute" style={{ left: x, top: y, width: w, transform: `rotate(${rot}deg)` }}>
+const Card = ({ label, sub, x, y, rot, w = 180, accent }: CardProps) => (
+  <div className="absolute" style={{ left: x, top: y, width: w, transform: `rotate(${rot}deg)` }}>
+    <div
+      className="rounded-xl bg-white"
+      style={{
+        border: `1px solid ${tokens.color.border}`,
+        boxShadow: '0 12px 28px rgba(26,26,26,0.06), 0 2px 6px rgba(26,26,26,0.04)',
+        padding: 14,
+      }}
+    >
+      <div className="flex items-center gap-2 mb-2">
+        <span
+          style={{
+            display: 'inline-block',
+            width: 7,
+            height: 7,
+            borderRadius: 99,
+            background: accent,
+          }}
+        />
+        <span className="label-xs" style={{ color: tokens.color.text.muted, fontSize: 9.5 }}>
+          {label}
+        </span>
+      </div>
       <div
-        className="rounded-xl bg-white"
-        style={{
-          border: `1px solid ${tokens.color.border}`,
-          boxShadow: '0 12px 28px rgba(26,26,26,0.06), 0 2px 6px rgba(26,26,26,0.04)',
-          padding: 14,
-        }}
+        className="serif"
+        style={{ fontSize: 14, fontWeight: 600, color: tokens.color.ink, lineHeight: 1.25 }}
       >
-        <div className="flex items-center gap-2 mb-2">
-          <span
-            style={{
-              display: 'inline-block',
-              width: 7,
-              height: 7,
-              borderRadius: 99,
-              background: accent,
-            }}
-          />
-          <span className="label-xs" style={{ color: tokens.color.text.muted, fontSize: 9.5 }}>
-            {label}
-          </span>
-        </div>
-        <div
-          className="serif"
-          style={{ fontSize: 14, fontWeight: 600, color: tokens.color.ink, lineHeight: 1.25 }}
-        >
-          {sub.title}
-        </div>
-        <div className="mt-2 space-y-1.5">
-          {sub.rows.map((r, i) => (
-            <div
-              key={i}
-              className="flex items-center justify-between"
-              style={{ fontSize: 11, color: tokens.color.text.sub }}
-            >
-              <span>{r[0]}</span>
-              <span className="mono tabular" style={{ color: tokens.color.ink, fontSize: 10.5 }}>
-                {r[1]}
-              </span>
-            </div>
-          ))}
-        </div>
+        {sub.title}
+      </div>
+      <div className="mt-2 space-y-1.5">
+        {sub.rows.map((r, i) => (
+          <div
+            key={i}
+            className="flex items-center justify-between"
+            style={{ fontSize: 11, color: tokens.color.text.sub }}
+          >
+            <span>{r[0]}</span>
+            <span className="mono tabular" style={{ color: tokens.color.ink, fontSize: 10.5 }}>
+              {r[1]}
+            </span>
+          </div>
+        ))}
       </div>
     </div>
-  );
+  </div>
+);
 
+function HeroComposition() {
   return (
     <div className="relative" style={{ height: 560 }}>
       {/* annotation */}

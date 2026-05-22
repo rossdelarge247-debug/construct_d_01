@@ -1,129 +1,147 @@
-# Session 113 Pre-flight Context Block (carrying session 112 wrap delta)
+# Session 115 Pre-flight Context Block (carrying session 114 wrap delta)
 
-## Session 112 wrap delta — read this first
+## Session 114 wrap delta — read this first
 
-Session 112 shipped the first marketing-landing prototype slice: `S-PROTO-marketing-landing-canvas-port`. Canvas-as-source port of an 8-section single-page vertical scroll landing page to `/dev/proto/marketing-landing`. Slice + wrap docs both on `claude/session-112-kickoff-gpWhH`; **no PR opened this session** — user opens when ready.
+Session 114 closed the `S-PROTO-post-connect-dashboard-canvas-port` slice that session 113 had opened. PR [#221](https://github.com/rossdelarge247-debug/construct_d_01/pull/221) is open. Branch tip `24dbd53`, ahead-7 of main `34f87d7`. Decoded canvas + `SignedInHeader` chrome (session 113) plus slice docs + dashboard route + smoke test + 2 rounds of PR-feedback fixes (session 114) all sit on the branch.
 
-### Slice shipped — `S-PROTO-marketing-landing-canvas-port`
+### What shipped on the branch (7 commits ahead)
 
-Category `prototype`. `src/app/dev/proto/marketing-landing/page.tsx` (1,457 lines, single file) ports the canvas with:
-- 8 sections in source order: hero · picture · journey · compare · trust · pricing · faq · closing.
-- Sticky header + nav + skip-link + main landmark + footer.
-- 11 inline SVG icons via `Ic` factory + inline `Wordmark`.
-- 7 canonical colour constants → `tokens.color.*`; 4 canvas-local one-offs inlined (SOFT, WARM, `#D6D3CC`, `#3F3F3F`).
-- Phase tints declared as inline `PHASE` const at file head (canvas L758-764 verbatim).
-- FAQ accordion: `useState<number | null>(null)` single-open behaviour, `aria-expanded` + `aria-controls`.
+- `a273514` — decoded bundled canvas (session 113)
+- `c80b070` — `SignedInHeader` chrome + 10 specs (session 113)
+- `7244332` — Session 113 wrap docs (session 113)
+- `0cc5e07` — Slice docs (4 files · 225L): acceptance · verification · security · test-plan (session 114)
+- `0c13b0b` — Dashboard route + smoke test (912 insertions): `src/app/dev/proto/post-connect-dashboard/page.tsx` (800L · 5 components + Dashboard wrapper) + `tests/unit/proto-post-connect-dashboard/dashboard.test.tsx` (10 cases) (session 114)
+- `f0d63d4` — PR-review fix batch (17/-18): `prefers-reduced-motion` via Tailwind `motion-reduce:` variant, `disabled` on LockedSection CTAs, `UploadIc`→`UploadIcon`, `pageBg`→`mainBg`, AC-7 reworded to match canvas reality, spec-citation paraphrases dropped (session 114)
+- `24dbd53` — Scope add-on for pre-existing Lint failures (49/-50): hoisted `const Card` out of `HeroComposition()` to module scope in `marketing-landing/page.tsx`; converted on-mount rehydrate-effect to `useState` lazy initializer in `welcome-tour/page.tsx`. User-authorised scope add-on per `AskUserQuestion`. Local lint post-fix: 0 errors / 50 pre-existing warnings (session 114)
 
-**Test:** `tests/unit/proto-marketing-landing/faq-accordion.test.tsx` written (4 cases). Execution deferred — agent container has no `node_modules`, vitest fresh-install path doesn't resolve `vitest/config`. User-side `npm test` or CI on push will run.
+### What did NOT ship
 
-**No PR open.** Slice + wrap on `claude/session-112-kickoff-gpWhH`. Commit `ce0f246`.
+- PR #221 merge (awaiting user preview-walk + reviewer approve + final-CI-green confirm)
+- 6-dim preview-deploy rubric in `verification.md` filled (user-side)
+- Variant pruning (Conservative or Expressive — to be picked after user walks both)
 
-**Detailed retro in `docs/HANDOFF-SESSION-112.md`.**
+### What's open for session 115
 
-## Session 113 priorities — user picks scope
+- Confirm CI green on PR #221 after the `24dbd53` lint cleanup
+- User preview-walks both `?variant=conservative` and `?variant=expressive` URLs
+- Pick variant; prune the loser
+- Merge PR #221
+- Move to next-up priority
 
-The marketing-landing slice needs preview-deploy + PR + merge before any responsive follow-up. Other prototype surfaces remain available.
+## Session 115 priorities — user picks scope
+
+Most natural continuation: P1 (close PR #221 — preview walk + merge). Other prototype work remains available.
 
 | # | Priority | Scope | Effort | Blocked? |
 |---|---|---|---|---|
-| 1 | **Marketing-landing preview-deploy verification + PR + merge** | User walks `/dev/proto/marketing-landing` on Vercel preview, confirms 6-dim rubric, opens PR, squash-merges. Optional: promote registry row to `live`. | Trivial (review) + Small (PR) | No |
-| 2 | **Mobile responsive pass for marketing-landing** | Add responsive breakpoints (375 · 480 · 768 · 1024 · 1280 · 1320+) on top of the shipped port. Answers registry's `Mobile-first vs desktop-first authoring order?` open question via the empirical adapt. Ships as separate slice `S-PROTO-marketing-landing-responsive-mobile`. | Medium | No (#1 should land first ideally) |
-| 3 | **Next prototype surface — Welcome Tour** | Canvas at `docs/design-source/welcome-tour/`. Canvas-as-source pattern same as marketing-landing. | Medium | No |
-| 4 | **Next prototype surface — Post-connect Dashboard** | Canvas at `docs/design-source/post-connect-dashboard/`. C-V11..C-V14 anchors per spec 68g. Heavier than marketing-landing if multi-state. | Medium-Large | No |
-| 5 | **Adjacent pre-auth-public route** | Dedicated routes for `how-it-works`, `pricing`, `faq-trust` (registry §1 entries) — separate slice each. Currently the marketing-landing canvas folds them as scroll sections. Decision: ship dedicated routes or stay scroll? | Small-Medium per route | Product decision |
-| 6 | **A11y holistic pass (deferred from session 112)** | System-wide responsive a11y + NVDA/VoiceOver + roving-tabindex + Footer MUTE. User framed for "once we've got all the screens"; revisit when that's true. | Medium-Large | Soft-blocked on prototype-phase completion |
-| 7 | **User-directed fresh work** | Mobile Screens v2, Decouple.zip unpacking, authenticated-screens header, post-signup, etc. | Varies | n/a |
+| 1 | **Close PR #221** | Confirm CI green; user preview-walk Conservative + Expressive at preview URL; pick variant; prune loser; reviewer approve; merge | Small (user walk + small prune + merge) | No |
+| 2 | **Mobile responsive marketing-landing** | Add responsive breakpoints (375 · 480 · 768 · 1024 · 1280 · 1320+) on top of the shipped port. Answers registry's `Mobile-first vs desktop-first authoring order?` open question. Ships as separate slice `S-PROTO-marketing-landing-responsive-mobile`. | Medium | No |
+| 3 | **Promote pre-auth-public shells to full canvases** | `/how-it-works` · `/pricing` · `/faq-trust` are placeholder routes. Replace each with a full canvas-as-source port. | Small-Medium per route | No |
+| 4 | **Welcome-tour migrate to SignedInHeader** | Replace welcome-tour's bespoke TopBar with `SignedInHeader mode='tour' rightSlot={…}`. Ships as `S-INFRA-welcome-tour-signedinheader-migrate`. | Small | Soft-blocked on P1 (dashboard validates `app` mode first; needs PR #221 merged) |
+| 5 | **A11y holistic pass (deferred from sessions 111-114)** | System-wide responsive a11y + NVDA/VoiceOver + roving-tabindex + Footer MUTE + the PhaseStrip opacity-contrast (logged session 114). Revisit "once we've got all the screens". | Medium-Large | Soft-blocked on prototype-phase completion |
+| 6 | **User-directed fresh work** | Post-signup, authenticated-screens beyond dashboard, Decouple.zip unpacking, Mobile Screens v2, etc. | Varies | n/a |
 
-**Recommended:** P1 (preview-walk + PR + merge for the new slice) is the cleanest opening move — closes the loop on this session's work before scoping new. If user has reviewed already, P2 (responsive pass) is the natural follow-up; P3 (Welcome Tour) is the natural fresh-surface pick.
+**Recommended:** P1 (close PR #221 — merge first, take the win, then choose next surface).
 
 ## Scoping-discipline observations carried as recurrence-watch
 
-**Session 112 applied:**
+**Session 114 applied:**
 
-- Pre-priority canvas-fidelity verification — `docs/design-source/marketing-landing/decoded/Landing Page - Standalone.html` already in repo. CLAUDE.md §"Planning conduct" §(a) satisfied.
-- Quote, don't paraphrase — CLAUDE.md §"Canvas-as-source" 5-step quoted verbatim in acceptance.md plan-vs-spec cross-check. Author-time hook flagged 2 stub-mode false-positives at section headers (`## Test-pain audit (per spec 72d §3)`) where verbatim quote sat on the next line; live-mode persona would resolve.
-- Pre-priority verification — `git log --oneline origin/main | head -5` at turn 0 confirmed session-111 squash-merges on main. No catch-up cost.
-- Verify before planning — registry checked for marketing-landing row status; open questions (`Mobile-first vs desktop-first authoring order?`) carried to acceptance.md deferrals.
+- Pre-priority verification — branch tip + slice-shipped-state confirmed via `git log --oneline` before treating session 113's in-flight work as resumable.
+- Verify before planning — confirmed session-113 captured decisions still held with user before resuming impl.
+- AskUserQuestion frontloading — scope-add-on decision (fix lint in PR vs separate slice vs admin-bypass) settled via question, not by silently deciding.
 
 **New observations this session (one-session-observed; promote at second session if recurs):**
 
-- **Hook line-count attribution on agent-written files surfaces full LoC against the parent session's first Edit.** Untracked file written by sub-agent → main session's first Edit on it computes diff baseline as empty → all the agent's lines counted as the parent's session churn. Pattern: false-positive line-budget alarm. Promotion target: line-count hook could distinguish agent-vs-main-session writes.
-- **`npx vitest` blocked in agent sandbox without `npm install`.** Fresh-installed vitest doesn't resolve `vitest/config` from the local config. Tests can be written but execution defers to user/CI.
-- **Agent task with batch-end report can fail with API 529 Overloaded.** Long-running general-purpose agent (~20 minutes) succeeded at file write + failed at report. Files on disk; main session recovered cleanly via `git status` + targeted greps. Pattern is recoverable but flags fragility of batch-end-only reports.
+- **Branch-checkout content inflates session line-count budget.** Switching to session 113's branch added ~2,139L pre-existing committed content to working-tree state; line-count hook attributed all of it against session 114's first-Edit baseline. STOP fired at 2,442L before any real code was written. User-authorised override needed. Promotion target: extend the existing "Hook line-count attribution on agent-written files" observation to cover branch-checkout surfacing.
+- **AC-write before canvas-read fabricates AC content.** AC-7 was authored asserting "three rows (canvas's 'Pages built', 'Disclosure', 'Reconcile')" without reading the canvas section first; the canvas has a single-section card. Auto-review's `ac-gap` finding caught it. Promotion target: anchor each AC's claim to a canvas line-range only AFTER reading that range.
+- **Surgical-edit identifier renames need `replace_all: true`.** `pageBg`→`mainBg` const-side edit succeeded but JSX-usage at L667 was untouched; caught only via grep sweep before push. Promotion target: when renaming an identifier with >1 usage, prefer `Edit replace_all: true` over surgical Edits.
+- **`npm ci` works in agent sandbox.** Earlier observation "`npx vitest` blocked without `npm install`" is incomplete — `npm ci` itself works; only fresh-installed vitest mis-resolves its config. For CI-failure diagnosis, `npm ci && npm run lint` should be the FIRST step, not a fallback after guessing. Caching `node_modules` between sessions would speed it up. Promotion target: refine the existing observation, AND add "CI-log-fetch needs local-equivalent first" as method.
+- **Subscription-onboarding system-prompt fires concurrent with wrap → split focus.** `subscribe_pr_activity` confirmation system-injects an "investigate now" directive that runs in parallel with whatever the session is mid-doing. Tractable if PR-review fixes are completed before resuming wrap. Promotion target: the subscription tool's onboarding message could honour session-state context.
+
+**Carried unchanged from session 113 (3 entries):**
+
+- Canvas-decode commits eat the session line budget (1,750L tracked for dashboard's decode alone).
+- TDD-guard + stop-hook untracked-file complaints compound to force commits.
+- Hook session-churn counter resets across SessionStart hook fires within a continuous conversation (5 SessionStart fires in session 114 again).
+
+**Carried unchanged from session 112 (3 entries):**
+
+- Hook line-count attribution on agent-written files surfaces full LoC against the parent session's first Edit.
+- `npx vitest` blocked in agent sandbox without `npm install` — partially superseded by session-114's finding above.
+- Agent task with batch-end report can fail with API 529 Overloaded.
 
 **Carried unchanged from session 111 (3 entries):**
 
-- React inline-style shorthand+longhand diff edge case (not exercised session 112).
-- Sandbox blocks Vercel preview URL (`x-deny-reason: host_not_allowed`) — re-exercised session 112; AC-12 preview-deploy evidence routes through user-side.
-- `/dev/control` 404 on Vercel previews (not exercised session 112).
+- React inline-style shorthand+longhand diff edge case (not exercised session 114).
+- Sandbox blocks Vercel preview URL (`x-deny-reason: host_not_allowed`) — exercised this session via PR-side preview walk routing through user.
+- `/dev/control` 404 on Vercel previews (not exercised session 114).
 
-**Carried unchanged from session 110 (3 entries — multi-PR unmerged backlog, bundled-wrap-PR risk, audit-style slice line-count budget). Bundled-wrap-PR risk exercised this session (single-branch wrap-into-impl due to line budget); no merge conflict yet because PR isn't open.**
+**Carried unchanged from session 110 (3 entries — multi-PR unmerged backlog, bundled-wrap-PR risk, audit-style slice line-count budget). None exercised session 114.**
 
-**Carried unchanged from session 109 (3 entries — none exercised session 112).**
-
-**Wrap-protocol skipping (fourth-session-observed via session 112's pre-flight clean-main confirmation):** Sessions 108-110 paid turn-0 cost; sessions 111-112 paid none after prior session wrapped properly. Promotion-eligible to numbered negative constraint #42 if session 113+ confirms a fifth.
+**Wrap-protocol skipping (sixth-session-eligible if session 115 inherits clean main):** Sessions 108-110 paid turn-0 cost; sessions 111-114 paid none after prior session wrapped properly. Session 114 inherited clean session-113 wrap (in-flight slice cleanly documented). Promotion-eligible to numbered negative constraint #42 if session 115 confirms a sixth.
 
 **Carried unchanged from earlier sessions (24 entries):** see `docs/HANDOFF-SESSION-109.md` for full list; entries unchanged.
 
-## Authoritative reading order at session 113 start
+## Authoritative reading order at session 115 start
 
 1. This file.
-2. `docs/HANDOFF-SESSION-112.md` (retro — marketing-landing port, agent delegation pattern, 529 recovery, hook-attribution observation).
-3. For preview-deploy + PR + merge of the marketing-landing slice: `docs/slices/S-PROTO-marketing-landing-canvas-port/{acceptance,verification,test-plan,security}.md`.
-4. For mobile responsive pass: same slice docs + canvas at `docs/design-source/marketing-landing/decoded/Landing Page - Standalone.html`.
-5. For Welcome Tour: `docs/design-source/welcome-tour/` (canvas to-be-decoded; check `decoded/` subdir + `scripts/decode-bundler-canvas.sh` if missing).
-6. For Post-connect Dashboard: `docs/design-source/post-connect-dashboard/` + spec 68g §"Visual anchors" C-V11..C-V14.
+2. `docs/HANDOFF-SESSION-114.md` (retro — dashboard slice closure, PR-review fixes, scope add-on lint cleanup, persona findings).
+3. **If PR #221 still open at turn 0:** check PR status via `mcp__github__pull_request_read` (`get_check_runs` + `get_review_comments` + `get_comments`); confirm tip `24dbd53` is the head.
+4. **If PR #221 merged before turn 0:** move to next-priority deliberation; session-114 dashboard slice is on main.
 
-## Session 113 kickoff prompt (paste-ready)
+## Session 115 kickoff prompt (paste-ready)
 
 ```
-Kick off session 113.
+Kick off session 115.
 
 Read docs/SESSION-CONTEXT.md first.
 
 Turn-0 verification:
 - SessionStart hook surfaces live branch state.
-- Branch convention: harness-suffixed off clean main, OR scope-named
-  sub-branch.
-- Session 112 left an UNMERGED slice on branch
-  claude/session-112-kickoff-gpWhH (commit ce0f246 — marketing-landing
-  canvas-as-source port + wrap). No PR opened. Verify via
-  `git log --oneline claude/session-112-kickoff-gpWhH | head -3` if
-  uncertain.
-- If the harness landed you on a different base, follow CLAUDE.md
-  §"Branch-resume check": git fetch / git checkout -B.
+- Session 114 closed S-PROTO-post-connect-dashboard-canvas-port:
+  PR #221 open at tip 24dbd53 (after PR-review fixes + scope
+  add-on pre-existing-Lint cleanup).
+- If continuing P1 (close PR #221): work proceeds either on the
+  branch claude/S-PROTO-post-connect-dashboard-canvas-port (if
+  the PR is still open) or off clean main (if user merged before
+  kickoff).
+- If switching to P2-6: harness-suffixed branch off clean main.
+- If the harness landed you on a different base, follow
+  CLAUDE.md §"Branch-resume check": git fetch / git checkout -B.
 
 Read at session start (Tier 2 + Tier 3, in order):
 1. docs/SESSION-CONTEXT.md (this file).
-2. docs/HANDOFF-SESSION-112.md.
-3. For marketing-landing PR review/merge: the slice's 4 docs at
-   docs/slices/S-PROTO-marketing-landing-canvas-port/.
+2. docs/HANDOFF-SESSION-114.md.
+3. For P1 (close PR #221): check PR status via
+   mcp__github__pull_request_read (get_check_runs +
+   get_review_comments + get_comments).
 
 Pre-priority verifications (run BEFORE treating any priority as
 authorized, per CLAUDE.md §"Planning conduct"):
 
-For P1 (marketing-landing preview-deploy + PR + merge):
-- Confirm session-112 branch tip ce0f246 still resolves
-  (git fetch origin claude/session-112-kickoff-gpWhH).
-- If user has preview-walked, fill out 6-dim rubric table in
-  verification.md, run `npm test tests/unit/proto-marketing-landing/`,
-  open PR if green.
+For P1 (close PR #221):
+- Confirm PR #221 still open + tip 24dbd53.
+- Confirm CI checks green (Lint + Fitness functions + spec-
+  citation-quote-check + auto-review aggregate).
+- Confirm whether user has walked the preview yet.
+- If preview-walk done + variant picked + reviewer ok: prune the
+  loser variant + merge.
+- If preview-walk pending: nudge user.
 
-For P2 (mobile responsive pass):
-- Read canvas's only @media block (prefers-reduced-motion at L680);
-  no responsive breakpoints in canvas. Mobile is add-work.
-- Answer the registry's open question
-  (Mobile-first vs desktop-first authoring order?) explicitly with
-  user before scoping.
+For P2 (mobile responsive marketing-landing):
+- Read canvas's only @media block (prefers-reduced-motion at
+  L680); no responsive breakpoints in canvas. Mobile is add-work.
+- Answer the registry's open question (Mobile-first vs desktop-
+  first authoring order?) explicitly with user before scoping.
 
-For P3 (Welcome Tour):
-- ls docs/design-source/welcome-tour/decoded/ to check decoded sibling
-  exists (CLAUDE.md §"Planning conduct" §"Pre-priority canvas-fidelity").
-- If not, run scripts/decode-bundler-canvas.sh first.
+For P3 (promote shells to full canvases):
+- Confirm shell route shape via cat src/app/dev/proto/{how-it-
+  works,pricing,faq-trust}/page.tsx (placeholder pattern).
+- Confirm each canvas exists. Decode if bundled-form.
 
-Confirm priority with the user. Recommended: P1 (close the loop on
-session 112's slice). P3 (Welcome Tour) is the natural next prototype
-surface.
+Confirm priority with the user. Recommended: P1 (close PR #221 —
+merge first, then choose next surface).
 ```
 
 ## Product positioning (preserve across sessions)
@@ -132,34 +150,41 @@ Decouple is the **complete settlement workspace for separating couples**. NOT a 
 
 ## Stack
 
-Next.js 14 (app router) + TypeScript · Tailwind v4 via CSS variables · S-F1 token system at `src/styles/tokens.ts` (76 tokens) · Tink for bank connect · Anthropic SDK for AI extraction · Vercel previews per branch, production at `construct-dev.vercel.app`.
+Next.js 16 (app router) + TypeScript · Tailwind v4 via CSS variables · S-F1 token system at `src/styles/tokens.ts` (76 tokens) · Tink for bank connect · Anthropic SDK for AI extraction · Vercel previews per branch, production at `construct-dev.vercel.app` · React 19.2.4 (eslint-plugin-react-hooks 5+ rules `react-hooks/static-components` + `react-hooks/set-state-in-effect` strict as of session 114).
 
-Prototype on main now spans:
-- **Pre-signup-interview prototype:** 12 screens (O1-O8 + Q-bridge + O6.5 + O6.6 + O6.7) with shared chassis + 5 Help Rail variants. All Phase 1 a11y fixes (F-A11Y-01..18) shipped via session 111.
-- **Marketing landing prototype:** 8-section single-page scroll at `/dev/proto/marketing-landing` (shipped session 112 on `claude/session-112-kickoff-gpWhH`, unmerged at session end).
+Prototype on main now spans (post-session-114 close-out, pending PR #221 merge):
+- **Pre-signup-interview prototype** — 12 screens with shared chassis + 5 Help Rail variants.
+- **Marketing landing prototype** — 8-section single-page scroll at `/dev/proto/marketing-landing`.
+- **Welcome tour prototype** — canvas-as-source port at `/dev/proto/welcome-tour`.
+- **Pre-auth-public route shells** — `/how-it-works` · `/pricing` · `/faq-trust` placeholder routes.
+- **Signed-in shared chrome** — `src/components/layout/signed-in-header.tsx` (session 113).
+- **Post-connect dashboard prototype** — `src/app/dev/proto/post-connect-dashboard/page.tsx` with `?variant=conservative|expressive` query routing (session 114, pending merge via PR #221).
 
 ## Branch
 
-Session 112 work lives on `claude/session-112-kickoff-gpWhH` (1 commit ahead of `origin/main e9e1208`; not yet PR'd).
+Session 114 work lives on `claude/S-PROTO-post-connect-dashboard-canvas-port` (7 commits ahead of `origin/main 34f87d7` plus the session-114 wrap commit; PR #221 open). Slice closed; awaiting merge.
 
-Session 113 branch: harness-suffixed off clean main (post P1 merge), OR scope-named sub-branch.
+Session 115 branch: continue on the same branch for P1 (until PR merges); harness-suffixed off clean main for P2-6.
 
 ## Negative constraints (preserve)
 
-#1-#41 from prior sessions. **No new numbered constraints surfaced session 112.** Thirty-nine scoping-discipline observations on recurrence-watch (3 new session 112 — hook line-count attribution on agent files; `npx vitest` blocked without `npm install`; agent batch-end-report 529 failure). Wrap-protocol skipping is **fourth-session-observed**, promotion-eligible if session 113+ confirms a fifth.
+#1-#41 from prior sessions. **No new numbered constraints surfaced session 114.** Forty-seven scoping-discipline observations on recurrence-watch (5 new session 114 — branch-checkout line-count inflation · AC-write-before-canvas-read · partial-rename without replace_all · `npm ci` works in sandbox · subscription-onboarding split focus). Wrap-protocol skipping is **sixth-session-eligible** session 115 if main is clean at turn 0.
 
-**Active pre-existing CI failures (carry forward):**
+**Active pre-existing CI status (post-session-114 cleanup):**
 
-- 16 pre-existing ESLint warnings in O1.tsx / O2.tsx / O3.tsx / O8.tsx / o7.ts / o8.ts (unused-vars). All pre-existing; not regressions. Unchanged session 112.
+- 50 ESLint warnings repo-wide (all pre-existing baseline; non-blocking — CI tolerates warnings, only errors fail).
+- 0 ESLint errors (cleaned session 114 via scope add-on).
 - `Footer.module.css:33-36` `.captionDisabled` uses MUTE — adjacent observation carried forward to the deferred holistic a11y pass.
 
 ## Scope ceiling
 
-Session 113 is most likely P1 (close session-112 loop) or P3 (Welcome Tour) — both bounded. P2 (mobile responsive) is also bounded but harder if the canvas has no responsive scaffolding. Out of scope unless explicitly added: post-signup work · authenticated-screens · Decouple.zip unpacking · Mobile Screens v2.
+Session 115 is most likely P1 (close PR #221) — small + bounded (preview walk + variant pick + merge). Out of scope unless explicitly added: post-signup work · authenticated-screens beyond dashboard · Decouple.zip unpacking · Mobile Screens v2.
 
 ## Current prototype URLs
 
-- Production landing: `https://construct-dev.vercel.app/dev/proto/marketing-landing` (after main-merge of session-112 slice)
+- Marketing landing: `https://construct-dev.vercel.app/dev/proto/marketing-landing`
+- Welcome tour: `https://construct-dev.vercel.app/dev/proto/welcome-tour`
+- Pre-auth-public shells: `/dev/proto/how-it-works` · `/dev/proto/pricing` · `/dev/proto/faq-trust`
 - Pre-signup interview: `https://construct-dev.vercel.app/dev/proto/pre-signup-interview`
+- **Post-connect dashboard:** preview URL on PR #221 (surfaced as Vercel comment); production `/dev/proto/post-connect-dashboard?variant=conservative|expressive` post-merge.
 - Per-PR preview: surfaced as Vercel comment on each PR.
-- Variant toggle for Help Rails: production + local only at `/dev/control`; on previews use `?variant.helpRail=v1|v2|v3|v4|v5`.
