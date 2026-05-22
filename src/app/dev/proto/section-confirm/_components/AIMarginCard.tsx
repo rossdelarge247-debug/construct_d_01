@@ -1,8 +1,22 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { tokens } from '@/styles/tokens';
 import { AI_PURPLE_DEEP, AI_PURPLE_EDGE, AI_PURPLE_TINT, AIBadge } from './SparkGlyph';
+
+function useReducedMotion(): boolean {
+  const [reduced, setReduced] = useState(false);
+  useEffect(() => {
+    if (typeof window === 'undefined' || typeof window.matchMedia !== 'function') return;
+    const mq = window.matchMedia('(prefers-reduced-motion: reduce)');
+    const update = (matches: boolean) => setReduced(matches);
+    update(mq.matches);
+    const onChange = (e: MediaQueryListEvent) => update(e.matches);
+    mq.addEventListener('change', onChange);
+    return () => mq.removeEventListener('change', onChange);
+  }, []);
+  return reduced;
+}
 
 type Severity = 'info' | 'notice' | 'warn';
 
@@ -36,6 +50,7 @@ export function AIMarginCard({
   defaultOpenReasoning?: boolean;
 }) {
   const [openReasoning, setOpenReasoning] = useState(defaultOpenReasoning);
+  const reducedMotion = useReducedMotion();
   const sev = SEV[severity];
   const kindLabel = KIND_MAP[kind] ?? kind;
   const hasReasoning = Boolean(body || citation);
@@ -141,7 +156,13 @@ export function AIMarginCard({
             >
               {openReasoning ? 'Hide reasoning' : 'Show reasoning'}
             </span>
-            <span style={{ fontSize: 9, transform: openReasoning ? 'rotate(180deg)' : 'none', transition: 'transform 180ms' }}>
+            <span
+              style={{
+                fontSize: 9,
+                transform: openReasoning ? 'rotate(180deg)' : 'none',
+                transition: reducedMotion ? 'none' : 'transform 180ms',
+              }}
+            >
               ▾
             </span>
           </button>

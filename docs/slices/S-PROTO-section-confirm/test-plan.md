@@ -66,9 +66,15 @@ This slice ports canvas content to React + extracts shared components. The surfa
 
 ## Test-pain audit
 
-Spec 72d §3 verbatim: *"If any unit test in a slice requires more than 2 mock setups for collaborators, step back and reconsider seams before continuing implementation."*
+Per spec 72d §3:
 
-For `category: prototype` slices the threshold raises to `>5` per spec 76 §3. All planned tests are static-render or local-state — zero mocks needed. Threshold not approached.
+> *"If any unit test in this slice requires more than 2 mock setups for collaborators, step back and reconsider seams before continuing implementation."*
+
+Per spec 76 §3 (L51 table row):
+
+> *">5 mocks triggers step-back"*
+
+For `category: prototype` slices the threshold raises per the row above. All planned tests are static-render or local-state — zero mocks needed. Threshold not approached.
 
 ## Run
 

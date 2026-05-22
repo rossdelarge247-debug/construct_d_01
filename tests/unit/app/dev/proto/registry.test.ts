@@ -109,7 +109,7 @@ describe('registry data', () => {
     };
 
     for (const [id, exp] of Object.entries(expected)) {
-      it(`'${id}' carries status=${exp.status}, lastTouched.session=117, links.prototype set, canvas link retained`, () => {
+      it(`'${id}' carries status=${exp.status}, refreshed lastTouched + links.prototype, canvas link retained`, () => {
         const row = registry.find((r) => r.id === id);
         expect(row, `row id=${id} missing`).toBeDefined();
         expect(row!.status).toBe(exp.status);

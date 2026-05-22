@@ -71,7 +71,7 @@ ESLint clean on new code (`npx eslint src/app/dev/proto/section-confirm/ tests/u
 - `/dev/proto/section-confirm/categorise` (8 assertions)
 - `/dev/proto/section-confirm/confirm-recurring` (6 assertions)
 
-Per spec 72a 6-dimension rubric, recorded post-merge:
+Six dimensions per `docs/workspace-spec/72a-preview-deploy-rubric.md` §"The six dimensions" — recorded post-merge:
 
 | Dimension | Status | Evidence |
 |---|---|---|

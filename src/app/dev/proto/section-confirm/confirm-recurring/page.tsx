@@ -9,7 +9,7 @@ import { TxnRow } from '../_components/TxnRow';
 
 export default function ConfirmRecurringPage() {
   return (
-    <div
+    <main
       style={{
         height: '100vh',
         background: tokens.color.surface.page,
@@ -191,7 +191,7 @@ export default function ConfirmRecurringPage() {
           Add to expenses
         </button>
       </div>
-    </div>
+    </main>
   );
 }
 

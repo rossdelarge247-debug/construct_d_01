@@ -119,4 +119,14 @@ The 4 remaining `bank-rec-*` rows (L57-60: ManualEntry / Duplicate / Split / Bal
 
 - Slice acceptance.md size: ≤300L target per CLAUDE.md §"Adversarial review gate" — this slice fits a single 3-dimension review spawn (security · correctness · style).
 - The `per-section-confirm` registry row's stated open question conflated two surfaces (the 8 ES2 sections + the confirm-or-correct interaction). The canvas survey clarified the split: this slice ports the confirm-pattern only; the 8-sections × state-icons surface belongs to a future `your-picture-private` slice.
-- Test-pain audit. Spec 72d §3 verbatim: *"If any unit test in a slice requires more than 2 mock setups for collaborators, step back and reconsider seams before continuing implementation."* For `category: prototype` the threshold raises to `>5` per spec 76 §3. Smoke tests for the form routes need zero mocks (canvas is static React state). RadioRow stateful test needs zero mocks. Threshold not approached.
+### Test-pain audit
+
+Per spec 72d §3:
+
+> *"If any unit test in this slice requires more than 2 mock setups for collaborators, step back and reconsider seams before continuing implementation."*
+
+Per spec 76 §3 (L51 table row):
+
+> *">5 mocks triggers step-back"*
+
+For `category: prototype`. Smoke tests for the form routes need zero mocks (canvas is static React state). RadioRow stateful test needs zero mocks. Threshold not approached.

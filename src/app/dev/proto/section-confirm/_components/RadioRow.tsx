@@ -24,6 +24,7 @@ export function RadioRow({
       onClick={onClick}
       style={{
         width: '100%',
+        minHeight: 44,
         textAlign: 'left',
         padding: '11px 12px',
         borderRadius: 10,

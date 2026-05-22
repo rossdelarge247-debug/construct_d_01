@@ -42,7 +42,7 @@ export default function CategorisePage() {
   const [choice, setChoice] = useState<CategoriseChoice>('joint_life');
 
   return (
-    <div
+    <main
       style={{
         height: '100vh',
         background: tokens.color.surface.page,
@@ -192,6 +192,6 @@ export default function CategorisePage() {
           Save & continue →
         </button>
       </div>
-    </div>
+    </main>
   );
 }
