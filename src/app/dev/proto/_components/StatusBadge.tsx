@@ -4,6 +4,7 @@ const STATUS_DISPLAY: Record<Status, { emoji: string; label: string }> = {
   'not-started': { emoji: '🔴', label: 'not started' },
   'spec-only': { emoji: '🟠', label: 'spec only' },
   'canvas-drafted': { emoji: '🟡', label: 'canvas drafted' },
+  'shell-built': { emoji: '🔵', label: 'shell built' },
   'prototype-built': { emoji: '🟢', label: 'prototype built' },
   shipped: { emoji: '✅', label: 'shipped' },
 };

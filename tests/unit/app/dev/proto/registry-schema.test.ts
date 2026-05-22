@@ -127,10 +127,20 @@ describe('registryRowSchema', () => {
       expect(() => sectionSchema.parse('not-a-section')).toThrow();
     });
 
-    it('statusSchema accepts all 5 values', () => {
-      for (const v of ['not-started', 'spec-only', 'canvas-drafted', 'prototype-built', 'shipped']) {
+    it('statusSchema accepts all 6 values', () => {
+      for (const v of ['not-started', 'spec-only', 'canvas-drafted', 'shell-built', 'prototype-built', 'shipped']) {
         expect(() => statusSchema.parse(v)).not.toThrow();
       }
+    });
+
+    it("statusSchema orders 'shell-built' between 'canvas-drafted' and 'prototype-built'", () => {
+      const options = statusSchema.options;
+      const canvasIdx = options.indexOf('canvas-drafted');
+      const shellIdx = options.indexOf('shell-built');
+      const protoIdx = options.indexOf('prototype-built');
+      expect(canvasIdx).toBeGreaterThanOrEqual(0);
+      expect(shellIdx).toBe(canvasIdx + 1);
+      expect(protoIdx).toBe(shellIdx + 1);
     });
 
     it('confidenceSchema accepts all 4 values', () => {
