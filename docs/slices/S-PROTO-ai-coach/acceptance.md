@@ -86,4 +86,4 @@ DoD-6: this slice's open 68d/68f decisions touched are the registry L74 open Q. 
 
 ## §Status
 
-Drafted session 118 turn 2 after spec-only-not-canvas-port shape confirmed via decoded canvas survey; pending impl + tests + verification.md fills.
+Drafted session 118 turn 2 after spec-only-not-canvas-port shape confirmed via decoded canvas survey. Impl + tests + verification.md fills shipped session 118; commits `36e37e6` (slice docs) + `6da61b5` (impl + tests + registry) on branch `claude/exciting-clarke-PjeRw`. 49/49 ai-coach + registry tests · 896/896 full unit suite · typecheck + ESLint clean. PR not opened in-session.
