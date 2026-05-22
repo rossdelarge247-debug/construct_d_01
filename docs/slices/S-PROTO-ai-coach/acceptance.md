@@ -32,9 +32,11 @@ Verbatim spec quotes used in AC framing below:
 
 ### AC-1 · Route + 3-tab right rail shell (S-A1)
 
-Route `/dev/proto/ai-coach` mounts a standalone preview of the Settle-phase right rail. Rail header carries three tab affordances: `Comments` · `AI coach` · `Activity`. AI coach is the default-active tab on mount per S-A1 verbatim: *"AI coach default in Settle phase."*. Other two tabs are click-switchable to placeholder panels (single-line stub copy each; full Comments/Activity surfaces deferred). The rail renders at the right-hand third of the viewport on desktop (≥1024px); single-column stack on mobile (<768px).
+Route `/dev/proto/ai-coach` mounts a standalone preview of the Settle-phase right rail as a self-contained component. Rail header carries three tab affordances: `Comments` · `AI coach` · `Activity`. AI coach is the default-active tab on mount per S-A1 verbatim: *"AI coach default in Settle phase."*. Other two tabs are click-switchable to placeholder panels (single-line stub copy each; full Comments/Activity surfaces deferred). Standalone-preview layout: the rail renders centred at a representative max-width (≈720px) so reviewers can see the pattern in isolation; right-third positioning within a viewport is a proposal-builder host responsibility (deferred to `S-PROTO-proposal-builder`, registry L73, `spec-only`).
 
-**Done when:** Vitest assertion on rail render shows 3 tab buttons in DOM order [Comments, AI coach, Activity] with `aria-selected="true"` on AI coach. Switching to Comments or Activity hides the AI coach panel and renders the stub.
+Tab/panel relationship follows the ARIA APG tabs pattern: each tab carries a stable `id`, `aria-controls` pointing at the panel id, and `tabindex` reflecting roving focus (active=0, inactive=-1); the panel carries `aria-labelledby` pointing at the active tab id. Arrow keys (ArrowLeft / ArrowRight) move focus along the tablist and activate the new tab; Tab exits to the panel.
+
+**Done when:** Vitest assertion on rail render shows 3 tab buttons in DOM order [Comments, AI coach, Activity] with `aria-selected="true"` on AI coach + `id="tab-{slug}"` + `aria-controls="panel-{slug}"`. Panel carries matching `id="panel-{active}"` + `aria-labelledby="tab-{active}"`. Switching to Comments or Activity hides the AI coach panel and renders the stub.
 
 ### AC-2 · Four coach card variants (S-A2)
 

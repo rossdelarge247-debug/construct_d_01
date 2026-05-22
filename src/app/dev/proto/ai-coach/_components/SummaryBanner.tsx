@@ -1,6 +1,7 @@
 'use client';
 
 import { tokens } from '@/styles/tokens';
+import { FLAG_RED, NOTICE_AMBER } from './colors';
 
 interface Props {
   intro: string;
@@ -10,8 +11,6 @@ interface Props {
 
 const AI_VIOLET = tokens.color.accent.violet;
 const AI_TINT = '#F3EEFE';
-const FLAG_RED = tokens.color.danger;
-const NOTICE_AMBER = '#D97706';
 
 export function SummaryBanner({ intro, flagCount, noticeCount }: Props) {
   return (

@@ -56,7 +56,6 @@ describe('RightRail', () => {
   it('Comments stub renders default copy when no commentsStub prop is passed', () => {
     render(<RightRail aiCoachPanel={PANELS.aiCoachPanel} />);
     fireEvent.click(screen.getByRole('tab', { name: /Comments/ }));
-    // default stub copy lives in the component
     expect(screen.getByText(/Comments \(placeholder\)/i)).toBeTruthy();
   });
 });

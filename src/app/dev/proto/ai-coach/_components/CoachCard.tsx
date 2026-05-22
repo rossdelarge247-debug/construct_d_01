@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { tokens } from '@/styles/tokens';
+import { FLAG_RED, NOTICE_AMBER } from './colors';
 
 export type CardType = 'court-reasonableness' | 'fairness-check' | 'coaching' | 'on-this-comment';
 
@@ -18,8 +19,6 @@ interface Props {
   fallbacks?: Fallback[];
 }
 
-const FLAG_RED = '#DC2626';
-const NOTICE_AMBER = '#D97706';
 const POSITIVE_GREEN = '#16A34A';
 const THREAD_NEUTRAL = '#57534E';
 
@@ -32,7 +31,7 @@ const TYPE_STYLE: Record<CardType, { color: string; label: string; tint: string 
 
 export function CoachCard({ type, title, body, reasoning, fallbacks }: Props) {
   const [expanded, setExpanded] = useState(false);
-  const style = TYPE_STYLE[type];
+  const cardTheme = TYPE_STYLE[type];
 
   return (
     <article
@@ -40,7 +39,7 @@ export function CoachCard({ type, title, body, reasoning, fallbacks }: Props) {
       style={{
         background: '#FFFFFF',
         border: `1px solid ${tokens.color.border}`,
-        borderLeft: `3px solid ${style.color}`,
+        borderLeft: `3px solid ${cardTheme.color}`,
         borderRadius: tokens.radius.md,
         padding: '14px 16px',
         marginBottom: 12,
@@ -53,15 +52,15 @@ export function CoachCard({ type, title, body, reasoning, fallbacks }: Props) {
           fontSize: tokens.type['11'],
           fontWeight: tokens.weight.semibold,
           letterSpacing: '0.06em',
-          color: style.color,
+          color: cardTheme.color,
           marginBottom: 6,
-          background: style.tint,
+          background: cardTheme.tint,
           display: 'inline-block',
           padding: '2px 6px',
           borderRadius: tokens.radius.sm,
         }}
       >
-        {style.label}
+        {cardTheme.label}
       </div>
       <h3
         style={{
@@ -91,11 +90,12 @@ export function CoachCard({ type, title, body, reasoning, fallbacks }: Props) {
           marginTop: 10,
           background: 'transparent',
           border: 'none',
-          padding: 0,
+          padding: '10px 0',
+          minHeight: 44,
           fontSize: tokens.type['11'],
           fontWeight: tokens.weight.semibold,
           letterSpacing: '0.06em',
-          color: style.color,
+          color: cardTheme.color,
           cursor: 'pointer',
           textDecoration: 'underline',
           textUnderlineOffset: 2,
@@ -110,7 +110,7 @@ export function CoachCard({ type, title, body, reasoning, fallbacks }: Props) {
             fontSize: tokens.type['14-5'],
             lineHeight: 1.5,
             color: tokens.color.text.sub,
-            background: style.tint,
+            background: cardTheme.tint,
             padding: '10px 12px',
             borderRadius: tokens.radius.sm,
           }}
@@ -152,10 +152,11 @@ export function CoachCard({ type, title, body, reasoning, fallbacks }: Props) {
                   type="button"
                   style={{
                     background: '#FFFFFF',
-                    border: `1px solid ${style.color}`,
-                    color: style.color,
+                    border: `1px solid ${cardTheme.color}`,
+                    color: cardTheme.color,
                     borderRadius: tokens.radius.sm,
-                    padding: '4px 10px',
+                    padding: '12px 10px',
+                    minHeight: 44,
                     fontSize: tokens.type['11'],
                     fontWeight: tokens.weight.semibold,
                     letterSpacing: '0.04em',

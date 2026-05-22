@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, type ReactNode } from 'react';
+import { useRef, useState, type KeyboardEvent, type ReactNode } from 'react';
 import { tokens } from '@/styles/tokens';
 
 type Tab = 'comments' | 'ai-coach' | 'activity';
@@ -38,6 +38,17 @@ function StubPanel({ children }: { children: ReactNode }) {
 
 export function RightRail({ aiCoachPanel, commentsStub, activityStub }: Props) {
   const [active, setActive] = useState<Tab>('ai-coach');
+  const tabRefs = useRef<Array<HTMLButtonElement | null>>([]);
+
+  function handleKeyDown(event: KeyboardEvent<HTMLButtonElement>, currentIndex: number) {
+    if (event.key !== 'ArrowRight' && event.key !== 'ArrowLeft') return;
+    event.preventDefault();
+    const delta = event.key === 'ArrowRight' ? 1 : -1;
+    const nextIndex = (currentIndex + delta + TABS.length) % TABS.length;
+    const nextTab = TABS[nextIndex];
+    setActive(nextTab.id);
+    tabRefs.current[nextIndex]?.focus();
+  }
 
   return (
     <aside
@@ -60,19 +71,27 @@ export function RightRail({ aiCoachPanel, commentsStub, activityStub }: Props) {
           marginBottom: 12,
         }}
       >
-        {TABS.map((tab) => {
+        {TABS.map((tab, index) => {
           const isActive = active === tab.id;
           return (
             <button
               key={tab.id}
+              ref={(el) => {
+                tabRefs.current[index] = el;
+              }}
+              id={`tab-${tab.id}`}
               type="button"
               role="tab"
               aria-selected={isActive}
+              aria-controls={`panel-${tab.id}`}
+              tabIndex={isActive ? 0 : -1}
               onClick={() => setActive(tab.id)}
+              onKeyDown={(event) => handleKeyDown(event, index)}
               style={{
                 background: 'transparent',
                 border: 'none',
                 padding: '8px 12px',
+                minHeight: 44,
                 fontSize: tokens.type['14-5'],
                 fontWeight: isActive ? tokens.weight.semibold : tokens.weight.medium,
                 color: isActive ? AI_VIOLET : tokens.color.text.sub,
@@ -87,7 +106,12 @@ export function RightRail({ aiCoachPanel, commentsStub, activityStub }: Props) {
           );
         })}
       </div>
-      <div role="tabpanel">
+      <div
+        role="tabpanel"
+        id={`panel-${active}`}
+        aria-labelledby={`tab-${active}`}
+        tabIndex={0}
+      >
         {active === 'ai-coach' ? aiCoachPanel : null}
         {active === 'comments' ? (commentsStub ?? <StubPanel>Comments (placeholder) — threading + reply UX deferred.</StubPanel>) : null}
         {active === 'activity' ? (activityStub ?? <StubPanel>Activity (placeholder) — feed + filters deferred.</StubPanel>) : null}
