@@ -37,6 +37,26 @@ The post-audit 3-phase plan, restored to `SESSION-CONTEXT.md` via commit `780fa6
 
 Sessions 112-114 ran off-sequence — marketing-landing, welcome-tour, and post-connect-dashboard canvas-ports shipped against §1/§3/§5 surfaces while the sequence's §6 (Build) `S-PROTO-section-confirm` remained unstarted. Session 115 restores discipline via `S-PROTO-journey-restore` (this slice). The next planned slice per the sequence is `S-PROTO-section-confirm` (§6 Build phase confirm pattern).
 
+## Apply your own deltas first
+
+Before committing wrap docs at session end, re-read this session's diff to `CLAUDE.md` and `docs/workspace-spec/**.md`. Audit `SESSION-CONTEXT.md` + `HANDOFF-N.md` against every rule added or modified this session — rules you just authored apply retroactively to your own wrap output. The discipline starts in the same PR that codifies it.
+
+**Failure mode this prevents:** a session adds a rule (e.g. a new flagging convention, a new checklist item, a new constraint), then later in the same session writes wrap docs that violate the rule it just authored. The recall-failure root cause: rules are typically added mid-session; wrap docs are written under wrap-time load when the new rule is no longer top-of-mind. The result is a meta-failure where the very PR that codifies the discipline immediately violates it.
+
+**Mechanism (T1 + T2; current):**
+- T1 — this CLAUDE.md rule; recall-prompt at the moment of risk; lives next to the wrap protocol.
+- T2 — `.claude/hooks/wrap-check.sh` self-delta-audit step; `/wrap` checklist surfaces a `[ ] Self-delta audit` item when `git diff origin/main...HEAD -- CLAUDE.md docs/workspace-spec/` is non-empty.
+
+**Escalation triggers:** self-violations track via SESSION-CONTEXT.md recurrence-watch (existing mechanism). On **second recurrence after this rule lands**, escalate to one of:
+- **T3** — author-time hook for the specific recurring rule (mirrors `.claude/hooks/journey-declared.sh` pattern — PostToolUse:Write|Edit on the relevant doc; advisory when rule-content marker absent). Use when failure is concentrated to one specific rule.
+- **T4** — adversarial review subagent pass on wrap docs against current CLAUDE.md before commit (one-shot `claude -p` invocation; finds any rule the wrap docs violate). Use when failure is diffuse across multiple different rules.
+
+Pick T3 vs T4 based on the recurrence pattern; record the choice in the session's HANDOFF + amend this section to drop the "current" / "escalation triggers" framing once stabilised.
+
+### §Status
+
+T1 + T2 shipped after a self-violation surfaced where a §"Phase 3 sequence" off-sequence-flagging rule was codified and then immediately violated in the same session's `SESSION-CONTEXT.md` priorities table; meta-failure caught by user post-wrap. Recurrence count under this rule: 0 (rule just landed). Promotion targets per existing recurrence-watch mechanism.
+
 ## Session startup (do this FIRST)
 
 1. **Verify your working branch.** `.claude/hooks/session-start.sh` surfaces live branch state at turn 0 (current branch, HEAD vs origin/main, ahead/behind, tree state). Canonical branch name is in `docs/SESSION-CONTEXT.md` or the task description. If the harness landed you on a different base, resync: `git fetch origin <branch>` → `git checkout -B <branch> origin/<branch>`.
