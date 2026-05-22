@@ -35,7 +35,7 @@ The post-audit 3-phase plan, restored to `SESSION-CONTEXT.md` via commit `780fa6
 
 ### §Status
 
-Sessions 112-114 ran off-sequence — marketing-landing, welcome-tour, and post-connect-dashboard canvas-ports shipped against §1/§3/§5 surfaces while the sequence's §6 (Build) `S-PROTO-section-confirm` remained unstarted. Session 115 restores discipline via `S-PROTO-journey-restore` (this slice). The next planned slice per the sequence is `S-PROTO-section-confirm` (§6 Build phase confirm pattern).
+Sessions 112-114 ran off-sequence — marketing-landing, welcome-tour, and post-connect-dashboard canvas-ports shipped against §1/§3/§5 surfaces while the sequence's §6 (Build) `S-PROTO-section-confirm` remained unstarted. Session 115 restored discipline via `S-PROTO-journey-restore`. Session 117 shipped `S-PROTO-section-confirm` (§6 Build, P0). Session 118 shipped `S-PROTO-ai-coach` (§8 Settle, P1). The next planned slice per the sequence is `S-PROTO-share-flow` (§7 Reconcile multi-actor, P2+) — the last rung on the HANDOFF-74 L80-82 ladder; post-share-flow, the explicit Phase 3 sequence is exhausted and future work shifts to off-sequence priorities or Phase C engineering.
 
 ## Apply your own deltas first
 
