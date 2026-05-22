@@ -80,6 +80,17 @@ else
   printf -- '- [ ] docs/SESSION-CONTEXT.md missing\n'
 fi
 
+# --- Step 2b: Self-delta audit (CLAUDE.md §"Apply your own deltas first") ---
+# Rules added or modified this session apply retroactively to the wrap docs.
+# Checks both committed (origin/main...HEAD) and uncommitted (working tree vs HEAD) changes
+# to CLAUDE.md + docs/workspace-spec/ — the rule-bearing surfaces.
+DELTA_DIFF=$( { git diff origin/main...HEAD -- CLAUDE.md 'docs/workspace-spec/' 2>/dev/null; git diff HEAD -- CLAUDE.md 'docs/workspace-spec/' 2>/dev/null; } | head -1 )
+if [ -n "$DELTA_DIFF" ]; then
+  printf -- '- [ ] **Self-delta audit** — `CLAUDE.md` or `docs/workspace-spec/` changed this session (committed and/or uncommitted). Re-read those diffs (`git diff origin/main...HEAD -- CLAUDE.md docs/workspace-spec/` AND `git diff HEAD -- CLAUDE.md docs/workspace-spec/`) and audit `SESSION-CONTEXT.md` + `HANDOFF-N.md` against every new/modified rule. Per CLAUDE.md §"Apply your own deltas first".\n'
+else
+  printf -- '- [x] Self-delta audit — no rule-bearing-doc changes this session (CLAUDE.md / docs/workspace-spec/); audit not required.\n'
+fi
+
 # --- Step 6: PR status ---
 printf -- '- PR status for branch: check via GitHub MCP (`mcp__github__list_pull_requests` head=%s) or gh CLI. Hook cannot call MCP tools directly.\n' "$BRANCH"
 
