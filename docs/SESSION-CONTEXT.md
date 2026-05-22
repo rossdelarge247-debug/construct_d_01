@@ -34,18 +34,27 @@ Plus slice docs (security · test-plan · verification) at `docs/slices/S-PROTO-
 
 ### Session 116 priorities table — user picks scope
 
-Recommended P1: `S-PROTO-section-confirm` (back on Phase 3 sequence). Other prototype work remains available.
+Recommended P1: `S-PROTO-section-confirm` (back on Phase 3 sequence). Per CLAUDE.md §"Phase 3 sequence" §Status (shipped AC-6 this session), the on-sequence ladder per HANDOFF-74 L80-82 verbatim is **P1: section-confirm (Build) · P2: ai-coach (Settle) · P3: share-flow (Reconcile multi-actor)**. Off-sequence work is permitted but must be flagged with `OFF-SEQUENCE because X` per the same §Status rule.
 
-| # | Priority | Scope | Effort | Blocked? |
+**On-sequence (HANDOFF-74 L80-82 verbatim):**
+
+| # | Priority | Phase | Scope | Effort | Blocked? |
+|---|---|---|---|---|---|
+| 1 | **`S-PROTO-section-confirm`** | §6 Build | Build phase confirm pattern — next slice in Phase 3 sequence. Registry row L54 `per-section-confirm` is `spec-only` / `confidence: low` / `tags: high-uncertainty`. Open Q on row: "8 sections × multi-state — canvas-first vs prototype?" — resolve with user before AC-freeze. | Medium-Large | No |
+| 2 | **`S-PROTO-ai-coach`** | §8 Settle | Settle phase AI coach surface. Registry row L74 `ai-coach` is `spec-only` / `confidence: low` / `tags: ai-dependent, high-uncertainty`. Open Q: "Invocation pattern + conversational scope?" Likely needs section-confirm shape decisions to anchor. | Large | Soft-blocked on section-confirm shape |
+| 3 | **`S-PROTO-share-flow`** | §7 Reconcile | Multi-actor share flow (Sarah/Mark joint). Registry row L69 is `spec-only` / `confidence: low` / `tags: multi-actor, high-uncertainty`. Open Q: "Invite mechanics + real-time-vs-async?" | Large | Soft-blocked on Build state landing |
+
+**Off-sequence (each carries `OFF-SEQUENCE because X` rationale per CLAUDE.md §"Phase 3 sequence" rule):**
+
+| # | Priority | OFF-SEQUENCE rationale | Scope | Effort |
 |---|---|---|---|---|
-| 1 | **`S-PROTO-section-confirm`** | §6 Build phase confirm pattern — the next slice in the Phase 3 sequence (HANDOFF-74 L80-82 verbatim). 4-step loop applied to Build phase | Medium-Large | No |
-| 2 | **Mobile responsive marketing-landing** | 6-breakpoint responsive pass on the shipped port. Answers registry's `Mobile-first vs desktop-first?` open Q. `S-PROTO-marketing-landing-responsive-mobile`. | Medium | No |
-| 3 | **Promote pre-auth-public shells to full canvases** | `/how-it-works` · `/pricing` · `/faq-trust` now `shell-built` per AC-1. Replace each with full canvas-as-source port. | Small-Medium per route | No |
-| 4 | **Sign-up canvas port** | The shell stub from AC-3 has registry row `shell-built`. Port the canvas at `docs/design-source/mobile-screens-v2/` per spec 65a. Address persona's round-1 copy-clarity finding here. | Medium | No |
-| 5 | **Welcome-tour migrate to SignedInHeader** | Replace bespoke TopBar with `SignedInHeader mode='tour'`. `S-INFRA-welcome-tour-signedinheader-migrate`. | Small | No |
-| 6 | **A11y holistic pass (deferred from sessions 111-115)** | System-wide responsive a11y + NVDA/VoiceOver + roving-tabindex + Footer MUTE + PhaseStrip opacity-contrast | Medium-Large | Soft-blocked on prototype-phase completion |
-| 7 | **`slice-verification` LABELS injection fix** | Same script-injection class auto-review flagged on this slice's new job, but in the existing job. Surgical infra slice | Tiny | No |
-| 8 | **User-directed fresh work** | Post-signup, authenticated screens beyond dashboard, Decouple.zip unpacking, Mobile Screens v2, etc. | Varies | n/a |
+| 4 | **Mobile responsive marketing-landing** | OFF-SEQUENCE because opportunistic — answers registry row L19 open Q `Mobile-first vs desktop-first authoring order?` on the shipped marketing port; doesn't progress Build/Settle/Reconcile spine | 6-breakpoint responsive pass on the shipped port; ships as `S-PROTO-marketing-landing-responsive-mobile` | Medium |
+| 5 | **Promote pre-auth-public shells to full canvases** | OFF-SEQUENCE because canvas-port readiness — the 3 routes now sit `shell-built` per AC-1 with canvases extant at `docs/design-source/mobile-screens-v2/`; advances marketing-launch readiness but not Build/Settle/Reconcile spine | `/how-it-works` · `/pricing` · `/faq-trust` shells → canvas-as-source ports | Small-Medium per route |
+| 6 | **Sign-up canvas port** | OFF-SEQUENCE because dependency-of-AC-3 — the shell stub I just shipped points here; addresses prototype-readiness persona's round-1 copy-clarity finding (warm post-O8 holding message vs current dev-path metadata) | Port canvas at `docs/design-source/mobile-screens-v2/` per spec 65a; replace body copy per persona suggestion | Medium |
+| 7 | **Welcome-tour migrate to SignedInHeader** | OFF-SEQUENCE because scope-add-on — surfaced in session 114 PR #221 as soft-blocked while dashboard validated `app` mode; now unblocked | Bespoke TopBar → `SignedInHeader mode='tour'`; `S-INFRA-welcome-tour-signedinheader-migrate` | Small |
+| 8 | **A11y holistic pass** | OFF-SEQUENCE because cross-cutting infrastructure — not surface-progression; deferred from sessions 111-115 with `Soft-blocked on prototype-phase completion` rationale; the deferral itself is the off-sequence justification | System-wide responsive a11y + NVDA/VoiceOver + roving-tabindex + Footer MUTE + PhaseStrip opacity-contrast | Medium-Large |
+| 9 | **`slice-verification` LABELS injection fix** | OFF-SEQUENCE because CI-infrastructure carry-over — same script-injection class auto-review flagged on this slice's new `registry-update-check` job, but in the pre-existing `slice-verification` job. Surgical infra fix | `.github/workflows/pr-dod.yml` `LABELS=...` → `env:` map | Tiny |
+| 10 | **User-directed fresh work** | OFF-SEQUENCE — explicitly user-discretionary | Post-signup · authenticated screens beyond dashboard · Decouple.zip unpacking · Mobile Screens v2 · etc. | Varies |
 
 ## Scoping-discipline observations carried as recurrence-watch
 
@@ -102,9 +111,14 @@ Turn-0 verification:
 - Session 116 closed S-PROTO-journey-restore: PR #222
   squash-merged to main as 3b30a06. All 6 ACs shipped.
 - Per CLAUDE.md §"Phase 3 sequence" §Status (added in AC-6
-  this session), next planned slice is S-PROTO-section-confirm
-  (§6 Build phase confirm pattern) — back on the Phase 3
-  sequence per HANDOFF-74 L80-82 verbatim.
+  this session), the on-sequence ladder per HANDOFF-74
+  L80-82 verbatim is:
+    P1 (on-sequence next):  S-PROTO-section-confirm (§6 Build)
+    P2 (on-sequence after): S-PROTO-ai-coach        (§8 Settle)
+    P3 (on-sequence after): S-PROTO-share-flow      (§7 Reconcile)
+  Any priority other than these three at session 117 start
+  must carry `OFF-SEQUENCE because X` rationale per the same
+  §Status rule.
 - Harness-suffixed branch off clean main is the expected
   starting state.
 

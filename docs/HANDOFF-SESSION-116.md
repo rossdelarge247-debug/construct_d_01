@@ -46,6 +46,7 @@ User said "merge" → squash-merged to main as `3b30a06`.
 - **Filename convention drift in AC text.** `acceptance.md` AC-5 named the spec file `journey-declared_spec.sh` (underscore). Repo convention is `.spec.sh` (dot — every other entry under `tests/shellspec/`). Caught at shellspec runtime (file pattern mismatch); renamed to `.spec.sh`. Worth a CLAUDE.md sweep at slice-scoping time: prefer naming-by-precedent over naming-from-memory.
 - **AC-3 had to deviate from "Next.js `Link`" literal text.** Footer's CTA is button-based; wrapping `<button>` in `<a>` (which `Link` does) produces invalid HTML. Used `router.push` instead — equivalent Next.js navigation primitive. Flagged in verification.md AC-3 §Impl note. Cost: minor narrative drag in verification.md. Avoidable if AC-3 had named "Next.js navigation" generically rather than the `Link` primitive specifically.
 - **Comment-review hook fired on multiple false positives** in this slice's docs/CLAUDE.md edits (emoji used for UI rendering not comments; "SESSION-74" used as a literal filename citation required by AC-6; "slice S-X" used as the literal placeholder in the convention example). Each is advisory-only so didn't gate, but the noise-to-signal felt high. Worth refining the hook's skip-list for §Visual-direction-style spec text or for filename-citation patterns. New observation, recurrence-watch.
+- **Self-violation of the discipline I just shipped (caught by user post-wrap).** AC-6 enshrined the rule "any off-sequence Phase 3 work must be flagged in `SESSION-CONTEXT.md`'s session priorities table with an explicit `OFF-SEQUENCE because X` note." My first wrap doc's priorities table (1) listed only `S-PROTO-section-confirm` as on-sequence — omitting `S-PROTO-ai-coach` (Settle, P2) and `S-PROTO-share-flow` (Reconcile, P3) which HANDOFF-74 L82 names verbatim — and (2) did NOT flag priorities #2-#8 as off-sequence despite all of them being off-sequence work. User caught it ("is the work flow we previously agreed being honoured in the list of upcoming priorities?"). Amended in same wrap PR before merge. Promotion target: the off-sequence-flag rule applies retroactively to MY OWN wrap docs, not just future sessions' kickoff briefs. The discipline is for the author writing the priorities, regardless of whether they're a fresh session brief or a wrap doc. New observation, recurrence-watch — first-session-observed, but the meta-failure mode (codifying a rule then immediately violating it in the same wrap) is severe enough to warrant promotion-watch flag.
 
 ## Key decisions made
 
@@ -71,19 +72,26 @@ User said "merge" → squash-merged to main as `3b30a06`.
 
 ## Next session priorities
 
-**Recommended P1: `S-PROTO-section-confirm` (§6 Build phase confirm pattern).** Back on Phase 3 sequence per the AC-6 anchor + HANDOFF-74 L80-82 verbatim. After three off-sequence sessions (112-114) and this session's restoration slice, the next surface per the original 4-slice plan.
+**Recommended P1: `S-PROTO-section-confirm` (§6 Build phase confirm pattern).** Back on Phase 3 sequence per the AC-6 anchor + HANDOFF-74 L80-82 verbatim. After three off-sequence sessions (112-114) and this session's restoration slice, the next on-sequence surface per the original plan.
 
-**Other priorities (carried + new):**
+**On-sequence (HANDOFF-74 L80-82 verbatim):**
 
-| # | Priority | Scope | Effort | Blocked? |
-|---|---|---|---|---|
-| 1 | **`S-PROTO-section-confirm`** | §6 Build phase confirm pattern — the next slice in the Phase 3 sequence (HANDOFF-74 L80-82 verbatim) | Medium-Large | No |
-| 2 | **Mobile responsive marketing-landing** | 6-breakpoint responsive pass on the shipped port. Answers registry's `Mobile-first vs desktop-first?` open Q | Medium | No |
-| 3 | **Promote pre-auth-public shells to full canvases** | `/how-it-works` · `/pricing` · `/faq-trust` are now `shell-built` per AC-1. Replace each with a full canvas-as-source port. | Small-Medium per route | No |
-| 4 | **Sign-up canvas port** | The shell stub from AC-3 has registry row `shell-built`. Port the canvas at `docs/design-source/mobile-screens-v2/` per spec 65a. Persona's round-1 copy-clarity finding ("warm holding message after Continue on O8") to be addressed here. | Medium | No |
-| 5 | **Welcome-tour migrate to SignedInHeader** | Replace bespoke TopBar with `SignedInHeader mode='tour'` | Small | No |
-| 6 | **A11y holistic pass (deferred from sessions 111-114)** | System-wide responsive a11y + NVDA/VoiceOver + roving-tabindex + Footer MUTE + PhaseStrip opacity-contrast | Medium-Large | Soft-blocked on prototype-phase completion |
-| 7 | **Pre-existing `slice-verification` job LABELS injection fix** | Same script-injection class the security persona flagged on this slice's new job, in the existing job. Out of scope this PR; surgical fix in next infra slice | Tiny | No |
+| # | Priority | Phase | Scope | Effort | Blocked? |
+|---|---|---|---|---|---|
+| 1 | **`S-PROTO-section-confirm`** | §6 Build | Build phase confirm pattern — next slice in Phase 3 sequence. Registry row L54 `per-section-confirm` is `spec-only` / `confidence: low` / `tags: high-uncertainty`. Open Q: "8 sections × multi-state — canvas-first vs prototype?" | Medium-Large | No |
+| 2 | **`S-PROTO-ai-coach`** | §8 Settle | Settle phase AI coach. Registry row L74 is `spec-only` / `tags: ai-dependent, high-uncertainty`. Open Q: "Invocation pattern + conversational scope?" | Large | Soft-blocked on section-confirm shape |
+| 3 | **`S-PROTO-share-flow`** | §7 Reconcile | Multi-actor share flow. Registry row L69 is `spec-only` / `tags: multi-actor, high-uncertainty`. Open Q: "Invite mechanics + real-time-vs-async?" | Large | Soft-blocked on Build state |
+
+**Off-sequence (each carries `OFF-SEQUENCE because X` rationale per CLAUDE.md §"Phase 3 sequence" rule):**
+
+| # | Priority | OFF-SEQUENCE rationale | Effort |
+|---|---|---|---|
+| 4 | **Mobile responsive marketing-landing** | OFF-SEQUENCE because opportunistic — answers registry row L19 open Q on the shipped marketing port | Medium |
+| 5 | **Promote pre-auth-public shells to full canvases** | OFF-SEQUENCE because canvas-port readiness — 3 routes now `shell-built` per AC-1 with canvases extant | Small-Medium per route |
+| 6 | **Sign-up canvas port** | OFF-SEQUENCE because dependency-of-AC-3 — addresses prototype-readiness persona's round-1 copy-clarity finding | Medium |
+| 7 | **Welcome-tour migrate to SignedInHeader** | OFF-SEQUENCE because scope-add-on — surfaced in PR #221 prior session | Small |
+| 8 | **A11y holistic pass (deferred from sessions 111-115)** | OFF-SEQUENCE because cross-cutting infrastructure — not surface-progression | Medium-Large |
+| 9 | **`slice-verification` LABELS injection fix** | OFF-SEQUENCE because CI-infrastructure carry-over from this slice's auto-review round 1 | Tiny |
 
 ## §Status
 
