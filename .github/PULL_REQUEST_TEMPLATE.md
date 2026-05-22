@@ -24,6 +24,7 @@
 - [ ] **Preview deploy verified in-browser** (UI only) — golden path + edge cases + `prefers-reduced-motion`
 - [ ] **No regression in adjacent slices** — smoke check + automated tests across affected surfaces
 - [ ] **Slice's open 68f/g entries resolved** or explicitly deferred with reasoning in slice wrap
+- [ ] **Registry row updated** — if PR touches `src/app/dev/proto/<surface>/page.tsx`, the corresponding row in `src/app/dev/proto/registry.ts` has `lastTouched.session` bumped and `status` reflects ship state; new surfaces add a row in the same PR.
 
 ## Security DoD (spec 72 §11 — 14 items)
 

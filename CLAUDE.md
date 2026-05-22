@@ -23,6 +23,20 @@ The experience should feel like having a brilliant, patient analyst sitting besi
 
 **MLP, not MVP.** When engineering phases open and scope conversations happen per slice, the frame is "what the *loveable* version requires vs what can iterate post-launch" — not "what's the minimum viable." Minimum Loveable Product. This matters because users are in crisis; a barely-functional product would do more harm than no product. Loveable is the floor.
 
+## Phase 3 sequence
+
+The post-audit 3-phase plan, restored to `SESSION-CONTEXT.md` via commit `780fa6c`, is verbatim from `docs/HANDOFF-SESSION-74.md` L80-82:
+
+> **P1 (after P0):** `S-PROTO-pre-signup-interview` — Phase 3 prototype P1 per refreshed Phase 3 sequence. 4-step loop: dialogue → canvas-prompt → absorb → construct.
+>
+> **P2+:** `S-PROTO-section-confirm` (Build phase confirm pattern) · `S-PROTO-ai-coach` (Settle phase) · `S-PROTO-share-flow` (Reconcile multi-actor).
+
+**Rule:** any off-sequence Phase 3 work must be flagged in `SESSION-CONTEXT.md`'s session priorities table with an explicit `OFF-SEQUENCE because X` note (where X names the reason — opportunistic canvas-port readiness, infra dependency, scope-add-on from prior PR, etc.). Off-sequence work is not forbidden; it must be visible.
+
+### §Status
+
+Sessions 112-114 ran off-sequence — marketing-landing, welcome-tour, and post-connect-dashboard canvas-ports shipped against §1/§3/§5 surfaces while the sequence's §6 (Build) `S-PROTO-section-confirm` remained unstarted. Session 115 restores discipline via `S-PROTO-journey-restore` (this slice). The next planned slice per the sequence is `S-PROTO-section-confirm` (§6 Build phase confirm pattern).
+
 ## Session startup (do this FIRST)
 
 1. **Verify your working branch.** `.claude/hooks/session-start.sh` surfaces live branch state at turn 0 (current branch, HEAD vs origin/main, ahead/behind, tree state). Canonical branch name is in `docs/SESSION-CONTEXT.md` or the task description. If the harness landed you on a different base, resync: `git fetch origin <branch>` → `git checkout -B <branch> origin/<branch>`.
@@ -412,6 +426,22 @@ The original framing treated all canvas work as preserve-and-rebuild. The split 
 **Source files repo-committed, not URL-fetched.** Claude AI Design outputs must live at `docs/design-source/{slug}/`. The Anthropic-hosted URLs are auth-gated and unreachable from the agent sandbox.
 
 **Not reference points:** Airbnb, Emma, Habito. Legacy in-house visual language (spec 18 colour palette, spec 27 visual direction) is superseded.
+
+### Journey wiring
+
+Every prototype slice's `acceptance.md` declares a `**Journey:**` field immediately after `**Category:**`, naming inbound (where the user arrives from) and outbound (where the user goes next). Forces inter-surface wiring to be an explicit decision at slice-scope time, not an after-thought.
+
+Format:
+
+> `**Journey:** inbound from = <surface-id | "external/marketing"> · outbound to = <surface-id | "completion-stub">`
+
+Orphan surfaces declare:
+
+> `**Journey:** orphan — pending wiring in slice S-X` with reason
+
+Detection regex (used by author-time hook + future CI lint): `^\*\*Journey:\*\*[[:space:]]+`.
+
+Enforcement: `.claude/hooks/journey-declared.sh` (PostToolUse:Write|Edit) emits an advisory when a `docs/slices/S-PROTO-*/acceptance.md` is authored without the field. Advisory only (exits 0). Convention is enforced by author + reviewer discipline; the hook keeps the rule top-of-mind during authoring.
 
 ### Canvas-as-source (prototype default)
 

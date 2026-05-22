@@ -35,7 +35,9 @@ Mirrors `tests/unit/proto-faq-trust/shell.test.tsx` shape, scaled to the smaller
 | Body paragraph rendering canvas-pending placeholder | AC-3 |
 | Back-link with `href="/dev/proto"` renders | AC-3 |
 
-### `tests/shellspec/journey-declared_spec.sh` (new)
+### `tests/shellspec/journey-declared.spec.sh` (new)
+
+(Renamed from acceptance.md's `journey-declared_spec.sh` to match repo's `.spec.sh` convention — all other entries under `tests/shellspec/` use the dot form. Noted in verification.md AC-5 evidence.)
 
 | Scenario | Expected | AC |
 |---|---|---|
@@ -56,5 +58,5 @@ For `category: prototype` slices the threshold raises to >5 (spec 76 §3). All p
 npm test -- tests/unit/app/dev/proto/registry.test.ts \
             tests/unit/proto-marketing-landing/start-cta-href.test.tsx \
             tests/unit/proto-sign-up/shell.test.tsx
-shellspec tests/shellspec/journey-declared_spec.sh
+shellspec tests/shellspec/journey-declared.spec.sh
 ```

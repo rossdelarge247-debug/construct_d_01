@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import Link from 'next/link';
 import { tokens } from '@/styles/tokens';
 
 /* Phase tints — used only where we reference the phases themselves */
@@ -266,17 +267,18 @@ function Header() {
           <a href="#compare" className="hover:text-[#1A1A1A]">
             Why us
           </a>
-          <a href="#pricing" className="hover:text-[#1A1A1A]">
+          <Link href="/dev/proto/pricing" className="hover:text-[#1A1A1A]">
             Pricing
-          </a>
+          </Link>
         </nav>
 
         <div className="flex items-center gap-5">
+          {/* TODO(journey): route to /dev/proto/sign-in once that surface ships. */}
           <a href="#signin" className="text-[13.5px]" style={{ color: tokens.color.text.sub }}>
             Sign in
           </a>
-          <a
-            href="#start"
+          <Link
+            href="/dev/proto/pre-signup-interview"
             className="cta-primary inline-flex items-center gap-2 rounded-full font-medium"
             style={{
               padding: '10px 18px',
@@ -288,7 +290,7 @@ function Header() {
           >
             Start your free plan
             <ArrowRight size={13} />
-          </a>
+          </Link>
         </div>
       </div>
     </header>

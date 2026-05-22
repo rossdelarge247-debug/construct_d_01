@@ -72,3 +72,76 @@ jobs:
       - name: Skip reason (no src/ changes)
         if: steps.diff.outputs.src_count == '0'
         run: echo "PR does not touch src/; slice-verification reference not required."
+
+  registry-update-check:
+    name: prototype surface changes update registry.ts
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Detect prototype surface page.tsx changes
+        id: surfaces
+        run: |
+          BASE="${{ github.event.pull_request.base.sha }}"
+          HEAD="${{ github.event.pull_request.head.sha }}"
+          # Surface = src/app/dev/proto/<literal>/page.tsx
+          # Excluded: [slug]/page.tsx (parametric stub), root page.tsx (registry hub), _components/**
+          SURFACES=$(git diff --name-only "$BASE" "$HEAD" \
+            | grep -E '^src/app/dev/proto/[^/]+/page\.tsx$' \
+            | grep -v '\[slug\]' \
+            | grep -v '_components' \
+            || true)
+          if [ -z "$SURFACES" ]; then
+            echo "count=0" >> "$GITHUB_OUTPUT"
+            echo "PR does not touch any prototype surface page.tsx."
+          else
+            COUNT=$(printf '%s\n' "$SURFACES" | wc -l | tr -d ' ')
+            echo "count=$COUNT" >> "$GITHUB_OUTPUT"
+            echo "PR touches $COUNT prototype surface(s):"
+            printf '  %s\n' $SURFACES
+          fi
+
+      - name: Require registry.ts in diff when prototype surface(s) touched
+        if: steps.surfaces.outputs.count != '0'
+        run: |
+          BASE="${{ github.event.pull_request.base.sha }}"
+          HEAD="${{ github.event.pull_request.head.sha }}"
+          if git diff --name-only "$BASE" "$HEAD" | grep -qx 'src/app/dev/proto/registry.ts'; then
+            echo "PASS — src/app/dev/proto/registry.ts is in the diff."
+            exit 0
+          fi
+
+          LABELS='${{ toJson(github.event.pull_request.labels.*.name) }}'
+          if printf '%s' "$LABELS" | grep -q 'no-registry-update'; then
+            echo "PASS — PR has 'no-registry-update' label; registry update not required."
+            exit 0
+          fi
+
+          cat <<'MSG' >&2
+          Registry-update gate FAILED.
+
+          This PR modifies one or more prototype surface page.tsx files
+          but does NOT update src/app/dev/proto/registry.ts.
+
+          Per CLAUDE.md §"Engineering conventions" §"Definition of Done"
+          item 7: "Registry row updated — if PR touches
+          src/app/dev/proto/<surface>/page.tsx, the corresponding row in
+          src/app/dev/proto/registry.ts has lastTouched.session bumped
+          and status reflects ship state; new surfaces add a row in the
+          same PR."
+
+          Fix (one of):
+            - Update the corresponding registry row(s) in the same PR
+              (status + lastTouched.session + links.prototype as
+              applicable). Add a new row for any new surface.
+            - If the surface touch is genuinely unrelated to ship state
+              (e.g. a config-only sweep that doesn't change behaviour),
+              apply the 'no-registry-update' label to this PR.
+          MSG
+          exit 1
+
+      - name: Skip reason (no prototype surface changes)
+        if: steps.surfaces.outputs.count == '0'
+        run: echo "PR does not touch any prototype surface page.tsx; registry-update check not required."
