@@ -26,7 +26,7 @@ Verbatim spec quotes used in AC framing below:
 - **Host surface scoping.** Standalone preview at `/dev/proto/ai-coach`. Coach-surface components extract under `_components/` so the future `S-PROTO-proposal-builder` slice can mount them in its right-third column without copying.
 - **Static prototype content.** Per `prototype` category + registry L74 `confidence: low` + `tags: ['ai-dependent', 'high-uncertainty']`, the cards render realistic mock content with no live Anthropic API call. Mock content is the Sarah/Mark fixture used elsewhere in `/dev/proto/`.
 - **Card taxonomy scoping.** S-A2 names 4 types; C-A2 (68a L112-117) names 5 (the additional 5th is *"Jump-to link — deep-link to the relevant section"*). This slice ships the 4 Settle-specific types from S-A2. C-A2 Jump-to-link is recorded under §"Architectural deferrals" — it's a cross-phase navigation primitive better extracted alongside the proposal-builder host that has sections to deep-link into.
-- **Test-pain audit (per spec 72d §3).** Verbatim: *"If any unit test in a slice requires more than 2 mock setups for collaborators, step back and reconsider seams before continuing implementation."* No external collaborators needed for this slice; static-data prototype → unit tests assert rendered structure with zero mock setups required. Test-pain threshold cleared trivially.
+- **Test-pain audit (spec 72d §3).** Verbatim: *"If any unit test in a slice requires more than 2 mock setups for collaborators, step back and reconsider seams before continuing implementation."* No external collaborators needed for this slice; static-data prototype → unit tests assert rendered structure with zero mock setups required. Test-pain threshold cleared trivially.
 
 ## Acceptance criteria
 

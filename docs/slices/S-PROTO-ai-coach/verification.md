@@ -1,6 +1,6 @@
 # S-PROTO-ai-coach — verification
 
-Final-state record per CLAUDE.md §"Engineering conventions" §"Definition of Done" item 1. AC-by-AC evidence; preview-deploy 6-dim per spec 72a; auto-review verdict + DoD checklist.
+Final-state record per CLAUDE.md §"Engineering conventions" §"Definition of Done" item 1. AC-by-AC evidence; preview-deploy 6-dim (spec 72a); auto-review verdict + DoD checklist.
 
 ## AC-1 · Route + 3-tab right rail shell (S-A1)
 
@@ -77,7 +77,7 @@ Test-pain audit cleared: 0 mock setups across all 6 test files.
 
 ## Preview-deploy verification
 
-**Status:** PENDING — auto-deploy on PR open. Per spec 72a §6-dim rubric:
+**Status:** PENDING — auto-deploy on PR open. Spec 72a 6-dim rubric:
 
 | Dimension | Status | Evidence |
 |---|---|---|

@@ -64,7 +64,7 @@ Regression-guard: other Settle rows (`proposal-builder`, `counter`, `settlement-
 
 ## Test-pain audit
 
-Per spec 72d §3 verbatim: *"If any unit test in a slice requires more than 2 mock setups for collaborators, step back and reconsider seams before continuing implementation."*
+Spec 72d §3 verbatim: *"If any unit test in a slice requires more than 2 mock setups for collaborators, step back and reconsider seams before continuing implementation."*
 
 Mock setups per test file: **0**. Every component is pure-presentational or carries local-only `useState`. No external dependencies to mock. Threshold (>2 mocks/test) cleared trivially.
 
