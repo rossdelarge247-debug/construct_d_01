@@ -87,4 +87,54 @@ describe('registry data', () => {
       });
     }
   });
+
+  describe('section-confirm slice surfaces carry refreshed status + lastTouched + links.prototype', () => {
+    const expected: Record<string, { status: string; linksPrototype: string; canvasLink: string; hasSlice?: boolean }> = {
+      'per-section-confirm': {
+        status: 'prototype-built',
+        linksPrototype: 'src/app/dev/proto/section-confirm/',
+        canvasLink: 'docs/design-source/mobile-screens-v2/',
+        hasSlice: true,
+      },
+      'bank-rec-categorise': {
+        status: 'prototype-built',
+        linksPrototype: 'src/app/dev/proto/section-confirm/categorise/',
+        canvasLink: 'docs/design-source/mobile-screens-v2/',
+      },
+      'bank-rec-confirm-recurring': {
+        status: 'prototype-built',
+        linksPrototype: 'src/app/dev/proto/section-confirm/confirm-recurring/',
+        canvasLink: 'docs/design-source/mobile-screens-v2/',
+      },
+    };
+
+    for (const [id, exp] of Object.entries(expected)) {
+      it(`'${id}' carries status=${exp.status}, refreshed lastTouched + links.prototype, canvas link retained`, () => {
+        const row = registry.find((r) => r.id === id);
+        expect(row, `row id=${id} missing`).toBeDefined();
+        expect(row!.status).toBe(exp.status);
+        expect(row!.lastTouched.session).toBe(117);
+        expect(row!.lastTouched.date).toBe('2026-05-22');
+        expect(row!.links.prototype).toBe(exp.linksPrototype);
+        expect(row!.links.canvas).toBe(exp.canvasLink);
+        if (exp.hasSlice) {
+          expect(row!.links.slice).toBe('docs/slices/S-PROTO-section-confirm/');
+        }
+      });
+    }
+
+    it("'per-section-confirm' no longer carries the 'high-uncertainty' tag", () => {
+      const row = registry.find((r) => r.id === 'per-section-confirm');
+      expect(row).toBeDefined();
+      expect(row!.tags ?? []).not.toContain('high-uncertainty');
+    });
+
+    it("remaining 4 bank-rec-* rows (manual-entry, resolve-duplicate, split, balance-check) stay canvas-drafted (regression guard for out-of-scope)", () => {
+      for (const id of ['bank-rec-manual-entry', 'bank-rec-resolve-duplicate', 'bank-rec-split', 'bank-rec-balance-check']) {
+        const row = registry.find((r) => r.id === id);
+        expect(row, `row id=${id} missing`).toBeDefined();
+        expect(row!.status, `row id=${id}`).toBe('canvas-drafted');
+      }
+    });
+  });
 });
