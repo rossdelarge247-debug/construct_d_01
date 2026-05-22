@@ -4,9 +4,9 @@ import { registryRowSchema } from '@/app/dev/proto/registry-schema';
 import type { Section } from '@/app/dev/proto/registry-schema';
 
 describe('registry data', () => {
-  describe('section counts total 62', () => {
-    it('contains exactly 61 rows', () => {
-      expect(registry).toHaveLength(62);
+  describe('registry totals + section sum invariants', () => {
+    it('total row count matches expected length', () => {
+      expect(registry).toHaveLength(63);
     });
 
     it('section counts match acceptance.md AC-1', () => {
@@ -15,7 +15,7 @@ describe('registry data', () => {
         'auth-boundary': 3,
         'post-signup-onboarding': 4,
         'bank-connect': 5,
-        hub: 5,
+        hub: 6,
         build: 10,
         reconcile: 5,
         settle: 5,
@@ -30,14 +30,14 @@ describe('registry data', () => {
       expect(actual).toEqual(expected);
     });
 
-    it('Σ section counts equals 62', () => {
+    it('Σ section counts equals total row count', () => {
       const sum = Object.values(
         registry.reduce<Record<string, number>>((counts, row) => {
           counts[row.section] = (counts[row.section] ?? 0) + 1;
           return counts;
         }, {}),
       ).reduce((a, b) => a + b, 0);
-      expect(sum).toBe(62);
+      expect(sum).toBe(registry.length);
     });
   });
 
@@ -135,6 +135,49 @@ describe('registry data', () => {
         expect(row, `row id=${id} missing`).toBeDefined();
         expect(row!.status, `row id=${id}`).toBe('canvas-drafted');
       }
+    });
+  });
+
+  describe('ai-coach slice surface carries refreshed status + confidence + lastTouched + links', () => {
+    it("'ai-coach' transitions spec-only → prototype-built with confidence bump and openQuestion resolution", () => {
+      const row = registry.find((r) => r.id === 'ai-coach');
+      expect(row, "row id='ai-coach' missing").toBeDefined();
+      expect(row!.section).toBe('settle');
+      expect(row!.status).toBe('prototype-built');
+      expect(row!.confidence).toBe('medium');
+      expect(row!.lastTouched.session).toBe(118);
+      expect(row!.lastTouched.date).toBe('2026-05-22');
+      expect(row!.links.prototype).toBe('src/app/dev/proto/ai-coach/');
+      expect(row!.links.slice).toBe('docs/slices/S-PROTO-ai-coach/');
+      expect(row!.tags ?? []).toContain('ai-dependent');
+      const openQs = row!.openQuestions ?? [];
+      expect(openQs.some((q) => q.includes('Invocation pattern locked'))).toBe(true);
+    });
+
+    it("other §8 Settle rows unchanged (regression guard)", () => {
+      for (const id of ['proposal-builder', 'counter', 'settlement-redline', 'negotiation-history']) {
+        const row = registry.find((r) => r.id === id);
+        expect(row, `row id=${id} missing`).toBeDefined();
+        expect(row!.section).toBe('settle');
+      }
+      const proposalBuilder = registry.find((r) => r.id === 'proposal-builder');
+      expect(proposalBuilder!.status).toBe('spec-only');
+      const settlementRedline = registry.find((r) => r.id === 'settlement-redline');
+      expect(settlementRedline!.status).toBe('canvas-drafted');
+    });
+  });
+
+  describe('todos surface — newly-sighted M_Todos canvas added to hub section', () => {
+    it("'todos' row exists in hub section with canvas-drafted status + canvas link", () => {
+      const row = registry.find((r) => r.id === 'todos');
+      expect(row, "row id='todos' missing").toBeDefined();
+      expect(row!.section).toBe('hub');
+      expect(row!.status).toBe('canvas-drafted');
+      expect(row!.confidence).toBe('low');
+      expect(row!.links.canvas).toBe('docs/design-source/mobile-screens-v2/');
+      expect(row!.tags ?? []).toContain('canvas-multi-variant');
+      const openQs = row!.openQuestions ?? [];
+      expect(openQs.some((q) => q.toLowerCase().includes('variant'))).toBe(true);
     });
   });
 });

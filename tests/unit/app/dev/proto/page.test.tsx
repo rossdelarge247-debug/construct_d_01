@@ -30,14 +30,14 @@ describe('ProtoHubPage', () => {
     }
   });
 
-  it('renders 62 flow rows across all sections', () => {
+  it('renders 63 flow rows across all sections', () => {
     const { container } = render(<ProtoHubPage />);
-    expect(container.querySelectorAll('article')).toHaveLength(62);
+    expect(container.querySelectorAll('article')).toHaveLength(63);
   });
 
   it('header reports the count and section total', () => {
     render(<ProtoHubPage />);
-    expect(screen.getByText(/62 flows tracked/i)).toBeInTheDocument();
+    expect(screen.getByText(/63 flows tracked/i)).toBeInTheDocument();
     expect(screen.getByText(/11 sections/i)).toBeInTheDocument();
   });
 });
