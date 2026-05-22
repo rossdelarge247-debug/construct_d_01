@@ -137,4 +137,33 @@ describe('registry data', () => {
       }
     });
   });
+
+  describe('ai-coach slice surface carries refreshed status + confidence + lastTouched + links', () => {
+    it("'ai-coach' transitions spec-only → prototype-built with confidence bump and openQuestion resolution", () => {
+      const row = registry.find((r) => r.id === 'ai-coach');
+      expect(row, "row id='ai-coach' missing").toBeDefined();
+      expect(row!.section).toBe('settle');
+      expect(row!.status).toBe('prototype-built');
+      expect(row!.confidence).toBe('medium');
+      expect(row!.lastTouched.session).toBe(118);
+      expect(row!.lastTouched.date).toBe('2026-05-22');
+      expect(row!.links.prototype).toBe('src/app/dev/proto/ai-coach/');
+      expect(row!.links.slice).toBe('docs/slices/S-PROTO-ai-coach/');
+      expect(row!.tags ?? []).toContain('ai-dependent');
+      const openQs = row!.openQuestions ?? [];
+      expect(openQs.some((q) => q.includes('Invocation pattern locked'))).toBe(true);
+    });
+
+    it("other §8 Settle rows unchanged (regression guard)", () => {
+      for (const id of ['proposal-builder', 'counter', 'settlement-redline', 'negotiation-history']) {
+        const row = registry.find((r) => r.id === id);
+        expect(row, `row id=${id} missing`).toBeDefined();
+        expect(row!.section).toBe('settle');
+      }
+      const proposalBuilder = registry.find((r) => r.id === 'proposal-builder');
+      expect(proposalBuilder!.status).toBe('spec-only');
+      const settlementRedline = registry.find((r) => r.id === 'settlement-redline');
+      expect(settlementRedline!.status).toBe('canvas-drafted');
+    });
+  });
 });

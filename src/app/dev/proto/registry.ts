@@ -71,7 +71,7 @@ export const registry: RegistryRow[] = [
 
   // §8 · Settle
   row({ id: 'proposal-builder', title: 'Proposal builder', section: 'settle', status: 'spec-only', confidence: 'low-blocked', openQuestions: ['Anchor visualisation + what-if explorer?'] }),
-  row({ id: 'ai-coach', title: 'AI coach', section: 'settle', status: 'spec-only', confidence: 'low', tags: ['ai-dependent', 'high-uncertainty'], openQuestions: ['Invocation pattern + conversational scope?'] }),
+  row({ id: 'ai-coach', title: 'AI coach', section: 'settle', status: 'prototype-built', confidence: 'medium', tags: ['ai-dependent'], openQuestions: ['Invocation pattern locked: always-on rail, cards-only'], lastTouched: { session: 118, date: '2026-05-22' }, links: { prototype: 'src/app/dev/proto/ai-coach/', slice: 'docs/slices/S-PROTO-ai-coach/' } }),
   row({ id: 'counter', title: 'Counter (against proposal)', section: 'settle', status: 'spec-only', confidence: 'low-blocked', openQuestions: ['Suggestion-quality threshold?'] }),
   row({ id: 'settlement-redline', title: 'Settlement redline', section: 'settle', status: 'canvas-drafted', confidence: 'medium', openQuestions: ['Change-visualisation + accept/reject UX?'], links: { canvas: 'docs/design-source/mobile-screens-v2/' } }),
   row({ id: 'negotiation-history', title: 'Negotiation history', section: 'settle', status: 'not-started', confidence: 'low-blocked', openQuestions: ['Timeline UX + what to surface?'] }),

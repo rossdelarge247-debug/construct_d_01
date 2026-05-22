@@ -69,7 +69,7 @@ The AI coach panel renders a footer disclaimer at the bottom with the C-A3 verba
 
 ### AC-6 · Registry update + journey + DoD-6 evidence
 
-Registry row L74 (`ai-coach`) transitions `status: 'spec-only'` → `status: 'prototype-built'`. `lastTouched.session` set to `118`. `lastTouched.slice` set to `S-PROTO-ai-coach`. `links.proto` set to `/dev/proto/ai-coach`. `confidence` bumps `low` → `medium` (locked spec content now has a working prototype against it; AI-wiring uncertainty preserved as `ai-dependent` tag). `openQuestions` updated to record the resolution: `['Invocation pattern locked: always-on rail, cards-only (session 118)']`.
+Registry row L74 (`ai-coach`) transitions `status: 'spec-only'` → `status: 'prototype-built'`. `lastTouched.session` set to `118` and `lastTouched.date` set to `'2026-05-22'`. `links.prototype` set to `'src/app/dev/proto/ai-coach/'`. `links.slice` set to `'docs/slices/S-PROTO-ai-coach/'`. `confidence` bumps `low` → `medium` (locked spec content now has a working prototype against it; AI-wiring uncertainty preserved as `ai-dependent` tag). `openQuestions` updated to record the resolution: `['Invocation pattern locked: always-on rail, cards-only']`.
 
 Journey field declared as orphan (header above) per CLAUDE.md §"Journey wiring" — pending wiring in `S-PROTO-proposal-builder`. The journey-declared hook should pass without advisory fire.
 
