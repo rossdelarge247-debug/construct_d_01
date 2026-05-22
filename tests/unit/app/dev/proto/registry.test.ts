@@ -61,4 +61,30 @@ describe('registry data', () => {
       }
     });
   });
+
+  describe('recently-shipped prototype surfaces carry refreshed status + lastTouched + links.prototype', () => {
+    const expectedRows: Record<string, { status: string; linksPrototype: string; hasSlice?: boolean }> = {
+      'marketing-landing': { status: 'prototype-built', linksPrototype: 'src/app/dev/proto/marketing-landing/' },
+      'how-it-works': { status: 'shell-built', linksPrototype: 'src/app/dev/proto/how-it-works/' },
+      'pricing': { status: 'shell-built', linksPrototype: 'src/app/dev/proto/pricing/' },
+      'faq-trust': { status: 'shell-built', linksPrototype: 'src/app/dev/proto/faq-trust/' },
+      'sign-up': { status: 'shell-built', linksPrototype: 'src/app/dev/proto/sign-up/' },
+      'welcome-tour': { status: 'prototype-built', linksPrototype: 'src/app/dev/proto/welcome-tour/' },
+      'hub-day-7-state-f': { status: 'prototype-built', linksPrototype: 'src/app/dev/proto/post-connect-dashboard/', hasSlice: true },
+    };
+
+    for (const [id, expected] of Object.entries(expectedRows)) {
+      it(`'${id}' carries status=${expected.status}, lastTouched.session=115, links.prototype set`, () => {
+        const row = registry.find((r) => r.id === id);
+        expect(row, `row id=${id} missing`).toBeDefined();
+        expect(row!.status).toBe(expected.status);
+        expect(row!.lastTouched.session).toBe(115);
+        expect(row!.lastTouched.date).toBe('2026-05-22');
+        expect(row!.links.prototype).toBe(expected.linksPrototype);
+        if (expected.hasSlice) {
+          expect(row!.links.slice).toBe('docs/slices/S-PROTO-post-connect-dashboard-canvas-port/');
+        }
+      });
+    }
+  });
 });

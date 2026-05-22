@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, type CSSProperties, type ReactNode } from 'react';
+import { useRouter } from 'next/navigation';
 import { tokens } from '@/styles/tokens';
 import { Arrow } from '../components/Arrow';
 import { BrandBar } from '../components/BrandBar';
@@ -212,7 +213,8 @@ function OptionCard({ option, selected, onSelect, staggerIndex }: {
 }
 
 export function O8() {
-  const { back, next, answers } = useProto();
+  const { back, answers } = useProto();
+  const router = useRouter();
   const [selectedId, setSelectedId] = useState<O8OptionId | null>(null);
   const stage = answers.stage ?? 'thinking';
   const copy = getCopy(stage);
@@ -251,7 +253,7 @@ export function O8() {
         caption={selected ? '' : copy.footer.captionFallback}
         ctaLabel={selected?.cta ?? copy.footer.ctaFallback}
         enabled={!!selected}
-        onContinue={next}
+        onContinue={() => router.push('/dev/proto/sign-up')}
         variant="light"
       />
     </main>

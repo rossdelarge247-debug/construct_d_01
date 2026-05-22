@@ -1,7 +1,11 @@
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 import { fireEvent, render, screen, within } from '@testing-library/react';
 import { ProtoProvider } from '@/app/dev/proto/pre-signup-interview/lib/proto-context';
 import { O8 } from '@/app/dev/proto/pre-signup-interview/screens/O8';
+
+vi.mock('next/navigation', () => ({
+  useRouter: () => ({ push: vi.fn() }),
+}));
 
 function renderO8() {
   return render(

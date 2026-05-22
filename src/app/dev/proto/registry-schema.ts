@@ -18,6 +18,7 @@ export const statusSchema = z.enum([
   'not-started',
   'spec-only',
   'canvas-drafted',
+  'shell-built',
   'prototype-built',
   'shipped',
 ]);
