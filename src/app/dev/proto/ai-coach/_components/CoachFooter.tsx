@@ -6,7 +6,6 @@ export function CoachFooter() {
   return (
     <p
       style={{
-        margin: 0,
         marginTop: 24,
         paddingTop: 16,
         borderTop: `1px solid ${tokens.color.border}`,

@@ -24,6 +24,20 @@ describe('RightRail', () => {
     expect(aiTab.getAttribute('aria-selected')).toBe('true');
   });
 
+  it('ARIA tab/panel association — tabs carry id + aria-controls; panel carries aria-labelledby', () => {
+    render(<RightRail {...PANELS} />);
+    const tabs = screen.getAllByRole('tab');
+    expect(tabs[0].getAttribute('id')).toBe('tab-comments');
+    expect(tabs[0].getAttribute('aria-controls')).toBe('panel-comments');
+    expect(tabs[1].getAttribute('id')).toBe('tab-ai-coach');
+    expect(tabs[1].getAttribute('aria-controls')).toBe('panel-ai-coach');
+    expect(tabs[2].getAttribute('id')).toBe('tab-activity');
+    expect(tabs[2].getAttribute('aria-controls')).toBe('panel-activity');
+    const panel = screen.getByRole('tabpanel');
+    expect(panel.getAttribute('id')).toBe('panel-ai-coach');
+    expect(panel.getAttribute('aria-labelledby')).toBe('tab-ai-coach');
+  });
+
   it('Comments and Activity tabs are inactive on mount', () => {
     render(<RightRail {...PANELS} />);
     expect(screen.getByRole('tab', { name: /Comments/ }).getAttribute('aria-selected')).toBe('false');

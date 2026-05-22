@@ -4,8 +4,8 @@ import { registryRowSchema } from '@/app/dev/proto/registry-schema';
 import type { Section } from '@/app/dev/proto/registry-schema';
 
 describe('registry data', () => {
-  describe('section counts total 63', () => {
-    it('contains exactly 63 rows', () => {
+  describe('registry totals + section sum invariants', () => {
+    it('total row count matches expected length', () => {
       expect(registry).toHaveLength(63);
     });
 
@@ -30,14 +30,14 @@ describe('registry data', () => {
       expect(actual).toEqual(expected);
     });
 
-    it('Σ section counts equals 63', () => {
+    it('Σ section counts equals total row count', () => {
       const sum = Object.values(
         registry.reduce<Record<string, number>>((counts, row) => {
           counts[row.section] = (counts[row.section] ?? 0) + 1;
           return counts;
         }, {}),
       ).reduce((a, b) => a + b, 0);
-      expect(sum).toBe(63);
+      expect(sum).toBe(registry.length);
     });
   });
 
