@@ -30,11 +30,17 @@ User confirmed P1 (`S-PROTO-ai-coach`) on the priority-select round; resolved th
 
 ### Push state
 
-Two commits pushed to `origin/claude/exciting-clarke-PjeRw`:
+Two commits pushed to `origin/claude/exciting-clarke-PjeRw` before wrap:
 - `36e37e6` — slice docs checkpoint
 - `6da61b5` — impl + tests + registry + verification.md fills
 
 PR creation deferred to user trigger per CLAUDE.md ("Do NOT create a pull request unless the user explicitly asks for one"). Auto-review fires on PR open.
+
+### Post-wrap hub consistency addition
+
+User raised a discipline-check question post-wrap: *"are we being consistent with our plan of working through the identified flows from the master prototype flow page, evaluating what needs to be translated, and developed based on a combination of canvases and specs and working through and also updating the hub?"* Answer: mostly yes (canvas+spec eval done at AC-freeze; L74 atomically updated; on-sequence advance held), but the M_Todos artboard sighted at turn 0 was flagged in priorities but **not** added to the hub registry as a row — meaning the master prototype flow page was silent on a newly-discovered surface. Small inconsistency.
+
+Resolved in-session: added `todos` row to `section: 'hub'` with `status: 'canvas-drafted'`, `confidence: 'low'`, `tags: ['canvas-multi-variant']` (M_Todos has 5 variants in the canvas: base + v2 + vA + vB + vC; M_Todos_v2 is the PhoneStage-rendered canonical), `links.canvas: 'docs/design-source/mobile-screens-v2/'`, `openQ: 'Variant choice — base / v2 / vA / vB / vC?'`. Test-first via TDD-guard override (atomic single-row insert pattern); 100% rule swept (`total: 62 → 63`, `hub: 5 → 6`).
 
 ## What went well
 

@@ -49,6 +49,7 @@ export const registry: RegistryRow[] = [
   row({ id: 'hub-state-a-mid-build', title: 'Hub state A (mid-build)', section: 'hub', status: 'not-started', confidence: 'low', openQuestions: ['Section-completion ordering?'] }),
   row({ id: 'hub-state-b-review', title: 'Hub state B (review)', section: 'hub', status: 'not-started', confidence: 'low', openQuestions: ['Trigger criteria?'] }),
   row({ id: 'hub-return-visit', title: 'Hub return-visit', section: 'hub', status: 'not-started', confidence: 'low-blocked', openQuestions: ["What's-changed-since-last UX?"] }),
+  row({ id: 'todos', title: 'Todos', section: 'hub', status: 'canvas-drafted', confidence: 'low', tags: ['canvas-multi-variant'], openQuestions: ['Variant choice — base / v2 / vA / vB / vC?'], links: { canvas: 'docs/design-source/mobile-screens-v2/' } }),
 
   // §6 · Build
   row({ id: 'per-section-confirm', title: 'Per-section confirmation pattern', section: 'build', status: 'prototype-built', confidence: 'medium', openQuestions: ['Lock final adapt rules for state-icon TOC in Sarah\'s Picture container slice?'], lastTouched: { session: 117, date: '2026-05-22' }, links: { canvas: 'docs/design-source/mobile-screens-v2/', prototype: 'src/app/dev/proto/section-confirm/', slice: 'docs/slices/S-PROTO-section-confirm/' } }),

@@ -4,9 +4,9 @@ import { registryRowSchema } from '@/app/dev/proto/registry-schema';
 import type { Section } from '@/app/dev/proto/registry-schema';
 
 describe('registry data', () => {
-  describe('section counts total 62', () => {
-    it('contains exactly 61 rows', () => {
-      expect(registry).toHaveLength(62);
+  describe('section counts total 63', () => {
+    it('contains exactly 63 rows', () => {
+      expect(registry).toHaveLength(63);
     });
 
     it('section counts match acceptance.md AC-1', () => {
@@ -15,7 +15,7 @@ describe('registry data', () => {
         'auth-boundary': 3,
         'post-signup-onboarding': 4,
         'bank-connect': 5,
-        hub: 5,
+        hub: 6,
         build: 10,
         reconcile: 5,
         settle: 5,
@@ -30,14 +30,14 @@ describe('registry data', () => {
       expect(actual).toEqual(expected);
     });
 
-    it('Σ section counts equals 62', () => {
+    it('Σ section counts equals 63', () => {
       const sum = Object.values(
         registry.reduce<Record<string, number>>((counts, row) => {
           counts[row.section] = (counts[row.section] ?? 0) + 1;
           return counts;
         }, {}),
       ).reduce((a, b) => a + b, 0);
-      expect(sum).toBe(62);
+      expect(sum).toBe(63);
     });
   });
 
@@ -164,6 +164,20 @@ describe('registry data', () => {
       expect(proposalBuilder!.status).toBe('spec-only');
       const settlementRedline = registry.find((r) => r.id === 'settlement-redline');
       expect(settlementRedline!.status).toBe('canvas-drafted');
+    });
+  });
+
+  describe('todos surface — newly-sighted M_Todos canvas added to hub section', () => {
+    it("'todos' row exists in hub section with canvas-drafted status + canvas link", () => {
+      const row = registry.find((r) => r.id === 'todos');
+      expect(row, "row id='todos' missing").toBeDefined();
+      expect(row!.section).toBe('hub');
+      expect(row!.status).toBe('canvas-drafted');
+      expect(row!.confidence).toBe('low');
+      expect(row!.links.canvas).toBe('docs/design-source/mobile-screens-v2/');
+      expect(row!.tags ?? []).toContain('canvas-multi-variant');
+      const openQs = row!.openQuestions ?? [];
+      expect(openQs.some((q) => q.toLowerCase().includes('variant'))).toBe(true);
     });
   });
 });

@@ -202,4 +202,4 @@ Session 119 P1 (S-PROTO-share-flow) is Large + soft-blocked on Build state. Out 
 - Section-confirm hub: `/dev/proto/section-confirm/`
 - Section-confirm forms: `/dev/proto/section-confirm/categorise` · `/dev/proto/section-confirm/confirm-recurring`
 - **AI coach (new this session — branch only, post-merge available on `construct-dev.vercel.app`):** `/dev/proto/ai-coach`
-- Registry hub: `/dev/proto` (62 rows · 1 refreshed this session)
+- Registry hub: `/dev/proto` (63 rows · 1 refreshed + 1 added this session — newly-sighted M_Todos canvas landed as `todos` row in §hub, status `canvas-drafted`)
