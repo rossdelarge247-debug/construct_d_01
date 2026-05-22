@@ -105,6 +105,8 @@ jobs:
 
       - name: Require registry.ts in diff when prototype surface(s) touched
         if: steps.surfaces.outputs.count != '0'
+        env:
+          LABELS: ${{ toJson(github.event.pull_request.labels.*.name) }}
         run: |
           BASE="${{ github.event.pull_request.base.sha }}"
           HEAD="${{ github.event.pull_request.head.sha }}"
@@ -113,7 +115,6 @@ jobs:
             exit 0
           fi
 
-          LABELS='${{ toJson(github.event.pull_request.labels.*.name) }}'
           if printf '%s' "$LABELS" | grep -q 'no-registry-update'; then
             echo "PASS — PR has 'no-registry-update' label; registry update not required."
             exit 0

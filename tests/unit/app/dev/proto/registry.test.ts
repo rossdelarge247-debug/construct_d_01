@@ -62,7 +62,7 @@ describe('registry data', () => {
     });
   });
 
-  describe('S-PROTO-journey-restore row refresh', () => {
+  describe('recently-shipped prototype surfaces carry refreshed status + lastTouched + links.prototype', () => {
     const expectedRows: Record<string, { status: string; linksPrototype: string; hasSlice?: boolean }> = {
       'marketing-landing': { status: 'prototype-built', linksPrototype: 'src/app/dev/proto/marketing-landing/' },
       'how-it-works': { status: 'shell-built', linksPrototype: 'src/app/dev/proto/how-it-works/' },
