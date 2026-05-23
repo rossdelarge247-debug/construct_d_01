@@ -167,6 +167,31 @@ describe('registry data', () => {
     });
   });
 
+  describe('share-flow slice surface carries refreshed status + confidence + lastTouched + links', () => {
+    it("'share-flow' transitions spec-only → prototype-built with confidence bump and openQuestion resolution", () => {
+      const row = registry.find((r) => r.id === 'share-flow');
+      expect(row, "row id='share-flow' missing").toBeDefined();
+      expect(row!.status).toBe('prototype-built');
+      expect(row!.confidence).toBe('medium');
+      expect(row!.section).toBe('reconcile');
+      expect(row!.openQuestions).toEqual([]);
+      expect(row!.lastTouched).toEqual({ session: 119, date: '2026-05-23' });
+      expect(row!.links.spec).toBe('docs/workspace-spec/68a-decisions-crosscutting.md');
+      expect(row!.links.prototype).toBe('src/app/dev/proto/share-flow/');
+      expect(row!.links.slice).toBe('docs/slices/S-PROTO-share-flow/');
+      expect(row!.links.canvas).toBeUndefined();
+    });
+
+    it("other §7 Reconcile rows unchanged (regression guard)", () => {
+      for (const id of ['joint-document-view', 'conflict-card', 'reconciliation-queue', 'counter-proposal-request']) {
+        const row = registry.find((r) => r.id === id);
+        expect(row, `row id=${id} missing`).toBeDefined();
+        expect(row!.section).toBe('reconcile');
+        expect(row!.lastTouched?.session ?? 0).toBeLessThan(119);
+      }
+    });
+  });
+
   describe('todos surface — newly-sighted M_Todos canvas added to hub section', () => {
     it("'todos' row exists in hub section with canvas-drafted status + canvas link", () => {
       const row = registry.find((r) => r.id === 'todos');

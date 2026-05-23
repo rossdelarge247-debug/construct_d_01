@@ -67,7 +67,7 @@ export const registry: RegistryRow[] = [
   row({ id: 'joint-document-view', title: 'Joint document view', section: 'reconcile', status: 'canvas-drafted', confidence: 'medium', tags: ['multi-actor'], openQuestions: ['Divergence display + permissions?'], links: { canvas: 'docs/design-source/mobile-screens-v2/' } }),
   row({ id: 'conflict-card', title: 'Conflict card', section: 'reconcile', status: 'spec-only', confidence: 'low', tags: ['multi-actor', 'high-uncertainty'], openQuestions: ['Tone + resolution-path UX?'] }),
   row({ id: 'reconciliation-queue', title: 'Reconciliation queue', section: 'reconcile', status: 'spec-only', confidence: 'low', tags: ['multi-actor'], openQuestions: ['Ordering + status display?'] }),
-  row({ id: 'share-flow', title: 'Share flow (Sarah/Mark joint)', section: 'reconcile', status: 'spec-only', confidence: 'low', tags: ['multi-actor', 'high-uncertainty'], openQuestions: ['Invite mechanics + real-time-vs-async?'] }),
+  row({ id: 'share-flow', title: 'Share flow (Sarah/Mark joint)', section: 'reconcile', status: 'prototype-built', confidence: 'medium', tags: ['multi-actor', 'high-uncertainty'], openQuestions: [], lastTouched: { session: 119, date: '2026-05-23' }, links: { spec: 'docs/workspace-spec/68a-decisions-crosscutting.md', prototype: 'src/app/dev/proto/share-flow/', slice: 'docs/slices/S-PROTO-share-flow/' } }),
   row({ id: 'counter-proposal-request', title: 'Counter-proposal request', section: 'reconcile', status: 'spec-only', confidence: 'low-blocked', tags: ['multi-actor'], openQuestions: ['Respondent-path UX?'] }),
 
   // §8 · Settle
