@@ -78,6 +78,14 @@ describe('ShareModal', () => {
     expect(onClose).toHaveBeenCalledOnce();
   });
 
+  it('backdrop click closes the modal', () => {
+    const onClose = vi.fn();
+    render(<ShareModal open={true} onClose={onClose} />);
+    const backdrop = screen.getByRole('presentation');
+    fireEvent.click(backdrop);
+    expect(onClose).toHaveBeenCalledOnce();
+  });
+
   it('Cancel button closes the modal (AC-3)', () => {
     const onClose = vi.fn();
     render(<ShareModal open={true} onClose={onClose} />);
