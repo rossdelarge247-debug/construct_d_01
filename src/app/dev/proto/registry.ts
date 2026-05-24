@@ -32,7 +32,7 @@ export const registry: RegistryRow[] = [
 
   // §3 · Post-signup onboarding
   row({ id: 'welcome-tour', title: 'Welcome tour / carousel', section: 'post-signup-onboarding', status: 'prototype-built', confidence: 'medium', openQuestions: ['Skip-to-end vs forced linearity?'], lastTouched: { session: 115, date: '2026-05-22' }, links: { canvas: 'docs/design-source/welcome-tour/', prototype: 'src/app/dev/proto/welcome-tour/' } }),
-  row({ id: 'moment-1-ack', title: 'Moment 1 acknowledgement', section: 'post-signup-onboarding', status: 'spec-only', confidence: 'low-blocked', openQuestions: ['Emotional copy authorship?'], links: { spec: 'docs/workspace-spec/65-pre-signup-interview-reconciled.md' } }),
+  row({ id: 'moment-1-ack', title: 'Moment 1 acknowledgement', section: 'post-signup-onboarding', status: 'prototype-built', confidence: 'medium', links: { spec: 'docs/workspace-spec/67-post-signup-profiling-progress.md', prototype: 'src/app/dev/proto/moment-1-ack/' } }),
   row({ id: 'moment-2-profiling', title: 'Moment 2 pre-bank profiling', section: 'post-signup-onboarding', status: 'spec-only', confidence: 'low-blocked', openQuestions: ['Question set V1 minimum?'], links: { spec: 'docs/workspace-spec/67-post-signup-profiling-progress.md' } }),
   row({ id: 'safeguarding-signposting', title: 'Safeguarding signposting', section: 'post-signup-onboarding', status: 'prototype-built', confidence: 'high', tags: ['safeguarding'], links: { spec: 'docs/workspace-spec/67-post-signup-profiling-progress.md', prototype: 'src/app/dev/proto/safeguarding-signposting/' } }),
 

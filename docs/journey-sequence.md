@@ -58,7 +58,7 @@ Build only when questions 1-3 are answered. If canvas or spec is insufficient, f
 | # | Flow | Registry ID | Status | Source material | Wiring gap |
 |---|------|------------|--------|-----------------|------------|
 | 10 | Welcome tour | `welcome-tour` | DONE | Own canvas at `docs/design-source/welcome-tour/` | Exit → #11 or #15 |
-| 11 | Moment 1 acknowledgement | `moment-1-ack` | BLOCKED | Spec 65 only; no canvas | Emotional copy needed |
+| 11 | Moment 1 acknowledgement | `moment-1-ack` | DONE | Spec 67 L86-121 | Built — recap bullets, safety-flag toggle, Exit this page |
 | 12 | Moment 2 pre-bank profiling | `moment-2-profiling` | BLOCKED | Spec 67 only; no canvas | Question set V1 needed |
 | 13 | Safeguarding signposting | `safeguarding-signposting` | DONE | Spec 67 L813-845 | Built — crisis helplines, 3 CTAs, Exit this page component |
 
