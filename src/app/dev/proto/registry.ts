@@ -34,7 +34,7 @@ export const registry: RegistryRow[] = [
   row({ id: 'welcome-tour', title: 'Welcome tour / carousel', section: 'post-signup-onboarding', status: 'prototype-built', confidence: 'medium', openQuestions: ['Skip-to-end vs forced linearity?'], lastTouched: { session: 115, date: '2026-05-22' }, links: { canvas: 'docs/design-source/welcome-tour/', prototype: 'src/app/dev/proto/welcome-tour/' } }),
   row({ id: 'moment-1-ack', title: 'Moment 1 acknowledgement', section: 'post-signup-onboarding', status: 'spec-only', confidence: 'low-blocked', openQuestions: ['Emotional copy authorship?'], links: { spec: 'docs/workspace-spec/65-pre-signup-interview-reconciled.md' } }),
   row({ id: 'moment-2-profiling', title: 'Moment 2 pre-bank profiling', section: 'post-signup-onboarding', status: 'spec-only', confidence: 'low-blocked', openQuestions: ['Question set V1 minimum?'], links: { spec: 'docs/workspace-spec/67-post-signup-profiling-progress.md' } }),
-  row({ id: 'safeguarding-signposting', title: 'Safeguarding signposting', section: 'post-signup-onboarding', status: 'spec-only', confidence: 'medium', tags: ['safeguarding'], openQuestions: ['Detection trigger criteria?'] }),
+  row({ id: 'safeguarding-signposting', title: 'Safeguarding signposting', section: 'post-signup-onboarding', status: 'prototype-built', confidence: 'high', tags: ['safeguarding'], links: { spec: 'docs/workspace-spec/67-post-signup-profiling-progress.md', prototype: 'src/app/dev/proto/safeguarding-signposting/' } }),
 
   // §4 · Bank-connect
   row({ id: 'bank-picker', title: 'Bank picker', section: 'bank-connect', status: 'spec-only', confidence: 'medium', openQuestions: ['Search vs popular UK banks?'] }),
