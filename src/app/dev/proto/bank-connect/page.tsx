@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { tokens } from '@/styles/tokens';
 import { getAllTestScenarios } from '@/lib/bank/test-scenarios';
 import type { TestScenario } from '@/lib/bank/test-scenarios';
+import type { BankStatementExtraction } from '@/lib/ai/extraction-schemas';
 import { useBankData } from '../_context/bank-data-context';
 
 type State =
@@ -17,7 +18,7 @@ type State =
 export default function BankConnectPage() {
   const [state, setState] = useState<State>({ phase: 'select' });
   const scenarios = getAllTestScenarios();
-  const { loadScenario } = useBankData();
+  const { loadScenario, loadExtractions } = useBankData();
 
   const handleTinkMessage = useCallback((e: MessageEvent) => {
     if (e.data?.type === 'tink-complete' && Array.isArray(e.data.results)) {
@@ -37,10 +38,11 @@ export default function BankConnectPage() {
           expectedGaps: [],
           expectedClassifiedRate: 0,
         };
+        loadExtractions(`${first.extraction.provider} — Live`, e.data.results.map((r: { extraction: BankStatementExtraction }) => r.extraction));
         setState({ phase: 'success', scenario: synth });
       }
     }
-  }, []);
+  }, [loadExtractions]);
 
   useEffect(() => {
     window.addEventListener('message', handleTinkMessage);

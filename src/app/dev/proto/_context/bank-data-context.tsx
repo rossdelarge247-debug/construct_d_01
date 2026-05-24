@@ -28,6 +28,7 @@ type BankDataContextValue = {
   sectionSummaries: SectionSummaryData[];
   allScenarios: TestScenario[];
   loadScenario: (id: string) => void;
+  loadExtractions: (name: string, exts: BankStatementExtraction[]) => void;
   clear: () => void;
 };
 
@@ -61,14 +62,24 @@ export function BankDataProvider({ children }: { children: ReactNode }) {
     setExtractions(createDemoExtractions(personaKey));
   }, [allScenarios]);
 
+  const loadExtractions = useCallback((name: string, exts: BankStatementExtraction[]) => {
+    setScenario({
+      id: 'live-connected', name, description: 'Connected via Open Banking',
+      provider: exts[0]?.provider ?? 'Unknown', accountType: 'current', isJoint: false,
+      transactions: [], expectedIncomes: [], expectedPayments: [],
+      expectedQuestions: [], expectedGaps: [], expectedClassifiedRate: 0,
+    });
+    setExtractions(exts);
+  }, []);
+
   const clear = useCallback(() => {
     setScenario(null);
     setExtractions([]);
   }, []);
 
   const value = useMemo<BankDataContextValue>(() => ({
-    scenario, extractions, sectionSteps, sectionSummaries, allScenarios, loadScenario, clear,
-  }), [scenario, extractions, sectionSteps, sectionSummaries, allScenarios, loadScenario, clear]);
+    scenario, extractions, sectionSteps, sectionSummaries, allScenarios, loadScenario, loadExtractions, clear,
+  }), [scenario, extractions, sectionSteps, sectionSummaries, allScenarios, loadScenario, loadExtractions, clear]);
 
   return <BankDataContext.Provider value={value}>{children}</BankDataContext.Provider>;
 }
@@ -78,7 +89,7 @@ export function useBankData(): BankDataContextValue {
   if (!ctx) {
     return {
       scenario: null, extractions: [], sectionSteps: {} as Record<ConfirmationSectionKey, ConfirmationStep[]>,
-      sectionSummaries: [], allScenarios: [], loadScenario: () => {}, clear: () => {},
+      sectionSummaries: [], allScenarios: [], loadScenario: () => {}, loadExtractions: () => {}, clear: () => {},
     };
   }
   return ctx;
