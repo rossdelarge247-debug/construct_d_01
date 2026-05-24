@@ -14,6 +14,26 @@ const DEMOS = [
     title: 'Confirm recurring',
     sub: 'Confirm a recurring payment as a fixed expense',
   },
+  {
+    href: '/dev/proto/section-confirm/manual-entry',
+    title: 'Manual entry',
+    sub: 'Add a transaction manually — cash, private sales, gifts',
+  },
+  {
+    href: '/dev/proto/section-confirm/resolve-duplicate',
+    title: 'Resolve duplicate',
+    sub: 'Decide if two similar transactions are the same payment or separate',
+  },
+  {
+    href: '/dev/proto/section-confirm/split',
+    title: 'Split transaction',
+    sub: 'Split one transaction across two categories',
+  },
+  {
+    href: '/dev/proto/section-confirm/balance-check',
+    title: 'Confirm balance',
+    sub: 'Verify a detected closing balance is correct',
+  },
 ] as const;
 
 export default function SectionConfirmHubPage() {
@@ -61,8 +81,7 @@ export default function SectionConfirmHubPage() {
           }}
         >
           Build-phase confirm-or-correct pattern. Each form surfaces when the AI has inferred something from
-          bank-signal that needs the user to verify or amend. Two of six forms ported in this prototype slice
-          (Categorise · Confirm recurring); the remaining four are follow-up slices.
+          bank-signal that needs the user to verify or amend. All six forms ported.
         </p>
 
         <ul
