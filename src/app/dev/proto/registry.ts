@@ -37,10 +37,10 @@ export const registry: RegistryRow[] = [
   row({ id: 'safeguarding-signposting', title: 'Safeguarding signposting', section: 'post-signup-onboarding', status: 'prototype-built', confidence: 'high', tags: ['safeguarding'], links: { spec: 'docs/workspace-spec/67-post-signup-profiling-progress.md', prototype: 'src/app/dev/proto/safeguarding-signposting/' } }),
 
   // §4 · Bank-connect
-  row({ id: 'bank-picker', title: 'Bank picker', section: 'bank-connect', status: 'spec-only', confidence: 'medium', openQuestions: ['Search vs popular UK banks?'] }),
-  row({ id: 'tink-mid-flow', title: 'Tink iframe mid-flow', section: 'bank-connect', status: 'not-started', confidence: 'low', openQuestions: ['Iframe sizing on mobile + abandon recovery?'] }),
-  row({ id: 'callback-success', title: 'Callback success', section: 'bank-connect', status: 'not-started', confidence: 'low-blocked', openQuestions: ['Transition animation to hub?'] }),
-  row({ id: 'callback-error-retry', title: 'Callback error / retry', section: 'bank-connect', status: 'not-started', confidence: 'low-blocked', openQuestions: ['Error taxonomy + retry pathway?'] }),
+  row({ id: 'bank-picker', title: 'Bank picker', section: 'bank-connect', status: 'prototype-built', confidence: 'high', links: { prototype: 'src/app/dev/proto/bank-connect/' } }),
+  row({ id: 'tink-mid-flow', title: 'Tink iframe mid-flow', section: 'bank-connect', status: 'prototype-built', confidence: 'medium', links: { prototype: 'src/app/dev/proto/bank-connect/' } }),
+  row({ id: 'callback-success', title: 'Callback success', section: 'bank-connect', status: 'prototype-built', confidence: 'high', links: { prototype: 'src/app/dev/proto/bank-connect/' } }),
+  row({ id: 'callback-error-retry', title: 'Callback error / retry', section: 'bank-connect', status: 'prototype-built', confidence: 'high', links: { prototype: 'src/app/dev/proto/bank-connect/' } }),
   row({ id: 'manual-entry-fallback', title: 'Manual entry fallback', section: 'bank-connect', status: 'not-started', confidence: 'low-blocked', openQuestions: ['When offered vs document upload?'] }),
 
   // §5 · Hub

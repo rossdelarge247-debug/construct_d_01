@@ -68,10 +68,10 @@ Build only when questions 1-3 are answered. If canvas or spec is insufficient, f
 
 | # | Flow | Registry ID | Status | Source material | Wiring gap |
 |---|------|------------|--------|-----------------|------------|
-| 14 | Bank picker | `bank-picker` | READY | Tink Link IS the picker; `/api/bank/connect` route generates URL; `tink-client.ts` (321L) | Prototype UI wrapper needed |
-| 15 | Tink iframe mid-flow | `tink-mid-flow` | READY | Popup mode in callback route; handles popup/iframe/redirect | Prototype chrome around Tink Link popup |
-| 16 | Callback success | `callback-success` | READY | Full pipeline at `/api/bank/callback` (133L): auth exchange → accounts → transactions → transform → postMessage | Success confirmation UI needed |
-| 17 | Callback error/retry | `callback-error-retry` | READY | `redirectWithError()` exists in callback route | Error UI + retry CTA needed |
+| 14 | Bank picker | `bank-picker` | DONE | Tink Link IS the picker; `/api/bank/connect` route generates URL; `tink-client.ts` (321L) | Built — Open Banking CTA + 5 dev-mode scenarios |
+| 15 | Tink iframe mid-flow | `tink-mid-flow` | DONE | Popup mode in callback route; handles popup/iframe/redirect | Built — connecting spinner + popup launch |
+| 16 | Callback success | `callback-success` | DONE | Full pipeline at `/api/bank/callback` (133L): auth exchange → accounts → transactions → transform → postMessage | Built — provider, account type, transaction count, date range |
+| 17 | Callback error/retry | `callback-error-retry` | DONE | `redirectWithError()` exists in callback route | Built — error message + retry CTA |
 | 18 | Manual entry fallback | `manual-entry-fallback` | PARTIALLY READY | `test-scenarios.ts` (644L) provides data shape; no entry UI yet | Entry form + scenario loader needed |
 
 **Stage 5 verdict:** NOT blocked. 3,801 lines of existing Tink integration + 5 synthetic test scenarios exist from V2 foundational work. The heavy backend is done. Prototype work: build a bank-connect screen that launches Tink Link (live) or loads test scenarios (dev mode), shows success/error states, wires to hub. Biggest opportunity in the journey for reuse.
