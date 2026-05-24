@@ -12,6 +12,7 @@ import {
   type ConfirmationSectionKey,
 } from '@/lib/bank/confirmation-questions';
 import type { BankStatementExtraction } from '@/lib/ai/extraction-schemas';
+import { useProfiling } from './profiling-context';
 
 const SCENARIO_TO_PERSONA: Record<string, string | undefined> = {
   'sarah-employed-homeowner': undefined,
@@ -26,6 +27,7 @@ type BankDataContextValue = {
   extractions: BankStatementExtraction[];
   sectionSteps: Record<ConfirmationSectionKey, ConfirmationStep[]>;
   sectionSummaries: SectionSummaryData[];
+  profilingAnswers: Record<string, string | undefined>;
   allScenarios: TestScenario[];
   loadScenario: (id: string) => void;
   loadExtractions: (name: string, exts: BankStatementExtraction[]) => void;
@@ -37,16 +39,21 @@ const BankDataContext = createContext<BankDataContextValue | null>(null);
 export function BankDataProvider({ children }: { children: ReactNode }) {
   const [scenario, setScenario] = useState<TestScenario | null>(null);
   const [extractions, setExtractions] = useState<BankStatementExtraction[]>([]);
+  const { answers: profilingAnswers } = useProfiling();
 
   const allScenarios = useMemo(() => getAllTestScenarios(), []);
 
   const sectionSteps = useMemo(() => {
     const result = {} as Record<ConfirmationSectionKey, ConfirmationStep[]>;
     for (const key of CONFIRMATION_SECTIONS) {
+      if (key === 'business' && profilingAnswers.selfEmployment === 'neither') {
+        result[key] = [];
+        continue;
+      }
       result[key] = extractions.length > 0 ? generateSectionSteps(key, extractions) : [];
     }
     return result;
-  }, [extractions]);
+  }, [extractions, profilingAnswers.selfEmployment]);
 
   const sectionSummaries = useMemo(() => {
     if (extractions.length === 0) return [];
@@ -78,8 +85,8 @@ export function BankDataProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const value = useMemo<BankDataContextValue>(() => ({
-    scenario, extractions, sectionSteps, sectionSummaries, allScenarios, loadScenario, loadExtractions, clear,
-  }), [scenario, extractions, sectionSteps, sectionSummaries, allScenarios, loadScenario, loadExtractions, clear]);
+    scenario, extractions, sectionSteps, sectionSummaries, profilingAnswers, allScenarios, loadScenario, loadExtractions, clear,
+  }), [scenario, extractions, sectionSteps, sectionSummaries, profilingAnswers, allScenarios, loadScenario, loadExtractions, clear]);
 
   return <BankDataContext.Provider value={value}>{children}</BankDataContext.Provider>;
 }
@@ -89,7 +96,7 @@ export function useBankData(): BankDataContextValue {
   if (!ctx) {
     return {
       scenario: null, extractions: [], sectionSteps: {} as Record<ConfirmationSectionKey, ConfirmationStep[]>,
-      sectionSummaries: [], allScenarios: [], loadScenario: () => {}, loadExtractions: () => {}, clear: () => {},
+      sectionSummaries: [], profilingAnswers: {}, allScenarios: [], loadScenario: () => {}, loadExtractions: () => {}, clear: () => {},
     };
   }
   return ctx;

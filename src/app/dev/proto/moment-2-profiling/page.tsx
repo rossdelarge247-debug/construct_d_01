@@ -3,6 +3,7 @@
 import { useMemo, useState } from 'react';
 import Link from 'next/link';
 import { tokens } from '@/styles/tokens';
+import { useProfiling } from '../_context/profiling-context';
 
 type PropertyStatus = 'mortgage' | 'rent' | 'own_outright' | 'other';
 type SelfEmployment = 'me' | 'both' | 'neither';
@@ -33,14 +34,14 @@ const radioRow: React.CSSProperties = {
   fontSize: tokens.type['14-5'], color: tokens.color.ink, cursor: 'pointer',
 };
 
-function StepP1({ property }: { property: PropertyStatus }) {
+function StepP1({ property, setAnswer }: StepProps) {
   if (property === 'mortgage') return (
     <div>
       <h2 style={{ margin: '0 0 20px', fontSize: tokens.type['21'], fontWeight: 600, color: tokens.color.ink }}>
         Who&rsquo;s your mortgage with?
       </h2>
       <label style={label}>Mortgage provider</label>
-      <select style={input} defaultValue="">
+      <select style={input} defaultValue="" onChange={(e) => setAnswer('mortgageProvider', e.target.value)}>
         <option value="" disabled>Select provider…</option>
         <option>Halifax</option><option>Nationwide</option>
         <option>Santander</option><option>Barclays</option><option>NatWest</option>
@@ -56,9 +57,9 @@ function StepP1({ property }: { property: PropertyStatus }) {
         Who do you pay rent to?
       </h2>
       <label style={label}>Landlord or agent</label>
-      <input type="text" placeholder="e.g. Countrywide Lettings" style={input} />
+      <input type="text" placeholder="e.g. Countrywide Lettings" style={input} onChange={(e) => setAnswer('rentLandlord', e.target.value)} />
       <label style={{ ...label, marginTop: 16 }}>Monthly amount</label>
-      <input type="text" placeholder="e.g. £950" style={input} />
+      <input type="text" placeholder="e.g. £950" style={input} onChange={(e) => setAnswer('rentAmount', e.target.value)} />
       <label style={{ ...label, marginTop: 16 }}>Payment day</label>
       <input type="text" placeholder="e.g. 1st" style={input} />
     </div>
@@ -74,19 +75,19 @@ function StepP1({ property }: { property: PropertyStatus }) {
   );
 }
 
-function StepP2a() {
+function StepP2a({ setAnswer }: StepProps) {
   return (
     <div>
       <h2 style={{ margin: '0 0 20px', fontSize: tokens.type['21'], fontWeight: 600, color: tokens.color.ink }}>
         Tell us about your business
       </h2>
       <label style={label}>Company / trading name</label>
-      <input type="text" style={input} />
+      <input type="text" style={input} onChange={(e) => setAnswer('businessName', e.target.value)} />
       <fieldset style={{ border: 'none', padding: 0, margin: '20px 0 0' }}>
         <legend style={label}>Structure</legend>
         {['Sole trader', 'Limited company', 'Partnership', 'Other'].map((o) => (
           <label key={o} style={radioRow}>
-            <input type="radio" name="structure" value={o} /> {o}
+            <input type="radio" name="structure" value={o} onChange={() => setAnswer('businessType', o)} /> {o}
           </label>
         ))}
       </fieldset>
@@ -94,7 +95,7 @@ function StepP2a() {
   );
 }
 
-function StepP2b() {
+function StepP2b({ setAnswer }: StepProps) {
   const options = [
     'Salary only (PAYE through the company)',
     'Dividends only',
@@ -111,7 +112,7 @@ function StepP2b() {
         <legend className="sr-only">Pay method</legend>
         {options.map((o) => (
           <label key={o} style={radioRow}>
-            <input type="radio" name="pay-method" value={o} /> {o}
+            <input type="radio" name="pay-method" value={o} onChange={() => setAnswer('businessPayMethod', o)} /> {o}
           </label>
         ))}
       </fieldset>
@@ -119,7 +120,7 @@ function StepP2b() {
   );
 }
 
-function StepP2c() {
+function StepP2c({ setAnswer }: StepProps) {
   const options = [
     'Client payments direct to me',
     'Rental income through the company',
@@ -143,7 +144,7 @@ function StepP2c() {
   );
 }
 
-function StepP4a() {
+function StepP4a({ setAnswer }: StepProps) {
   const options = [
     'Yes, one',
     'Yes, more than one',
@@ -160,7 +161,7 @@ function StepP4a() {
         <legend className="sr-only">Pension existence</legend>
         {options.map((o) => (
           <label key={o} style={radioRow}>
-            <input type="radio" name="pension-exist" value={o} /> {o}
+            <input type="radio" name="pension-exist" value={o} onChange={() => setAnswer('hasPension', o)} /> {o}
           </label>
         ))}
       </fieldset>
@@ -168,14 +169,14 @@ function StepP4a() {
   );
 }
 
-function StepP4b() {
+function StepP4b({ setAnswer }: StepProps) {
   return (
     <div>
       <h2 style={{ margin: '0 0 20px', fontSize: tokens.type['21'], fontWeight: 600, color: tokens.color.ink }}>
         Who&rsquo;s your pension provider?
       </h2>
       <label style={label}>Provider 1</label>
-      <select style={input} defaultValue="">
+      <select style={input} defaultValue="" onChange={(e) => setAnswer('pensionProvider', e.target.value)}>
         <option value="" disabled>Select provider…</option>
         <option>Aviva</option><option>Scottish Widows</option>
         <option>Legal &amp; General</option><option>Standard Life</option>
@@ -204,7 +205,7 @@ function StepP4b() {
   );
 }
 
-function StepP4c() {
+function StepP4c({ setAnswer }: StepProps) {
   return (
     <div>
       <h2 style={{ margin: '0 0 20px', fontSize: tokens.type['21'], fontWeight: 600, color: tokens.color.ink }}>
@@ -223,7 +224,7 @@ function StepP4c() {
         <button type="button" style={{ flex: 1, padding: '12px', borderRadius: 8, border: 'none', background: tokens.color.ink, color: '#fff', fontWeight: 600, fontSize: 13, cursor: 'pointer' }}>
           OK, add to my to-do list
         </button>
-        <button type="button" style={{ flex: 1, padding: '12px', borderRadius: 8, border: `1px solid ${tokens.color.border}`, background: 'transparent', color: tokens.color.text.sub, fontWeight: 600, fontSize: 13, cursor: 'pointer' }}>
+        <button type="button" onClick={() => setAnswer('cetvStatus', 'skipped')} style={{ flex: 1, padding: '12px', borderRadius: 8, border: `1px solid ${tokens.color.border}`, background: 'transparent', color: tokens.color.text.sub, fontWeight: 600, fontSize: 13, cursor: 'pointer' }}>
           Skip for now
         </button>
       </div>
@@ -231,7 +232,7 @@ function StepP4c() {
   );
 }
 
-function StepP6() {
+function StepP6(_props: StepProps) {
   return (
     <div>
       <h2 style={{ margin: '0 0 20px', fontSize: tokens.type['21'], fontWeight: 600, color: tokens.color.ink }}>
@@ -262,12 +263,15 @@ function StepP6() {
   );
 }
 
-const STEP_COMPONENTS: Record<StepId, React.ComponentType<{ property: PropertyStatus }>> = {
+type StepProps = { property: PropertyStatus; setAnswer: (key: string, value: string) => void };
+
+const STEP_COMPONENTS: Record<StepId, React.ComponentType<StepProps>> = {
   p1: StepP1, p2a: StepP2a, p2b: StepP2b, p2c: StepP2c,
   p4a: StepP4a, p4b: StepP4b, p4c: StepP4c, p6: StepP6,
 };
 
 export default function Moment2ProfilingPage() {
+  const { setAnswer } = useProfiling();
   const [property, setProperty] = useState<PropertyStatus>('mortgage');
   const [selfEmp, setSelfEmp] = useState<SelfEmployment>('neither');
   const steps = useSteps(property, selfEmp);
@@ -304,7 +308,7 @@ export default function Moment2ProfilingPage() {
       </div>
 
       <main style={{ maxWidth: 480, margin: '0 auto', padding: '20px 20px 24px' }}>
-        <StepComponent property={property} />
+        <StepComponent property={property} setAnswer={setAnswer} />
 
         {!isLast && (
           <div style={{ display: 'flex', gap: 10, marginTop: 28 }}>
@@ -342,7 +346,7 @@ export default function Moment2ProfilingPage() {
             <label style={{ fontSize: 12, color: tokens.color.text.sub, display: 'flex', flexDirection: 'column', gap: 4, flex: 1 }}>
               Property
               <select aria-label="Property status" value={property}
-                onChange={(e) => { setProperty(e.target.value as PropertyStatus); setStepIdx(0); }}
+                onChange={(e) => { const v = e.target.value as PropertyStatus; setProperty(v); setAnswer('propertyStatus', v); setStepIdx(0); }}
                 style={{ fontSize: 12, padding: '4px 6px', borderRadius: 4, border: `1px solid ${tokens.color.border}` }}
               >
                 <option value="mortgage">Mortgage</option>
@@ -354,7 +358,7 @@ export default function Moment2ProfilingPage() {
             <label style={{ fontSize: 12, color: tokens.color.text.sub, display: 'flex', flexDirection: 'column', gap: 4, flex: 1 }}>
               Self-employment
               <select aria-label="Self-employment status" value={selfEmp}
-                onChange={(e) => { setSelfEmp(e.target.value as SelfEmployment); setStepIdx(0); }}
+                onChange={(e) => { const v = e.target.value as SelfEmployment; setSelfEmp(v); setAnswer('selfEmployment', v); setStepIdx(0); }}
                 style={{ fontSize: 12, padding: '4px 6px', borderRadius: 4, border: `1px solid ${tokens.color.border}` }}
               >
                 <option value="neither">Neither</option>
