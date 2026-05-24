@@ -197,24 +197,46 @@ function SuccessView({ scenario }: { scenario: TestScenario }) {
         Bank connected
       </h2>
       <p style={{ margin: '0 0 24px', fontSize: tokens.type['14-5'], color: tokens.color.text.sub }}>
-        We&rsquo;ve pulled in your data. Here&rsquo;s what we found.
+        Here are the accounts we connected.
       </p>
 
-      <div style={{
-        padding: '16px', borderRadius: 10, border: `1px solid ${tokens.color.border}`,
-        background: tokens.color.surface.panel, textAlign: 'left', marginBottom: 24,
+      <div role="list" aria-label="Connected accounts" style={{ display: 'flex', flexDirection: 'column', gap: 10, marginBottom: 12 }}>
+        <div role="listitem" style={{
+          padding: '16px', borderRadius: 10, border: `1px solid ${tokens.color.border}`,
+          background: tokens.color.surface.panel, textAlign: 'left',
+        }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 8 }}>
+            <span style={{ fontWeight: 600, color: tokens.color.ink }}>{scenario.provider}</span>
+            <span style={{ fontSize: 13, color: tokens.color.text.sub, textTransform: 'capitalize' }}>
+              {scenario.accountType.replace('_', ' ')}
+            </span>
+          </div>
+          <div style={{ fontSize: 13, color: tokens.color.text.sub, lineHeight: 1.8 }}>
+            <div>{scenario.transactions.length} transactions</div>
+            <div>{dateRange}</div>
+            {scenario.isJoint && <div style={{ color: tokens.color.phase.reconcile.accent }}>Joint account</div>}
+          </div>
+        </div>
+      </div>
+
+      <button type="button" data-testid="connect-another" style={{
+        width: '100%', padding: '10px', marginBottom: 24, borderRadius: 8,
+        border: `1px solid ${tokens.color.border}`, background: 'transparent',
+        color: tokens.color.phase.build.accent, fontSize: 13, fontWeight: 600,
+        cursor: 'pointer', fontFamily: tokens.font.sans,
       }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 8 }}>
-          <span style={{ fontWeight: 600, color: tokens.color.ink }}>{scenario.provider}</span>
-          <span style={{ fontSize: 13, color: tokens.color.text.sub, textTransform: 'capitalize' }}>
-            {scenario.accountType.replace('_', ' ')}
-          </span>
-        </div>
-        <div style={{ fontSize: 13, color: tokens.color.text.sub, lineHeight: 1.8 }}>
-          <div>{scenario.transactions.length} transactions</div>
-          <div>{dateRange}</div>
-          {scenario.isJoint && <div style={{ color: tokens.color.phase.reconcile.accent }}>Joint account</div>}
-        </div>
+        + Connect another bank
+      </button>
+
+      <div style={{
+        padding: '12px 16px', borderRadius: 8, marginBottom: 20,
+        background: tokens.color.phase.build.soft, textAlign: 'left',
+        border: `1px solid ${tokens.color.phase.build.accent}20`,
+      }}>
+        <p style={{ margin: 0, fontSize: 12, color: tokens.color.text.sub, lineHeight: 1.5 }}>
+          Next step: section-by-section confirmation of what we found (Moment 3).
+          This flow is not yet built — continuing to dashboard for now.
+        </p>
       </div>
 
       <Link href="/dev/proto/post-connect-dashboard" style={{

@@ -65,7 +65,7 @@ describe('/dev/proto/bank-connect page', () => {
   it('transitions to success state when a scenario card is clicked (AC-1 + AC-3)', () => {
     render(<Page />);
     fireEvent.click(screen.getByText(/Sarah/));
-    expect(screen.getByText(/connected/i)).toBeTruthy();
+    expect(screen.getByText(/Bank connected/i)).toBeTruthy();
     expect(screen.getByText(/142 transactions/i)).toBeTruthy();
   });
 
@@ -73,6 +73,24 @@ describe('/dev/proto/bank-connect page', () => {
     render(<Page />);
     fireEvent.click(screen.getByText(/Sarah/));
     expect(screen.getByText(/Barclays/)).toBeTruthy();
+  });
+
+  it('shows connected accounts list (AC-3)', () => {
+    render(<Page />);
+    fireEvent.click(screen.getByText(/Sarah/));
+    expect(screen.getByRole('list', { name: /connected accounts/i })).toBeTruthy();
+  });
+
+  it('shows "+ Connect another bank" button (AC-3)', () => {
+    render(<Page />);
+    fireEvent.click(screen.getByText(/Sarah/));
+    expect(screen.getByTestId('connect-another')).toBeTruthy();
+  });
+
+  it('shows Moment 3 gap notice (reconciliation flag)', () => {
+    render(<Page />);
+    fireEvent.click(screen.getByText(/Sarah/));
+    expect(screen.getByText(/Moment 3/i)).toBeTruthy();
   });
 
   it('shows "Continue to your dashboard" CTA in success state (AC-3)', () => {
