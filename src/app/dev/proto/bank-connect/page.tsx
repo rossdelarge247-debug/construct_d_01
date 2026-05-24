@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { tokens } from '@/styles/tokens';
 import { getAllTestScenarios } from '@/lib/bank/test-scenarios';
 import type { TestScenario } from '@/lib/bank/test-scenarios';
+import { useBankData } from '../_context/bank-data-context';
 
 type State =
   | { phase: 'select' }
@@ -16,6 +17,7 @@ type State =
 export default function BankConnectPage() {
   const [state, setState] = useState<State>({ phase: 'select' });
   const scenarios = getAllTestScenarios();
+  const { loadScenario } = useBankData();
 
   const handleTinkMessage = useCallback((e: MessageEvent) => {
     if (e.data?.type === 'tink-complete' && Array.isArray(e.data.results)) {
@@ -78,7 +80,7 @@ export default function BankConnectPage() {
         {state.phase === 'select' && (
           <SelectView
             scenarios={scenarios}
-            onSelect={(s) => setState({ phase: 'success', scenario: s })}
+            onSelect={(s) => { loadScenario(s.id); setState({ phase: 'success', scenario: s }); }}
             onLaunchLive={launchTinkLink}
             onSimulateError={() => setState({ phase: 'error', message: 'Simulated connection error for testing' })}
           />
