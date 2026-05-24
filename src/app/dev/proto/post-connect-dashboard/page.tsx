@@ -2,6 +2,7 @@
 
 import { ReactNode, Suspense, useState } from 'react';
 import { useSearchParams } from 'next/navigation';
+import Link from 'next/link';
 import { tokens } from '@/styles/tokens';
 import { SignedInHeader } from '@/components/layout/signed-in-header';
 
@@ -779,6 +780,13 @@ export function Dashboard({ variant = 'conservative' }: { variant?: Variant }) {
             />
           </div>
         </div>
+        <Link
+          href="/dev/proto/your-picture"
+          className="block w-full mt-6 rounded-xl py-4 text-center font-semibold"
+          style={{ background: tokens.color.ink, color: '#fff', textDecoration: 'none', fontSize: 14.5 }}
+        >
+          View your picture &rarr;
+        </Link>
       </main>
     </div>
   );

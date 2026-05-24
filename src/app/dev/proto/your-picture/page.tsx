@@ -111,7 +111,7 @@ export default function YourPicturePage() {
               </div>
 
               {s.items.length === 0 ? (
-                <p style={{ fontSize: 13, color: tokens.color.text.muted, fontStyle: 'italic' }}>No data yet. Add information or connect a relevant account.</p>
+                <p style={{ fontSize: 13, color: tokens.color.text.muted, fontStyle: 'italic' }}>No data yet. <Link href="/dev/proto/section-confirm" style={{ color: tokens.color.phase.build.accent }}>Add information</Link> or connect a relevant account.</p>
               ) : (
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
                   {s.items.map((item) => (
@@ -127,6 +127,18 @@ export default function YourPicturePage() {
               )}
             </section>
           ))}
+
+          <Link
+            href="/dev/proto/share-flow"
+            style={{
+              display: 'block', width: '100%', padding: '14px 20px', marginTop: 8,
+              borderRadius: 10, background: tokens.color.ink, color: '#fff',
+              fontWeight: 600, fontSize: tokens.type['14-5'], textAlign: 'center',
+              textDecoration: 'none', fontFamily: tokens.font.sans,
+            }}
+          >
+            Share your picture with Mark &rarr;
+          </Link>
         </main>
 
         {/* Right rail — panels */}

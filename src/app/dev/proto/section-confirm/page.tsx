@@ -49,7 +49,7 @@ export default function SectionConfirmHubPage() {
     >
       <div style={{ maxWidth: 720, margin: '0 auto' }}>
         <Link
-          href="/dev/proto"
+          href="/dev/proto/your-picture"
           style={{
             display: 'inline-block',
             fontSize: 12,
@@ -58,7 +58,7 @@ export default function SectionConfirmHubPage() {
             marginBottom: 16,
           }}
         >
-          ← Back to registry
+          ← Back to Your Picture
         </Link>
         <h1
           style={{

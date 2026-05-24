@@ -57,7 +57,7 @@ export default function ProtoHubPage() {
           End-to-end signed-in journey
         </h2>
         <p style={{ fontSize: 'var(--ds-type-14-5)', color: 'var(--ds-color-text-sub)', margin: '0 0 12px' }}>
-          Click through the full post-signup experience: onboarding &rarr; profiling &rarr; bank connect &rarr; dashboard.
+          Click through the full post-signup experience. Each screen&apos;s primary CTA leads to the next.
         </p>
         <div className="flex flex-wrap gap-2">
           {[
@@ -67,6 +67,7 @@ export default function ProtoHubPage() {
             { label: 'Moment 2 profiling', href: '/dev/proto/moment-2-profiling' },
             { label: 'Bank connect', href: '/dev/proto/bank-connect' },
             { label: 'Dashboard', href: '/dev/proto/post-connect-dashboard' },
+            { label: 'Your Picture', href: '/dev/proto/your-picture' },
             { label: 'Section confirm', href: '/dev/proto/section-confirm' },
             { label: 'Share flow', href: '/dev/proto/share-flow' },
             { label: 'AI coach', href: '/dev/proto/ai-coach' },

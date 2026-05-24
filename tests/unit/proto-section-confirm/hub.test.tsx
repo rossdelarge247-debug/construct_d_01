@@ -20,9 +20,9 @@ describe('section-confirm hub page', () => {
     expect(link.getAttribute('href')).toBe('/dev/proto/section-confirm/confirm-recurring');
   });
 
-  it('back-link to /dev/proto', () => {
+  it('back-link to your-picture', () => {
     render(<SectionConfirmHubPage />);
-    const back = screen.getByRole('link', { name: /Back to registry/ });
-    expect(back.getAttribute('href')).toBe('/dev/proto');
+    const back = screen.getByRole('link', { name: /Back to Your Picture/ });
+    expect(back.getAttribute('href')).toBe('/dev/proto/your-picture');
   });
 });
