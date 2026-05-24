@@ -66,7 +66,7 @@ export default function BankConnectPage() {
   }
 
   return (
-    <div style={{ minHeight: '100dvh', background: tokens.color.surface.page, fontFamily: tokens.font.sans }}>
+    <div>
       <ProtoHeader backHref="/dev/proto" backLabel="Connect your bank" />
 
       <main style={{ maxWidth: 480, margin: '0 auto', padding: '24px 20px 40px' }}>

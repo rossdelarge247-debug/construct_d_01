@@ -283,7 +283,7 @@ export default function Moment2ProfilingPage() {
   const isLast = clampedIdx === steps.length - 1;
 
   return (
-    <div style={{ minHeight: '100dvh', background: tokens.color.surface.page, fontFamily: tokens.font.sans }}>
+    <div>
       <ProtoHeader backHref="/dev/proto" backLabel="Your profile" />
 
       <div data-testid="step-indicator" style={{

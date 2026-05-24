@@ -17,7 +17,7 @@ export default function Moment1AckPage() {
   const [safetyFlag, setSafetyFlag] = useState(false);
 
   return (
-    <div style={{ minHeight: '100dvh', background: tokens.color.surface.page, fontFamily: tokens.font.sans }}>
+    <div>
       <ProtoHeader backHref="/dev/proto" rightSlot={safetyFlag ? <ExitThisPage /> : undefined} />
 
       <main style={{ maxWidth: 480, margin: '0 auto', padding: '32px 20px 40px' }}>

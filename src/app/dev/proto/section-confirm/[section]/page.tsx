@@ -168,7 +168,7 @@ export default function DynamicSectionPage() {
 
   return (
     <main style={{
-      minHeight: '100vh', background: tokens.color.surface.page,
+      minHeight: '100vh',
       display: 'flex', flexDirection: 'column', fontFamily: tokens.font.sans,
     }}>
       <ProtoHeader

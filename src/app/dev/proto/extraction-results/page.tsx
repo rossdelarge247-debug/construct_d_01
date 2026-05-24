@@ -121,7 +121,7 @@ export default function ExtractionResultsPage() {
   const txnCount = extractions.reduce((n, e) => n + (e.spending_categories?.reduce((sum, c) => sum + c.transaction_count, 0) ?? 0), 0);
 
   return (
-    <div style={{ minHeight: '100dvh', background: tokens.color.surface.page, fontFamily: tokens.font.sans }}>
+    <div>
       <ProtoHeader backHref="/dev/proto/bank-connect" backLabel="Bank analysis" />
 
       <main style={{ maxWidth: 640, margin: '0 auto', padding: '28px 20px 64px' }}>

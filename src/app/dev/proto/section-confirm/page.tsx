@@ -46,7 +46,7 @@ export default function SectionConfirmHubPage() {
   const totalQ = sections.reduce((n, s) => n + s.questions, 0);
 
   return (
-    <div style={{ minHeight: '100vh', background: tokens.color.surface.page, fontFamily: tokens.font.sans, color: tokens.color.ink }}>
+    <div>
       <ProtoHeader />
     <main style={{ padding: '28px 20px 64px' }}>
       <div style={{ maxWidth: 640, margin: '0 auto' }}>

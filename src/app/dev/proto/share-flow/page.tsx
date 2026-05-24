@@ -11,7 +11,7 @@ export default function ShareFlowPage() {
   const [modalOpen, setModalOpen] = useState(false);
 
   return (
-    <div style={{ minHeight: '100dvh', background: tokens.color.surface.page, fontFamily: tokens.font.sans }}>
+    <div>
       <ProtoHeader backHref="/dev/proto" backLabel="Reconcile" />
 
       <main style={{ maxWidth: 480, margin: '0 auto', padding: '0 20px 40px' }}>

@@ -42,7 +42,7 @@ export default function SafeguardingSignpostingPage() {
   const [showMore, setShowMore] = useState(false);
 
   return (
-    <div style={{ minHeight: '100dvh', background: tokens.color.surface.page, fontFamily: tokens.font.sans }}>
+    <div>
       <ProtoHeader backHref="/dev/proto" rightSlot={<ExitThisPage />} />
 
       <main style={{ maxWidth: 480, margin: '0 auto', padding: '24px 20px 40px' }}>

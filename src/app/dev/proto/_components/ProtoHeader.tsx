@@ -59,7 +59,7 @@ export function ProtoHeader({ backHref, backLabel, rightSlot }: ProtoHeaderProps
         style={{
           height: 64,
           background: tokens.color.surface.panel,
-          borderBottom: backHref ? 'none' : `1px solid ${tokens.color.border}`,
+          borderBottom: `1px solid ${tokens.color.border}`,
         }}
       >
         <Link

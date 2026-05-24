@@ -658,7 +658,7 @@ export function Dashboard({ variant = 'conservative' }: { variant?: Variant }) {
     <div
       data-variant={variant}
       className="flex flex-col"
-      style={{ background: BG, minHeight: '100vh' }}
+      style={{ minHeight: '100vh' }}
     >
       <ProtoHeader />
       <main role="main" id="main" className="flex-1" style={{ background: mainBg }}>

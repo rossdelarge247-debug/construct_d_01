@@ -73,6 +73,11 @@ function computeSnapshot(sections: PictureSection[], exts: BankStatementExtracti
   ];
 }
 
+const CHIP_STYLE: Record<PictureItem['confidence'], { bg: string; color: string; label: string }> = {
+  confirmed: { bg: '#D1FAE5', color: '#047857', label: 'Confirmed' },
+  estimated: { bg: '#FEF3C7', color: '#92400E', label: 'Estimated' },
+};
+
 const STATUS_ICON: Record<SectionStatus, { char: string; color: string }> = {
   fully_evidenced: { char: '✓', color: tokens.color.phase.finalise.accent },
   partial_evidence: { char: '!', color: '#D97706' },
@@ -93,7 +98,7 @@ export default function YourPicturePage() {
   const pct = SECTIONS.length > 0 ? Math.round((completedCount / SECTIONS.length) * 100) : 0;
 
   return (
-    <div style={{ minHeight: '100dvh', background: tokens.color.surface.page, fontFamily: tokens.font.sans }}>
+    <div>
       <ProtoHeader
         backHref="/dev/proto/section-confirm"
         backLabel={`${scenarioName}’s Picture`}
