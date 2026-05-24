@@ -93,17 +93,17 @@ describe('/dev/proto/bank-connect page', () => {
     expect(screen.getByText(/Moment 3/i)).toBeTruthy();
   });
 
-  it('shows "Continue to your dashboard" CTA in success state (AC-3)', () => {
+  it('shows "See what we found" CTA in success state (AC-3)', () => {
     render(<Page />);
     fireEvent.click(screen.getByText(/Sarah/));
-    expect(screen.getByRole('link', { name: /continue/i })).toBeTruthy();
+    expect(screen.getByRole('link', { name: /what we found/i })).toBeTruthy();
   });
 
-  it('dashboard CTA links to post-connect-dashboard (AC-3)', () => {
+  it('CTA links to extraction-results (AC-3)', () => {
     render(<Page />);
     fireEvent.click(screen.getByText(/Sarah/));
-    const link = screen.getByRole('link', { name: /continue/i });
-    expect(link.getAttribute('href')).toBe('/dev/proto/post-connect-dashboard');
+    const link = screen.getByRole('link', { name: /what we found/i });
+    expect(link.getAttribute('href')).toBe('/dev/proto/extraction-results');
   });
 
   it('shows "Try again" button in error state (AC-4)', () => {

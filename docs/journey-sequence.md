@@ -82,13 +82,14 @@ Build only when questions 1-3 are answered. If canvas or spec is insufficient, f
 |---|------|------------|--------|-----------------|------------|
 | 19 | Hub Day 1 (empty state) | `hub-day-1` | BLOCKED | No canvas | Empty-state UX needed |
 | 20 | Hub state A (mid-build) | `hub-state-a-mid-build` | BLOCKED | No canvas | Section-completion ordering needed |
-| 21 | Section-confirm pattern | `per-section-confirm` | DONE | Artboard in mobile-screens-v2 | Built (hub + categorise + confirm-recurring) |
+| 20a | What we found (extraction results) | `extraction-results` | DONE | Spec 22 + signal rules | Built — 7 spec-22 sections, confidence indicators, CTA to confirm |
+| 21 | Confirm your data (7-section hub) | `per-section-confirm` | DONE | Artboard in mobile-screens-v2 + spec 22 | Refactored — 7 sections with status, progress, per-section form links |
 | 22 | Bank-rec: Categorise | `bank-rec-categorise` | DONE | Artboard in mobile-screens-v2 | Built |
 | 23 | Bank-rec: Confirm recurring | `bank-rec-confirm-recurring` | DONE | Artboard in mobile-screens-v2 | Built |
-| 24 | Bank-rec: Manual entry | `bank-rec-manual-entry` | READY | Artboard in mobile-screens-v2 | Canvas-port needed |
-| 25 | Bank-rec: Resolve duplicate | `bank-rec-resolve-duplicate` | READY | Artboard in mobile-screens-v2 | Canvas-port needed |
-| 26 | Bank-rec: Split | `bank-rec-split` | READY | Artboard in mobile-screens-v2 | Canvas-port needed |
-| 27 | Bank-rec: Balance check | `bank-rec-balance-check` | READY | Artboard in mobile-screens-v2 | Canvas-port needed |
+| 24 | Bank-rec: Manual entry | `bank-rec-manual-entry` | DONE | Artboard in mobile-screens-v2 | Built |
+| 25 | Bank-rec: Resolve duplicate | `bank-rec-resolve-duplicate` | DONE | Artboard in mobile-screens-v2 | Built |
+| 26 | Bank-rec: Split | `bank-rec-split` | DONE | Artboard in mobile-screens-v2 | Built |
+| 27 | Bank-rec: Balance check | `bank-rec-balance-check` | DONE | Artboard in mobile-screens-v2 | Built |
 | 28 | Hidden-asset prompts | `hidden-asset-prompts` | BLOCKED | Spec only | Trigger criteria needed |
 | 29 | Your Picture (private) | `your-picture-private` | DONE | Spec 68b 3-column layout + canvas + V2 hub.ts types | Built — TOC rail, §-numbered sections, snapshot + data sources + todos rails |
 | 30 | Document picker | `document-picker` | BLOCKED | No canvas, no spec | Upload UX needed |

@@ -66,9 +66,10 @@ export default function ProtoHubPage() {
             { label: 'Moment 1', href: '/dev/proto/moment-1-ack' },
             { label: 'Moment 2 profiling', href: '/dev/proto/moment-2-profiling' },
             { label: 'Bank connect', href: '/dev/proto/bank-connect' },
-            { label: 'Dashboard', href: '/dev/proto/post-connect-dashboard' },
+            { label: 'What we found', href: '/dev/proto/extraction-results' },
+            { label: 'Confirm your data', href: '/dev/proto/section-confirm' },
             { label: 'Your Picture', href: '/dev/proto/your-picture' },
-            { label: 'Section confirm', href: '/dev/proto/section-confirm' },
+            { label: 'Dashboard', href: '/dev/proto/post-connect-dashboard' },
             { label: 'Share flow', href: '/dev/proto/share-flow' },
             { label: 'AI coach', href: '/dev/proto/ai-coach' },
           ].map((step, i) => (

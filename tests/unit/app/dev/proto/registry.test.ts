@@ -6,7 +6,7 @@ import type { Section } from '@/app/dev/proto/registry-schema';
 describe('registry data', () => {
   describe('registry totals + section sum invariants', () => {
     it('total row count matches expected length', () => {
-      expect(registry).toHaveLength(63);
+      expect(registry).toHaveLength(64);
     });
 
     it('section counts match acceptance.md AC-1', () => {
@@ -16,7 +16,7 @@ describe('registry data', () => {
         'post-signup-onboarding': 4,
         'bank-connect': 5,
         hub: 6,
-        build: 10,
+        build: 11,
         reconcile: 5,
         settle: 5,
         finalise: 5,

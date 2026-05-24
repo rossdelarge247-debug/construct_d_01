@@ -108,6 +108,9 @@ export default function YourPicturePage() {
                 <span style={{ fontSize: 13, color: tokens.color.text.muted, fontFamily: tokens.font.mono }}>§{i + 1}</span>
                 <h2 style={{ margin: 0, fontSize: tokens.type['17'], fontWeight: 600, color: tokens.color.ink }}>{s.label}</h2>
                 <span style={{ fontSize: 11, color: tokens.color.text.muted, marginLeft: 'auto' }}>Form E {s.formE}</span>
+                <Link href="/dev/proto/section-confirm" aria-label={`Review ${s.label}`} style={{ fontSize: 11, color: tokens.color.phase.build.accent, textDecoration: 'none', marginLeft: 8 }}>
+                  Review →
+                </Link>
               </div>
 
               {s.items.length === 0 ? (

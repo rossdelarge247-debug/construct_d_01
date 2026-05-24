@@ -239,13 +239,13 @@ function SuccessView({ scenario }: { scenario: TestScenario }) {
         </p>
       </div>
 
-      <Link href="/dev/proto/post-connect-dashboard" style={{
+      <Link href="/dev/proto/extraction-results" style={{
         display: 'block', width: '100%', padding: '14px 20px', borderRadius: 10,
         background: tokens.color.ink, color: '#fff', fontWeight: 600,
         fontSize: tokens.type['14-5'], textAlign: 'center', textDecoration: 'none',
         fontFamily: tokens.font.sans,
       }}>
-        Continue to your dashboard
+        See what we found &rarr;
       </Link>
     </div>
   );
