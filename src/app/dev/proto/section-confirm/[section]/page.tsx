@@ -18,7 +18,7 @@ const SECTION_LABELS: Record<string, string> = {
   pensions: 'Pensions', debts: 'Debts', business: 'Business', other_assets: 'Other assets',
 };
 
-function StepRenderer({ step, index, total, onNext }: { step: ConfirmationStep; index: number; total: number; onNext: () => void }) {
+function StepRenderer({ step, index, total, onNext }: { step: ConfirmationStep; index: number; total: number; onNext: (stepId: string, answer: string | null) => void }) {
   const [selected, setSelected] = useState<string | null>(step.options?.[0]?.value ?? null);
   const [inputValue, setInputValue] = useState('');
 
@@ -117,7 +117,7 @@ function StepRenderer({ step, index, total, onNext }: { step: ConfirmationStep; 
 
         <div style={{ display: 'flex', gap: 10, marginTop: 20 }}>
           {step.type !== 'confirmation_message' && (
-            <button type="button" onClick={onNext} style={{
+            <button type="button" onClick={() => onNext(step.id, null)} style={{
               flex: 1, padding: '14px', borderRadius: 10, border: `1px solid ${tokens.color.border}`,
               background: 'transparent', color: tokens.color.text.sub, fontWeight: 600,
               fontSize: 13, cursor: 'pointer', fontFamily: tokens.font.sans,
@@ -125,7 +125,7 @@ function StepRenderer({ step, index, total, onNext }: { step: ConfirmationStep; 
               Skip
             </button>
           )}
-          <button type="button" onClick={onNext} style={{
+          <button type="button" onClick={() => onNext(step.id, selected ?? (inputValue || 'yes'))} style={{
             flex: 2, padding: '14px', borderRadius: 10, border: 'none',
             background: tokens.color.ink, color: '#fff', fontWeight: 600,
             fontSize: tokens.type['14-5'], cursor: 'pointer', fontFamily: tokens.font.sans,
@@ -138,17 +138,33 @@ function StepRenderer({ step, index, total, onNext }: { step: ConfirmationStep; 
   );
 }
 
+function shouldShow(step: ConfirmationStep, answers: Record<string, string>): boolean {
+  if (!step.showWhen) return true;
+  const prev = answers[step.showWhen.questionId];
+  if (!prev) return false;
+  if (Array.isArray(step.showWhen.value)) return step.showWhen.value.includes(prev);
+  return prev === step.showWhen.value;
+}
+
 export default function DynamicSectionPage() {
   const params = useParams();
   const sectionKey = (params?.section as string) ?? 'income';
   const label = SECTION_LABELS[sectionKey] ?? sectionKey;
   const { sectionSteps, extractions } = useBankData();
-  const steps = sectionSteps[sectionKey as ConfirmationSectionKey] ?? [];
-  const [currentStep, setCurrentStep] = useState(0);
+  const allSteps = sectionSteps[sectionKey as ConfirmationSectionKey] ?? [];
+  const [answers, setAnswers] = useState<Record<string, string>>({});
+  const [rawIdx, setRawIdx] = useState(0);
 
+  const visibleSteps = allSteps.filter(s => shouldShow(s, answers));
+  const currentStep = Math.min(rawIdx, visibleSteps.length - 1);
   const hasData = extractions.length > 0;
-  const step = steps[currentStep];
-  const isComplete = hasData && currentStep >= steps.length;
+  const step = visibleSteps[currentStep];
+  const isComplete = hasData && rawIdx >= visibleSteps.length;
+
+  function handleNext(stepId: string, answer: string | null) {
+    if (answer) setAnswers(prev => ({ ...prev, [stepId]: answer }));
+    setRawIdx(i => i + 1);
+  }
 
   return (
     <main style={{
@@ -157,7 +173,7 @@ export default function DynamicSectionPage() {
     }}>
       <FormTop
         title={`${label} confirmation`}
-        step={hasData && steps.length > 0 ? `${Math.min(currentStep + 1, steps.length)} of ${steps.length}` : undefined}
+        step={hasData && visibleSteps.length > 0 ? `${Math.min(currentStep + 1, visibleSteps.length)} of ${visibleSteps.length}` : undefined}
       />
 
       {!hasData ? (
@@ -179,7 +195,7 @@ export default function DynamicSectionPage() {
             {label} confirmed
           </h2>
           <p style={{ margin: 0, fontSize: 13, color: tokens.color.text.sub }}>
-            All {steps.length} question{steps.length !== 1 ? 's' : ''} reviewed.
+            All {visibleSteps.length} question{visibleSteps.length !== 1 ? 's' : ''} reviewed.
           </p>
           <Link href="/dev/proto/section-confirm" style={{
             padding: '12px 24px', borderRadius: 10, background: tokens.color.ink,
@@ -188,7 +204,7 @@ export default function DynamicSectionPage() {
             Back to sections
           </Link>
         </div>
-      ) : steps.length === 0 ? (
+      ) : visibleSteps.length === 0 ? (
         <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: 20, gap: 12 }}>
           <h2 style={{ margin: 0, fontSize: tokens.type['17'], fontWeight: 600, color: tokens.color.ink }}>
             No questions for {label}
@@ -207,8 +223,8 @@ export default function DynamicSectionPage() {
         <StepRenderer
           step={step}
           index={currentStep}
-          total={steps.length}
-          onNext={() => setCurrentStep(i => i + 1)}
+          total={visibleSteps.length}
+          onNext={handleNext}
         />
       ) : null}
     </main>
