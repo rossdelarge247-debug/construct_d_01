@@ -96,6 +96,7 @@ export default function YourPicturePage() {
 
   const completedCount = SECTIONS.filter(s => s.status === 'fully_evidenced').length;
   const pct = SECTIONS.length > 0 ? Math.round((completedCount / SECTIONS.length) * 100) : 0;
+  const deltaCount = SECTIONS.filter(s => s.status === 'partial_evidence' || s.status === 'estimate_only').length;
 
   return (
     <div>
@@ -120,112 +121,203 @@ export default function YourPicturePage() {
         </main>
       ) : (
         <div style={{ display: 'grid', gridTemplateColumns: '220px 1fr 260px', gap: 0, maxWidth: 1200, margin: '0 auto' }}>
-          {/* Left rail — TOC */}
+          {/* Left rail — TOC with locked/unlocked sections */}
           <nav data-testid="left-rail-toc" style={{
             padding: '20px 16px', borderRight: `1px solid ${tokens.color.border}`,
+            background: tokens.color.surface.panel,
             position: 'sticky', top: 0, alignSelf: 'start', maxHeight: '100dvh', overflow: 'auto',
           }}>
-            <p style={{ margin: '0 0 4px', fontSize: 11, fontWeight: 600, color: tokens.color.text.muted, textTransform: 'uppercase', letterSpacing: '0.06em' }}>
+            <p style={{ margin: '0 0 4px', fontSize: 9.5, fontWeight: 700, color: tokens.color.text.muted, textTransform: 'uppercase', letterSpacing: '0.1em' }}>
               In this document
             </p>
+            <p style={{ margin: '0 0 6px', fontFamily: tokens.font.serif, fontSize: 18, fontWeight: 600, color: tokens.color.ink, letterSpacing: '-0.015em' }}>
+              {scenarioName}&rsquo;s Picture
+            </p>
             <p style={{ margin: '0 0 16px', fontSize: 12, color: tokens.color.text.sub }}>
-              {pct}% complete ({completedCount} of {SECTIONS.length})
+              {pct}% complete &middot; {completedCount} of {SECTIONS.length} sections
             </p>
             {SECTIONS.map((s) => {
               const icon = STATUS_ICON[s.status];
+              const isLocked = s.status === 'not_started';
               return (
                 <a key={s.key} href={`#section-${s.key}`} data-status={s.status} style={{
-                  display: 'flex', alignItems: 'center', gap: 8, padding: '6px 0',
-                  textDecoration: 'none', fontSize: 13, color: tokens.color.ink,
+                  display: 'flex', alignItems: 'center', gap: 8, padding: '8px 10px', marginBottom: 2,
+                  borderRadius: 8,
+                  textDecoration: 'none', fontSize: 13, color: isLocked ? tokens.color.text.muted : tokens.color.ink,
+                  fontWeight: isLocked ? 400 : 500,
+                  opacity: isLocked ? 0.6 : 1,
+                  background: s.status === 'fully_evidenced' ? '#F0FDF4' : 'transparent',
+                  transition: 'background 0.15s',
                 }}>
-                  <span style={{ width: 18, height: 18, borderRadius: '50%', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', fontSize: 11, fontWeight: 700, color: icon.color, border: s.status === 'not_started' ? `1.5px solid ${tokens.color.border}` : 'none', background: s.status === 'fully_evidenced' ? '#DCFCE7' : 'transparent' }}>
+                  <span style={{
+                    width: 20, height: 20, borderRadius: '50%', display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
+                    fontSize: 11, fontWeight: 700, color: icon.color, flexShrink: 0,
+                    border: isLocked ? `1.5px dashed ${tokens.color.border}` : s.status === 'fully_evidenced' ? 'none' : `1.5px solid ${icon.color}`,
+                    background: s.status === 'fully_evidenced' ? '#DCFCE7' : 'transparent',
+                  }}>
                     {icon.char}
                   </span>
-                  {s.label}
+                  <span>{s.label}</span>
+                  {isLocked && <span style={{ marginLeft: 'auto', fontSize: 9, color: tokens.color.text.muted, fontStyle: 'italic' }}>empty</span>}
                 </a>
               );
             })}
           </nav>
 
           {/* Middle column — document body */}
-          <main style={{ padding: '24px 28px 60px' }}>
+          <main style={{ padding: '20px 28px 60px' }}>
+            {/* View bar */}
+            <div style={{
+              display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+              background: tokens.color.surface.panel, border: `1px solid ${tokens.color.border}`, borderRadius: 10, padding: '10px 12px',
+              marginBottom: 16,
+            }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                <span style={{ fontSize: 9.5, letterSpacing: '0.1em', textTransform: 'uppercase', fontWeight: 700, color: tokens.color.text.muted }}>View</span>
+                <span style={{ fontSize: 13, fontWeight: 600, color: tokens.color.ink }}>Private</span>
+                <span style={{ fontSize: 11, color: tokens.color.text.muted }}>&blacktriangledown;</span>
+              </div>
+              {deltaCount > 0 && (
+                <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6, padding: '4px 8px', borderRadius: 999, background: '#FFF7ED', color: '#9A3412', fontSize: 11, fontWeight: 600 }}>
+                  &bull; {deltaCount} to share
+                </span>
+              )}
+            </div>
+
+            {/* Net worth headline card */}
+            <div style={{
+              background: tokens.color.surface.panel, border: `1px solid ${tokens.color.border}`, borderRadius: 12, padding: '14px 16px',
+              marginBottom: 16,
+            }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline' }}>
+                <span style={{ fontSize: 9.5, letterSpacing: '0.1em', textTransform: 'uppercase', fontWeight: 700, color: tokens.color.text.muted }}>Net worth &middot; your view</span>
+                <span style={{ fontSize: 10.5, color: tokens.color.text.muted }}>Private</span>
+              </div>
+              <div style={{ fontFamily: tokens.font.serif, fontSize: 26, fontWeight: 600, letterSpacing: '-0.02em', color: tokens.color.ink, marginTop: 4, fontVariantNumeric: 'tabular-nums' }}>
+                &pound;{snapshot[0]?.value.replace(/£/, '') ?? '—'}
+              </div>
+              {deltaCount > 0 && (
+                <div style={{ fontSize: 11.5, color: tokens.color.text.sub, marginTop: 2 }}>{deltaCount} deltas held back from Mark</div>
+              )}
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 6, marginTop: 10 }}>
+                {snapshot.slice(1).map(m => (
+                  <div key={m.label} style={{ background: tokens.color.surface.canvas, border: `1px solid ${tokens.color.border}`, borderRadius: 8, padding: '7px 9px' }}>
+                    <div style={{ fontSize: 9.5, letterSpacing: '0.06em', textTransform: 'uppercase', color: tokens.color.text.muted, fontWeight: 700 }}>{m.label}</div>
+                    <div style={{ fontSize: 13.5, fontWeight: 600, color: tokens.color.ink, marginTop: 2, fontVariantNumeric: 'tabular-nums' }}>{m.value}</div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Provenance intro */}
             <p style={{ margin: '0 0 24px', fontSize: tokens.type['14-5'], lineHeight: 1.6, color: tokens.color.text.sub }}>
               A structured record of what you own, owe, earn and spend.
               Based on data from your connected {providerNames.join(' and ')} account{extractions.length > 1 ? 's' : ''}.
             </p>
 
+            {/* Sections */}
             {SECTIONS.map((s, i) => (
-              <section key={s.key} id={`section-${s.key}`} style={{ marginBottom: 32 }}>
-                <div style={{ display: 'flex', alignItems: 'baseline', gap: 8, marginBottom: 12, borderBottom: `1px solid ${tokens.color.border}`, paddingBottom: 8 }}>
-                  <span style={{ fontSize: 13, color: tokens.color.text.muted, fontFamily: tokens.font.mono }}>§{i + 1}</span>
-                  <h2 style={{ margin: 0, fontSize: tokens.type['17'], fontWeight: 600, color: tokens.color.ink }}>{s.label}</h2>
-                  <span style={{ fontSize: 11, color: tokens.color.text.muted, marginLeft: 'auto' }}>Form E {s.formE}</span>
-                  <Link href="/dev/proto/section-confirm" aria-label={`Review ${s.label}`} style={{ fontSize: 11, color: tokens.color.phase.build.accent, textDecoration: 'none', marginLeft: 8 }}>
-                    Review →
-                  </Link>
-                </div>
-
-                {s.items.length === 0 ? (
-                  <p style={{ fontSize: 13, color: tokens.color.text.muted, fontStyle: 'italic' }}>No data yet. <Link href="/dev/proto/section-confirm" style={{ color: tokens.color.phase.build.accent }}>Add information</Link> or connect a relevant account.</p>
-                ) : (
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-                    {s.items.map((item) => (
-                      <div key={item.label} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', padding: '6px 0' }}>
-                        <span style={{ fontSize: tokens.type['14-5'], color: tokens.color.ink }}>{item.label}</span>
-                        <span style={{ fontSize: 13, color: item.confidence === 'confirmed' ? tokens.color.ink : tokens.color.text.sub, fontFamily: tokens.font.mono }}>
-                          {item.value}
-                          {item.confidence === 'estimated' && <span style={{ marginLeft: 6, fontSize: 10, color: '#D97706' }}>est.</span>}
-                        </span>
-                      </div>
-                    ))}
+              <section key={s.key} id={`section-${s.key}`} style={{ marginBottom: 16 }}>
+                <div style={{
+                  background: tokens.color.surface.panel, border: `1px solid ${tokens.color.border}`, borderRadius: 12, overflow: 'hidden',
+                }}>
+                  <div style={{
+                    padding: '10px 14px', borderBottom: `1px solid ${tokens.color.border}`,
+                    display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+                  }}>
+                    <div style={{ display: 'flex', alignItems: 'baseline', gap: 8 }}>
+                      <span style={{ fontSize: 12, color: tokens.color.text.muted, fontFamily: tokens.font.mono }}>§{i + 1}</span>
+                      <span style={{ fontSize: 9.5, letterSpacing: '0.1em', textTransform: 'uppercase', fontWeight: 700, color: tokens.color.text.muted }}>{s.label}</span>
+                    </div>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                      <span style={{ fontSize: 11, color: tokens.color.text.muted }}>{s.items.length} item{s.items.length !== 1 ? 's' : ''}</span>
+                      <Link href="/dev/proto/section-confirm" aria-label={`Review ${s.label}`} style={{ fontSize: 11, color: tokens.color.phase.build.accent, textDecoration: 'none' }}>
+                        Review
+                      </Link>
+                    </div>
                   </div>
-                )}
+
+                  {s.items.length === 0 ? (
+                    <div style={{ padding: '14px', fontSize: 13, color: tokens.color.text.muted, fontStyle: 'italic' }}>
+                      No data yet. <Link href="/dev/proto/section-confirm" style={{ color: tokens.color.phase.build.accent }}>Add information</Link>
+                    </div>
+                  ) : (
+                    <div>
+                      {s.items.map((item, j) => {
+                        const chip = CHIP_STYLE[item.confidence];
+                        return (
+                          <div key={item.label} style={{
+                            padding: '10px 14px',
+                            borderBottom: j < s.items.length - 1 ? `1px solid ${tokens.color.border}` : 'none',
+                            display: 'flex', alignItems: 'flex-start', gap: 10,
+                          }}>
+                            <div style={{ flex: 1, minWidth: 0 }}>
+                              <div style={{ fontSize: 13.5, color: tokens.color.ink, fontWeight: 500 }}>{item.label}</div>
+                              <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginTop: 3 }}>
+                                <span style={{ display: 'inline-block', padding: '2px 7px', borderRadius: 999, background: chip.bg, color: chip.color, fontSize: 10.5, fontWeight: 600 }}>
+                                  {chip.label}
+                                </span>
+                              </div>
+                            </div>
+                            <div style={{ fontSize: 14, fontWeight: 600, color: tokens.color.ink, fontVariantNumeric: 'tabular-nums', letterSpacing: '-0.01em' }}>{item.value}</div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  )}
+                </div>
               </section>
             ))}
 
-            <Link href="/dev/proto/share-flow" style={{
-              display: 'block', width: '100%', padding: '14px 20px', marginTop: 8,
-              borderRadius: 10, background: tokens.color.ink, color: '#fff',
-              fontWeight: 600, fontSize: tokens.type['14-5'], textAlign: 'center',
-              textDecoration: 'none', fontFamily: tokens.font.sans,
-            }}>
-              Share your picture with Mark &rarr;
-            </Link>
           </main>
 
           {/* Right rail — panels */}
           <aside style={{ padding: '20px 16px', borderLeft: `1px solid ${tokens.color.border}`, position: 'sticky', top: 0, alignSelf: 'start', maxHeight: '100dvh', overflow: 'auto' }}>
             {/* Snapshot */}
-            <div style={{ marginBottom: 20, padding: '14px', borderRadius: 10, background: tokens.color.surface.panel, border: `1px solid ${tokens.color.border}` }}>
-              <p style={{ margin: '0 0 10px', fontSize: 12, fontWeight: 600, color: tokens.color.text.muted, textTransform: 'uppercase', letterSpacing: '0.04em' }}>Snapshot</p>
+            <div style={{ marginBottom: 12, padding: '14px', borderRadius: 12, background: tokens.color.surface.panel, border: `1px solid ${tokens.color.border}` }}>
+              <p style={{ margin: '0 0 10px', fontSize: 9.5, fontWeight: 700, color: tokens.color.text.muted, textTransform: 'uppercase', letterSpacing: '0.1em' }}>Snapshot</p>
               {snapshot.map((m) => (
-                <div key={m.label} style={{ display: 'flex', justifyContent: 'space-between', padding: '4px 0', fontSize: 13 }}>
+                <div key={m.label} style={{ display: 'flex', justifyContent: 'space-between', padding: '5px 0', fontSize: 13 }}>
                   <span style={{ color: tokens.color.text.sub }}>{m.label}</span>
-                  <span style={{ fontWeight: 600, fontFamily: tokens.font.mono, color: m.color }}>{m.value}</span>
+                  <span style={{ fontWeight: 600, fontVariantNumeric: 'tabular-nums', color: m.color }}>{m.value}</span>
                 </div>
               ))}
             </div>
 
             {/* Data sources */}
-            <div style={{ marginBottom: 20, padding: '14px', borderRadius: 10, background: tokens.color.surface.panel, border: `1px solid ${tokens.color.border}` }}>
-              <p style={{ margin: '0 0 10px', fontSize: 12, fontWeight: 600, color: tokens.color.text.muted, textTransform: 'uppercase', letterSpacing: '0.04em' }}>Data sources</p>
+            <div style={{ marginBottom: 12, padding: '14px', borderRadius: 12, background: tokens.color.surface.panel, border: `1px solid ${tokens.color.border}` }}>
+              <p style={{ margin: '0 0 10px', fontSize: 9.5, fontWeight: 700, color: tokens.color.text.muted, textTransform: 'uppercase', letterSpacing: '0.1em' }}>Data sources</p>
               {extractions.map((e) => (
-                <div key={`${e.provider}-${e.account_number_last4}`} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '4px 0', fontSize: 12 }}>
+                <div key={`${e.provider}-${e.account_number_last4}`} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '5px 0', fontSize: 12 }}>
                   <span style={{ color: tokens.color.ink }}>{e.provider} {e.account_type}</span>
-                  <span style={{ color: tokens.color.text.muted, fontSize: 11 }}>connected</span>
+                  <span style={{ display: 'inline-block', padding: '2px 7px', borderRadius: 999, background: '#D1FAE5', color: '#047857', fontSize: 10, fontWeight: 600 }}>connected</span>
                 </div>
               ))}
             </div>
 
             {/* Needs your attention */}
-            <div style={{ padding: '14px', borderRadius: 10, background: tokens.color.surface.panel, border: `1px solid ${tokens.color.border}` }}>
-              <p style={{ margin: '0 0 10px', fontSize: 12, fontWeight: 600, color: tokens.color.text.muted, textTransform: 'uppercase', letterSpacing: '0.04em' }}>Needs your attention</p>
+            <div style={{ marginBottom: 12, padding: '14px', borderRadius: 12, background: tokens.color.surface.panel, border: `1px solid ${tokens.color.border}` }}>
+              <p style={{ margin: '0 0 10px', fontSize: 9.5, fontWeight: 700, color: tokens.color.text.muted, textTransform: 'uppercase', letterSpacing: '0.1em' }}>Needs your attention</p>
               {SECTIONS.filter(s => s.status === 'not_started' || s.status === 'estimate_only').map((s) => (
                 <div key={s.key} style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '5px 0', fontSize: 12, color: tokens.color.text.sub }}>
-                  <span style={{ color: '#D97706', fontSize: 14 }}>&bull;</span> {s.label} — {s.status === 'not_started' ? 'no data yet' : 'needs confirmation'}
+                  <span style={{ width: 6, height: 6, borderRadius: 999, background: '#D97706', flexShrink: 0 }} />
+                  {s.label} — {s.status === 'not_started' ? 'no data yet' : 'needs confirmation'}
                 </div>
               ))}
             </div>
+
+            {/* Share CTA */}
+            <Link href="/dev/proto/share-flow" style={{
+              display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
+              width: '100%', height: 46, borderRadius: 11, border: 'none',
+              background: '#9A3412', color: '#fff', fontSize: 14, fontWeight: 600,
+              textDecoration: 'none', cursor: 'pointer',
+            }}>
+              Share with Mark
+              {deltaCount > 0 && (
+                <span style={{ background: 'rgba(255,255,255,0.2)', padding: '1px 7px', borderRadius: 999, fontSize: 12 }}>{deltaCount}</span>
+              )}
+            </Link>
           </aside>
         </div>
       )}
