@@ -106,28 +106,44 @@ function SelectView({ scenarios, onSelect, onLaunchLive, onSimulateError }: {
 }) {
   return (
     <>
-      <button type="button" onClick={onLaunchLive} style={{
-        width: '100%', padding: '16px 20px', borderRadius: 10, border: 'none',
-        background: tokens.color.ink, color: '#fff', fontWeight: 600,
-        fontSize: tokens.type['14-5'], cursor: 'pointer', fontFamily: tokens.font.sans,
-        marginBottom: 8,
-      }}>
-        Connect with Open Banking
-      </button>
-      <p style={{ margin: '0 0 28px', fontSize: 12, color: tokens.color.text.muted, textAlign: 'center' }}>
-        Launches Tink Link — requires configured credentials
+      <p style={{ margin: '0 0 20px', fontSize: tokens.type['14-5'], color: tokens.color.text.sub, lineHeight: 1.55 }}>
+        Choose a data source. Use a test scenario for instant demo data, or connect your real bank via Open Banking.
       </p>
 
+      {/* Live Tink connection */}
       <div style={{
-        display: 'flex', alignItems: 'center', gap: 12, marginBottom: 20,
+        padding: '18px', borderRadius: 12, marginBottom: 16,
+        border: `1px solid ${tokens.color.border}`, background: tokens.color.surface.panel,
       }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 10 }}>
+          <span style={{ width: 28, height: 28, borderRadius: 8, background: '#DBEAFE', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', fontSize: 14, fontWeight: 700, color: '#1E40AF' }}>
+            ⚡
+          </span>
+          <div>
+            <div style={{ fontSize: 14, fontWeight: 600, color: tokens.color.ink }}>Live bank connection</div>
+            <div style={{ fontSize: 11, color: tokens.color.text.muted }}>Open Banking via Tink — real transaction data</div>
+          </div>
+        </div>
+        <button type="button" onClick={onLaunchLive} style={{
+          width: '100%', padding: '12px 16px', borderRadius: 8, border: 'none',
+          background: tokens.color.ink, color: '#fff', fontWeight: 600,
+          fontSize: 13, cursor: 'pointer', fontFamily: tokens.font.sans,
+        }}>
+          Connect with Open Banking
+        </button>
+        <p style={{ margin: '6px 0 0', fontSize: 11, color: tokens.color.text.muted, textAlign: 'center' }}>
+          Requires Tink credentials in Vercel env
+        </p>
+      </div>
+
+      {/* Divider */}
+      <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 16 }}>
         <div style={{ flex: 1, height: 1, background: tokens.color.border }} />
-        <span style={{ fontSize: 12, color: tokens.color.text.muted, fontFamily: tokens.font.mono }}>
-          Dev: test scenarios
-        </span>
+        <span style={{ fontSize: 11, color: tokens.color.text.muted, textTransform: 'uppercase', letterSpacing: '0.06em', fontWeight: 600 }}>or use test data</span>
         <div style={{ flex: 1, height: 1, background: tokens.color.border }} />
       </div>
 
+      {/* Test scenarios */}
       <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
         {scenarios.map((s) => (
           <button key={s.id} type="button" onClick={() => onSelect(s)} style={{
