@@ -10,6 +10,7 @@ type State =
   | { phase: 'select' }
   | { phase: 'connecting' }
   | { phase: 'success'; scenario: TestScenario }
+  | { phase: 'analysing'; scenario: TestScenario }
   | { phase: 'error'; message: string };
 
 export default function BankConnectPage() {
@@ -83,7 +84,8 @@ export default function BankConnectPage() {
           />
         )}
         {state.phase === 'connecting' && <ConnectingView />}
-        {state.phase === 'success' && <SuccessView scenario={state.scenario} />}
+        {state.phase === 'success' && <SuccessView scenario={state.scenario} onAnalyse={() => setState({ phase: 'analysing', scenario: state.scenario })} />}
+        {state.phase === 'analysing' && <AnalysingView scenario={state.scenario} />}
         {state.phase === 'error' && (
           <ErrorView message={state.message} onRetry={() => setState({ phase: 'select' })} />
         )}
@@ -179,7 +181,7 @@ function ConnectingView() {
   );
 }
 
-function SuccessView({ scenario }: { scenario: TestScenario }) {
+function SuccessView({ scenario, onAnalyse }: { scenario: TestScenario; onAnalyse: () => void }) {
   const dateRange = scenario.transactions.length > 0
     ? `${scenario.transactions[0].date} — ${scenario.transactions[scenario.transactions.length - 1].date}`
     : 'No date range';
@@ -228,25 +230,92 @@ function SuccessView({ scenario }: { scenario: TestScenario }) {
         + Connect another bank
       </button>
 
-      <div style={{
-        padding: '12px 16px', borderRadius: 8, marginBottom: 20,
-        background: tokens.color.phase.build.soft, textAlign: 'left',
-        border: `1px solid ${tokens.color.phase.build.accent}20`,
-      }}>
-        <p style={{ margin: 0, fontSize: 12, color: tokens.color.text.sub, lineHeight: 1.5 }}>
-          Next step: section-by-section confirmation of what we found (Moment 3).
-          This flow is not yet built — continuing to dashboard for now.
-        </p>
-      </div>
 
-      <Link href="/dev/proto/extraction-results" style={{
+      <button type="button" onClick={onAnalyse} style={{
         display: 'block', width: '100%', padding: '14px 20px', borderRadius: 10,
         background: tokens.color.ink, color: '#fff', fontWeight: 600,
-        fontSize: tokens.type['14-5'], textAlign: 'center', textDecoration: 'none',
-        fontFamily: tokens.font.sans,
+        fontSize: tokens.type['14-5'], textAlign: 'center', cursor: 'pointer',
+        fontFamily: tokens.font.sans, border: 'none',
       }}>
-        See what we found &rarr;
-      </Link>
+        Analyse my data
+      </button>
+    </div>
+  );
+}
+
+function AnalysingView({ scenario }: { scenario: TestScenario }) {
+  const steps = [
+    'Reading transactions…',
+    'Identifying income sources…',
+    'Categorising spending…',
+    'Detecting recurring payments…',
+    'Building your financial picture…',
+  ];
+  const [step, setStep] = useState(0);
+  const [done, setDone] = useState(false);
+
+  useEffect(() => {
+    if (step < steps.length - 1) {
+      const t = setTimeout(() => setStep(s => s + 1), 1200);
+      return () => clearTimeout(t);
+    }
+    const t = setTimeout(() => setDone(true), 1400);
+    return () => clearTimeout(t);
+  }, [step, steps.length]);
+
+  return (
+    <div style={{ textAlign: 'center', padding: '48px 0' }}>
+      <div style={{
+        width: 64, height: 64, margin: '0 auto 24px', borderRadius: '50%',
+        background: tokens.color.phase.build.soft,
+        display: 'flex', alignItems: 'center', justifyContent: 'center',
+      }}>
+        {done
+          ? <span style={{ fontSize: 28, color: tokens.color.phase.finalise.accent }}>&#10003;</span>
+          : <div style={{
+              width: 32, height: 32, borderRadius: '50%',
+              border: `3px solid ${tokens.color.border}`,
+              borderTopColor: tokens.color.phase.build.accent,
+              animation: 'spin 1s linear infinite',
+            }} />}
+      </div>
+      <style>{`@keyframes spin { to { transform: rotate(360deg) } }`}</style>
+
+      <h2 style={{ margin: '0 0 8px', fontSize: tokens.type['21'], fontWeight: 600, color: tokens.color.ink }}>
+        {done ? 'Analysis complete' : 'Analysing your data…'}
+      </h2>
+      <p style={{ margin: '0 0 24px', fontSize: tokens.type['14-5'], color: tokens.color.text.sub }}>
+        {done
+          ? `We found ${scenario.transactions.length} transactions across 12 months.`
+          : steps[step]}
+      </p>
+
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 4, maxWidth: 280, margin: '0 auto 28px' }}>
+        {steps.map((s, i) => (
+          <div key={s} style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '3px 0' }}>
+            <span style={{ fontSize: 14, color: i <= step ? tokens.color.phase.finalise.accent : tokens.color.border }}>
+              {i < step || done ? '✓' : i === step ? '•' : '○'}
+            </span>
+            <span style={{
+              fontSize: 13, color: i <= step ? tokens.color.ink : tokens.color.text.muted,
+              fontWeight: i === step && !done ? 600 : 400,
+            }}>
+              {s}
+            </span>
+          </div>
+        ))}
+      </div>
+
+      {done && (
+        <Link href="/dev/proto/extraction-results" style={{
+          display: 'block', width: '100%', padding: '14px 20px', borderRadius: 10,
+          background: tokens.color.ink, color: '#fff', fontWeight: 600,
+          fontSize: tokens.type['14-5'], textAlign: 'center', textDecoration: 'none',
+          fontFamily: tokens.font.sans,
+        }}>
+          See what we found &rarr;
+        </Link>
+      )}
     </div>
   );
 }

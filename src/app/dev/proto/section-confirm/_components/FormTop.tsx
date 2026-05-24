@@ -8,8 +8,8 @@ export function FormTop({ title, step, backHref = '/dev/proto/section-confirm' }
   return (
     <div
       style={{
-        height: 48,
-        padding: '0 16px',
+        height: 52,
+        padding: '0 20px',
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'space-between',

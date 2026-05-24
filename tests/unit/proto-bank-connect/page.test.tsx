@@ -87,23 +87,10 @@ describe('/dev/proto/bank-connect page', () => {
     expect(screen.getByTestId('connect-another')).toBeTruthy();
   });
 
-  it('shows Moment 3 gap notice (reconciliation flag)', () => {
+  it('shows "Analyse my data" button in success state (AC-3)', () => {
     render(<Page />);
     fireEvent.click(screen.getByText(/Sarah/));
-    expect(screen.getByText(/Moment 3/i)).toBeTruthy();
-  });
-
-  it('shows "See what we found" CTA in success state (AC-3)', () => {
-    render(<Page />);
-    fireEvent.click(screen.getByText(/Sarah/));
-    expect(screen.getByRole('link', { name: /what we found/i })).toBeTruthy();
-  });
-
-  it('CTA links to extraction-results (AC-3)', () => {
-    render(<Page />);
-    fireEvent.click(screen.getByText(/Sarah/));
-    const link = screen.getByRole('link', { name: /what we found/i });
-    expect(link.getAttribute('href')).toBe('/dev/proto/extraction-results');
+    expect(screen.getByRole('button', { name: /analyse my data/i })).toBeTruthy();
   });
 
   it('shows "Try again" button in error state (AC-4)', () => {

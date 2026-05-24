@@ -26,12 +26,12 @@ export default function ManualEntryPage() {
   };
 
   return (
-    <main style={{ height: '100vh', background: tokens.color.surface.page, display: 'flex', flexDirection: 'column', overflow: 'hidden', fontFamily: tokens.font.sans }}>
+    <main style={{ minHeight: '100vh', background: tokens.color.surface.page, display: 'flex', flexDirection: 'column',  fontFamily: tokens.font.sans }}>
       <FormTop title="Manual entry" step="Add item" />
       <div style={{ flex: 1, overflow: 'auto', padding: '14px 16px 40px' }}>
         <AIMarginCard title="Add a missing transaction" body="Can't find a transaction? Add it manually — cash payments, private sales, gifts, or anything not in your bank data." />
 
-        <div style={{ maxWidth: 480, margin: '16px auto 0', display: 'flex', flexDirection: 'column', gap: 18 }}>
+        <div style={{ maxWidth: 640, margin: '16px auto 0', display: 'flex', flexDirection: 'column', gap: 18 }}>
           <div>
             <label htmlFor="me-desc" style={labelStyle}>Description</label>
             <input id="me-desc" type="text" placeholder="e.g. Cash rent from lodger" style={fieldStyle} />

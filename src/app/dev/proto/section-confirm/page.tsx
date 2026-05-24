@@ -2,6 +2,7 @@
 
 import Link from 'next/link';
 import { tokens } from '@/styles/tokens';
+import { SignedInHeader } from '@/components/layout/signed-in-header';
 
 type SectionRow = {
   key: string;
@@ -54,10 +55,9 @@ export default function SectionConfirmHubPage() {
   const pct = Math.round((totalA / totalQ) * 100);
 
   return (
-    <main style={{
-      minHeight: '100vh', background: tokens.color.surface.page,
-      fontFamily: tokens.font.sans, color: tokens.color.ink, padding: '32px 20px 64px',
-    }}>
+    <div style={{ minHeight: '100vh', background: tokens.color.surface.page, fontFamily: tokens.font.sans, color: tokens.color.ink }}>
+      <SignedInHeader pageLabel="Confirm your data" />
+    <main style={{ padding: '28px 20px 64px' }}>
       <div style={{ maxWidth: 640, margin: '0 auto' }}>
         <Link href="/dev/proto/extraction-results" style={{
           display: 'inline-block', fontSize: 12, color: tokens.color.text.sub,
@@ -65,7 +65,6 @@ export default function SectionConfirmHubPage() {
         }}>
           &larr; Back to what we found
         </Link>
-
         <h1 style={{
           fontFamily: tokens.font.serif, fontSize: 28, fontWeight: 600,
           letterSpacing: '-0.015em', margin: '0 0 8px',
@@ -136,5 +135,6 @@ export default function SectionConfirmHubPage() {
         </Link>
       </div>
     </main>
+    </div>
   );
 }

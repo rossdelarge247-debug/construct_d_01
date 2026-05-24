@@ -10,12 +10,12 @@ export default function BalanceCheckPage() {
   const [choice, setChoice] = useState<string>('confirm');
 
   return (
-    <main style={{ height: '100vh', background: tokens.color.surface.page, display: 'flex', flexDirection: 'column', overflow: 'hidden', fontFamily: tokens.font.sans }}>
+    <main style={{ minHeight: '100vh', background: tokens.color.surface.page, display: 'flex', flexDirection: 'column',  fontFamily: tokens.font.sans }}>
       <FormTop title="Confirm balance" step="Q21 of 22" />
       <div style={{ flex: 1, overflow: 'auto', padding: '14px 16px 40px' }}>
         <AIMarginCard title="Verify your balance" body="We detected your closing balance from your connected bank data. Please confirm it's correct, or enter the actual figure." />
 
-        <div style={{ maxWidth: 480, margin: '16px auto 0' }}>
+        <div style={{ maxWidth: 640, margin: '16px auto 0' }}>
           <div style={{
             padding: '20px', borderRadius: 12, background: tokens.color.surface.panel,
             border: `1px solid ${tokens.color.border}`, textAlign: 'center', marginBottom: 24,

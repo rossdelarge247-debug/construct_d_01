@@ -21,12 +21,12 @@ export default function SplitPage() {
   };
 
   return (
-    <main style={{ height: '100vh', background: tokens.color.surface.page, display: 'flex', flexDirection: 'column', overflow: 'hidden', fontFamily: tokens.font.sans }}>
+    <main style={{ minHeight: '100vh', background: tokens.color.surface.page, display: 'flex', flexDirection: 'column',  fontFamily: tokens.font.sans }}>
       <FormTop title="Split transaction" step="Q19 of 22" />
       <div style={{ flex: 1, overflow: 'auto', padding: '14px 16px 40px' }}>
         <AIMarginCard title="Split across categories" body="This transaction looks like it might cover more than one category. Split it so each part is counted correctly." />
 
-        <div style={{ maxWidth: 480, margin: '16px auto 0' }}>
+        <div style={{ maxWidth: 640, margin: '16px auto 0' }}>
           <p style={{ margin: '0 0 8px', fontSize: 12, fontWeight: 600, color: tokens.color.text.muted, textTransform: 'uppercase', letterSpacing: '0.04em' }}>
             Original transaction
           </p>

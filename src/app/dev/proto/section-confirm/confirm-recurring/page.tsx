@@ -11,11 +11,11 @@ export default function ConfirmRecurringPage() {
   return (
     <main
       style={{
-        height: '100vh',
+        minHeight: '100vh',
         background: tokens.color.surface.page,
         display: 'flex',
         flexDirection: 'column',
-        overflow: 'hidden',
+        
         fontFamily: tokens.font.sans,
       }}
     >
@@ -28,7 +28,7 @@ export default function ConfirmRecurringPage() {
           display: 'flex',
           flexDirection: 'column',
           gap: 12,
-          maxWidth: 420,
+          maxWidth: 640,
           margin: '0 auto',
           width: '100%',
         }}
@@ -54,12 +54,12 @@ export default function ConfirmRecurringPage() {
             Detected · 12 months
           </div>
           <TxnRow
-            logo="O"
-            logoBg="#FEF3C7"
-            logoColor="#92400E"
-            merchant="Octopus Energy"
-            sub="DD · 12 of 12 months · £142–£218"
-            amount="£178/mo avg"
+            logo="H"
+            logoBg="#DBEAFE"
+            logoColor="#1E40AF"
+            merchant="Halifax Mortgage"
+            sub="DD · 12 of 12 months · £1,150"
+            amount="£1,150/mo"
           />
         </div>
 
@@ -113,9 +113,9 @@ export default function ConfirmRecurringPage() {
             </span>
           </div>
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10, marginTop: 10 }}>
-            <Field label="Category" value="Utilities · Energy" />
-            <Field label="Whose" value="Joint household" />
-            <Field label="Monthly" value="£178.00" tabular />
+            <Field label="Category" value="Housing · Mortgage" />
+            <Field label="Whose" value="Joint (Sarah & Mark)" />
+            <Field label="Monthly" value="£1,150.00" tabular />
             <Field label="Frequency" value="Monthly DD" />
           </div>
           <button
@@ -138,10 +138,10 @@ export default function ConfirmRecurringPage() {
         <AIMarginCard
           kind="tip"
           severity="info"
-          title="Average across 12 months — winter months are higher."
-          body="Energy bills on variable tariffs swing seasonally. The £178/mo we use is the trailing 12-month mean (range £142–£218). For a needs-based budget this is the figure courts expect."
-          citation="Form E §3 · Recurring expenditure"
-          relatedTo={{ label: 'Spending · Utilities' }}
+          title="Consistent across all 12 months — fixed-rate mortgage."
+          body="Your Halifax mortgage payment of £1,150 has been the same every month for the past 12 months, consistent with a fixed-rate deal. This is your largest single outgoing and goes into both housing costs and the property section of your picture."
+          citation="Form E §2.1 · Property / §3 · Housing costs"
+          relatedTo={{ label: 'Property · Mortgage' }}
         />
       </div>
 
@@ -152,7 +152,7 @@ export default function ConfirmRecurringPage() {
           borderTop: `1px solid ${tokens.color.border}`,
           display: 'flex',
           gap: 8,
-          maxWidth: 420,
+          maxWidth: 640,
           margin: '0 auto',
           width: '100%',
         }}

@@ -9,11 +9,11 @@ describe('section-confirm categorise page', () => {
     expect(screen.getByText('Q20 of 22')).toBeTruthy();
   });
 
-  it('renders anchor TxnRow (Aviva £1,250.00 with negative sign)', () => {
+  it('renders anchor TxnRow (Aviva £42.50 with negative sign)', () => {
     render(<CategorisePage />);
     expect(screen.getByText('Aviva Life Insurance')).toBeTruthy();
     expect(screen.getByText('DD · monthly · since 2019')).toBeTruthy();
-    expect(screen.getByText('−£1,250.00')).toBeTruthy();
+    expect(screen.getByText('−£42.50')).toBeTruthy();
   });
 
   it('renders the question heading', () => {
