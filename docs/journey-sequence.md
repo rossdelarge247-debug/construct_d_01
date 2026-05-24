@@ -180,6 +180,7 @@ Marketing  →  Interview  →  Sign-up  →  Welcome  →  [Hub]  →  Build fo
 | E-7 | Pre-flight advisory (#45) | Small |
 | E-8 | Trust band (#49) | Small |
 | E-9 | Reconcile waiting states (#5 in SESSION-CONTEXT) | Medium |
+| E-10 | Live AI tips in section-confirm forms — call Anthropic API with extraction context to generate contextual tips (currently hardcoded copy); schemas + route exist at `api/test-pipeline` | Medium |
 
 ## Rules
 
