@@ -154,7 +154,7 @@ export default function SafeguardingSignpostingPage() {
 
         <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
           <Link
-            href="/dev/proto"
+            href="/dev/proto/moment-1-ack"
             style={{
               ...ctaBase,
               background: tokens.color.ink,

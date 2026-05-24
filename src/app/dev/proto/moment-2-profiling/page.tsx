@@ -248,7 +248,7 @@ function StepP6() {
         <li>Closed accounts in the last 12 months — we&rsquo;ll ask about these after we see what you connect</li>
       </ul>
       <Link
-        href="/dev/proto"
+        href="/dev/proto/bank-connect"
         style={{
           display: 'block', width: '100%', padding: '14px 20px',
           background: tokens.color.ink, color: '#fff', borderRadius: 10,

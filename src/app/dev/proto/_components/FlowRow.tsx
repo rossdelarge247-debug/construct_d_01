@@ -5,6 +5,9 @@ import { ConfidenceBadge } from './ConfidenceBadge';
 
 export function FlowRow({ row }: { row: RegistryRow }) {
   const topQuestion = row.openQuestions[0];
+  const protoPath = row.links.prototype
+    ? '/' + row.links.prototype.replace(/\/$/, '').replace(/^src\/app\//, '')
+    : `/dev/proto/${row.id}`;
   const isClickable = row.status !== 'not-started';
 
   return (
@@ -25,7 +28,7 @@ export function FlowRow({ row }: { row: RegistryRow }) {
           }}
         >
           {isClickable ? (
-            <Link href={`/dev/proto/${row.id}`} style={{ color: 'inherit', textDecoration: 'underline' }}>
+            <Link href={protoPath} style={{ color: 'inherit', textDecoration: 'underline' }}>
               {row.title}
             </Link>
           ) : (

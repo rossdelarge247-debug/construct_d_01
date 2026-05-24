@@ -91,7 +91,7 @@ export default function Moment1AckPage() {
         </p>
 
         <Link
-          href="/dev/proto"
+          href="/dev/proto/moment-2-profiling"
           style={{
             display: 'block',
             width: '100%',
