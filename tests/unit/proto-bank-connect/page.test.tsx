@@ -52,7 +52,7 @@ describe('/dev/proto/bank-connect page', () => {
 
   it('renders scenario cards from test-scenarios (AC-1)', () => {
     render(<Page />);
-    expect(screen.getByText(/Sarah/)).toBeTruthy();
+    expect(screen.getByText(/Sarah — /)).toBeTruthy();
     expect(screen.getByText(/Marcus/)).toBeTruthy();
   });
 
@@ -64,32 +64,32 @@ describe('/dev/proto/bank-connect page', () => {
 
   it('transitions to success state when a scenario card is clicked (AC-1 + AC-3)', () => {
     render(<Page />);
-    fireEvent.click(screen.getByText(/Sarah/));
+    fireEvent.click(screen.getByText(/Sarah — /));
     expect(screen.getByText(/Bank connected/i)).toBeTruthy();
     expect(screen.getByText(/142 transactions/i)).toBeTruthy();
   });
 
   it('shows provider name in success state (AC-3)', () => {
     render(<Page />);
-    fireEvent.click(screen.getByText(/Sarah/));
+    fireEvent.click(screen.getByText(/Sarah — /));
     expect(screen.getByText(/Barclays/)).toBeTruthy();
   });
 
   it('shows connected accounts list (AC-3)', () => {
     render(<Page />);
-    fireEvent.click(screen.getByText(/Sarah/));
+    fireEvent.click(screen.getByText(/Sarah — /));
     expect(screen.getByRole('list', { name: /connected accounts/i })).toBeTruthy();
   });
 
   it('shows "+ Connect another bank" button (AC-3)', () => {
     render(<Page />);
-    fireEvent.click(screen.getByText(/Sarah/));
+    fireEvent.click(screen.getByText(/Sarah — /));
     expect(screen.getByTestId('connect-another')).toBeTruthy();
   });
 
   it('shows "Analyse my data" button in success state (AC-3)', () => {
     render(<Page />);
-    fireEvent.click(screen.getByText(/Sarah/));
+    fireEvent.click(screen.getByText(/Sarah — /));
     expect(screen.getByRole('button', { name: /analyse my data/i })).toBeTruthy();
   });
 
@@ -103,7 +103,7 @@ describe('/dev/proto/bank-connect page', () => {
     render(<Page />);
     fireEvent.click(screen.getByTestId('simulate-error'));
     fireEvent.click(screen.getByText(/try again/i));
-    expect(screen.getByText(/Sarah/)).toBeTruthy();
+    expect(screen.getByText(/Sarah — /)).toBeTruthy();
   });
 
   it('renders the Open Banking CTA (AC-2)', () => {

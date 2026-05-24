@@ -2,6 +2,7 @@
 
 import Link from 'next/link';
 import { tokens } from '@/styles/tokens';
+import { ProtoHeader } from '../_components/ProtoHeader';
 import type { SectionStatus } from '@/types/hub';
 import { useBankData } from '../_context/bank-data-context';
 import type { BankStatementExtraction } from '@/lib/ai/extraction-schemas';
@@ -93,21 +94,18 @@ export default function YourPicturePage() {
 
   return (
     <div style={{ minHeight: '100dvh', background: tokens.color.surface.page, fontFamily: tokens.font.sans }}>
-      <header style={{
-        padding: '10px 20px', display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-        borderBottom: `1px solid ${tokens.color.border}`, background: tokens.color.surface.panel,
-      }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-          <Link href="/dev/proto/section-confirm" aria-label="Back" style={{ color: tokens.color.ink, textDecoration: 'none', fontSize: 20 }}>&larr;</Link>
-          <span style={{ fontSize: tokens.type['17'], fontWeight: 600, color: tokens.color.ink }}>{scenarioName}&rsquo;s Picture</span>
-        </div>
-        <button type="button" style={{
-          padding: '8px 16px', borderRadius: 8, border: 'none',
-          background: tokens.color.ink, color: '#fff', fontSize: 13, fontWeight: 600, cursor: 'pointer',
-        }}>
-          Share with Mark
-        </button>
-      </header>
+      <ProtoHeader
+        backHref="/dev/proto/section-confirm"
+        backLabel={`${scenarioName}’s Picture`}
+        rightSlot={
+          <button type="button" style={{
+            padding: '8px 16px', borderRadius: 8, border: 'none',
+            background: tokens.color.ink, color: '#fff', fontSize: 13, fontWeight: 600, cursor: 'pointer',
+          }}>
+            Share with Mark
+          </button>
+        }
+      />
 
       {!hasData ? (
         <main style={{ maxWidth: 640, margin: '0 auto', padding: '48px 20px', textAlign: 'center' }}>

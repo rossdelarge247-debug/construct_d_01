@@ -5,7 +5,7 @@ import { useParams } from 'next/navigation';
 import Link from 'next/link';
 import { tokens } from '@/styles/tokens';
 import { useBankData } from '../../_context/bank-data-context';
-import { FormTop } from '../_components/FormTop';
+import { ProtoHeader } from '../../_components/ProtoHeader';
 import { RadioRow } from '../_components/RadioRow';
 import { AIMarginCard } from '../_components/AIMarginCard';
 import { SparkGlyph, AI_PURPLE_DEEP } from '../_components/SparkGlyph';
@@ -171,9 +171,14 @@ export default function DynamicSectionPage() {
       minHeight: '100vh', background: tokens.color.surface.page,
       display: 'flex', flexDirection: 'column', fontFamily: tokens.font.sans,
     }}>
-      <FormTop
-        title={`${label} confirmation`}
-        step={hasData && visibleSteps.length > 0 ? `${Math.min(currentStep + 1, visibleSteps.length)} of ${visibleSteps.length}` : undefined}
+      <ProtoHeader
+        backHref="/dev/proto/section-confirm"
+        backLabel={`${label} confirmation`}
+        rightSlot={hasData && visibleSteps.length > 0 ? (
+          <span style={{ fontSize: 11, color: '#9CA3AF', letterSpacing: '0.06em', textTransform: 'uppercase', fontWeight: 600 }}>
+            {Math.min(currentStep + 1, visibleSteps.length)} of {visibleSteps.length}
+          </span>
+        ) : undefined}
       />
 
       {!hasData ? (

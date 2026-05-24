@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { tokens } from '@/styles/tokens';
-import { SignedInHeader } from '@/components/layout/signed-in-header';
+import { ProtoHeader } from '../_components/ProtoHeader';
 import { useBankData } from '../_context/bank-data-context';
 import type { ConfirmationSectionKey } from '@/lib/bank/confirmation-questions';
 
@@ -47,7 +47,7 @@ export default function SectionConfirmHubPage() {
 
   return (
     <div style={{ minHeight: '100vh', background: tokens.color.surface.page, fontFamily: tokens.font.sans, color: tokens.color.ink }}>
-      <SignedInHeader pageLabel="Confirm your data" />
+      <ProtoHeader />
     <main style={{ padding: '28px 20px 64px' }}>
       <div style={{ maxWidth: 640, margin: '0 auto' }}>
         <Link href="/dev/proto/extraction-results" style={{

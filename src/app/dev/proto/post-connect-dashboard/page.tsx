@@ -4,7 +4,7 @@ import { ReactNode, Suspense, useState } from 'react';
 import { useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { tokens } from '@/styles/tokens';
-import { SignedInHeader } from '@/components/layout/signed-in-header';
+import { ProtoHeader } from '../_components/ProtoHeader';
 
 const INK = tokens.color.ink;
 const SUB = tokens.color.text.sub;
@@ -660,11 +660,7 @@ export function Dashboard({ variant = 'conservative' }: { variant?: Variant }) {
       className="flex flex-col"
       style={{ background: BG, minHeight: '100vh' }}
     >
-      <SignedInHeader
-        mode="app"
-        pageLabel="Dashboard"
-        user={{ name: 'Sarah', initial: 'S', status: 'Just joined' }}
-      />
+      <ProtoHeader />
       <main role="main" id="main" className="flex-1" style={{ background: mainBg }}>
         <div className="mx-auto" style={{ maxWidth: 960, padding: '36px 40px 80px' }}>
           <div>

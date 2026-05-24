@@ -2,6 +2,7 @@
 
 import Link from 'next/link';
 import { tokens } from '@/styles/tokens';
+import { ProtoHeader } from '../_components/ProtoHeader';
 import { useBankData } from '../_context/bank-data-context';
 import type { BankStatementExtraction } from '@/lib/ai/extraction-schemas';
 import type { ConfirmationSectionKey } from '@/lib/bank/confirmation-questions';
@@ -121,13 +122,7 @@ export default function ExtractionResultsPage() {
 
   return (
     <div style={{ minHeight: '100dvh', background: tokens.color.surface.page, fontFamily: tokens.font.sans }}>
-      <header style={{
-        padding: '12px 20px', borderBottom: `1px solid ${tokens.color.border}`,
-        background: tokens.color.surface.panel, display: 'flex', alignItems: 'center', gap: 12,
-      }}>
-        <Link href="/dev/proto/bank-connect" aria-label="Back" style={{ color: tokens.color.ink, textDecoration: 'none', fontSize: 20 }}>&larr;</Link>
-        <span style={{ fontSize: tokens.type['17'], fontWeight: 600, color: tokens.color.ink }}>Bank analysis</span>
-      </header>
+      <ProtoHeader backHref="/dev/proto/bank-connect" backLabel="Bank analysis" />
 
       <main style={{ maxWidth: 640, margin: '0 auto', padding: '28px 20px 64px' }}>
         <h1 style={{

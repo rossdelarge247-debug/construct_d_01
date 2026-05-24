@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import Link from 'next/link';
 import { tokens } from '@/styles/tokens';
+import { ProtoHeader } from '../_components/ProtoHeader';
 import { getAllTestScenarios } from '@/lib/bank/test-scenarios';
 import type { TestScenario } from '@/lib/bank/test-scenarios';
 import type { BankStatementExtraction } from '@/lib/ai/extraction-schemas';
@@ -66,17 +67,7 @@ export default function BankConnectPage() {
 
   return (
     <div style={{ minHeight: '100dvh', background: tokens.color.surface.page, fontFamily: tokens.font.sans }}>
-      <header style={{
-        padding: '12px 16px', display: 'flex', alignItems: 'center', gap: 12,
-        borderBottom: `1px solid ${tokens.color.border}`, background: tokens.color.surface.panel,
-      }}>
-        <Link href="/dev/proto" aria-label="Back" style={{ color: tokens.color.ink, textDecoration: 'none', fontSize: 20 }}>
-          &larr;
-        </Link>
-        <h1 style={{ margin: 0, fontSize: tokens.type['17'], fontWeight: 600, color: tokens.color.ink }}>
-          Connect your bank
-        </h1>
-      </header>
+      <ProtoHeader backHref="/dev/proto" backLabel="Connect your bank" />
 
       <main style={{ maxWidth: 480, margin: '0 auto', padding: '24px 20px 40px' }}>
         {state.phase === 'select' && (
