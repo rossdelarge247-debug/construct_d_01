@@ -7,13 +7,13 @@ import { useBankData } from '../_context/bank-data-context';
 import type { ConfirmationSectionKey } from '@/lib/bank/confirmation-questions';
 
 const FORM_ROUTES: Record<string, { href: string; label: string }[]> = {
-  income:    [{ href: '/dev/proto/section-confirm/categorise', label: 'Categorise income' }, { href: '/dev/proto/section-confirm/confirm-recurring', label: 'Confirm recurring' }],
-  property:  [{ href: '/dev/proto/section-confirm/confirm-recurring', label: 'Confirm mortgage' }, { href: '/dev/proto/section-confirm/manual-entry', label: 'Add property value' }],
-  accounts:  [{ href: '/dev/proto/section-confirm/balance-check', label: 'Confirm balances' }, { href: '/dev/proto/section-confirm/resolve-duplicate', label: 'Resolve duplicates' }],
-  pensions:  [{ href: '/dev/proto/section-confirm/categorise', label: 'Confirm pension type' }, { href: '/dev/proto/section-confirm/manual-entry', label: 'Add CETV' }],
-  debts:     [{ href: '/dev/proto/section-confirm/categorise', label: 'Categorise debts' }, { href: '/dev/proto/section-confirm/confirm-recurring', label: 'Confirm repayments' }],
-  business:  [],
-  other_assets: [{ href: '/dev/proto/section-confirm/manual-entry', label: 'Add asset' }],
+  income:      [{ href: '/dev/proto/section-confirm/income', label: 'Confirm income' }],
+  property:    [{ href: '/dev/proto/section-confirm/property', label: 'Confirm property' }],
+  accounts:    [{ href: '/dev/proto/section-confirm/accounts', label: 'Confirm accounts' }],
+  pensions:    [{ href: '/dev/proto/section-confirm/pensions', label: 'Confirm pensions' }],
+  debts:       [{ href: '/dev/proto/section-confirm/debts', label: 'Confirm debts' }],
+  business:    [{ href: '/dev/proto/section-confirm/business', label: 'Confirm business' }],
+  other_assets: [{ href: '/dev/proto/section-confirm/other_assets', label: 'Confirm other assets' }],
 };
 
 const SECTION_FORM_E: Record<string, string> = {
