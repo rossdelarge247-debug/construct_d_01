@@ -62,19 +62,19 @@ Build only when questions 1-3 are answered. If canvas or spec is insufficient, f
 | 12 | Moment 2 pre-bank profiling | `moment-2-profiling` | DONE | Spec 67 L128-560 | Built — P1 property, P2 self-employed (3), P4 pensions (3), P6 heads-up |
 | 13 | Safeguarding signposting | `safeguarding-signposting` | DONE | Spec 67 L813-845 | Built — crisis helplines, 3 CTAs, Exit this page component |
 
-**Stage 4 verdict:** Welcome tour is built. Moments 1+2 are blocked on canvas/copy — skip for now; wire welcome-tour exit directly to hub.
+**Stage 4 verdict:** COMPLETE. Welcome tour, safeguarding signposting, Moment 1 acknowledgement, and Moment 2 pre-bank profiling all built.
 
 ### Stage 5 — Bank connection
 
 | # | Flow | Registry ID | Status | Source material | Wiring gap |
 |---|------|------------|--------|-----------------|------------|
-| 14 | Bank picker | `bank-picker` | BLOCKED | Spec only; no canvas | Search vs popular-banks UX unresolved |
-| 15 | Tink iframe mid-flow | `tink-mid-flow` | N/A | Backend-dependent (Tink SDK) | Not prototypable as static UI |
-| 16 | Callback success | `callback-success` | BLOCKED | No canvas, no spec detail | Transition animation unresolved |
-| 17 | Callback error/retry | `callback-error-retry` | BLOCKED | No canvas, no spec detail | Error taxonomy needed |
-| 18 | Manual entry fallback | `manual-entry-fallback` | BLOCKED | No canvas | When-offered rules needed |
+| 14 | Bank picker | `bank-picker` | READY | Tink Link IS the picker; `/api/bank/connect` route generates URL; `tink-client.ts` (321L) | Prototype UI wrapper needed |
+| 15 | Tink iframe mid-flow | `tink-mid-flow` | READY | Popup mode in callback route; handles popup/iframe/redirect | Prototype chrome around Tink Link popup |
+| 16 | Callback success | `callback-success` | READY | Full pipeline at `/api/bank/callback` (133L): auth exchange → accounts → transactions → transform → postMessage | Success confirmation UI needed |
+| 17 | Callback error/retry | `callback-error-retry` | READY | `redirectWithError()` exists in callback route | Error UI + retry CTA needed |
+| 18 | Manual entry fallback | `manual-entry-fallback` | PARTIALLY READY | `test-scenarios.ts` (644L) provides data shape; no entry UI yet | Entry form + scenario loader needed |
 
-**Stage 5 verdict:** Entire bank-connect stage is blocked or N/A for prototyping. For journey walkthrough: stub as a single "Bank connected" transition screen that jumps to hub.
+**Stage 5 verdict:** NOT blocked. 3,801 lines of existing Tink integration + 5 synthetic test scenarios exist from V2 foundational work. The heavy backend is done. Prototype work: build a bank-connect screen that launches Tink Link (live) or loads test scenarios (dev mode), shows success/error states, wires to hub. Biggest opportunity in the journey for reuse.
 
 ### Stage 6 — Hub + Build (Sarah's Picture)
 
