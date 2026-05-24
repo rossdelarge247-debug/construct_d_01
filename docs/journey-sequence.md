@@ -90,7 +90,7 @@ Build only when questions 1-3 are answered. If canvas or spec is insufficient, f
 | 26 | Bank-rec: Split | `bank-rec-split` | READY | Artboard in mobile-screens-v2 | Canvas-port needed |
 | 27 | Bank-rec: Balance check | `bank-rec-balance-check` | READY | Artboard in mobile-screens-v2 | Canvas-port needed |
 | 28 | Hidden-asset prompts | `hidden-asset-prompts` | BLOCKED | Spec only | Trigger criteria needed |
-| 29 | Your Picture (private) | `your-picture-private` | READY | Artboard in mobile-screens-v2 ("Your Picture" + "Build your picture") | Canvas-port needed — umbrella container for forms |
+| 29 | Your Picture (private) | `your-picture-private` | DONE | Spec 68b 3-column layout + canvas + V2 hub.ts types | Built — TOC rail, §-numbered sections, snapshot + data sources + todos rails |
 | 30 | Document picker | `document-picker` | BLOCKED | No canvas, no spec | Upload UX needed |
 | 31 | Hub state B (review) | `hub-state-b-review` | BLOCKED | No canvas | Trigger criteria needed |
 | 32 | Hub Day 7 (state F) | `hub-day-7-state-f` | DONE | Own canvas at `docs/design-source/post-connect-dashboard/` | Built (post-connect dashboard) |
