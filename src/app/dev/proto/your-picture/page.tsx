@@ -544,7 +544,7 @@ export default function YourPicturePage() {
               <h4 className={styles.footerHeading}>{col.heading}</h4>
               {col.links.map(link => (
                 <div key={link} style={{ marginBottom: 6 }}>
-                  <a href="#" className={styles.footerLink}>{link}</a>
+                  <span className={styles.footerLink}>{link}</span>
                 </div>
               ))}
             </div>

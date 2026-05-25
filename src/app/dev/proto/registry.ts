@@ -61,7 +61,7 @@ export const registry: RegistryRow[] = [
   row({ id: 'bank-rec-split', title: 'Bank-rec: Split', section: 'build', status: 'prototype-built', confidence: 'high', links: { canvas: 'docs/design-source/mobile-screens-v2/', prototype: 'src/app/dev/proto/section-confirm/split/' } }),
   row({ id: 'bank-rec-balance-check', title: 'Bank-rec: Balance check', section: 'build', status: 'prototype-built', confidence: 'high', links: { canvas: 'docs/design-source/mobile-screens-v2/', prototype: 'src/app/dev/proto/section-confirm/balance-check/' } }),
   row({ id: 'hidden-asset-prompts', title: 'Hidden-asset prompts', section: 'build', status: 'spec-only', confidence: 'low-blocked', openQuestions: ['Trigger criteria?'] }),
-  row({ id: 'your-picture-private', title: 'Your Picture (private mode)', section: 'build', status: 'prototype-built', confidence: 'high', links: { canvas: 'docs/design-source/mobile-screens-v2/', prototype: 'src/app/dev/proto/your-picture/' } }),
+  row({ id: 'your-picture-private', title: 'Your Picture (private mode)', section: 'build', status: 'prototype-built', confidence: 'high', lastTouched: { session: 124, date: '2026-05-25' }, links: { canvas: 'docs/design-source/mobile-screens-v2/', prototype: 'src/app/dev/proto/your-picture/' } }),
   row({ id: 'document-picker', title: 'Document picker', section: 'build', status: 'not-started', confidence: 'low-blocked', openQuestions: ['Upload UX + document types?'] }),
 
   // §7 · Reconcile
