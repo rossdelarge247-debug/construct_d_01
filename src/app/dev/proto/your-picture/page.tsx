@@ -110,7 +110,7 @@ function NavSection({ items, depth = 0 }: { items: NavItem[]; depth?: number }) 
 }
 
 export default function YourPicturePage() {
-  const { extractions, scenario } = useBankData();
+  const { extractions, scenario, allScenarios, loadScenario, clear } = useBankData();
   const { answers: profiling } = useProfiling();
   const [bankOpen, setBankOpen] = useState(false);
   const [childrenDisclosed, setChildrenDisclosed] = useState(true);
@@ -132,6 +132,24 @@ export default function YourPicturePage() {
     const mp = extractions.flatMap(e => e.regular_payments).find(p => p.likely_category === 'mortgage');
     return mp ? mp.amount * 12 * 20 : 220000;
   }, [extractions]);
+
+  const bankProviders = useMemo(() => {
+    if (!hasData) return [
+      { name: 'Barclays', accounts: [{ type: 'Current', last4: '2312', joint: false }, { type: 'Joint', last4: '7818', joint: true }] },
+      { name: 'Monzo', accounts: [{ type: 'Current', last4: '2312', joint: false }] },
+    ];
+    const grouped: Record<string, { type: string; last4: string; joint: boolean }[]> = {};
+    for (const ext of extractions) {
+      if (!grouped[ext.provider]) grouped[ext.provider] = [];
+      grouped[ext.provider].push({ type: ext.account_type, last4: ext.account_number_last4 ?? '0000', joint: ext.is_joint });
+    }
+    return Object.entries(grouped).map(([name, accounts]) => ({ name, accounts }));
+  }, [extractions, hasData]);
+
+  const transactionCount = useMemo(() => {
+    if (!hasData) return 247;
+    return extractions.flatMap(e => e.spending_categories).reduce((s, c) => s + c.transaction_count, 0);
+  }, [extractions, hasData]);
 
   return (
     <div className={styles.page}>
@@ -183,6 +201,15 @@ export default function YourPicturePage() {
         <label className={styles.toggleLabel}>
           <input type="checkbox" checked={hasShared} onChange={() => setHasShared(!hasShared)} /> Post-share state
         </label>
+        <select
+          value={scenario?.id ?? ''}
+          onChange={e => e.target.value ? loadScenario(e.target.value) : clear()}
+          style={{ fontSize: 11, padding: '2px 4px', borderRadius: 4 }}
+        >
+          <option value="">Hardcoded fallback</option>
+          {allScenarios.map(s => <option key={s.id} value={s.id}>{s.name}</option>)}
+        </select>
+        {hasData && <span style={{ fontSize: 11, color: 'var(--ds-color-status-confirmed-text)' }}>● Live: {scenario?.name}</span>}
       </div>
 
       {/* 3-column layout */}
@@ -216,7 +243,7 @@ export default function YourPicturePage() {
           </h1>
           <p className={styles.description}>
             A structured record of what you own, owe, earn and spend, as of 20 April 2026.
-            Based on 247 transactions across 12 months from your connected accounts, plus items you&rsquo;ve added yourself.
+            Based on {transactionCount} transactions across 12 months from your connected accounts, plus items you&rsquo;ve added yourself.
           </p>
 
           {/* G3: Bank accounts accordion */}
@@ -236,43 +263,26 @@ export default function YourPicturePage() {
             </button>
             {bankOpen && (
               <div className={styles.accordionContent}>
-                {/* Barclays */}
-                <div className={styles.bankProvider}>
-                  <div className={styles.bankProviderHeader}>
-                    <div>
-                      <span className={styles.bankProviderName}>Barclays</span>
-                      <span className={styles.bankProviderExpiry}>This connection last for 87 days</span>
+                {bankProviders.map(provider => (
+                  <div key={provider.name} className={styles.bankProvider}>
+                    <div className={styles.bankProviderHeader}>
+                      <div>
+                        <span className={styles.bankProviderName}>{provider.name}</span>
+                        <span className={styles.bankProviderExpiry}>Connected · 12 months of data</span>
+                      </div>
+                      <button type="button" className={styles.btnDisconnect}>
+                        Disconnect and clear data
+                      </button>
                     </div>
-                    <button type="button" className={styles.btnDisconnect}>
-                      Disconnect and clear data
-                    </button>
-                  </div>
-                  <div className={styles.bankAccounts}>
-                    <div className={styles.bankAccountRow}>
-                      <span className={styles.bankAccountCheck}>✓</span> Current account xxxx2312 &nbsp; 12 months of transaction data from 9th April 2027
-                    </div>
-                    <div className={styles.bankAccountRow}>
-                      <span className={styles.bankAccountCheck}>✓</span> Joint account xxxx7818 &nbsp; 12 months of transaction data from 9th April 2027
-                    </div>
-                  </div>
-                </div>
-                {/* Monzo */}
-                <div className={styles.bankProvider}>
-                  <div className={styles.bankProviderHeader}>
-                    <div>
-                      <span className={styles.bankProviderName}>Monzo</span>
-                      <span className={styles.bankProviderExpiry}>This connection last for 72 days</span>
-                    </div>
-                    <button type="button" className={styles.btnDisconnect}>
-                      Disconnect and clear data
-                    </button>
-                  </div>
-                  <div className={styles.bankAccounts}>
-                    <div className={styles.bankAccountRow}>
-                      <span className={styles.bankAccountCheck}>✓</span> Current account xxxx2312 &nbsp; 12 months of transaction data from 9th April 2027
+                    <div className={styles.bankAccounts}>
+                      {provider.accounts.map(acc => (
+                        <div key={acc.last4} className={styles.bankAccountRow}>
+                          <span className={styles.bankAccountCheck}>✓</span> {acc.joint ? 'Joint' : acc.type} account xxxx{acc.last4} &nbsp; 12 months of transaction data
+                        </div>
+                      ))}
                     </div>
                   </div>
-                </div>
+                ))}
                 <button type="button" className={`${styles.btn} ${styles.btnSuccess}`}>
                   Connect another bank
                 </button>
