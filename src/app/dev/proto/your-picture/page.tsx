@@ -1,24 +1,60 @@
 'use client';
 
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import Link from 'next/link';
 import { useBankData } from '../_context/bank-data-context';
+import { useProfiling } from '../_context/profiling-context';
+import type { BankStatementExtraction } from '@/lib/ai/extraction-schemas';
 import styles from './your-picture.module.css';
 
-const SNAPSHOT = [
+const FALLBACK_SNAPSHOT = [
   { label: 'Net position', value: '£54,560', negative: false },
   { label: 'Assets', value: '£282,240', negative: false },
   { label: 'Debts', value: '(£227,680)', negative: true },
   { label: 'Monthly gap', value: '(£892)', negative: true },
 ];
 
-const OUTGOINGS = [
+const FALLBACK_OUTGOINGS: OutgoingItem[] = [
   { icon: '🏠', label: 'Household utilities & maintenance', amount: '£300 p/m', sub: null },
   { icon: '🏠', label: 'Personal & Living Expenses', amount: '£380 p/m', sub: null },
   { icon: '🚗', label: 'Transportation costs', amount: '£560 p/m', sub: null },
   { icon: '👶', label: 'Child expenses', amount: '£400 p/m', sub: 'Nursery… Clothing…' },
   { icon: '🏠', label: 'Leisure & other expenditure', amount: '£250 p/m', sub: 'Gym… Cinema…' },
 ];
+
+type OutgoingItem = { icon: string; label: string; amount: string; sub: string | null };
+
+const CATEGORY_ICONS: Record<string, string> = {
+  Housing: '🏠', Groceries: '🛒', Transport: '🚗', Utilities: '🏠',
+  'Dining & entertainment': '🍽️', Childcare: '👶', Subscriptions: '📺',
+  Insurance: '🛡️',
+};
+
+function buildSnapshot(exts: BankStatementExtraction[]) {
+  const totalBalance = exts.reduce((s, e) => s + (e.closing_balance ?? 0), 0);
+  const totalIncome = exts.flatMap(e => e.income_deposits).reduce((s, i) => s + i.amount, 0);
+  const totalSpending = exts.flatMap(e => e.spending_categories).reduce((s, c) => s + c.monthly_average, 0);
+  const mortgageMonthly = exts.flatMap(e => e.regular_payments.filter(r => r.likely_category === 'mortgage')).reduce((s, p) => s + p.amount, 0);
+  const estimatedMortgageDebt = mortgageMonthly > 0 ? mortgageMonthly * 12 * 20 : 220000;
+  const assets = totalBalance + 450000;
+  const netPosition = assets - estimatedMortgageDebt;
+  const gap = totalIncome - totalSpending;
+  return [
+    { label: 'Net position', value: `£${netPosition.toLocaleString()}`, negative: netPosition < 0 },
+    { label: 'Assets', value: `£${assets.toLocaleString()}`, negative: false },
+    { label: 'Debts', value: `(£${estimatedMortgageDebt.toLocaleString()})`, negative: true },
+    { label: 'Monthly gap', value: gap < 0 ? `(£${Math.abs(gap).toLocaleString()})` : `£${gap.toLocaleString()}`, negative: gap < 0 },
+  ];
+}
+
+function buildOutgoings(exts: BankStatementExtraction[]): OutgoingItem[] {
+  return exts.flatMap(e => e.spending_categories).map(c => ({
+    icon: CATEGORY_ICONS[c.category] ?? '🏠',
+    label: c.category,
+    amount: `£${c.monthly_average.toLocaleString()} p/m`,
+    sub: null,
+  }));
+}
 
 const LEFT_NAV = [
   { id: 'prepare', label: 'Prepare your disclosure', level: 0, children: [
@@ -74,7 +110,8 @@ function NavSection({ items, depth = 0 }: { items: NavItem[]; depth?: number }) 
 }
 
 export default function YourPicturePage() {
-  const { extractions } = useBankData();
+  const { extractions, scenario } = useBankData();
+  const { answers: profiling } = useProfiling();
   const [bankOpen, setBankOpen] = useState(false);
   const [childrenDisclosed, setChildrenDisclosed] = useState(true);
   const [outgoingsConfirmed, setOutgoingsConfirmed] = useState(false);
@@ -82,7 +119,19 @@ export default function YourPicturePage() {
   const [discloseOpen, setDiscloseOpen] = useState(false);
   const [shareModal, setShareModal] = useState<'closed' | 'form' | 'sent'>('closed');
 
+  const hasData = extractions.length > 0;
+  const snapshot = useMemo(() => hasData ? buildSnapshot(extractions) : FALLBACK_SNAPSHOT, [extractions, hasData]);
+  const outgoings = useMemo(() => hasData ? buildOutgoings(extractions) : FALLBACK_OUTGOINGS, [extractions, hasData]);
   const accountCount = extractions.length || 3;
+  const mortgageProvider = useMemo(() => {
+    if (profiling.mortgageProvider) return profiling.mortgageProvider;
+    const mp = extractions.flatMap(e => e.regular_payments).find(p => p.likely_category === 'mortgage');
+    return mp?.payee ?? 'Halifax';
+  }, [extractions, profiling.mortgageProvider]);
+  const mortgageAmount = useMemo(() => {
+    const mp = extractions.flatMap(e => e.regular_payments).find(p => p.likely_category === 'mortgage');
+    return mp ? mp.amount * 12 * 20 : 220000;
+  }, [extractions]);
 
   return (
     <div className={styles.page}>
@@ -283,9 +332,9 @@ export default function YourPicturePage() {
               </div>
               <div className={styles.homeRow} style={{ marginBottom: 8 }}>
                 <span className={styles.homeDot} />
-                Mortgage (Halifax)
+                Mortgage ({mortgageProvider})
                 <button type="button" className={`${styles.btn} ${styles.btnUpload}`}>Upload statement</button>
-                <span className={styles.homeValueDebt}>(£220,000)</span>
+                <span className={styles.homeValueDebt}>(£{mortgageAmount.toLocaleString()})</span>
               </div>
               <div className={styles.homeEquity}>
                 <span>Net equity</span>
@@ -319,7 +368,7 @@ export default function YourPicturePage() {
               )}
             </div>
 
-            {!outgoingsConfirmed && OUTGOINGS.length > 0 && (
+            {!outgoingsConfirmed && outgoings.length > 0 && (
               <div className={styles.infoBanner}>
                 <span className={styles.infoBannerIcon}>ℹ</span>
                 <div className={styles.infoBannerText}>
@@ -331,11 +380,11 @@ export default function YourPicturePage() {
               </div>
             )}
 
-            {OUTGOINGS.length === 0 ? (
+            {outgoings.length === 0 ? (
               <p className={styles.sectionEmpty}>Nothing disclosed yet</p>
             ) : (
               <div>
-                {OUTGOINGS.map(o => (
+                {outgoings.map(o => (
                   <div key={o.label} className={styles.outgoingRow}>
                     <span className={styles.outgoingIcon}>{o.icon}</span>
                     <div className={styles.outgoingBody}>
@@ -360,7 +409,7 @@ export default function YourPicturePage() {
           {/* Snapshot */}
           <div className={styles.card}>
             <p className={styles.cardHeading}>Snapshot</p>
-            {SNAPSHOT.map(m => (
+            {snapshot.map(m => (
               <div key={m.label} className={styles.snapshotRow}>
                 <span className={styles.snapshotLabel}>{m.label}</span>
                 <span className={styles.snapshotValue} style={{ color: m.negative ? 'var(--ds-color-danger)' : 'var(--ds-color-ink)' }}>{m.value}</span>
