@@ -428,7 +428,7 @@ export default function YourPicturePage() {
           {/* Data sources */}
           <div style={{ marginBottom: 16, padding: '14px', borderRadius: 10, background: tokens.color.surface.panel, border: `1px solid ${tokens.color.border}` }}>
             <p style={{ margin: '0 0 8px', fontSize: 9.5, fontWeight: 700, color: tokens.color.text.muted, textTransform: 'uppercase', letterSpacing: '0.1em' }}>Data sources</p>
-            {(extractions.length > 0 ? extractions : [{ provider: 'Barclays', account_type: 'Current' }, { provider: 'Barclays', account_type: 'Joint' }, { provider: 'Monzo', account_type: 'Current' }]).map((e: Record<string, string>, i: number) => (
+            {(extractions.length > 0 ? extractions.map(x => ({ provider: x.provider, account_type: x.account_type })) : [{ provider: 'Barclays', account_type: 'Current' }, { provider: 'Barclays', account_type: 'Joint' }, { provider: 'Monzo', account_type: 'Current' }]).map((e, i) => (
               <div key={i} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '4px 0', fontSize: 12 }}>
                 <span style={{ color: tokens.color.ink }}>{e.provider} {e.account_type}</span>
                 <span style={{ padding: '2px 7px', borderRadius: 999, background: '#D1FAE5', color: '#047857', fontSize: 10, fontWeight: 600 }}>connected</span>
