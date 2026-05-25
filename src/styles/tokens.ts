@@ -45,6 +45,17 @@ export const tokens = {
       magenta: '#BE185D',
       indigo:  '#4F46E5',
     },
+    status: {
+      confirmed: { accent: '#22C55E', soft: '#D1FAE5', text: '#047857' },
+      estimated: { accent: '#D97706', soft: '#FEF3C7', text: '#92400E' },
+      info:      { accent: '#0369A1', soft: '#F0F9FF', border: '#BAE6FD' },
+    },
+    action: {
+      primary: '#DC2626',
+      upload:  '#F97316',
+      share:   '#9A3412',
+      banner:  '#14532D',
+    },
   },
   font: {
     sans:  "'Inter', -apple-system, BlinkMacSystemFont, sans-serif",
@@ -52,7 +63,10 @@ export const tokens = {
     mono:  "'JetBrains Mono', ui-monospace, Menlo, monospace",
   },
   type: {
+    '10':   '10px',
     '11':   '11px',
+    '12':   '12px',
+    '13':   '13px',
     '14-5': '14.5px',
     '15-5': '15.5px',
     '16':   '16px',
@@ -75,9 +89,11 @@ export const tokens = {
     wide: '0.12em',
   },
   radius: {
-    sm: '4px',
-    md: '6px',
-    lg: '8px',
+    sm:   '4px',
+    md:   '6px',
+    lg:   '8px',
+    xl:   '10px',
+    pill: '999px',
   },
   shadow: {
     sm: '0 2px 6px rgba(0, 0, 0, 0.1)',
@@ -156,12 +172,30 @@ export type TokenName =
   | '--ds-color-accent-violet'
   | '--ds-color-accent-magenta'
   | '--ds-color-accent-indigo'
+  // Colours · Status
+  | '--ds-color-status-confirmed'
+  | '--ds-color-status-confirmed-soft'
+  | '--ds-color-status-confirmed-text'
+  | '--ds-color-status-estimated'
+  | '--ds-color-status-estimated-soft'
+  | '--ds-color-status-estimated-text'
+  | '--ds-color-status-info'
+  | '--ds-color-status-info-soft'
+  | '--ds-color-status-info-border'
+  // Colours · Action
+  | '--ds-color-action-primary'
+  | '--ds-color-action-upload'
+  | '--ds-color-action-share'
+  | '--ds-color-action-banner'
   // Fonts
   | '--ds-font-sans'
   | '--ds-font-serif'
   | '--ds-font-mono'
   // Type scale
+  | '--ds-type-10'
   | '--ds-type-11'
+  | '--ds-type-12'
+  | '--ds-type-13'
   | '--ds-type-14-5'
   | '--ds-type-15-5'
   | '--ds-type-16'
@@ -184,6 +218,8 @@ export type TokenName =
   | '--ds-radius-sm'
   | '--ds-radius-md'
   | '--ds-radius-lg'
+  | '--ds-radius-xl'
+  | '--ds-radius-pill'
   // Shadows · Neutral
   | '--ds-shadow-sm'
   | '--ds-shadow-md'
@@ -247,10 +283,26 @@ export const TOKEN_NAMES: ReadonlyArray<TokenName> = [
   '--ds-color-accent-violet',
   '--ds-color-accent-magenta',
   '--ds-color-accent-indigo',
+  '--ds-color-status-confirmed',
+  '--ds-color-status-confirmed-soft',
+  '--ds-color-status-confirmed-text',
+  '--ds-color-status-estimated',
+  '--ds-color-status-estimated-soft',
+  '--ds-color-status-estimated-text',
+  '--ds-color-status-info',
+  '--ds-color-status-info-soft',
+  '--ds-color-status-info-border',
+  '--ds-color-action-primary',
+  '--ds-color-action-upload',
+  '--ds-color-action-share',
+  '--ds-color-action-banner',
   '--ds-font-sans',
   '--ds-font-serif',
   '--ds-font-mono',
+  '--ds-type-10',
   '--ds-type-11',
+  '--ds-type-12',
+  '--ds-type-13',
   '--ds-type-14-5',
   '--ds-type-15-5',
   '--ds-type-16',
@@ -270,6 +322,8 @@ export const TOKEN_NAMES: ReadonlyArray<TokenName> = [
   '--ds-radius-sm',
   '--ds-radius-md',
   '--ds-radius-lg',
+  '--ds-radius-xl',
+  '--ds-radius-pill',
   '--ds-shadow-sm',
   '--ds-shadow-md',
   '--ds-shadow-lg',
