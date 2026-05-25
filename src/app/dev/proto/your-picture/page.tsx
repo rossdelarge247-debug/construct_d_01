@@ -56,26 +56,38 @@ function buildOutgoings(exts: BankStatementExtraction[]): OutgoingItem[] {
   }));
 }
 
-const LEFT_NAV = [
-  { id: 'prepare', label: 'Prepare your disclosure', level: 0, children: [
-    { id: 'position', label: 'Your position', progress: 0.6 },
-    { id: 'children-nav', label: 'Children (2)', progress: 1.0 },
-    { id: 'finances', label: 'Finances', level: 0, children: [
-      { id: 'income', label: 'Income (1)', progress: 0.5 },
-      { id: 'assets', label: 'Assets (3)', progress: 0.6 },
-      { id: 'debt', label: 'Debt (0)', progress: 0 },
-      { id: 'outgoings-nav', label: 'Outgoings', progress: 0 },
+function buildNavTree(exts: BankStatementExtraction[]) {
+  const hasIncome = exts.some(e => e.income_deposits.length > 0);
+  const incomeCount = exts.flatMap(e => e.income_deposits).length;
+  const hasAccounts = exts.some(e => e.closing_balance != null);
+  const accountCount = exts.filter(e => e.closing_balance != null).length;
+  const hasDebt = exts.some(e => e.regular_payments.some(r => r.likely_category === 'loan_repayment' || r.likely_category === 'credit_card'));
+  const hasOutgoings = exts.some(e => e.spending_categories.length > 0);
+  const hasPensions = exts.some(e => e.regular_payments.some(r => r.likely_category === 'pension_contribution'));
+
+  return [
+    { id: 'prepare', label: 'Prepare your disclosure', level: 0, children: [
+      { id: 'position', label: 'Your position', progress: hasIncome ? 0.6 : 0 },
+      { id: 'children-nav', label: 'Children (2)', progress: 1.0 },
+      { id: 'finances', label: 'Finances', level: 0, children: [
+        { id: 'income', label: `Income (${incomeCount})`, progress: hasIncome ? 0.5 : 0 },
+        { id: 'assets', label: `Assets (${accountCount})`, progress: hasAccounts ? 0.6 : 0 },
+        { id: 'debt', label: `Debt (${hasDebt ? '1' : '0'})`, progress: hasDebt ? 0.3 : 0 },
+        { id: 'outgoings-nav', label: 'Outgoings', progress: hasOutgoings ? 0.4 : 0 },
+      ]},
     ]},
-  ]},
-  { id: 'shared', label: 'Shared position', progress: -1 },
-  { id: 'settle', label: 'Settle and agree', level: 0, children: [
-    { id: 'proposal', label: 'The proposal', progress: -1 },
-    { id: 'children-settle', label: 'Children', progress: -1 },
-    { id: 'assets-settle', label: 'Assets', progress: -1 },
-    { id: 'needs', label: 'Needs', progress: -1 },
-  ]},
-  { id: 'finalisation', label: 'Finalisation', progress: -1 },
-];
+    { id: 'shared', label: 'Shared position', progress: -1 },
+    { id: 'settle', label: 'Settle and agree', level: 0, children: [
+      { id: 'proposal', label: 'The proposal', progress: -1 },
+      { id: 'children-settle', label: 'Children', progress: -1 },
+      { id: 'assets-settle', label: 'Assets', progress: -1 },
+      { id: 'needs', label: 'Needs', progress: -1 },
+    ]},
+    { id: 'finalisation', label: 'Finalisation', progress: -1 },
+  ];
+}
+
+const FALLBACK_NAV = buildNavTree([]);
 
 function ProgressBar({ progress }: { progress: number }) {
   if (progress < 0) return <span className={styles.progressNotStarted}>Not ready to start yet</span>;
@@ -151,6 +163,19 @@ export default function YourPicturePage() {
     return extractions.flatMap(e => e.spending_categories).reduce((s, c) => s + c.transaction_count, 0);
   }, [extractions, hasData]);
 
+  const navTree = useMemo(() => hasData ? buildNavTree(extractions) : FALLBACK_NAV, [extractions, hasData]);
+
+  const needsAttention = useMemo(() => {
+    if (!hasData) return ['Pensions — no data yet', 'Other assets — no data yet', 'Debts — no data yet'];
+    const items: string[] = [];
+    const hasPensions = extractions.some(e => e.regular_payments.some(r => r.likely_category === 'pension_contribution'));
+    const hasDebt = extractions.some(e => e.regular_payments.some(r => r.likely_category === 'loan_repayment' || r.likely_category === 'credit_card'));
+    if (!hasPensions) items.push('Pensions — no data yet');
+    if (!hasDebt) items.push('Debts — no data yet');
+    if (extractions.length < 2) items.push('Only 1 account connected');
+    return items;
+  }, [extractions, hasData]);
+
   return (
     <div className={styles.page}>
       {/* Header */}
@@ -220,7 +245,7 @@ export default function YourPicturePage() {
           <Link href="/dev/proto/post-connect-dashboard" className={styles.navBack}>
             &lt; Back to Dashboard
           </Link>
-          <NavSection items={LEFT_NAV} />
+          <NavSection items={navTree} />
         </nav>
 
         {/* Middle column */}
@@ -448,7 +473,7 @@ export default function YourPicturePage() {
           {/* Needs attention */}
           <div className={styles.card}>
             <p className={styles.cardHeading}>Needs your attention</p>
-            {['Pensions — no data yet', 'Other assets — no data yet', 'Debts — no data yet'].map(item => (
+            {needsAttention.map(item => (
               <div key={item} className={styles.attentionRow}>
                 <span className={styles.attentionDot} />
                 {item}
