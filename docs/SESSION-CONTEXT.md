@@ -1,99 +1,66 @@
-# Session 123 Context Block
+# Session 124 Context Block
 
-## Session 122 accomplishments
+## Session 123 accomplishments
 
-Session 122 shipped 3 commits on branch `claude/intelligent-faraday-eDatJ` (now 24 ahead of main) before the session errored without wrapping. Wrap docs written retroactively.
+Session 123 merged sessions 120-122 bulk work to main (PR #227) and reconciled Your Picture against 9 user wireframes (PR #228). Main tip: `05e17d4`.
 
-### What shipped (session 122 only)
+### What shipped
 
-| Commit | Change |
+| Deliverable | PR |
 |---|---|
-| `6b89fdd` Standardise signed-in header | Extracted `ProtoHeader.tsx` (140 lines) as shared two-strip header (primary + sub-nav) |
-| `12900cf` Header divider + expressive background | Faint divider line in ProtoHeader; expressive gradient (`#F3EEFE → #FCE7F3 → #F5F5F4`) on proto layout; removed 10 per-page background wrappers |
-| `e7c0bdb` Your Picture canvas reconciliation | Reconciled against spec 68b + M_YourPicture_v2: left rail locked/unlocked sections, middle column net worth + accordion, right rail data sources + share CTA |
+| Sessions 120-122 bulk merge (24 commits: journey chain, data pipeline, ProtoHeader, gradient) | #227 |
+| Your Picture wireframe reconciliation — 13 gaps (G1-G13) addressed, dev toggles for all states | #228 |
 
-16 files changed, +369/-223 lines.
+### Wireframe gap summary (all addressed)
 
-### Cumulative branch state (sessions 120-122)
-
-Branch `claude/intelligent-faraday-eDatJ` carries 24 commits ahead of main spanning sessions 120, 121, and 122. Full journey chain:
-
-```
-welcome-tour → safeguarding → moment-1 → moment-2 → bank-connect
-  → analysing animation → extraction-results → section-confirm hub
-  → /section-confirm/[section] → your-picture → share-flow
-```
-
-Architecture: BankDataProvider + ProfilingProvider + showWhen filtering + 5 test scenarios + live Tink wiring.
+G1 header breadcrumb · G2 disclose dropdown · G3 bank accounts accordion · G4 children section · G5 home section with upload CTAs · G6 outgoings pre-confirmation · G7 outgoings post-confirmation · G8 post-share banner · G9 share modal · G10 upload CTAs · G11 footer · G12 contextual todo placeholder · G13 full Form E left rail nav
 
 ## Current state
 
-- Branch `claude/intelligent-faraday-eDatJ`, 24 ahead of main, no PR open
-- ProtoHeader shared component + expressive gradient on layout
-- Your Picture reconciled against canvas + spec 68b
-- Full journey wired end-to-end
-- Tink integration live (requires env vars in Vercel)
+- Main at `05e17d4`, no open PRs
+- Your Picture page uses **hardcoded demo data** — needs dynamic wiring to BankDataProvider + ProfilingProvider
+- Full journey chain wired end-to-end
+- Dev toggles on Your Picture: bank open/closed, children disclosed/empty, outgoings estimated/confirmed, post-share
 
 ## Prioritised deliverables for next session
 
-1. **Open PR for the branch** — 24 commits ahead of main with no PR; needs review + merge
-2. **Browser test the full flow** — verify journey chain with different scenarios (Marcus, Jean, Aisha)
-3. **CP-1: Sign-up canvas-port** — gap before welcome-tour in the journey
-4. **CP-2: Hub stub** — minimal hub landing with section links
-5. **Consider removing static form pages** — categorise, confirm-recurring at static routes are redundant since /section-confirm/[section] handles real flow
-6. **Deepen profiling→engine bridges** — mortgage provider matching, pension provider pre-fill
+1. **P1: Wire dynamic data into Your Picture** — reconnect BankDataProvider extractions + ProfilingProvider answers to the new wireframe layout. Restore `buildSectionsFromExtractions()` logic. Hardcoded data becomes fallback when no scenario loaded. Existing plumbing: `bank-data-context.tsx`, `profiling-context.tsx`, `confirmation-questions.ts` (1998 lines), 5 test scenarios.
+2. **P2: User review feedback** — address any visual/structural feedback from Vercel preview review.
+3. **P3: Contextual todo panel** — wireframes show it in all 9 frames but label it "need to design". Currently a grey placeholder.
+4. **P4: Continue off-sequence prototype work** — sign-up canvas-port, hub stub, or other user-directed priorities.
 
-## Enhancement backlog
-
-| # | What | Effort |
-|---|------|--------|
-| E-1–E-9 | Canvas-ports (FAQ, sign-in, todos), joint doc, settlement redline, pre-flight, trust band, reconcile states | Small–Medium |
-| E-10 | Live AI tips in section-confirm forms (Anthropic API) | Medium |
-
-## Negative constraints
-
-#1-#42 from prior sessions.
-
-- Do NOT delete the 6 static form pattern pages without user approval — they may serve as a pattern library
-- AI tips remain hardcoded strings (E-10 backlog)
-- ProfilingProvider only wires business-section-skip so far — more bridges deferred
-
-## Authoritative reading order at session 123 start
+## Authoritative reading order at session 124 start
 
 1. This file.
-2. `docs/HANDOFF-SESSION-122.md` (retro — header/background + your-picture canvas reconciliation; session errored before wrap).
-3. `docs/HANDOFF-SESSION-121.md` (retro — full journey build + data pipeline wiring).
-4. For chosen priority: relevant specs on demand.
+2. `docs/HANDOFF-SESSION-123.md` (retro — bulk merge + wireframe reconciliation).
+3. `src/app/dev/proto/your-picture/page.tsx` (current hardcoded page — 537 lines).
+4. `src/app/dev/proto/_context/bank-data-context.tsx` + `profiling-context.tsx` (providers to wire).
 
 ## Key files
 
 ```
-Context + layout
-src/app/dev/proto/_components/ProtoHeader.tsx        — Shared two-strip header (session 122)
-src/app/dev/proto/_context/bank-data-context.tsx     — BankDataProvider (scenarios + Tink + engine)
-src/app/dev/proto/_context/profiling-context.tsx      — ProfilingProvider (moment-2 answers)
-src/app/dev/proto/layout.tsx                          — Expressive gradient + providers wrapping all proto pages
+Your Picture (session 123 rewrite)
+src/app/dev/proto/your-picture/page.tsx              — 537 lines, hardcoded demo, all 13 wireframe gaps addressed
+tests/unit/proto-your-picture/page.test.tsx           — 11 tests covering G1-G13
 
-Journey pages (in order)
-src/app/dev/proto/safeguarding-signposting/page.tsx
-src/app/dev/proto/moment-1-ack/page.tsx
-src/app/dev/proto/moment-2-profiling/page.tsx
-src/app/dev/proto/bank-connect/page.tsx
-src/app/dev/proto/extraction-results/page.tsx
-src/app/dev/proto/section-confirm/page.tsx            — 7-section hub
-src/app/dev/proto/section-confirm/[section]/page.tsx  — Dynamic confirmation per section
-src/app/dev/proto/your-picture/page.tsx               — 3-column picture (canvas-reconciled session 122)
+Data providers (wire into Your Picture)
+src/app/dev/proto/_context/bank-data-context.tsx      — BankDataProvider (scenarios + Tink + engine)
+src/app/dev/proto/_context/profiling-context.tsx       — ProfilingProvider (moment-2 answers)
+src/app/dev/proto/layout.tsx                           — Wraps all proto pages with both providers
 
-Stable bank libraries (unchanged, wired in)
-src/lib/bank/confirmation-questions.ts                — 1998 lines, spec 22 decision trees
-src/lib/bank/bank-data-utils.ts                       — Extraction → UI types
-src/lib/bank/test-scenarios.ts                        — 5 scenarios
-src/lib/bank/signal-rules/                            — 17 rules
+Stable bank libraries
+src/lib/bank/confirmation-questions.ts                 — 1998 lines, spec 22 decision trees
+src/lib/bank/bank-data-utils.ts                        — Extraction → UI types
+src/lib/bank/test-scenarios.ts                         — 5 scenarios
 
 Tracking
-docs/journey-sequence.md                              — 64-row checklist + E-10 backlog
+docs/journey-sequence.md                               — 64-row checklist + E-10 backlog
 ```
 
 ## Branch
 
-`claude/intelligent-faraday-eDatJ` — 24 ahead of main, no PR open.
+Main. No feature branch active.
+
+## Negative constraints
+
+#1-#42 from prior sessions. No new constraints this session.
