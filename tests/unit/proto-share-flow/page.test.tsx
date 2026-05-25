@@ -15,7 +15,7 @@ describe('/dev/proto/share-flow page', () => {
 
   it('renders the page title "Reconcile"', () => {
     render(<Page />);
-    expect(screen.getByRole('heading', { name: /reconcile/i, level: 1 })).toBeTruthy();
+    expect(screen.getByText(/reconcile/i)).toBeTruthy();
   });
 
   it('renders the C-S1 page-level copy verbatim (AC-2)', () => {

@@ -6,7 +6,7 @@ import type { Section } from '@/app/dev/proto/registry-schema';
 describe('registry data', () => {
   describe('registry totals + section sum invariants', () => {
     it('total row count matches expected length', () => {
-      expect(registry).toHaveLength(63);
+      expect(registry).toHaveLength(64);
     });
 
     it('section counts match acceptance.md AC-1', () => {
@@ -16,7 +16,7 @@ describe('registry data', () => {
         'post-signup-onboarding': 4,
         'bank-connect': 5,
         hub: 6,
-        build: 10,
+        build: 11,
         reconcile: 5,
         settle: 5,
         finalise: 5,
@@ -129,11 +129,11 @@ describe('registry data', () => {
       expect(row!.tags ?? []).not.toContain('high-uncertainty');
     });
 
-    it("remaining 4 bank-rec-* rows (manual-entry, resolve-duplicate, split, balance-check) stay canvas-drafted (regression guard for out-of-scope)", () => {
+    it("remaining 4 bank-rec-* rows (manual-entry, resolve-duplicate, split, balance-check) are prototype-built", () => {
       for (const id of ['bank-rec-manual-entry', 'bank-rec-resolve-duplicate', 'bank-rec-split', 'bank-rec-balance-check']) {
         const row = registry.find((r) => r.id === id);
         expect(row, `row id=${id} missing`).toBeDefined();
-        expect(row!.status, `row id=${id}`).toBe('canvas-drafted');
+        expect(row!.status, `row id=${id}`).toBe('prototype-built');
       }
     });
   });

@@ -94,7 +94,7 @@ export async function GET(request: NextRequest) {
     } else {
       // Redirect mode — store in sessionStorage
       sessionStorage.setItem('pendingBankData', JSON.stringify(data));
-      window.location.href = '/workspace?source=openbanking';
+      window.location.href = '/dev/proto/bank-connect?source=openbanking';
     }
   } catch (e) {
     document.body.innerHTML = '<p>Something went wrong storing your bank data. Please try again.</p>';
@@ -124,7 +124,7 @@ a{color:#2563eb}</style>
 <body>
 <h2>Bank connection error</h2>
 <pre>${safeMessage}</pre>
-<p><a href="/workspace">Back to workspace</a></p>
+<p><a href="/dev/proto/bank-connect">Back to workspace</a></p>
 </body></html>`
 
   return new Response(html, {

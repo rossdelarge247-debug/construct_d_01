@@ -2,8 +2,9 @@
 
 import { ReactNode, Suspense, useState } from 'react';
 import { useSearchParams } from 'next/navigation';
+import Link from 'next/link';
 import { tokens } from '@/styles/tokens';
-import { SignedInHeader } from '@/components/layout/signed-in-header';
+import { ProtoHeader } from '../_components/ProtoHeader';
 
 const INK = tokens.color.ink;
 const SUB = tokens.color.text.sub;
@@ -657,13 +658,9 @@ export function Dashboard({ variant = 'conservative' }: { variant?: Variant }) {
     <div
       data-variant={variant}
       className="flex flex-col"
-      style={{ background: BG, minHeight: '100vh' }}
+      style={{ minHeight: '100vh' }}
     >
-      <SignedInHeader
-        mode="app"
-        pageLabel="Dashboard"
-        user={{ name: 'Sarah', initial: 'S', status: 'Just joined' }}
-      />
+      <ProtoHeader />
       <main role="main" id="main" className="flex-1" style={{ background: mainBg }}>
         <div className="mx-auto" style={{ maxWidth: 960, padding: '36px 40px 80px' }}>
           <div>
@@ -779,6 +776,13 @@ export function Dashboard({ variant = 'conservative' }: { variant?: Variant }) {
             />
           </div>
         </div>
+        <Link
+          href="/dev/proto/your-picture"
+          className="block w-full mt-6 rounded-xl py-4 text-center font-semibold"
+          style={{ background: tokens.color.ink, color: '#fff', textDecoration: 'none', fontSize: 14.5 }}
+        >
+          View your picture &rarr;
+        </Link>
       </main>
     </div>
   );

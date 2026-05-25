@@ -1,8 +1,8 @@
 'use client';
 
 import { useState } from 'react';
-import Link from 'next/link';
 import { tokens } from '@/styles/tokens';
+import { ProtoHeader } from '../_components/ProtoHeader';
 import { JoinedAvatarsHero } from './_components/JoinedAvatarsHero';
 import { MarkStatusCard } from './_components/MarkStatusCard';
 import { ShareModal } from './_components/ShareModal';
@@ -11,28 +11,8 @@ export default function ShareFlowPage() {
   const [modalOpen, setModalOpen] = useState(false);
 
   return (
-    <div style={{ minHeight: '100dvh', background: tokens.color.surface.page, fontFamily: tokens.font.sans }}>
-      <header
-        style={{
-          padding: '12px 16px',
-          display: 'flex',
-          alignItems: 'center',
-          gap: 12,
-          borderBottom: `1px solid ${tokens.color.border}`,
-          background: tokens.color.surface.panel,
-        }}
-      >
-        <Link
-          href="/dev/proto"
-          aria-label="Back"
-          style={{ color: tokens.color.ink, textDecoration: 'none', fontSize: 20 }}
-        >
-          &larr;
-        </Link>
-        <h1 style={{ margin: 0, fontSize: tokens.type['17'], fontWeight: 600, color: tokens.color.ink }}>
-          Reconcile
-        </h1>
-      </header>
+    <div>
+      <ProtoHeader backHref="/dev/proto" backLabel="Reconcile" />
 
       <main style={{ maxWidth: 480, margin: '0 auto', padding: '0 20px 40px' }}>
         <p

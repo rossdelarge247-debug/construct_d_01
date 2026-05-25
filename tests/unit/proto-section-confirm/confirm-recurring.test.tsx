@@ -9,11 +9,11 @@ describe('section-confirm confirm-recurring page', () => {
     expect(screen.getByText('3 to confirm')).toBeTruthy();
   });
 
-  it('renders anchor TxnRow (Octopus Energy + £178/mo avg)', () => {
+  it('renders anchor TxnRow (Halifax Mortgage £1,150/mo)', () => {
     render(<ConfirmRecurringPage />);
-    expect(screen.getByText('Octopus Energy')).toBeTruthy();
-    expect(screen.getByText('DD · 12 of 12 months · £142–£218')).toBeTruthy();
-    expect(screen.getByText('−£178/mo avg')).toBeTruthy();
+    expect(screen.getByText('Halifax Mortgage')).toBeTruthy();
+    expect(screen.getByText('DD · 12 of 12 months · £1,150')).toBeTruthy();
+    expect(screen.getByText('−£1,150/mo')).toBeTruthy();
   });
 
   it('renders the question heading', () => {
@@ -23,15 +23,15 @@ describe('section-confirm confirm-recurring page', () => {
 
   it('renders the 4 suggested-entry fields', () => {
     render(<ConfirmRecurringPage />);
-    expect(screen.getByText('Utilities · Energy')).toBeTruthy();
-    expect(screen.getByText('Joint household')).toBeTruthy();
-    expect(screen.getByText('£178.00')).toBeTruthy();
+    expect(screen.getByText('Housing · Mortgage')).toBeTruthy();
+    expect(screen.getByText('Joint (Sarah & Mark)')).toBeTruthy();
+    expect(screen.getByText('£1,150.00')).toBeTruthy();
     expect(screen.getByText('Monthly DD')).toBeTruthy();
   });
 
   it('renders the AIMarginCard title', () => {
     render(<ConfirmRecurringPage />);
-    expect(screen.getByText(/Average across 12 months/)).toBeTruthy();
+    expect(screen.getByText(/Consistent across all 12 months/)).toBeTruthy();
   });
 
   it('renders both CTA buttons', () => {

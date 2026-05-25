@@ -44,11 +44,11 @@ export default function CategorisePage() {
   return (
     <main
       style={{
-        height: '100vh',
+        minHeight: '100vh',
         background: tokens.color.surface.page,
         display: 'flex',
         flexDirection: 'column',
-        overflow: 'hidden',
+        
         fontFamily: tokens.font.sans,
       }}
     >
@@ -61,7 +61,7 @@ export default function CategorisePage() {
           display: 'flex',
           flexDirection: 'column',
           gap: 12,
-          maxWidth: 420,
+          maxWidth: 640,
           margin: '0 auto',
           width: '100%',
         }}
@@ -84,7 +84,7 @@ export default function CategorisePage() {
               marginTop: 8,
             }}
           >
-            From your Halifax joint account
+            From your Barclays current account
           </div>
           <TxnRow
             logo="A"
@@ -92,7 +92,7 @@ export default function CategorisePage() {
             logoColor="#9A3412"
             merchant="Aviva Life Insurance"
             sub="DD · monthly · since 2019"
-            amount="£1,250.00"
+            amount="£42.50"
           />
         </div>
 
@@ -139,9 +139,9 @@ export default function CategorisePage() {
           kind="tip"
           severity="info"
           title="Aviva typically bundles life + critical illness for couples with children."
-          body="Your DD is £1,250/mo on a joint Halifax account, started 2019 — that's a year after your second child. Pattern fits a family-cover bundle. 'Joint life cover' is the safer answer; you can add a note if it's CI-only."
+          body="Your DD is £42.50/mo from your Barclays account, started 2019 — that's a year after Jack was born. Pattern fits a family-cover bundle. 'Joint life cover' is the safer answer; you can add a note if it's CI-only."
           citation={null}
-          relatedTo={{ label: 'Halifax joint · DD £1,250' }}
+          relatedTo={{ label: 'Barclays current · DD £42.50' }}
           defaultOpenReasoning
         />
       </div>
@@ -153,7 +153,7 @@ export default function CategorisePage() {
           borderTop: `1px solid ${tokens.color.border}`,
           display: 'flex',
           gap: 8,
-          maxWidth: 420,
+          maxWidth: 640,
           margin: '0 auto',
           width: '100%',
         }}

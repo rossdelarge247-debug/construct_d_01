@@ -32,15 +32,15 @@ export const registry: RegistryRow[] = [
 
   // §3 · Post-signup onboarding
   row({ id: 'welcome-tour', title: 'Welcome tour / carousel', section: 'post-signup-onboarding', status: 'prototype-built', confidence: 'medium', openQuestions: ['Skip-to-end vs forced linearity?'], lastTouched: { session: 115, date: '2026-05-22' }, links: { canvas: 'docs/design-source/welcome-tour/', prototype: 'src/app/dev/proto/welcome-tour/' } }),
-  row({ id: 'moment-1-ack', title: 'Moment 1 acknowledgement', section: 'post-signup-onboarding', status: 'spec-only', confidence: 'low-blocked', openQuestions: ['Emotional copy authorship?'], links: { spec: 'docs/workspace-spec/65-pre-signup-interview-reconciled.md' } }),
-  row({ id: 'moment-2-profiling', title: 'Moment 2 pre-bank profiling', section: 'post-signup-onboarding', status: 'spec-only', confidence: 'low-blocked', openQuestions: ['Question set V1 minimum?'], links: { spec: 'docs/workspace-spec/67-post-signup-profiling-progress.md' } }),
-  row({ id: 'safeguarding-signposting', title: 'Safeguarding signposting', section: 'post-signup-onboarding', status: 'spec-only', confidence: 'medium', tags: ['safeguarding'], openQuestions: ['Detection trigger criteria?'] }),
+  row({ id: 'moment-1-ack', title: 'Moment 1 acknowledgement', section: 'post-signup-onboarding', status: 'prototype-built', confidence: 'medium', links: { spec: 'docs/workspace-spec/67-post-signup-profiling-progress.md', prototype: 'src/app/dev/proto/moment-1-ack/' } }),
+  row({ id: 'moment-2-profiling', title: 'Moment 2 pre-bank profiling', section: 'post-signup-onboarding', status: 'prototype-built', confidence: 'medium', links: { spec: 'docs/workspace-spec/67-post-signup-profiling-progress.md', prototype: 'src/app/dev/proto/moment-2-profiling/' } }),
+  row({ id: 'safeguarding-signposting', title: 'Safeguarding signposting', section: 'post-signup-onboarding', status: 'prototype-built', confidence: 'high', tags: ['safeguarding'], links: { spec: 'docs/workspace-spec/67-post-signup-profiling-progress.md', prototype: 'src/app/dev/proto/safeguarding-signposting/' } }),
 
   // §4 · Bank-connect
-  row({ id: 'bank-picker', title: 'Bank picker', section: 'bank-connect', status: 'spec-only', confidence: 'medium', openQuestions: ['Search vs popular UK banks?'] }),
-  row({ id: 'tink-mid-flow', title: 'Tink iframe mid-flow', section: 'bank-connect', status: 'not-started', confidence: 'low', openQuestions: ['Iframe sizing on mobile + abandon recovery?'] }),
-  row({ id: 'callback-success', title: 'Callback success', section: 'bank-connect', status: 'not-started', confidence: 'low-blocked', openQuestions: ['Transition animation to hub?'] }),
-  row({ id: 'callback-error-retry', title: 'Callback error / retry', section: 'bank-connect', status: 'not-started', confidence: 'low-blocked', openQuestions: ['Error taxonomy + retry pathway?'] }),
+  row({ id: 'bank-picker', title: 'Bank picker', section: 'bank-connect', status: 'prototype-built', confidence: 'high', links: { prototype: 'src/app/dev/proto/bank-connect/' } }),
+  row({ id: 'tink-mid-flow', title: 'Tink iframe mid-flow', section: 'bank-connect', status: 'prototype-built', confidence: 'medium', links: { prototype: 'src/app/dev/proto/bank-connect/' } }),
+  row({ id: 'callback-success', title: 'Callback success', section: 'bank-connect', status: 'prototype-built', confidence: 'high', links: { prototype: 'src/app/dev/proto/bank-connect/' } }),
+  row({ id: 'callback-error-retry', title: 'Callback error / retry', section: 'bank-connect', status: 'prototype-built', confidence: 'high', links: { prototype: 'src/app/dev/proto/bank-connect/' } }),
   row({ id: 'manual-entry-fallback', title: 'Manual entry fallback', section: 'bank-connect', status: 'not-started', confidence: 'low-blocked', openQuestions: ['When offered vs document upload?'] }),
 
   // §5 · Hub
@@ -52,15 +52,16 @@ export const registry: RegistryRow[] = [
   row({ id: 'todos', title: 'Todos', section: 'hub', status: 'canvas-drafted', confidence: 'low', tags: ['canvas-multi-variant'], openQuestions: ['Variant choice — base / v2 / vA / vB / vC?'], links: { canvas: 'docs/design-source/mobile-screens-v2/' } }),
 
   // §6 · Build
-  row({ id: 'per-section-confirm', title: 'Per-section confirmation pattern', section: 'build', status: 'prototype-built', confidence: 'medium', openQuestions: ['Lock final adapt rules for state-icon TOC in Sarah\'s Picture container slice?'], lastTouched: { session: 117, date: '2026-05-22' }, links: { canvas: 'docs/design-source/mobile-screens-v2/', prototype: 'src/app/dev/proto/section-confirm/', slice: 'docs/slices/S-PROTO-section-confirm/' } }),
+  row({ id: 'extraction-results', title: 'What we found (AI extraction results)', section: 'build', status: 'prototype-built', confidence: 'high', links: { prototype: 'src/app/dev/proto/extraction-results/' } }),
+  row({ id: 'per-section-confirm', title: 'Confirm your data (7-section hub)', section: 'build', status: 'prototype-built', confidence: 'high', lastTouched: { session: 117, date: '2026-05-22' }, links: { canvas: 'docs/design-source/mobile-screens-v2/', prototype: 'src/app/dev/proto/section-confirm/', slice: 'docs/slices/S-PROTO-section-confirm/' } }),
   row({ id: 'bank-rec-categorise', title: 'Bank-rec: Categorise', section: 'build', status: 'prototype-built', confidence: 'medium', openQuestions: ['Category-set finalisation?'], lastTouched: { session: 117, date: '2026-05-22' }, links: { canvas: 'docs/design-source/mobile-screens-v2/', prototype: 'src/app/dev/proto/section-confirm/categorise/' } }),
   row({ id: 'bank-rec-confirm-recurring', title: 'Bank-rec: Confirm recurring', section: 'build', status: 'prototype-built', confidence: 'medium', openQuestions: ['Variable-amount edge cases?'], lastTouched: { session: 117, date: '2026-05-22' }, links: { canvas: 'docs/design-source/mobile-screens-v2/', prototype: 'src/app/dev/proto/section-confirm/confirm-recurring/' } }),
-  row({ id: 'bank-rec-manual-entry', title: 'Bank-rec: Manual entry', section: 'build', status: 'canvas-drafted', confidence: 'medium', openQuestions: ['Cash-handling rules?'], links: { canvas: 'docs/design-source/mobile-screens-v2/' } }),
-  row({ id: 'bank-rec-resolve-duplicate', title: 'Bank-rec: Resolve duplicate', section: 'build', status: 'canvas-drafted', confidence: 'medium', openQuestions: ['Detection-logic UX surface?'], links: { canvas: 'docs/design-source/mobile-screens-v2/' } }),
-  row({ id: 'bank-rec-split', title: 'Bank-rec: Split', section: 'build', status: 'canvas-drafted', confidence: 'medium', openQuestions: ['3-way+ splits + rounding?'], links: { canvas: 'docs/design-source/mobile-screens-v2/' } }),
-  row({ id: 'bank-rec-balance-check', title: 'Bank-rec: Balance check', section: 'build', status: 'canvas-drafted', confidence: 'medium', openQuestions: ['PDF/OCR confidence display?'], links: { canvas: 'docs/design-source/mobile-screens-v2/' } }),
+  row({ id: 'bank-rec-manual-entry', title: 'Bank-rec: Manual entry', section: 'build', status: 'prototype-built', confidence: 'high', links: { canvas: 'docs/design-source/mobile-screens-v2/', prototype: 'src/app/dev/proto/section-confirm/manual-entry/' } }),
+  row({ id: 'bank-rec-resolve-duplicate', title: 'Bank-rec: Resolve duplicate', section: 'build', status: 'prototype-built', confidence: 'high', links: { canvas: 'docs/design-source/mobile-screens-v2/', prototype: 'src/app/dev/proto/section-confirm/resolve-duplicate/' } }),
+  row({ id: 'bank-rec-split', title: 'Bank-rec: Split', section: 'build', status: 'prototype-built', confidence: 'high', links: { canvas: 'docs/design-source/mobile-screens-v2/', prototype: 'src/app/dev/proto/section-confirm/split/' } }),
+  row({ id: 'bank-rec-balance-check', title: 'Bank-rec: Balance check', section: 'build', status: 'prototype-built', confidence: 'high', links: { canvas: 'docs/design-source/mobile-screens-v2/', prototype: 'src/app/dev/proto/section-confirm/balance-check/' } }),
   row({ id: 'hidden-asset-prompts', title: 'Hidden-asset prompts', section: 'build', status: 'spec-only', confidence: 'low-blocked', openQuestions: ['Trigger criteria?'] }),
-  row({ id: 'your-picture-private', title: 'Your Picture (private mode)', section: 'build', status: 'canvas-drafted', confidence: 'medium', openQuestions: ['Completion gating + share trigger?'], links: { canvas: 'docs/design-source/mobile-screens-v2/' } }),
+  row({ id: 'your-picture-private', title: 'Your Picture (private mode)', section: 'build', status: 'prototype-built', confidence: 'high', links: { canvas: 'docs/design-source/mobile-screens-v2/', prototype: 'src/app/dev/proto/your-picture/' } }),
   row({ id: 'document-picker', title: 'Document picker', section: 'build', status: 'not-started', confidence: 'low-blocked', openQuestions: ['Upload UX + document types?'] }),
 
   // §7 · Reconcile
