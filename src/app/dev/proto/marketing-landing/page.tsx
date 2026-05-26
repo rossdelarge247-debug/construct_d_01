@@ -120,7 +120,7 @@ function Wordmark({ size = 18 }: { size?: number }) {
         />
       </div>
       <span style={{ fontSize: size, letterSpacing: '-0.01em', fontWeight: 600, color: '#111' }}>
-        decouple
+        Decouple.
       </span>
     </div>
   );

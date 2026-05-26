@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { tokens } from '@/styles/tokens';
-import { APP_NAME } from '@/constants';
+import { WORDMARK } from '@/constants';
 import type { ReactNode } from 'react';
 
 type IconProps = { size?: number };
@@ -67,7 +67,7 @@ export function ProtoHeader({ backHref, backLabel, rightSlot }: ProtoHeaderProps
           className="text-[18px] font-bold tracking-tight select-none"
           style={{ color: tokens.color.ink, textDecoration: 'none' }}
         >
-          {APP_NAME}
+          {WORDMARK}
         </Link>
 
         <div className="flex items-center gap-1 sm:gap-1.5">

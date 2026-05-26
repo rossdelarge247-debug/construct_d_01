@@ -1,6 +1,7 @@
 import type { WorkspacePhase } from '@/types'
 
 export const APP_NAME = 'Decouple'
+export const WORDMARK = 'Decouple.'
 export const APP_DESCRIPTION = 'A calm separation workspace'
 
 export const WORKSPACE_PHASES: { key: WorkspacePhase; label: string; description: string }[] = [

@@ -1,4 +1,5 @@
 import { tokens } from '@/styles/tokens';
+import { WORDMARK } from '@/constants';
 
 export function BrandBar() {
   return (
@@ -12,7 +13,7 @@ export function BrandBar() {
           letterSpacing: '-0.02em',
         }}
       >
-        Decouple.
+        {WORDMARK}
       </span>
     </div>
   );
