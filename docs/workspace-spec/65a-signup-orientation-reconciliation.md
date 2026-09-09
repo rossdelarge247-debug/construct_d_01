@@ -25,7 +25,7 @@ This is a register, not a redesign.
 | Screen | Status | Post-pivot home |
 |---|---|---|
 | 1.1 Landing page | SURVIVES | S-M1 marketing slice; copy + visual treatment per Claude AI Design canvas (live at `docs/design-source/marketing-landing/`); positioning per spec 42 |
-| 1.2 Sign up | SURVIVES with simplification | Sign-up form (Google OAuth + email magic link); arrives via spec 65 O8 *"Create a free account and start building my picture"* CTA |
+| 1.2 Sign up | SURVIVES with simplification | Sign-up form (Google OAuth + email magic link — auth model superseded, see §Status); arrives via spec 65 O8 *"Create a free account and start building my picture"* CTA |
 | 1.2a Magic link sent | SURVIVES | Standard transactional surface; copy per spec 73 |
 | 1.3 Sign in | SURVIVES | Standard auth surface; returning-user fork preserved |
 | 1.4 Invitation landing (from ex) | RE-HOMED | Spec 60 / S-O2 Mark's respondent flow; spec 67 §"Gap 7: Invited party (Mark) profiling variant" governs |
@@ -88,3 +88,5 @@ Exploration is now a TONE within the full journey (`stage='thinking'`), not a se
 ## Status
 
 Drafted at session 70 alongside spec 74 (P0). This register concretely resolves spec 65's open supersedes claim now that spec 67 is locked. It does not amend spec 57 + 58 source — those remain canonical for their post-pivot subset.
+
+Session 125 (S-PROTO-sign-up): row 1.2's auth model is superseded by the canvas. The sign-up artboard (`#m-signup`, mobile-screens-v2 "05b · Mobile · Sign up") is full name · email · password (hint *"Min 12 characters"*) · terms checkbox · *"Create account"* — no Google OAuth, no magic link. Decision A follows the canvas, so 1.2a magic-link-sent leaves that slice's scope; the magic-link-vs-password question is logged for user testing rather than decided in this register. The built O8 CTA reads *"Create my account"*, not the copy quoted in row 1.2. Spec 57 §1.2/§1.2a source text is left intact; this note is the amendment of record.

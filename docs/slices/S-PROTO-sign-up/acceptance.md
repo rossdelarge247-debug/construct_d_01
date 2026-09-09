@@ -8,7 +8,7 @@ Bounded-loop card: objective · metric · boundary. `progress.md` beside this fi
 
 Ship `/dev/proto/sign-up` as a working mobile sign-up screen that a fresh critic — shown the rendered page and the canvas artboard side by side, unlabelled — cannot reliably tell apart on structure, hierarchy, spacing and type; and that carries a user with valid details through to `/dev/proto/welcome-tour`.
 
-**Auth model: password (decision A — see §Status).** Spec 57 §1.2 as written is *"Email input → [Send magic link] → 1.2a"* and spec 65a L28 records *"Sign-up form (Google OAuth + email magic link)"*. This slice follows the canvas instead: full name · email · create password (hint *"Min 12 characters"*) · terms checkbox · *"Create account"*. Spec 57 §1.2/§1.2a and spec 65a L28–29 are amended in this PR with a §Status note; magic-link-sent (1.2a) leaves the slice.
+**Auth model: password (decision A — see §Status).** Spec 57 §1.2 as written is *"Email input → [Send magic link] → 1.2a"* and spec 65a L28 records *"Sign-up form (Google OAuth + email magic link)"*. This slice follows the canvas instead: full name · email · create password (hint *"Min 12 characters"*) · terms checkbox · *"Create account"*. Spec 65a carries the amendment of record in its §Status (its row 1.2 is marked superseded); spec 57 source stays intact, per 65a's own rule that *"those remain canonical for their post-pivot subset"*. Magic-link-sent (1.2a) leaves the slice.
 
 ## INPUTS AND STATE
 

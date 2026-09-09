@@ -49,7 +49,7 @@ Build only when questions 1-3 are answered. If canvas or spec is insufficient, f
 |---|------|------------|--------|-----------------|------------|
 | 7 | Sign up | `sign-up` | SHELL | Artboard in mobile-screens-v2 | Canvas-port needed; spec 65a |
 | 8 | Sign in | `sign-in` | READY | Artboard in mobile-screens-v2 | Canvas-port needed |
-| 9 | Magic-link sent | `magic-link-sent` | BLOCKED | No canvas, no spec | UX design needed |
+| 9 | Magic-link sent | `magic-link-sent` | BLOCKED | No canvas; spec 57 §1.2a (L55–63) defines the actions | Canvas needed; out of scope while sign-up follows the canvas's password model (S-PROTO-sign-up decision A) |
 
 **Stage 3 verdict:** Sign-up shell exists but needs canvas-port. Sign-in has canvas material. Magic-link is blocked. For journey walkthrough: build sign-up as pass-through to welcome-tour.
 
