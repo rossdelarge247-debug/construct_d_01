@@ -100,6 +100,10 @@ test.describe('Sign-up · visual bar capture', () => {
   test('rendered /dev/proto/sign-up at 402x874', async ({ page }) => {
     await page.setViewportSize(SCREEN);
     await page.goto('/dev/proto/sign-up');
+    // EnvBanner is harness chrome from the root layout, not design — and a giveaway in a blind pick.
+    await page.addStyleTag({
+      content: '[role="region"][aria-label="Dev mode banner"]{display:none !important}',
+    });
     await page.evaluate(() => document.fonts.ready);
     expect(await interLoaded(page), 'rendered side must have Inter loaded').toBe(true);
     await page.screenshot({ path: path.join(OUT, 'm-signup.rendered.png') });
