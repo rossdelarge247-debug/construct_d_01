@@ -60,8 +60,28 @@
 }
 
 .haveAccount {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  padding: 0 4px;
   font-size: var(--ds-type-12);
   color: var(--ds-color-text-sub);
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.haveAccountAction {
+  margin-left: 4px;
+  color: var(--ds-color-ink);
+  font-weight: var(--ds-weight-semibold);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.haveAccount:focus-visible {
+  outline: 2px solid var(--ds-color-ink);
+  outline-offset: -2px;
+  border-radius: var(--ds-radius-sm);
 }
 
 /* ---------- scroll body ---------- */
@@ -213,37 +233,98 @@
   margin-top: 4px;
 }
 
-.terms {
-  display: flex;
-  gap: 8px;
-  align-items: flex-start;
+.fieldError {
+  margin: 4px 0 0;
   font-size: var(--ds-type-12);
-  color: var(--ds-color-text-sub);
-  line-height: 1.4;
-}
-
-.termsBox {
-  accent-color: var(--ds-color-ink);
-  margin: 2px 0 0;
-  flex-shrink: 0;
-}
-
-.termsLink {
-  color: var(--ds-color-ink);
-  font-weight: var(--ds-weight-semibold);
-  text-decoration: underline;
-}
-
-.alert {
-  margin: 0;
-  font-size: var(--ds-type-13);
-  /* Danger hue deepened towards ink so 13px text clears WCAG AA on white;
+  /* Danger hue deepened towards ink so small text clears WCAG AA on white;
      the raw danger token stays for non-text accents only. */
   color: color-mix(in srgb, var(--ds-color-danger) 65%, var(--ds-color-ink));
   line-height: 1.4;
 }
 
+/* Whole row is the tap target (≥44px) so a thumb landing near the box
+   toggles it instead of falling through to the CTA below. */
+.terms {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  min-height: 44px;
+  font-size: var(--ds-type-12);
+  color: var(--ds-color-text-sub);
+  line-height: 1.4;
+  cursor: pointer;
+}
+
+.termsBox {
+  appearance: none;
+  width: 22px;
+  height: 22px;
+  margin: 0;
+  flex-shrink: 0;
+  position: relative;
+  border: 1.5px solid var(--ds-color-text-muted);
+  border-radius: var(--ds-radius-sm);
+  background: var(--ds-color-surface-canvas);
+  cursor: pointer;
+}
+
+.termsBox:checked {
+  border-color: var(--ds-color-ink);
+  background: var(--ds-color-ink);
+}
+
+.termsBox:checked::after {
+  content: '';
+  position: absolute;
+  left: 6px;
+  top: 2px;
+  width: 6px;
+  height: 11px;
+  border: solid var(--ds-color-surface-panel);
+  border-width: 0 2px 2px 0;
+  transform: rotate(45deg);
+}
+
+.termsBox:focus-visible {
+  outline: 2px solid var(--ds-color-ink);
+  outline-offset: 2px;
+}
+
+.termsBox[aria-invalid='true'] {
+  border-color: var(--ds-color-danger);
+}
+
+.termsName {
+  color: var(--ds-color-ink);
+  font-weight: var(--ds-weight-semibold);
+}
+
+.legalLinks {
+  margin: 0;
+  font-size: var(--ds-type-11);
+  color: var(--ds-color-text-muted);
+  text-align: center;
+  line-height: 1.4;
+}
+
+.legalLink {
+  display: inline-block;
+  padding: 15px 2px;
+  margin: -15px 0;
+  color: var(--ds-color-ink);
+  font-weight: var(--ds-weight-semibold);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.legalLink:focus-visible {
+  outline: 2px solid var(--ds-color-ink);
+  outline-offset: -4px;
+  border-radius: var(--ds-radius-sm);
+}
+
 .submit {
+  margin-top: 8px;
   height: 48px;
   border-radius: var(--ds-radius-xl);
   background: var(--ds-color-ink);

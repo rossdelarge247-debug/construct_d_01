@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, type FormEvent } from 'react';
+import { useState, type ChangeEvent, type FormEvent } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { APP_NAME } from '@/constants';
@@ -12,27 +12,39 @@ const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 const STEPS = ['Account', 'About you', 'Pay'] as const;
 
-type FieldName = 'name' | 'email' | 'password' | 'terms';
+const SIGN_IN_ROUTE = '/dev/proto/sign-in';
+const LEGAL_ROUTE = '/dev/proto/legal-trio';
+const WELCOME_TOUR_ROUTE = '/dev/proto/welcome-tour';
 
-interface Problem {
-  field: FieldName;
-  message: string;
+const FIELD_ORDER = ['name', 'email', 'password', 'terms'] as const;
+type FieldName = (typeof FIELD_ORDER)[number];
+type Problems = Partial<Record<FieldName, string>>;
+
+const RULES: Record<FieldName, (value: string) => string | null> = {
+  name: (value) => (value.trim() ? null : 'Please enter your full name.'),
+  email: (value) => {
+    const email = value.trim();
+    if (!email) return 'Please enter your email address.';
+    return EMAIL_PATTERN.test(email) ? null : "That email address doesn't look right.";
+  },
+  password: (value) =>
+    value.length >= MIN_PASSWORD_LENGTH
+      ? null
+      : `Your password needs at least ${MIN_PASSWORD_LENGTH} characters.`,
+  terms: (value) => (value === 'on' ? null : 'Please agree to the Terms and Privacy Policy to continue.'),
+};
+
+function findProblems(form: FormData): Problems {
+  const problems: Problems = {};
+  for (const field of FIELD_ORDER) {
+    const message = RULES[field](String(form.get(field) ?? ''));
+    if (message) problems[field] = message;
+  }
+  return problems;
 }
 
-function findProblem(form: FormData): Problem | null {
-  const name = String(form.get('name') ?? '').trim();
-  const email = String(form.get('email') ?? '').trim();
-  const password = String(form.get('password') ?? '');
-  const terms = form.get('terms') === 'on';
-
-  if (!name) return { field: 'name', message: 'Please enter your full name.' };
-  if (!email) return { field: 'email', message: 'Please enter your email address.' };
-  if (!EMAIL_PATTERN.test(email)) return { field: 'email', message: "That email address doesn't look right." };
-  if (password.length < MIN_PASSWORD_LENGTH) {
-    return { field: 'password', message: `Your password needs at least ${MIN_PASSWORD_LENGTH} characters.` };
-  }
-  if (!terms) return { field: 'terms', message: 'Please agree to the Terms and Privacy Policy to continue.' };
-  return null;
+function errorId(field: FieldName) {
+  return `signup-${field}-error`;
 }
 
 function SparkGlyph({ size }: { size: number }) {
@@ -88,18 +100,69 @@ function Stepper() {
   );
 }
 
+interface FieldErrorProps {
+  field: FieldName;
+  message: string;
+  announce: boolean;
+}
+
+function FieldError({ field, message, announce }: FieldErrorProps) {
+  return (
+    <p id={errorId(field)} role={announce ? 'alert' : undefined} className={styles.fieldError}>
+      {message}
+    </p>
+  );
+}
+
 export default function SignUpPage() {
   const router = useRouter();
-  const [problem, setProblem] = useState<Problem | null>(null);
+  const [problems, setProblems] = useState<Problems>({});
+  const [announced, setAnnounced] = useState<FieldName | null>(null);
+  const [submitCount, setSubmitCount] = useState(0);
 
   function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    const next = findProblem(new FormData(event.currentTarget));
-    setProblem(next);
-    if (!next) router.push('/dev/proto/welcome-tour');
+    const form = event.currentTarget;
+    const next = findProblems(new FormData(form));
+    const firstInvalid = FIELD_ORDER.find((field) => next[field]);
+
+    setProblems(next);
+    setAnnounced(firstInvalid ?? null);
+    setSubmitCount((count) => count + 1);
+
+    if (!firstInvalid) {
+      router.push(WELCOME_TOUR_ROUTE);
+      return;
+    }
+    (form.elements.namedItem(firstInvalid) as HTMLInputElement | null)?.focus();
   }
 
-  const invalid = (field: FieldName) => (problem?.field === field ? true : undefined);
+  function revalidate(event: ChangeEvent<HTMLInputElement>) {
+    const { name, type, checked, value } = event.target;
+    const field = name as FieldName;
+    if (!problems[field]) return;
+
+    const message = RULES[field](type === 'checkbox' ? (checked ? 'on' : '') : value);
+    setProblems((previous) => {
+      const updated = { ...previous };
+      if (message) updated[field] = message;
+      else delete updated[field];
+      return updated;
+    });
+  }
+
+  const invalid = (field: FieldName) => (problems[field] ? true : undefined);
+  const describedBy = (field: FieldName, ...extra: string[]) => {
+    const ids = [problems[field] ? errorId(field) : null, ...extra].filter(Boolean);
+    return ids.length ? ids.join(' ') : undefined;
+  };
+  const renderError = (field: FieldName) => {
+    const message = problems[field];
+    if (!message) return null;
+    const announce = announced === field;
+    // A fresh key remounts the live region so a repeated failure is announced again.
+    return <FieldError key={announce ? submitCount : field} field={field} message={message} announce={announce} />;
+  };
 
   return (
     <main className={styles.page}>
@@ -110,7 +173,9 @@ export default function SignUpPage() {
           </Link>
         </div>
         <div className={styles.topBarSide}>
-          <span className={styles.haveAccount}>Have an account?</span>
+          <Link href={SIGN_IN_ROUTE} className={styles.haveAccount}>
+            Have an account? <strong className={styles.haveAccountAction}>Sign in</strong>
+          </Link>
         </div>
       </header>
 
@@ -138,7 +203,10 @@ export default function SignUpPage() {
                 autoComplete="name"
                 className={styles.input}
                 aria-invalid={invalid('name')}
+                aria-describedby={describedBy('name')}
+                onChange={revalidate}
               />
+              {renderError('name')}
             </div>
             <div>
               <label htmlFor="signup-email" className={styles.fieldLabel}>
@@ -152,7 +220,10 @@ export default function SignUpPage() {
                 inputMode="email"
                 className={styles.input}
                 aria-invalid={invalid('email')}
+                aria-describedby={describedBy('email')}
+                onChange={revalidate}
               />
+              {renderError('email')}
             </div>
             <div>
               <label htmlFor="signup-password" className={styles.fieldLabel}>
@@ -165,37 +236,51 @@ export default function SignUpPage() {
                 autoComplete="new-password"
                 placeholder="••••••••••••"
                 className={styles.input}
-                aria-describedby="signup-password-hint"
                 aria-invalid={invalid('password')}
+                aria-describedby={describedBy('password', 'signup-password-hint')}
+                onChange={revalidate}
               />
+              {renderError('password')}
               <div id="signup-password-hint" className={styles.hint}>
                 Min {MIN_PASSWORD_LENGTH} characters
               </div>
             </div>
           </div>
 
-          <label className={styles.terms}>
-            <input
-              type="checkbox"
-              name="terms"
-              className={styles.termsBox}
-              aria-invalid={invalid('terms')}
-            />
-            <span>
-              I agree to {APP_NAME}&apos;s <span className={styles.termsLink}>Terms</span> and{' '}
-              <span className={styles.termsLink}>Privacy Policy</span>.
-            </span>
-          </label>
-
-          {problem && (
-            <p role="alert" className={styles.alert}>
-              {problem.message}
-            </p>
-          )}
+          <div>
+            <label htmlFor="signup-terms" className={styles.terms}>
+              <input
+                id="signup-terms"
+                type="checkbox"
+                name="terms"
+                className={styles.termsBox}
+                aria-invalid={invalid('terms')}
+                aria-describedby={describedBy('terms')}
+                onChange={revalidate}
+              />
+              <span>
+                I agree to {APP_NAME}&apos;s <strong className={styles.termsName}>Terms</strong> and{' '}
+                <strong className={styles.termsName}>Privacy Policy</strong>.
+              </span>
+            </label>
+            {renderError('terms')}
+          </div>
 
           <button type="submit" className={styles.submit}>
             Create account →
           </button>
+
+          <p className={styles.legalLinks}>
+            Read the{' '}
+            <Link href={LEGAL_ROUTE} className={styles.legalLink}>
+              Terms
+            </Link>{' '}
+            and{' '}
+            <Link href={LEGAL_ROUTE} className={styles.legalLink}>
+              Privacy Policy
+            </Link>
+            .
+          </p>
         </form>
 
         <div className={styles.aiCard}>
