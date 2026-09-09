@@ -25,8 +25,8 @@ Ship `/dev/proto/sign-up` as a working mobile sign-up screen that a fresh critic
   | SUB | `#5F6368` | `text.sub` | `#57534E` | drift (cool vs warm) |
   | MUTE | `#9AA0A6` | `text.muted` | `#78716C` | drift |
   | LINE | `#EAECEF` | `border` | `#E5E3DC` | drift |
-  | ACCENT | `#2F6D5F` | — | — | no token |
-  | AI card | `#4C3FB8` / `#F5F3FF` / `#E4DEFD` | nearest `accent.violet` | `#7C3AED` | no token |
+  | ACCENT | `#2F6D5F` | `accent.brand` | `#2F6D5F` | match (S-F1 extension, session 126) |
+  | AI card | `#4C3FB8` / `#F5F3FF` / `#E4DEFD` / badge `#6D5BD0` | `ai.text` / `ai.soft` / `ai.border` / `ai.accent` | same | match (S-F1 extension, session 126) |
 
 - **Durable state:** `progress.md` — one row per round: change · verifier evidence · critic's largest gap · next action.
 
@@ -59,4 +59,4 @@ Sign-in (`#m-signin`, candidate for run 2) · magic-link-sent · desktop (no ass
 
 ## Status
 
-Card written session 125, the first live run of the builder/critic loop experiment. Decision A (password, follow the canvas) taken session 125 against spec 57 §1.2's magic-link model. Bars authored before the builder existed. Loop not yet run.
+Card written session 125, the first live run of the builder/critic loop experiment. Decision A (password, follow the canvas) taken session 125 against spec 57 §1.2's magic-link model. Bars authored before the builder existed. Loop ran 4 rounds in session 125 (see `progress.md`). Session 126: the ACCENT and AI-card drift rows resolved by the S-F1 token extension; `sign-up.module.css` carries no phase-colour stand-ins or `color-mix()`.

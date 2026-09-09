@@ -40,10 +40,18 @@ export const tokens = {
       finalise:  { accent: '#166534', soft: '#DCFCE7' },
     },
     danger: '#FF3B30',
+    dangerText: '#AF2F28',
     accent: {
       violet:  '#7C3AED',
       magenta: '#BE185D',
       indigo:  '#4F46E5',
+      brand:   '#2F6D5F',
+    },
+    ai: {
+      accent: '#6D5BD0',
+      text:   '#4C3FB8',
+      soft:   '#F5F3FF',
+      border: '#E4DEFD',
     },
     status: {
       confirmed: { accent: '#22C55E', soft: '#D1FAE5', text: '#047857' },
@@ -59,7 +67,7 @@ export const tokens = {
   },
   font: {
     sans:  "'Inter', -apple-system, BlinkMacSystemFont, sans-serif",
-    serif: "'Source Serif Pro', Georgia, serif",
+    serif: "'Source Serif 4', Georgia, serif",
     mono:  "'JetBrains Mono', ui-monospace, Menlo, monospace",
   },
   type: {
@@ -168,10 +176,17 @@ export type TokenName =
   | '--ds-color-trust-bank-evidenced-soft'
   // Colours · State
   | '--ds-color-danger'
+  | '--ds-color-danger-text'
   // Colours · Accents
   | '--ds-color-accent-violet'
   | '--ds-color-accent-magenta'
   | '--ds-color-accent-indigo'
+  | '--ds-color-accent-brand'
+  // Colours · AI
+  | '--ds-color-ai'
+  | '--ds-color-ai-text'
+  | '--ds-color-ai-soft'
+  | '--ds-color-ai-border'
   // Colours · Status
   | '--ds-color-status-confirmed'
   | '--ds-color-status-confirmed-soft'
@@ -280,9 +295,15 @@ export const TOKEN_NAMES: ReadonlyArray<TokenName> = [
   '--ds-color-trust-bank-evidenced',
   '--ds-color-trust-bank-evidenced-soft',
   '--ds-color-danger',
+  '--ds-color-danger-text',
   '--ds-color-accent-violet',
   '--ds-color-accent-magenta',
   '--ds-color-accent-indigo',
+  '--ds-color-accent-brand',
+  '--ds-color-ai',
+  '--ds-color-ai-text',
+  '--ds-color-ai-soft',
+  '--ds-color-ai-border',
   '--ds-color-status-confirmed',
   '--ds-color-status-confirmed-soft',
   '--ds-color-status-confirmed-text',

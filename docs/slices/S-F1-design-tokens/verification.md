@@ -114,6 +114,13 @@ What S-F1 ships vs what downstream slices may need to extend.
 
 These gaps are *expected* and *additive*; existing S-F1 tokens are stable.
 
+### Extensions landed after S-F1
+
+| Tokens | Source | Evidence |
+|---|---|---|
+| `--ds-color-status-*` (9) · `--ds-color-action-*` (4) · type + radius additions (5) | Your Picture standardisation | `tests/unit/styles/tokens.test.ts` parity at 94 entries |
+| `--ds-color-accent-brand` · `--ds-color-ai` / `-text` / `-soft` / `-border` · `--ds-color-danger-text` (6); `--ds-font-serif` re-pointed to `'Source Serif 4'`, the family `src/app/layout.tsx` registers via next/font (was `'Source Serif Pro'`, which fell through to Georgia everywhere) | Mobile canvas `ACCENT` (decoded Standalone.html L1352) and `AI_PURPLE*` (L2265–2268); sign-up loop escalations in `docs/slices/S-PROTO-sign-up/progress.md` | Parity test at 100 entries plus CSS↔TS value assertions for the six new tokens and the serif family; `document.fonts` on `/dev/proto/sign-up` reports `Source Serif 4 600 loaded`; sign-up behaviour, a11y and visual bars green after `sign-up.module.css` moved off its phase-colour stand-ins and `color-mix()` |
+
 ---
 
 ## Sign-off

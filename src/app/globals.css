@@ -147,13 +147,21 @@
   --ds-color-trust-bank-evidenced: #15803D;
   --ds-color-trust-bank-evidenced-soft: #F0FDF4;
 
-  /* ─── Colours · State (1) ─── */
+  /* ─── Colours · State (2) ─── */
   --ds-color-danger: #FF3B30;
+  --ds-color-danger-text: #AF2F28;
 
-  /* ─── Colours · Accents (3) — pre-signup canvas canon ─── */
+  /* ─── Colours · Accents (4) — pre-signup + mobile canvas canon ─── */
   --ds-color-accent-violet: #7C3AED;
   --ds-color-accent-magenta: #BE185D;
   --ds-color-accent-indigo: #4F46E5;
+  --ds-color-accent-brand: #2F6D5F;
+
+  /* ─── Colours · AI (4) — mobile canvas AI_PURPLE family ─── */
+  --ds-color-ai: #6D5BD0;
+  --ds-color-ai-text: #4C3FB8;
+  --ds-color-ai-soft: #F5F3FF;
+  --ds-color-ai-border: #E4DEFD;
 
   /* ─── Colours · Status (9) — data trust/confirmation states ─── */
   --ds-color-status-confirmed: #22C55E;
@@ -174,7 +182,7 @@
 
   /* ─── Typography · Families (3) ─── */
   --ds-font-sans: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-  --ds-font-serif: 'Source Serif Pro', Georgia, serif;
+  --ds-font-serif: 'Source Serif 4', Georgia, serif;
   --ds-font-mono: 'JetBrains Mono', ui-monospace, Menlo, monospace;
 
   /* ─── Typography · Scale (15) — literal pixel preserved per user direction ─── */

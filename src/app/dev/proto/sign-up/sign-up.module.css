@@ -101,7 +101,7 @@
 }
 
 .wordmarkDot {
-  color: var(--ds-color-phase-finalise);
+  color: var(--ds-color-accent-brand);
 }
 
 .title {
@@ -236,9 +236,7 @@
 .fieldError {
   margin: 4px 0 0;
   font-size: var(--ds-type-12);
-  /* Danger hue deepened towards ink so small text clears WCAG AA on white;
-     the raw danger token stays for non-text accents only. */
-  color: color-mix(in srgb, var(--ds-color-danger) 65%, var(--ds-color-ink));
+  color: var(--ds-color-danger-text);
   line-height: 1.4;
 }
 
@@ -344,8 +342,8 @@
 /* ---------- AI trust card (canvas L3715; AIBadge L2293) ---------- */
 .aiCard {
   padding: 12px 14px;
-  background: var(--ds-color-phase-build-soft);
-  border: 1px solid color-mix(in srgb, var(--ds-color-phase-build) 18%, var(--ds-color-surface-panel));
+  background: var(--ds-color-ai-soft);
+  border: 1px solid var(--ds-color-ai-border);
   border-radius: var(--ds-radius-xl);
   display: flex;
   gap: 10px;
@@ -356,7 +354,7 @@
   width: 20px;
   height: 20px;
   border-radius: var(--ds-radius-pill);
-  background: var(--ds-color-accent-violet);
+  background: var(--ds-color-ai);
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -372,7 +370,7 @@
   margin: 0;
   font-size: var(--ds-type-12);
   font-weight: var(--ds-weight-semibold);
-  color: var(--ds-color-phase-build);
+  color: var(--ds-color-ai-text);
 }
 
 .aiText {
