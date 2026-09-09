@@ -22,4 +22,4 @@ Target: `acceptance.md` §OBJECTIVE. Base: `main` @ `2e35ca3`. Branch: `claude/t
 
 ## Boundaries remaining
 
-Rounds: 6 · Token cap: unset (user to set before round 1) · Same-gap-twice: 0/2
+Rounds: 0/6 · Wall-clock: ~60 min · Same-gap-twice: 0/2

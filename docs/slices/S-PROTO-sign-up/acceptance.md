@@ -51,7 +51,7 @@ Four critics, each with fresh context and one lens: **visual** (blind pick) · *
 
 - **Allowed:** read the repo; edit `src/app/dev/proto/sign-up/**`, the `sign-up` row in `registry.ts`, `progress.md`, this file's §Status; add `tests/e2e/**` fixtures; add parity-tested tokens only after the user resolves an escalation.
 - **Forbidden without approval:** push to `main`, any deploy, credentials, spending, new runtime dependencies, edits outside the paths above, editing the two bar specs to make them pass.
-- **Stop and report when:** all four verifiers pass and the blind critic's stated reason is below materiality · the same largest-gap finding recurs two rounds running · 6 rounds elapse · the token boundary is reached (user to set before the run) · any blocker needs credentials or a product decision.
+- **Stop and report when:** all four verifiers pass and the blind critic's stated reason is below materiality · the same largest-gap finding recurs two rounds running · 6 rounds or ~60 minutes wall-clock elapse, whichever first · any blocker needs credentials or a product decision.
 
 ## Out of scope
 
