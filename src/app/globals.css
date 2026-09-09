@@ -155,13 +155,33 @@
   --ds-color-accent-magenta: #BE185D;
   --ds-color-accent-indigo: #4F46E5;
 
+  /* ─── Colours · Status (9) — data trust/confirmation states ─── */
+  --ds-color-status-confirmed: #22C55E;
+  --ds-color-status-confirmed-soft: #D1FAE5;
+  --ds-color-status-confirmed-text: #047857;
+  --ds-color-status-estimated: #D97706;
+  --ds-color-status-estimated-soft: #FEF3C7;
+  --ds-color-status-estimated-text: #92400E;
+  --ds-color-status-info: #0369A1;
+  --ds-color-status-info-soft: #F0F9FF;
+  --ds-color-status-info-border: #BAE6FD;
+
+  /* ─── Colours · Action (4) — CTA button palette ─── */
+  --ds-color-action-primary: #DC2626;
+  --ds-color-action-upload: #F97316;
+  --ds-color-action-share: #9A3412;
+  --ds-color-action-banner: #14532D;
+
   /* ─── Typography · Families (3) ─── */
   --ds-font-sans: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
   --ds-font-serif: 'Source Serif Pro', Georgia, serif;
   --ds-font-mono: 'JetBrains Mono', ui-monospace, Menlo, monospace;
 
-  /* ─── Typography · Scale (12) — literal pixel preserved per user direction ─── */
+  /* ─── Typography · Scale (15) — literal pixel preserved per user direction ─── */
+  --ds-type-10: 10px;
   --ds-type-11: 11px;
+  --ds-type-12: 12px;
+  --ds-type-13: 13px;
   --ds-type-14-5: 14.5px;
   --ds-type-15-5: 15.5px;
   --ds-type-16: 16px;
@@ -183,10 +203,12 @@
   /* ─── Typography · Letter-spacing (1) ─── */
   --ds-letter-spacing-wide: 0.12em;
 
-  /* ─── Radii (3) ─── */
+  /* ─── Radii (5) ─── */
   --ds-radius-sm: 4px;
   --ds-radius-md: 6px;
   --ds-radius-lg: 8px;
+  --ds-radius-xl: 10px;
+  --ds-radius-pill: 999px;
 
   /* ─── Shadows · Neutral (3) ─── */
   --ds-shadow-sm: 0 2px 6px rgba(0, 0, 0, 0.1);

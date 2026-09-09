@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect, type CSSProperties, type ReactNode } from 'react';
+import Link from 'next/link';
 import { tokens } from '@/styles/tokens';
 
 /* =========================================================================
@@ -749,13 +750,13 @@ function DashboardStage({ onConnect, onManual, connected }: { onConnect: (k: str
           </div>
 
           {/* journey continuation */}
-          <a
+          <Link
             href="/dev/proto/moment-1-ack"
             className="mt-8 block w-full rounded-xl py-4 text-center text-[14.5px] font-semibold"
             style={{ background: INK, color: '#FFF', textDecoration: 'none' }}
           >
             Continue to profiling &rarr;
-          </a>
+          </Link>
 
           {/* quiet status footer */}
           <div className="mt-10 pt-5 flex items-center justify-between text-[11.5px]" style={{ color: MUTE, borderTop: `1px solid ${LINE}` }}>

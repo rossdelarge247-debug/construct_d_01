@@ -85,7 +85,7 @@ done
 wait
 
 DIMS_CSV=$(IFS=,; echo "${DIMS[*]}")
-AGGREGATE_JSON=$(scripts/spawn-multi-reviewer.sh aggregate --dimensions "$DIMS_CSV" "$PREFLIGHT_DIR/envelopes") || {
+AGGREGATE_JSON=$(scripts/spawn-multi-reviewer.sh aggregate "$PREFLIGHT_DIR/envelopes" --dimensions "$DIMS_CSV") || {
   echo "preflight: aggregator failed" >&2
   exit 1
 }
