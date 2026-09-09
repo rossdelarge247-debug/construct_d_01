@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { useBankData } from '../_context/bank-data-context';
 import { useProfiling } from '../_context/profiling-context';
 import type { BankStatementExtraction } from '@/lib/ai/extraction-schemas';
+import { WORDMARK } from '@/constants';
 import styles from './your-picture.module.css';
 
 const FALLBACK_SNAPSHOT = [
@@ -181,7 +182,7 @@ export default function YourPicturePage() {
       {/* Header */}
       <header className={styles.header}>
         <div className={styles.breadcrumb}>
-          <span className={styles.breadcrumbBrand}>decouple</span>
+          <span className={styles.breadcrumbBrand}>{WORDMARK}</span>
           <span>&rsaquo;</span>
           <span>Prepare your picture (disclosure)</span>
         </div>
