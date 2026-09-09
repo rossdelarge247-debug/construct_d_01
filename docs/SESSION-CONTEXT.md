@@ -1,80 +1,82 @@
-# Session 126 Context Block
+# Session 127 Context Block
 
-## Session 125 accomplishments
+## Session 126 accomplishments
 
-First session after a ~3-month pause. Main tip is `2e35ca3` (PR #231 merged). Work since lives on `claude/trusting-brahmagupta-uFE21`, unmerged — the user reviews the Vercel preview before a PR opens.
+Main tip is `2e35ca3`. Two branches carry the work, stacked: `claude/trusting-brahmagupta-uFE21` (session 125, sign-up; PR held until the user reviews the Vercel preview) and `claude/session-126-kickoff-iioj8m` on top of it (this session; 5 commits, pushed).
 
 | Deliverable | Where |
 |---|---|
-| PR deck cleared: #231 merged (CI fixes + npm audit + wordmark + preflight fix); #139/#140/#141/#160 closed | main `2e35ca3` |
-| `WORDMARK = 'Decouple.'` constant; every nav/brand mark uses it (ProtoHeader, BrandBar, marketing-landing, welcome-tour, your-picture breadcrumb) | `src/constants/index.ts`, `b874915` |
-| Next 16 agent-rules block redirected to `AGENTS.md` (generator verified to skip CLAUDE.md) | `aa4cfda` |
-| Gauntlet-loop harness: Playwright config, behaviour+a11y bar, bare visual-bar capture, Template-2 loop card, progress log | `playwright.config.ts`, `tests/e2e/`, `docs/slices/S-PROTO-sign-up/` |
-| Sign-up screen built by the loop from canvas `#m-signup` — 3 rounds + a majors-targeted round 4; all bars green; production build verified under CI conditions | `src/app/dev/proto/sign-up/`, `tests/unit/proto-sign-up/page.test.tsx` |
-| Doc drift fixed: registry `spec:` path, journey-sequence #9, spec 65a §Status records decision A (password per canvas) | `fbd80c3`, `78a9a84` |
+| S-F1 token extension: `--ds-color-accent-brand` (canvas ACCENT teal), `--ds-color-ai` / `-text` / `-soft` / `-border` (canvas AI_PURPLE family), `--ds-color-danger-text`; `--ds-font-serif` → `'Source Serif 4'`, the face next/font registers (every serif heading was Georgia); parity test at 100 entries with CSS↔TS value assertions; `sign-up.module.css` off its phase-colour stand-ins and `color-mix()` | `fd3a4ea`; `docs/slices/S-F1-design-tokens/verification.md` §Extensions |
+| Two session-125 escalations closed as non-defects: Inter 500–800 were always registered; the canvas Wordmark dot is teal, not purple | `docs/slices/S-PROTO-sign-up/progress.md` §Resolved |
+| User decisions: keep the "Read the Terms…" line; two stacked PRs; sign-up PR held for preview review; sign-in = password + Forgot? only (decision B, spec 65a §Status) | spec 65a; this file |
+| S-PROTO-sign-in loop run 2: bars first, `tests/e2e/helpers/canvas-capture.ts` extracted from run 1, screen built from canvas `M_SignIn`, 4 rounds with a fresh blind critic per round, loop stopped at the boundary with every remaining pick reason deliberate or below materiality | `da16a76` → `42175f3`; `docs/slices/S-PROTO-sign-in/{acceptance,progress,verification}.md` |
+| Registry `sign-in` → `prototype-built`; journey-sequence #8 DONE | `src/app/dev/proto/registry.ts`, `docs/journey-sequence.md` |
 
-Round-4 outcome: the majors-targeted round cut critic majors 18 → 11 (per-field errors with `aria-describedby`, first-invalid focus, all problems at once, 44px terms row, links to the sign-in and legal stubs; `8f7a82f`). The blind critic still identifies the implementation; its one material gap is a "Read the Terms and Privacy Policy." line beneath the button that the canvas lacks — added so the legal links live outside the checkbox label. `docs/slices/S-PROTO-sign-up/verification.md` written; production build verified under CI conditions.
+Floor at wrap: vitest 139 files / 1065 tests; lint 0 errors; tsc clean; production build green under CI env with no dev server; Playwright 20/20 across both screens' bars.
 
 ## Current state
 
-- `main` @ `2e35ca3`. Branch `claude/trusting-brahmagupta-uFE21` ahead by the commits above; **no PR yet**.
-- Sign-up: prototype-built, wired O8 → sign-up → welcome-tour. Sign-in, magic-link-sent, desktop variants out of scope.
-- Design-system escalations open (see P1). Top-bar treatment differs across sign-up / welcome-tour / moment-1-ack (see P4).
-- Your Picture leftovers from session 124 still hardcoded: children (Emma/Jake), home address/value, outgoings "confirmed" provider name.
-- Loop harness is reusable: the visual bar's canvas capture mounts any `window.M_*` screen component standalone; bars live in `tests/e2e/*.e2e.ts` (named so vitest ignores them).
+- `main` @ `2e35ca3`. `claude/trusting-brahmagupta-uFE21` @ `db162dc` (12 ahead of main, no PR). `claude/session-126-kickoff-iioj8m` @ `42175f3` (17 ahead of main, 5 ahead of the 125 branch, no PR).
+- Sign-up and sign-in are built and wired both ways; sign-in hands off to post-connect-dashboard. Both share the canvas TopBar; the dashboard uses ProtoHeader (P2 below).
+- Known, deliberate deviations from the sign-in canvas: no Google/passkey buttons or divider (decision B); text links underlined; password is an empty placeholder, not the canvas's faked filled value; heading string 16px wider because the canvas embeds Source Serif Pro while the app loads Source Serif 4.
+- Sign-up still has its 22px custom checkbox; sign-in uses a 14px native-size box in a 44px row. Align when sign-up is next touched.
+- Pre-signup rail components (`rails/rail-constants.tsx`, `RailCoach.tsx`, `RailHuman.tsx`) hardcode `"Source Serif Pro"` inline and still render the fallback serif — same bug class as the token, not yet fixed.
+- Your Picture leftovers from session 124 still hardcoded: children, home address/value, outgoings provider name.
 
-## Prioritised deliverables for session 126
+## Prioritised deliverables for session 127
 
-1. **P1: Design-system tokens slice.** Add parity-tested tokens (`tokens.ts` + `globals.css` + `tests/unit/styles/tokens.test.ts`) for: brand accent teal `#2F6D5F` (canvas `ACCENT`; sign-up currently borrows `--ds-color-phase-finalise`), AI trust-card family `#4C3FB8 / #F5F3FF / #E4DEFD` (currently `phase-build` + `accent-violet` + a `color-mix()` border), a text-safe danger colour (alert uses `color-mix` on `--ds-color-danger`), and fix `--ds-font-serif` to the family next/font actually loads (`Source Serif 4` — today every serif heading is Georgia) and Inter weights beyond 400. Then re-point `sign-up.module.css`. Note the TDD-guard parity chicken-and-egg from HANDOFF-124: update the parity test, CSS and TS in one coherent step.
-2. **P2: Open the PR** for `claude/trusting-brahmagupta-uFE21` → main once the user has reviewed the preview. CI + 3-specialist auto-review is the post-loop gate. PR body must reference `docs/slices/S-PROTO-sign-up/verification.md` (`pr-dod.yml` checks for it). Journey-sequence row #7 is already DONE on the branch. Settle the round-4 residue first: the "Read the Terms and Privacy Policy." line beneath the button — keep it (a11y-safe legal links) or restyle to the canvas; and check the canvas `Wordmark` (decoded L1370–1376) for the dot's real colour — the round-4 critic saw purple, the drift table assumed the teal `ACCENT`.
-3. **P3: Sign-in as loop run 2.** Canvas `#m-signin` (`window.M_SignIn`, decoded L3609). Its canvas carries "Continue with Google" and "Sign in with passkey" affordances that decision A removed from sign-up — decide consistency before setting the bar. Reuse the harness; write the bars first; include the unit suite in the floor; count majors in the stop rule from round 1.
-4. **P4: Nav consistency** — the user is producing a new canvas; reconcile top-bar treatment (ProtoHeader vs sign-up TopBar vs welcome-tour header) from it, then apply across logged-in surfaces.
-5. **P5:** Your Picture hardcoded sections (children model, property profiling, provider name) — carried from session 124.
+| # | Deliverable | Sequence note |
+|---|---|---|
+| P1 | **Open the PRs.** After the user confirms the Vercel preview of the 125 branch: open `claude/trusting-brahmagupta-uFE21` → main (body references `docs/slices/S-PROTO-sign-up/verification.md`); once merged, open `claude/session-126-kickoff-iioj8m` → main (body references `docs/slices/S-F1-design-tokens/verification.md` and `docs/slices/S-PROTO-sign-in/verification.md`). CI + 3-specialist auto-review is the post-loop gate for both. | — |
+| P2 | **Nav consistency** from the user's new canvas: reconcile canvas TopBar (sign-up, sign-in) vs welcome-tour header vs ProtoHeader (moment-1-ack, dashboard); also the "Welcome back" → "Welcome" tonal repeat across sign-in → dashboard. | OFF-SEQUENCE because §1/§3 surface polish precedes the sequence's next slice `S-PROTO-section-confirm` (§6 Build) — carried from session 125 P4 at the user's request. |
+| P3 | **Your Picture leftovers** — children model, property profiling, outgoings provider name. | OFF-SEQUENCE because scope-add-on from session 124, carried at the user's request. |
+| P4 | **Pair-consistency fixes on sign-up** when its PR is next touched: 14px checkbox as sign-in; user decision on link underlines across both screens (weight-only cue would match the canvas). | — |
+| P5 | **Pre-signup rails serif**: replace the three inline `"Source Serif Pro"` literals with `tokens.font.serif` so O-screens' rails render Source Serif 4. | — |
 
-## Authoritative reading order at session 126 start
+`S-PROTO-section-confirm` remains the next slice per CLAUDE.md §"Phase 3 sequence"; every row above that is not it carries its OFF-SEQUENCE note.
+
+## Authoritative reading order at session 127 start
 
 1. This file.
-2. `docs/HANDOFF-SESSION-125.md` (retro — long; read §Bugs and §What could improve at minimum).
-3. `docs/slices/S-PROTO-sign-up/acceptance.md` + `progress.md` (the loop card and round log).
-4. `tests/e2e/sign-up.visual-bar.e2e.ts` (how the canvas is captured — reuse for sign-in).
+2. `docs/HANDOFF-SESSION-126.md` — §Bugs found and §What could improve at minimum.
+3. `docs/slices/S-PROTO-sign-in/progress.md` §Escalations (three user-facing design calls).
+4. `tests/e2e/helpers/canvas-capture.ts` — the reusable capture for any `window.M_*` screen.
 
 ## Key files
 
 ```
-Loop harness (session 125)
-playwright.config.ts                                   — Chromium pinned to sandbox build; :3000 app + :3100 canvas servers
-tests/e2e/sign-up.journey.e2e.ts                       — behaviour + a11y bar (Playwright + axe)
-tests/e2e/sign-up.visual-bar.e2e.ts                    — bare 402×874 captures of canvas screen + app, fonts shared
-docs/slices/S-PROTO-sign-up/acceptance.md              — Template-2 loop card (objective · metric · boundary) + drift table
-docs/slices/S-PROTO-sign-up/progress.md                — round log + escalations
-tests/unit/proto-sign-up/page.test.tsx                 — unit test (CI coverage; Playwright is not in CI)
+Loop harness (sessions 125–126)
+playwright.config.ts                                   — Chromium pinned to the sandbox build; :3000 app + :3100 canvas servers
+tests/e2e/helpers/canvas-capture.ts                    — mountCanvasScreen / captureRendered: bare 402×874 captures, Inter shared with the canvas
+tests/e2e/sign-up.{journey,visual-bar}.e2e.ts          — run 1 bars
+tests/e2e/sign-in.{journey,visual-bar}.e2e.ts          — run 2 bars (axe before + after invalid submit; checkbox metrics)
+docs/slices/S-PROTO-sign-in/{acceptance,progress,verification}.md — run 2 loop card, round log, final record
+tests/unit/proto-sign-in/page.test.tsx                 — unit floor for sign-in
 
-Sign-up surface
-src/app/dev/proto/sign-up/page.tsx                     — built from canvas M_SignUp; APP_NAME/WORDMARK; noValidate form
-src/app/dev/proto/sign-up/sign-up.module.css           — tokens + var(--ds-*); phase-colour stand-ins pending P1
+Auth surfaces
+src/app/dev/proto/sign-up/{page.tsx,sign-up.module.css}
+src/app/dev/proto/sign-in/{page.tsx,sign-in.module.css} — built from canvas M_SignIn (Standalone.html L3609–3666) under decision B
+
+Design system
+src/styles/tokens.ts · src/app/globals.css · tests/unit/styles/tokens.test.ts — 100 tokens; value assertions for the session-126 additions
+docs/slices/S-F1-design-tokens/verification.md         — §Extensions landed after S-F1
 
 Canvas
 docs/design-source/mobile-screens-v2/decoded/Mobile Screens v2 - Standalone.html
-                                                        — 7.4MB; screens are window.M_* globals (M_SignUp L3667, M_SignIn L3609);
-                                                          constants L1351-1353; artboards render into [data-dc-slot]
-
-Rules files
-AGENTS.md                                              — hosts Next 16's managed agent-rules block (keeps CLAUDE.md clean)
+                                                        — screens are window.M_* globals (M_SignUp L3667, M_SignIn L3609); constants L1351-1353;
+                                                          AI_PURPLE family L2265-2268; the canvas embeds its own Inter (28) + Source Serif Pro (12) faces
 ```
 
 ## Branch
 
-`claude/trusting-brahmagupta-uFE21` — PR pending user preview review.
+`claude/session-126-kickoff-iioj8m` — stacked on `claude/trusting-brahmagupta-uFE21`; both pushed, neither has a PR (P1).
 
 ## Negative constraints
 
-#1–#42 from prior sessions, plus:
+#1–#50 from prior sessions, plus:
 
-- **#43** Never pipe a long-running server through `head` or any bounded consumer — SIGPIPE kills it mid-run. Log to a file.
-- **#44** `pkill -f <pattern>` must not appear literally in the invoking command line (use `[n]ext dev`); it will kill the calling shell.
-- **#45** Playwright wipes `outputDir` on every run — never keep helper scripts or captures there (`tests/e2e/.bar/` is for captures and tools).
-- **#46** Launch agent loops on a clean tree; a tidy builder will commit stray dirty docs into its round commit.
-- **#47** Commit CSS-module and `registry.ts` changes with a `tests/` change alongside — the commit gate exempts only `.ts/.tsx` under a proto slug, and reads the index before the command runs.
-- **#48** Don't run `next build` beside a running dev server in one checkout (`.next/types` vs `.next/dev/types` collide); the production build needs `NEXT_PUBLIC_DECOUPLE_AUTH_MODE=prod`.
-- **#49** A loop card's floor includes the unit suite; its stop rule counts majors, not only blocking findings.
-- **#50** Comment-review's stub does not honour the `## Status` exemption — expect false positives on §Status lineage until the hook is fixed.
+- **#51** A background `Agent` dies silently to the account's session rate limit; the adversarial-review gate then has to be run by hand. Keep critic spawns to one lightweight agent per round and check `ReadNotifications` before assuming a result.
+- **#52** After killing `next dev`, port 3000 can stay held; Playwright's `webServer` then falls through to 3001 and times out. Check `ss -ltnp | grep 300` before a Playwright run and restart clean.
+- **#53** `document.fonts` status `loaded` and `fonts.ready` do not prove a face is applied. Measure ink bands from the capture PNGs. The mobile canvas embeds its own Inter and Source Serif Pro faces, so sharing app fonts with it only matters for families it lacks.
+- **#54** Token font strings stay plain family lists (no `var()`): pre-signup components build inline `font:` shorthands from `tokens.font.*`, and jsdom drops the whole shorthand when the family carries `var()`.
+- **#55** Escalations rot like kickoffs: verify "font X not loaded" / "colour is Y" claims against `document.fonts` and the decoded canvas before adding tokens for them.
