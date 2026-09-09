@@ -3,7 +3,7 @@
 import { useState, type FormEvent } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { WORDMARK } from '@/constants';
+import { APP_NAME } from '@/constants';
 import { tokens } from '@/styles/tokens';
 import styles from './sign-up.module.css';
 
@@ -54,10 +54,9 @@ function SparkGlyph({ size }: { size: number }) {
 }
 
 function Wordmark() {
-  const text = WORDMARK.endsWith('.') ? WORDMARK.slice(0, -1) : WORDMARK;
   return (
     <span className={styles.wordmark}>
-      {text}
+      {APP_NAME}
       <span className={styles.wordmarkDot}>.</span>
     </span>
   );
@@ -183,7 +182,7 @@ export default function SignUpPage() {
               aria-invalid={invalid('terms')}
             />
             <span>
-              I agree to Decouple&apos;s <span className={styles.termsLink}>Terms</span> and{' '}
+              I agree to {APP_NAME}&apos;s <span className={styles.termsLink}>Terms</span> and{' '}
               <span className={styles.termsLink}>Privacy Policy</span>.
             </span>
           </label>
