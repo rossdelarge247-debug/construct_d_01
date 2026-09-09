@@ -95,6 +95,17 @@ describe('registry data', () => {
       expect(row!.links.prototype).toBe('src/app/dev/proto/sign-up/');
       expect(row!.links.spec).toBe('docs/workspace-spec/65a-signup-orientation-reconciliation.md');
     });
+
+    it("'sign-in' is prototype-built with lastTouched, links.prototype, links.spec and links.slice set", () => {
+      const row = registry.find((r) => r.id === 'sign-in');
+      expect(row, 'row id=sign-in missing').toBeDefined();
+      expect(row!.status).toBe('prototype-built');
+      expect(row!.lastTouched.session).toBe(126);
+      expect(row!.lastTouched.date).toBe('2026-09-09');
+      expect(row!.links.prototype).toBe('src/app/dev/proto/sign-in/');
+      expect(row!.links.spec).toBe('docs/workspace-spec/65a-signup-orientation-reconciliation.md');
+      expect(row!.links.slice).toBe('docs/slices/S-PROTO-sign-in/');
+    });
   });
 
   describe('section-confirm slice surfaces carry refreshed status + lastTouched + links.prototype', () => {

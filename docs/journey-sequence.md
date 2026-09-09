@@ -48,10 +48,10 @@ Build only when questions 1-3 are answered. If canvas or spec is insufficient, f
 | # | Flow | Registry ID | Status | Source material | Wiring gap |
 |---|------|------------|--------|-----------------|------------|
 | 7 | Sign up | `sign-up` | DONE | Canvas `#m-signup` (mobile-screens-v2) built via the S-PROTO-sign-up loop card; password model per canvas (65a §Status decision A) | Built — validation, `role="alert"`, hand-off → #10; sign-in link and 1.2a out of scope |
-| 8 | Sign in | `sign-in` | READY | Artboard in mobile-screens-v2 | Canvas-port needed |
+| 8 | Sign in | `sign-in` | DONE | Canvas `#m-signin` (mobile-screens-v2) built via the S-PROTO-sign-in loop card; password model per 65a §Status decision B | Built — validation, `role="alert"` per field, Forgot? note, hand-off to post-connect-dashboard |
 | 9 | Magic-link sent | `magic-link-sent` | BLOCKED | No canvas; spec 57 §1.2a (L55–63) defines the actions | Canvas needed; out of scope while sign-up follows the canvas's password model (S-PROTO-sign-up decision A) |
 
-**Stage 3 verdict:** Sign-up is built and hands off to welcome-tour. Sign-in has canvas material (`#m-signin`, which also carries Google + passkey affordances — reconcile with sign-up's password model before building). Magic-link is blocked on a canvas.
+**Stage 3 verdict:** Sign-up is built and hands off to welcome-tour. Sign-in is built under decision B (password only; the canvas's Google + passkey affordances omitted to match sign-up) and hands off to post-connect-dashboard. Magic-link is blocked on a canvas.
 
 ### Stage 4 — Onboarding (post-signup)
 
