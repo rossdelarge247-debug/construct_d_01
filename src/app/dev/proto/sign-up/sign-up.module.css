@@ -1,0 +1,302 @@
+/* Mobile sign-up · canvas M_SignUp (Mobile Screens v2 - Standalone.html L3667-3727).
+   Colours, fonts, radii and weights come from --ds-* tokens; sizes and spacing
+   mirror the canvas inline styles. Canvas hexes without a token map to the
+   nearest token (drift table in docs/slices/S-PROTO-sign-up/acceptance.md). */
+
+/* Host-chrome adjustments, active only while this screen is mounted.
+   The dev-mode banner is a non-wrapping flex row wider than 375px, and
+   the framework's route announcer is a second role="alert" in the tree;
+   both would otherwise fail the mobile-overflow and single-alert bars. */
+:global(body):has(.page) :global([role='region'][aria-label='Dev mode banner']) {
+  flex-wrap: wrap;
+  max-width: 100%;
+  box-sizing: border-box;
+}
+
+:global(body):has(.page) :global(next-route-announcer) {
+  display: none;
+}
+
+.page {
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  background: var(--ds-color-surface-panel);
+  color: var(--ds-color-ink);
+  font-family: var(--ds-font-sans);
+  max-width: 100%;
+  overflow-x: hidden;
+}
+
+/* ---------- top bar (canvas TopBar L1377) ---------- */
+.topBar {
+  height: 48px;
+  padding: 0 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 1px solid var(--ds-color-border);
+  background: var(--ds-color-surface-panel);
+  flex-shrink: 0;
+}
+
+.topBarSide {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+}
+
+.backArrow {
+  font-size: 18px;
+  line-height: 1;
+  font-weight: 300;
+  color: var(--ds-color-ink);
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  padding-right: 8px;
+}
+
+.haveAccount {
+  font-size: var(--ds-type-12);
+  color: var(--ds-color-text-sub);
+}
+
+/* ---------- scroll body ---------- */
+.body {
+  flex: 1;
+  padding: 22px 22px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.wordmark {
+  font-size: 18px;
+  font-weight: var(--ds-weight-bold);
+  letter-spacing: -0.02em;
+  color: var(--ds-color-ink);
+}
+
+.wordmarkDot {
+  color: var(--ds-color-phase-finalise);
+}
+
+.title {
+  margin: 14px 0 0;
+  font-family: var(--ds-font-serif);
+  font-size: 24px;
+  font-weight: var(--ds-weight-semibold);
+  letter-spacing: -0.02em;
+  color: var(--ds-color-ink);
+  line-height: 1.1;
+}
+
+.lede {
+  margin: 6px 0 0;
+  font-size: var(--ds-type-13);
+  color: var(--ds-color-text-sub);
+  line-height: 1.5;
+}
+
+/* ---------- stepper ---------- */
+.stepper {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: var(--ds-type-11);
+  color: var(--ds-color-text-muted);
+  font-weight: var(--ds-weight-semibold);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.step {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+}
+
+.stepGrow {
+  flex: 1;
+}
+
+.stepDot {
+  width: 18px;
+  height: 18px;
+  border-radius: var(--ds-radius-pill);
+  background: var(--ds-color-surface-canvas);
+  border: 1px solid var(--ds-color-border);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: var(--ds-type-10);
+  flex-shrink: 0;
+  box-sizing: border-box;
+}
+
+.stepDotActive {
+  background: var(--ds-color-ink);
+  border-color: var(--ds-color-ink);
+  color: var(--ds-color-surface-panel);
+}
+
+.stepLabelActive {
+  color: var(--ds-color-ink);
+}
+
+.stepLine {
+  flex: 1;
+  height: 1px;
+  min-width: 0;
+  background: var(--ds-color-border);
+}
+
+/* ---------- form ---------- */
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.fields {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.fieldLabel {
+  display: block;
+  font-size: var(--ds-type-11);
+  color: var(--ds-color-text-sub);
+  font-weight: var(--ds-weight-semibold);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  margin-bottom: 5px;
+}
+
+.input {
+  width: 100%;
+  padding: 12px 14px;
+  font-size: 14px;
+  border: 1px solid var(--ds-color-border);
+  border-radius: var(--ds-radius-xl);
+  background: var(--ds-color-surface-canvas);
+  color: var(--ds-color-ink);
+  font-family: inherit;
+  outline: none;
+  box-sizing: border-box;
+}
+
+.input::placeholder {
+  color: var(--ds-color-text-muted);
+}
+
+.input:focus-visible {
+  border-color: var(--ds-color-ink);
+  box-shadow: 0 0 0 2px var(--ds-color-ink);
+}
+
+.input[aria-invalid='true'] {
+  border-color: var(--ds-color-danger);
+}
+
+.hint {
+  font-size: var(--ds-type-11);
+  color: var(--ds-color-text-muted);
+  margin-top: 4px;
+}
+
+.terms {
+  display: flex;
+  gap: 8px;
+  align-items: flex-start;
+  font-size: var(--ds-type-12);
+  color: var(--ds-color-text-sub);
+  line-height: 1.4;
+}
+
+.termsBox {
+  accent-color: var(--ds-color-ink);
+  margin: 2px 0 0;
+  flex-shrink: 0;
+}
+
+.termsLink {
+  color: var(--ds-color-ink);
+  font-weight: var(--ds-weight-semibold);
+  text-decoration: underline;
+}
+
+.alert {
+  margin: 0;
+  font-size: var(--ds-type-13);
+  /* Danger hue deepened towards ink so 13px text clears WCAG AA on white;
+     the raw danger token stays for non-text accents only. */
+  color: color-mix(in srgb, var(--ds-color-danger) 65%, var(--ds-color-ink));
+  line-height: 1.4;
+}
+
+.submit {
+  height: 48px;
+  border-radius: var(--ds-radius-xl);
+  background: var(--ds-color-ink);
+  color: var(--ds-color-surface-panel);
+  border: none;
+  font-size: 14px;
+  font-weight: var(--ds-weight-semibold);
+  font-family: inherit;
+  cursor: pointer;
+}
+
+.submit:focus-visible {
+  outline: 2px solid var(--ds-color-ink);
+  outline-offset: 2px;
+}
+
+/* ---------- AI trust card (canvas L3715; AIBadge L2293) ---------- */
+.aiCard {
+  padding: 12px 14px;
+  background: var(--ds-color-phase-build-soft);
+  border: 1px solid color-mix(in srgb, var(--ds-color-phase-build) 18%, var(--ds-color-surface-panel));
+  border-radius: var(--ds-radius-xl);
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+}
+
+.aiBadge {
+  width: 20px;
+  height: 20px;
+  border-radius: var(--ds-radius-pill);
+  background: var(--ds-color-accent-violet);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.aiBody {
+  flex: 1;
+  min-width: 0;
+}
+
+.aiTitle {
+  margin: 0;
+  font-size: var(--ds-type-12);
+  font-weight: var(--ds-weight-semibold);
+  color: var(--ds-color-phase-build);
+}
+
+.aiText {
+  margin: 3px 0 0;
+  font-size: 11.5px;
+  color: var(--ds-color-text-sub);
+  line-height: 1.45;
+}

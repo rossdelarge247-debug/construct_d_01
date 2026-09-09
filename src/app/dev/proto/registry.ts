@@ -27,7 +27,7 @@ export const registry: RegistryRow[] = [
 
   // §2 · Auth boundary
   row({ id: 'sign-in', title: 'Sign in', section: 'auth-boundary', status: 'canvas-drafted', confidence: 'medium', openQuestions: ['Magic-link only or password fallback?'], links: { canvas: 'docs/design-source/mobile-screens-v2/' } }),
-  row({ id: 'sign-up', title: 'Sign up', section: 'auth-boundary', status: 'shell-built', confidence: 'medium', openQuestions: ['Spec 65a reconciliation rendering?'], lastTouched: { session: 115, date: '2026-05-22' }, links: { canvas: 'docs/design-source/mobile-screens-v2/', spec: 'docs/workspace-spec/65a-sign-up-reconciliation-logic.md', prototype: 'src/app/dev/proto/sign-up/' } }),
+  row({ id: 'sign-up', title: 'Sign up', section: 'auth-boundary', status: 'prototype-built', confidence: 'medium', openQuestions: ['Spec 65a reconciliation rendering?'], lastTouched: { session: 125, date: '2026-09-09' }, links: { canvas: 'docs/design-source/mobile-screens-v2/', spec: 'docs/workspace-spec/65a-signup-orientation-reconciliation.md', prototype: 'src/app/dev/proto/sign-up/' } }),
   row({ id: 'magic-link-sent', title: 'Magic-link sent confirmation', section: 'auth-boundary', status: 'not-started', confidence: 'low-blocked', openQuestions: ['Resend cooldown UX?'] }),
 
   // §3 · Post-signup onboarding

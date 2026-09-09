@@ -7,6 +7,7 @@ Target: `acceptance.md` §OBJECTIVE. Base: `main` @ `2e35ca3`. Branch: `claude/t
 | Round | Change | Verifier evidence | Critic's largest gap | Next action |
 |---|---|---|---|---|
 | 0 | Bars authored (`tests/e2e/sign-up.{journey,visual-bar}.e2e.ts`, `playwright.config.ts`, Chromium pinned to the sandbox build); shell untouched | Journey bar RED 6/7 against the 49-line shell — structure, validation, hand-off, keyboard all absent; the shell also overflows horizontally at 375px. A11y floor passes (near-empty page). Visual bar captures both sides bare at 402×874 (canvas: `M_SignUp` mounted standalone — the editor's device bezel and pan/zoom viewport were a blind-pick tell; the artboard `id` never reaches the DOM, slots are `[data-dc-slot]`). Canvas served over http (CORS blocked its state-JSON fetch on `file://`), Tailwind CDN stubbed, app's Inter shared via route stub. Thumbnail eyeballed: real screens both sides. Inter-loaded asserted on both captures; EnvBanner (dev banner) hidden in the rendered capture — dev chrome was a tell | — | Start the loop (gated on go + token cap) |
+| 1 | Round 1: built /dev/proto/sign-up from canvas M_SignUp (L3667-3727) — TopBar with back-arrow Link to pre-signup-interview + "Have an account?", Wordmark (WORDMARK from @/constants, green dot), serif "Start your case." h1 + lede, 3-step Acco | journey 7/7; axe true; lint true; tsc true; blind pick A (spotted impl) minor; realDOM true | [axe color-contrast, impact=serious, 1 node, wcag2aa/143] Fires only AFTER an invalid submit, so the load-state scan (0 violations across 89 rules) misses it. Target `.sign-up-module__72puSW__alert` (`<p role="alert">`): fg #FF3B30 (`--ds-c | Round 2: fix largest gap |
 
 ## Failed approaches
 
@@ -19,7 +20,9 @@ Target: `acceptance.md` §OBJECTIVE. Base: `main` @ `2e35ca3`. Branch: `claude/t
 - Sans parity for the visual bar: app has self-hosted Inter; the canvas cannot reach Google Fonts from headless Chromium. Capture spec serves the app's Inter to the canvas via a route stub so the blind pick isn't decided by font-family.
 - Token drift (SUB · MUTE · LINE · ACCENT · AI-card purples) — raised to the user only if the visual critic's largest gap lands on it. See `acceptance.md` §Drift rule.
 - "Pay" stepper label vs free-tier copy on the same screen — logged as an open question, not routed.
+- r1 DRIFT: /home/user/construct_d_01/src/app/dev/proto/sign-up/sign-up.module.css:83-85 `.wordmarkDot { color: var(--ds-color-phase-finalise) }` (#166534, tokens.ts L40) stands in for drift-table row ACCENT `#2F6D5F` marked "no token" (acceptance.md L28). No hex was inlined (correct), but `phase-finalise` is the Phase-5 identity colour from the 68g phase colour system, not a brand accent — the pre-auth brand mark now carries Finalise-phase semantics, and forest #166534 is a visibly different green from the canvas's muted teal #2F6D5F.
+- r1 DRIFT: /home/user/construct_d_01/src/app/dev/proto/sign-up/sign-up.module.css:261-292 — the AI trust card draws from two unrelated token families plus a fabricated colour: `.aiCard` background `--ds-color-phase-build-soft` (#EEF2FF) and border `color-mix(in srgb, var(--ds-color-phase-build) 18%, var(--ds-color-surface-panel))` (L264); `.aiTitle` colour `--ds-color-phase-build` (#4338CA, L291); `.aiBadge` background `--ds-color-accent-violet` (#7C3AED, L275). Drift-table "AI card" row (acceptance.md L29): canvas #4C3FB8 / #F5F3FF / #E4DEFD, "no token". The color-mix() border is a value outside the palette — the same class of bypass as an inline hex, just computed.
 
 ## Boundaries remaining
 
-Rounds: 0/6 · Wall-clock: ~60 min · Same-gap-twice: 0/2
+Rounds: 1/6 · Wall-clock: ~60 min · Same-gap-twice: 0/2

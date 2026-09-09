@@ -35,7 +35,7 @@ Ship `/dev/proto/sign-up` as a working mobile sign-up screen that a fresh critic
 1. **Behaviour bar** — `npx playwright test tests/e2e/sign-up.journey.e2e.ts` green: canvas structure present · empty and short-password submits stay on the page and announce a `role="alert"` · valid details hand off to welcome-tour · tab order visits every control and Enter submits · no horizontal overflow at 375px.
 2. **A11y floor** — same spec: zero serious/critical axe violations.
 3. **Visual bar** — `npx playwright test tests/e2e/sign-up.visual-bar.e2e.ts` writes `tests/e2e/.bar/m-signup.{canvas,rendered}.png`. A fresh-context critic receives both images with labels stripped and says which is the reference and why. The loop continues while it picks correctly with a stated, material reason. The critic must also confirm the rendered page is real DOM (resize it, tab through it, inspect it) — never an image.
-4. **Floor** — `npm run lint` · `npm run typecheck` · `npm run build` green; registry row bumped.
+4. **Floor** — `npm run lint` · `npm run typecheck` · `npm test` (the whole vitest suite — CI runs this, not Playwright; a shipped surface changes the registry snapshot test and retires any placeholder test) · `npm run build` green; registry row bumped.
 
 Post-loop gate, outside the loop: full CI + 3-specialist auto-review on the PR. The rigour suite is the last critic, not a per-keystroke tax.
 

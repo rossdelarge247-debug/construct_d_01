@@ -68,7 +68,6 @@ describe('registry data', () => {
       'how-it-works': { status: 'shell-built', linksPrototype: 'src/app/dev/proto/how-it-works/' },
       'pricing': { status: 'shell-built', linksPrototype: 'src/app/dev/proto/pricing/' },
       'faq-trust': { status: 'shell-built', linksPrototype: 'src/app/dev/proto/faq-trust/' },
-      'sign-up': { status: 'shell-built', linksPrototype: 'src/app/dev/proto/sign-up/' },
       'welcome-tour': { status: 'prototype-built', linksPrototype: 'src/app/dev/proto/welcome-tour/' },
       'hub-day-7-state-f': { status: 'prototype-built', linksPrototype: 'src/app/dev/proto/post-connect-dashboard/', hasSlice: true },
     };
@@ -86,6 +85,16 @@ describe('registry data', () => {
         }
       });
     }
+
+    it("'sign-up' is prototype-built with lastTouched, links.prototype and links.spec set", () => {
+      const row = registry.find((r) => r.id === 'sign-up');
+      expect(row, 'row id=sign-up missing').toBeDefined();
+      expect(row!.status).toBe('prototype-built');
+      expect(row!.lastTouched.session).toBe(125);
+      expect(row!.lastTouched.date).toBe('2026-09-09');
+      expect(row!.links.prototype).toBe('src/app/dev/proto/sign-up/');
+      expect(row!.links.spec).toBe('docs/workspace-spec/65a-signup-orientation-reconciliation.md');
+    });
   });
 
   describe('section-confirm slice surfaces carry refreshed status + lastTouched + links.prototype', () => {
