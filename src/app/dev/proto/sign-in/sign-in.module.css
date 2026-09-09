@@ -171,6 +171,7 @@
   width: 100%;
   padding: 13px 14px;
   font-size: 14px;
+  line-height: 1.2;
   border: 1px solid var(--ds-color-border);
   border-radius: var(--ds-radius-xl);
   background: var(--ds-color-surface-canvas);
@@ -211,13 +212,15 @@
   margin-top: 6px;
 }
 
-/* Whole row is the tap target (≥44px). */
+/* Whole row is the tap target (≥44px); the negative margin keeps the row at
+   the canvas's visual height without shrinking the hit area. */
 .remember {
   display: flex;
-  gap: 10px;
+  gap: 8px;
   align-items: center;
   min-height: 44px;
-  margin-top: 2px;
+  padding: 0;
+  margin: -11px 0 -11px;
   font-size: var(--ds-type-12);
   color: var(--ds-color-text-sub);
   line-height: 1.4;
@@ -226,8 +229,8 @@
 
 .rememberBox {
   appearance: none;
-  width: 22px;
-  height: 22px;
+  width: 14px;
+  height: 14px;
   margin: 0;
   flex-shrink: 0;
   position: relative;
@@ -245,12 +248,12 @@
 .rememberBox:checked::after {
   content: '';
   position: absolute;
-  left: 6px;
-  top: 2px;
-  width: 6px;
-  height: 11px;
+  left: 4px;
+  top: 1px;
+  width: 3px;
+  height: 7px;
   border: solid var(--ds-color-surface-panel);
-  border-width: 0 2px 2px 0;
+  border-width: 0 1.5px 1.5px 0;
   transform: rotate(45deg);
 }
 
