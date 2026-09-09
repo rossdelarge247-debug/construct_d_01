@@ -36,13 +36,11 @@ async function appFontFaces(page: Page, appRoute: string): Promise<string> {
 }
 
 // Headless Chromium has no egress here, so the canvas cannot reach Google Fonts. Serving the app's
-// own Inter and serif faces to it keeps the blind pick about the design rather than about
-// font-family. The canvas asks for 'Source Serif Pro'; the app registers Source Serif 4.
+// own Inter to it keeps the blind pick about the design rather than about font-family.
 async function shareAppFonts(page: Page, request: APIRequestContext, fontFaces: string) {
   // next/font emits src URLs relative to its CSS chunk dir (/_next/static/chunks/).
   const css = fontFaces
     .replace(/font-family:\s*["']?__Inter[^;"']*["']?/g, 'font-family: Inter')
-    .replace(/font-family:\s*["']Source Serif 4["']/g, "font-family: 'Source Serif Pro'")
     .replace(/url\((["']?)\.\.\/media\//g, `url($1${APP}/_next/static/media/`)
     .replace(/url\((["']?)\/_next\//g, `url($1${APP}/_next/`);
   await page.route(/fonts\.googleapis\.com/, (r) => r.fulfill({ status: 200, contentType: 'text/css', body: css }));
