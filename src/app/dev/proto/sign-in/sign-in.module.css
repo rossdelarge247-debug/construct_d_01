@@ -238,7 +238,7 @@
   flex-shrink: 0;
   position: relative;
   border: 1.5px solid var(--ds-color-text-muted);
-  border-radius: var(--ds-radius-sm);
+  border-radius: 2px; /* native-control radius at 14px; the 4px token reads circular */
   background: var(--ds-color-surface-canvas);
   cursor: pointer;
 }

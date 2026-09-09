@@ -28,6 +28,19 @@ test.describe('Sign-in · behaviour bar', () => {
     await expect(page.getByText(/continue with google|passkey/i)).toHaveCount(0);
   });
 
+  test('remember-device row: native-scale box inside a 44px hit area', async ({ page }) => {
+    await page.goto(SIGN_IN);
+    const box = page.getByRole('checkbox', { name: /remember this device/i });
+    const metrics = await box.evaluate((el) => {
+      const cs = getComputedStyle(el);
+      const row = el.closest('label')!.getBoundingClientRect();
+      return { size: el.getBoundingClientRect().width, radius: parseFloat(cs.borderRadius), rowHeight: row.height };
+    });
+    expect(metrics.size).toBeLessThanOrEqual(16);
+    expect(metrics.radius).toBeLessThanOrEqual(3);
+    expect(metrics.rowHeight).toBeGreaterThanOrEqual(44);
+  });
+
   test('empty password submit stays on the page and announces an error', async ({ page }) => {
     await page.goto(SIGN_IN);
     await page.getByLabel(/^password/i).fill('');

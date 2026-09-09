@@ -26,6 +26,6 @@ Integration critic (fresh context, after round 4): journey walk green end-to-end
 
 ## Architectural deferrals
 
-- Colour tokens: brand accent, AI trust-card family, text-safe danger — sign-up uses phase-colour stand-ins and a `color-mix()` border until the tokens slice lands (session 126 P1). Recorded in `progress.md` §Escalations.
-- `--ds-font-serif` names a family next/font does not load; Inter registered at weight 400 only — same slice.
+- Colour tokens: brand accent, AI trust-card family, text-safe danger — landed as the S-F1 extension (session 126); `sign-up.module.css` re-pointed, no phase-colour stand-ins or `color-mix()` remain. Resolution recorded in `progress.md` §Escalations.
+- `--ds-font-serif` now names Source Serif 4, the family next/font loads. The Inter-weights escalation was a misread: weights 500–800 were always registered.
 - Sign-in, magic-link-sent (spec 57 §1.2a), desktop variants: out of scope; sign-in and legal links point at the parametric stub routes.
