@@ -47,11 +47,11 @@ Build only when questions 1-3 are answered. If canvas or spec is insufficient, f
 
 | # | Flow | Registry ID | Status | Source material | Wiring gap |
 |---|------|------------|--------|-----------------|------------|
-| 7 | Sign up | `sign-up` | SHELL | Artboard in mobile-screens-v2 | Canvas-port needed; spec 65a |
+| 7 | Sign up | `sign-up` | DONE | Canvas `#m-signup` (mobile-screens-v2) built via the S-PROTO-sign-up loop card; password model per canvas (65a §Status decision A) | Built — validation, `role="alert"`, hand-off → #10; sign-in link and 1.2a out of scope |
 | 8 | Sign in | `sign-in` | READY | Artboard in mobile-screens-v2 | Canvas-port needed |
 | 9 | Magic-link sent | `magic-link-sent` | BLOCKED | No canvas; spec 57 §1.2a (L55–63) defines the actions | Canvas needed; out of scope while sign-up follows the canvas's password model (S-PROTO-sign-up decision A) |
 
-**Stage 3 verdict:** Sign-up shell exists but needs canvas-port. Sign-in has canvas material. Magic-link is blocked. For journey walkthrough: build sign-up as pass-through to welcome-tour.
+**Stage 3 verdict:** Sign-up is built and hands off to welcome-tour. Sign-in has canvas material (`#m-signin`, which also carries Google + passkey affordances — reconcile with sign-up's password model before building). Magic-link is blocked on a canvas.
 
 ### Stage 4 — Onboarding (post-signup)
 
@@ -153,14 +153,14 @@ The minimum set of screens needed for a user to walk through the complete Decoup
 
 ```
 Marketing  →  Interview  →  Sign-up  →  Welcome  →  [Hub]  →  Build forms  →  Your Picture  →  Dashboard  →  Share  →  [Proposal]  →  AI Coach  →  [Finalise]
-  DONE          DONE        SHELL       DONE       STUB       4 READY        READY           DONE         DONE      BLOCKED        DONE        STUB
+  DONE          DONE        DONE        DONE       STUB       4 READY        READY           DONE         DONE      BLOCKED        DONE        STUB
 ```
 
 ### Build order for critical-path gaps
 
 | Priority | Flow | What's needed | Effort |
 |----------|------|---------------|--------|
-| CP-1 | Sign-up (#7) canvas-port | Port artboard from mobile-screens-v2; wire interview exit → sign-up → welcome-tour | Small |
+| CP-1 | Sign-up (#7) canvas-port — DONE (S-PROTO-sign-up) | Ported from `#m-signup`; O8 → sign-up → welcome-tour wired | Small |
 | CP-2 | Hub stub (#19) | Minimal hub landing that shows "Your sections" with links to build forms + Your Picture | Small |
 | CP-3 | 4 remaining bank-rec forms (#24-27) | Canvas-port from mobile-screens-v2; add to section-confirm hub | Small each |
 | CP-4 | Your Picture container (#29) | Canvas-port from mobile-screens-v2; umbrella for all section-confirm forms | Medium |

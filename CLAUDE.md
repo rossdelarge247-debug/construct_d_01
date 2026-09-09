@@ -170,6 +170,13 @@ Hook + CI enforcement (sessions 25 + 27)
 .github/workflows/pr-dod.yml                        — CI: src/ PRs must reference docs/slices/S-*/verification.md (session 27 P0.4)
 .github/PULL_REQUEST_TEMPLATE.md                    — 6-item DoD + 14-item security checklist on every PR (session 27 P0.4; base count reconciled session 75 — spec 72 §11 always had 14 boxes)
 
+Loop harness + sign-up (session 125)
+playwright.config.ts                                — Chromium pinned to the sandbox build; :3000 app + :3100 decoded-canvas servers
+tests/e2e/sign-up.journey.e2e.ts                    — behaviour + a11y bar (Playwright + axe); CI runs vitest, not this — keep unit coverage too
+tests/e2e/sign-up.visual-bar.e2e.ts                 — bare 402×874 captures: canvas screen (window.M_SignUp mounted standalone) + app, fonts shared
+docs/slices/S-PROTO-sign-up/{acceptance,progress}.md — Template-2 loop card (objective · metric · boundary) + round log + drift escalations
+AGENTS.md                                           — hosts Next 16's managed nextjs-agent-rules block so `next dev` leaves this file alone
+
 Stable libraries (preserve across rebuild — Re-use per Build Map)
 src/lib/bank/tink-client.ts                         — Tink API client
 src/lib/bank/tink-transformer.ts                    — Tink → BankStatementExtraction
