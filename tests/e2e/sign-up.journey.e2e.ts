@@ -32,6 +32,19 @@ test.describe('Sign-up · behaviour bar', () => {
     await expect(page.getByText(/your account is yours/i)).toBeVisible();
   });
 
+  test('terms row: native-scale box inside a 44px hit area', async ({ page }) => {
+    await page.goto(SIGN_UP);
+    const box = page.getByRole('checkbox', { name: /terms/i });
+    const metrics = await box.evaluate((el) => {
+      const cs = getComputedStyle(el);
+      const row = el.closest('label')!.getBoundingClientRect();
+      return { size: el.getBoundingClientRect().width, radius: parseFloat(cs.borderRadius), rowHeight: row.height };
+    });
+    expect(metrics.size).toBeLessThanOrEqual(16);
+    expect(metrics.radius).toBeLessThanOrEqual(3);
+    expect(metrics.rowHeight).toBeGreaterThanOrEqual(44);
+  });
+
   test('empty submit stays on the page and announces an error', async ({ page }) => {
     await page.goto(SIGN_UP);
     await page.getByRole('button', { name: /create account/i }).click();
