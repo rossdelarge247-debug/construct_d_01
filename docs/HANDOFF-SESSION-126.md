@@ -41,6 +41,10 @@ Ink-band measurement from the PNGs (PIL) replaced eyeballing from round 2 on; it
 
 The canvas h1 measured 249×33, the app's 265×36, at identical computed size / weight / letter-spacing. Ruled out in order: Georgia fallback (Georgia isn't installed; the default serif measures 237×29), font files (both sides fetch the same four woff2), font-optical-sizing / kerning / feature settings / smoothing / line-height (no effect), zoom or transform on the canvas host (none). The answer: the decoded canvas declares 28 `@font-face` rules for Inter and 12 for `'Source Serif Pro'` — it embeds its own faces and never fell back to Georgia. Source Serif Pro (the canvas) and Source Serif 4 (Google Fonts' current release, which next/font loads) differ in advance widths. Unfixable in-app; the two harness changes made along the way (rename the served serif; force-load fonts used in the host) changed no pixel and were reverted.
 
+### 6. The method, written down
+
+The user asked whether an "official" Gauntlet markdown existed and how the viborc variant compared. There is no canonical file; Shumer's method is an X post and a ~150-word prompt, packaged as skills by several people. `docs/gauntlet-loop.md` now records his rules verbatim (named / fetchable / comparable bar; separate fresh critic; a pick not a score; never soften; human is the brake), our five deviations with the run evidence, the card and ledger mechanics, the solo-budget shape, and a recovery + promotion mapping from viborc's Git-state variant. The viborc article, Shumer's post and two summary sites were egress-blocked from the sandbox; the doc's §Status says so.
+
 ## What went well
 
 - Diagnose-before-fix paid twice: two of the five kickoff escalations were non-defects, and the heading chase ended in a documented cause instead of a patch.

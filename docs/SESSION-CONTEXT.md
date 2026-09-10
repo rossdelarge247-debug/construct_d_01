@@ -11,6 +11,7 @@ Main tip is `2e35ca3`. Two branches carry the work, stacked: `claude/trusting-br
 | User decisions: keep the "Read the Terms…" line; two stacked PRs; sign-up PR held for preview review; sign-in = password + Forgot? only (decision B, spec 65a §Status) | spec 65a; this file |
 | S-PROTO-sign-in loop run 2: bars first, `tests/e2e/helpers/canvas-capture.ts` extracted from run 1, screen built from canvas `M_SignIn`, 4 rounds with a fresh blind critic per round, loop stopped at the boundary with every remaining pick reason deliberate or below materiality | `da16a76` → `42175f3`; `docs/slices/S-PROTO-sign-in/{acceptance,progress,verification}.md` |
 | Registry `sign-in` → `prototype-built`; journey-sequence #8 DONE | `src/app/dev/proto/registry.ts`, `docs/journey-sequence.md` |
+| `docs/gauntlet-loop.md`: Shumer's rules kept verbatim, five earned deviations (materiality exit, verifier bars, one builder per screen, delta-briefed critic, escalation), card/ledger mechanics, recovery + promotion mapped from the viborc variant; both loop cards cite it | `908fd6e` |
 
 Floor at wrap: vitest 139 files / 1065 tests; lint 0 errors; tsc clean; production build green under CI env with no dev server; Playwright 20/20 across both screens' bars.
 
