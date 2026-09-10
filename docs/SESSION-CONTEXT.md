@@ -1,8 +1,8 @@
-# Session 128 Context Block
+# Session 129 Context Block
 
 ## Mode
 
-Product mode, per `CLAUDE.md` §"Product mode". Session 127 ended the Gauntlet experiment (two screens, three sessions, reference won 8/8 blind picks), archived the rigour rulebook to `docs/archive/CLAUDE-rigour-mode.md`, parked ten workflows to `.github/workflows-parked/`, unregistered every hook except session-start, line-count and read-cap, and cut the PR template to four headings. CI is now lint · typecheck · unit tests · build · gitleaks · the two spec-72 scans.
+Product mode, per `CLAUDE.md` §"Product mode". CI is lint · typecheck · unit tests · build · gitleaks · the two spec-72 scans. One adversarial pass on the diff before commit; no loops, no new rules.
 
 ## The journey
 
@@ -10,16 +10,17 @@ Product mode, per `CLAUDE.md` §"Product mode". Session 127 ended the Gauntlet e
 
 Every session's outcome is a sentence of the form "a user can now … in the preview" on this path. Screens outside it wait.
 
-## State at session 127 wrap
+## State at session 128 wrap
 
-- `main` @ `2e35ca3`. Session branch `claude/session-127-kickoff-doy9pk` carries sessions 125–127 (sign-up, sign-in, token extension, rails serif fix, product mode). PR to main opens at wrap; the user merges after the preview.
-- Built and wired: interview (O1–O8) → sign-up → welcome-tour → moment-1-ack → moment-2-profiling → post-connect-dashboard. Sign-in → dashboard. All on static data past the interview.
-- Real engine: Tink connect + callback routes, transformer, 17 signal rules, extraction schemas, result transformer, 5 synthetic scenarios, engine workbench at `/workspace/engine-workbench`.
-- Gaps on the journey: the sign-up stepper's "About you" step is the post-signup profiling (Moment 1/2), per user decision at session 127; "Pay" has no screen yet and is designed when the journey reaches it; no bank-connect screen on the proto path; Your Picture is hardcoded (children, home address/value, outgoings provider name).
+- `main` @ `d818ea2`. Session branch `claude/session-128-kickoff-r3fm3l` carries session 128. PR to main opens at wrap; the user merges after the preview.
+- Wired: interview (O1–O8) → sign-up → welcome-tour → bank-connect → Your Picture. Sign-in → dashboard. Moment 1/2 stay built but off the path.
+- Bank-connect launches Tink Link as a full-page redirect. The callback (`api/bank/callback`) stores the transformer output in sessionStorage and lands on `your-picture`; `_context/bank-data-storage.ts` hydrates the context via `useSyncExternalStore` and survives reloads. Test scenarios follow the same path.
+- Your Picture reads snapshot, outgoings, providers, transaction count, statement period, income and regular payments from the extractions. Still hardcoded: the name "Sarah", children, home address and home value.
+- Verified in the sandbox on the production build: tour link · scenario path · reload · a seeded callback payload · the 503 error state without credentials. The live Tink click is not yet verified by a person.
 
-## Next outcome (session 128)
+## Next outcome (session 129)
 
-**"A user can connect the Tink sandbox bank from the welcome tour and see their real transactions on Your Picture."** Steps: wire welcome-tour exit → bank connect (reuse `api/bank/connect`) · callback lands on Your Picture · Your Picture reads the transformer output instead of literals. Ugly is fine; working is the bar.
+Click the real Tink sandbox connection end to end and fix what breaks. Then: "a user can reach the dashboard from Your Picture with the connected figures carried through."
 
 ## Decisions on record
 
@@ -27,15 +28,18 @@ Every session's outcome is a sentence of the form "a user can now … in the pre
 - Serif drift between the canvas (Source Serif Pro) and the app (Source Serif 4) is accepted. Link underlines stay. Checkboxes are 14px native-scale in a 44px row.
 - Claude Design canvases are reference, not bar. No new canvases until the journey works.
 - Sign-up keeps its Account · About you · Pay stepper; "About you" is the post-signup profiling already built, "Pay" is designed when the journey reaches it.
+- Session 128: the welcome tour exits straight to bank-connect; the Tink callback lands on Your Picture, not the dashboard.
 
 ## Lessons (one line each; this replaces new rules)
 
 - Kickoffs and escalations rot: verify branch tips, "X not loaded" and "colour is Y" against git, `document.fonts` and the decoded canvas first.
-- `npm ci` on main's lockfile omits Playwright; install from the branch that has it.
 - Port 3000 can stay held after killing `next dev`; check before a Playwright run.
 - A background agent can die silently to the account rate limit; check `ReadNotifications` before trusting a result.
 - The main branch check "npm audit (high + critical)" is already red on `2e35ca3`; it is not a PR's failure.
+- Tink whitelists only `https://construct-dev.vercel.app/api/bank/callback`, and `api/bank/connect` derives the redirect URI from the request origin, so the real click works on production after merge, or on a preview only once its callback URL is added in the Tink console.
+- The eslint react-hooks rule rejects setState inside an effect; hydrate from browser storage with `useSyncExternalStore` and a null server snapshot instead.
+- The Playwright package in the lockfile expects a newer Chromium than `/opt/pw-browsers`; launch with `executablePath: '/opt/pw-browsers/chromium-1194/chrome-linux/chrome'`.
 
 ## Branch
 
-`claude/session-127-kickoff-doy9pk` until merged; session 128 starts its own branch from `main`.
+`claude/session-128-kickoff-r3fm3l` until merged; session 129 starts its own branch from `main`.
