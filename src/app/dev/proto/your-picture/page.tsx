@@ -25,6 +25,21 @@ const FALLBACK_OUTGOINGS: OutgoingItem[] = [
 
 type OutgoingItem = { icon: string; label: string; amount: string; sub: string | null };
 
+const INCOME_TYPE_LABEL: Record<string, string> = {
+  employment: 'salary', benefits: 'benefits', rental: 'rental income', self_employment: 'self-employment',
+  pension_income: 'pension', maintenance: 'maintenance received', other: 'other income',
+};
+
+const FREQUENCY_LABEL: Record<string, string> = {
+  monthly: 'month', weekly: 'week', quarterly: 'quarter', annual: 'year', one_off: 'one-off',
+};
+
+function formatDate(iso: string): string {
+  const d = new Date(iso);
+  if (Number.isNaN(d.getTime())) return iso;
+  return d.toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' });
+}
+
 const CATEGORY_ICONS: Record<string, string> = {
   Housing: '🏠', Groceries: '🛒', Transport: '🚗', Utilities: '🏠',
   'Dining & entertainment': '🍽️', Childcare: '👶', Subscriptions: '📺',
@@ -165,6 +180,17 @@ export default function YourPicturePage() {
   }, [extractions, hasData]);
 
   const navTree = useMemo(() => hasData ? buildNavTree(extractions) : FALLBACK_NAV, [extractions, hasData]);
+  const incomes = useMemo(() => extractions.flatMap(e => e.income_deposits.map(i => ({ ...i, provider: e.provider }))), [extractions]);
+  const regularPayments = useMemo(
+    () => extractions.flatMap(e => e.regular_payments.map(p => ({ ...p, provider: e.provider }))).sort((a, b) => b.amount - a.amount),
+    [extractions],
+  );
+  const periodLabel = useMemo(() => {
+    const starts = extractions.map(e => e.statement_period_start).filter((d): d is string => !!d).sort();
+    const ends = extractions.map(e => e.statement_period_end).filter((d): d is string => !!d).sort();
+    if (starts.length === 0 || ends.length === 0) return null;
+    return { from: formatDate(starts[0]), to: formatDate(ends[ends.length - 1]) };
+  }, [extractions]);
 
   const needsAttention = useMemo(() => {
     if (!hasData) return ['Pensions — no data yet', 'Other assets — no data yet', 'Debts — no data yet'];
@@ -268,8 +294,8 @@ export default function YourPicturePage() {
             Sarah&rsquo;s Picture
           </h1>
           <p className={styles.description}>
-            A structured record of what you own, owe, earn and spend, as of 20 April 2026.
-            Based on {transactionCount} transactions across 12 months from your connected accounts, plus items you&rsquo;ve added yourself.
+            A structured record of what you own, owe, earn and spend, as of {periodLabel?.to ?? '20 April 2026'}.
+            Based on {transactionCount} transactions {periodLabel ? `from ${periodLabel.from} to ${periodLabel.to}` : 'across 12 months'} from your connected accounts, plus items you&rsquo;ve added yourself.
           </p>
 
           {/* G3: Bank accounts accordion */}
@@ -315,6 +341,47 @@ export default function YourPicturePage() {
               </div>
             )}
           </div>
+
+          {/* Income and regular payments, straight from the connected accounts */}
+          <section className={styles.section}>
+            <div className={styles.sectionHeader}>
+              <span className={styles.sectionId}>§</span>
+              <h2 className={styles.sectionTitle}>Your income</h2>
+              <span className={styles.sectionSub}>&mdash; {incomes.length} source{incomes.length === 1 ? '' : 's'} found</span>
+            </div>
+            <div className={styles.sectionContent}>
+              {incomes.length === 0 ? (
+                <span className={styles.sectionEmpty}>No income found in your connected accounts yet</span>
+              ) : incomes.map((inc, i) => (
+                <div key={`${inc.source}-${i}`} className={styles.childrenRow}>
+                  <span className={styles.homeDot} />
+                  {inc.source} &mdash; {INCOME_TYPE_LABEL[inc.type] ?? inc.type}
+                  <span className={`${styles.chip} ${styles.chipVerified}`}>From {inc.provider}</span>
+                  <span className={styles.childrenAmount}>£{inc.amount.toLocaleString()} / {inc.period === 'annual' ? 'year' : 'month'}</span>
+                </div>
+              ))}
+            </div>
+          </section>
+
+          <section className={styles.section}>
+            <div className={styles.sectionHeader}>
+              <span className={styles.sectionId}>§</span>
+              <h2 className={styles.sectionTitle}>Regular payments</h2>
+              <span className={styles.sectionSub}>&mdash; {regularPayments.length} found</span>
+            </div>
+            <div className={styles.sectionContent}>
+              {regularPayments.length === 0 ? (
+                <span className={styles.sectionEmpty}>No regular payments found yet</span>
+              ) : regularPayments.map((p, i) => (
+                <div key={`${p.payee}-${i}`} className={styles.childrenRow}>
+                  <span className={styles.homeDot} />
+                  {p.payee} &mdash; {p.likely_category.replace(/_/g, ' ')}
+                  <span className={`${styles.chip} ${styles.chipVerified}`}>From {p.provider}</span>
+                  <span className={styles.childrenAmount}>£{p.amount.toLocaleString()} / {FREQUENCY_LABEL[p.frequency]}</span>
+                </div>
+              ))}
+            </div>
+          </section>
 
           {/* G4: Children section */}
           <section className={styles.section}>

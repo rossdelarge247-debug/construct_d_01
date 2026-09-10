@@ -30,7 +30,7 @@ describe('/api/bank/callback route', () => {
     vi.stubEnv('TINK_CLIENT_SECRET', 'test-secret');
   });
 
-  it('success redirect points to /dev/proto/bank-connect, not stale /workspace', async () => {
+  it('success redirect points to /dev/proto/your-picture, not stale /workspace', async () => {
     const { GET } = await import('@/app/api/bank/callback/route');
     const url = new URL('http://localhost/api/bank/callback?code=test-code');
     const req = new Request(url) as Parameters<typeof GET>[0];
@@ -39,7 +39,7 @@ describe('/api/bank/callback route', () => {
     const res = await GET(req);
     const html = await res.text();
 
-    expect(html).toContain('/dev/proto/bank-connect?source=openbanking');
+    expect(html).toContain('/dev/proto/your-picture?source=openbanking');
     expect(html).not.toContain('/workspace?source=openbanking');
   });
 

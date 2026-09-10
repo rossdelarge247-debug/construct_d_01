@@ -57,7 +57,7 @@ Build only when questions 1-3 are answered. If canvas or spec is insufficient, f
 
 | # | Flow | Registry ID | Status | Source material | Wiring gap |
 |---|------|------------|--------|-----------------|------------|
-| 10 | Welcome tour | `welcome-tour` | DONE | Own canvas at `docs/design-source/welcome-tour/` | Exit → #11 or #15 |
+| 10 | Welcome tour | `welcome-tour` | DONE | Own canvas at `docs/design-source/welcome-tour/` | Exit → #14 bank-connect (session 128 decision; #11/#12 stay built, off the path) |
 | 11 | Moment 1 acknowledgement | `moment-1-ack` | DONE | Spec 67 L86-121 | Built — recap bullets, safety-flag toggle, Exit this page |
 | 12 | Moment 2 pre-bank profiling | `moment-2-profiling` | DONE | Spec 67 L128-560 | Built — P1 property, P2 self-employed (3), P4 pensions (3), P6 heads-up |
 | 13 | Safeguarding signposting | `safeguarding-signposting` | DONE | Spec 67 L813-845 | Built — crisis helplines, 3 CTAs, Exit this page component |
@@ -69,8 +69,8 @@ Build only when questions 1-3 are answered. If canvas or spec is insufficient, f
 | # | Flow | Registry ID | Status | Source material | Wiring gap |
 |---|------|------------|--------|-----------------|------------|
 | 14 | Bank picker | `bank-picker` | DONE | Tink Link IS the picker; `/api/bank/connect` route generates URL; `tink-client.ts` (321L) | Built — Open Banking CTA + 5 dev-mode scenarios |
-| 15 | Tink iframe mid-flow | `tink-mid-flow` | DONE | Popup mode in callback route; handles popup/iframe/redirect | Built — connecting spinner + popup launch |
-| 16 | Callback success | `callback-success` | DONE | Full pipeline at `/api/bank/callback` (133L): auth exchange → accounts → transactions → transform → postMessage | Built — provider, account type, transaction count, date range |
+| 15 | Tink iframe mid-flow | `tink-mid-flow` | DONE | Full-page redirect to Tink Link; callback stores result in sessionStorage | Built — connecting spinner + popup launch |
+| 16 | Callback success | `callback-success` | DONE | Full pipeline at `/api/bank/callback` (133L): auth exchange → accounts → transactions → transform → sessionStorage → Your Picture | Built — lands on `your-picture` with the connected accounts |
 | 17 | Callback error/retry | `callback-error-retry` | DONE | `redirectWithError()` exists in callback route | Built — error message + retry CTA |
 | 18 | Manual entry fallback | `manual-entry-fallback` | PARTIALLY READY | `test-scenarios.ts` (644L) provides data shape; no entry UI yet | Entry form + scenario loader needed |
 

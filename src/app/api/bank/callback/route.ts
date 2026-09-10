@@ -9,9 +9,9 @@ import type { DocumentClassification } from '@/lib/ai/extraction-schemas'
  *
  * Tink Link redirects here after user connects their bank.
  * Fetches account + transaction data, transforms it through the existing pipeline,
- * and returns an HTML page that stores the result and redirects to the hub.
+ * and returns an HTML page that stores the result and redirects to Your Picture.
  *
- * The data flows: Tink API → tink-transformer → transformExtractionResult → hub Q&A
+ * The data flows: Tink API → tink-transformer → transformExtractionResult → Your Picture
  */
 export async function GET(request: NextRequest) {
   const code = request.nextUrl.searchParams.get('code')
@@ -94,7 +94,7 @@ export async function GET(request: NextRequest) {
     } else {
       // Redirect mode — store in sessionStorage
       sessionStorage.setItem('pendingBankData', JSON.stringify(data));
-      window.location.href = '/dev/proto/bank-connect?source=openbanking';
+      window.location.href = '/dev/proto/your-picture?source=openbanking';
     }
   } catch (e) {
     document.body.innerHTML = '<p>Something went wrong storing your bank data. Please try again.</p>';
@@ -124,7 +124,7 @@ a{color:#2563eb}</style>
 <body>
 <h2>Bank connection error</h2>
 <pre>${safeMessage}</pre>
-<p><a href="/dev/proto/bank-connect">Back to workspace</a></p>
+<p><a href="/dev/proto/bank-connect">Try connecting again</a></p>
 </body></html>`
 
   return new Response(html, {

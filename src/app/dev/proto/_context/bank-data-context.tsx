@@ -1,6 +1,6 @@
 'use client';
 
-import { createContext, useCallback, useContext, useMemo, useState, type ReactNode } from 'react';
+import { createContext, useCallback, useContext, useMemo, useState, useSyncExternalStore, type ReactNode } from 'react';
 import { getAllTestScenarios, type TestScenario } from '@/lib/bank/test-scenarios';
 import { createDemoExtractions } from '@/lib/bank/bank-data-utils';
 import {
@@ -13,6 +13,7 @@ import {
 } from '@/lib/bank/confirmation-questions';
 import type { BankStatementExtraction } from '@/lib/ai/extraction-schemas';
 import { useProfiling } from './profiling-context';
+import { getBankDataServerSnapshot, getBankDataSnapshot, subscribeBankData, writeBankData } from './bank-data-storage';
 
 const SCENARIO_TO_PERSONA: Record<string, string | undefined> = {
   'sarah-employed-homeowner': undefined,
@@ -37,8 +38,19 @@ type BankDataContextValue = {
 const BankDataContext = createContext<BankDataContextValue | null>(null);
 
 export function BankDataProvider({ children }: { children: ReactNode }) {
-  const [scenario, setScenario] = useState<TestScenario | null>(null);
-  const [extractions, setExtractions] = useState<BankStatementExtraction[]>([]);
+  const persisted = useSyncExternalStore(subscribeBankData, getBankDataSnapshot, getBankDataServerSnapshot);
+  const extractions = useMemo(() => persisted?.extractions ?? [], [persisted]);
+  const [demoScenario, setDemoScenario] = useState<TestScenario | null>(null);
+  const scenario = useMemo<TestScenario | null>(() => {
+    if (!persisted) return null;
+    if (demoScenario) return demoScenario;
+    return {
+      id: 'live-connected', name: persisted.name, description: 'Connected via Open Banking',
+      provider: persisted.extractions[0]?.provider ?? 'Unknown', accountType: 'current', isJoint: false,
+      transactions: [], expectedIncomes: [], expectedPayments: [],
+      expectedQuestions: [], expectedGaps: [], expectedClassifiedRate: 0,
+    };
+  }, [persisted, demoScenario]);
   const { answers: profilingAnswers } = useProfiling();
 
   const allScenarios = useMemo(() => getAllTestScenarios(), []);
@@ -64,24 +76,18 @@ export function BankDataProvider({ children }: { children: ReactNode }) {
   const loadScenario = useCallback((id: string) => {
     const found = allScenarios.find(s => s.id === id);
     if (!found) return;
-    setScenario(found);
-    const personaKey = SCENARIO_TO_PERSONA[id];
-    setExtractions(createDemoExtractions(personaKey));
+    setDemoScenario(found);
+    writeBankData({ name: found.name, extractions: createDemoExtractions(SCENARIO_TO_PERSONA[id]) });
   }, [allScenarios]);
 
   const loadExtractions = useCallback((name: string, exts: BankStatementExtraction[]) => {
-    setScenario({
-      id: 'live-connected', name, description: 'Connected via Open Banking',
-      provider: exts[0]?.provider ?? 'Unknown', accountType: 'current', isJoint: false,
-      transactions: [], expectedIncomes: [], expectedPayments: [],
-      expectedQuestions: [], expectedGaps: [], expectedClassifiedRate: 0,
-    });
-    setExtractions(exts);
+    setDemoScenario(null);
+    writeBankData({ name, extractions: exts });
   }, []);
 
   const clear = useCallback(() => {
-    setScenario(null);
-    setExtractions([]);
+    setDemoScenario(null);
+    writeBankData(null);
   }, []);
 
   const value = useMemo<BankDataContextValue>(() => ({

@@ -752,11 +752,11 @@ function DashboardStage({ onConnect, onManual, connected }: { onConnect: (k: str
 
           {/* journey continuation */}
           <Link
-            href="/dev/proto/moment-1-ack"
+            href="/dev/proto/bank-connect"
             className="mt-8 block w-full rounded-xl py-4 text-center text-[14.5px] font-semibold"
             style={{ background: INK, color: '#FFF', textDecoration: 'none' }}
           >
-            Continue to profiling &rarr;
+            Connect your bank &rarr;
           </Link>
 
           {/* quiet status footer */}
