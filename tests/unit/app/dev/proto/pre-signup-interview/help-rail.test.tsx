@@ -60,6 +60,13 @@ describe('Help Rail components — smoke', () => {
     );
   });
 
+  it('rail headings use the serif face next/font registers', () => {
+    render(<RailHuman />);
+    const heading = screen.getByRole('heading', { name: "We're here." });
+    expect(heading.style.fontFamily).toContain('Source Serif 4');
+    expect(heading.style.fontFamily).not.toContain('Source Serif Pro');
+  });
+
   it('RailHybrid renders with default Ask Decouple tab active', () => {
     render(<RailHybrid />);
     expect(screen.getByLabelText('Help options rail')).toBeTruthy();

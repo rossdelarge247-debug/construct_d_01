@@ -20,6 +20,7 @@ import {
   railSubStyle,
 } from './rail-constants';
 import styles from './rail-constants.module.css';
+import { tokens } from '@/styles/tokens';
 
 const optionsListStyle: CSSProperties = {
   display: 'flex',
@@ -29,7 +30,7 @@ const optionsListStyle: CSSProperties = {
 
 const founderStrongStyle: CSSProperties = {
   color: INK,
-  fontFamily: '"Source Serif Pro", Georgia, serif',
+  fontFamily: tokens.font.serif,
   fontSize: 13,
 };
 

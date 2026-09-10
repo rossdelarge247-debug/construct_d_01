@@ -1,4 +1,5 @@
 import type { CSSProperties } from 'react';
+import { tokens } from '@/styles/tokens';
 
 export const INK = '#1A1A1A';
 export const SUB = '#57534E';
@@ -36,7 +37,7 @@ export const railEyebrowStyle: CSSProperties = {
 };
 
 export const railHeadingStyle: CSSProperties = {
-  fontFamily: '"Source Serif Pro", Georgia, serif',
+  fontFamily: tokens.font.serif,
   fontSize: 24,
   fontWeight: 600,
   letterSpacing: '-0.015em',
@@ -73,7 +74,7 @@ export const optIconStyle: CSSProperties = {
 };
 
 export const optTitleStyle: CSSProperties = {
-  fontFamily: '"Source Serif Pro", Georgia, serif',
+  fontFamily: tokens.font.serif,
   fontSize: 14,
   fontWeight: 600,
   color: INK,

@@ -27,6 +27,7 @@ Ship `/dev/proto/sign-up` as a working mobile sign-up screen that a fresh critic
   | LINE | `#EAECEF` | `border` | `#E5E3DC` | drift |
   | ACCENT | `#2F6D5F` | `accent.brand` | `#2F6D5F` | match (S-F1 extension, session 126) |
   | AI card | `#4C3FB8` / `#F5F3FF` / `#E4DEFD` / badge `#6D5BD0` | `ai.text` / `ai.soft` / `ai.border` / `ai.accent` | same | match (S-F1 extension, session 126) |
+  | Serif face | embedded *Source Serif Pro* | `font.serif` | *Source Serif 4* (next/font) | accepted drift — advance widths differ by release (h1 string 16px wider in the app); user decision session 127, no canvas re-export |
 
 - **Durable state:** `progress.md` — one row per round: change · verifier evidence · critic's largest gap · next action.
 

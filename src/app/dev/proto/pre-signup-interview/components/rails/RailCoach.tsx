@@ -14,6 +14,7 @@ import {
   railSubStyle,
 } from './rail-constants';
 import styles from '../focus-visible.module.css';
+import { tokens } from '@/styles/tokens';
 
 const bubbleUserStyle: CSSProperties = {
   alignSelf: 'flex-end',
@@ -110,7 +111,7 @@ export function RailCoachBody() {
         </div>
         <div style={bubbleBotStyle}>
           Pick <strong>Married</strong>.{' '}
-          <span style={{ fontFamily: '"Source Serif Pro", Georgia, serif', fontStyle: 'italic' }}>
+          <span style={{ fontFamily: tokens.font.serif, fontStyle: 'italic' }}>
             Separation isn&apos;t a legal status in the UK
           </span>{' '}
           — until divorce papers are filed, you&apos;re still married for most purposes (tax,

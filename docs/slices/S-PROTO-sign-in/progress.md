@@ -18,6 +18,8 @@ Target: `acceptance.md` §OBJECTIVE. Base: `claude/trusting-brahmagupta-uFE21` @
 
 ## Escalations
 
+All three resolved by the user at session 127 start: serif drift accepted as a standing deliberate delta (no canvas re-export); underlines kept on both screens as the accessibility affordance; sign-up's checkbox aligned to the 14px native-size box on its own branch (`9b4a0f0`), behaviour bar asserting the same metrics as sign-in's.
+
 - **Serif version drift (design-system, unfixable in-app).** The canvas embeds *Source Serif Pro* faces; the app loads *Source Serif 4*, Google Fonts' current release of the same family. At the 26px h1 the string measures 16px wider in the app. Sharing the app's serif with the canvas cannot close this (the canvas's own faces win). Accept, or re-export the canvas against Source Serif 4.
 - **Link underlines.** "Need an account?" and "Start your case" are underlined in the build (sign-up underlines its "Sign in" and legal links the same way); the canvas shows none. Deliberate affordance — a critic can always pick the build on it. User call whether both screens drop underlines in favour of weight-only cues.
 - **Checkbox size across the pair.** Sign-in now uses a 14px box (canvas native size) with a 44px row target; sign-up still has the 22px custom box from its round 4. Align sign-up when its PR is next touched.
