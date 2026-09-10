@@ -39,8 +39,9 @@ Floor at wrap: vitest 139 files / 1065 tests; lint 0 errors; tsc clean; producti
 
 1. This file.
 2. `docs/HANDOFF-SESSION-126.md` — §Bugs found and §What could improve at minimum.
-3. `docs/slices/S-PROTO-sign-in/progress.md` §Escalations (three user-facing design calls).
-4. `tests/e2e/helpers/canvas-capture.ts` — the reusable capture for any `window.M_*` screen.
+3. `docs/gauntlet-loop.md` — the loop method; every new loop card cites it.
+4. `docs/slices/S-PROTO-sign-in/progress.md` §Escalations (three user-facing design calls).
+5. `tests/e2e/helpers/canvas-capture.ts` — the reusable capture for any `window.M_*` screen.
 
 ## Key files
 

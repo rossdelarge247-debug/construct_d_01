@@ -2,7 +2,7 @@
 **Category:** prototype
 **Journey:** inbound from = sign-up ("Have an account? Sign in", `sign-up/page.tsx` L176) and external/marketing (back arrow returns to marketing-landing) · outbound to = post-connect-dashboard (registry `hub-day-7-state-f` — the returning user's "Day 7" state the canvas lede names)
 
-Bounded-loop card: objective · metric · boundary. `progress.md` beside this file is the durable state.
+Bounded-loop card: objective · metric · boundary. `progress.md` beside this file is the durable state. Method and deviations: `docs/gauntlet-loop.md`.
 
 ## OBJECTIVE
 

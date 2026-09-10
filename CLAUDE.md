@@ -171,6 +171,7 @@ Hook + CI enforcement (sessions 25 + 27)
 .github/PULL_REQUEST_TEMPLATE.md                    — 6-item DoD + 14-item security checklist on every PR (session 27 P0.4; base count reconciled session 75 — spec 72 §11 always had 14 boxes)
 
 Loop harness + auth surfaces (sessions 125–126)
+docs/gauntlet-loop.md                               — the loop method: Shumer's rules kept verbatim, our earned deviations (materiality exit, verifier bars, one builder per screen, delta-briefed critic, escalation), card/ledger mechanics, recovery + promotion
 playwright.config.ts                                — Chromium pinned to the sandbox build; :3000 app + :3100 decoded-canvas servers
 tests/e2e/helpers/canvas-capture.ts                 — mountCanvasScreen / captureRendered: bare 402×874 captures of any window.M_* screen + the app, Inter shared
 tests/e2e/sign-up.{journey,visual-bar}.e2e.ts       — run-1 bars (Playwright + axe); CI runs vitest, not this — keep unit coverage too

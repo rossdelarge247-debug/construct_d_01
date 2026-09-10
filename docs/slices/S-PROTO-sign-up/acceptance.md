@@ -2,7 +2,7 @@
 **Category:** prototype
 **Journey:** inbound from = pre-signup-interview (O8 "Create my account", `screens/O8.tsx:256`, pre-existing and unchanged) · outbound to = welcome-tour
 
-Bounded-loop card: objective · metric · boundary. `progress.md` beside this file is the durable state; long chat history is not.
+Bounded-loop card: objective · metric · boundary. `progress.md` beside this file is the durable state; long chat history is not. Method and deviations: `docs/gauntlet-loop.md`.
 
 ## OBJECTIVE
 
