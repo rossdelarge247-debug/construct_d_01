@@ -3,6 +3,7 @@
 import { useState, useEffect, type CSSProperties, type ReactNode } from 'react';
 import Link from 'next/link';
 import { tokens } from '@/styles/tokens';
+import { WORDMARK } from '@/constants';
 
 /* =========================================================================
    TWEAK DEFAULTS
@@ -141,8 +142,8 @@ function Wordmark({ small }: { small?: boolean }) {
         <div className="absolute rounded-full" style={{ left:'42%', top:0, width:'58%', height:'100%', background: BG }}/>
         <div className="absolute rounded-full" style={{ left:'45%', top:'12%', width:'10%', height:'76%', background:'#111' }}/>
       </div>
-      <span style={{ fontSize: small ? 14.5 : 16, letterSpacing: '-0.01em', fontWeight: 600, color: '#111' }}>
-        decouple
+      <span style={{ fontSize: small ? 14.5 : 16, letterSpacing: '-0.01em', fontWeight: 600, color: tokens.color.ink }}>
+        {WORDMARK}
       </span>
     </div>
   );

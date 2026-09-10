@@ -1,0 +1,307 @@
+/* Mobile sign-in · canvas M_SignIn (Mobile Screens v2 - Standalone.html L3609-3666).
+   Colours, fonts, radii and weights come from --ds-* tokens; sizes and spacing
+   mirror the canvas inline styles. The canvas's Google and passkey buttons and
+   their "or" divider are omitted under decision B (password model, as sign-up). */
+
+/* Host-chrome adjustments, active only while this screen is mounted: the
+   dev-mode banner is a non-wrapping flex row wider than 375px, and the
+   framework's route announcer is a second role="alert" in the tree. */
+:global(body):has(.page) :global([role='region'][aria-label='Dev mode banner']) {
+  flex-wrap: wrap;
+  max-width: 100%;
+  box-sizing: border-box;
+}
+
+:global(body):has(.page) :global(next-route-announcer) {
+  display: none;
+}
+
+.page {
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  background: var(--ds-color-surface-panel);
+  color: var(--ds-color-ink);
+  font-family: var(--ds-font-sans);
+  max-width: 100%;
+  overflow-x: hidden;
+}
+
+/* ---------- top bar (canvas TopBar L1377) ---------- */
+.topBar {
+  height: 48px;
+  padding: 0 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 1px solid var(--ds-color-border);
+  background: var(--ds-color-surface-panel);
+  flex-shrink: 0;
+}
+
+.topBarSide {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+}
+
+.backArrow {
+  font-size: 18px;
+  line-height: 1;
+  font-weight: 300;
+  color: var(--ds-color-ink);
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  padding-right: 8px;
+}
+
+.needAccount {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  padding: 0 4px;
+  font-size: var(--ds-type-12);
+  color: var(--ds-color-text-sub);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  white-space: nowrap;
+}
+
+.backArrow:focus-visible,
+.needAccount:focus-visible {
+  outline: 2px solid var(--ds-color-ink);
+  outline-offset: -2px;
+  border-radius: var(--ds-radius-sm);
+}
+
+/* ---------- scroll body ---------- */
+.body {
+  flex: 1;
+  padding: 24px 22px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.wordmark {
+  display: block;
+  line-height: 1.2;
+  font-size: 20px;
+  font-weight: var(--ds-weight-bold);
+  letter-spacing: -0.02em;
+  color: var(--ds-color-ink);
+}
+
+.wordmarkDot {
+  color: var(--ds-color-accent-brand);
+}
+
+.title {
+  margin: 18px 0 0;
+  font-family: var(--ds-font-serif);
+  font-size: 26px;
+  font-weight: var(--ds-weight-semibold);
+  letter-spacing: -0.02em;
+  color: var(--ds-color-ink);
+  line-height: 1.1;
+}
+
+.lede {
+  margin: 8px 0 0;
+  font-size: var(--ds-type-13);
+  color: var(--ds-color-text-sub);
+  line-height: 1.5;
+}
+
+/* ---------- form ---------- */
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.fields {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.fieldLabel {
+  display: block;
+  font-size: var(--ds-type-11);
+  color: var(--ds-color-text-sub);
+  font-weight: var(--ds-weight-semibold);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  margin-bottom: 5px;
+}
+
+.labelRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  margin-bottom: 5px;
+}
+
+.labelRow .fieldLabel {
+  margin-bottom: 0;
+}
+
+/* Text-sized affordance with a thumb-sized hit area: the negative margin keeps
+   the label row at the canvas's height while the button still measures 44px. */
+.forgot {
+  margin: -16px 0 -16px 0;
+  padding: 16px 0 16px 12px;
+  border: none;
+  background: none;
+  font: inherit;
+  font-size: var(--ds-type-11);
+  font-weight: var(--ds-weight-medium);
+  color: var(--ds-color-ink);
+  cursor: pointer;
+}
+
+.forgot:focus-visible {
+  outline: 2px solid var(--ds-color-ink);
+  outline-offset: -4px;
+  border-radius: var(--ds-radius-sm);
+}
+
+.input {
+  width: 100%;
+  padding: 13px 14px;
+  font-size: 14px;
+  line-height: 1.2;
+  border: 1px solid var(--ds-color-border);
+  border-radius: var(--ds-radius-xl);
+  background: var(--ds-color-surface-canvas);
+  color: var(--ds-color-ink);
+  font-family: inherit;
+  outline: none;
+  box-sizing: border-box;
+}
+
+.input::placeholder {
+  color: var(--ds-color-text-muted);
+}
+
+.input:focus-visible {
+  border-color: var(--ds-color-ink);
+  box-shadow: 0 0 0 2px var(--ds-color-ink);
+}
+
+.input[aria-invalid='true'] {
+  border-color: var(--ds-color-danger);
+}
+
+.fieldError {
+  margin: 4px 0 0;
+  font-size: var(--ds-type-12);
+  color: var(--ds-color-danger-text);
+  line-height: 1.4;
+}
+
+.resetNote {
+  margin: 0;
+  font-size: var(--ds-type-12);
+  color: var(--ds-color-text-sub);
+  line-height: 1.4;
+}
+
+.resetNote:not(:empty) {
+  margin-top: 6px;
+}
+
+/* Whole row is the tap target (≥44px); the negative margin keeps the row at
+   the canvas's visual height without shrinking the hit area. */
+.remember {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  min-height: 44px;
+  padding: 0;
+  margin: -11px 0 -11px;
+  font-size: var(--ds-type-12);
+  color: var(--ds-color-text-sub);
+  line-height: 1.4;
+  cursor: pointer;
+}
+
+.rememberBox {
+  appearance: none;
+  width: 14px;
+  height: 14px;
+  margin: 0;
+  flex-shrink: 0;
+  position: relative;
+  border: 1.5px solid var(--ds-color-text-muted);
+  border-radius: 2px; /* native-control radius at 14px; the 4px token reads circular */
+  background: var(--ds-color-surface-canvas);
+  cursor: pointer;
+}
+
+.rememberBox:checked {
+  border-color: var(--ds-color-ink);
+  background: var(--ds-color-ink);
+}
+
+.rememberBox:checked::after {
+  content: '';
+  position: absolute;
+  left: 4px;
+  top: 1px;
+  width: 3px;
+  height: 7px;
+  border: solid var(--ds-color-surface-panel);
+  border-width: 0 1.5px 1.5px 0;
+  transform: rotate(45deg);
+}
+
+.rememberBox:focus-visible {
+  outline: 2px solid var(--ds-color-ink);
+  outline-offset: 2px;
+}
+
+.submit {
+  height: 48px;
+  border-radius: var(--ds-radius-xl);
+  background: var(--ds-color-ink);
+  color: var(--ds-color-surface-panel);
+  border: none;
+  font-size: 14px;
+  font-weight: var(--ds-weight-semibold);
+  font-family: inherit;
+  cursor: pointer;
+}
+
+.submit:focus-visible {
+  outline: 2px solid var(--ds-color-ink);
+  outline-offset: 2px;
+}
+
+.newHere {
+  margin: 0;
+  padding-top: 6px;
+  text-align: center;
+  font-size: var(--ds-type-12);
+  color: var(--ds-color-text-sub);
+}
+
+.newHereLink {
+  display: inline-block;
+  padding: 14px 4px;
+  margin: -14px 0;
+  color: var(--ds-color-ink);
+  font-weight: var(--ds-weight-semibold);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.newHereLink:focus-visible {
+  outline: 2px solid var(--ds-color-ink);
+  outline-offset: -4px;
+  border-radius: var(--ds-radius-sm);
+}
