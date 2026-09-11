@@ -1,12 +1,11 @@
 'use client';
 
-import { useCallback, useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { tokens } from '@/styles/tokens';
 import { ProtoHeader } from '../_components/ProtoHeader';
 import { getAllTestScenarios } from '@/lib/bank/test-scenarios';
 import type { TestScenario } from '@/lib/bank/test-scenarios';
-import type { BankStatementExtraction } from '@/lib/ai/extraction-schemas';
 import { useBankData } from '../_context/bank-data-context';
 
 type State =
@@ -19,37 +18,11 @@ type State =
 export default function BankConnectPage() {
   const [state, setState] = useState<State>({ phase: 'select' });
   const scenarios = getAllTestScenarios();
-  const { loadScenario, loadExtractions } = useBankData();
+  const { loadScenario } = useBankData();
 
-  const handleTinkMessage = useCallback((e: MessageEvent) => {
-    if (e.data?.type === 'tink-complete' && Array.isArray(e.data.results)) {
-      const first = e.data.results[0];
-      if (first?.extraction) {
-        const synth: TestScenario = {
-          id: 'live-connected',
-          name: `${first.extraction.provider} — Live`,
-          description: 'Connected via Open Banking',
-          provider: first.extraction.provider,
-          accountType: first.extraction.account_type === 'SAVINGS' ? 'savings' : 'current',
-          isJoint: false,
-          transactions: first.extraction.transactions ?? [],
-          expectedIncomes: [],
-          expectedPayments: [],
-          expectedQuestions: [],
-          expectedGaps: [],
-          expectedClassifiedRate: 0,
-        };
-        loadExtractions(`${first.extraction.provider} — Live`, e.data.results.map((r: { extraction: BankStatementExtraction }) => r.extraction));
-        setState({ phase: 'success', scenario: synth });
-      }
-    }
-  }, [loadExtractions]);
-
-  useEffect(() => {
-    window.addEventListener('message', handleTinkMessage);
-    return () => window.removeEventListener('message', handleTinkMessage);
-  }, [handleTinkMessage]);
-
+  // Full-page redirect rather than a popup: popups are blocked unpredictably,
+  // and the callback route stores its result in sessionStorage before landing
+  // on Your Picture, so no opener window is needed.
   async function launchTinkLink() {
     setState({ phase: 'connecting' });
     try {
@@ -59,7 +32,7 @@ export default function BankConnectPage() {
         setState({ phase: 'error', message: data.error || 'Failed to start bank connection' });
         return;
       }
-      window.open(data.url, 'tink-link', 'width=480,height=720');
+      window.location.assign(data.url);
     } catch {
       setState({ phase: 'error', message: 'Network error — could not reach the server' });
     }
@@ -186,7 +159,7 @@ function ConnectingView() {
         Connecting to your bank&hellip;
       </h2>
       <p style={{ margin: 0, fontSize: tokens.type['14-5'], color: tokens.color.text.sub }}>
-        Complete the connection in the popup window.
+        Taking you to your bank&rsquo;s secure login.
       </p>
     </div>
   );
@@ -318,13 +291,13 @@ function AnalysingView({ scenario }: { scenario: TestScenario }) {
       </div>
 
       {done && (
-        <Link href="/dev/proto/extraction-results" style={{
+        <Link href="/dev/proto/your-picture" style={{
           display: 'block', width: '100%', padding: '14px 20px', borderRadius: 10,
           background: tokens.color.ink, color: '#fff', fontWeight: 600,
           fontSize: tokens.type['14-5'], textAlign: 'center', textDecoration: 'none',
           fontFamily: tokens.font.sans,
         }}>
-          See what we found &rarr;
+          See your picture &rarr;
         </Link>
       )}
     </div>
